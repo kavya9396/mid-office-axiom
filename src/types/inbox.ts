@@ -10,6 +10,7 @@ export type UserContextResponse = {
   roleType: string;
   roles: RoleGroup[];
   pools?: Record<string, string[]>;
+  poolData?:Record<string, string[]>;
 };
 export type PoolProps = {
   onSelectPool: (pool: string) => void;

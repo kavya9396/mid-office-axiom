@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { apiRequest, type ApiRequest } from "../../services/api";
 
-type ThunkConfig<TResponse> = {
+type ThunkConfig = {
   rejectValue: string;
 };
 
@@ -12,7 +12,7 @@ export function createApiThunk<TResponse, TBody = unknown>(
   return createAsyncThunk<
     TResponse,
     TBody,
-    ThunkConfig<TResponse>
+    ThunkConfig
   >(typePrefix, async (payload, { rejectWithValue }) => {
     try {
        const isBodyAllowed = requestConfig.method !== "GET" && requestConfig.method !== "DELETE";

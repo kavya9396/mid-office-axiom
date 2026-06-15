@@ -9,8 +9,9 @@ type LeftPanelProps = PoolProps & {
   role?: string;
   roles: RoleGroup[];
   rows: tableData[];
-  poolCounts?: Record<string, number>;
+  poolData: Record<string, string[]>;
 };
+
 
 const PoolItem = ({
   label,
@@ -54,7 +55,7 @@ const PoolItem = ({
 const LeftPanel = ({ toggle, setToggle, mode,
   roles, selectedPool,
   onSelectPool,
-  poolCounts = {}, }: LeftPanelProps) => {
+  poolData, }: LeftPanelProps) => {
     const isAccordion = mode === "accordion";
 
   const poolEntries = roles.filter((group) => group.pools?.length > 0);
@@ -68,7 +69,10 @@ const LeftPanel = ({ toggle, setToggle, mode,
     showCount={false}
   />
 );
-console.log('roles',roles)
+console.log('roles',roles,roles.length)
+const getPoolCount = (pool: string) => {
+  return poolData?.[pool]?.length ?? 0;
+};
   return (
     <Box
       sx={{
@@ -115,7 +119,7 @@ console.log('roles',roles)
                           value={pool}
                           selectedPool={selectedPool}
                           onClick={onSelectPool}
-                          count={poolCounts[pool] ?? 0}
+                          count={getPoolCount(pool)}
                         />
                       ))}
                     </List>
@@ -133,7 +137,7 @@ console.log('roles',roles)
                       value={pool}
                       selectedPool={selectedPool}
                       onClick={onSelectPool}
-                      count={poolCounts[pool] ?? 0}
+                     count={getPoolCount(pool)}
                     />
                   ))}
                 </List>
