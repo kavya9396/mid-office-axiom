@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import apiReducer from "./slices/apiSlice";
+import drsReducer from "./slices/drsSlice";
 
 export const store = configureStore({
   reducer: {
     api: apiReducer,
+    drs: drsReducer
   },
 });
 

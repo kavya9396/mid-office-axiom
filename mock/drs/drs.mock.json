@@ -1,0 +1,122 @@
+{
+  "breDecision": {
+    "decision": "STD",
+    "status": "Failure",
+    "remarks": "#ICICI Prudential Website#Check Basic KYC Document Attestations#Standard Age Proof Requiredi## UW Control DIGI IIB hit PSO not reguired#lB hit compulsory PSO and OID required##Model Output: Green#PTLR Modet output Green: UW Standard#Standard Age Proof Required For This Rider Type#Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs",
+    "discrepancy": "Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs",
+    "timestamp": "01/04/2026, 1300hrs",
+    "retrigger": false
+  },
+  "applicationOverview": {
+    "product": {
+      "name": "ICICI PRU IPROTECT SMART PLUS",
+      "sumAssured": 1000000
+    },
+    "distribution": {
+      "channel": "AG",
+      "subChannel": "AG1"
+    },
+    "agent": {
+      "agentCode": "00000046",
+      "agentName": "Agent Company Mumbai"
+    },
+    "customer": {
+      "customerType": "non HNI",
+      "policyType": "Retail - New Business"
+    },
+    "policyDetails": {
+      "modalPremium": 14916,
+      "policyTerm": 36,
+      "premiumPaymentTerm": 36,
+      "paymentMode": "Yearly"
+    }
+  },
+  "riderDetails": [
+    {
+      "riderName": "ICICI Pru Non-Linked Accidental Death and Disability Rider",
+      "option": "Accidental Total and Permanent Disability",
+      "policyTerm": 36,
+      "sumAssured": 5000000,
+      "modalPremium": 2300,
+      "premiumPaymentTerm": 44
+    },
+    {
+      "riderName": "ICICI Pru Non-Linked Accidental Death and Disability Rider",
+      "option": "Accidental Death Benefit",
+      "policyTerm": 36,
+      "sumAssured": 5000000,
+      "modalPremium": 3300,
+      "premiumPaymentTerm": 44
+    },
+    {
+      "riderName": "ICICI Pru Non-Linked Health Protect Rider",
+      "option": "Critical Illness - 60CI package",
+      "policyTerm": 36,
+      "sumAssured": 5000000,
+      "modalPremium": 3876,
+      "premiumPaymentTerm": 20
+    }
+  ],
+  "requirements": [
+    {
+      "team": "Team 1",
+      "profile": "Profile 1",
+      "category": "Cate 1",
+      "subCategory": "Sub Cate 1",
+      "document": "Aadhar",
+      "specialTest": "Blood Test",
+      "reason": "Reason 1",
+      "fupCode": "fupCode 1",
+      "description": "Additional identity verification required",
+      "status": "Raised",
+      "raisedDate": "2025-01-10",
+      "raisedBy": "John Doe",
+      "receivedDate": "2025-01-12",
+      "receivedBy": "Jane Smith",
+      "validity": "30 Days",
+      "userId": "USR001",
+      "remarks": "Awaiting document validation",
+      "udsLink": "https://uds.example.com/req/001"
+    },
+    {
+      "team": "Team 2",
+      "profile": "Profile 2",
+      "category": "Cate 2",
+      "subCategory": "Sub Cate 2",
+      "document": "PAN",
+      "specialTest": "ECG",
+      "reason": "Reason 2",
+      "fupCode": "fupCode 2",
+      "description": "Financial verification required",
+      "status": "Received",
+      "raisedDate": "2025-01-15",
+      "raisedBy": "Michael Brown",
+      "receivedDate": "2025-01-17",
+      "receivedBy": "Sarah Wilson",
+      "validity": "45 Days",
+      "userId": "USR002",
+      "remarks": "Documents received and under review",
+      "udsLink": "https://uds.example.com/req/002"
+    },
+    {
+      "team": "Team 3",
+      "profile": "Profile 3",
+      "category": "Cate 3",
+      "subCategory": "Sub Cate 3",
+      "document": "Voter",
+      "specialTest": "X-Ray",
+      "reason": "Reason 3",
+      "fupCode": "fupCode 3",
+      "description": "Address proof verification required",
+      "status": "Completed",
+      "raisedDate": "2025-01-20",
+      "raisedBy": "David Lee",
+      "receivedDate": "2025-01-22",
+      "receivedBy": "Emily Davis",
+      "validity": "60 Days",
+      "userId": "USR003",
+      "remarks": "Requirement successfully completed",
+      "udsLink": "https://uds.example.com/req/003"
+    }
+  ]
+}
