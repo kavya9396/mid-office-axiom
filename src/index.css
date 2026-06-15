@@ -1,0 +1,5 @@
+/* Global reset: remove default browser body margin */
+body {
+	margin: 0;
+}
+
