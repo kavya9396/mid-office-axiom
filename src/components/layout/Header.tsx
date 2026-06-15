@@ -178,7 +178,10 @@ return(
                 cursor: "pointer",
                 "&:hover": { backgroundColor: "#f3f4f6" },
               }}
-              onClick={()=>navigate("/login")}
+              onClick={() => {
+  localStorage.removeItem("token"); // or your key name
+  navigate("/login");
+}}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <LogoutIcon />

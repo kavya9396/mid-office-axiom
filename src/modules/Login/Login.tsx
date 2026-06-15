@@ -41,6 +41,7 @@ const navigate = useNavigate();
     if (res?.ldapAuthentication === "Success") {
       console.log('login successful')
        localStorage.setItem("token", res?.token);
+
       navigate("/retail/inbox");
     }
   } catch (err) {

@@ -7,4 +7,7 @@ import type {
 export const loginThunk = createApiThunk<
   LoginResponse,
   LoginRequest
->("/mock/auth/login.mock.json");
+>("/mock/auth/login.json", {
+    url: "/mock/auth/login.json",
+    method: "POST",
+  });
