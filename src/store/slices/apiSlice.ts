@@ -1,39 +1,44 @@
-// store/slices/apiSlice.ts
-
 import { createSlice } from "@reduxjs/toolkit";
-import { commonApiThunk } from "../thunks/apiThunk";
+import { loginThunk } from "../thunks/authThunk";
+import type { LoginResponse } from "../../types/auth";
 
-interface ApiState {
-  loading: boolean;
-  data: unknown;
-  error: string | null;
+interface AppState {
+  auth: {
+    user: LoginResponse  | null;
+    loading: boolean;
+    error: string | null;
+  };
 }
 
-const initialState: ApiState = {
-  loading: false,
-  data: null,
-  error: null,
+const initialState: AppState = {
+  auth: {
+    user: null,
+    loading: false,
+    error: null,
+  },
 };
 
-const apiSlice = createSlice({
-  name: "api",
+const appSlice = createSlice({
+  name: "app",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(commonApiThunk.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      // LOGIN
+      .addCase(loginThunk.pending, (state) => {
+        state.auth.loading = true;
+        state.auth.error = null;
       })
-      .addCase(commonApiThunk.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload;
+      .addCase(loginThunk.fulfilled, (state, action) => {
+        state.auth.loading = false;
+        state.auth.user = action.payload;
       })
-      .addCase(commonApiThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
+      .addCase(loginThunk.rejected, (state, action) => {
+        state.auth.loading = false;
+        state.auth.error =
+          (action.payload as string) ?? "Login failed";
       });
   },
 });
 
-export default apiSlice.reducer;
+export default appSlice.reducer;

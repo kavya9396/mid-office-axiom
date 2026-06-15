@@ -8,5 +8,5 @@ export interface LoginRequest {
 export interface LoginResponse {
   token: string;
   userId: string;
-  ldapSuccessResponse:string;
+  ldapAuthentication:string;
 }

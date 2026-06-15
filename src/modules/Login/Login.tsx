@@ -38,7 +38,7 @@ const navigate = useNavigate();
        })).unwrap();
 
     // mock response: { ldapsuresponse: "success" }
-    if (res?.ldapSuccessResponse === "success") {
+    if (res?.ldapAuthentication === "Success") {
       navigate("/inbox");
     }
   } catch (err) {
