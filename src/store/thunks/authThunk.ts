@@ -7,4 +7,4 @@ import type {
 export const loginThunk = createApiThunk<
   LoginResponse,
   LoginRequest
->("auth/login");
+>("/mock/auth/login.mock.json");

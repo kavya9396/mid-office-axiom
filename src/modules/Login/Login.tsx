@@ -39,7 +39,9 @@ const navigate = useNavigate();
 
     // mock response: { ldapsuresponse: "success" }
     if (res?.ldapAuthentication === "Success") {
-      navigate("/inbox");
+      console.log('login successful')
+       localStorage.setItem("token", res?.token);
+      navigate("/retail/inbox");
     }
   } catch (err) {
     console.error("Login failed", err);

@@ -1,4 +1,5 @@
 {
     "ldapAuthentication":"Success",
-    "lastlogin":""
+    "lastlogin":"",
+    "token":"1234"
 }
