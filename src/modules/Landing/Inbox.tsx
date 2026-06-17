@@ -1,7 +1,7 @@
 import { Box, Grid } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import LeftPanel from "./LeftPanel";
-import type {  RoleGroup, tableData } from "../../types/inbox";
+import type { RoleGroup, tableData } from "../../types/inbox";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
 import { useAppDispatch } from "../../store/hooks";
 import RightPanel from "./RightPanel";
@@ -9,24 +9,29 @@ import { poolThunk } from "../../store/thunks/poolThunk";
 
 const Inbox = () => {
   const dispatch = useAppDispatch();
+
   const [toggle, setToggle] = useState(false);
   const [roleList, setRoleList] = useState<RoleGroup[]>([]);
   const [selectedPool, setSelectedPool] = useState("");
   const [userRole, setUserRole] = useState("");
   const [panelMode, setPanelMode] = useState<"simple" | "accordion">("simple");
-  const [poolData, setPoolData] =
-  useState<Record<string, tableData[]>>({});
-  const [tableRows, setTableRows] = useState<tableData[]>([]);
+
+  const [poolData, setPoolData] = useState<Record<string, tableData[]>>({});
   const [poolCounts, setPoolCounts] = useState<Record<string, number>>({});
+
   const didFetch = useRef(false);
+
+  // 🚫 prevents poolThunk from running on initial auto-selection
+  const skipInitialPoolFetch = useRef(true);
+
+  // ---------------- INITIAL LOAD ----------------
   useEffect(() => {
     if (didFetch.current) return;
     didFetch.current = true;
+
     const loadData = async () => {
       try {
-        // Fetch Roles
-
-       const roleResponse = await dispatch(fetchInboxThunk()).unwrap();
+        const roleResponse = await dispatch(fetchInboxThunk()).unwrap();
 
         const role = roleResponse.roleType ?? "admin";
 
@@ -42,14 +47,22 @@ const Inbox = () => {
         setPanelMode("accordion");
 
         const allPools = roleGroups.flatMap((group) => group.pools);
-
         const firstPool = allPools[0];
 
-        setPoolData(roleResponse.poolData ?? {});
+        const poolDataFromAPI = roleResponse.poolData ?? {};
 
+        setPoolData(poolDataFromAPI);
+
+        // set counts only (no table binding needed)
+        const initialCounts: Record<string, number> = {};
+        Object.keys(poolDataFromAPI).forEach((pool) => {
+          initialCounts[pool] = poolDataFromAPI[pool]?.length ?? 0;
+        });
+        setPoolCounts(initialCounts);
+
+        // set default selected pool ONLY (no API call triggered)
         if (firstPool) {
           setSelectedPool(firstPool);
-          setTableRows(roleResponse.poolData?.[firstPool] ?? []);
         }
       } catch (error) {
         console.error("Failed to load data:", error);
@@ -57,38 +70,47 @@ const Inbox = () => {
     };
 
     loadData();
-  }, []);
+  }, [dispatch]);
+
+  // ---------------- FETCH ONLY ON USER CLICK ----------------
   useEffect(() => {
-  if (!selectedPool) return;
+    if (!selectedPool || !userRole) return;
 
-  const loadPoolData = async () => {
-    try {
-      const response = await dispatch(
-        poolThunk({
-    username: userRole,
-    poolname: selectedPool,
-  })
-      ).unwrap();
-      setPoolData(prev => ({
-  ...prev,
-  ...response.poolData,
-}));
-
-console.log('response',response)
-const rows = response.poolData[selectedPool] ?? [];
-setPoolCounts(prev => ({
-  ...prev,
-  [selectedPool]: rows.length,
-}));
-setTableRows(rows);
-    } catch (error) {
-      console.error("Failed to load pool data", error);
-      setTableRows([]);
+    // 🚫 skip first auto-selection from initial load
+    if (skipInitialPoolFetch.current) {
+      skipInitialPoolFetch.current = false;
+      return;
     }
-  };
 
-  loadPoolData();
-}, [selectedPool, dispatch]);
+    const loadPoolData = async () => {
+      try {
+        const response = await dispatch(
+          poolThunk({
+            username: userRole,
+            poolname: selectedPool,
+          })
+        ).unwrap();
+
+        const rows = response.poolData[selectedPool] ?? [];
+
+        setPoolData((prev) => ({
+          ...prev,
+          ...response.poolData,
+        }));
+
+        setPoolCounts((prev) => ({
+          ...prev,
+          [selectedPool]: rows.length,
+        }));
+      } catch (error) {
+        console.error("Failed to load pool data", error);
+      }
+    };
+
+    loadPoolData();
+  }, [selectedPool, dispatch, userRole]);
+
+  // ---------------- UI ----------------
   return (
     <Box>
       <Grid container sx={{ flexWrap: "nowrap" }} className="bg-grey-200">
@@ -104,12 +126,13 @@ setTableRows(rows);
           poolData={poolData}
           poolCounts={poolCounts}
         />
-         <Box sx={{ flex: 1 }}>
-        <RightPanel
-          selectedPool={selectedPool}
-          rows={tableRows}
-        />
-      </Box>
+
+        <Box sx={{ flex: 1 }}>
+          <RightPanel
+            selectedPool={selectedPool}
+            rows={poolData[selectedPool] ?? []}
+          />
+        </Box>
       </Grid>
     </Box>
   );

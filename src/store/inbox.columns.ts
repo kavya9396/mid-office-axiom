@@ -5,6 +5,11 @@ export const allColumns: TableColumn<tableData>[] = [
     key: "applicationNo",
     label: "Application No.",
   },
+   {
+    key: "appliedSa",
+    label: "Applied SA",
+    numeric: true,
+  },
   {
     key: "productCode",
     label: "Product Code",

@@ -2,7 +2,9 @@ import {
   Box,
   List,
   ListItem,
+  MenuItem,
   Paper,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -10,18 +12,28 @@ import {
   TableHead,
   TableRow,
   Typography,
+  type SelectChangeEvent,
 } from "@mui/material";
 import { columnFlex, modalTitleStyles } from "../../utils/styles";
 import CustomButton from "../../components/ui/Button/Button";
-import type {  TableColumn, tableData } from "../../types/inbox";
+import type { TableColumn, tableData } from "../../types/inbox";
 import { allColumns } from "../../store/inbox.columns";
-import { FilterIcon, SearchIcon, SettingsIcon } from "../../icons/Icons";
+import {
+  FilterIcon,
+  KeyLeftArrowIcon,
+  KeyRightArrowIcon,
+  SearchIcon,
+  SettingsIcon,
+} from "../../icons/Icons";
 import SearchBar from "../../components/ui/SearchBar/SearchBar";
-import {   useState } from "react";
+import {  useState } from "react";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 //import { poolAllowedColumns } from "../../store/pool.columns.config";
 import { useColumnConfig } from "../../hooks/useColumnConfig";
+import Badge from "../../components/ui/Badge/Badge";
+import { useNavigate } from "react-router-dom";
+import FilterTable from "./FilterTable";
 
 const RightPanel = ({
   selectedPool,
@@ -30,16 +42,13 @@ const RightPanel = ({
   selectedPool: string;
   rows: tableData[];
 }) => {
-  console.log("selectedPool", selectedPool);
+  const navigate = useNavigate();
   const [openFilterDialog, setOpenFilterDialog] = useState<boolean>(false);
-  
-    // ---------------- STATES ----------------
 
-const userId = 'abc'
-const { config, updateConfig } = useColumnConfig(
-  userId,
-  selectedPool
-);
+  // ---------------- STATES ----------------
+
+  const userId = "abc";
+  const { config, updateConfig } = useColumnConfig(userId, selectedPool);
 
   const [left, setLeft] = useState<string[]>([]);
   const [right, setRight] = useState<string[]>([]);
@@ -48,30 +57,25 @@ const { config, updateConfig } = useColumnConfig(
   const [openTransferDialog, setOpenTransferDialog] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
-
-console.log(openFilterDialog,searchText)
-
+  const [page, setPage] = useState<number>(0);
+  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [filterValues, setFilterValues] = useState<Record<string, string[]>>({});
 
 
   const visibleColumns = allColumns.filter((col) =>
-  config.visible.includes(col.key)
-);
+    config.visible.includes(col.key),
+  );
+  // ---------------- OPEN DIALOG ----------------
+  const openColumnDialog = () => {
+    setLeft(config.hidden);
+    setRight(config.visible);
+    setOpenTransferDialog(true);
+  };
 
-  
- // ---------------- OPEN DIALOG ----------------
- const openColumnDialog = () => {
-  setLeft(config.hidden);
-  setRight(config.visible);
-  setOpenTransferDialog(true);
-};
-
-  
-    // ---------------- MOVE LOGIC ----------------
+  // ---------------- MOVE LOGIC ----------------
   const handleToggle = (item: string) => () => {
     setChecked((prev) =>
-      prev.includes(item)
-        ? prev.filter((i) => i !== item)
-        : [...prev, item]
+      prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
     );
   };
 
@@ -89,41 +93,51 @@ console.log(openFilterDialog,searchText)
 
   // ---------------- APPLY ----------------
   const handleApply = () => {
-  updateConfig({
-    visible: right,
-    hidden: left,
-  });
+    updateConfig({
+      visible: right,
+      hidden: left,
+    });
 
-  setOpenTransferDialog(false);
-};
-// -------------- Header content -----------------
-   const headerContent = () => (
-    <TableRow sx={{
-          "&:hover": {
-            backgroundColor: "#f5faff",
-            cursor: "pointer",
-          },
-        }}>
+    setOpenTransferDialog(false);
+  };
+  // -------------- Header content -----------------
+  const headerContent = () => (
+    <TableRow
+      sx={{
+        "&:hover": {
+          backgroundColor: "#f5faff",
+          cursor: "pointer",
+        },
+      }}
+    >
       {visibleColumns.map((column: TableColumn<tableData>) => (
-        <TableCell key={String(column.key)}
-              variant="head"
-              align={column.numeric ? "right" : "left"}
-              sx={{
-                backgroundColor: "#E9EEF3",
-                px: 1,
-                fontWeight: "bold",
-                fontSize: "13px",
-                width: column.width,
-                padding: 0.5,
-              }}>
+        <TableCell
+          key={String(column.key)}
+          variant="head"
+          align={column.numeric ? "right" : "left"}
+          sx={{
+            backgroundColor: "#E9EEF3",
+            px: 1,
+            fontWeight: "bold",
+            fontSize: "13px",
+            width: column.width,
+            padding: 0.5,
+          }}
+        >
           {column.label}
         </TableCell>
       ))}
     </TableRow>
   );
-// ---------------- RENDER LIST ----------------
+  // ---------------- RENDER LIST ----------------
   const customList = (title: string, items: string[]) => (
-    <Paper sx={{ width: 300 }}>
+    <Paper
+      sx={{
+        width: 300,
+        height: 400, // 👈 same fixed height for both boxes
+        overflow: "hidden", // 👈 prevents outer scroll
+      }}
+    >
       <Box sx={{ px: 2, py: 1, backgroundColor: "#f5f5f5" }}>
         <Typography variant="subtitle1">{title}</Typography>
       </Box>
@@ -143,6 +157,107 @@ console.log(openFilterDialog,searchText)
       </List>
     </Paper>
   );
+  const filteredRows = rows
+  .filter((row) => {
+    const activeFilters = Object.entries(filterValues);
+
+    if (!activeFilters.length) return true;
+
+    return activeFilters.every(([key, values]) => {
+      if (!values.length) return true;
+
+      const rowValue = String(row[key as keyof typeof row] ?? "");
+
+      return values.includes(rowValue);
+    });
+  })
+  .filter((row) => {
+    if (!searchText.trim()) return true;
+
+    const search = searchText.toLowerCase();
+
+    return visibleColumns.some((col) => {
+      const value = row[col.key];
+
+      return String(value ?? "")
+        .toLowerCase()
+        .includes(search);
+    });
+  });
+  const paginatedRows =
+    rowsPerPage === -1
+      ? filteredRows
+      : filteredRows.slice(
+          page * rowsPerPage,
+          page * rowsPerPage + rowsPerPage,
+        );
+  const totalCount = filteredRows.length;
+
+  const totalPages =
+    rowsPerPage === -1 ? 1 : Math.ceil(totalCount / rowsPerPage);
+
+  const startRecord = rowsPerPage === -1 ? 1 : page * rowsPerPage + 1;
+
+  const endRecord =
+    rowsPerPage === -1
+      ? totalCount
+      : Math.min((page + 1) * rowsPerPage, totalCount);
+  const handleChangeRowsPerPage = (e: SelectChangeEvent<number>) => {
+    const value = Number(e.target.value);
+    setRowsPerPage(value);
+    setPage(0);
+  };
+  const renderPageButtons = () => {
+    const pages: Array<number | string> = [];
+
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i += 1) pages.push(i);
+    } else if (page <= 3) {
+      pages.push(1, 2, 3, 4, "...", totalPages - 1, totalPages);
+    } else if (page >= totalPages - 4) {
+      pages.push(
+        1,
+        2,
+        "...",
+        totalPages - 3,
+        totalPages - 2,
+        totalPages - 1,
+        totalPages,
+      );
+    } else {
+      pages.push(1, 2, "...", page + 1, "...", totalPages - 1, totalPages);
+    }
+
+    return pages.map((item, index) =>
+      typeof item === "number" ? (
+        <CustomButton
+          key={item}
+          size="small"
+          variant={item === page + 1 ? "outlined" : "text"}
+          onClick={() => setPage(item - 1)}
+          sx={{
+            minWidth: 32,
+            borderRadius: "134px",
+            px: "10px",
+            py: "6px",
+            fontWeight: item === page + 1 ? 600 : 400,
+            ...(item !== page + 1 && {
+              color: "#444444",
+            }),
+          }}
+        >
+          {item}
+        </CustomButton>
+      ) : (
+        <Typography
+          key={`${item}-${index}`}
+          sx={{ mx: 1, color: "text.secondary" }}
+        >
+          {item}
+        </Typography>
+      ),
+    );
+  };
 
   return (
     <Box
@@ -296,48 +411,214 @@ console.log(openFilterDialog,searchText)
                     {headerContent()}
                   </TableHead>
                   <TableBody>
-                {rows.map((row) => (
-                  <TableRow key={row.id}
-        hover
-        sx={{
-          cursor: "pointer",
-          "&:hover": { backgroundColor: "#f5faff" },
-        }}>
-                    {visibleColumns.map((col) => (
-                      <TableCell key={String(col.key)} sx={{ p: 1.5, pl: 2, fontSize: "13px" }}>
-                        {row[col.key as keyof tableData] ?? "-"}
-                      </TableCell>
+                    {paginatedRows.map((row) => (
+                      <TableRow
+                        key={row.id}
+                        hover
+                        sx={{
+                          cursor: "pointer",
+                          "&:hover": { backgroundColor: "#f5faff" },
+                        }}
+                      >
+                        {visibleColumns.map((col) => {
+                          const cellValue = row[col.key];
+                          return (
+                            <TableCell
+                              key={String(col.key)}
+                              sx={{ p: 1.5, pl: 2, fontSize: "13px" }}
+                            >
+                              {col.key === "drc" ? (
+                                <Badge
+                                  label={row.drc}
+                                  variant={
+                                    row.drc === "Medium"
+                                      ? "Medium"
+                                      : row.drc === "Low"
+                                        ? "Low"
+                                        : "High"
+                                  }
+                                />
+                              ) : col.key === "applicationNo" ? (
+                                <Typography
+                                  sx={{
+                                    cursor: "pointer",
+                                    fontWeight: 600,
+                                    fontSize: "13px",
+                                    color: "#0E3762",
+                                    "&:hover": { textDecoration: "underline" },
+                                  }}
+                                  onClick={(e) => {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    navigate(
+                                      `/retail/app/${row.applicationNo}/drs`,
+                                      {
+                                        state: {
+                                          roleType: row.roleType,
+                                          applicationNo: row.applicationNo,
+                                        },
+                                      },
+                                    );
+                                  }}
+                                >
+                                  {row.applicationNo}
+                                </Typography>
+                              ) : (
+                                String(cellValue ?? "")
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
                     ))}
-                  </TableRow>
-                ))}
-              </TableBody>
+                  </TableBody>
                 </Table>
               </TableContainer>
-            </Paper>
+              {/* Footer Pagination */}
+              <Box
+                sx={{
+                  borderTop: "1px solid #e0e0e0",
+                  px: 2,
+                  py: 1.5,
+                  borderRadius: "0 0 20px",
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    flexWrap: "wrap",
+                    gap: 2,
+                  }}
+                >
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography sx={{ fontSize: 14, color: "#444444" }}>
+                      Show
+                    </Typography>
+                    <Select
+                      value={rowsPerPage}
+                      size="small"
+                      onChange={handleChangeRowsPerPage}
+                      sx={{
+                        minWidth: 80,
+                        height: 34,
+                        fontSize: 14,
+                      }}
+                    >
+                      <MenuItem value={10}>10</MenuItem>
+                      <MenuItem value={25}>25</MenuItem>
+                      <MenuItem value={50}>50</MenuItem>
+                      <MenuItem value={100}>100</MenuItem>
+                      <MenuItem value={-1}>All</MenuItem>
+                    </Select>
+                  </Box>
 
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <CustomButton
+                      onClick={() => setPage(Math.max(0, page - 1))}
+                      disabled={page === 0}
+                    >
+                      <KeyLeftArrowIcon />
+                      Previous
+                    </CustomButton>
+
+                    {renderPageButtons()}
+
+                    <CustomButton
+                      onClick={() =>
+                        setPage(Math.min(totalPages - 1, page + 1))
+                      }
+                      disabled={page >= totalPages - 1}
+                    >
+                      Next
+                      <KeyRightArrowIcon />
+                    </CustomButton>
+                  </Box>
+
+                  <Typography sx={{ fontSize: 14, color: "#444444" }}>
+                    Showing {startRecord}-{endRecord} of {totalCount}
+                  </Typography>
+                </Box>
+              </Box>
+            </Paper>
+            {/*  ------- Filter table ------------ */}
+         
+<FilterTable openFilterDialog={openFilterDialog}
+  setOpenFilterDialog={setOpenFilterDialog}
+  filterValues={filterValues}
+  setFilterValues={setFilterValues}
+  onApply={() => setPage(0)}/>
+{/*  ------- Custom table ------------ */}
             <CustomDialog
               open={openTransferDialog}
               onClose={() => setOpenTransferDialog(false)}
               title="Customize Columns"
-              maxWidth="lg"
+              maxWidth="md"
               fullWidth
-              titleSx={modalTitleStyles}
+              titleSx={{ ...modalTitleStyles }}
+              contentSx={{ p: 3 }}
+              actionsSx={{ justifyContent: "center", pb: 3 }}
               actions={
                 <CustomButton
-                  onClick={handleApply}
                   variant="contained"
-                  sx={{ width: 150 }}
+                  onClick={handleApply}
+                  sx={{ width: "150px", borderRadius: "50px" }}
                 >
                   Apply
                 </CustomButton>
               }
             >
-              <Box sx={{ display: "flex", gap: 2, justifyContent: "center" }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  gap: 2,
+                  justifyContent: "center",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                }}
+              >
                 {customList("Available", left)}
 
-                <Box sx={{ display: "flex", flexDirection: "column" }}>
-                  <CustomButton onClick={moveRight}>›</CustomButton>
-                  <CustomButton onClick={moveLeft}>‹</CustomButton>
+                <Box
+                  sx={{
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    gap: 1,
+                    mt: 2,
+                  }}
+                >
+                  <CustomButton
+                    sx={{ my: 1 }}
+                    variant="outlined"
+                    size="small"
+                    onClick={moveRight}
+                    disabled={
+                      checked.filter((c) => left.includes(c)).length === 0
+                    }
+                  >
+                    <Box component="span">›</Box>
+                  </CustomButton>
+                  <CustomButton
+                    sx={{ my: 1 }}
+                    variant="outlined"
+                    size="small"
+                    disabled={
+                      checked.filter((c) => right.includes(c)).length === 0
+                    }
+                    onClick={moveLeft}
+                  >
+                    {" "}
+                    <Box component="span">‹</Box>
+                  </CustomButton>
                 </Box>
 
                 {customList("Visible", right)}

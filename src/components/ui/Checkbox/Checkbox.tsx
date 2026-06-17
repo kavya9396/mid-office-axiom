@@ -20,7 +20,7 @@ export default function CustomCheckbox({
           onChange={onChange}
           sx={{
             "&.Mui-checked": {
-              color: "#E77817",
+              color: "#063E6F",
             },
           }}
         />

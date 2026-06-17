@@ -1,4 +1,4 @@
-import {  useState } from "react";
+import {  useMemo, useState } from "react";
 import {
   loadColumnConfig,
   saveColumnConfig,
@@ -11,45 +11,45 @@ import { poolAllowedColumns } from "../store/pool.columns.config";
 
 const getDefaultConfig = (pool: string): ColumnConfig => {
   const allowed = poolAllowedColumns[pool] ?? allColumns.map((c) => c.key);
-
   return {
-    visible: allowed.slice(0, 7),
+    visible: allowed.slice(0, 8),
     hidden: allowed.slice(7),
   };
 };
 
 export const useColumnConfig = (userId: string, selectedPool: string) => {
-  const [configMap, setConfigMap] = useState(() => loadColumnConfig());
 
   const key = getConfigKey(userId, selectedPool);
 
-  // current active config
-const config: ColumnConfig = (() => {
-  const existing = configMap[key];
+const [configMap, setConfigMap] = useState(() => {
+  const stored = loadColumnConfig();
 
-  if (existing) {
-    return existing;
+  const key = getConfigKey(userId, selectedPool);
+
+  if (!stored[key]) {
+    stored[key] = getDefaultConfig(selectedPool);
+    saveColumnConfig(stored);
   }
 
-  return getDefaultConfig(selectedPool);
-})();
+  return stored;
+});
+  // ✅ always derive current config
+  const config: ColumnConfig = useMemo(() => {
+    return configMap[key] ?? getDefaultConfig(selectedPool);
+  }, [configMap, key, selectedPool]);
 
+  // ✅ update config safely
+  const updateConfig = (newConfig: ColumnConfig) => {
+    setConfigMap((prev) => {
+      const updated = {
+        ...prev,
+        [key]: newConfig,
+      };
 
-
-const updateConfig = (newConfig: ColumnConfig) => {
-  setConfigMap((prev) => {
-    const updated = {
-      ...prev,
-      [key]: newConfig,
-    };
-
-    saveColumnConfig(updated);
-    return updated;
-  });
-};
-
-  return {
-    config,
-    updateConfig,
+      saveColumnConfig(updated);
+      return updated;
+    });
   };
+
+  return { config, updateConfig };
 };

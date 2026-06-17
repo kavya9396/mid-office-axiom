@@ -215,7 +215,7 @@ const BreDecision = () => {
             <CustomButton
               onClick={() => {
                 setBreDialogOpen(false)
-                navigate("/group/inbox")
+                navigate("/retail/inbox")
               }}
               sx={{ borderRadius: "50px", paddingX: "40px" }}
             >
