@@ -1,38 +1,63 @@
 {
   "userId": "ipru1234",
-  "username":"Username",
-  "businessType":"retail",
-  "roleType":"cops",
+  "username": "Username",
+  "businessType": "retail",
+  "roleType": "cops",
   "roles": [
     {
       "name": "Active Pools",
-      "pools": [ "CVT Pool",
+      "pools": [
+        "CVT Pool",
         "CPT Pool",
         "PIVV Pool",
         "Pre Issuance Servicing Pool",
-        "Exceptional Pool"]
+        "Exceptional Pool"
+      ]
     },
-     {
+    {
       "name": "Pending Pools",
-      "pools": [ "System Wait Pool - Non medical",
-      "AMR - Non medical",
-      "Reconsideration Pool",
-      "Reject Pool",
-      "Ready for Issuance Pool",
-      "Issuance Pool"
-        ]
+      "pools": [
+        "System Wait Pool - Non medical",
+        "AMR - Non medical",
+        "Reconsideration Pool",
+        "Reject Pool",
+        "Ready for Issuance Pool",
+        "Issuance Pool"
+      ]
     },
     {
       "name": "User Handle",
-      "pools": [ "Allocation Details",
-        "Leave Management"
-        ]
+      "pools": ["Allocation Details", "Leave Management"]
     },
     {
       "name": "Case Handle",
-      "pools": [ "Reassign/Transfer Cases",
-        "Force Close Case"
-        ]
+      "pools": ["Reassign/Transfer Cases", "Force Close Case"]
     }
-  ]
+  ],
+  "poolData": {
+    "CVT Pool": [
+      {
+        "id": 1,
+        "applicationNo": "OB25175127",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "CVT Pool"
+      },
+      {
+        "id": 2,
+        "applicationNo": "OB25175128",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "CVT Pool"
+      }
+    ]
+  }
 }

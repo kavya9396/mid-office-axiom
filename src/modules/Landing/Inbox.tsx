@@ -1,9 +1,11 @@
 import { Box, Grid } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import LeftPanel from "./LeftPanel";
-import type { RoleGroup } from "../../types/inbox";
+import type {  RoleGroup, tableData } from "../../types/inbox";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
 import { useAppDispatch } from "../../store/hooks";
+import RightPanel from "./RightPanel";
+import { poolThunk } from "../../store/thunks/poolThunk";
 
 const Inbox = () => {
   const dispatch = useAppDispatch();
@@ -13,7 +15,9 @@ const Inbox = () => {
   const [userRole, setUserRole] = useState("");
   const [panelMode, setPanelMode] = useState<"simple" | "accordion">("simple");
   const [poolData, setPoolData] =
-  useState<Record<string, string[]>>({});
+  useState<Record<string, tableData[]>>({});
+  const [tableRows, setTableRows] = useState<tableData[]>([]);
+  const [poolCounts, setPoolCounts] = useState<Record<string, number>>({});
   const didFetch = useRef(false);
   useEffect(() => {
     if (didFetch.current) return;
@@ -22,12 +26,10 @@ const Inbox = () => {
       try {
         // Fetch Roles
 
-        const roleResponse = await dispatch(fetchInboxThunk()).unwrap();
-
-        console.log("roleResponse", roleResponse);
+       const roleResponse = await dispatch(fetchInboxThunk()).unwrap();
 
         const role = roleResponse.roleType ?? "admin";
-        console.log("roleGroups", roleResponse, role);
+
         const roleGroups: RoleGroup[] = roleResponse.roles
           ? roleResponse.roles
           : Object.entries(roleResponse.pools ?? {}).map(([name, pools]) => ({
@@ -38,15 +40,17 @@ const Inbox = () => {
         setRoleList(roleGroups);
         setUserRole(role);
         setPanelMode("accordion");
-        setPoolData(roleResponse.poolData ?? {});
 
         const allPools = roleGroups.flatMap((group) => group.pools);
-        if (allPools.length > 0) {
-          setSelectedPool(allPools[0]);
+
+        const firstPool = allPools[0];
+
+        setPoolData(roleResponse.poolData ?? {});
+
+        if (firstPool) {
+          setSelectedPool(firstPool);
+          setTableRows(roleResponse.poolData?.[firstPool] ?? []);
         }
-        console.log("roleGroups", roleGroups);
-        // Fetch Table Data
-        //  await dispatch(fetchInboxTableData());
       } catch (error) {
         console.error("Failed to load data:", error);
       }
@@ -54,6 +58,37 @@ const Inbox = () => {
 
     loadData();
   }, []);
+  useEffect(() => {
+  if (!selectedPool) return;
+
+  const loadPoolData = async () => {
+    try {
+      const response = await dispatch(
+        poolThunk({
+    username: userRole,
+    poolname: selectedPool,
+  })
+      ).unwrap();
+      setPoolData(prev => ({
+  ...prev,
+  ...response.poolData,
+}));
+
+console.log('response',response)
+const rows = response.poolData[selectedPool] ?? [];
+setPoolCounts(prev => ({
+  ...prev,
+  [selectedPool]: rows.length,
+}));
+setTableRows(rows);
+    } catch (error) {
+      console.error("Failed to load pool data", error);
+      setTableRows([]);
+    }
+  };
+
+  loadPoolData();
+}, [selectedPool, dispatch]);
   return (
     <Box>
       <Grid container sx={{ flexWrap: "nowrap" }} className="bg-grey-200">
@@ -67,7 +102,14 @@ const Inbox = () => {
           roles={roleList}
           rows={[]}
           poolData={poolData}
+          poolCounts={poolCounts}
         />
+         <Box sx={{ flex: 1 }}>
+        <RightPanel
+          selectedPool={selectedPool}
+          rows={tableRows}
+        />
+      </Box>
       </Grid>
     </Box>
   );

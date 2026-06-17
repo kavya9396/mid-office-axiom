@@ -1,0 +1,53 @@
+{
+  "poolData": {
+    "CVT Pool": [
+      {
+        "id": 1,
+        "applicationNo": "OB25175127",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "CVT Pool",
+        "productType":"test"
+      },
+      {
+        "id": 2,
+        "applicationNo": "OB25175128",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "CVT Pool"
+      }
+    ],"CPT Pool": [
+      {
+        "id": 1,
+        "applicationNo": "OB25175129",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "CPT Pool",
+        "productType":"test"
+      },
+      {
+        "id": 2,
+        "applicationNo": "OB25175138",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "CPT Pool"
+      }
+    ]
+  }
+}
