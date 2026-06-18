@@ -114,3 +114,31 @@ export type AdditionalRequirementRow = {
   remarks: string;
   udsLink: string;
 };
+
+export type UserRequest = {
+  role: string
+};
+
+export type UserResponse = {
+  users: User[];
+};
+
+export interface User {
+  userId: string;
+  userName: string;
+  role: string;
+  ticketsInPool: number;
+};
+
+export interface DecisionCode {
+  label: string;
+  value: string;
+}
+
+export type DecisionCodeRequest = {
+  decision: string;
+};
+
+export type DecisionCodeResponse = {
+  decisionCodes: DecisionCode[];
+};

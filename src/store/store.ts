@@ -1,11 +1,15 @@
 import { configureStore } from "@reduxjs/toolkit";
 import apiReducer from "./slices/apiSlice";
 import drsReducer from "./slices/drsSlice";
+import referralUsersReducer from "./slices/referralUsersSlice";
+import decisionCodeReducer from "./slices/decisionCodeSlice";
 
 export const store = configureStore({
   reducer: {
     api: apiReducer,
-    drs: drsReducer
+    drs: drsReducer,
+    referralUsers: referralUsersReducer,
+    decisionCodes: decisionCodeReducer,
   },
 });
 

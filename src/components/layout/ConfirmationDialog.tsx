@@ -8,6 +8,8 @@ type ConfirmationDialogProps = {
   message: string;
   onClose: () => void;
   onConfirm?: () => void;
+  title?: string;
+  buttonText?: string;
 };
 
 const ConfirmationDialog = ({
@@ -15,6 +17,8 @@ const ConfirmationDialog = ({
   message,
   onClose,
   onConfirm,
+  title = "Confirmation",
+  buttonText = "Yes",
 }: ConfirmationDialogProps) => {
   return (
     <CustomDialog
@@ -22,7 +26,7 @@ const ConfirmationDialog = ({
       onClose={onClose}
       title={
         <Typography sx={modalTitleStyles}>
-          Confirmation
+          {title}
         </Typography>
       }
       actionsSx={{
@@ -40,7 +44,7 @@ const ConfirmationDialog = ({
             px: 5,
           }}
         >
-          Yes
+          {buttonText}
         </CustomButton>
       }
     >

@@ -1,0 +1,16 @@
+{
+  "decisionCodes": [
+    {
+      "label": "XXR",
+      "value": "XXR"
+    },
+    {
+      "label": "TAX",
+      "value": "TAX"
+    },
+    {
+      "label": "TJX",
+      "value": "TJX"
+    }
+  ]
+}

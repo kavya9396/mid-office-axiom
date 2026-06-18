@@ -74,6 +74,19 @@ export default function CustomSelect({
             height: 40,
             borderRadius: "8px",
             backgroundColor: "#fff",
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "rgba(0, 0, 0, 0.23)",
+            },
+
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#9A2529",
+            },
+
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#9A2529",
+              borderWidth: "2px",
+            },
+
             "& .MuiSelect-select": {
               px: 2,
               py: 1,

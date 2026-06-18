@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "userId": "USR001",
+      "userName": "Sarang Gokhale",
+      "role": "HO CMO",
+      "ticketsInPool": 15
+    },
+    {
+      "userId": "USR002",
+      "userName": "Vijay Aahale",
+      "role": "HO CMO",
+      "ticketsInPool": 8
+    },
+    {
+      "userId": "USR003",
+      "userName": "Amit Kulkarni",
+      "role": "HO CMO",
+      "ticketsInPool": 5
+    }
+  ]
+}
