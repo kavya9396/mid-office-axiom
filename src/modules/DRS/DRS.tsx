@@ -6,13 +6,20 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
 
+const mapper = {
+    "CVT Pool": "RETAIL_CVT_POOL"
+}
+
 const DRS = () => {
-    const accordions = DRS_LAYOUTS["RETAIL_CVT_ADMIN"];
+    const roleType = localStorage.getItem("roleType") ?? "";
+
+const layout = mapper[roleType as keyof typeof mapper];
+const accordions = layout ? DRS_LAYOUTS[layout] : [];
     const navigate = useNavigate();
 
     const dispatch = useDispatch<AppDispatch>();
     const applicationId = "OB25175127";
-    const roleType = "CVT POOL";
+    
 
     useEffect(() => {
         dispatch(

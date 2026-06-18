@@ -26,7 +26,7 @@ import {
   SettingsIcon,
 } from "../../icons/Icons";
 import SearchBar from "../../components/ui/SearchBar/SearchBar";
-import {  useState } from "react";
+import { useState } from "react";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 //import { poolAllowedColumns } from "../../store/pool.columns.config";
@@ -34,6 +34,7 @@ import { useColumnConfig } from "../../hooks/useColumnConfig";
 import Badge from "../../components/ui/Badge/Badge";
 import { useNavigate } from "react-router-dom";
 import FilterTable from "./FilterTable";
+import { getDRSPath } from "../../routes/routes";
 
 const RightPanel = ({
   selectedPool,
@@ -59,8 +60,9 @@ const RightPanel = ({
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
-  const [filterValues, setFilterValues] = useState<Record<string, string[]>>({});
-
+  const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
+    {},
+  );
 
   const visibleColumns = allColumns.filter((col) =>
     config.visible.includes(col.key),
@@ -158,32 +160,32 @@ const RightPanel = ({
     </Paper>
   );
   const filteredRows = rows
-  .filter((row) => {
-    const activeFilters = Object.entries(filterValues);
+    .filter((row) => {
+      const activeFilters = Object.entries(filterValues);
 
-    if (!activeFilters.length) return true;
+      if (!activeFilters.length) return true;
 
-    return activeFilters.every(([key, values]) => {
-      if (!values.length) return true;
+      return activeFilters.every(([key, values]) => {
+        if (!values.length) return true;
 
-      const rowValue = String(row[key as keyof typeof row] ?? "");
+        const rowValue = String(row[key as keyof typeof row] ?? "");
 
-      return values.includes(rowValue);
+        return values.includes(rowValue);
+      });
+    })
+    .filter((row) => {
+      if (!searchText.trim()) return true;
+
+      const search = searchText.toLowerCase();
+
+      return visibleColumns.some((col) => {
+        const value = row[col.key];
+
+        return String(value ?? "")
+          .toLowerCase()
+          .includes(search);
+      });
     });
-  })
-  .filter((row) => {
-    if (!searchText.trim()) return true;
-
-    const search = searchText.toLowerCase();
-
-    return visibleColumns.some((col) => {
-      const value = row[col.key];
-
-      return String(value ?? "")
-        .toLowerCase()
-        .includes(search);
-    });
-  });
   const paginatedRows =
     rowsPerPage === -1
       ? filteredRows
@@ -450,14 +452,9 @@ const RightPanel = ({
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
+                                    localStorage.setItem("roleType", row.roleType);
                                     navigate(
-                                      `/retail/app/${row.applicationNo}/drs`,
-                                      {
-                                        state: {
-                                          roleType: row.roleType,
-                                          applicationNo: row.applicationNo,
-                                        },
-                                      },
+                                      getDRSPath("retail", row.applicationNo),
                                     );
                                   }}
                                 >
@@ -550,13 +547,15 @@ const RightPanel = ({
               </Box>
             </Paper>
             {/*  ------- Filter table ------------ */}
-         
-<FilterTable openFilterDialog={openFilterDialog}
-  setOpenFilterDialog={setOpenFilterDialog}
-  filterValues={filterValues}
-  setFilterValues={setFilterValues}
-  onApply={() => setPage(0)}/>
-{/*  ------- Custom table ------------ */}
+
+            <FilterTable
+              openFilterDialog={openFilterDialog}
+              setOpenFilterDialog={setOpenFilterDialog}
+              filterValues={filterValues}
+              setFilterValues={setFilterValues}
+              onApply={() => setPage(0)}
+            />
+            {/*  ------- Custom table ------------ */}
             <CustomDialog
               open={openTransferDialog}
               onClose={() => setOpenTransferDialog(false)}

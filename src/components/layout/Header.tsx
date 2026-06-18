@@ -181,6 +181,7 @@ return(
               onClick={() => {
   localStorage.removeItem("token"); // or your key name
   localStorage.removeItem("column_config_v1");
+  localStorage.removeItem("roleType");
   navigate("/login");
 }}
             >
