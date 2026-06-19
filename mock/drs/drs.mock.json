@@ -11,7 +11,9 @@
     {
       "memberType": "proposer",
       "proposerSummary": {
-        "name": "JITESH KUMAR",
+        "firstName": "Rudra",
+        "middleName": "Kumar",
+        "lastName": "Sangha",
         "dob": "22-02-1992",
         "age": 34.0,
         "gender": "Male",
@@ -70,7 +72,7 @@
       },
       "communicationAddressDetails": {
         "addressLine1": "PRISM Towers",
-        "addressLine2": "Malad west",
+        "addressLine2": "Mindspace",
         "addressLine3": "Malad west",
         "landmark": "Behind Inorbit Mall",
         "city": "Mumbai",
@@ -80,7 +82,7 @@
       },
       "permanentAddressDetails": {
         "addressLine1": "PRISM Towers",
-        "addressLine2": "Malad west",
+        "addressLine2": "Mindspace",
         "addressLine3": "Malad west",
         "landmark": "Behind Inorbit Mall",
         "city": "Mumbai",
@@ -123,16 +125,17 @@
       },
       "lifestyleHabits": {
         "alcoholConsumption": "No",
-        "alcoholQuantity": "-",
+        "alcoholQuantity": "No",
         "smoking": "No",
-        "smokingQuantity": "-",
+        "smokingQuantity": "No",
         "tobaccoGutka": "No",
         "narcotics": "No",
         "hazardousOccupation": "No",
         "aviationActivities": "No",
         "diving": "No",
         "mountaineering": "No",
-        "otherHazardousActivities": "No"
+        "otherHazardousActivities": "No",
+        "racing": "No"
       },
       "nominees": [
         {
@@ -190,7 +193,9 @@
     {
       "memberType": "lifeassured1",
       "proposerSummary": {
-        "name": "JITESH KUMAR",
+        "firstName": "Rudra",
+        "middleName": "Kumar",
+        "lastName": "Sangha",
         "dob": "22-02-1992",
         "age": 34.0,
         "gender": "Male",

@@ -5,13 +5,14 @@ import { applicantTabs } from "../../../utils/constant"
 import { useState } from "react"
 import type { ApplicantTab, RiskCard } from "../../../types/drs.types"
 import { HeartIcon, InfoIcon, TickIcon, WalletIcon } from "../../../icons/Icons"
-import { centerFlex, columnFlex } from "../../../utils/styles"
+import { centerFlex, columnFlex, modalTitleStyles } from "../../../utils/styles"
 import { useSelector } from "react-redux"
 import type { RootState } from "../../../store/store"
 import Badge from "../../../components/ui/Badge/Badge"
 import { GridSection } from "../../../components/layout/GridSection"
 import CustomButton from "../../../components/ui/Button/Button"
 import ApplicantProfile from "./ApplicantProfile"
+import CustomDialog from "../../../components/ui/Dialog/Dialog"
 
 const riskDetails: RiskCard[] = [
     {
@@ -72,8 +73,10 @@ const Summary = () => {
     const availableMemberTypes = summary?.map(item => item.memberType);
 
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
+    const [openPhotoDialog, setOpenPhotoDialog] = useState(false);
     const [open, setOpen] = useState(false);
     const [selectedCard, setSelectedCard] = useState<RiskCard | null>(null);
+    const [selectedPhotoSrc, setSelectedPhotoSrc] = useState("");
 
     const visibleTabs = applicantTabs.filter(tab =>
         availableMemberTypes?.includes(tab.key)
@@ -89,10 +92,17 @@ const Summary = () => {
     const policy = currentSummary?.policyDetails;
     const underwriting = currentSummary?.underwriting;
 
+    const name = proposer?.firstName + " " + proposer?.middleName + " " + proposer?.lastName
     const imageURL = proposer?.profileImage;
+    
     const handleOpen = (item: RiskCard) => {
         setSelectedCard(item);
         setOpen(true);
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setSelectedCard(null);
     };
 
     const currentApplicant = applicantTabs.find(
@@ -310,17 +320,17 @@ const Summary = () => {
                                             cursor: "pointer",
                                             "&:hover": { opacity: 0.8 },
                                         }}
-                                    // onClick={() => {
-                                    //   if (imageURL) {
-                                    //     setSelectedPhotoSrc(imageURL);
-                                    //     setOpenPhotoDialog(true);
-                                    //   }
-                                    // }}
+                                        onClick={() => {
+                                            if (imageURL) {
+                                                setSelectedPhotoSrc(imageURL);
+                                                setOpenPhotoDialog(true);
+                                            }
+                                        }}
                                     >
                                         <Box
                                             component="img"
                                             src={imageURL}
-                                            alt={`${proposer?.name}'s photo`}
+                                            alt={`${name}'s photo`}
                                             sx={{
                                                 width: "100%",
                                                 height: "100%",
@@ -363,7 +373,7 @@ const Summary = () => {
                                                     color: "#161616",
                                                 }}
                                             >
-                                                {proposer?.name}
+                                                {name}
                                             </Typography>
                                             <Typography
                                                 sx={{
@@ -492,6 +502,73 @@ const Summary = () => {
 
                 </CustomAccordion>
             </Box>
+            <CustomDialog
+                open={openPhotoDialog}
+                onClose={() => setOpenPhotoDialog(false)}
+                showCloseIcon={false}
+                maxWidth="sm"
+                fullWidth
+                paperSx={{
+                    backgroundColor: "transparent",
+                    boxShadow: "none",
+                }}
+                backdropSx={{
+                    backgroundColor: "rgba(0, 0, 0, 0.7)",
+                }}
+                contentSx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    p: 0,
+                    backgroundColor: "transparent",
+                }}
+            >
+                <Box
+                    component="img"
+                    src={selectedPhotoSrc}
+                    alt="Expanded Photo"
+                    sx={{
+                        width: "300px",
+                        height: "300px",
+                        borderRadius: "50%",
+                        objectFit: "cover",
+                    }}
+                />
+            </CustomDialog>
+
+            <CustomDialog
+                open={open}
+                onClose={handleClose}
+                title={
+                    <Typography
+                        sx={{
+                            ...modalTitleStyles
+                        }}
+                    >
+                        {selectedCard?.detailedDescTitle}
+                    </Typography>
+                }
+                maxWidth="sm"
+                fullWidth
+            >
+                <Box sx={{ py: 1 }}>
+                    <Box component="ul" sx={{ pl: 2, m: 0 }}>
+                        {selectedCard?.detailedDesc.map((detail, index) => (
+                            <Box
+                                component="li"
+                                key={index}
+                                sx={{
+                                    fontSize: "14px",
+                                    color: "#20242c",
+                                    mb: 1,
+                                }}
+                            >
+                                {detail}
+                            </Box>
+                        ))}
+                    </Box>
+                </Box>
+            </CustomDialog>
         </Container>
     )
 }

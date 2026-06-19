@@ -192,7 +192,9 @@ export interface SummaryResponse {
 };
 
 export interface ProposerSummary {
-  name: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
   dob: string;
   age: number;
   gender: "Male" | "Female" | "Other";
@@ -321,6 +323,7 @@ export interface LifestyleHabits {
   diving: string;
   mountaineering: string;
   otherHazardousActivities: string;
+  racing: string
 }
 
 export interface Nominee {
@@ -381,3 +384,33 @@ export type FieldProps = {
   label: string;
   value: string;
 };
+
+export interface ApplicantEditForm {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  dob: string;
+  gender: string;
+  nationality: string;
+
+  panNumber: string;
+  identityProofType: string;
+  identityProofNumber: string;
+  addressProof: string;
+
+  communicationAddressLine1: string;
+  communicationAddressLine2: string;
+  communicationAddressLine3: string;
+  communicationCity: string;
+  communicationState: string;
+  communicationCountry: string;
+  communicationPincode: string;
+
+  permanentAddressLine1: string;
+  permanentAddressLine2: string;
+  permanentAddressLine3: string;
+  permanentCity: string;
+  permanentState: string;
+  permanentCountry: string;
+  permanentPincode: string;
+}

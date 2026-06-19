@@ -66,3 +66,109 @@ export const buildPairFields = <T,>(
         };
     });
 };
+
+type MaskOptions = {
+  visibleStart?: number;
+  visibleEnd?: number;
+  maskChar?: string;
+};
+
+/**
+ * Generic mask function for sensitive strings (PAN, Aadhaar, etc.)
+ */
+export const maskString = (
+  value?: string,
+  options: MaskOptions = {}
+): string => {
+  if (!value) return "";
+
+  const {
+    visibleStart = 0,
+    visibleEnd = 0,
+    maskChar = "X",
+  } = options;
+
+  const str = value.trim();
+  const len = str.length;
+
+  if (len <= visibleStart + visibleEnd) {
+    return maskChar.repeat(len);
+  }
+
+  const start = str.slice(0, visibleStart);
+  const end = str.slice(len - visibleEnd);
+  const maskedPart = maskChar.repeat(len - visibleStart - visibleEnd);
+
+  return `${start}${maskedPart}${end}`;
+};
+
+export const maskPAN = (pan?: string) => maskString(pan, { visibleStart: 2, visibleEnd: 2 });
+export const maskAadhaar = (aadhaar?: string) => maskString(aadhaar, { visibleStart: 0, visibleEnd: 4 });
+
+export const maskSensitive = (
+  value: string,
+  start = 0,
+  end = 4
+) => {
+  if (!value) return "-";
+  if (value.length <= start + end) return value;
+
+  return (
+    value.slice(0, start) +
+    "*".repeat(value.length - start - end) +
+    value.slice(-end)
+  );
+};
+
+export const formatDOB = (dob: string): string => {
+  if (!dob) return "";
+  const [dd, mm, yyyy] = dob.split("-");
+  return `${yyyy}-${mm}-${dd}`;
+};
+
+type TripleFieldConfig<T> = {
+    first: {
+        label: string;
+        key: keyof T;
+        format?: (value: T[keyof T]) => string;
+    };
+    second: {
+        label: string;
+        key: keyof T;
+        format?: (value: T[keyof T]) => string;
+    };
+    third: {
+        label: string;
+        key: keyof T;
+        format?: (value: T[keyof T]) => string;
+    };
+};
+
+
+export const buildTripleFields = <T,>(
+    data: T | undefined,
+    rows: TripleFieldConfig<T>[]
+) => {
+    return rows.map((row) => {
+        const firstRaw = data?.[row.first.key];
+        const secondRaw = data?.[row.second.key];
+        const thirdRaw = data?.[row.third.key];
+
+        return {
+            firstLabel: row.first.label,
+            firstValue: row.first.format
+                ? row.first.format(firstRaw as T[keyof T])
+                : (firstRaw ?? "-"),
+
+            secondLabel: row.second.label,
+            secondValue: row.second.format
+                ? row.second.format(secondRaw as T[keyof T])
+                : (secondRaw ?? "-"),
+
+            thirdLabel: row.third.label,
+            thirdValue: row.third.format
+                ? row.third.format(thirdRaw as T[keyof T])
+                : (thirdRaw ?? "-"),
+        };
+    });
+};

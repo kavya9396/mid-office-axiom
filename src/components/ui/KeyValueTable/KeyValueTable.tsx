@@ -9,10 +9,12 @@ import {
 } from "@mui/material";
 
 export type KeyValueRow = {
-  leftLabel: string;
-  leftValue: React.ReactNode;
-  rightLabel: string;
-  rightValue: React.ReactNode;
+  firstLabel: string;
+  firstValue: React.ReactNode;
+  secondLabel: string;
+  secondValue: React.ReactNode;
+  thirdLabel: string;
+  thirdValue: React.ReactNode;
 };
 
 type KeyValueTableProps = {
@@ -70,38 +72,55 @@ export default function KeyValueTable({
           <TableBody>
             {rows.map((row, index) => (
               <TableRow key={index}>
-                {/* LEFT LABEL */}
+                {/* FIRST LABEL */}
                 <TableCell
                   sx={{
                     backgroundColor: "#D2D7DE",
-                    width: "25%",
+                    width: "16.66%",
                     borderBottom: "1px solid #C9CDD3",
                     fontWeight: 600,
                   }}
                 >
-                  {row.leftLabel}
+                  {row.firstLabel}
                 </TableCell>
 
-                {/* LEFT VALUE */}
-                <TableCell sx={{ width: "25%" }}>
-                  {row.leftValue}
+                {/* FIRST VALUE */}
+                <TableCell sx={{ width: "16.66%" }}>
+                  {row.firstValue}
                 </TableCell>
 
-                {/* RIGHT LABEL */}
+                {/* SECOND LABEL */}
                 <TableCell
                   sx={{
                     backgroundColor: "#D2D7DE",
-                    width: "25%",
+                    width: "16.66%",
                     borderBottom: "1px solid #C9CDD3",
                     fontWeight: 600,
                   }}
                 >
-                  {row.rightLabel}
+                  {row.secondLabel}
                 </TableCell>
 
-                {/* RIGHT VALUE */}
-                <TableCell sx={{ width: "25%" }}>
-                  {row.rightValue}
+                {/* SECOND VALUE */}
+                <TableCell sx={{ width: "16.66%" }}>
+                  {row.secondValue}
+                </TableCell>
+
+                {/* THIRD LABEL */}
+                <TableCell
+                  sx={{
+                    backgroundColor: "#D2D7DE",
+                    width: "16.66%",
+                    borderBottom: "1px solid #C9CDD3",
+                    fontWeight: 600,
+                  }}
+                >
+                  {row.thirdLabel}
+                </TableCell>
+
+                {/* THIRD VALUE */}
+                <TableCell sx={{ width: "16.66%" }}>
+                  {row.thirdValue}
                 </TableCell>
               </TableRow>
             ))}
