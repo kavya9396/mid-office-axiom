@@ -27,7 +27,7 @@ type CustomTableProps<T> = {
   headerAction?: React.ReactNode;
 };
 
-export default function CustomTable<T extends Record<string, unknown>>({
+export default function CustomTable<T extends object>({
   title,
   columns,
   data,

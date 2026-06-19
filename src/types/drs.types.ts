@@ -35,10 +35,12 @@ export type DRSRequest = {
 };
 
 export type DRSResponse = {
-  breDecision: BreDecisionResponse | null;
-  applicationOverview: ApplicationOverview | null;
-  riderDetails: RiderDetail[] | null;
-  requirements: AdditionalRequirementRow[] | null;
+  breDecision: BreDecisionResponse;
+  applicationOverview: ApplicationOverview;
+  summary: SummaryResponse[];
+  riderDetails: RiderDetail[];
+  requirements: AdditionalRequirementRow[];
+  pivvSection: PivvSection;
 };
 
 export interface BreDecisionResponse {
@@ -141,4 +143,241 @@ export type DecisionCodeRequest = {
 
 export type DecisionCodeResponse = {
   decisionCodes: DecisionCode[];
+};
+
+export interface PivvSection {
+  title: string;
+  remarks: string;
+  decision: string;
+  reason: string;
+  userId: string;
+};
+
+export interface PivvSectionResponse {
+  pivvSection: PivvSection;
+};
+
+export type ApplicantTab = 
+  | "proposer"
+  | "lifeassured1"
+  | "lifeassured2"
+
+export type RiskCard = {
+  title: string;
+  desc: string;
+  detailedDescTitle: string;
+  detailedDesc: string[];
+  type: "medical" | "financial" | "other";
+  status: "warning" | "success";
+};
+
+export interface SummaryResponse {
+  memberType: "proposer" | "lifeassured1" | "lifeassured2";
+  proposerSummary: ProposerSummary;
+  personalDetails: PersonalDetails;
+  financialDetails: FinancialDetails;
+  policyDetails: PolicyDetails;
+  underwriting: Underwriting;
+  applicantDetails: ApplicantDetails;
+  kycDetails: KycDetails;
+  communicationAddressDetails: AddressDetails;
+  permanentAddressDetails: AddressDetails;
+  contactDetails: ContactDetails;
+  applicantFinancialDetails: ApplicantFinancialDetails;
+  healthInformation: HealthInformation;
+  lifestyleHabits: LifestyleHabits;
+  nominees: Nominee[];
+  genericDetails: GenericDetails;
+  eiaDetails: EiaDetails;
+};
+
+export interface ProposerSummary {
+  name: string;
+  dob: string;
+  age: number;
+  gender: "Male" | "Female" | "Other";
+  profileImage: string;
+  caseStatus: string;
+};
+
+export interface PersonalDetails {
+  maritalStatus: "Single" | "Married" | "Divorced" | "Widowed";
+  location: Location;
+  occupation: Occupation;
+};
+
+export interface Location {
+  city: string;
+  country: string;
+};
+
+export interface Occupation {
+  type: string;
+  designation: string;
+  organization: string;
+};
+
+export interface FinancialDetails {
+  annualIncome: number;
+  appliedSumAssured: number;
+  trsa: number;
+  tfesa: number;
+};
+
+export interface PolicyDetails {
+  productName: string;
+  productType: string;
+  modalPremium: number;
+  channel: string;
+};
+
+export interface Underwriting {
+  remarks: string;
+  breDecision: BreDecision;
+};
+
+export interface BreDecision {
+  status: string;
+  category: string;
+  coverage: string;
+};
+
+  export interface ApplicantDetails {
+  dateOfBirth: string;
+  gender: string;
+  maritalStatus: string;
+  nationality: string;
+  countryOfResidence: string;
+  education: string;
+}
+
+export interface KycDetails {
+  panNumber: string;
+  identityProofType: string;
+  identityProofNumber: string;
+  addressProof: string;
+  incomeProof: string;
+  existingCkycNumber: string;
+  pep: boolean;
+  criminalProceedings: string;
+}
+
+export interface AddressDetails {
+  addressLine1: string;
+  addressLine2: string;
+  addressLine3: string;
+  landmark: string;
+  city: string;
+  state: string;
+  country: string;
+  pincode: string;
+}
+
+export interface ContactDetails {
+  mobileNumber: string;
+  emailId: string;
+  alternateMobile: string;
+  landlineNumber: string;
+}
+
+export interface ApplicantFinancialDetails {
+  occupation: string;
+  annualIncome: number;
+  gstin: string;
+  organisationType: string;
+  organisationName: string;
+}
+
+export interface HealthInformation {
+  height: string;
+  weight: string;
+  diabetes: string;
+  hypertension: string;
+  heartDisease: string;
+  cancer: string;
+  kidneyDisease: string;
+  liverDisease: string;
+  lungDisease: string;
+  neurologicalDisorder: string;
+  mentalDisorder: string;
+  hivAids: string;
+  anySurgery: string;
+  hospitalization: string;
+  otherIllness: string;
+  familyHeartDisease: string;
+  familyCancer: string;
+  familyDiabetes: string;
+}
+
+export interface LifestyleHabits {
+  alcoholConsumption: string;
+  alcoholQuantity: string;
+  smoking: string;
+  smokingQuantity: string;
+  tobaccoGutka: string;
+  narcotics: string;
+  hazardousOccupation: string;
+  aviationActivities: string;
+  diving: string;
+  mountaineering: string;
+  otherHazardousActivities: string;
+}
+
+export interface Nominee {
+  nomineeName: string;
+  nomineeDOB: string;
+  gender: string;
+  relationship: string;
+  accountNumber: string;
+  ifsc: string;
+  sharePercentage: number;
+  appointeeName: string;
+  appointeeGender: string;
+  appointeeDOB: string;
+}
+
+export interface GenericDetails {
+  existingPolicyNumber: string;
+  clientId: string;
+  selfProposed: string;
+  typeOfProposer: string;
+  relationshipWithLifeAssured: string;
+  typeOfProposal: string;
+}
+
+export interface EiaDetails {
+  openEIA: string;
+  existingEIANumber: string;
+  preferredRepository: string;
+  convertPolicies: string;
+}
+
+export interface ApplicantProfile {
+  applicantDetails: ApplicantDetails;
+  kycDetails: KycDetails;
+  communicationAddressDetails: AddressDetails;
+  permanentAddressDetails: AddressDetails;
+  contactDetails: ContactDetails;
+  applicantfinancialDetails: ApplicantFinancialDetails;
+  healthInformation: HealthInformation;
+  lifestyleHabits: LifestyleHabits;
+  nominees: Nominee[];
+  genericDetails: GenericDetails;
+  eiaDetails: EiaDetails;
+}
+
+export type ApplicantInfoTab =
+  | "personalKyc"
+  | "contactAddress"
+  | "financialProfession"
+  | "medicalLifestyle"
+  | "nominee"
+  | "generic"
+  | "eia";
+
+export type NomineeRow = Nominee;
+
+export type FieldProps = {
+  label: string;
+  value: string;
 };

@@ -1,17 +1,21 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type {
-    AdditionalRequirementRow,
+  AdditionalRequirementRow,
   ApplicationOverview,
   BreDecisionResponse,
+  PivvSection,
   RiderDetail,
+  SummaryResponse,
 } from "../../types/drs.types";
 import { drsThunk } from "../thunks/drsThunk";
 
 interface DrsState {
   breDecision: BreDecisionResponse | null;
+  summary: SummaryResponse[] | null;
   applicationOverview: ApplicationOverview | null;
   riderDetails: RiderDetail[] | null;
   requirements: AdditionalRequirementRow[] | null;
+  pivvSection: PivvSection | null;
   loading: "idle" | "loading" | "failed";
   error: string | null;
 }
@@ -19,7 +23,9 @@ interface DrsState {
 const initialState: DrsState = {
   breDecision: null,
   applicationOverview: null,
+  summary: null,
   riderDetails: null,
+  pivvSection: null,
   requirements: [],
   loading: "idle",
   error: null,
@@ -39,9 +45,11 @@ const drsSlice = createSlice({
         state.loading = "idle";
         state.error = null;
         state.breDecision = action.payload.breDecision;
+        state.summary = action.payload.summary;
         state.applicationOverview = action.payload.applicationOverview;
         state.riderDetails = action.payload.riderDetails;
         state.requirements = action.payload.requirements;
+        state.pivvSection = action.payload.pivvSection;
       })
       .addCase(drsThunk.rejected, (state, action) => {
         state.loading = "failed";

@@ -1,8 +1,12 @@
 import { Box, Container } from "@mui/material";
-import CustomAccordion from "../../../../../../git/copsaxiom/src/component/ui/Accordion/Accordion";
-import LastUWRemarks from "../../../../../../git/copsaxiom/src/pages/DRS/UWDecision/LastUWRemarks";
+import CustomAccordion from "../../../components/ui/Accordion/Accordion";
+import LastUWRemarks from "../LastUWRemarks";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../store/store";
 
 const PIVVSection = () => {
+  const { pivvSection } = useSelector((state: RootState) => state.drs);
+
   return (
     <>
       <Container disableGutters>
@@ -18,36 +22,15 @@ const PIVVSection = () => {
             >
               <LastUWRemarks
                 title="PIVV Pool Remarks"
-                remarks="Applicant is a 38-year-old non-smoker with no significant medical history. Financials and occupation details are satisfactory as per underwriting guidelines. Case is referred to HoD for final review and approval."
+                remarks={pivvSection?.remarks}
                 firstFieldLabel="PIVV Pool Decision"
-                firstFieldValue="Reject"
+                firstFieldValue={pivvSection?.decision}
                 secondFieldLabel="Reason"
-                secondFieldValue="Customer not speaking"
+                secondFieldValue={pivvSection?.reason}
                 thirdFieldLabel="User ID"
-                thirdFieldValue="sunil.sharma"
+                thirdFieldValue={pivvSection?.userId}
               />
             </Box>
-            {/* <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              mt: 2,
-            }}
-          >
-            <CustomButton
-              variant="contained"
-              sx={{
-                minWidth: 200,
-                height: 44,
-                borderRadius: "50px",
-                fontWeight: 600,
-                px: 3,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Submit
-            </CustomButton>
-          </Box> */}
           </CustomAccordion>
         </Box>
       </Container>

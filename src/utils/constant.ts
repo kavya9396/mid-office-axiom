@@ -1,3 +1,5 @@
+import type { ApplicantInfoTab, ApplicantTab } from "../types/drs.types";
+
 export const reasonOptions = [
   { value: "tea", label: "Tea / Coffee Break" },
   { value: "lunch", label: "Lunch Break" },
@@ -96,4 +98,29 @@ export const ReinsurerOptions = [
   { label: "Hannover Re", value: "Hannover Re" },
   { label: "RGA", value: "RGA" },
   { label: "GenRe", value: "GenRe" },
+];
+
+export const cvtDecisionOptions = [
+  { label: "Accept", value: "Accept" },
+  { label: "Raise Requirements", value: "Raise Requirements" },
+  { label: "Refer to Risk", value: "Refer to Risk" },
+  { label: "Refer to IT", value: "Refer to IT" },
+  { label: "Reraise PIVV", value: "Reraise PIVV" },
+  { label: "Refer to CUW", value: "Refer to CUW" },
+];
+
+export const applicantTabs: { key: ApplicantTab; label: string }[] = [
+  { key: "proposer", label: "Proposer" },
+  { key: "lifeassured1", label: "Life Assured 1" },
+  { key: "lifeassured2", label: "Life Assured 2" },
+];
+
+export const applicantInfoTabs: { key: ApplicantInfoTab; label: string }[] = [
+  { key: "personalKyc", label: "Personal & KYC" },
+  { key: "contactAddress", label: "Contact & Address" },
+  { key: "financialProfession", label: "Financial & Profession" },
+  { key: "medicalLifestyle", label: "Medical & Lifestyle" },
+  { key: "nominee", label: "Nominee" },
+  { key: "generic", label: "Generic" },
+  { key: "eia", label: "eIA" },
 ];

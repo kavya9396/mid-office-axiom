@@ -13,8 +13,8 @@ const mapper = {
 const DRS = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
 
-const layout = mapper[roleType as keyof typeof mapper];
-const accordions = layout ? DRS_LAYOUTS[layout] : [];
+    const layout = mapper[roleType as keyof typeof mapper];
+    const accordions = layout ? DRS_LAYOUTS[layout] : [];
     const navigate = useNavigate();
 
     const dispatch = useDispatch<AppDispatch>();

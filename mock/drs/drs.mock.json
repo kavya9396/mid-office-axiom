@@ -7,6 +7,230 @@
     "timestamp": "01/04/2026, 1300hrs",
     "retrigger": false
   },
+  "summary": [
+    {
+      "memberType": "proposer",
+      "proposerSummary": {
+        "name": "JITESH KUMAR",
+        "dob": "22-02-1992",
+        "age": 34.0,
+        "gender": "Male",
+        "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
+        "caseStatus": "Green Case"
+      },
+      "personalDetails": {
+        "maritalStatus": "Married",
+        "location": {
+          "city": "Mumbai",
+          "country": "India"
+        },
+        "occupation": {
+          "type": "Salaried",
+          "designation": "",
+          "organization": "SBI LIFE INSURANCE COMPANY LTD"
+        }
+      },
+      "financialDetails": {
+        "annualIncome": 650000,
+        "appliedSumAssured": 10000000,
+        "trsa": 10000000,
+        "tfesa": 10000000
+      },
+      "policyDetails": {
+        "productName": "ICICI Pru iProtect Smart Plus",
+        "productType": "Life",
+        "modalPremium": 14916,
+        "channel": "Proprietary"
+      },
+      "underwriting": {
+        "remarks": "No adverse findings in family history, avocation, occupation, or personal habits; no existing insurance. Medicals non-adverse; financials adequate and viable for full cover; no other risks identified.",
+        "breDecision": {
+          "status": "Accept",
+          "category": "Standard",
+          "coverage": "Full Cover"
+        }
+      },
+      "applicantDetails": {
+        "dateOfBirth": "22-02-1992",
+        "gender": "Male",
+        "maritalStatus": "Married",
+        "nationality": "Indian",
+        "countryOfResidence": "India",
+        "education": "GRAD"
+      },
+      "kycDetails": {
+        "panNumber": "APJP3224R",
+        "identityProofType": "Aadhaar Card",
+        "identityProofNumber": "987654328236",
+        "addressProof": "Aadhaar Card",
+        "incomeProof": "Form 16",
+        "existingCkycNumber": "NA",
+        "pep": "No",
+        "criminalProceedings": "No"
+      },
+      "communicationAddressDetails": {
+        "addressLine1": "PRISM Towers",
+        "addressLine2": "Malad west",
+        "addressLine3": "Malad west",
+        "landmark": "Behind Inorbit Mall",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "country": "India",
+        "pincode": "400064"
+      },
+      "permanentAddressDetails": {
+        "addressLine1": "PRISM Towers",
+        "addressLine2": "Malad west",
+        "addressLine3": "Malad west",
+        "landmark": "Behind Inorbit Mall",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "country": "India",
+        "pincode": "400064"
+      },
+      "contactDetails": {
+        "mobileNumber": "9898989898",
+        "emailId": "test@ipru.com",
+        "alternateMobile": "-",
+        "landlineNumber": ""
+      },
+      "applicantFinancialDetails": {
+        "occupation": "Salaried",
+        "annualIncome": 500000,
+        "gstin": "-",
+        "organisationType": "Public",
+        "organisationName": "ICICI Bank"
+      },
+      "healthInformation": {
+        "height": "170 Cms",
+        "weight": "70 Kgs",
+        "diabetes": "No",
+        "hypertension": "No",
+        "heartDisease": "No",
+        "cancer": "No",
+        "kidneyDisease": "No",
+        "liverDisease": "No",
+        "lungDisease": "No",
+        "neurologicalDisorder": "No",
+        "mentalDisorder": "No",
+        "hivAids": "No",
+        "anySurgery": "No",
+        "hospitalization": "No",
+        "otherIllness": "No",
+        "familyHeartDisease": "No",
+        "familyCancer": "No",
+        "familyDiabetes": "No"
+      },
+      "lifestyleHabits": {
+        "alcoholConsumption": "No",
+        "alcoholQuantity": "-",
+        "smoking": "No",
+        "smokingQuantity": "-",
+        "tobaccoGutka": "No",
+        "narcotics": "No",
+        "hazardousOccupation": "No",
+        "aviationActivities": "No",
+        "diving": "No",
+        "mountaineering": "No",
+        "otherHazardousActivities": "No"
+      },
+      "nominees": [
+        {
+          "nomineeName": "Tanaya Sharma",
+          "nomineeDOB": "21/02/1996",
+          "gender": "Female",
+          "relationship": "Spouse",
+          "accountNumber": "1234AW",
+          "ifsc": "ICIC231400",
+          "sharePercentage": 50,
+          "appointeeName": "NA",
+          "appointeeGender": "NA",
+          "appointeeDOB": "NA"
+        },
+        {
+          "nomineeName": "Aryan Sangha",
+          "nomineeDOB": "15/08/2012",
+          "gender": "Male",
+          "relationship": "Son",
+          "accountNumber": "5678ZX",
+          "ifsc": "HDFC0002451",
+          "sharePercentage": 30,
+          "appointeeName": "Tanaya Sharma",
+          "appointeeGender": "Female",
+          "appointeeDOB": "21/02/1996"
+        },
+        {
+          "nomineeName": "Meera Sangha",
+          "nomineeDOB": "09/11/2016",
+          "gender": "Female",
+          "relationship": "Daughter",
+          "accountNumber": "8901KL",
+          "ifsc": "SBIN0001122",
+          "sharePercentage": 20,
+          "appointeeName": "Tanaya Sharma",
+          "appointeeGender": "Female",
+          "appointeeDOB": "21/02/1996"
+        }
+      ],
+      "genericDetails": {
+        "existingPolicyNumber": "NA",
+        "clientId": "NA",
+        "selfProposed": "Yes",
+        "typeOfProposer": "Individual",
+        "relationshipWithLifeAssured": "Self",
+        "typeOfProposal": "Individual"
+      },
+      "eiaDetails": {
+        "openEIA": "No",
+        "existingEIANumber": "NA",
+        "preferredRepository": "CDSL",
+        "convertPolicies": "No"
+      }
+    },
+    {
+      "memberType": "lifeassured1",
+      "proposerSummary": {
+        "name": "JITESH KUMAR",
+        "dob": "22-02-1992",
+        "age": 34.0,
+        "gender": "Male",
+        "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
+        "caseStatus": "Green Case"
+      },
+      "personalDetails": {
+        "maritalStatus": "Married",
+        "location": {
+          "city": "Mumbai",
+          "country": "India"
+        },
+        "occupation": {
+          "type": "Salaried",
+          "designation": "",
+          "organization": "SBI LIFE INSURANCE COMPANY LTD"
+        }
+      },
+      "financialDetails": {
+        "annualIncome": 650000,
+        "appliedSumAssured": 10000000,
+        "trsa": 10000000,
+        "tfesa": 10000000
+      },
+      "policyDetails": {
+        "productName": "ICICI Pru iProtect Smart Plus",
+        "productType": "Life",
+        "modalPremium": 20004,
+        "channel": "Proprietary"
+      },
+      "underwriting": {
+        "remarks": "No adverse findings in family history, avocation, occupation, or personal habits; no existing insurance. Medicals non-adverse; financials adequate and viable for full cover; no other risks identified.",
+        "breDecision": {
+          "status": "Accept",
+          "category": "Standard",
+          "coverage": "Full Cover"
+        }
+      }
+    }
+  ],
   "applicationOverview": {
     "product": {
       "name": "ICICI PRU IPROTECT SMART PLUS",
@@ -118,5 +342,12 @@
       "remarks": "Requirement successfully completed",
       "udsLink": "https://uds.example.com/req/003"
     }
-  ]
+  ],
+  "pivvSection": {
+    "title": "PIVV Pool Remarks",
+    "remarks": "Applicant is a 40-year-old non-smoker with no significant medical history. Financials and occupation details are satisfactory as per underwriting guidelines. Case is referred to HoD for final review and approval.",
+    "decision": "Reject",
+    "reason": "Customer not speaking",
+    "userId": "sunil.sharma"
+  }
 }

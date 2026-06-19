@@ -2,7 +2,7 @@ import { Box, Divider, Typography } from "@mui/material";
 
 type GridItem = {
   label: string;
-  value?: string | number;
+  value?: string | number | boolean;
 };
 
 type GridSectionProps = {
