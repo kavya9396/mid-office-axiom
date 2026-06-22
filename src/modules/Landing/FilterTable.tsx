@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import { Box } from "@mui/material";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 import CustomButton from "../../components/ui/Button/Button";
 import { modalTitleStyles } from "../../utils/styles";
+import type { TableColumn, tableData } from "../../types/inbox";
+import { toFilterComparableValue } from "../../utils/filter.ts";
 
 type FilterTableProps = {
   openFilterDialog: boolean;
@@ -12,34 +14,79 @@ type FilterTableProps = {
   setFilterValues: React.Dispatch<
     React.SetStateAction<Record<string, string[]>>
   >;
-   onApply: () => void;
+  visibleColumns: TableColumn<tableData>[];
+  rows: tableData[];
+  onApply: () => void;
 };
-const filterConfig = {
-  productType: ["Medical", "Non-Medical"],
-  drc: ["High", "Medium", "Low"],
-  hniFlag: ["Yes", "No"],
-  medicalType: ["Medical", "Non-Medical"],
-  caseFlag: ["Open", "Closed"],
-} as const;
-type FilterKey = keyof typeof filterConfig;
+
 const FilterTable = ({
   openFilterDialog,
   setOpenFilterDialog,
   filterValues,
   setFilterValues,
-  onApply
+  visibleColumns,
+  rows,
+  onApply,
 }: FilterTableProps) => {
-  const [selectedFilter, setSelectedFilter] =
-  useState<FilterKey>("productType");
+  const visibleFilterKeys = useMemo(
+    () => visibleColumns.map((column) => String(column.key)),
+    [visibleColumns],
+  );
 
-  
-  const toggleFilterValue = (value: string) => {
+  const [selectedFilter, setSelectedFilter] = useState<string>("");
+
+  const activeFilter = useMemo(() => {
+    if (visibleFilterKeys.includes(selectedFilter)) return selectedFilter;
+    return visibleFilterKeys[0] ?? "";
+  }, [selectedFilter, visibleFilterKeys]);
+
+  const filterOptionsByColumn = useMemo(() => {
+    const options: Record<string, string[]> = {};
+
+    visibleColumns.forEach((column) => {
+      const key = String(column.key);
+      const uniqueValues = new Set<string>();
+
+      rows.forEach((row) => {
+        const value = toFilterComparableValue(row[column.key]);
+        if (value !== "") uniqueValues.add(value);
+      });
+
+      options[key] = Array.from(uniqueValues);
+    });
+
+    return options;
+  }, [rows, visibleColumns]);
+
+  const filterLabelByKey = useMemo(() => {
+    const labels: Record<string, string> = {};
+    visibleColumns.forEach((column) => {
+      labels[String(column.key)] = column.label;
+    });
+    return labels;
+  }, [visibleColumns]);
+
+  useEffect(() => {
+    const visibleSet = new Set(visibleFilterKeys);
+
     setFilterValues((prev) => {
-      const current = prev[selectedFilter] || [];
+      const next = Object.fromEntries(
+        Object.entries(prev).filter(([key]) => visibleSet.has(key)),
+      );
+
+      return Object.keys(next).length === Object.keys(prev).length ? prev : next;
+    });
+  }, [setFilterValues, visibleFilterKeys]);
+
+  const toggleFilterValue = (value: string) => {
+    if (!activeFilter) return;
+
+    setFilterValues((prev) => {
+      const current = prev[activeFilter] || [];
 
       return {
         ...prev,
-        [selectedFilter]: current.includes(value)
+        [activeFilter]: current.includes(value)
           ? current.filter((v) => v !== value)
           : [...current, value],
       };
@@ -48,6 +95,8 @@ const FilterTable = ({
   const clearAllFilters = () => {
     setFilterValues({});
   };
+
+  const selectedFilterOptions = filterOptionsByColumn[activeFilter] ?? [];
 
   return (
     <CustomDialog
@@ -95,7 +144,7 @@ const FilterTable = ({
       <Box sx={{ display: "flex", height: 420, width: "100%" }}>
         {/* LEFT SIDE - Categories */}
         <Box sx={{ width: "40%", borderRight: "1px solid #eee" }}>
-          {(Object.keys(filterConfig) as FilterKey[]).map((key) => (
+          {visibleFilterKeys.map((key) => (
             <Box
               key={key}
               onClick={() => setSelectedFilter(key)}
@@ -103,32 +152,44 @@ const FilterTable = ({
                 padding: "12px",
                 cursor: "pointer",
                 backgroundColor:
-                  selectedFilter === key ? "#f0f3f8" : "transparent",
+                  activeFilter === key ? "#f0f3f8" : "transparent",
                 borderLeft:
-                  selectedFilter === key
+                  activeFilter === key
                     ? "4px solid #004A80"
                     : "4px solid transparent",
               }}
             >
-              {key}
+              {filterLabelByKey[key] ?? key}
             </Box>
           ))}
+
+          {!visibleFilterKeys.length && (
+            <Box sx={{ padding: "12px", color: "#666" }}>
+              No visible columns to filter
+            </Box>
+          )}
         </Box>
 
         {/* RIGHT SIDE - Options */}
         <Box sx={{ width: "60%", p: 2 }}>
-          {filterConfig[selectedFilter].map((item) => (
+          {selectedFilterOptions.map((item) => (
             <Box
               key={item}
               sx={{ display: "flex", alignItems: "center", mb: 1 }}
             >
               <CustomCheckbox
                 label={item}
-                checked={(filterValues[selectedFilter] || []).includes(item)}
+                checked={(filterValues[activeFilter] || []).includes(item)}
                 onChange={() => toggleFilterValue(item)}
               />
             </Box>
           ))}
+
+          {!!activeFilter && selectedFilterOptions.length === 0 && (
+            <Box sx={{ color: "#666", fontSize: "14px" }}>
+              No values available for this column
+            </Box>
+          )}
         </Box>
       </Box>
     </CustomDialog>

@@ -33,10 +33,14 @@ const PoolItem = ({
   showCount = true,
 }: PoolItemProps) => {
   const isSelected = selectedPool === value;
+  const handlePoolClick = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    onClick(value);
+  };
 
   return (
     <Box
-      onClick={() => onClick(value)}
+      onClick={handlePoolClick}
       sx={{
         display: "flex",
         alignItems: "center",

@@ -111,6 +111,7 @@ export const allColumns: TableColumn<tableData>[] = [
   {key:"caseStatus",label:"Case Status"},
   {key:"caseInWhichPool",label:"Case In Which Pool"},
   {key:"remarks",label:"Remarks"},
+  {key:"premium",label:"Premium"},
 ];
 
 

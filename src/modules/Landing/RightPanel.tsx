@@ -26,7 +26,7 @@ import {
   SettingsIcon,
 } from "../../icons/Icons";
 import SearchBar from "../../components/ui/SearchBar/SearchBar";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 //import { poolAllowedColumns } from "../../store/pool.columns.config";
@@ -36,6 +36,9 @@ import { useNavigate } from "react-router-dom";
 import FilterTable from "./FilterTable";
 import { getDRSPath } from "../../routes/routes";
 import SearchApplication from "./SearchApplication";
+import { toFilterComparableValue } from "../../utils/filter.ts";
+
+type SortDirection = "asc" | "desc";
 
 const RightPanel = ({
   selectedPool,
@@ -61,6 +64,8 @@ const RightPanel = ({
   const [searchText, setSearchText] = useState("");
   const [page, setPage] = useState<number>(0);
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [sortKey, setSortKey] = useState<keyof tableData | "">("");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
     {},
   );
@@ -94,6 +99,59 @@ const RightPanel = ({
     setChecked([]);
   };
 
+  const handleSort = (columnKey: keyof tableData) => {
+    setPage(0);
+
+    if (sortKey === columnKey) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+      return;
+    }
+
+    setSortKey(columnKey);
+    setSortDirection("asc");
+  };
+
+  const getSortIndicator = (columnKey: keyof tableData) => {
+    if (sortKey !== columnKey) return "⇅";
+    return sortDirection === "asc" ? "▲" : "▼";
+  };
+
+  const compareByColumn = (
+    a: tableData,
+    b: tableData,
+    column: TableColumn<tableData>,
+  ) => {
+    const aRaw = a[column.key];
+    const bRaw = b[column.key];
+
+    const aText = toFilterComparableValue(aRaw).trim();
+    const bText = toFilterComparableValue(bRaw).trim();
+
+    if (!aText && !bText) return 0;
+    if (!aText) return 1;
+    if (!bText) return -1;
+
+    if (column.numeric) {
+      const aNum = Number(aText.toString().replace(/,/g, ""));
+      const bNum = Number(bText.toString().replace(/,/g, ""));
+
+      if (Number.isFinite(aNum) && Number.isFinite(bNum)) {
+        return aNum - bNum;
+      }
+    }
+
+    const aDate = Date.parse(aText);
+    const bDate = Date.parse(bText);
+    if (!Number.isNaN(aDate) && !Number.isNaN(bDate)) {
+      return aDate - bDate;
+    }
+
+    return aText.localeCompare(bText, undefined, {
+      numeric: true,
+      sensitivity: "base",
+    });
+  };
+
   // ---------------- APPLY ----------------
   const handleApply = () => {
     updateConfig({
@@ -118,6 +176,7 @@ const RightPanel = ({
           key={String(column.key)}
           variant="head"
           align={column.numeric ? "right" : "left"}
+          onClick={() => handleSort(column.key)}
           sx={{
             backgroundColor: "#E9EEF3",
             px: 1,
@@ -125,9 +184,24 @@ const RightPanel = ({
             fontSize: "13px",
             width: column.width,
             padding: 0.5,
+            userSelect: "none",
           }}
         >
-          {column.label}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: column.numeric ? "flex-end" : "flex-start",
+              gap: 0.5,
+            }}
+          >
+            <Typography component="span" sx={{ fontSize: "13px", fontWeight: "bold" }}>
+              {column.label}
+            </Typography>
+            <Typography component="span" sx={{ fontSize: "11px", color: "#4A4A4A" }}>
+              {getSortIndicator(column.key)}
+            </Typography>
+          </Box>
         </TableCell>
       ))}
     </TableRow>
@@ -169,7 +243,7 @@ const RightPanel = ({
       return activeFilters.every(([key, values]) => {
         if (!values.length) return true;
 
-        const rowValue = String(row[key as keyof typeof row] ?? "");
+        const rowValue = toFilterComparableValue(row[key as keyof typeof row]);
 
         return values.includes(rowValue);
       });
@@ -187,14 +261,27 @@ const RightPanel = ({
           .includes(search);
       });
     });
+  const sortedRows = useMemo(() => {
+    if (!sortKey) return filteredRows;
+
+    const sortColumn = visibleColumns.find((column) => column.key === sortKey);
+    if (!sortColumn) return filteredRows;
+
+    const sorted = [...filteredRows].sort((a, b) =>
+      compareByColumn(a, b, sortColumn),
+    );
+
+    return sortDirection === "asc" ? sorted : sorted.reverse();
+  }, [filteredRows, sortDirection, sortKey, visibleColumns]);
+
   const paginatedRows =
     rowsPerPage === -1
-      ? filteredRows
-      : filteredRows.slice(
+      ? sortedRows
+      : sortedRows.slice(
           page * rowsPerPage,
           page * rowsPerPage + rowsPerPage,
         );
-  const totalCount = filteredRows.length;
+  const totalCount = sortedRows.length;
 
   const totalPages =
     rowsPerPage === -1 ? 1 : Math.ceil(totalCount / rowsPerPage);
@@ -556,6 +643,8 @@ const RightPanel = ({
               setOpenFilterDialog={setOpenFilterDialog}
               filterValues={filterValues}
               setFilterValues={setFilterValues}
+              visibleColumns={visibleColumns}
+              rows={rows}
               onApply={() => setPage(0)}
             />
             {/*  ------- Custom table ------------ */}
