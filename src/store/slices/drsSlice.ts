@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type {
   AdditionalRequirementRow,
   ApplicationOverview,
+  AuditTrail,
   BreDecisionResponse,
   PivvSection,
   RiderDetail,
@@ -15,6 +16,7 @@ interface DrsState {
   applicationOverview: ApplicationOverview | null;
   riderDetails: RiderDetail[] | null;
   requirements: AdditionalRequirementRow[] | null;
+  auditTrail: AuditTrail | null;
   pivvSection: PivvSection | null;
   loading: "idle" | "loading" | "failed";
   error: string | null;
@@ -27,6 +29,7 @@ const initialState: DrsState = {
   riderDetails: null,
   pivvSection: null,
   requirements: [],
+  auditTrail: null,
   loading: "idle",
   error: null,
 };
@@ -49,6 +52,7 @@ const drsSlice = createSlice({
         state.applicationOverview = action.payload.applicationOverview;
         state.riderDetails = action.payload.riderDetails;
         state.requirements = action.payload.requirements;
+        state.auditTrail = action.payload.auditTrail;
         state.pivvSection = action.payload.pivvSection;
       })
       .addCase(drsThunk.rejected, (state, action) => {

@@ -34,5 +34,6 @@ export const poolAllowedColumns: Record<string, string[]> = {
   "Ready for Issuance Pool":[...baseColumnsCops, "lastPool"],
   "Issuance Pool":[...baseColumnsCops, "lastPool"],
   "Allocation Details":[...baseColumns],
-  "Leave Management":["uwName","userId","leaveDateFrom","leaveDateTill","leaveReason","caseToReassignToUw","reassignedUserId"]
+  "Leave Management":["uwName","userId","leaveDateFrom","leaveDateTill","leaveReason","caseToReassignToUw","reassignedUserId"],
+  "Reassign/Transfer Cases":["applicationNo","nameOfProposer","nameOfLifeAssured","product","plan","appliedSa","caseStatus","caseInWhichPool","userId","reassignedUserId","remarks"]
 };

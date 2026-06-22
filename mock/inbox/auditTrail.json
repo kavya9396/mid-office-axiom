@@ -1,0 +1,48 @@
+{
+  "auditTrailData": [
+    {
+      "dateTime": "29/03/2026",
+      "fromPool": "H1C",
+      "fromPoolUser": "Medical",
+      "toPool": "Life Assured",
+      "toPoolUser": "Accepted",
+      "subPool": "27/03/2026",
+      "userId": "29/03/2026",
+      "uwDecision": "29/03/2026",
+      "breDecision": "29/03/2026"
+    },
+    {
+      "dateTime": "29/03/2026",
+      "fromPool": "H1C",
+      "fromPoolUser": "Medical",
+      "toPool": "Life Assured",
+      "toPoolUser": "Accepted",
+      "subPool": "27/03/2026",
+      "userId": "29/03/2026",
+      "uwDecision": "29/03/2026",
+      "breDecision": "29/03/2026"
+    },
+    {
+      "dateTime": "29/03/2026",
+      "fromPool": "H1C",
+      "fromPoolUser": "Medical",
+      "toPool": "Life Assured",
+      "toPoolUser": "Accepted",
+      "subPool": "27/03/2026",
+      "userId": "29/03/2026",
+      "uwDecision": "29/03/2026",
+      "breDecision": "29/03/2026"
+    },
+    {
+      "dateTime": "29/03/2026",
+      "fromPool": "H1C",
+      "fromPoolUser": "Medical",
+      "toPool": "Life Assured",
+      "toPoolUser": "Accepted",
+      "subPool": "27/03/2026",
+      "userId": "29/03/2026",
+      "uwDecision": "29/03/2026",
+      "breDecision": "29/03/2026"
+    }
+  ]
+}

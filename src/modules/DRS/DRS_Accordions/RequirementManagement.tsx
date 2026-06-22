@@ -196,12 +196,16 @@ const formFields = [
     },
   ],
 ];
-
-const RequirementManagement = () => {
-  const {
-    requirements,
-  } = useSelector((state: RootState) => state.drs);
-
+interface RequirementManagementProps {
+  requirements?: AdditionalRequirementRow[];
+}
+const RequirementManagement = ({
+  requirements,
+}: RequirementManagementProps) => {
+  const reduxRequirements = useSelector(
+  (state: RootState) => state.drs.requirements
+);
+const finalRequirements = requirements ?? reduxRequirements;
   const [openReqDialog, setOpenReqDialog] = useState(false);
   const [requirementForm, setRequirementForm] = useState({
     team: "",
@@ -226,7 +230,7 @@ const RequirementManagement = () => {
   const [submittedRequirements, setSubmittedRequirements] = useState<CVTRequirementRow[]>([]);
 
   const requirementRows = [
-    ...(requirements?.map((item: AdditionalRequirementRow) => ({
+    ...(finalRequirements?.map((item: AdditionalRequirementRow) => ({
       team: item.team,
       profile: item.profile,
       category: item.category,

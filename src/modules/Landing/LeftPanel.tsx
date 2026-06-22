@@ -1,8 +1,19 @@
-import { Box, List, Typography } from "@mui/material";
-import type { PoolItemProps, PoolProps, RoleGroup, tableData } from "../../types/inbox";
-import { InboxIcon, KeyRightArrowIcon, MenuIcon, TaskIcon } from "../../icons/Icons";
+import { Box, List, Paper, Typography } from "@mui/material";
+import type {
+  PoolItemProps,
+  PoolProps,
+  RoleGroup,
+  tableData,
+} from "../../types/inbox";
+import {
+  InboxIcon,
+  KeyRightArrowIcon,
+  MenuIcon,
+  TaskIcon,
+} from "../../icons/Icons";
 import { columnFlex, hoverSx, selectedSx } from "../../utils/styles";
 import CustomAccordion from "../../components/ui/Accordion/Accordion";
+import LastLogin from "./LastLogin";
 
 type LeftPanelProps = PoolProps & {
   mode?: "simple" | "accordion";
@@ -12,7 +23,6 @@ type LeftPanelProps = PoolProps & {
   poolData: Record<string, tableData[]>;
   poolCounts: Record<string, number>;
 };
-
 
 const PoolItem = ({
   label,
@@ -43,35 +53,46 @@ const PoolItem = ({
         sx={{
           fontWeight: 600,
           color: isSelected ? "#9A2529" : "#999999",
-          fontSize:"14px"
+          fontSize: "14px",
         }}
       >
-        {label} {selectedPool  != 'User Management' && (showCount && count !== undefined && `(${count})`)}
+       
+        {label}{" "}
+        {selectedPool != "User Management" &&
+          showCount &&
+          count !== undefined &&
+          `(${count})`}
       </Typography>
 
       {isSelected && <KeyRightArrowIcon style={{ color: "#9A2529" }} />}
     </Box>
   );
 };
-const LeftPanel = ({ toggle, setToggle, mode,
-  roles, selectedPool,
+const LeftPanel = ({
+  toggle,
+  setToggle,
+  mode,
+  roles,
+  selectedPool,
   onSelectPool,
-  poolCounts, }: LeftPanelProps) => {
-    const isAccordion = mode === "accordion";
+  poolCounts,
+}: LeftPanelProps) => {
+  const isAccordion = mode === "accordion";
 
   const poolEntries = roles.filter((group) => group.pools?.length > 0);
   const allPools = poolEntries.flatMap((group) => group.pools);
   const searchItem = (
-  <PoolItem
-    label="Search Applications"
-    value="Search Applications"
-    selectedPool={selectedPool}
-    onClick={onSelectPool}
-    showCount={false}
-  />
-);
-const getPoolCount = (pool: string) =>
-  poolCounts[pool] ?? 0;
+    <>
+    <PoolItem
+      label="Search Applications"
+      value="Search Applications"
+      selectedPool={selectedPool}
+      onClick={onSelectPool}
+      showCount={false}
+    />
+    </>
+  );
+  const getPoolCount = (pool: string) => poolCounts[pool] ?? 0;
   return (
     <Box
       sx={{
@@ -81,54 +102,70 @@ const getPoolCount = (pool: string) =>
         overflow: "hidden",
       }}
     >
-      <Box sx={{ pl: 2, py: 2 }}>
-        <Box
-          onClick={() => setToggle((prev) => !prev)}
-          sx={{ cursor: "pointer" }}
+      <Paper sx={{ height: "100%" }}>
+          <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{
+            position: "sticky",
+            bottom: 10,
+            pl: 1,
+            pb:1
+          }}
         >
-          <MenuIcon />
-        </Box>
-      </Box>
-      {toggle ? (
-          <Box sx={{ ...columnFlex, gap: 4, p: 2 }}>
-            <InboxIcon />
-            <TaskIcon />
+          <LastLogin lastLogin={"2026-05-24T11:32:00"} />
+        </Typography>
+        <Box sx={{ pl: 2, py: 2 }}>
+          <Box
+            onClick={() => setToggle((prev) => !prev)}
+            sx={{ cursor: "pointer" }}
+          >
+            <MenuIcon />
           </Box>
-        ) :(<>
-            {poolEntries.length === 0 ? (
-              <Typography sx={{ p: 2, color: "#999" }}>
-                No work pools available.
-              </Typography>
-            ) : isAccordion ? (
-              <>
-                {poolEntries.map((group, index) => (
-                  <CustomAccordion
-                    key={group.name}
-                    title={(group.name).toUpperCase()}
-                    titleFontSize={14}
-                    titleColor="#5D5D5D"
-                    detailPadding={0}
-                    defaultExpanded={index === 0}
-                  >
-                    <List disablePadding >
-                      {group.pools.map((pool) => (
-                        <PoolItem
-                          key={pool}
-                          label={pool}
-                          value={pool}
-                          selectedPool={selectedPool}
-                          onClick={onSelectPool}
-                          count={getPoolCount(pool)}
-                        />
-                      ))}
-                    </List>
-                  </CustomAccordion>
-                ))}
-              </>
-            ) : (
-              <>
-                {/* <Typography sx={sectionTitleSx}>ACTIVE POOLS</Typography> */}
-                <List disablePadding sx={{ }}>
+        </Box>
+      
+        {/* Main Content */}
+        <Box sx={{ flex: 1, overflowY: "auto" }}>
+          {toggle ? (
+            <Box sx={{ ...columnFlex, gap: 4, p: 2 }}>
+              <InboxIcon />
+              <TaskIcon />
+            </Box>
+          ) : (
+            <>
+             {searchItem}
+              {poolEntries.length === 0 ? (
+                <Typography sx={{ p: 2, color: "#999" }}>
+                  No work pools available.
+                </Typography>
+              ) : isAccordion ? (
+                <>
+                  {poolEntries.map((group, index) => (
+                    <CustomAccordion
+                      key={group.name}
+                      title={group.name.toUpperCase()}
+                      titleFontSize={14}
+                      titleColor="#5D5D5D"
+                      detailPadding={0}
+                      defaultExpanded={index === 0}
+                    >
+                      <List disablePadding>
+                        {group.pools.map((pool) => (
+                          <PoolItem
+                            key={pool}
+                            label={pool}
+                            value={pool}
+                            selectedPool={selectedPool}
+                            onClick={onSelectPool}
+                            count={getPoolCount(pool)}
+                          />
+                        ))}
+                      </List>
+                    </CustomAccordion>
+                  ))}
+                </>
+              ) : (
+                <List disablePadding>
                   {allPools.map((pool) => (
                     <PoolItem
                       key={pool}
@@ -136,14 +173,18 @@ const getPoolCount = (pool: string) =>
                       value={pool}
                       selectedPool={selectedPool}
                       onClick={onSelectPool}
-                     count={getPoolCount(pool)}
+                      count={getPoolCount(pool)}
                     />
                   ))}
                 </List>
-              </>
-            )}
-            {searchItem}
-          </>)}
+              )}
+
+             
+            </>
+          )}
+        </Box>
+
+      </Paper>
     </Box>
   );
 };

@@ -40,6 +40,7 @@ export type DRSResponse = {
   summary: SummaryResponse[];
   riderDetails: RiderDetail[];
   requirements: AdditionalRequirementRow[];
+  auditTrail: AuditTrail;
   pivvSection: PivvSection;
 };
 
@@ -413,4 +414,32 @@ export interface ApplicantEditForm {
   permanentState: string;
   permanentCountry: string;
   permanentPincode: string;
+}
+
+export type AuditTrailRow = {
+  dateTime: string;
+  fromPool: string;
+  fromPoolUser: string;
+  toPool: string;
+  toPoolUser: string;
+  subPool: string;
+  userId: string;
+  uwDecision: string;
+  breDecision: string;
+};
+
+export type AuditTrail = AuditTrailRow[];
+
+export interface ApplicationDetails{
+   applicationId: string;
+  dob: string;
+  nameOfProposer: string;
+  productOpted: string;
+  planOpted: string;
+  appliedSA: string;
+  premium: number;
+  clientType: string;
+  lastBucket: string;
+  lastUser: string;
+  roleType: string;
 }

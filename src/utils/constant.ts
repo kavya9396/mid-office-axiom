@@ -386,3 +386,15 @@ export const CountryOptions = [
   { label: "Zambia", value: "Zambia" },
   { label: "Zimbabwe", value: "Zimbabwe" },
 ];
+
+export const applicationDetailsFields = [
+  { label: "DoB", key: "dob" },
+  { label: "Name of Proposer", key: "nameOfProposer" },
+  { label: "Product Opted", key: "productOpted" },
+  { label: "Plan Opted", key: "planOpted" },
+  { label: "Applied SA", key: "appliedSA" },
+  { label: "Premium", key: "premium" },
+  { label: "Client Type", key: "clientType" },
+  { label: "Last Bucket", key: "lastBucket" },
+  { label: "Last User", key: "lastUser" },
+] as const;

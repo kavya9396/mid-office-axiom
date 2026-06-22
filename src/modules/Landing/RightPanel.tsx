@@ -35,6 +35,7 @@ import Badge from "../../components/ui/Badge/Badge";
 import { useNavigate } from "react-router-dom";
 import FilterTable from "./FilterTable";
 import { getDRSPath } from "../../routes/routes";
+import SearchApplication from "./SearchApplication";
 
 const RightPanel = ({
   selectedPool,
@@ -269,53 +270,52 @@ const RightPanel = ({
         height: "250vh",
       }}
     >
-      {selectedPool != "Search Applications" && (
-        <>
-          <Box
-            sx={{
-              // height:"100%",
-              width: "100%",
-              backgroundColor: "transparent",
-              ...columnFlex,
-              margin: 4,
-            }}
-          >
-            <Box
+      <Box
+        sx={{
+          // height:"100%",
+          width: "100%",
+          backgroundColor: "transparent",
+          ...columnFlex,
+          margin: 4,
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            p: 0.7,
+            pl: 2,
+            borderRadius: "20px 20px 0 0",
+            backgroundColor: "#004A80",
+            color: "#FFFFFF",
+          }}
+        >
+          <Typography component="span" className="gap-1">
+            {selectedPool ? selectedPool : ""}
+          </Typography>
+          {(selectedPool == "Leave Management" ||
+            selectedPool == "UW Details") && (
+            <CustomButton
+              variant="contained"
+              size="small"
               sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                p: 0.7,
-                pl: 2,
-                borderRadius: "20px 20px 0 0",
-                backgroundColor: "#004A80",
-                color: "#FFFFFF",
+                backgroundColor: "white",
+                color: "#063E6F",
+                fontWeight: 700,
+                fontSize: "14px",
+                "&:hover": {
+                  backgroundColor: "white",
+                },
+                mr: 2,
               }}
             >
-              <Typography component="span" className="gap-1">
-                {selectedPool ? selectedPool : ""}
-              </Typography>
-              {(selectedPool == "Leave Management" ||
-                selectedPool == "UW Details") && (
-                <CustomButton
-                  variant="contained"
-                  size="small"
-                  sx={{
-                    backgroundColor: "white",
-                    color: "#063E6F",
-                    fontWeight: 700,
-                    fontSize: "14px",
-                    "&:hover": {
-                      backgroundColor: "white",
-                    },
-                    mr: 2,
-                  }}
-                >
-                  + Add
-                </CustomButton>
-              )}
-            </Box>
-
+              + Add
+            </CustomButton>
+          )}
+        </Box>
+        {selectedPool != "Search Applications" && (
+          <>
             <Box
               sx={{
                 display: "flex",
@@ -452,7 +452,10 @@ const RightPanel = ({
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
-                                    localStorage.setItem("roleType", row.roleType);
+                                    localStorage.setItem(
+                                      "roleType",
+                                      row.roleType,
+                                    );
                                     navigate(
                                       getDRSPath("retail", row.applicationNo),
                                     );
@@ -623,15 +626,16 @@ const RightPanel = ({
                 {customList("Visible", right)}
               </Box>
             </CustomDialog>
-          </Box>
+          </>
+        )}
+        {selectedPool == "Search Applications" && (
+        <>
+          <SearchApplication />
         </>
       )}
-      {/* {selectedPool == "Search Applications" && (
-        <>
-         <PoolSearchApplication/>
-        </>
-        
-      )} */}
+      </Box>
+
+      
     </Box>
   );
 };

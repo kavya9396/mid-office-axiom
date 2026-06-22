@@ -1,0 +1,108 @@
+{
+  "applicationDetails": {
+    "applicationId": "1234567890",
+    "dob": "Standard",
+    "nameOfProposer": "Mr. Rudra Prakash Sangha",
+    "productOpted": "NA",
+    "planOpted": "-",
+    "appliedSA": "Standard",
+    "premium": 11243,
+    "clientType": "NA",
+    "lastBucket": "-",
+    "lastUser": "-",
+    "roleType": "Sr. UW"
+  },
+  "requirements": [
+    {
+      "profile": "HbA1C",
+      "category": "H1C",
+      "subCategory": "Medical",
+      "requirement": "Life Assured",
+      "requirementId": "REQ001",
+      "reason": "Medical Requirement",
+      "requirementStatus": "Accepted",
+      "raisedDate": "2026-03-27",
+      "raisedBy": "Sarang Gokhale"
+    },
+    {
+      "profile": "SMA 12 Group",
+      "category": "S12",
+      "subCategory": "Medical",
+      "requirement": "Life Assured",
+      "requirementId": "REQ002",
+      "reason": "Financial Verification",
+      "requirementStatus": "Pending",
+      "raisedDate": "2026-04-01",
+      "raisedBy": "Vijay Aahale"
+    },
+    {
+      "profile": "ECG Report",
+      "category": "ECG",
+      "subCategory": "Cardiac",
+      "requirement": "Proposer",
+      "requirementId": "REQ003",
+      "reason": "Cardiac Assessment",
+      "requirementStatus": "Received",
+      "raisedDate": "05/04/2026",
+      "raisedBy": "Rahul Sharma"
+    },
+    {
+      "profile": "Income Proof",
+      "category": "FIN",
+      "subCategory": "Financial",
+      "requirement": "Life Assured",
+      "requirementId": "REQ004",
+      "reason": "Income Validation",
+      "requirementStatus": "Waived",
+      "raisedDate": "08/04/2026",
+      "raisedBy": "Neha Patil"
+    }
+  ],
+  "auditTrail": [
+    {
+      "dateTime": "2026-05-15T10:30:00",
+      "fromPool": "UW Queue",
+      "fromPoolUser": "rahul.sharma",
+      "toPool": "Risk Queue",
+      "toPoolUser": "neha.patil",
+      "subPool": "Medical",
+      "userId": "rahul.sharma",
+      "uwDecision": "Refer",
+      "breDecision": "Triggered"
+    },
+    {
+      "dateTime": "2026-05-15T11:15:00",
+      "fromPool": "Risk Queue",
+      "fromPoolUser": "neha.patil",
+      "toPool": "HoD Queue",
+      "toPoolUser": "vijay.aahale",
+      "subPool": "Financial",
+      "userId": "neha.patil",
+      "uwDecision": "Pending",
+      "breDecision": "Approved"
+    },
+    {
+      "dateTime": "2026-05-16T09:45:00",
+      "fromPool": "HoD Queue",
+      "fromPoolUser": "vijay.aahale",
+      "toPool": "Final Issuance",
+      "toPoolUser": "sarang.gokhale",
+      "subPool": "Approval",
+      "userId": "vijay.aahale",
+      "uwDecision": "Accepted",
+      "breDecision": "Passed"
+    },
+    {
+      "dateTime": "2026-05-16T14:20:00",
+      "fromPool": "UW Queue",
+      "fromPoolUser": "john.doe",
+      "toPool": "Closure Queue",
+      "toPoolUser": "priya.kulkarni",
+      "subPool": "Closure",
+      "userId": "john.doe",
+      "uwDecision": "Rejected",
+      "breDecision": "Failed"
+    }
+  ],
+  "udsLink": "https://udsviewer-uat.iprulifeinsurance.com/App/UdsViewer/document-listing/split?roleid=VkhjeVE3M0dzd1ZmSFg2TW0xTXhLUT09&_uidtype=R1NoN0FWdloxTzhQeU9IbnhRM3ZkZz09&_uidvalue=WEpPUTA4SnZ6S1ppVDlrS2RVb0Fudz09&ntid=UDSViewerMCA&refuserid=5085324&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJQRkFJWU1DQVEyWjdSdFEzUVRyck01R3Vnc2JhVVdYMmhheEdUckd3aUdzM3p6N0ciLCJhdWQiOiJ1cm46Ly9jNjA1MTFjMC0xMmEyLTQ3M2MtODBmZC00MjUyOGViNjVhNmEiLCJudElkIjoiVURTVmlld2VyTUNBIiwiYXV0aCI6ImRPbHNzYTRrV2RCTUVJRjlNbkd6R2NpTkN0Z0oiLCJpc3MiOiJ1cm46Ly9hcGlnZWUtZWRnZS1KV1QtcG9saWN5LXRlc3QiLCJleHAiOjE3NDIyNzk4NjYsImlhdCI6MTc0MjI3ODA2NiwianRpIjoiMWI3Mjc3YWItZjFlZC00ZWUyLThmMzEtYzYzYmFlM2JlYTE2In0.uyAVx_L01A8ti4emFYzSm71XPExq9nNhuqo2KfpsPqo7SAoXTlpyomE4yE2tpn6UfQyhjMN0efeqRkBtWNIUwMeHLGQqUzVp8oIpXh81xiD9zOiPKzfJ9anf_-dFgb9v6dTTU2H1QIclOZT2U5Bivg54tc131jWLETNZg2X4gApzmn0Idj--dKggX8dOdOYc6lbOOQVV1ne3GRsFBWET66l4FbxsxL9WDRiWt4yK_hf7gWyZ9hgYrwH5m09csot9x1xyCdfoKT0yV2Zq_IlDDFWq8CcvjtRP8C0mM0Wj6_jssM_bgDD4J8J5kTgn8cL89NYN1FyMXRSCIoNHF1q1DOyAcFBUyKuCJkpohedfM8m4DjzOhHFBFEL8Sv7U8C2kJtX80ojCxT7gqjXCEu2SXbcoYEHg0HTGE45bAiDndET7D1cEznvY7301m_pYntRRj2mrQjGNnhcr1RAaeukSyTnLKa98i8sCEp5ZfFlH2gPl2ouUcjSbUObwxYZRB9PZVZ2x0jn4EyK-QH1cR2JSjofbJuL0MWbDNglt1y8WvQ211Q3vVg79DnwFiaaeCYsldHgNTHIveJ3SpOXA1_LgbYF9up_J4Ys-0WMiGqY4jQjImJXfMqrZD0Sc5QUJ2cUJk5NlCuJWDLp5jdPOwEZGC1na3ql2wTL_7IG0yH8g5So"
+}

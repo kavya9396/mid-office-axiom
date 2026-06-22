@@ -69,6 +69,12 @@ export interface tableData {
   endDate?:string;
   status?:string;
   premium?:string;
+  nameOfProposer?:string;
+  nameOfLifeAssured?:string;
+  plan?:string;
+  caseStatus?:string;
+  caseInWhichPool?:string;
+  remarks?:string;
   
 }
 export type PoolItemProps = {

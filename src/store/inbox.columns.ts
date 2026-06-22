@@ -105,7 +105,12 @@ export const allColumns: TableColumn<tableData>[] = [
   {key:"startDate",label:"Start Date"},
   {key:"endDate",label:"End Date"},
   {key:"status",label:"Status"},
-  {key:"premium",label:"Premium"}
+  {key:"nameOfProposer",label:"Name Of Proposer"},
+  {key:"nameOfLifeAssured",label:"Name Of Life Assured"},
+  {key:"plan",label:"Plan"},
+  {key:"caseStatus",label:"Case Status"},
+  {key:"caseInWhichPool",label:"Case In Which Pool"},
+  {key:"remarks",label:"Remarks"},
 ];
 
 
