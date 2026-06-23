@@ -357,7 +357,7 @@ const RightPanel = ({
       sx={{
         display: "flex",
         backgroundColor: "#F0F3F8",
-        height: "250vh",
+        height: "90vh",
       }}
     >
       <Box
@@ -386,23 +386,23 @@ const RightPanel = ({
           </Typography>
           {(selectedPool == "Leave Management" ||
             selectedPool == "UW Details") && (
-            <CustomButton
-              variant="contained"
-              size="small"
-              sx={{
-                backgroundColor: "white",
-                color: "#063E6F",
-                fontWeight: 700,
-                fontSize: "14px",
-                "&:hover": {
+              <CustomButton
+                variant="contained"
+                size="small"
+                sx={{
                   backgroundColor: "white",
-                },
-                mr: 2,
-              }}
-            >
-              + Add
-            </CustomButton>
-          )}
+                  color: "#063E6F",
+                  fontWeight: 700,
+                  fontSize: "14px",
+                  "&:hover": {
+                    backgroundColor: "white",
+                  },
+                  mr: 2,
+                }}
+              >
+                + Add
+              </CustomButton>
+            )}
         </Box>
         {selectedPool != "Search Applications" && (
           <>
@@ -562,15 +562,18 @@ const RightPanel = ({
                       </TableRow>
                     ))}
                     {paginatedRows.length <= 0 && (
-                      <Typography
-                        sx={{
-                          display: "flex",
-                          justifyContent: "center",
-                          alignItems: "center",
-                        }}
-                      >
-                        No Data Found!
-                      </Typography>
+                      <TableRow>
+                        <TableCell
+                          colSpan={visibleColumns.length}
+                          sx={{
+                            height: "60vh",
+                            textAlign: "center",
+                            verticalAlign: "middle",
+                          }}
+                        >
+                          No Data Found!
+                        </TableCell>
+                      </TableRow>
                     )}
                   </TableBody>
                 </Table>

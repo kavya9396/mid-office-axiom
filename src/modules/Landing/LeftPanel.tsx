@@ -60,7 +60,7 @@ const PoolItem = ({
           fontSize: "14px",
         }}
       >
-       
+
         {label}{" "}
         {selectedPool != "User Management" &&
           showCount &&
@@ -86,7 +86,6 @@ const LeftPanel = ({
   const poolEntries = roles.filter((group) => group.pools?.length > 0);
   const allPools = poolEntries.flatMap((group) => group.pools);
   const searchItem = (
-    <>
     <PoolItem
       label="Search Applications"
       value="Search Applications"
@@ -94,9 +93,10 @@ const LeftPanel = ({
       onClick={onSelectPool}
       showCount={false}
     />
-    </>
   );
+
   const getPoolCount = (pool: string) => poolCounts[pool] ?? 0;
+
   return (
     <Box
       sx={{
@@ -104,22 +104,18 @@ const LeftPanel = ({
         backgroundColor: "#fff",
         transition: "all 0.3s",
         overflow: "hidden",
+        height: "90vh",
       }}
     >
-      <Paper sx={{ height: "100%" }}>
-          <Typography
-          variant="body2"
-          color="text.secondary"
-          sx={{
-            position: "sticky",
-            bottom: 10,
-            pl: 1,
-            pb:1
-          }}
-        >
-          <LastLogin lastLogin={"2026-05-24T11:32:00"} />
-        </Typography>
-        <Box sx={{ pl: 2, py: 2 }}>
+      <Paper
+        sx={{
+          height: "100%",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        {/* Top Section */}
+        <Box sx={{ pl: 2, pt: 2 }}>
           <Box
             onClick={() => setToggle((prev) => !prev)}
             sx={{ cursor: "pointer" }}
@@ -127,7 +123,7 @@ const LeftPanel = ({
             <MenuIcon />
           </Box>
         </Box>
-      
+
         {/* Main Content */}
         <Box sx={{ flex: 1, overflowY: "auto" }}>
           {toggle ? (
@@ -137,7 +133,8 @@ const LeftPanel = ({
             </Box>
           ) : (
             <>
-             {searchItem}
+              {searchItem}
+
               {poolEntries.length === 0 ? (
                 <Typography sx={{ p: 2, color: "#999" }}>
                   No work pools available.
@@ -182,14 +179,21 @@ const LeftPanel = ({
                   ))}
                 </List>
               )}
-
-             
             </>
           )}
         </Box>
 
+        {/* Bottom Footer */}
+        {
+          !toggle && (
+            <Box sx={{ mx: "auto", my: 2 }}>
+                <LastLogin lastLogin={"2026-05-24T11:32:00"} />
+            </Box>
+          )
+        }
       </Paper>
     </Box>
   );
 };
+
 export default LeftPanel;
