@@ -31,7 +31,7 @@ export const poolAllowedColumns: Record<string, string[]> = {
   "AMR - Non medical":[...baseColumnsCops, "lastPool"],
   "Reconsideration Pool":[...baseColumnsCops, "lastPool"],
   "Reject Pool":[...baseColumnsCops, "lastPool"],
-  "Ready for Issuance Pool":[...baseColumnsCops, "lastPool"],
+  "Ready For Issuance Pool":[...baseColumnsCops, "lastPool"],
   "Issuance Pool":[...baseColumnsCops, "lastPool"],
   "Allocation Details":[...baseColumns],
   "Leave Management":["uwName","userId","leaveDateFrom","leaveDateTill","leaveReason","caseToReassignToUw","reassignedUserId"],

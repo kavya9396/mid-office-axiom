@@ -195,10 +195,16 @@ const RightPanel = ({
               gap: 0.5,
             }}
           >
-            <Typography component="span" sx={{ fontSize: "13px", fontWeight: "bold" }}>
+            <Typography
+              component="span"
+              sx={{ fontSize: "13px", fontWeight: "bold" }}
+            >
               {column.label}
             </Typography>
-            <Typography component="span" sx={{ fontSize: "11px", color: "#4A4A4A" }}>
+            <Typography
+              component="span"
+              sx={{ fontSize: "11px", color: "#4A4A4A" }}
+            >
               {getSortIndicator(column.key)}
             </Typography>
           </Box>
@@ -277,10 +283,7 @@ const RightPanel = ({
   const paginatedRows =
     rowsPerPage === -1
       ? sortedRows
-      : sortedRows.slice(
-          page * rowsPerPage,
-          page * rowsPerPage + rowsPerPage,
-        );
+      : sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   const totalCount = sortedRows.length;
 
   const totalPages =
@@ -558,6 +561,17 @@ const RightPanel = ({
                         })}
                       </TableRow>
                     ))}
+                    {paginatedRows.length <= 0 && (
+                      <Typography
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center",
+                        }}
+                      >
+                        No Data Found!
+                      </Typography>
+                    )}
                   </TableBody>
                 </Table>
               </TableContainer>
@@ -718,13 +732,11 @@ const RightPanel = ({
           </>
         )}
         {selectedPool == "Search Applications" && (
-        <>
-          <SearchApplication />
-        </>
-      )}
+          <>
+            <SearchApplication />
+          </>
+        )}
       </Box>
-
-      
     </Box>
   );
 };

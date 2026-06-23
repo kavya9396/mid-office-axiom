@@ -31,6 +31,12 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
     "pivvSection",
     "cvtDecision",
     "summary"
+  ],
+  RETAIL_READY_FOR_ISSUANCE_POOL :[
+    "breDecision",
+    "applicationOverview",
+    "requirementManagement",
+    "uwDecision"
   ]
   // GROUP_CVT_ADMIN: ["applicationOverview"]
 };

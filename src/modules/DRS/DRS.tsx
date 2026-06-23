@@ -7,7 +7,8 @@ import type { AppDispatch } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
 
 const mapper = {
-    "CVT Pool": "RETAIL_CVT_POOL"
+    "CVT Pool": "RETAIL_CVT_POOL",
+    "Ready For Issuance Pool":"RETAIL_READY_FOR_ISSUANCE_POOL"
 }
 
 const DRS = () => {
@@ -15,6 +16,7 @@ const DRS = () => {
 
     const layout = mapper[roleType as keyof typeof mapper];
     const accordions = layout ? DRS_LAYOUTS[layout] : [];
+    console.log('accordions',accordions,roleType,layout)
     const navigate = useNavigate();
 
     const dispatch = useDispatch<AppDispatch>();
