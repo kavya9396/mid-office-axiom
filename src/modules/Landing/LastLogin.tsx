@@ -1,3 +1,4 @@
+import { Typography } from "@mui/material";
 import React from "react";
 
 type LastLoginProps = {
@@ -35,7 +36,7 @@ const formatLastLogin = (value: string | Date) => {
 };
 
 const LastLogin: React.FC<LastLoginProps> = ({ lastLogin }) => {
-  return <span>{formatLastLogin(lastLogin)}</span>;
+  return <Typography sx={{ fontSize: 12, color: "#999" }}>{formatLastLogin(lastLogin)}</Typography>;
 };
 
 
