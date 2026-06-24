@@ -10,7 +10,8 @@ const mapper = {
     "CVT Pool": "RETAIL_CVT_POOL",
     "Ready For Issuance Pool":"RETAIL_READY_FOR_ISSUANCE_POOL",
     "System Wait Pool - Non medical":"RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
-    "AMR - Non medical":"RETAIL_NON_MEDICAL"
+    "AMR - Non medical":"RETAIL_AMR_NON_MEDICAL",
+    "Reconsideration Pool":"RETAIL_RECONSIDERATION_POOL"
 }
 
 const DRS = () => {

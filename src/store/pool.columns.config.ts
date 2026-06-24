@@ -20,20 +20,58 @@ const baseColumnsCops = [
 export const poolAllowedColumns: Record<string, string[]> = {
   "CVT Pool": [...baseColumnsCops],
 
-  "CPT Pool": [...baseColumnsCops],
+  "CPT Pool": [...baseColumnsCops,"medicalReceivedDate","financialReceivedDate","poolTAT"],
 
   "PIVV Pool": [...baseColumnsCops],
 
   "Pre Issuance Servicing Pool": [...baseColumnsCops],
 
   "Exceptional Pool": [...baseColumnsCops, "lastPool"],
-  "System Wait Pool - Non medical":[...baseColumnsCops, "lastPool","requirementRaisedDate","userId"],
-  "AMR - Non medical":[...baseColumnsCops, "lastPool","requirementRaisedDate","userId"],
-  "Reconsideration Pool":[...baseColumnsCops, "lastPool"],
-  "Reject Pool":[...baseColumnsCops, "lastPool"],
-  "Ready For Issuance Pool":[...baseColumnsCops, "lastPool"],
-  "Issuance Pool":[...baseColumnsCops, "lastPool"],
-  "Allocation Details":[...baseColumns],
-  "Leave Management":["uwName","userId","leaveDateFrom","leaveDateTill","leaveReason","caseToReassignToUw","reassignedUserId"],
-  "Reassign/Transfer Cases":["applicationNo","nameOfProposer","nameOfLifeAssured","product","plan","appliedSa","caseStatus","caseInWhichPool","userId","reassignedUserId","remarks"]
+  "System Wait Pool - Non medical": [
+    ...baseColumnsCops,
+    "lastPool",
+    "requirementRaisedDate",
+    "userId",
+  ],
+  "AMR - Non medical": [
+    ...baseColumnsCops,
+    "lastPool",
+    "requirementRaisedDate",
+    "userId",
+  ],
+  "Reconsideration Pool": [
+    ...baseColumnsCops,
+    "lastPool",
+    "userId",
+    "uwDecisionDate",
+    "poolTAT",
+    "dueDate",
+  ],
+  "Reject Pool": [...baseColumnsCops, "lastPool", "userId",
+    "uwDecisionDate","laDecisionDate"],
+  "Ready For Issuance Pool": [...baseColumnsCops, "lastPool"],
+  "Issuance Pool": [...baseColumnsCops, "uwDecisionDate","laDecisionDate"],
+  "Allocation Details": [...baseColumns],
+  "Leave Management": [
+    "uwName",
+    "userId",
+    "leaveDateFrom",
+    "leaveDateTill",
+    "leaveReason",
+    "caseToReassignToUw",
+    "reassignedUserId",
+  ],
+  "Reassign/Transfer Cases": [
+    "applicationNo",
+    "nameOfProposer",
+    "nameOfLifeAssured",
+    "product",
+    "plan",
+    "appliedSa",
+    "caseStatus",
+    "caseInWhichPool",
+    "userId",
+    "reassignedUserId",
+    "remarks",
+  ],
 };

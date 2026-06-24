@@ -35,9 +35,15 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
     "applicationOverview",
     "requirementManagement",
   ],
-  RETAIL_NON_MEDICAL:[
+  RETAIL_AMR_NON_MEDICAL:[
     "applicationOverview",
     "requirementManagement",
+  ],
+  RETAIL_RECONSIDERATION_POOL:[
+    "breDecision",
+    "applicationOverview",
+     "summary",
+     "requirementManagement",
   ]
   // GROUP_CVT_ADMIN: ["applicationOverview"]
 };

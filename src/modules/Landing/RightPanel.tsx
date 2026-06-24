@@ -73,9 +73,14 @@ const RightPanel = ({
   const visibleColumns = allColumns.filter((col) =>
     config.visible.includes(col.key),
   );
+
+  console.log("Left datat", left)
   // ---------------- OPEN DIALOG ----------------
   const openColumnDialog = () => {
-    setLeft(config.hidden);
+    const leftColumns = allColumns.filter((col) =>
+    config.hidden.includes(col.key),
+  ).map((col) => String(col.key));
+    setLeft(leftColumns);
     setRight(config.visible);
     setOpenTransferDialog(true);
   };
@@ -230,7 +235,10 @@ const RightPanel = ({
           <ListItem key={item} disablePadding>
             <Box sx={{ px: 2 }}>
               <CustomCheckbox
-                label={item}
+                label={
+                  allColumns.find((col) => String(col.key) === item)?.label ??
+                  item
+                }
                 checked={checked.includes(item)}
                 onChange={handleToggle(item)}
               />
@@ -579,7 +587,7 @@ const RightPanel = ({
                 </Table>
               </TableContainer>
               {/* Footer Pagination */}
-              <Box
+              {paginatedRows.length > 0 && ( <Box
                 sx={{
                   borderTop: "1px solid #e0e0e0",
                   px: 2,
@@ -651,7 +659,8 @@ const RightPanel = ({
                     Showing {startRecord}-{endRecord} of {totalCount}
                   </Typography>
                 </Box>
-              </Box>
+              </Box>)}
+             
             </Paper>
             {/*  ------- Filter table ------------ */}
 
