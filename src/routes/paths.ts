@@ -8,5 +8,5 @@ export const PATHS = {
   DRS: "app/:applicationNumber/drs",
   DRS_MEDICAL: "app/:applicationNumber/drs/medical",
   DRS_FINANCIAL: "app/:applicationNumber/drs/financial",
-  DRS_PREVIOUS: "app/:applicationNumber/drs/previous-policies",
+  DRS_PREVIOUS: "app/:applicationNumber/drs/previousPolicies",
 };

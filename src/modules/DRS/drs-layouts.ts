@@ -5,6 +5,8 @@ import PIVVSection from "./DRS_Accordions/PIVVSection";
 import RequirementManagement from "./DRS_Accordions/RequirementManagement";
 import Summary from "./DRS_Accordions/Summary";
 import UWDecision from "./DRS_Accordions/UWDecision";
+import QuickLinks from "./QuickLinks";
+import UWToolkit from "./UWToolkit";
 
 export const accordionRegistry = {
   breDecision: BreDecision,
@@ -14,6 +16,8 @@ export const accordionRegistry = {
   pivvSection: PIVVSection,
   cvtDecision: CVTDecision,
   summary: Summary,
+  quickLinks: QuickLinks,
+  uwToolkit: UWToolkit
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
@@ -21,13 +25,22 @@ type AccordionKey = keyof typeof accordionRegistry;
 export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
   RETAIL_CVT_POOL : [
     "breDecision",
-     "summary",
+    "summary",
     "applicationOverview",
     "pivvSection",
-    "cvtDecision"
+    "cvtDecision",
+    "quickLinks"
   ],
-  RETAIL_CPT_POOL:["applicationOverview",
-    "requirementManagement"],
+  RETAIL_CPT_POOL: [
+    "applicationOverview",
+    "requirementManagement",
+  ],
+  RETAIL_PIVV_POOL: [
+    "applicationOverview",
+    "requirementManagement",
+    "quickLinks",
+    "uwToolkit"
+  ],
   RETAIL_READY_FOR_ISSUANCE_POOL :[
     "breDecision",
     "applicationOverview",
