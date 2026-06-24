@@ -23,7 +23,8 @@ const ApplicationOverview = () => {
 const expandedRoles = [
   'Ready For Issuance Pool',
   'System Wait Pool - Non medical',
-  'AMR - Non medical'
+  'AMR - Non medical',
+  'CPT Pool'
 ];
 
 const isExpanded = expandedRoles.includes(roleType);
