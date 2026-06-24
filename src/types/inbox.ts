@@ -12,6 +12,9 @@ export type UserContextResponse = {
   pools?: Record<string, string[]>;
 poolData?: Record<string, tableData[]>;
 };
+export type InboxRequest = {
+  username: string;
+}
 export type PoolProps = {
   onSelectPool: (pool: string) => void;
   selectedPool: string;
@@ -114,7 +117,8 @@ export type ColumnConfig = {
 
 
 export interface PoolRequest {
-  username: string;
+  roleName:string;
+  userId: string;
   poolname: string;
 }
 

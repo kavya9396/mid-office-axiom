@@ -205,6 +205,9 @@ const RequirementManagement = ({
   const reduxRequirements = useSelector(
   (state: RootState) => state.drs.requirements
 );
+const roleType = localStorage.getItem("roleType") ?? "";
+const isVisible = roleType !== 'Ready For Issuance Pool' ? true : false;
+console.log(roleType,isVisible)
 const finalRequirements = requirements ?? reduxRequirements;
   const [openReqDialog, setOpenReqDialog] = useState(false);
   const [requirementForm, setRequirementForm] = useState({
@@ -316,7 +319,7 @@ const finalRequirements = requirements ?? reduxRequirements;
             title="Requirement Management"
             columns={requirementColumns}
             data={requirementRows}
-            headerAction={
+            headerAction={isVisible ?
               <CustomButton
                 variant="contained"
                 size="small"
@@ -332,7 +335,7 @@ const finalRequirements = requirements ?? reduxRequirements;
                 onClick={() => setOpenReqDialog(true)}
               >
                 + Add
-              </CustomButton>
+              </CustomButton> : ''
             }
           />
         </CustomAccordion>

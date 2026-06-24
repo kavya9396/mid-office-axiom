@@ -8,7 +8,9 @@ import { drsThunk } from "../../store/thunks/drsThunk";
 
 const mapper = {
     "CVT Pool": "RETAIL_CVT_POOL",
-    "Ready For Issuance Pool":"RETAIL_READY_FOR_ISSUANCE_POOL"
+    "Ready For Issuance Pool":"RETAIL_READY_FOR_ISSUANCE_POOL",
+    "System Wait Pool - Non medical":"RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
+    "AMR - Non medical":"RETAIL_NON_MEDICAL"
 }
 
 const DRS = () => {

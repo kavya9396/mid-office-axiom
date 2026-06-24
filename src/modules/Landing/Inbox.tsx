@@ -31,7 +31,8 @@ const Inbox = () => {
 
     const loadData = async () => {
       try {
-        const roleResponse = await dispatch(fetchInboxThunk()).unwrap();
+        const username = localStorage.getItem("username") ?? "";
+        const roleResponse = await dispatch(fetchInboxThunk({ username })).unwrap();
 
         const role = roleResponse.roleType ?? "admin";
 
@@ -84,10 +85,12 @@ const Inbox = () => {
 
     const loadPoolData = async () => {
       try {
+        const username = localStorage.getItem("username") ?? "";
         const response = await dispatch(
           poolThunk({
-            username: userRole,
+            roleName: userRole,
             poolname: selectedPool,
+            userId:username
           })
         ).unwrap();
 

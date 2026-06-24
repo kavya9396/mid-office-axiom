@@ -7,6 +7,7 @@ export const auth = {
 
   logout: () =>{
     localStorage.removeItem("token");
+  localStorage.removeItem("username");
   localStorage.removeItem("column_config_v1");
   localStorage.removeItem("roleType");
   }

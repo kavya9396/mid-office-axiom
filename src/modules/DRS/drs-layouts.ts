@@ -13,30 +13,31 @@ export const accordionRegistry = {
   uwDecision: UWDecision,
   pivvSection: PIVVSection,
   cvtDecision: CVTDecision,
-  summary: Summary
+  summary: Summary,
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
 
 export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
-  RETAIL_CVT_ADMIN: [
-    "breDecision",
-    "applicationOverview",
-    "requirementManagement",
-    "uwDecision"
-  ],
   RETAIL_CVT_POOL : [
     "breDecision",
+     "summary",
     "applicationOverview",
     "pivvSection",
-    "cvtDecision",
-    "summary"
+    "cvtDecision"
   ],
   RETAIL_READY_FOR_ISSUANCE_POOL :[
     "breDecision",
     "applicationOverview",
+    "requirementManagement"
+  ],
+  RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL :[
+    "applicationOverview",
     "requirementManagement",
-    "uwDecision"
+  ],
+  RETAIL_NON_MEDICAL:[
+    "applicationOverview",
+    "requirementManagement",
   ]
   // GROUP_CVT_ADMIN: ["applicationOverview"]
 };

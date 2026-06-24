@@ -72,6 +72,54 @@
         "caseType": "New Business",
         "roleType": "CVT Pool"
       }
+    ],"System Wait Pool - Non medical": [
+      {
+        "id": 1,
+        "applicationNo": "OB25175127",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "System Wait Pool - Non medical",
+        "productType":"test"
+      },
+      {
+        "id": 2,
+        "applicationNo": "OB25175128",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "System Wait Pool - Non medical"
+      }
+    ],"AMR - Non medical": [
+      {
+        "id": 1,
+        "applicationNo": "OB25175127",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "AMR - Non medical",
+        "productType":"test"
+      },
+      {
+        "id": 2,
+        "applicationNo": "OB25175128",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "AMR - Non medical"
+      }
     ]
   }
 }

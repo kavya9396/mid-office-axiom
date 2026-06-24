@@ -562,7 +562,7 @@ const RightPanel = ({
                       </TableRow>
                     ))}
                     {paginatedRows.length <= 0 && (
-                      <TableRow>
+                     <TableRow>
                         <TableCell
                           colSpan={visibleColumns.length}
                           sx={{
@@ -573,7 +573,7 @@ const RightPanel = ({
                         >
                           No Data Found!
                         </TableCell>
-                      </TableRow>
+                        </TableRow>
                     )}
                   </TableBody>
                 </Table>

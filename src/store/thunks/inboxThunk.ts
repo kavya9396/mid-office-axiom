@@ -1,9 +1,9 @@
 import { createApiThunk } from "./createApiThunk";
-import type { UserContextResponse } from "../../types/inbox";
+import type { InboxRequest, UserContextResponse } from "../../types/inbox";
 
 export const fetchInboxThunk = createApiThunk<
   UserContextResponse,
-  void
+  InboxRequest
 >("mock/inbox/roleList.json",{
     url: "/mock/inbox/roleList.json",
     method: "POST",

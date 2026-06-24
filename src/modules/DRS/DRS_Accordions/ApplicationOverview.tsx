@@ -19,9 +19,14 @@ const riderColumns: Column<RiderRow>[] = [
 const ApplicationOverview = () => {
   const { applicationOverview, riderDetails } = useSelector((state: RootState) => state.drs);
 
-  //    const userRole = useSelector(
-  //   (state: RootState) => state.drs.applicationDetails?.roleType
-  //   );
+ const roleType = localStorage.getItem("roleType") ?? "";
+const expandedRoles = [
+  'Ready For Issuance Pool',
+  'System Wait Pool - Non medical',
+  'AMR - Non medical'
+];
+
+const isExpanded = expandedRoles.includes(roleType);
 
   const applicationDetails = [
     {
@@ -92,7 +97,7 @@ const ApplicationOverview = () => {
     <Container disableGutters>
       <Box sx={{ mt: 2 }}>
         {/* <CustomAccordion title="Application Overview" defaultExpanded={userRole ==='CPT'?true:false}> */}
-        <CustomAccordion title="Application Overview" defaultExpanded={false}>
+        <CustomAccordion title="Application Overview" defaultExpanded={isExpanded}>
           <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
             <GridSection columns={6} items={applicationDetails} />
           </Box>

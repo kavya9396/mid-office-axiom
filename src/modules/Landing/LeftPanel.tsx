@@ -64,7 +64,7 @@ const PoolItem = ({
         {label}{" "}
         {selectedPool != "User Management" &&
           showCount &&
-          count !== undefined &&
+          count !== undefined && count > 0 &&
           `(${count})`}
       </Typography>
 
@@ -94,9 +94,7 @@ const LeftPanel = ({
       showCount={false}
     />
   );
-
-  const getPoolCount = (pool: string) => poolCounts[pool] ?? 0;
-
+  const getPoolCount = (pool: string) => poolCounts[pool] ?? '';
   return (
     <Box
       sx={{

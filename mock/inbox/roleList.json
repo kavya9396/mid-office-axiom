@@ -35,7 +35,7 @@
     }
   ],
   "poolData": {
-    "Ready For Issuance Pool": [
+    "CVT Pool": [
       {
         "id": 1,
         "applicationNo": "OB25175127",
@@ -45,7 +45,8 @@
         "premium": 1000,
         "clientType": "Individual",
         "caseType": "New Business",
-        "roleType": "Ready For Issuance Pool"
+        "roleType": "CVT Pool",
+        "productType":"test"
       },
       {
         "id": 2,
@@ -56,7 +57,7 @@
         "premium": 1000,
         "clientType": "Individual",
         "caseType": "New Business",
-        "roleType": "Ready For Issuance Pool"
+        "roleType": "CVT Pool"
       }
     ]
   }

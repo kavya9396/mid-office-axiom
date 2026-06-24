@@ -27,8 +27,8 @@ export const poolAllowedColumns: Record<string, string[]> = {
   "Pre Issuance Servicing Pool": [...baseColumnsCops],
 
   "Exceptional Pool": [...baseColumnsCops, "lastPool"],
-  "System Wait Pool - Non medical":[...baseColumnsCops, "lastPool"],
-  "AMR - Non medical":[...baseColumnsCops, "lastPool"],
+  "System Wait Pool - Non medical":[...baseColumnsCops, "lastPool","requirementRaisedDate","userId"],
+  "AMR - Non medical":[...baseColumnsCops, "lastPool","requirementRaisedDate","userId"],
   "Reconsideration Pool":[...baseColumnsCops, "lastPool"],
   "Reject Pool":[...baseColumnsCops, "lastPool"],
   "Ready For Issuance Pool":[...baseColumnsCops, "lastPool"],

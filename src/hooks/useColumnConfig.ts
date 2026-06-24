@@ -13,7 +13,7 @@ const getDefaultConfig = (pool: string): ColumnConfig => {
   const allowed = poolAllowedColumns[pool] ?? allColumns.map((c) => c.key);
   return {
     visible: allowed.slice(0, 8),
-    hidden: allowed.slice(7),
+    hidden: allowed.slice(8),
   };
 };
 
