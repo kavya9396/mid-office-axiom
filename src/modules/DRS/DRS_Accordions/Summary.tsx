@@ -11,7 +11,7 @@ import type { RootState } from "../../../store/store"
 import Badge from "../../../components/ui/Badge/Badge"
 import { GridSection } from "../../../components/layout/GridSection"
 import CustomButton from "../../../components/ui/Button/Button"
-import ApplicantProfile from "./ApplicantProfile"
+import ApplicantProfile from "./ApplicantProfile/ApplicantProfile"
 import CustomDialog from "../../../components/ui/Dialog/Dialog"
 
 const riskDetails: RiskCard[] = [
