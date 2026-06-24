@@ -9,11 +9,23 @@ import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import CustomButton from "../../../components/ui/Button/Button";
 import type { RootState } from "../../../store/store";
 import { useSelector } from "react-redux";
+import type { BreDecisionResponse } from "../../../types/drs.types";
 
 type SelectedItem = {
   label: string;
   value: string;
 };
+
+type BreDecisionExtraField = {
+  label: string;
+  value?: string | null;
+  visibleWhen?: "always" | "success" | "failure";
+};
+
+interface BreDecisionProps {
+  extraFields?: BreDecisionExtraField[];
+  breDecisionOverride?: BreDecisionResponse | null;
+}
 
 const truncateText = (text: string, limit: number) => {
   if (text.length <= limit) return text;
@@ -21,8 +33,9 @@ const truncateText = (text: string, limit: number) => {
   return truncated.slice(0, truncated.lastIndexOf(" "));
 };
 
-const BreDecision = () => {
-  const { breDecision } = useSelector((state: RootState) => state.drs);
+const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisionProps) => {
+  const { breDecision: drsBreDecision } = useSelector((state: RootState) => state.drs);
+  const breDecision = breDecisionOverride ?? drsBreDecision;
   const navigate = useNavigate();
 
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -32,10 +45,50 @@ const BreDecision = () => {
 
   const isBreSuccess = breDecision?.status?.toLowerCase() === "success";
 
-  //This count should come from backend.
+  // This count should come from backend.
   const isRetriggerDisabled = isBreSuccess || retriggerCount >= 3;
 
-  const breDetails = [
+  const conditionalFields = extraFields
+    .filter((item) => {
+      if (item.visibleWhen === "success") return isBreSuccess;
+      if (item.visibleWhen === "failure") return !isBreSuccess;
+      return true;
+    })
+    .map((item) => ({
+      label: item.label,
+      value: item.value ?? "-",
+    }));
+
+  const hasValue = (value: unknown) =>
+    value !== null && value !== undefined && String(value).trim() !== "";
+
+  const breDecisionParams = breDecision as Record<string, unknown> | null;
+
+  const conditionalBreDecisionParams = [
+    {
+      label: "Medical Decision",
+      value: breDecisionParams?.medicalDecision,
+    },
+    {
+      label: "Medical Decision Date",
+      value: breDecisionParams?.medicalDecisionDate,
+    },
+    {
+      label: "Medical Discrepancy",
+      value: breDecisionParams?.medicalDiscrepancy,
+    },
+    {
+      label: "Medical Remarks",
+      value: breDecisionParams?.medicalRemarks,
+    },
+  ]
+    .filter((item) => hasValue(item.value))
+    .map((item) => ({
+      label: item.label,
+      value: String(item.value),
+    }));
+
+  const coreBreDetails = [
     {
       label: "BRE Status",
       value: breDecision?.status ?? "-",
@@ -52,6 +105,11 @@ const BreDecision = () => {
       label: "BRE Timestamp",
       value: breDecision?.timestamp ?? "-",
     },
+  ];
+
+  const additionalBreDetails = [
+    ...conditionalBreDecisionParams,
+    ...conditionalFields,
   ];
 
   const handleRetrigger = () => {
@@ -74,6 +132,58 @@ const BreDecision = () => {
     return truncateText(text, 80);
   };
 
+  const renderBreDetail = (item: { label: string; value: string }, key: string) => {
+    const isLongText = item.value.length > 80;
+
+    return (
+      <Box key={key} sx={{ ...columnFlex }}>
+        <Typography
+          sx={{
+            color: "#444444",
+            fontSize: "12px",
+          }}
+        >
+          {item.label}
+        </Typography>
+        <Typography
+          sx={{
+            color: "#161616",
+            fontWeight: 600,
+            fontSize: "14px",
+            lineHeight: "20px",
+            maxHeight: "40px",
+            overflow: "hidden",
+          }}
+        >
+          {getDisplayText(item.value)}
+
+          {isLongText && "... "}
+
+          {isLongText && (
+            <Box
+              component="span"
+              onClick={() => {
+                setSelectedItem({
+                  label: item.label,
+                  value: item.value,
+                });
+                setDialogOpen(true);
+              }}
+              sx={{
+                color: "#063E6F",
+                cursor: "pointer",
+                fontWeight: 500,
+                textDecoration: "underline",
+              }}
+            >
+              show more
+            </Box>
+          )}
+        </Typography>
+      </Box>
+    );
+  };
+
   return (
     <Container disableGutters>
       <CustomAccordion
@@ -86,88 +196,58 @@ const BreDecision = () => {
       >
         <Box
           sx={{
-            display: "grid",
-            gridTemplateColumns: "0.8fr 2.5fr 2.5fr 1.5fr 0.5fr",
-            gap: "16px",
             backgroundColor: "#f6f6f6",
             padding: "16px",
             marginTop: "8px",
             borderRadius: "8px",
           }}
         >
-          {breDetails.map((item, index) => {
-            const isLongText = typeof item.value === "string" && item.value.length > 80;
-
-            return (
-              <Box key={index} sx={{ ...columnFlex }}>
-                <Typography
-                  sx={{
-                    color: "#444444",
-                    fontSize: "12px",
-                  }}
-                >
-                  {item.label}
-                </Typography>
-                <Typography
-                  sx={{
-                    color: "#161616",
-                    fontWeight: 600,
-                    fontSize: "14px",
-                    lineHeight: "20px",
-                    maxHeight: "40px",
-                    overflow: "hidden",
-                  }}
-                >
-                  {getDisplayText(item.value)}
-
-                  {isLongText && "... "}
-
-                  {isLongText && (
-                    <Box
-                      component="span"
-                      onClick={() => {
-                        setSelectedItem({
-                          label: item.label,
-                          value: item.value,
-                        });
-                        setDialogOpen(true);
-                      }}
-                      sx={{
-                        color: "#063E6F",
-                        cursor: "pointer",
-                        fontWeight: 500,
-                        textDecoration: "underline"
-                      }}
-                    >
-                      show more
-                    </Box>
-                  )}
-                </Typography>
-              </Box>
-            );
-          })}
-
           <Box
             sx={{
-              ...centerFlex,
+              display: "grid",
+              gridTemplateColumns: "0.8fr 2.5fr 2.5fr 1.5fr 0.5fr",
+              gap: "16px",
             }}
           >
+            {coreBreDetails.map((item, index) => renderBreDetail(item, `core-${item.label}-${index}`))}
+
             <Box
-              component="span"
-              onClick={handleRetrigger}
               sx={{
-                color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
-                border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
-                padding: 1,
-                borderRadius: "8px",
-                display: "flex",
-                cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
-                opacity: isRetriggerDisabled ? 0.5 : 1,
+                ...centerFlex,
               }}
             >
-              <RefreshIcon />
+              <Box
+                component="span"
+                onClick={handleRetrigger}
+                sx={{
+                  color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
+                  border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
+                  padding: 1,
+                  borderRadius: "8px",
+                  display: "flex",
+                  cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
+                  opacity: isRetriggerDisabled ? 0.5 : 1,
+                }}
+              >
+                <RefreshIcon />
+              </Box>
             </Box>
           </Box>
+
+          {additionalBreDetails.length > 0 && (
+            <Box
+              sx={{
+                mt: 2,
+                pt: 2,
+                borderTop: "1px solid #E3E3E3",
+                display: "grid",
+                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
+                gap: "16px",
+              }}
+            >
+              {additionalBreDetails.map((item, index) => renderBreDetail(item, `extra-${item.label}-${index}`))}
+            </Box>
+          )}
         </Box>
 
         <CustomDialog
@@ -176,7 +256,7 @@ const BreDecision = () => {
           title={
             <Typography
               sx={{
-                ...modalTitleStyles
+                ...modalTitleStyles,
               }}
             >
               {selectedItem?.label?.replace("BRE ", "")}
@@ -201,7 +281,7 @@ const BreDecision = () => {
           title={
             <Typography
               sx={{
-                ...modalTitleStyles
+                ...modalTitleStyles,
               }}
             >
               BRE Retriggered
@@ -214,8 +294,8 @@ const BreDecision = () => {
           actions={
             <CustomButton
               onClick={() => {
-                setBreDialogOpen(false)
-                navigate("/retail/inbox")
+                setBreDialogOpen(false);
+                navigate("/retail/inbox");
               }}
               sx={{ borderRadius: "50px", paddingX: "40px" }}
             >

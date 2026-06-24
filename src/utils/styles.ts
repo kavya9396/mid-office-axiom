@@ -98,7 +98,7 @@ export const modalTitleStyles = {
   color: "#063E6F",
   fontWeight: 800,
   textTransform: "uppercase",
-  fontSize: "20px",
+  fontSize: "16px",
 };
 
 export const decisionStyles = {

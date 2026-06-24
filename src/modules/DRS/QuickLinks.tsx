@@ -4,24 +4,27 @@ import { centerFlex, columnFlex } from "../../utils/styles";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useState } from "react";
 import { getFinancialPath, getMedicalPath, getPreviousPoliciesPath } from "../../routes/routes";
-
-const businessType = "retail";
-const appNo = "OB25175129"
-
-const quickLinks = [
-    { label: "Proposal Form", path: "" },
-    { label: "Previous Policies", path: getPreviousPoliciesPath(businessType, appNo) },
-    { label: "Open Tasks", path: "" },
-    { label: "Risk Details", path: "" },
-    { label: "Audit Trail", path: "" },
-    { label: "Refer to IT", path: "" },
-    { label: "View Medical", path: getMedicalPath(businessType, appNo) },
-    { label: "View Financial", path: getFinancialPath(businessType, appNo) },
-];
+import { useAppContext } from "../../hooks/useAppContext";
 
 const QuickLinks = () => {
     const navigate = useNavigate();
     const [isOpen, setIsOpen] = useState(false);
+    const { businessType, applicationNumber } = useAppContext();
+
+    const safeBusinessType = businessType ?? "retail";
+    const safeApplicationNumber = applicationNumber ?? "";
+    const selectedApplicantTab = localStorage.getItem("drsSelectedApplicantTab") ?? "proposer";
+
+    const quickLinks = [
+        { label: "Proposal Form", path: "" },
+        { label: "Previous Policies", path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "" },
+        { label: "Open Tasks", path: "" },
+        { label: "Risk Details", path: "" },
+        { label: "Audit Trail", path: "" },
+        { label: "Refer to IT", path: "" },
+        { label: "View Medical", path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "" },
+        { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
+    ];
 
     const toggleQuickLinks = useCallback(() => {
         setIsOpen((prev) => !prev);
@@ -29,9 +32,22 @@ const QuickLinks = () => {
 
     const handleNavigate = useCallback(
         (path: string) => {
-            if (path) navigate(path);
+            if (!path) return;
+
+            const shouldPassApplicantTab = path.includes("/drs/medical");
+
+            if (shouldPassApplicantTab) {
+                navigate(path, {
+                    state: {
+                        selectedApplicantTab,
+                    },
+                });
+                return;
+            }
+
+            navigate(path);
         },
-        [navigate]
+        [navigate, selectedApplicantTab]
     );
 
     return (
@@ -61,7 +77,7 @@ const QuickLinks = () => {
                     >
                         <Typography
                             sx={{
-                                fontSize: 20,
+                                fontSize: 14,
                                 fontWeight: 700,
                                 color: "#1e1e1e",
                                 px: 2,
@@ -88,7 +104,7 @@ const QuickLinks = () => {
                                         cursor: path ? "pointer" : "default",
                                     }}
                                 >
-                                    <Typography sx={{ fontSize: 16, color: "#444" }}>
+                                    <Typography sx={{ fontSize: 14, color: "#444" }}>
                                         {label}
                                     </Typography>
 

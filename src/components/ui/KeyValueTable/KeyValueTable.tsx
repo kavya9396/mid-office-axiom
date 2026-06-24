@@ -46,7 +46,7 @@ export default function KeyValueTable({
         <Typography
           sx={{
             color: "#FFFFFF",
-            fontSize: 18,
+            fontSize: 14,
             fontWeight: 700,
             lineHeight: 1.2,
           }}
@@ -63,7 +63,7 @@ export default function KeyValueTable({
             "& td": {
               borderColor: "#D4D7DB",
               fontFamily: "Mulish, sans-serif",
-              fontSize: "14px",
+              fontSize: "12px",
               color: "#4B5563",
               py: 1.1,
             },

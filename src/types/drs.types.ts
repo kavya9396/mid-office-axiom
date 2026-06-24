@@ -44,6 +44,62 @@ export type DRSResponse = {
   pivvSection: PivvSection;
 };
 
+export type MedicalStatus = "normal" | "abnormal";
+
+export type MedicalTestRow = {
+  parameter: string;
+  value: string;
+  unit: string;
+  normalRange: string;
+  status: MedicalStatus;
+};
+
+export type MedicalSection = {
+  title: string;
+  rows: MedicalTestRow[];
+};
+
+export type BreDecisionExtraField = {
+  label: string;
+  value?: string | null;
+  visibleWhen?: "always" | "success" | "failure";
+};
+
+export type MedicalApplicantSummary = {
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  dob: string;
+  age: number;
+  gender: "Male" | "Female" | "Other";
+  profileImage: string;
+  caseStatus: string;
+  occupation?: string;
+  annualIncome?: string | number;
+  email?: string;
+  mobile?: string;
+};
+
+export type MedicalSummaryMember = {
+  memberType: "proposer" | "lifeassured1" | "lifeassured2";
+  proposerSummary?: MedicalApplicantSummary;
+  lifeassured1Summary?: MedicalApplicantSummary;
+  lifeassured2Summary?: MedicalApplicantSummary;
+};
+
+export type MedicalResponse = {
+  applicationId: string;
+  breDecision: BreDecisionResponse & {
+    medicalDecision?: string;
+    medicalDecisionDate?: string;
+    medicalDiscrepancy?: string;
+    medicalRemarks?: string;
+  };
+  breAdditionalFields?: BreDecisionExtraField[];
+  summary: MedicalSummaryMember[];
+  sections: MedicalSection[];
+};
+
 export interface BreDecisionResponse {
   decision: string | null;
   status: string | null;

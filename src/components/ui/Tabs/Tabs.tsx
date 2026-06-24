@@ -30,7 +30,7 @@ const getTabStyles = (isActive: boolean): SxProps<Theme> => ({
   borderRadius: "999px",
   px: 1,
   py: 1,
-  fontSize: "16px",
+  fontSize: "14px",
   fontWeight: isActive ? 700 : 500,
   color: isActive ? "#FFFFFF" : "#7A7A7A",
   backgroundColor: isActive ? "#9A2529" : "transparent",

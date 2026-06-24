@@ -40,7 +40,7 @@ export const GridSection = ({
             <Typography sx={{ color: "#444", fontSize: 14, fontWeight: 400 }}>
               {item.label}
             </Typography>
-            <Typography sx={{ color: "#161616", fontWeight: 600, fontSize: 16 }}>
+            <Typography sx={{ color: "#161616", fontWeight: 600, fontSize: 12 }}>
               {item.value ?? "-"}
             </Typography>
           </Box>

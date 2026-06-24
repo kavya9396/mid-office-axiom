@@ -27,7 +27,7 @@ export default function CustomAccordion({
   defaultExpanded = false,
   expanded: controlledExpanded,
   onChange,
-  titleFontSize = 20,
+  titleFontSize = 14,
   detailPadding,
   titleColor
 }: CustomAccordionProps) {

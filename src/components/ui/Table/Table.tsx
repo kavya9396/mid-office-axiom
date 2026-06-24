@@ -55,7 +55,7 @@ export default function CustomTable<T extends object>({
             alignItems: "center"
           }}
         >
-          <Typography sx={{ fontSize: "15px", fontWeight: 700 }}>
+          <Typography sx={{ fontSize: "12px", fontWeight: 700 }}>
             {title}
           </Typography>
            {headerAction && <Box>{headerAction}</Box>}
@@ -80,7 +80,7 @@ export default function CustomTable<T extends object>({
 
             "& td": {
               color: "#4A4A4A",
-              fontSize: "15px",
+              fontSize: "14px",
               py: 1.1,
               px: 2,
               borderBottom: "1px solid #E1E1E1",
@@ -106,7 +106,7 @@ export default function CustomTable<T extends object>({
                     {/* HEADER TITLE */}
                     <Typography
                       sx={{
-                        fontSize: "14px",
+                        fontSize: "12px",
                         fontWeight: 600,
                         color: "#4A4A4A",
                       }}
@@ -147,10 +147,15 @@ export default function CustomTable<T extends object>({
                   const value = row[col.key];
 
                   return (
-                    <TableCell key={String(col.key)}>
+                    <TableCell key={String(col.key)} sx={{fontSize:"12px"}}>
+                       <Typography
+                      sx={{
+                        fontSize: "12px",
+                      }}
+                    >
                       {col.render
                         ? col.render(value, row, rowIndex)
-                        : (value as React.ReactNode)}
+                        : (value as React.ReactNode)}</Typography>
                     </TableCell>
                   );
                 })}

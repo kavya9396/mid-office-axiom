@@ -48,7 +48,7 @@ const ConfirmationDialog = ({
         </CustomButton>
       }
     >
-      <Typography sx={{ fontSize: "14px", color: "#161616" }}>
+      <Typography sx={{ fontSize: "12px", color: "#161616" }}>
         {message}
       </Typography>
     </CustomDialog>

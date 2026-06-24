@@ -32,7 +32,7 @@ const navigate = useNavigate();
         <Typography
           component="span"
           sx={{
-            fontSize: "20px",
+            fontSize: "14px",
             fontWeight: 700,
             color: "#1E1E1E",
           }}

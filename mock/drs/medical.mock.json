@@ -1,0 +1,93 @@
+{
+  "applicationId": "OB25175129",
+   "breDecision": {
+    "decision": "STD",
+    "status": "Failure",
+    "remarks": "#ICICI Prudential Website#Check Basic KYC Document Attestations#Standard Age Proof Requiredi## UW Control DIGI IIB hit PSO not reguired#lB hit compulsory PSO and OID required##Model Output: Green#PTLR Modet output Green: UW Standard#Standard Age Proof Required For This Rider Type#Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs",
+    "discrepancy": "Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs",
+    "timestamp": "01/04/2026, 1300hrs",
+    "retrigger": false,
+    "medicalDecision":"Standard",
+    "medicalDecisionDate":"01/04/2026",
+    "medicalDiscrepancy":"-",
+    "medicalRemarks":"-"
+  },
+   "summary": [
+    {
+      "memberType": "proposer",
+      "proposerSummary": {
+        "firstName": "Rudra",
+        "middleName": "Kumar",
+        "lastName": "Sangha",
+        "dob": "22-02-1992",
+        "age": 34.0,
+        "gender": "Male",
+        "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
+        "caseStatus": "Green Case",
+        "occupation":"Salaried",
+        "annualIncome":"5000000",
+        "email":"test@ipru.com",
+        "mobile":"9876543210"
+      }},{"memberType": "lifeassured1","lifeassured1Summary": {
+        "firstName": "Neha",
+        "middleName": "Rudra",
+        "lastName": "Sangha",
+        "dob": "22-02-1992",
+        "age": 34.0,
+        "gender": "Male",
+        "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
+        "caseStatus": "Green Case",
+        "occupation":"Salaried",
+        "annualIncome":"5000000",
+        "email":"test@ipru.com",
+        "mobile":"9876543210"
+      }
+    }],
+  "sections": [
+    {
+      "title": "Complete Blood Count (CBC)",
+      "rows": [
+        { "parameter": "Haemoglobin", "value": "14.5", "unit": "g/dL", "normalRange": "13.0-17.0", "status": "normal" },
+        { "parameter": "RBC Count", "value": "5.2", "unit": "million/uL", "normalRange": "4.5-5.5", "status": "normal" },
+        { "parameter": "WBC Count", "value": "7.8", "unit": "thousand/uL", "normalRange": "4.0-11.0", "status": "normal" },
+        { "parameter": "Platelet Count", "value": "480", "unit": "thousand/uL", "normalRange": "150-400", "status": "abnormal" },
+        { "parameter": "Hematocrit", "value": "42", "unit": "%", "normalRange": "40-50", "status": "normal" },
+        { "parameter": "MCV", "value": "88", "unit": "fL", "normalRange": "80-100", "status": "normal" },
+        { "parameter": "MCH", "value": "29", "unit": "pg", "normalRange": "27-31", "status": "normal" },
+        { "parameter": "MCHC", "value": "38", "unit": "g/dL", "normalRange": "32-36", "status": "abnormal" },
+        { "parameter": "Neutrophils", "value": "62", "unit": "%", "normalRange": "40-70", "status": "normal" },
+        { "parameter": "Lymphocytes", "value": "30", "unit": "%", "normalRange": "20-40", "status": "normal" },
+        { "parameter": "Monocytes", "value": "10", "unit": "%", "normalRange": "2-8", "status": "abnormal" },
+        { "parameter": "Eosinophils", "value": "2", "unit": "%", "normalRange": "1-4", "status": "normal" }
+      ]
+    },
+    {
+      "title": "Lipid Profile",
+      "rows": []
+    },
+    {
+      "title": "Liver Function Test (LFT)",
+      "rows": []
+    },
+    {
+      "title": "Kidney Function Test (KFT)",
+      "rows": []
+    },
+    {
+      "title": "Diabetes Panel",
+      "rows": []
+    },
+    {
+      "title": "Thyroid Function",
+      "rows": []
+    },
+    {
+      "title": "Cardiac Markers",
+      "rows": []
+    },
+    {
+      "title": "Vitamin & Minerals",
+      "rows": []
+    }
+  ]
+}

@@ -2,7 +2,7 @@ import { Box, Container, Divider, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTabs from "../../../components/ui/Tabs/Tabs"
 import { applicantTabs } from "../../../utils/constant"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import type { ApplicantTab, RiskCard } from "../../../types/drs.types"
 import { HeartIcon, InfoIcon, TickIcon, WalletIcon } from "../../../icons/Icons"
 import { centerFlex, columnFlex, modalTitleStyles } from "../../../utils/styles"
@@ -77,6 +77,10 @@ const Summary = () => {
     const [open, setOpen] = useState(false);
     const [selectedCard, setSelectedCard] = useState<RiskCard | null>(null);
     const [selectedPhotoSrc, setSelectedPhotoSrc] = useState("");
+
+    useEffect(() => {
+        localStorage.setItem("drsSelectedApplicantTab", applicantTab);
+    }, [applicantTab]);
 
     const visibleTabs = applicantTabs.filter(tab =>
         availableMemberTypes?.includes(tab.key)
@@ -216,7 +220,7 @@ const Summary = () => {
                                         <Typography
                                             component="span"
                                             sx={{
-                                                fontSize: "15px",
+                                                fontSize: "14px",
                                                 fontWeight: 700,
                                                 color: "#20242c",
                                                 fontFamily: "Mulish, sans-serif",
@@ -368,7 +372,7 @@ const Summary = () => {
                                         <Box sx={{ ...columnFlex }}>
                                             <Typography
                                                 sx={{
-                                                    fontSize: "20px",
+                                                    fontSize: "16px",
                                                     fontWeight: 600,
                                                     color: "#161616",
                                                 }}
@@ -444,7 +448,7 @@ const Summary = () => {
                                                 sx={{
                                                     color: "#35A224",
                                                     fontWeight: 600,
-                                                    fontSize: "18px",
+                                                    fontSize: "16px",
                                                     pr: 0.5,
                                                 }}
                                             >
@@ -455,7 +459,7 @@ const Summary = () => {
                                                 sx={{
                                                     color: "#161616",
                                                     fontWeight: 600,
-                                                    fontSize: "18px",
+                                                    fontSize: "16px",
                                                 }}
                                             >
                                                 - {underwriting?.breDecision.category} ({underwriting?.breDecision.coverage})

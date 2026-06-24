@@ -33,7 +33,8 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
   ],
   RETAIL_CPT_POOL: [
     "applicationOverview",
-    "requirementManagement",
+    "quickLinks",
+    "uwToolkit"
   ],
   RETAIL_PIVV_POOL: [
     "applicationOverview",
