@@ -100,6 +100,18 @@ export type MedicalResponse = {
   sections: MedicalSection[];
 };
 
+export type MedicalSubmitRequest = {
+  applicationId: string;
+  roleType: string;
+  memberType: ApplicantTab;
+  sections: MedicalSection[];
+};
+
+export type MedicalSubmitResponse = {
+  success: boolean;
+  message: string;
+};
+
 export interface BreDecisionResponse {
   decision: string | null;
   status: string | null;

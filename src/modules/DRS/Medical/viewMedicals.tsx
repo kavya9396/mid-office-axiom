@@ -1,16 +1,19 @@
-import { Box, Container, TextField, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import BackButton from "../../../components/layout/BackButton";
 import BreDecision from "../DRS_Accordions/BreDecision";
-import ExpandAllAccordions from "../../../components/layout/ExpandAllAccordions";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
+import CustomSelect from "../../../components/ui/Select/Select";
+import CustomButton from "../../../components/ui/Button/Button";
+import CustomTextField from "../../../components/ui/TextField/TextField";
 import { applicantTabs } from "../../../utils/constant";
 import type {
 	ApplicantTab,
 	DRSRequest,
+	MedicalSubmitRequest,
 	MedicalResponse,
 	MedicalSection,
 	MedicalStatus,
@@ -22,6 +25,7 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { getDRSPath } from "../../../routes/routes";
 import { useAppDispatch } from "../../../store/hooks";
 import { medicalThunk } from "../../../store/thunks/medicalThunk";
+import { medicalSubmitThunk } from "../../../store/thunks/medicalSubmitThunk";
 
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
 const getStoredApplicantTab = () => (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
@@ -123,10 +127,14 @@ const ViewMedicals = () => {
 
 	const [medicalData, setMedicalData] = useState<MedicalResponse | null>(null);
 	const [editableSections, setEditableSections] = useState<MedicalSection[]>([]);
+	const [initialSections, setInitialSections] = useState<MedicalSection[]>([]);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
 	const [expandedAccordions, setExpandedAccordions] = useState<Record<string, boolean>>({});
+	const [selectedSection, setSelectedSection] = useState<string>("");
+	const [submitLoading, setSubmitLoading] = useState(false);
+	const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
 	const roleType = getRoleType();
 	const safeBusinessType = businessType ?? "retail";
@@ -134,6 +142,20 @@ const ViewMedicals = () => {
 	const isApplicationIdMissing = !safeApplicationId;
 
 	const sectionList = editableSections;
+	const editedSectionTitles = useMemo(
+		() =>
+			sectionList
+				.filter((section) => {
+					const initialSection = initialSections.find((item) => item.title === section.title);
+					if (!initialSection) {
+						return false;
+					}
+
+					return JSON.stringify(section.rows) !== JSON.stringify(initialSection.rows);
+				})
+				.map((section) => section.title),
+		[initialSections, sectionList]
+	);
 
 	useEffect(() => {
 		if (isApplicationIdMissing) {
@@ -162,6 +184,7 @@ const ViewMedicals = () => {
 
 				setMedicalData(response);
 				setEditableSections(hydratedSections);
+				setInitialSections(hydratedSections);
 
 				const initialExpandedState = hydratedSections.reduce<Record<string, boolean>>((acc, section) => {
 					acc[section.title] = false;
@@ -210,16 +233,17 @@ const ViewMedicals = () => {
 
 	const applicantData = getApplicantHeaderData(selectedApplicantSummary);
 
-	const isAllExpanded =
-		sectionList.length
-			? sectionList.every((section) => expandedAccordions[section.title])
-			: false;
-
 	const handleMedicalValueChange = (
 		sectionTitle: string,
 		rowIndex: number,
 		nextValue: string
 	) => {
+		setSubmitMessage(null);
+		setExpandedAccordions((previous) => ({
+			...previous,
+			[sectionTitle]: true,
+		}));
+
 		setEditableSections((previousSections) =>
 			previousSections.map((section) => {
 				if (section.title !== sectionTitle) {
@@ -259,7 +283,7 @@ const ViewMedicals = () => {
 				const isInvalidNumber = parsedRange !== null && Number.isNaN(Number(value));
 
 				return (
-					<TextField
+					<CustomTextField
 						value={value}
 						onChange={(event) => {
 							handleMedicalValueChange(sectionTitle, rowIndex, event.target.value);
@@ -309,27 +333,67 @@ const ViewMedicals = () => {
 		},
 	];
 
-	const handleExpandAll = () => {
-		if (!sectionList.length) return;
-
+	const handleSectionFilterChange = (sectionTitle: string) => {
+		setSubmitMessage(null);
+		setSelectedSection(sectionTitle);
 		setExpandedAccordions(
 			sectionList.reduce<Record<string, boolean>>((acc, section) => {
-				acc[section.title] = true;
+				acc[section.title] = sectionTitle !== "" && section.title === sectionTitle;
 				return acc;
 			}, {})
 		);
 	};
 
-	const handleCollapseAll = () => {
-		if (!sectionList.length) return;
+	const handleSubmit = async () => {
+		if (!safeApplicationId) {
+			setSubmitMessage("Application ID is missing.");
+			return;
+		}
 
-		setExpandedAccordions(
-			sectionList.reduce<Record<string, boolean>>((acc, section) => {
-				acc[section.title] = false;
-				return acc;
-			}, {})
-		);
+		try {
+			setSubmitLoading(true);
+			setSubmitMessage(null);
+
+			const payload: MedicalSubmitRequest = {
+				applicationId: safeApplicationId,
+				roleType,
+				memberType: currentApplicantTab,
+				sections: sectionList,
+			};
+
+			const response = await dispatch(medicalSubmitThunk(payload)).unwrap();
+			setInitialSections(
+				sectionList.map((section) => ({
+					...section,
+					rows: section.rows.map((row) => ({ ...row })),
+				}))
+			);
+			setSubmitMessage(response.message || "Medical details submitted successfully.");
+		} catch (err) {
+			setSubmitMessage(err instanceof Error ? err.message : "Failed to submit medical details.");
+		} finally {
+			setSubmitLoading(false);
+		}
 	};
+
+	const sectionOptions = useMemo(
+		() =>
+			sectionList.map((section) => ({
+				label: section.title,
+				value: section.title,
+			})),
+		[sectionList]
+	);
+
+	const visibleSections = useMemo(
+		() =>
+			sectionList.filter(
+				(section) =>
+					editedSectionTitles.includes(section.title) ||
+					(selectedSection !== "" && section.title === selectedSection)
+			),
+		[editedSectionTitles, sectionList, selectedSection]
+	);
 
 	return (
 		<Container disableGutters sx={{ pb: 4 }}>
@@ -404,29 +468,31 @@ const ViewMedicals = () => {
 				<CustomTabs
 					tabs={visibleTabs}
 					value={currentApplicantTab}
-					onChange={setActiveApplicantTab}
+					onChange={(value) => {
+						setActiveApplicantTab(value);
+						localStorage.setItem("drsSelectedApplicantTab", value);
+					}}
 				/>
 			</Box>
 
-			<CustomAccordion title="Applicant Profile" defaultExpanded>
+			<CustomAccordion title="Applicant Profile">
 				<Box
 					sx={{
-						p: 2,
+						p: 1.5,
 						bgcolor: "#F8FAFC",
 						borderRadius: "12px",
-						display: "grid",
-						gridTemplateColumns: { xs: "1fr", md: "110px 1fr" },
-						gap: 2,
+						display: "flex",
+						alignItems: "center",
+						gap: 1.5,
 					}}
 				>
 					<Box
 						sx={{
-							width: 92,
-							height: 92,
+							width: 52,
+							height: 52,
 							borderRadius: "50%",
 							overflow: "hidden",
 							bgcolor: "#E5E7EB",
-							justifySelf: { xs: "center", md: "start" },
 						}}
 					>
 						{applicantData.profileImage && (
@@ -440,36 +506,19 @@ const ViewMedicals = () => {
 					</Box>
 
 					<Box>
-						<Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2 }}>
-							<Box>
-								<Typography sx={{ fontSize: 16, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>
-									{applicantData.name}
-								</Typography>
-								<Typography sx={{ fontSize: 13, color: "#6B7280" }}>
-									DOB: {applicantData.dob}
-								</Typography>
-							</Box>
-							<Typography
-								sx={{
-									fontSize: 12,
-									fontWeight: 700,
-									color: "#0B4F8C",
-									bgcolor: "#E6F3FF",
-									borderRadius: "999px",
-									px: 1.5,
-									py: 0.5,
-								}}
-							>
-								{applicantData.gender}, {applicantData.age} Years
-							</Typography>
-						</Box>
+						<Typography sx={{ fontSize: 15, fontWeight: 700, color: "#111827", lineHeight: 1.2 }}>
+							{applicantData.name}
+						</Typography>
+						<Typography sx={{ fontSize: 12, color: "#6B7280" }}>
+							{applicantData.gender}, {applicantData.age} Years | DOB: {applicantData.dob}
+						</Typography>
 
 						<Box
 							sx={{
-								mt: 2,
+								mt: 1.5,
 								display: "grid",
 								gridTemplateColumns: { xs: "1fr", md: "repeat(4, 1fr)" },
-								gap: 2,
+								gap: 1.5,
 							}}
 						>
 							<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
@@ -511,20 +560,52 @@ const ViewMedicals = () => {
 			</CustomAccordion>
 
 			{!loading && sectionList.length > 0 && (
-				<Box sx={{ mt: 2 }}>
-					<ExpandAllAccordions
-						onExpandAll={handleExpandAll}
-						onCollapseAll={handleCollapseAll}
-						isAllExpanded={isAllExpanded}
+				<Box
+					sx={{
+						mt: 2,
+						mb: 2,
+						display: "grid",
+						gridTemplateColumns: { xs: "1fr", md: "320px auto" },
+						gap: 2,
+						alignItems: "end",
+					}}
+				>
+					<CustomSelect
+						label="Select Medical Section"
+						value={selectedSection}
+						onChange={handleSectionFilterChange}
+						options={sectionOptions}
+						placeholder="Choose section"
 					/>
+					<Box sx={{ display: "flex", justifyContent: { xs: "flex-start", md: "flex-end" } }}>
+						<CustomButton
+							onClick={handleSubmit}
+							disabled={submitLoading || isApplicationIdMissing || sectionList.length === 0}
+							sx={{ minWidth: 120, borderRadius: "999px" }}
+						>
+							{submitLoading ? "Submitting..." : "Submit"}
+						</CustomButton>
+					</Box>
 				</Box>
+			)}
+
+			{submitMessage && (
+				<Typography sx={{ color: submitMessage.toLowerCase().includes("failed") ? "#DE2C3B" : "#0F8A3D", mb: 2 }}>
+					{submitMessage}
+				</Typography>
 			)}
 
 			{loading ? (
 				<Typography sx={{ color: "#6B7280" }}>Loading medical details...</Typography>
 			) : (
 				<Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-					{sectionList.map((section) => {
+					{selectedSection === "" && sectionList.length > 0 && (
+						<Typography sx={{ color: "#6B7280" }}>
+							Select a medical section from dropdown to view tests.
+						</Typography>
+					)}
+
+					{visibleSections.map((section) => {
 						const abnormalCount = section.rows.filter((row) => row.status === "abnormal").length;
 
 						return (
@@ -533,10 +614,12 @@ const ViewMedicals = () => {
 								title={section.title}
 								expanded={Boolean(expandedAccordions[section.title])}
 								onChange={(expanded) => {
-									setExpandedAccordions((prev) => ({
-										...prev,
-										[section.title]: expanded,
-									}));
+									setExpandedAccordions(
+										sectionList.reduce<Record<string, boolean>>((acc, currentSection) => {
+											acc[currentSection.title] = currentSection.title === section.title ? expanded : false;
+											return acc;
+										}, {})
+									);
 								}}
 								titleFontSize={14}
 								chip={
