@@ -36,7 +36,7 @@ import { useNavigate } from "react-router-dom";
 import FilterTable from "./FilterTable";
 import { getDRSPath } from "../../routes/routes";
 import SearchApplication from "./SearchApplication";
-import { toFilterComparableValue } from "../../utils/filter.ts";
+import { toFilterComparableValue } from "../../utils/filter";
 
 type SortDirection = "asc" | "desc";
 

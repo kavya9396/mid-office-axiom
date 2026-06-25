@@ -112,6 +112,27 @@ export type MedicalSubmitResponse = {
   message: string;
 };
 
+export type MerFormFieldValue = {
+  id: string;
+  section: string;
+  type: string;
+  field: string;
+  value: string;
+};
+
+export type MerSubmitRequest = {
+  applicationId: string;
+  roleType: string;
+  memberType: ApplicantTab;
+  testCode: string;
+  fields: MerFormFieldValue[];
+};
+
+export type MerSubmitResponse = {
+  success: boolean;
+  message: string;
+};
+
 export interface BreDecisionResponse {
   decision: string | null;
   status: string | null;
