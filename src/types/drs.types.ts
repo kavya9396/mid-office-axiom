@@ -484,6 +484,19 @@ export interface ApplicantEditForm {
   permanentPincode: string;
 }
 
+export interface ApplicantProfileSubmitRequest {
+  applicationId: string;
+  roleType: string;
+  memberType: ApplicantTab;
+  updatedDetails: Partial<ApplicantEditForm>;
+}
+
+export interface ApplicantProfileSubmitResponse {
+  success: boolean;
+  message: string;
+  updatedDetails?: Partial<ApplicantEditForm>;
+}
+
 export type AuditTrailRow = {
   dateTime: string;
   fromPool: string;

@@ -1,5 +1,6 @@
 import {
   FormControl,
+  FormHelperText,
   Select,
   MenuItem,
   Typography,
@@ -22,6 +23,8 @@ type CustomSelectProps = {
   renderValue?: (value: string) => React.ReactNode;
 
   fullWidth?: boolean;
+  error?: boolean;
+  helperText?: string;
 };
 
 export default function CustomSelect({
@@ -32,6 +35,8 @@ export default function CustomSelect({
   placeholder = "Select",
   renderValue,
   fullWidth = true,
+  error = false,
+  helperText,
 }: CustomSelectProps) {
   const handleChange = (e: SelectChangeEvent) => {
     onChange?.(e.target.value);
@@ -64,7 +69,7 @@ export default function CustomSelect({
         </Typography>
       )}
 
-      <FormControl fullWidth={fullWidth}>
+      <FormControl fullWidth={fullWidth} error={error}>
         <Select
           value={value ?? ""}
           displayEmpty
@@ -107,6 +112,7 @@ export default function CustomSelect({
             </MenuItem>
           ))}
         </Select>
+        {!!helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>
     </div>
   );

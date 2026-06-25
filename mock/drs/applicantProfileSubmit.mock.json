@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "message": "Applicant profile updated successfully",
+  "updatedDetails": {
+    "firstName": "Rohan",
+    "middleName": "K",
+    "lastName": "Sharma",
+    "dob": "18-02-1990",
+    "gender": "Male",
+    "nationality": "Indian",
+    "panNumber": "ABCDE1234F",
+    "identityProofType": "PAN Card",
+    "identityProofNumber": "ABCDE1234F",
+    "addressProof": "Aadhaar Card",
+    "communicationAddressLine1": "Flat 101",
+    "communicationAddressLine2": "Palm Residency",
+    "communicationAddressLine3": "Sector 45",
+    "communicationCity": "Mumbai",
+    "communicationState": "Maharashtra",
+    "communicationCountry": "India",
+    "communicationPincode": "400001",
+    "permanentAddressLine1": "House 12",
+    "permanentAddressLine2": "Lake View",
+    "permanentAddressLine3": "Baner",
+    "permanentCity": "Pune",
+    "permanentState": "Maharashtra",
+    "permanentCountry": "India",
+    "permanentPincode": "411045"
+  }
+}
