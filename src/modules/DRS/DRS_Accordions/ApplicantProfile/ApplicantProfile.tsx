@@ -3,7 +3,12 @@ import CustomButton from "../../../../components/ui/Button/Button"
 import CustomTabs from "../../../../components/ui/Tabs/Tabs"
 import { AddressProofOptions, applicantInfoTabs, CountryOptions, GenderOptions, IDProofOptions, NationalityOptions, StateOptions } from "../../../../utils/constant"
 import { useMemo, useState } from "react"
-import type { ApplicantEditForm, ApplicantInfoTab, SummaryResponse } from "../../../../types/drs.types"
+import type {
+    ApplicantEditForm,
+    ApplicantInfoTab,
+    ApplicantProfileSubmitRequest,
+    SummaryResponse,
+} from "../../../../types/drs.types"
 import CustomDialog from "../../../../components/ui/Dialog/Dialog"
 import { columnFlex, labelStyles, modalTitleStyles } from "../../../../utils/styles"
 import CustomTextField from "../../../../components/ui/TextField/TextField"
@@ -16,6 +21,9 @@ import Nominee from "./Nominee"
 import Generic from "./Generic"
 import Eia from "./Eia"
 import { formatDOB } from "../../../../utils/helpers"
+import { useAppDispatch } from "../../../../store/hooks"
+import { applicantProfileSubmitThunk } from "../../../../store/thunks/applicantProfileSubmitThunk"
+import { useParams } from "react-router-dom"
 
 export interface ApplicantProfileProps {
     profile?: SummaryResponse;
@@ -27,6 +35,8 @@ type FormField = {
     type?: "text" | "date" | "select";
     options?: { label: string; value: string }[];
 };
+
+type FormErrors = Partial<Record<keyof ApplicantEditForm, string>>;
 
 const personalKycFields: FormField[] = [
     { name: "firstName", label: "First Name" },
@@ -107,6 +117,36 @@ const addressFields: FormField[] = [
     { name: "permanentPincode", label: "Perm. Pincode" },
 ];
 
+const allDialogFields: FormField[] = [...personalKycFields, ...addressFields];
+
+const idProofNumberValidationMap: Record<string, { regex: RegExp; message: string }> = {
+    "PAN Card": {
+        regex: /^[A-Z]{5}[0-9]{4}[A-Z]$/,
+        message: "Enter a valid PAN number (e.g. ABCDE1234F)",
+    },
+    "Voter ID": {
+        regex: /^[A-Z]{3}[0-9]{7}$/i,
+        message: "Enter a valid Voter ID (e.g. ABC1234567)",
+    },
+    "Aadhaar Card": {
+        regex: /^\d{12}$/,
+        message: "Enter a valid Aadhaar number (12 digits)",
+    },
+    "Passport": {
+        regex: /^[A-PR-WY][1-9]\d{6}$/i,
+        message: "Enter a valid Passport number (e.g. A1234567)",
+    },
+    "Driving's License": {
+        regex: /^[A-Z]{2}[0-9]{2}[0-9A-Z]{9,13}$/i,
+        message: "Enter a valid Driving License number",
+    },
+};
+
+const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+
+const allowedIdProofValues = new Set(IDProofOptions.map((option) => option.value));
+const allowedAddressProofValues = new Set(AddressProofOptions.map((option) => option.value));
+
 const buildFormData = (
     profile?: SummaryResponse
 ): ApplicantEditForm => ({
@@ -136,6 +176,53 @@ const buildFormData = (
     permanentPincode: profile?.permanentAddressDetails?.pincode ?? "",
 });
 
+const applyUpdatedDetailsToProfile = (
+    profile: SummaryResponse,
+    updatedDetails: Partial<ApplicantEditForm>
+): SummaryResponse => ({
+    ...profile,
+    proposerSummary: {
+        ...profile.proposerSummary,
+        firstName: updatedDetails.firstName ?? profile.proposerSummary.firstName,
+        middleName: updatedDetails.middleName ?? profile.proposerSummary.middleName,
+        lastName: updatedDetails.lastName ?? profile.proposerSummary.lastName,
+        dob: updatedDetails.dob ?? profile.proposerSummary.dob,
+    },
+    applicantDetails: {
+        ...profile.applicantDetails,
+        dateOfBirth: updatedDetails.dob ?? profile.applicantDetails.dateOfBirth,
+        gender: updatedDetails.gender ?? profile.applicantDetails.gender,
+        nationality: updatedDetails.nationality ?? profile.applicantDetails.nationality,
+    },
+    kycDetails: {
+        ...profile.kycDetails,
+        panNumber: updatedDetails.panNumber ?? profile.kycDetails.panNumber,
+        identityProofType: updatedDetails.identityProofType ?? profile.kycDetails.identityProofType,
+        identityProofNumber: updatedDetails.identityProofNumber ?? profile.kycDetails.identityProofNumber,
+        addressProof: updatedDetails.addressProof ?? profile.kycDetails.addressProof,
+    },
+    communicationAddressDetails: {
+        ...profile.communicationAddressDetails,
+        addressLine1: updatedDetails.communicationAddressLine1 ?? profile.communicationAddressDetails.addressLine1,
+        addressLine2: updatedDetails.communicationAddressLine2 ?? profile.communicationAddressDetails.addressLine2,
+        addressLine3: updatedDetails.communicationAddressLine3 ?? profile.communicationAddressDetails.addressLine3,
+        city: updatedDetails.communicationCity ?? profile.communicationAddressDetails.city,
+        state: updatedDetails.communicationState ?? profile.communicationAddressDetails.state,
+        country: updatedDetails.communicationCountry ?? profile.communicationAddressDetails.country,
+        pincode: updatedDetails.communicationPincode ?? profile.communicationAddressDetails.pincode,
+    },
+    permanentAddressDetails: {
+        ...profile.permanentAddressDetails,
+        addressLine1: updatedDetails.permanentAddressLine1 ?? profile.permanentAddressDetails.addressLine1,
+        addressLine2: updatedDetails.permanentAddressLine2 ?? profile.permanentAddressDetails.addressLine2,
+        addressLine3: updatedDetails.permanentAddressLine3 ?? profile.permanentAddressDetails.addressLine3,
+        city: updatedDetails.permanentCity ?? profile.permanentAddressDetails.city,
+        state: updatedDetails.permanentState ?? profile.permanentAddressDetails.state,
+        country: updatedDetails.permanentCountry ?? profile.permanentAddressDetails.country,
+        pincode: updatedDetails.permanentPincode ?? profile.permanentAddressDetails.pincode,
+    },
+});
+
 export const SectionCard = ({
     children,
 }: {
@@ -154,20 +241,65 @@ export const SectionCard = ({
 
 const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     const roleType = localStorage.getItem("roleType") ?? "";
+    const { applicationNumber } = useParams<{ applicationNumber: string }>();
+    const dispatch = useAppDispatch();
     const [applicantInfoTab, setApplicantInfoTab] = useState<ApplicantInfoTab>("personalKyc");
     const [openEditDialog, setOpenEditDialog] = useState(false);
+    const [submitLoading, setSubmitLoading] = useState(false);
+    const [submitError, setSubmitError] = useState<string | null>(null);
+    const [savedProfile, setSavedProfile] = useState<SummaryResponse | undefined>(undefined);
+
+    const displayProfile =
+        savedProfile && profile && savedProfile.memberType === profile.memberType
+            ? savedProfile
+            : profile;
 
     const initialFormData = useMemo(
-        () => buildFormData(profile),
-        [profile]
+        () => buildFormData(displayProfile),
+        [displayProfile]
     );
 
     const [formData, setFormData] = useState<ApplicantEditForm>(initialFormData);
+    const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
+
+    const validateForm = () => {
+        const errors: FormErrors = {};
+
+        allDialogFields.forEach((field) => {
+            const value = String(formData[field.name] ?? "").trim();
+            if (!value) {
+                errors[field.name] = `${field.label} is required`;
+            }
+        });
+
+        if (formData.panNumber.trim() && !panRegex.test(formData.panNumber.trim().toUpperCase())) {
+            errors.panNumber = "Enter a valid PAN number (e.g. ABCDE1234F)";
+        }
+
+        if (formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
+            errors.identityProofType = "Select a valid Identity Proof";
+        }
+
+        if (formData.addressProof && !allowedAddressProofValues.has(formData.addressProof)) {
+            errors.addressProof = "Select a valid Address Proof";
+        }
+
+        const selectedProofValidation = idProofNumberValidationMap[formData.identityProofType];
+        if (selectedProofValidation && formData.identityProofNumber.trim()) {
+            if (!selectedProofValidation.regex.test(formData.identityProofNumber.trim())) {
+                errors.identityProofNumber = selectedProofValidation.message;
+            }
+        }
+
+        setFieldErrors(errors);
+        return Object.keys(errors).length === 0;
+    };
 
     const handleOpenEdit = () => {
         // initializeFormFromDisplay();
-        // setFieldErrors({});
-        setFormData(buildFormData(profile));
+        setFieldErrors({});
+        setSubmitError(null);
+        setFormData(buildFormData(displayProfile));
         setOpenEditDialog(true);
     };
 
@@ -179,9 +311,89 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
             ...prev,
             [field]: value,
         }));
+
+        setFieldErrors((prev) => {
+            if (!prev[field]) {
+                return prev;
+            }
+
+            const nextErrors = { ...prev };
+            delete nextErrors[field];
+            return nextErrors;
+        });
+
+        if (field === "identityProofType" && fieldErrors.identityProofNumber) {
+            setFieldErrors((prev) => {
+                const nextErrors = { ...prev };
+                delete nextErrors.identityProofNumber;
+                return nextErrors;
+            });
+        }
     };
 
-    const handleSave = () => {
+    const handleSave = async () => {
+        const isValid = validateForm();
+        if (!isValid) {
+            return;
+        }
+
+        if (!applicationNumber) {
+            setSubmitError("Application ID is missing");
+            return;
+        }
+
+        const baselineData = buildFormData(displayProfile);
+        const updatedDetails = Object.entries(formData).reduce<Partial<ApplicantEditForm>>(
+            (acc, [key, value]) => {
+                const formKey = key as keyof ApplicantEditForm;
+                if (value !== baselineData[formKey]) {
+                    acc[formKey] = value;
+                }
+                return acc;
+            },
+            {}
+        );
+
+        if (Object.keys(updatedDetails).length === 0) {
+            setOpenEditDialog(false);
+            return;
+        }
+
+        try {
+            setSubmitLoading(true);
+            setSubmitError(null);
+
+            const payload: ApplicantProfileSubmitRequest = {
+                applicationId: applicationNumber,
+                roleType,
+                memberType: displayProfile?.memberType ?? "proposer",
+                updatedDetails,
+            };
+
+            const response = await dispatch(applicantProfileSubmitThunk(payload)).unwrap();
+
+            const serverUpdatedDetails = response.updatedDetails;
+            const finalUpdatedDetails = {
+                ...(serverUpdatedDetails ?? {}),
+                ...updatedDetails,
+            };
+
+            setSavedProfile((prevProfile) => {
+                if (!prevProfile) {
+                    if (!displayProfile) {
+                        return prevProfile;
+                    }
+                    return applyUpdatedDetailsToProfile(displayProfile, finalUpdatedDetails);
+                }
+                return applyUpdatedDetailsToProfile(prevProfile, finalUpdatedDetails);
+            });
+
+            setOpenEditDialog(false);
+        } catch (error) {
+            setSubmitError(error instanceof Error ? error.message : "Failed to save applicant profile");
+        } finally {
+            setSubmitLoading(false);
+        }
 
     }
 
@@ -193,6 +405,8 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
                     value={formData[field.name]}
                     options={field.options ?? []}
                     onChange={(value) => handleInputChange(field.name, value)}
+                    error={Boolean(fieldErrors[field.name])}
+                    helperText={fieldErrors[field.name]}
                 />
             );
         }
@@ -208,6 +422,8 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
                         borderRadius: "10px",
                     }}
                     value={formData[field.name]}
+                    error={Boolean(fieldErrors[field.name])}
+                    helperText={fieldErrors[field.name]}
                     onChange={(e) =>
                         handleInputChange(field.name, e.target.value)
                     }
@@ -217,13 +433,13 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     };
 
     const tabComponents: Record<ApplicantInfoTab, React.ReactNode> = {
-        personalKyc: <PersonalKYC profile={profile} />,
-        contactAddress: <ContactAndAddress profile={profile} />,
-        financialProfession: <FinanceAndProfession profile={profile} />,
-        medicalLifestyle: <MedicalLifestyle profile={profile} />,
-        nominee: <Nominee profile={profile} />,
-        generic: <Generic profile={profile} />,
-        eia: <Eia profile={profile} />,
+        personalKyc: <PersonalKYC profile={displayProfile} />,
+        contactAddress: <ContactAndAddress profile={displayProfile} />,
+        financialProfession: <FinanceAndProfession profile={displayProfile} />,
+        medicalLifestyle: <MedicalLifestyle profile={displayProfile} />,
+        nominee: <Nominee profile={displayProfile} />,
+        generic: <Generic profile={displayProfile} />,
+        eia: <Eia profile={displayProfile} />,
     };
 
     return (
@@ -256,7 +472,11 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
 
             <CustomDialog
                 open={openEditDialog}
-                onClose={() => setOpenEditDialog(false)}
+                onClose={() => {
+                    if (!submitLoading) {
+                        setOpenEditDialog(false)
+                    }
+                }}
                 maxWidth="md"
                 title={
                     <Typography
@@ -271,13 +491,19 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
                 actions={
                     <CustomButton
                         onClick={handleSave}
+                        disabled={submitLoading}
                         sx={{ borderRadius: "50px", paddingX: "40px" }}
                     >
-                        Save
+                        {submitLoading ? "Saving..." : "Save"}
                     </CustomButton>
                 }
             >
                 <Box sx={{ backgroundColor: "#F6F6F6", borderRadius: 2, p: 2, ...columnFlex, gap: 2 }}>
+                    {submitError && (
+                        <Typography sx={{ color: "#DE2C3B", fontSize: "14px", fontWeight: 500 }}>
+                            {submitError}
+                        </Typography>
+                    )}
                     <Box>
                         <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>Personal & KYC</Typography>
                         <Box
