@@ -1,10 +1,12 @@
 import { createApiThunk } from "./createApiThunk";
+import { apiEndpoints } from "../../services/endpoints";
 import type { DRSRequest, MedicalResponse } from "../../types/drs.types";
 
 export const medicalThunk = createApiThunk<MedicalResponse, DRSRequest>(
-  "/mock/drs/medical.mock.json",
+  "medical/view",
   {
-    url: "/mock/drs/medical.mock.json",
+    url: apiEndpoints.medicalView,
     method: "POST",
+    fallbackUrl: "/mock/drs/medical.mock.json",
   },
 );

@@ -5,7 +5,7 @@ import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 import CustomButton from "../../components/ui/Button/Button";
 import { modalTitleStyles } from "../../utils/styles";
 import type { TableColumn, tableData } from "../../types/inbox";
-import { toFilterComparableValue } from "../../utils/filter.ts";
+import { toFilterComparableValue } from "../../utils/filter";
 
 type FilterTableProps = {
   openFilterDialog: boolean;
