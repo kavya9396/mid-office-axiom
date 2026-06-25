@@ -297,7 +297,7 @@
       "reason": "Reason 1",
       "fupCode": "fupCode 1",
       "description": "Additional identity verification required",
-      "status": "Raised",
+      "status": "Pending",
       "raisedDate": "2025-01-10",
       "raisedBy": "John Doe",
       "receivedDate": "2025-01-12",
