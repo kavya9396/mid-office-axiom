@@ -7,6 +7,7 @@ import { cvtDecisionOptions } from "../../../utils/constant";
 import CustomButton from "../../../components/ui/Button/Button";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useNavigate } from "react-router-dom";
+import RequirementManagementTable from "./RequirementManagementTable";
 
 const CVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
@@ -72,6 +73,15 @@ const CVTDecision = () => {
                                 options={cvtDecisionOptions}
                             />
                         </Box>
+
+                        {
+                            (decision === "Raise Requirements" || decision === "Reraise PIVV") && (
+                                <Box sx={{mt:2}}>
+                                    <RequirementManagementTable />
+                                </Box>
+                            )
+                        }
+
                     </Box>
                     <Box
                         sx={{

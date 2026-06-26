@@ -1,0 +1,42 @@
+{
+  "userId": "ipru1234",
+  "username": "Username",
+  "businessType": "retail",
+  "roleType": "mmtadmin",
+  "roles": [
+    {
+      "name": "Active Pools",
+      "pools": ["Grievance Pool"]
+    },
+    {
+      "name": "Pending Pools",
+      "pools": ["System Wait Pool", "AMR - Medical Pool"]
+    }
+  ],
+  "poolData": {
+    "Grievance Pool": [
+      {
+        "id": 1,
+        "applicationNo": "OB25175127",
+        "clientName": "Alpana",
+        "clientType": "Individual",
+        "planOpted": "GL1",
+        "premium": "12000",
+        "assignedTpa": "Test",
+        "grievanceRaisedDate": "25/06/2026",
+        "roleType": "Grievance Pool"
+      },
+      {
+        "id": 2,
+        "applicationNo": "OB25175128",
+        "clientName": "Anupriya",
+        "clientType": "Individual",
+        "planOpted": "GL1",
+        "premium": "12000",
+        "assignedTpa": "Test",
+        "grievanceRaisedDate": "25/06/2026",
+        "roleType": "Grievance Pool"
+      }
+    ]
+  }
+}

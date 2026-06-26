@@ -74,4 +74,25 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "reassignedUserId",
     "remarks",
   ],
+  "Grievance Pool":[
+    "applicationNo",
+    "clientName",
+    "clientType",
+    "planOpted",
+    "premium",
+    "assignedTpa",
+    "grievanceRaisedDate"
+  ],
+   "System Wait Pool": [
+    ...baseColumnsCops,
+    "lastPool",
+    "requirementRaisedDate",
+    "userId",
+  ],
+  "AMR - Medical Pool": [
+    ...baseColumnsCops,
+    "lastPool",
+    "requirementRaisedDate",
+    "userId",
+  ],
 };

@@ -379,6 +379,8 @@ export interface ContactDetails {
   emailId: string;
   alternateMobile: string;
   landlineNumber: string;
+  emailPref: string;
+  smsPref: string;
 }
 
 export interface ApplicantFinancialDetails {

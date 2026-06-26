@@ -35,6 +35,8 @@ const ContactAndAddress = ({ profile }: ApplicantProfileProps) => {
         { label: "Email ID", key: "emailId" },
         { label: "Alternate Mobile", key: "alternateMobile" },
         { label: "Landline Number", key: "landlineNumber" },
+        { label: "Email Pref", key: "emailPref" },
+        { label: "SMS Pref", key: "smsPref" },
     ]);
 
     return (

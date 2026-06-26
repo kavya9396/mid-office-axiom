@@ -13,6 +13,8 @@ import { GridSection } from "../../../components/layout/GridSection"
 import CustomButton from "../../../components/ui/Button/Button"
 import ApplicantProfile from "./ApplicantProfile/ApplicantProfile"
 import CustomDialog from "../../../components/ui/Dialog/Dialog"
+import { getFinancialPath, getMedicalPath } from "../../../routes/routes"
+import { useNavigate } from "react-router-dom"
 
 const riskDetails: RiskCard[] = [
     {
@@ -68,6 +70,7 @@ const riskDetails: RiskCard[] = [
 ];
 
 const Summary = () => {
+    const navigate = useNavigate();
     const { summary } = useSelector((state: RootState) => state.drs);
 
     const availableMemberTypes = summary?.map(item => item.memberType);
@@ -484,7 +487,7 @@ const Summary = () => {
                                 fontSize: "16px",
                                 fontWeight: 700,
                             }}
-                        //   onClick={() => navigate("/drs/medical")}
+                           onClick={() => navigate(getMedicalPath("retail", "OB25175127") )}
                         >
                             View Medicals
                         </CustomButton>
@@ -498,7 +501,7 @@ const Summary = () => {
                                 fontSize: "16px",
                                 fontWeight: 700,
                             }}
-                        //   onClick={() => navigate("/drs/financial")}
+                        onClick={() => navigate(getFinancialPath("retail", "OB25175127") )}
                         >
                             View Financial Details
                         </CustomButton>

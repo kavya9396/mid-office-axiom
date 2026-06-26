@@ -35,7 +35,7 @@
         "clientType": "Individual",
         "caseType": "New Business",
         "roleType": "CPT Pool",
-        "productType":"test"
+        "medicalReceivedDate":"","financialReceivedDate":"","poolTAT":""
       },
       {
         "id": 2,
@@ -46,7 +46,8 @@
         "premium": 1000,
         "clientType": "Individual",
         "caseType": "New Business",
-        "roleType": "CPT Pool"
+        "roleType": "CPT Pool",
+         "medicalReceivedDate":"","financialReceivedDate":"","poolTAT":""
       }
     ],"CVT Pool": [
       {
@@ -58,8 +59,7 @@
         "premium": 1000,
         "clientType": "Individual",
         "caseType": "New Business",
-        "roleType": "CVT Pool",
-        "productType":"test"
+        "roleType": "CVT Pool"
       },
       {
         "id": 2,
@@ -144,10 +144,10 @@
         "caseType": "New Business",
         "roleType": "Reconsideration Pool"
       }
-    ], "PIVV Pool": [
-      {
+    ],"PIVV Pool":[
+       {
         "id": 1,
-        "applicationNo": "OB25175127",
+      "applicationNo": "OB25175129",
         "channel": "AG",
         "sumAssured": 100000,
         "product": "Life Insurance",
@@ -155,35 +155,13 @@
         "clientType": "Individual",
         "caseType": "New Business",
         "roleType": "PIVV Pool",
-        "productType":"test"
-      },
-      {
-        "id": 2,
-        "applicationNo": "OB25175128",
-        "channel": "AG",
-        "sumAssured": 100000,
-        "product": "Life Insurance",
-        "premium": 1000,
-        "clientType": "Individual",
-        "caseType": "New Business",
-        "roleType": "PIVV Pool"
-      }
-    ], "Pre Issuance Servicing Pool": [
-      {
+        "pivvRaisedDate":"",
+        "userId":""
+       }
+    ],"Pre Issuance Servicing Pool":[
+       {
         "id": 1,
-        "applicationNo": "OB25175127",
-        "channel": "AG",
-        "sumAssured": 100000,
-        "product": "Life Insurance",
-        "premium": 1000,
-        "clientType": "Individual",
-        "caseType": "New Business",
-        "roleType": "Pre Issuance Servicing Pool",
-        "productType":"test"
-      },
-      {
-        "id": 2,
-        "applicationNo": "OB25175128",
+      "applicationNo": "OB25175127",
         "channel": "AG",
         "sumAssured": 100000,
         "product": "Life Insurance",
@@ -191,11 +169,10 @@
         "clientType": "Individual",
         "caseType": "New Business",
         "roleType": "Pre Issuance Servicing Pool"
-      }
-    ], "Exceptional Pool": [
-      {
-        "id": 1,
-        "applicationNo": "OB25175127",
+       }
+    ],"Exceptional Pool":[{
+      "id": 1,
+      "applicationNo": "OB25175127",
         "channel": "AG",
         "sumAssured": 100000,
         "product": "Life Insurance",
@@ -203,19 +180,67 @@
         "clientType": "Individual",
         "caseType": "New Business",
         "roleType": "Exceptional Pool",
-        "productType":"test"
-      },
-      {
-        "id": 2,
-        "applicationNo": "OB25175128",
+        "lastPool":"","userId":"",
+        "uwDecisionDate":"",
+        "poolTATCallingForLA":""
+    }],"Reject Pool":[{
+      "id": 1,
+      "applicationNo": "OB25175127",
         "channel": "AG",
         "sumAssured": 100000,
         "product": "Life Insurance",
         "premium": 1000,
         "clientType": "Individual",
         "caseType": "New Business",
-        "roleType": "Exceptional Pool"
-      }
-    ]
+        "roleType": "Reject Pool",
+        "lastPool":"", "userId":"",
+    "uwDecisionDate":"","laDecisionDate":""
+    }],"Issuance Pool":[{
+      "id": 1,
+      "applicationNo": "OB25175127",
+        "channel": "AG",
+        "sumAssured": 100000,
+        "product": "Life Insurance",
+        "premium": 1000,
+        "clientType": "Individual",
+        "caseType": "New Business",
+        "roleType": "Issuance Pool",
+        "uwDecisionDate":"","laDecisionDate":""
+    }],"Allocation Details":[{
+      "id": 1,
+      "applicationNo": "OB25175127",
+  "appliedSa":"",
+  "annualPremium":"",
+  "productType":"",
+  "drc":"",
+  "hniFlag":"",
+  "isMedical":"",
+        "roleType": "Allocation Details"
+    }],"Leave Management":[{
+      "id": 1,
+      "applicationNo": "OB25175127",
+       "uwName":"",
+    "userId":"",
+    "leaveDateFrom":"",
+    "leaveDateTill":"",
+    "leaveReason":"",
+    "caseToReassignToUw":"",
+    "reassignedUserId":"",
+        "roleType": "Leave Management"
+    }],"Reassign/Transfer Cases": [
+      {
+        "id": 1,
+    "applicationNo":"",
+    "nameOfProposer":"",
+    "nameOfLifeAssured":"",
+    "product":"",
+    "plan":"",
+    "appliedSa":"",
+    "caseStatus":"",
+    "caseInWhichPool":"",
+    "userId":"",
+    "reassignedUserId":"",
+    "remarks":""}
+  ]
   }
 }

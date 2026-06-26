@@ -83,6 +83,10 @@ export interface tableData {
   laDecisionDate?:string;
   medicalReceivedDate?:string;
   financialReceivedDate?:string;
+  clientName?:string;
+  planOpted?:string;
+  assignedTpa?:string;
+  grievanceRaisedDate?:string;
   
 }
 export type PoolItemProps = {

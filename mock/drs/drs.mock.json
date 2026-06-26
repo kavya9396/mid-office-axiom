@@ -94,7 +94,9 @@
         "mobileNumber": "9898989898",
         "emailId": "test@ipru.com",
         "alternateMobile": "-",
-        "landlineNumber": ""
+        "landlineNumber": "",
+        "emailPref":"-",
+        "smsPref":""
       },
       "applicantFinancialDetails": {
         "occupation": "Salaried",
@@ -354,5 +356,9 @@
     "decision": "Reject",
     "reason": "Customer not speaking",
     "userId": "sunil.sharma"
+  },
+  "cvtDecision":{
+    "remark":"",
+    "decision":"Accept"
   }
 }
