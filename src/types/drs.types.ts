@@ -145,6 +145,17 @@ export type MerSubmitResponse = {
   message: string;
 };
 
+export type ReferToITRequest = {
+  applicationId: string;
+  roleType: string;
+  decision: "Refer to IT";
+};
+
+export type ReferToITResponse = {
+  success: boolean;
+  message: string;
+};
+
 export interface BreDecisionResponse {
   decision: string | null;
   status: string | null;

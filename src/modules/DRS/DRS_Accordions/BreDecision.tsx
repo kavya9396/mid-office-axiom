@@ -10,6 +10,9 @@ import CustomButton from "../../../components/ui/Button/Button";
 import type { RootState } from "../../../store/store";
 import { useSelector } from "react-redux";
 import type { BreDecisionResponse } from "../../../types/drs.types";
+import { useAppContext } from "../../../hooks/useAppContext";
+import { useAppDispatch } from "../../../store/hooks";
+import { referToItThunk } from "../../../store/thunks/referToItThunk";
 
 type SelectedItem = {
   label: string;
@@ -34,14 +37,20 @@ const truncateText = (text: string, limit: number) => {
 };
 
 const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisionProps) => {
+  const dispatch = useAppDispatch();
+  const { applicationNumber } = useAppContext();
   const { breDecision: drsBreDecision } = useSelector((state: RootState) => state.drs);
   const breDecision = breDecisionOverride ?? drsBreDecision;
   const navigate = useNavigate();
+  const roleType = localStorage.getItem("roleType") ?? "";
+  const applicationId = applicationNumber ?? "";
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bredialogOpen, setBreDialogOpen] = useState(false);
   const [retriggerCount, setRetriggerCount] = useState(0);
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
+  const [referToItLoading, setReferToItLoading] = useState(false);
+  const [referToItError, setReferToItError] = useState<string | null>(null);
 
   const isBreSuccess = breDecision?.status?.toLowerCase() === "success";
 
@@ -124,6 +133,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
 
     if (nextCount >= 3) {
       setRetriggerCount(nextCount);
+      setReferToItError(null);
       setBreDialogOpen(true);
       return;
     }
@@ -131,6 +141,37 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
     setRetriggerCount(nextCount);
 
     // Call BRE retrigger API here
+  };
+
+  const handleReferToIt = async () => {
+    if (!applicationId || !roleType) {
+      setReferToItError("Missing application or role information.");
+      return;
+    }
+
+    try {
+      setReferToItLoading(true);
+      setReferToItError(null);
+
+      await dispatch(
+        referToItThunk({
+          applicationId,
+          roleType,
+          decision: "Refer to IT",
+        }),
+      ).unwrap();
+
+      setBreDialogOpen(false);
+      navigate("/retail/inbox", {
+        state: {
+          snackbarMessage: "Case has been referred to IT successfully",
+        },
+      });
+    } catch (error) {
+      setReferToItError(error instanceof Error ? error.message : "Failed to refer to IT.");
+    } finally {
+      setReferToItLoading(false);
+    }
   };
 
   const getDisplayText = (text: string) => {
@@ -299,12 +340,12 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
           actions={
             <CustomButton
               onClick={() => {
-                setBreDialogOpen(false);
-                navigate("/retail/inbox");
+                void handleReferToIt();
               }}
+              disabled={referToItLoading}
               sx={{ borderRadius: "50px", paddingX: "40px" }}
             >
-              Refer to IT
+              {referToItLoading ? "Submitting..." : "Refer to IT"}
             </CustomButton>
           }
         >
@@ -316,6 +357,17 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
           >
             You have exhausted the retriggered of BRE. Kindly refer this ticket to IT Team.
           </Typography>
+          {referToItError && (
+            <Typography
+              sx={{
+                mt: 1,
+                fontSize: "13px",
+                color: "#DE2C3B",
+              }}
+            >
+              {referToItError}
+            </Typography>
+          )}
         </CustomDialog>
       </CustomAccordion>
     </Container>

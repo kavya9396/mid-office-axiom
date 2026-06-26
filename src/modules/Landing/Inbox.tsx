@@ -1,5 +1,6 @@
-import { Box, Grid } from "@mui/material";
+import { Alert, Box, Grid, Snackbar } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import LeftPanel from "./LeftPanel";
 import type { RoleGroup, tableData } from "../../types/inbox";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
@@ -9,6 +10,8 @@ import { poolThunk } from "../../store/thunks/poolThunk";
 
 const Inbox = () => {
   const dispatch = useAppDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const [toggle, setToggle] = useState(false);
   const [roleList, setRoleList] = useState<RoleGroup[]>([]);
@@ -18,6 +21,8 @@ const Inbox = () => {
 
   const [poolData, setPoolData] = useState<Record<string, tableData[]>>({});
   const [poolCounts, setPoolCounts] = useState<Record<string, number>>({});
+  const snackbarMessage = (location.state as { snackbarMessage?: string } | null)?.snackbarMessage ?? "";
+  const snackbarOpen = Boolean(snackbarMessage);
 
   const didFetch = useRef(false);
 
@@ -137,6 +142,21 @@ const Inbox = () => {
           />
         </Box>
       </Grid>
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => navigate(location.pathname, { replace: true })}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => navigate(location.pathname, { replace: true })}
+          severity="success"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
