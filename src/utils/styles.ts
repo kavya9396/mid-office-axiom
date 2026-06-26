@@ -87,6 +87,14 @@ export const fieldStylesEdit = {
   "& .MuiOutlinedInput-root": {
     backgroundColor: "#fff",
     borderRadius: "10px",
+
+    "&:hover .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#9A2529",
+    },
+
+    "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+      borderColor: "#9A2529",
+    },
   },
 
   "& .MuiOutlinedInput-notchedOutline": {

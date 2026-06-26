@@ -29,7 +29,19 @@ export const buildFields = <T,>(
     });
 };
 
-export const formatCurrencyINR = (value: number | null | undefined) => value != null ? `₹ ${value.toLocaleString("en-IN")}` : "-";
+export const formatCurrencyINR = (value: number | string | null | undefined) => {
+    if (value === null || value === undefined || value === "") {
+        return "-";
+    }
+
+    const numericValue = Number(value);
+
+    if (Number.isNaN(numericValue)) {
+        return String(value);
+    }
+
+    return `₹ ${numericValue.toLocaleString("en-IN")}`;
+};
 export const formatPhone = (value?: string) => value ? `+91 ${value}` : "-";
 
 type PairFieldConfig<T> = {

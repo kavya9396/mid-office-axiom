@@ -1,6 +1,6 @@
 import { Box, Divider, Typography } from "@mui/material";
 
-type GridItem = {
+export type GridItem = {
   label: string;
   value?: string | number | boolean;
 };

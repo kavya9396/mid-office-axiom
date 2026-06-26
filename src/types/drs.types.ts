@@ -100,6 +100,18 @@ export type MedicalResponse = {
   sections: MedicalSection[];
 };
 
+export type FinancialResponse = {
+  applicationId: string;
+  breDecision: BreDecisionResponse & {
+    financialDecision?: string;
+    financialDecisionDate?: string;
+    financialDiscrepancy?: string;
+    financialRemarks?: string;
+  };
+  breAdditionalFields?: BreDecisionExtraField[];
+  summary: MedicalSummaryMember[];
+};
+
 export type MedicalSubmitRequest = {
   applicationId: string;
   roleType: string;
@@ -140,7 +152,7 @@ export interface BreDecisionResponse {
   discrepancy: string | null;
   timestamp: string | null;
   retrigger: boolean | null;
-};
+}
 
 export interface ApplicationOverview {
   product: Product;
@@ -148,34 +160,34 @@ export interface ApplicationOverview {
   agent: Agent;
   customer: Customer;
   policyDetails: PolicyDetails;
-};
+}
 
 export interface Product {
   name: string;
   sumAssured: number;
-};
+}
 
 export interface Distribution {
   channel: string;
   subChannel: string;
-};
+}
 
 export interface Agent {
   agentCode: string;
   agentName: string;
-};
+}
 
 export interface Customer {
   customerType: string;
   policyType: string;
-};
+}
 
 export interface PolicyDetails {
   modalPremium: number;
   policyTerm: number;
   premiumPaymentTerm: number;
   paymentMode: string;
-};
+}
 
 export interface RiderDetail {
   riderName: string;
@@ -184,7 +196,7 @@ export interface RiderDetail {
   sumAssured: number;
   modalPremium: number;
   premiumPaymentTerm: number;
-};
+}
 
 export type AdditionalRequirementRow = {
   team: string;
@@ -208,7 +220,7 @@ export type AdditionalRequirementRow = {
 };
 
 export type UserRequest = {
-  role: string
+  role: string;
 };
 
 export type UserResponse = {
@@ -220,7 +232,7 @@ export interface User {
   userName: string;
   role: string;
   ticketsInPool: number;
-};
+}
 
 export interface DecisionCode {
   label: string;
@@ -241,16 +253,13 @@ export interface PivvSection {
   decision: string;
   reason: string;
   userId: string;
-};
+}
 
 export interface PivvSectionResponse {
   pivvSection: PivvSection;
-};
+}
 
-export type ApplicantTab = 
-  | "proposer"
-  | "lifeassured1"
-  | "lifeassured2"
+export type ApplicantTab = "proposer" | "lifeassured1" | "lifeassured2";
 
 export type RiskCard = {
   title: string;
@@ -279,7 +288,7 @@ export interface SummaryResponse {
   nominees: Nominee[];
   genericDetails: GenericDetails;
   eiaDetails: EiaDetails;
-};
+}
 
 export interface ProposerSummary {
   firstName: string;
@@ -290,51 +299,51 @@ export interface ProposerSummary {
   gender: "Male" | "Female" | "Other";
   profileImage: string;
   caseStatus: string;
-};
+}
 
 export interface PersonalDetails {
   maritalStatus: "Single" | "Married" | "Divorced" | "Widowed";
   location: Location;
   occupation: Occupation;
-};
+}
 
 export interface Location {
   city: string;
   country: string;
-};
+}
 
 export interface Occupation {
   type: string;
   designation: string;
   organization: string;
-};
+}
 
 export interface FinancialDetails {
   annualIncome: number;
   appliedSumAssured: number;
   trsa: number;
   tfesa: number;
-};
+}
 
 export interface PolicyDetails {
   productName: string;
   productType: string;
   modalPremium: number;
   channel: string;
-};
+}
 
 export interface Underwriting {
   remarks: string;
   breDecision: BreDecision;
-};
+}
 
 export interface BreDecision {
   status: string;
   category: string;
   coverage: string;
-};
+}
 
-  export interface ApplicantDetails {
+export interface ApplicantDetails {
   dateOfBirth: string;
   gender: string;
   maritalStatus: string;
@@ -413,7 +422,7 @@ export interface LifestyleHabits {
   diving: string;
   mountaineering: string;
   otherHazardousActivities: string;
-  racing: string
+  racing: string;
 }
 
 export interface Nominee {
@@ -532,8 +541,8 @@ export type AuditTrailRow = {
 
 export type AuditTrail = AuditTrailRow[];
 
-export interface ApplicationDetails{
-   applicationId: string;
+export interface ApplicationDetails {
+  applicationId: string;
   dob: string;
   nameOfProposer: string;
   productOpted: string;

@@ -7,6 +7,7 @@ import Inbox from "../modules/Landing/Inbox";
 import { PATHS } from "./paths";
 import DRS from "../modules/DRS/DRS";
 import ViewMedicals from "../modules/DRS/Medical/viewMedicals";
+import ViewFinancial from "../modules/DRS/Financial/ViewFinancial";
 
 function BusinessTypeRedirect() {
     return <Navigate to="inbox" replace />;
@@ -32,7 +33,7 @@ export default function AppRoutes() {
                         <Route path={PATHS.INBOX} element={<Inbox />} />
                         <Route path={PATHS.DRS} element={<DRS />} />
                         <Route path={PATHS.DRS_MEDICAL} element={<ViewMedicals />} />
-
+                        <Route path={PATHS.DRS_FINANCIAL} element={<ViewFinancial />} />
 
                     </Route>
                 </Route>

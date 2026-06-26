@@ -64,22 +64,27 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
 
   const breDecisionParams = breDecision as Record<string, unknown> | null;
 
+  const getBreDecisionValue = (keys: string[]) => {
+    if (!breDecisionParams) return undefined;
+    return keys.map((key) => breDecisionParams[key]).find((value) => hasValue(value));
+  };
+
   const conditionalBreDecisionParams = [
     {
-      label: "Medical Decision",
-      value: breDecisionParams?.medicalDecision,
+      label: "Decision",
+      value: getBreDecisionValue(["medicalDecision", "financialDecision"]),
     },
     {
-      label: "Medical Decision Date",
-      value: breDecisionParams?.medicalDecisionDate,
+      label: "Decision Date",
+      value: getBreDecisionValue(["medicalDecisionDate", "financialDecisionDate"]),
     },
     {
-      label: "Medical Discrepancy",
-      value: breDecisionParams?.medicalDiscrepancy,
+      label: "Discrepancy",
+      value: getBreDecisionValue(["medicalDiscrepancy", "financialDiscrepancy"]),
     },
     {
-      label: "Medical Remarks",
-      value: breDecisionParams?.medicalRemarks,
+      label: "Remarks",
+      value: getBreDecisionValue(["medicalRemarks", "financialRemarks"]),
     },
   ]
     .filter((item) => hasValue(item.value))
