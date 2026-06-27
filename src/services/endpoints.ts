@@ -7,5 +7,7 @@ export const apiEndpoints = {
   merSubmit: getEndpoint("VITE_API_MEDICAL_MER_SUBMIT_URL", "/api/medical/mer/submit"),
   specialMedicalSubmit: getEndpoint("VITE_API_MEDICAL_SPECIAL_SUBMIT_URL", "/api/medical/special/submit"),
   otherMedicalSubmit: getEndpoint("VITE_API_MEDICAL_OTHER_SUBMIT_URL", "/api/medical/other/submit"),
-  financialView: getEndpoint("VITE_API_FINANCIAL_VIEW_URL", "/api/financial/view")
+  financialView: getEndpoint("VITE_API_FINANCIAL_VIEW_URL", "/api/financial/view"),
+  grievanceView: getEndpoint("VITE_API_GRIEVANCE_VIEW_URL", "/api/grievance/view"),
+  grievanceSubmit: getEndpoint("VITE_API_GRIEVANCE_SUBMIT_URL", "/api/grievance/submit"),
 };

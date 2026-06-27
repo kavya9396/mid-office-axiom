@@ -1,16 +1,33 @@
 import { Box, Typography } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CustomButton from "../../components/ui/Button/Button";
+import { getGrievanceRaisePath } from "../../routes/routes";
 
-const uwToolkitLinks = ["UW ChatBot", "Calculator", "Raise a Grievance"];
 
 const UWToolkit = () => {
-const navigate = useNavigate();
-  const redirectTo = (link: string) => {
-    if(link == "Raise a Grievance"){
-      navigate("/grievance/raise");
-    }
-  }
+  const navigate = useNavigate();
+  const { businessType, applicationNumber } = useParams();
+  const roleType = localStorage.getItem("roleType") ?? "";
+  const safeBusinessType = businessType ?? "retail";
+
+const uwToolkitLinks = [
+  {
+    label: "UW ChatBot",
+    path: "/chatbot",
+    roles: ["UW", "Admin"],
+  },
+  {
+    label: "Calculator",
+    path: "/calculator",
+    roles: ["UW", "Admin"],
+  },
+  {
+    label: "Raise a Grievance",
+    path: getGrievanceRaisePath(safeBusinessType),
+    roles: ["CPT Pool"],
+  },
+].filter((link) => link.roles.includes(roleType));
+  
   return (
     <Box
       sx={{
@@ -47,15 +64,15 @@ const navigate = useNavigate();
         >
           {uwToolkitLinks.map((link) => (
             <CustomButton
-              key={link}
+              key={link.label}
               variant="outlined"
               size="small"
               sx={{
                 borderRadius: "50px",
               }}
-              onClick={() => redirectTo(link)}
+              onClick={() => navigate(link.path, { state: { applicationNumber, businessType: safeBusinessType } })}
             >
-              {link}
+              {link.label}
             </CustomButton>
           ))}
         </Box>

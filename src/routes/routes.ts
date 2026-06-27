@@ -15,3 +15,6 @@ export const getMedicalPath = (businessType: string, appNo: string) =>
 
 export const getFinancialPath = (businessType: string, appNo: string) =>
   `/${businessType}/app/${appNo}/drs/financial`;
+
+export const getGrievanceRaisePath = (businessType:string) => `/${businessType}/${PATHS.GRIEVANCE_RAISE}`;
+export const getGrievanceApplicationPath = (businessType:string) => `/${businessType}/${PATHS.GRIEVANCE_APPLICATION}`;

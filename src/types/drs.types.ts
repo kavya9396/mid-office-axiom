@@ -1,3 +1,36 @@
+export type GrieavanceReport = {
+  id: number;
+  report: string;
+  lifeAssured: string;
+  remarksUser: string;
+  remarksTpa: string;
+};
+
+export type GrievanceRequest = {
+  applicationId: string;
+  roleType?: string;
+};
+
+export type GrievanceResponse = {
+  applicationId: string;
+  policyNumber: string;
+  lifeAssuredName: string;
+  proposerName: string;
+  reports: GrieavanceReport[];
+};
+
+export type GrievanceSubmitRequest = {
+  applicationId: string;
+  roleType?: string;
+  remarks: string;
+  reports: GrieavanceReport[];
+};
+
+export type GrievanceSubmitResponse = {
+  success: boolean;
+  message: string;
+};
+
 export type RiderRow = {
   riderName: string;
   riderOption: string;

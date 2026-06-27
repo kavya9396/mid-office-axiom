@@ -1,0 +1,16 @@
+{
+  "applicationId": "OB25175129",
+  "policyNumber": "PL-45829034",
+  "lifeAssuredName": "Rahul Malhotra",
+  "proposerName": "Anita Sharma",
+  "reports": [
+    { "id": 1, "report": "KYC Report", "lifeAssured": "Rahul Malhotra", "remarksUser": "KYC Documents Pending", "remarksTpa": "-" },
+    { "id": 2, "report": "Medical Report", "lifeAssured": "Rahul Malhotra", "remarksUser": "Awaiting Lab Results", "remarksTpa": "-" },
+    { "id": 3, "report": "Income Proof", "lifeAssured": "Anita Sharma", "remarksUser": "Salary Slip Uploaded", "remarksTpa": "Verified" },
+    { "id": 4, "report": "Address Proof", "lifeAssured": "Rahul Malhotra", "remarksUser": "Aadhaar Submitted", "remarksTpa": "-" },
+    { "id": 5, "report": "Identity Proof", "lifeAssured": "Anita Sharma", "remarksUser": "PAN Card Uploaded", "remarksTpa": "Verified" },
+    { "id": 6, "report": "Age Proof", "lifeAssured": "Rahul Malhotra", "remarksUser": "Birth Certificate Pending", "remarksTpa": "-" },
+    { "id": 7, "report": "Nomination Form", "lifeAssured": "Rahul Malhotra", "remarksUser": "Form Signed", "remarksTpa": "-" },
+    { "id": 8, "report": "Policy Schedule", "lifeAssured": "Anita Sharma", "remarksUser": "Issued", "remarksTpa": "Acknowledged" }
+  ]
+}
