@@ -8,9 +8,10 @@ type MerFormProps = {
   applicationId: string;
   roleType: string;
   memberType: ApplicantTab;
+  isEditable?: boolean;
 };
 
-const MerForm = ({ applicationId, roleType, memberType }: MerFormProps) => {
+const MerForm = ({ applicationId, roleType, memberType, isEditable = true }: MerFormProps) => {
   const dispatch = useAppDispatch();
 
   return (
@@ -18,6 +19,7 @@ const MerForm = ({ applicationId, roleType, memberType }: MerFormProps) => {
       config={merFieldConfig}
       submitLabel="Submit MER"
       defaultExpandedSection="MER"
+      isEditable={isEditable}
       onSubmit={async ({ testCode, fields }) => {
         const response = await dispatch(merSubmitThunk({
           applicationId,

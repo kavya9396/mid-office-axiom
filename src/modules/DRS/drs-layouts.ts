@@ -25,7 +25,6 @@ type AccordionKey = keyof typeof accordionRegistry;
 export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
   RETAIL_CVT_POOL : [
     "breDecision",
-    "requirementManagement",
     "summary",
     "applicationOverview",
     "pivvSection",

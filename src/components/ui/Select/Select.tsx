@@ -25,6 +25,7 @@ type CustomSelectProps = {
   fullWidth?: boolean;
   error?: boolean;
   helperText?: string;
+  disabled?: boolean;
 };
 
 export default function CustomSelect({
@@ -37,6 +38,7 @@ export default function CustomSelect({
   fullWidth = true,
   error = false,
   helperText,
+  disabled = false,
 }: CustomSelectProps) {
   const handleChange = (e: SelectChangeEvent) => {
     onChange?.(e.target.value);
@@ -72,6 +74,7 @@ export default function CustomSelect({
       <FormControl fullWidth={fullWidth} error={error}>
         <Select
           value={value ?? ""}
+          disabled={disabled}
           displayEmpty
           onChange={handleChange}
           renderValue={renderValue || defaultRenderValue}

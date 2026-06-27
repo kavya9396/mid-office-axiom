@@ -27,7 +27,7 @@ const BackButton = ({
 
   return (
     <Container disableGutters>
-      <Box sx={{ display: "flex", justifyContent: justify, my: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: justify, mb: 2, pt:2 }}>
         <CustomButton
           variant="text"
           size="small"

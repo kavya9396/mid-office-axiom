@@ -12,6 +12,7 @@ import { useSelector } from "react-redux";
 import type { BreDecisionResponse } from "../../../types/drs.types";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppDispatch } from "../../../store/hooks";
+import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
 import { referToItThunk } from "../../../store/thunks/referToItThunk";
 
 type SelectedItem = {
@@ -49,13 +50,18 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const [bredialogOpen, setBreDialogOpen] = useState(false);
   const [retriggerCount, setRetriggerCount] = useState(0);
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
+  const [retriggeredBreDecision, setRetriggeredBreDecision] = useState<BreDecisionResponse | null>(null);
+  const [breRetriggerLoading, setBreRetriggerLoading] = useState(false);
+  const [breRetriggerError, setBreRetriggerError] = useState<string | null>(null);
   const [referToItLoading, setReferToItLoading] = useState(false);
   const [referToItError, setReferToItError] = useState<string | null>(null);
 
-  const isBreSuccess = breDecision?.status?.toLowerCase() === "success";
+  const currentBreDecision = retriggeredBreDecision ?? breDecision;
+
+  const isBreSuccess = currentBreDecision?.status?.toLowerCase() === "success";
 
   // This count should come from backend.
-  const isRetriggerDisabled = isBreSuccess || retriggerCount >= 3;
+  const isRetriggerDisabled = isBreSuccess || retriggerCount >= 3 || breRetriggerLoading;
 
   const conditionalFields = extraFields
     .filter((item) => {
@@ -71,7 +77,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const hasValue = (value: unknown) =>
     value !== null && value !== undefined && String(value).trim() !== "";
 
-  const breDecisionParams = breDecision as Record<string, unknown> | null;
+  const breDecisionParams = currentBreDecision as Record<string, unknown> | null;
 
   const getBreDecisionValue = (keys: string[]) => {
     if (!breDecisionParams) return undefined;
@@ -105,19 +111,19 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const coreBreDetails = [
     {
       label: "BRE Status",
-      value: breDecision?.status ?? "-",
+      value: currentBreDecision?.status ?? "-",
     },
     {
       label: "BRE Remarks",
-      value: isBreSuccess ? "-" : breDecision?.remarks ?? "-",
+      value: isBreSuccess ? "-" : currentBreDecision?.remarks ?? "-",
     },
     {
       label: "BRE Discrepancy",
-      value: isBreSuccess ? "-" : breDecision?.discrepancy ?? "-",
+      value: isBreSuccess ? "-" : currentBreDecision?.discrepancy ?? "-",
     },
     {
       label: "BRE Timestamp",
-      value: breDecision?.timestamp ?? "-",
+      value: currentBreDecision?.timestamp ?? "-",
     },
   ];
 
@@ -126,21 +132,49 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
     ...conditionalFields,
   ];
 
-  const handleRetrigger = () => {
-    if (isBreSuccess) return;
+  const handleRetrigger = async () => {
+    if (isBreSuccess || breRetriggerLoading) {
+      return;
+    }
 
-    const nextCount = retriggerCount + 1;
-
-    if (nextCount >= 3) {
-      setRetriggerCount(nextCount);
+    if (retriggerCount >= 3) {
       setReferToItError(null);
       setBreDialogOpen(true);
       return;
     }
 
-    setRetriggerCount(nextCount);
+    if (!applicationId || !roleType) {
+      setBreRetriggerError("Missing application or role information.");
+      return;
+    }
 
-    // Call BRE retrigger API here
+    try {
+      setBreRetriggerLoading(true);
+      setBreRetriggerError(null);
+
+      const response = await dispatch(
+        breRetriggerThunk({
+          applicationId,
+          roleType,
+        }),
+      ).unwrap();
+
+      setRetriggeredBreDecision(response.breDecision);
+
+      if (response.breDecision.status?.toLowerCase() !== "success") {
+        const nextCount = retriggerCount + 1;
+        setRetriggerCount(nextCount);
+
+        if (nextCount >= 3) {
+          setReferToItError(null);
+          setBreDialogOpen(true);
+        }
+      }
+    } catch (error) {
+      setBreRetriggerError(error instanceof Error ? error.message : "Failed to retrigger BRE.");
+    } finally {
+      setBreRetriggerLoading(false);
+    }
   };
 
   const handleReferToIt = async () => {
@@ -235,8 +269,8 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       <CustomAccordion
         title="BRE Decision"
         chip={
-          breDecision?.decision ? (
-            <Badge label={breDecision.decision} variant="Low" />
+          currentBreDecision?.decision ? (
+            <Badge label={currentBreDecision.decision} variant="Low" />
           ) : null
         }
       >
@@ -264,7 +298,9 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
             >
               <Box
                 component="span"
-                onClick={handleRetrigger}
+                onClick={() => {
+                  void handleRetrigger();
+                }}
                 sx={{
                   color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
                   border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
@@ -279,6 +315,18 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
               </Box>
             </Box>
           </Box>
+
+          {breRetriggerError && (
+            <Typography
+              sx={{
+                mt: 2,
+                fontSize: "13px",
+                color: "#DE2C3B",
+              }}
+            >
+              {breRetriggerError}
+            </Typography>
+          )}
 
           {additionalBreDetails.length > 0 && (
             <Box

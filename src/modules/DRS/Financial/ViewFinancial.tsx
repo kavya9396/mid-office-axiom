@@ -19,6 +19,7 @@ import CustomSelect from "../../../components/ui/Select/Select"
 import CustomTextField from "../../../components/ui/TextField/TextField"
 import { financialSectionOptions, financialSections, type FinancialSectionKey } from "./financialAccordionConfig"
 import { fieldStylesEdit } from "../../../utils/styles"
+import { getRoleAccess } from "../../../utils/roleAccess"
 
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
 const getStoredApplicantTab = () => (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
@@ -93,6 +94,7 @@ const ViewFinancial = () => {
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
+  const { canEditFinancial } = getRoleAccess(roleType);
 
   
   
@@ -131,6 +133,10 @@ const ViewFinancial = () => {
   const selectedFinancialSection = financialSections.find((section) => section.key === activeSection) ?? financialSections[0];
 
   const handleFieldChange = (sectionKey: FinancialSectionKey, label: string, value: string) => {
+    if (!canEditFinancial) {
+      return;
+    }
+
     setSubmitMessage(null);
     setFinancialFieldValues((current) => ({
       ...current,
@@ -385,6 +391,7 @@ const ViewFinancial = () => {
                           fullWidth
                           value={financialFieldValues[selectedFinancialSection.key]?.[item.label] ?? ""}
                           onChange={(event) => handleFieldChange(selectedFinancialSection.key, item.label, event.target.value)}
+                          disabled={!canEditFinancial}
                           error={Boolean(formErrors[selectedFinancialSection.key]?.[item.label])}
                           helperText={formErrors[selectedFinancialSection.key]?.[item.label] || " "}
                           sx={{...fieldStylesEdit}}

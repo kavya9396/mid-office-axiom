@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -8,7 +8,7 @@ import CustomTextField from "../../../components/ui/TextField/TextField";
 import { DangerIcon } from "../../../icons/Icons";
 import { useAppDispatch } from "../../../store/hooks";
 import { specialMedicalSubmitThunk } from "../../../store/thunks/specialMedicalSubmitThunk";
-import type { ApplicantTab } from "../../../types/drs.types";
+import type { ApplicantTab, MedicalSection } from "../../../types/drs.types";
 import type { MedicalFieldConfig } from "./medicalFieldConfig";
 import { specialMedicalFieldConfig } from "./specialMedicalFieldConfig";
 
@@ -16,6 +16,8 @@ type SpecialMedicalFormProps = {
   applicationId: string;
   roleType: string;
   memberType: ApplicantTab;
+  isEditable?: boolean;
+  medicalSections?: MedicalSection[];
 };
 
 type FormValues = Record<string, string>;
@@ -47,6 +49,29 @@ const sectionTitleMap: Record<string, string> = {
 };
 
 const getDisplaySectionTitle = (section: string) => sectionTitleMap[section] ?? section;
+const normalizeKey = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const rowTypeAliases: Record<string, string> = {
+  haemoglobin: "haemoglobinhb",
+  rbccount: "rbc",
+  wbccount: "wbc",
+  plateletcount: "platelets",
+  hematocrit: "pcv",
+  neutrophils: "differentialneutrophils",
+  lymphocytes: "differentiallymphocytes",
+  monocytes: "differentialmonocytes",
+  eosinophils: "differentialesinophils",
+};
+
+const getSpecialSectionMockTitle = (section: string) => {
+  const sectionKey = normalizeKey(section);
+
+  if (sectionKey === "cbcgroup") {
+    return "Complete Blood Count (CBC)";
+  }
+
+  return getDisplaySectionTitle(section);
+};
 
 const isDateField = (field: MedicalFieldConfig) => normalizeString(field.dataType).toUpperCase() === "DD/MM/YYYY";
 const isNumericField = (field?: MedicalFieldConfig) => normalizeString(field?.dataType).toLowerCase() === "numeric";
@@ -117,6 +142,7 @@ const renderCellField = (
   formValues: FormValues,
   formErrors: FormErrors,
   onChange: (fieldId: string, value: string) => void,
+  isEditable: boolean,
   placeholder?: string,
   width?: number
 ) => {
@@ -130,6 +156,7 @@ const renderCellField = (
     <CustomTextField
       value={value}
       onChange={(event) => onChange(field.id, event.target.value)}
+      disabled={!isEditable}
       size="small"
       type={isNumericField(field) ? "number" : "text"}
       placeholder={placeholder}
@@ -151,7 +178,7 @@ const renderCellField = (
   );
 };
 
-const SpecialMedicalForm = ({ applicationId, roleType, memberType }: SpecialMedicalFormProps) => {
+const SpecialMedicalForm = ({ applicationId, roleType, memberType, isEditable = true, medicalSections = [] }: SpecialMedicalFormProps) => {
   const dispatch = useAppDispatch();
   const [formValues, setFormValues] = useState<FormValues>({});
   const [formErrors, setFormErrors] = useState<FormErrors>({});
@@ -175,6 +202,18 @@ const SpecialMedicalForm = ({ applicationId, roleType, memberType }: SpecialMedi
   }, [validConfig]);
 
   const activeSection = selectedSection || sectionOptions[0]?.value || "";
+
+  const activeMockRows = useMemo(() => {
+    const expectedTitle = getSpecialSectionMockTitle(activeSection);
+    const expectedKey = normalizeKey(expectedTitle);
+
+    const match = medicalSections.find((section) => {
+      const titleKey = normalizeKey(section.title);
+      return titleKey === expectedKey || titleKey.includes(expectedKey) || expectedKey.includes(titleKey);
+    });
+
+    return match?.rows ?? [];
+  }, [activeSection, medicalSections]);
 
   const activeSectionConfig = useMemo(
     () => validConfig.filter((field) => field.section === activeSection),
@@ -215,12 +254,62 @@ const SpecialMedicalForm = ({ applicationId, roleType, memberType }: SpecialMedi
     return Array.from(grouped.values());
   }, [activeSectionConfig]);
 
+  useEffect(() => {
+    if (!activeMockRows.length || !tableRows.length) {
+      return;
+    }
+
+    setFormValues((previous) => {
+      const next = { ...previous };
+
+      for (const row of tableRows) {
+        if (!row.valueField) {
+          continue;
+        }
+
+        const typeKey = normalizeKey(row.type);
+        const matchedMockRow = activeMockRows.find((mockRow) => {
+          const parameterKey = normalizeKey(mockRow.parameter);
+          const alias = rowTypeAliases[parameterKey] ?? parameterKey;
+          return alias === typeKey;
+        });
+
+        if (!matchedMockRow) {
+          continue;
+        }
+
+        next[row.valueField.id] = matchedMockRow.value ?? "";
+        if (row.unitField) {
+          next[row.unitField.id] = matchedMockRow.unit ?? "";
+        }
+
+        const [from = "", to = ""] = (matchedMockRow.normalRange ?? "").split("-").map((item) => item.trim());
+        if (row.fromField) {
+          next[row.fromField.id] = from;
+        }
+        if (row.toField) {
+          next[row.toField.id] = to;
+        }
+
+        if (row.findingsField) {
+          next[row.findingsField.id] = matchedMockRow.status ?? "";
+        }
+      }
+
+      return next;
+    });
+  }, [activeMockRows, tableRows]);
+
   const abnormalCount = useMemo(
     () => tableRows.filter((row) => getFindingsValue(row, formValues).toLowerCase() === "abnormal").length,
     [formValues, tableRows]
   );
 
   const handleValueChange = (fieldId: string, value: string) => {
+    if (!isEditable) {
+      return;
+    }
+
     setSubmitMessage(null);
     setFormValues((previous) => ({ ...previous, [fieldId]: value }));
     setFormErrors((previous) => {
@@ -307,19 +396,19 @@ const SpecialMedicalForm = ({ applicationId, roleType, memberType }: SpecialMedi
       key: "type",
       header: "Parameter",
       width: "28%",
-      render: (value) => value,
+      render: (_, row) => row.type,
     },
     {
       key: "valueField",
       header: "Value",
       width: "16%",
-      render: (_, row) => renderCellField(row.valueField, formValues, formErrors, handleValueChange, "Value", 88),
+      render: (_, row) => renderCellField(row.valueField, formValues, formErrors, handleValueChange, isEditable, "Value", 88),
     },
     {
       key: "unitField",
       header: "Unit",
       width: "16%",
-      render: (_, row) => renderCellField(row.unitField, formValues, formErrors, handleValueChange, "Unit", 88),
+      render: (_, row) => renderCellField(row.unitField, formValues, formErrors, handleValueChange, isEditable, "Unit", 88),
     },
     {
       key: "fromField",
@@ -327,9 +416,9 @@ const SpecialMedicalForm = ({ applicationId, roleType, memberType }: SpecialMedi
       width: "24%",
       render: (_, row) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-          {renderCellField(row.fromField, formValues, formErrors, handleValueChange, "From", 72)}
+          {renderCellField(row.fromField, formValues, formErrors, handleValueChange, isEditable, "From", 72)}
           <Typography sx={{ fontSize: 12, color: "#6B7280" }}>-</Typography>
-          {renderCellField(row.toField, formValues, formErrors, handleValueChange, "To", 72)}
+          {renderCellField(row.toField, formValues, formErrors, handleValueChange, isEditable, "To", 72)}
         </Box>
       ),
     },
@@ -418,6 +507,7 @@ const SpecialMedicalForm = ({ applicationId, roleType, memberType }: SpecialMedi
                       onChange={(value) => handleValueChange(field.id, value)}
                       options={options}
                       placeholder="Select"
+                      disabled={!isEditable}
                     />
                     {formErrors[field.id] && (
                       <Typography sx={{ fontSize: 12, color: "#D32F2F", mt: 0.5 }}>{formErrors[field.id]}</Typography>
@@ -429,6 +519,7 @@ const SpecialMedicalForm = ({ applicationId, roleType, memberType }: SpecialMedi
                     <CustomTextField
                       value={formValues[field.id] ?? ""}
                       onChange={(event) => handleValueChange(field.id, event.target.value)}
+                      disabled={!isEditable}
                       size="small"
                       placeholder={isDateField(field) ? "DD/MM/YYYY" : ""}
                       error={Boolean(formErrors[field.id])}

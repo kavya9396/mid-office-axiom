@@ -16,6 +16,7 @@ type OtherMedicalsFormProps = {
   roleType: string;
   memberType: ApplicantTab;
   medicalSections?: MedicalSection[];
+  isEditable?: boolean;
 };
 
 type FieldKind = "text" | "date" | "number" | "select";
@@ -168,7 +169,7 @@ const buildSections = (rows: MedicalFieldConfig[]): ParsedSection[] => {
   }));
 };
 
-const OtherMedicalsForm = ({ applicationId, roleType, memberType, medicalSections = [] }: OtherMedicalsFormProps) => {
+const OtherMedicalsForm = ({ applicationId, roleType, memberType, medicalSections = [], isEditable = true }: OtherMedicalsFormProps) => {
   const dispatch = useAppDispatch();
   const [formValues, setFormValues] = useState<FormValues>({});
   const [formErrors, setFormErrors] = useState<FormErrors>({});
@@ -241,6 +242,10 @@ const OtherMedicalsForm = ({ applicationId, roleType, memberType, medicalSection
   ];
 
   const handleValueChange = (fieldId: string, value: string) => {
+    if (!isEditable) {
+      return;
+    }
+
     setSubmitMessage(null);
     setFormValues((previous) => ({ ...previous, [fieldId]: value }));
     setFormErrors((previous) => {
@@ -363,6 +368,7 @@ const OtherMedicalsForm = ({ applicationId, roleType, memberType, medicalSection
                     onChange={(nextValue) => handleValueChange(field.id, nextValue)}
                     options={selectOptions}
                     placeholder="Select"
+                    disabled={!isEditable}
                   />
                   {error && <Typography sx={{ fontSize: 12, color: "#D32F2F", mt: 0.5 }}>{error}</Typography>}
                 </Box>
@@ -375,6 +381,7 @@ const OtherMedicalsForm = ({ applicationId, roleType, memberType, medicalSection
                 <CustomTextField
                   value={value}
                   onChange={(event) => handleValueChange(field.id, event.target.value)}
+                  disabled={!isEditable}
                   size="small"
                   type={field.kind === "number" ? "number" : "text"}
                   placeholder={field.kind === "date" ? "DD/MM/YYYY" : ""}

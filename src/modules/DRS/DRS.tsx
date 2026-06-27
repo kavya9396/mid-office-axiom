@@ -1,10 +1,11 @@
 import { accordionRegistry, DRS_LAYOUTS } from "./drs-layouts";
 import BackButton from "../../components/layout/BackButton";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
+import { mastersThunk } from "../../store/thunks/mastersThunk";
 
 const mapper = {
     "CVT Pool": "RETAIL_CVT_POOL",
@@ -20,21 +21,31 @@ const mapper = {
 
 const DRS = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
+    const { applicationNumber } = useParams<{ applicationNumber: string }>();
 
     const layout = mapper[roleType as keyof typeof mapper];
     const accordions = layout ? DRS_LAYOUTS[layout] : [];
-    console.log('accordions',accordions,roleType,layout)
     const navigate = useNavigate();
 
     const dispatch = useDispatch<AppDispatch>();
-    const applicationId = "OB25175127";
+    const applicationId = applicationNumber ?? "";
     
 
     useEffect(() => {
+        if (!applicationId) {
+            return;
+        }
+
         dispatch(
             drsThunk({
                 applicationId,
                 roleType,
+            })
+        );
+
+        dispatch(
+            mastersThunk({
+                masters: ["gender", "nationality", "idProof", "addressProof", "state", "country"],
             })
         );
     }, [dispatch, applicationId, roleType]);

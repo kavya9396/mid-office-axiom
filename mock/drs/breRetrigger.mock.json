@@ -1,0 +1,10 @@
+{
+  "breDecision": {
+    "decision": "STD",
+    "status": "Failure",
+    "remarks": "BRE retrigger completed but validation rules still returned failure.",
+    "discrepancy": "Income proof verification remains pending.",
+    "timestamp": "27/06/2026, 1130hrs",
+    "retrigger": true
+  }
+}

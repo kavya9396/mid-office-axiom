@@ -4,11 +4,13 @@ import type {
   ApplicationOverview,
   AuditTrail,
   BreDecisionResponse,
+  MastersData,
   PivvSection,
   RiderDetail,
   SummaryResponse,
 } from "../../types/drs.types";
 import { drsThunk } from "../thunks/drsThunk";
+import { mastersThunk } from "../thunks/mastersThunk";
 
 interface DrsState {
   breDecision: BreDecisionResponse | null;
@@ -18,6 +20,9 @@ interface DrsState {
   requirements: AdditionalRequirementRow[] | null;
   auditTrail: AuditTrail | null;
   pivvSection: PivvSection | null;
+  masters: MastersData;
+  mastersLoading: "idle" | "loading" | "failed";
+  mastersError: string | null;
   loading: "idle" | "loading" | "failed";
   error: string | null;
 }
@@ -30,6 +35,9 @@ const initialState: DrsState = {
   pivvSection: null,
   requirements: [],
   auditTrail: null,
+  masters: {},
+  mastersLoading: "idle",
+  mastersError: null,
   loading: "idle",
   error: null,
 };
@@ -58,6 +66,20 @@ const drsSlice = createSlice({
       .addCase(drsThunk.rejected, (state, action) => {
         state.loading = "failed";
         state.error =
+          (action.payload as string) || action.error.message || null;
+      })
+      .addCase(mastersThunk.pending, (state) => {
+        state.mastersLoading = "loading";
+        state.mastersError = null;
+      })
+      .addCase(mastersThunk.fulfilled, (state, action) => {
+        state.mastersLoading = "idle";
+        state.mastersError = null;
+        state.masters = action.payload.data ?? {};
+      })
+      .addCase(mastersThunk.rejected, (state, action) => {
+        state.mastersLoading = "failed";
+        state.mastersError =
           (action.payload as string) || action.error.message || null;
       });
   },

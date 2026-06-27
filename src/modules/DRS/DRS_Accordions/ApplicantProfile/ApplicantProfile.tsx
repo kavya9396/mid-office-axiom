@@ -1,11 +1,12 @@
 import { Box, Divider, Typography } from "@mui/material"
 import CustomButton from "../../../../components/ui/Button/Button"
 import CustomTabs from "../../../../components/ui/Tabs/Tabs"
-import { AddressProofOptions, applicantInfoTabs, CountryOptions, GenderOptions, IDProofOptions, NationalityOptions, StateOptions } from "../../../../utils/constant"
+import { applicantInfoTabs } from "../../../../utils/constant"
 import { useMemo, useState } from "react"
 import type {
     ApplicantEditForm,
     ApplicantInfoTab,
+    MasterOption,
     ApplicantProfileSubmitRequest,
     SummaryResponse,
 } from "../../../../types/drs.types"
@@ -24,6 +25,8 @@ import { formatDOB } from "../../../../utils/helpers"
 import { useAppDispatch } from "../../../../store/hooks"
 import { applicantProfileSubmitThunk } from "../../../../store/thunks/applicantProfileSubmitThunk"
 import { useParams } from "react-router-dom"
+import { useSelector } from "react-redux"
+import type { RootState } from "../../../../store/store"
 
 export interface ApplicantProfileProps {
     profile?: SummaryResponse;
@@ -38,7 +41,13 @@ type FormField = {
 
 type FormErrors = Partial<Record<keyof ApplicantEditForm, string>>;
 
-const personalKycFields: FormField[] = [
+const emptyOptions: MasterOption[] = [];
+
+const getPersonalKycFields = (options: {
+    genderOptions: MasterOption[];
+    nationalityOptions: MasterOption[];
+    idProofOptions: MasterOption[];
+}): FormField[] => [
     { name: "firstName", label: "First Name" },
     { name: "middleName", label: "Middle Name" },
     { name: "lastName", label: "Last Name" },
@@ -47,20 +56,20 @@ const personalKycFields: FormField[] = [
         name: "gender",
         label: "Gender",
         type: "select",
-        options: GenderOptions,
+        options: options.genderOptions,
     },
     {
         name: "nationality",
         label: "Nationality",
         type: "select",
-        options: NationalityOptions,
+        options: options.nationalityOptions,
     },
     { name: "panNumber", label: "PAN Number" },
     {
         name: "identityProofType",
         label: "Identity Proof",
         type: "select",
-        options: IDProofOptions,
+        options: options.idProofOptions,
     },
     {
         name: "identityProofNumber",
@@ -68,56 +77,57 @@ const personalKycFields: FormField[] = [
     },
 ];
 
-const addressFields: FormField[] = [
+const getAddressFields = (options: {
+    addressProofOptions: MasterOption[];
+    stateOptions: MasterOption[];
+    countryOptions: MasterOption[];
+    communicationIsIndia: boolean;
+    permanentIsIndia: boolean;
+}): FormField[] => [
     {
         name: "addressProof",
         label: "Address Proof",
         type: "select",
-        options: AddressProofOptions,
+        options: options.addressProofOptions,
     },
 
     { name: "communicationAddressLine1", label: "Comm. Address Line 1" },
     { name: "communicationAddressLine2", label: "Comm. Address Line 2" },
     { name: "communicationAddressLine3", label: "Comm. Address Line 3" },
-    { name: "communicationCity", label: "Comm. City" },
-
-    {
-        name: "communicationState",
-        label: "Comm. State",
-        type: "select",
-        options: StateOptions,
-    },
     {
         name: "communicationCountry",
         label: "Comm. Country",
         type: "select",
-        options: CountryOptions,
+        options: options.countryOptions,
     },
-
+    
+    {
+        name: "communicationState",
+        label: "Comm. State",
+        type: options.communicationIsIndia ? "select" : "text",
+        options: options.communicationIsIndia ? options.stateOptions : undefined,
+    },
+    { name: "communicationCity", label: "Comm. City" },
     { name: "communicationPincode", label: "Comm. Pincode" },
-
     { name: "permanentAddressLine1", label: "Perm. Address Line 1" },
     { name: "permanentAddressLine2", label: "Perm. Address Line 2" },
     { name: "permanentAddressLine3", label: "Perm. Address Line 3" },
-    { name: "permanentCity", label: "Perm. City" },
-
-    {
-        name: "permanentState",
-        label: "Perm. State",
-        type: "select",
-        options: StateOptions,
-    },
     {
         name: "permanentCountry",
         label: "Perm. Country",
         type: "select",
-        options: CountryOptions,
+        options: options.countryOptions,
     },
-
+    
+    {
+        name: "permanentState",
+        label: "Perm. State",
+        type: options.permanentIsIndia ? "select" : "text",
+        options: options.permanentIsIndia ? options.stateOptions : undefined,
+    },
+    { name: "permanentCity", label: "Perm. City" },
     { name: "permanentPincode", label: "Perm. Pincode" },
 ];
-
-const allDialogFields: FormField[] = [...personalKycFields, ...addressFields];
 
 const idProofNumberValidationMap: Record<string, { regex: RegExp; message: string }> = {
     "PAN Card": {
@@ -143,9 +153,9 @@ const idProofNumberValidationMap: Record<string, { regex: RegExp; message: strin
 };
 
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
-
-const allowedIdProofValues = new Set(IDProofOptions.map((option) => option.value));
-const allowedAddressProofValues = new Set(AddressProofOptions.map((option) => option.value));
+const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
+const indiaPincodeRegex = /^\d{6}$/;
+const numericRegex = /^\d+$/;
 
 const buildFormData = (
     profile?: SummaryResponse
@@ -243,6 +253,7 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const { applicationNumber } = useParams<{ applicationNumber: string }>();
     const dispatch = useAppDispatch();
+    const masters = useSelector((state: RootState) => state.drs.masters);
     const [applicantInfoTab, setApplicantInfoTab] = useState<ApplicantInfoTab>("personalKyc");
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
@@ -262,6 +273,58 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     const [formData, setFormData] = useState<ApplicantEditForm>(initialFormData);
     const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
 
+    const genderOptions = masters.gender ?? emptyOptions;
+    const nationalityOptions = masters.nationality ?? emptyOptions;
+    const idProofOptions = masters.idProof ?? emptyOptions;
+    const addressProofOptions = masters.addressProof ?? emptyOptions;
+    const stateOptions = masters.state ?? emptyOptions;
+    const countryOptions = masters.country ?? emptyOptions;
+
+    const personalKycFields = useMemo(
+        () => getPersonalKycFields({ genderOptions, nationalityOptions, idProofOptions }),
+        [genderOptions, nationalityOptions, idProofOptions]
+    );
+
+    const communicationIsIndia = formData.communicationCountry.trim().toLowerCase() === "india";
+    const permanentIsIndia = formData.permanentCountry.trim().toLowerCase() === "india";
+
+    const addressFields = useMemo(
+        () => getAddressFields({
+            addressProofOptions,
+            stateOptions,
+            countryOptions,
+            communicationIsIndia,
+            permanentIsIndia,
+        }),
+        [
+            addressProofOptions,
+            stateOptions,
+            countryOptions,
+            communicationIsIndia,
+            permanentIsIndia,
+        ]
+    );
+
+    const allDialogFields = useMemo(
+        () => [...personalKycFields, ...addressFields],
+        [personalKycFields, addressFields]
+    );
+
+    const allowedIdProofValues = useMemo(
+        () => new Set(idProofOptions.map((option) => option.value)),
+        [idProofOptions]
+    );
+
+    const allowedAddressProofValues = useMemo(
+        () => new Set(addressProofOptions.map((option) => option.value)),
+        [addressProofOptions]
+    );
+
+    const allowedStateValues = useMemo(
+        () => new Set(stateOptions.map((option) => option.value)),
+        [stateOptions]
+    );
+
     const validateForm = () => {
         const errors: FormErrors = {};
 
@@ -276,12 +339,56 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
             errors.panNumber = "Enter a valid PAN number (e.g. ABCDE1234F)";
         }
 
-        if (formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
+        if (idProofOptions.length > 0 && formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
             errors.identityProofType = "Select a valid Identity Proof";
         }
 
-        if (formData.addressProof && !allowedAddressProofValues.has(formData.addressProof)) {
+        if (addressProofOptions.length > 0 && formData.addressProof && !allowedAddressProofValues.has(formData.addressProof)) {
             errors.addressProof = "Select a valid Address Proof";
+        }
+
+        if (formData.communicationCity.trim() && !alphabetOnlyRegex.test(formData.communicationCity.trim())) {
+            errors.communicationCity = "Comm. City must contain only alphabets";
+        }
+
+        if (formData.permanentCity.trim() && !alphabetOnlyRegex.test(formData.permanentCity.trim())) {
+            errors.permanentCity = "Perm. City must contain only alphabets";
+        }
+
+        if (communicationIsIndia) {
+            if (stateOptions.length > 0 && formData.communicationState && !allowedStateValues.has(formData.communicationState)) {
+                errors.communicationState = "Select a valid Comm. State";
+            }
+
+            if (formData.communicationPincode.trim() && !indiaPincodeRegex.test(formData.communicationPincode.trim())) {
+                errors.communicationPincode = "Comm. Pincode must be exactly 6 digits";
+            }
+        } else {
+            if (formData.communicationState.trim() && !alphabetOnlyRegex.test(formData.communicationState.trim())) {
+                errors.communicationState = "Comm. State must contain only alphabets";
+            }
+
+            if (formData.communicationPincode.trim() && !numericRegex.test(formData.communicationPincode.trim())) {
+                errors.communicationPincode = "Comm. Pincode must contain only digits";
+            }
+        }
+
+        if (permanentIsIndia) {
+            if (stateOptions.length > 0 && formData.permanentState && !allowedStateValues.has(formData.permanentState)) {
+                errors.permanentState = "Select a valid Perm. State";
+            }
+
+            if (formData.permanentPincode.trim() && !indiaPincodeRegex.test(formData.permanentPincode.trim())) {
+                errors.permanentPincode = "Perm. Pincode must be exactly 6 digits";
+            }
+        } else {
+            if (formData.permanentState.trim() && !alphabetOnlyRegex.test(formData.permanentState.trim())) {
+                errors.permanentState = "Perm. State must contain only alphabets";
+            }
+
+            if (formData.permanentPincode.trim() && !numericRegex.test(formData.permanentPincode.trim())) {
+                errors.permanentPincode = "Perm. Pincode must contain only digits";
+            }
         }
 
         const selectedProofValidation = idProofNumberValidationMap[formData.identityProofType];
@@ -307,10 +414,26 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
         field: keyof ApplicantEditForm,
         value: string
     ) => {
-        setFormData(prev => ({
-            ...prev,
-            [field]: value,
-        }));
+        setFormData((prev) => {
+            const nextFormData: ApplicantEditForm = {
+                ...prev,
+                [field]: value,
+            };
+
+            if (field === "communicationCountry") {
+                nextFormData.communicationState = "";
+                nextFormData.communicationCity = "";
+                nextFormData.communicationPincode = "";
+            }
+
+            if (field === "permanentCountry") {
+                nextFormData.permanentState = "";
+                nextFormData.permanentCity = "";
+                nextFormData.permanentPincode = "";
+            }
+
+            return nextFormData;
+        });
 
         setFieldErrors((prev) => {
             if (!prev[field]) {
@@ -326,6 +449,26 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
             setFieldErrors((prev) => {
                 const nextErrors = { ...prev };
                 delete nextErrors.identityProofNumber;
+                return nextErrors;
+            });
+        }
+
+        if (field === "communicationCountry") {
+            setFieldErrors((prev) => {
+                const nextErrors = { ...prev };
+                delete nextErrors.communicationState;
+                delete nextErrors.communicationCity;
+                delete nextErrors.communicationPincode;
+                return nextErrors;
+            });
+        }
+
+        if (field === "permanentCountry") {
+            setFieldErrors((prev) => {
+                const nextErrors = { ...prev };
+                delete nextErrors.permanentState;
+                delete nextErrors.permanentCity;
+                delete nextErrors.permanentPincode;
                 return nextErrors;
             });
         }

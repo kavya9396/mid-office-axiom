@@ -156,6 +156,24 @@ export type ReferToITResponse = {
   message: string;
 };
 
+export type BreRetriggerRequest = {
+  applicationId: string;
+  roleType: string;
+};
+
+export type BreRetriggerResponse = {
+  breDecision: BreDecisionResponse & {
+    medicalDecision?: string | null;
+    medicalDecisionDate?: string | null;
+    medicalDiscrepancy?: string | null;
+    medicalRemarks?: string | null;
+    financialDecision?: string | null;
+    financialDecisionDate?: string | null;
+    financialDiscrepancy?: string | null;
+    financialRemarks?: string | null;
+  };
+};
+
 export interface BreDecisionResponse {
   decision: string | null;
   status: string | null;
@@ -249,6 +267,30 @@ export interface DecisionCode {
   label: string;
   value: string;
 }
+
+export type MasterOption = {
+  label: string;
+  value: string;
+};
+
+export type MasterKey =
+  | "gender"
+  | "nationality"
+  | "idProof"
+  | "addressProof"
+  | "state"
+  | "country";
+
+export type MastersData = Partial<Record<MasterKey, MasterOption[]>>;
+
+export type MastersRequest = {
+  masters: MasterKey[];
+};
+
+export type MastersResponse = {
+  success: boolean;
+  data: MastersData;
+};
 
 export type DecisionCodeRequest = {
   decision: string;

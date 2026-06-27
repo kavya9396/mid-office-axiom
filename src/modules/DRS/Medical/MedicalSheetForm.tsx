@@ -23,6 +23,7 @@ type MedicalSheetFormProps = {
   emptyMessage?: string;
   defaultExpandedSection?: string;
   showTestSelector?: boolean;
+  isEditable?: boolean;
   onSubmit: (payload: { testCode: string; fields: SubmitFieldValue[] }) => Promise<string>;
 };
 
@@ -141,6 +142,7 @@ const MedicalField = ({ field, value, error, required, disabled, onChange }: Fie
           onChange={(next) => onChange(field.id, next)}
           options={parseDropdownOptions(field)}
           placeholder="Select"
+          disabled={disabled}
         />
         {error && <Typography sx={{ fontSize: 12, color: "#D32F2F", mt: 0.5 }}>{error}</Typography>}
       </Box>
@@ -171,6 +173,7 @@ const MedicalSheetForm = ({
   emptyMessage = "No fields configured.",
   defaultExpandedSection,
   showTestSelector = false,
+  isEditable = true,
   onSubmit,
 }: MedicalSheetFormProps) => {
   const [formValues, setFormValues] = useState<FormValues>({});
@@ -311,6 +314,10 @@ const MedicalSheetForm = ({
   const displayedValue = (field: MedicalFieldConfig) => derivedValues[field.id] ?? formValues[field.id] ?? "";
 
   const handleValueChange = (fieldId: string, value: string) => {
+    if (!isEditable) {
+      return;
+    }
+
     setSubmitMessage(null);
     setFormValues((previous) => ({ ...previous, [fieldId]: value }));
     setFormErrors((previous) => {
@@ -427,7 +434,7 @@ const MedicalSheetForm = ({
                         value={displayedValue(field)}
                         error={formErrors[field.id]}
                         required={isRequiredField(field)}
-                        disabled={isAutoDerived(field)}
+                        disabled={isAutoDerived(field) || !isEditable}
                         onChange={handleValueChange}
                       />
                     );

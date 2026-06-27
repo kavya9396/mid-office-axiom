@@ -12,6 +12,7 @@ import { useAppDispatch } from "../../../store/hooks";
 import { medicalThunk } from "../../../store/thunks/medicalThunk";
 import type { ApplicantTab, DRSRequest, MedicalResponse, MedicalSummaryMember } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
+import { getRoleAccess } from "../../../utils/roleAccess";
 import BreDecision from "../DRS_Accordions/BreDecision";
 import MerForm from "./MerForm";
 import OtherMedicalsForm from "./OtherMedicalsForm";
@@ -94,6 +95,7 @@ const ViewMedicals = () => {
   const [activeMedicalSectionTab, setActiveMedicalSectionTab] = useState<MedicalSectionTab>("specialMedical");
 
   const roleType = getRoleType();
+  const { canEditMedical } = getRoleAccess(roleType);
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const isApplicationIdMissing = !safeApplicationId;
@@ -279,15 +281,22 @@ const ViewMedicals = () => {
       {loading ? (
         <Typography sx={{ color: "#6B7280" }}>Loading medical details...</Typography>
       ) : activeMedicalSectionTab === "mer" ? (
-        <MerForm applicationId={safeApplicationId} roleType={roleType} memberType={currentApplicantTab} />
+        <MerForm applicationId={safeApplicationId} roleType={roleType} memberType={currentApplicantTab} isEditable={canEditMedical} />
       ) : activeMedicalSectionTab === "specialMedical" ? (
-        <SpecialMedicalForm applicationId={safeApplicationId} roleType={roleType} memberType={currentApplicantTab} />
+        <SpecialMedicalForm
+          applicationId={safeApplicationId}
+          roleType={roleType}
+          memberType={currentApplicantTab}
+          isEditable={canEditMedical}
+          medicalSections={medicalData?.sections ?? []}
+        />
       ) : activeMedicalSectionTab === "otherMedicals" ? (
         <OtherMedicalsForm
           applicationId={safeApplicationId}
           roleType={roleType}
           memberType={currentApplicantTab}
           medicalSections={medicalData?.sections ?? []}
+          isEditable={canEditMedical}
         />
       ) : (
         <Typography sx={{ color: "#6B7280", mt: 1 }}>
