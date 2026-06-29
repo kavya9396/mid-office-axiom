@@ -13,6 +13,8 @@ const QuickLinks = () => {
 
     const safeBusinessType = businessType ?? "retail";
     const safeApplicationNumber = applicationNumber ?? "";
+    const roleType = localStorage.getItem("roleType") ?? "";
+    const isCvtPoolRole = roleType === "CVT Pool";
     const selectedApplicantTab = localStorage.getItem("drsSelectedApplicantTab") ?? "proposer";
 
     const quickLinks = [
@@ -22,8 +24,12 @@ const QuickLinks = () => {
         { label: "Risk Details", path: "" },
         { label: "Audit Trail", path: "" },
         { label: "Refer to IT", path: "" },
-        { label: "View Medical", path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "" },
-        { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
+        ...(!isCvtPoolRole
+            ? [
+                { label: "View Medical", path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "" },
+                { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
+            ]
+            : []),
     ];
 
     const toggleQuickLinks = useCallback(() => {

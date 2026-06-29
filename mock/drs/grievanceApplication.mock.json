@@ -1,0 +1,41 @@
+{
+	"applicationId": "OB25175129",
+	"status": "Success",
+	"productOpted": "ICICI Pru iProtect Care (Term Plan)",
+	"premium": "₹ 11243",
+	"sumAssured": "₹ 50,00,000",
+	"medicalRaisedDate": "21/02/2026",
+	"medicalsReceivedDate": "24/02/2026",
+	"reports": [
+		{
+			"id": 1,
+			"user": "RI943678",
+			"reports": "Report 1",
+			"lifeAssuredProposer": "Proposer",
+			"remarksByUser": "KYC Accepted",
+			"grievanceRaisedDate": "09/01/2026",
+			"grievanceRaisedRemarks": "KYC Accepted",
+			"grievanceReceivedDate": "09/01/2026"
+		},
+		{
+			"id": 2,
+			"user": "RI943678",
+			"reports": "Report 2",
+			"lifeAssuredProposer": "Proposer",
+			"remarksByUser": "Address Verified",
+			"grievanceRaisedDate": "10/01/2026",
+			"grievanceRaisedRemarks": "Address document accepted",
+			"grievanceReceivedDate": "10/01/2026"
+		},
+		{
+			"id": 3,
+			"user": "RI943678",
+			"reports": "Report 3",
+			"lifeAssuredProposer": "Life Assured",
+			"remarksByUser": "Income proof uploaded",
+			"grievanceRaisedDate": "11/01/2026",
+			"grievanceRaisedRemarks": "Pending TPA review",
+			"grievanceReceivedDate": "11/01/2026"
+		}
+	]
+}

@@ -1,6 +1,6 @@
-export type GrieavanceReport = {
+export type GrievanceReport = {
   id: number;
-  report: string;
+  fupCode: string;
   lifeAssured: string;
   remarksUser: string;
   remarksTpa: string;
@@ -16,17 +16,64 @@ export type GrievanceResponse = {
   policyNumber: string;
   lifeAssuredName: string;
   proposerName: string;
-  reports: GrieavanceReport[];
+  fupCodes: GrievanceReport[];
 };
 
 export type GrievanceSubmitRequest = {
   applicationId: string;
   roleType?: string;
   remarks: string;
-  reports: GrieavanceReport[];
+  fupCodes: GrievanceReport[];
+  attachments?: GrievanceAttachment[];
+};
+
+export type GrievanceAttachment = {
+  fileName: string;
+  mimeType: string;
+  size: number;
+  contentBase64: string;
 };
 
 export type GrievanceSubmitResponse = {
+  success: boolean;
+  message: string;
+};
+
+export type GrievanceApplicationReport = {
+  id: number;
+  user: string;
+  reports: string;
+  lifeAssuredProposer: string;
+  remarksByUser: string;
+  grievanceRaisedDate: string;
+  grievanceRaisedRemarks: string;
+  grievanceReceivedDate: string;
+};
+
+export type GrievanceApplicationRequest = {
+  applicationId: string;
+  roleType?: string;
+};
+
+export type GrievanceApplicationResponse = {
+  applicationId: string;
+  status: string;
+  productOpted: string;
+  premium: string;
+  sumAssured: string;
+  medicalRaisedDate: string;
+  medicalsReceivedDate: string;
+  reports: GrievanceApplicationReport[];
+};
+
+export type GrievanceApplicationSubmitRequest = {
+  applicationId: string;
+  roleType?: string;
+  selectedReportIds: number[];
+  attachments: GrievanceAttachment[];
+};
+
+export type GrievanceApplicationSubmitResponse = {
   success: boolean;
   message: string;
 };

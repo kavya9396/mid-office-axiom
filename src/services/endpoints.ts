@@ -10,4 +10,6 @@ export const apiEndpoints = {
   financialView: getEndpoint("VITE_API_FINANCIAL_VIEW_URL", "/api/financial/view"),
   grievanceView: getEndpoint("VITE_API_GRIEVANCE_VIEW_URL", "/api/grievance/view"),
   grievanceSubmit: getEndpoint("VITE_API_GRIEVANCE_SUBMIT_URL", "/api/grievance/submit"),
+  grievanceApplicationView: getEndpoint("VITE_API_GRIEVANCE_APPLICATION_VIEW_URL", "/api/grievance/application/view"),
+  grievanceApplicationSubmit: getEndpoint("VITE_API_GRIEVANCE_APPLICATION_SUBMIT_URL", "/api/grievance/application/submit"),
 };

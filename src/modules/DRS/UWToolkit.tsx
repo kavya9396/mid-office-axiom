@@ -9,6 +9,7 @@ const UWToolkit = () => {
   const { businessType, applicationNumber } = useParams();
   const roleType = localStorage.getItem("roleType") ?? "";
   const safeBusinessType = businessType ?? "retail";
+  const safeApplicationNumber = applicationNumber ?? "";
 
 const uwToolkitLinks = [
   {
@@ -23,7 +24,9 @@ const uwToolkitLinks = [
   },
   {
     label: "Raise a Grievance",
-    path: getGrievanceRaisePath(safeBusinessType),
+    path: safeApplicationNumber
+      ? getGrievanceRaisePath(safeBusinessType, safeApplicationNumber)
+      : "",
     roles: ["CPT Pool"],
   },
 ].filter((link) => link.roles.includes(roleType));
@@ -70,7 +73,15 @@ const uwToolkitLinks = [
               sx={{
                 borderRadius: "50px",
               }}
-              onClick={() => navigate(link.path, { state: { applicationNumber, businessType: safeBusinessType } })}
+              onClick={() => {
+                if (!link.path) return;
+                navigate(link.path, {
+                  state: {
+                    applicationNumber,
+                    businessType: safeBusinessType,
+                  },
+                });
+              }}
             >
               {link.label}
             </CustomButton>

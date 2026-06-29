@@ -2,8 +2,8 @@ export const PATHS = {
   INBOX: "inbox",
   SEARCH: "search",
 
-  GRIEVANCE_RAISE: "grievance/raise",
-  GRIEVANCE_APPLICATION: "grievance/application",
+  GRIEVANCE_RAISE: "app/:applicationNumber/grievance/raise",
+  GRIEVANCE_APPLICATION: "app/:applicationNumber/grievance/application",
 
   DRS: "app/:applicationNumber/drs",
   DRS_MEDICAL: "app/:applicationNumber/drs/medical",

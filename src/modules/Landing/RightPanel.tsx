@@ -34,7 +34,7 @@ import { useColumnConfig } from "../../hooks/useColumnConfig";
 import Badge from "../../components/ui/Badge/Badge";
 import { useNavigate } from "react-router-dom";
 import FilterTable from "./FilterTable";
-import { getDRSPath } from "../../routes/routes";
+import { getDRSPath, getGrievanceApplicationPath } from "../../routes/routes";
 import SearchApplication from "./SearchApplication";
 import { toFilterComparableValue } from "../../utils/filter";
 
@@ -554,9 +554,10 @@ const RightPanel = ({
                                       "roleType",
                                       row.roleType,
                                     );
-                                    navigate(
-                                      getDRSPath("retail", row.applicationNo),
-                                    );
+                                    const targetPath = row.roleType === "Grievance Pool"
+                                      ? getGrievanceApplicationPath("retail", row.applicationNo)
+                                      : getDRSPath("retail", row.applicationNo);
+                                    navigate(targetPath);
                                   }}
                                 >
                                   {row.applicationNo}
