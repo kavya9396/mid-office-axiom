@@ -169,7 +169,7 @@ const MedicalLifestyle = ({ profile }: ApplicantProfileProps) => {
                             </Typography>
                         </Box>
                         <Box sx={{ ...centerFlex, bgcolor: "#D2D7DE" }}>
-                            <Typography sx={{ color: "#4B5563", fontSize: 14, fontWeight: 600, my: 1 }}>
+                            <Typography sx={{ color: "#4B5563", fontSize: 14, fontWeight: 400, my: 1 }}>
                                 No Lifestyle Habits
                             </Typography>
                         </Box>

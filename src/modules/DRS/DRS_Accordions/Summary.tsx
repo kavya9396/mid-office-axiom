@@ -226,7 +226,7 @@ const Summary = () => {
                                 sx={{
                                     border: "1px solid #d7d7d7",
                                     borderRadius: "10px",
-                                    borderLeft: `6px solid ${item.status === "success" ? "#39b54a" : "#f4a71d"
+                                    borderLeft: `6px solid ${item.status === "success" ? "#39b54a" : "#9A2529"
                                         }`,
                                     px: 2,
                                     py: 1.5,
@@ -277,10 +277,10 @@ const Summary = () => {
                                         <Box
                                             component="span"
                                             sx={{
-                                                color: "#F58220",
+                                                color: "#9A2529",
                                             }}
                                         >
-                                            <TickIcon />
+                                            <InfoIcon />
                                         </Box>
                                     )}
                                 </Box>
