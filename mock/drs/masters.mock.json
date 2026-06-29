@@ -1,6 +1,84 @@
 {
   "success": true,
   "data": {
+    "title": [
+      {
+        "label": "Mr.",
+        "value": "Mr."
+      },
+      {
+        "label": "Mrs.",
+        "value": "Mrs."
+      },
+      {
+        "label": "Ms.",
+        "value": "Ms."
+      },
+      {
+        "label": "Miss",
+        "value": "Miss"
+      },
+      {
+        "label": "Dr.",
+        "value": "Dr."
+      },
+      {
+        "label": "Prof.",
+        "value": "Prof."
+      },
+      {
+        "label": "Mx.",
+        "value": "Mx."
+      },
+      {
+        "label": "Master",
+        "value": "Master"
+      },
+      {
+        "label": "Rev.",
+        "value": "Rev."
+      },
+      {
+        "label": "Hon.",
+        "value": "Hon."
+      },
+      {
+        "label": "Capt.",
+        "value": "Capt."
+      },
+      {
+        "label": "Col.",
+        "value": "Col."
+      },
+      {
+        "label": "Maj.",
+        "value": "Maj."
+      },
+      {
+        "label": "Lt.",
+        "value": "Lt."
+      },
+      {
+        "label": "Brig.",
+        "value": "Brig."
+      },
+      {
+        "label": "Justice",
+        "value": "Justice"
+      },
+      {
+        "label": "Sir",
+        "value": "Sir"
+      },
+      {
+        "label": "Dame",
+        "value": "Dame"
+      },
+      {
+        "label": "Other",
+        "value": "Other"
+      }
+    ],
     "gender": [
       {
         "label": "Male",

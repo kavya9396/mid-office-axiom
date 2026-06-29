@@ -123,6 +123,7 @@ export const applicantInfoTabs: { key: ApplicantInfoTab; label: string }[] = [
   { key: "nominee", label: "Nominee" },
   { key: "generic", label: "Generic" },
   { key: "eia", label: "eIA" },
+  { key: "fundDetails", label: "Fund Details" },
 ];
 
 export const GenderOptions = [

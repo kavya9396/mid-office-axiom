@@ -24,9 +24,11 @@ import Eia from "./Eia"
 import { formatDOB } from "../../../../utils/helpers"
 import { useAppDispatch } from "../../../../store/hooks"
 import { applicantProfileSubmitThunk } from "../../../../store/thunks/applicantProfileSubmitThunk"
+import { updateApplicantProfile } from "../../../../store/slices/drsSlice"
 import { useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import type { RootState } from "../../../../store/store"
+import FundDetails from "./FundDetails"
 
 export interface ApplicantProfileProps {
     profile?: SummaryResponse;
@@ -44,10 +46,17 @@ type FormErrors = Partial<Record<keyof ApplicantEditForm, string>>;
 const emptyOptions: MasterOption[] = [];
 
 const getPersonalKycFields = (options: {
+    titleOptions: MasterOption[];
     genderOptions: MasterOption[];
     nationalityOptions: MasterOption[];
     idProofOptions: MasterOption[];
 }): FormField[] => [
+    {
+        name: "title",
+        label: "Title",
+        type: "select",
+        options: options.titleOptions,
+    },
     { name: "firstName", label: "First Name" },
     { name: "middleName", label: "Middle Name" },
     { name: "lastName", label: "Last Name" },
@@ -160,6 +169,7 @@ const numericRegex = /^\d+$/;
 const buildFormData = (
     profile?: SummaryResponse
 ): ApplicantEditForm => ({
+    title: profile?.proposerSummary?.title ?? "",
     firstName: profile?.proposerSummary?.firstName ?? "",
     middleName: profile?.proposerSummary?.middleName ?? "",
     lastName: profile?.proposerSummary?.lastName ?? "",
@@ -193,6 +203,7 @@ const applyUpdatedDetailsToProfile = (
     ...profile,
     proposerSummary: {
         ...profile.proposerSummary,
+        title: updatedDetails.title ?? profile.proposerSummary.title,
         firstName: updatedDetails.firstName ?? profile.proposerSummary.firstName,
         middleName: updatedDetails.middleName ?? profile.proposerSummary.middleName,
         lastName: updatedDetails.lastName ?? profile.proposerSummary.lastName,
@@ -273,6 +284,7 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     const [formData, setFormData] = useState<ApplicantEditForm>(initialFormData);
     const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
 
+    const titleOptions = masters.title ?? emptyOptions;
     const genderOptions = masters.gender ?? emptyOptions;
     const nationalityOptions = masters.nationality ?? emptyOptions;
     const idProofOptions = masters.idProof ?? emptyOptions;
@@ -281,8 +293,8 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     const countryOptions = masters.country ?? emptyOptions;
 
     const personalKycFields = useMemo(
-        () => getPersonalKycFields({ genderOptions, nationalityOptions, idProofOptions }),
-        [genderOptions, nationalityOptions, idProofOptions]
+        () => getPersonalKycFields({ titleOptions, genderOptions, nationalityOptions, idProofOptions }),
+        [titleOptions, genderOptions, nationalityOptions, idProofOptions]
     );
 
     const communicationIsIndia = formData.communicationCountry.trim().toLowerCase() === "india";
@@ -310,9 +322,26 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
         [personalKycFields, addressFields]
     );
 
+    const visibleApplicantInfoTabs = useMemo(
+        () => displayProfile?.fundDetails ? applicantInfoTabs : applicantInfoTabs.filter((tab) => tab.key !== "fundDetails"),
+        [displayProfile?.fundDetails]
+    );
+
+    const activeApplicantInfoTab = useMemo(
+        () => visibleApplicantInfoTabs.some((tab) => tab.key === applicantInfoTab)
+            ? applicantInfoTab
+            : visibleApplicantInfoTabs[0]?.key ?? "personalKyc",
+        [visibleApplicantInfoTabs, applicantInfoTab]
+    );
+
     const allowedIdProofValues = useMemo(
         () => new Set(idProofOptions.map((option) => option.value)),
         [idProofOptions]
+    );
+
+    const allowedTitleValues = useMemo(
+        () => new Set(titleOptions.map((option) => option.value)),
+        [titleOptions]
     );
 
     const allowedAddressProofValues = useMemo(
@@ -341,6 +370,10 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
 
         if (idProofOptions.length > 0 && formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
             errors.identityProofType = "Select a valid Identity Proof";
+        }
+
+        if (titleOptions.length > 0 && formData.title && !allowedTitleValues.has(formData.title)) {
+            errors.title = "Select a valid Title";
         }
 
         if (addressProofOptions.length > 0 && formData.addressProof && !allowedAddressProofValues.has(formData.addressProof)) {
@@ -521,15 +554,17 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
                 ...updatedDetails,
             };
 
-            setSavedProfile((prevProfile) => {
-                if (!prevProfile) {
-                    if (!displayProfile) {
-                        return prevProfile;
-                    }
-                    return applyUpdatedDetailsToProfile(displayProfile, finalUpdatedDetails);
-                }
-                return applyUpdatedDetailsToProfile(prevProfile, finalUpdatedDetails);
-            });
+            // Calculate the updated profile
+            if (!displayProfile) {
+                return;
+            }
+            const updatedProfile = applyUpdatedDetailsToProfile(displayProfile, finalUpdatedDetails);
+
+            // Update local state
+            setSavedProfile(updatedProfile);
+
+            // Update Redux store so Summary component reflects changes
+            dispatch(updateApplicantProfile(updatedProfile));
 
             setOpenEditDialog(false);
         } catch (error) {
@@ -583,6 +618,7 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
         nominee: <Nominee profile={displayProfile} />,
         generic: <Generic profile={displayProfile} />,
         eia: <Eia profile={displayProfile} />,
+        fundDetails: <FundDetails profile={displayProfile}/>,
     };
 
     return (
@@ -604,13 +640,13 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
 
                 <Box sx={{ display: "flex", justifyContent: "center", my: 2, width: "100%" }}>
                     <CustomTabs
-                        tabs={applicantInfoTabs}
-                        value={applicantInfoTab}
+                        tabs={visibleApplicantInfoTabs}
+                        value={activeApplicantInfoTab}
                         onChange={setApplicantInfoTab}
                     />
                 </Box>
 
-                {tabComponents[applicantInfoTab]}
+                {tabComponents[activeApplicantInfoTab]}
             </Box>
 
             <CustomDialog

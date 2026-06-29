@@ -2,6 +2,7 @@
   "success": true,
   "message": "Applicant profile updated successfully",
   "updatedDetails": {
+    "title": "Mrs.",
     "firstName": "Rohan",
     "middleName": "K",
     "lastName": "Sharma",

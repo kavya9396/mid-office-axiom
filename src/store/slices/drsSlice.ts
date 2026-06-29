@@ -45,7 +45,18 @@ const initialState: DrsState = {
 const drsSlice = createSlice({
   name: "drs",
   initialState,
-  reducers: {},
+  reducers: {
+    updateApplicantProfile: (state, action: { payload: SummaryResponse }) => {
+      if (state.summary) {
+        const index = state.summary.findIndex(
+          (item) => item.memberType === action.payload.memberType
+        );
+        if (index !== -1) {
+          state.summary[index] = action.payload;
+        }
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(drsThunk.pending, (state) => {
@@ -85,4 +96,5 @@ const drsSlice = createSlice({
   },
 });
 
+export const { updateApplicantProfile } = drsSlice.actions;
 export default drsSlice.reducer;

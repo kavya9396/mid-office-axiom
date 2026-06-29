@@ -4,7 +4,7 @@ import CustomTabs from "../../../components/ui/Tabs/Tabs"
 import { applicantTabs } from "../../../utils/constant"
 import { useEffect, useState } from "react"
 import type { ApplicantTab, RiskCard } from "../../../types/drs.types"
-import { HeartIcon, InfoIcon, TickIcon, WalletIcon } from "../../../icons/Icons"
+import { GalleryIcon, HeartIcon, InfoIcon, NoteIcon, ScannerIcon, TextAlignLeftIcon, TickIcon, WalletIcon } from "../../../icons/Icons"
 import { centerFlex, columnFlex, modalTitleStyles } from "../../../utils/styles"
 import { useSelector } from "react-redux"
 import type { RootState } from "../../../store/store"
@@ -99,9 +99,11 @@ const Summary = () => {
     const policy = currentSummary?.policyDetails;
     const underwriting = currentSummary?.underwriting;
 
-    const name = proposer?.firstName + " " + proposer?.middleName + " " + proposer?.lastName
+    const name = proposer?.title + " " + proposer?.firstName + " " + proposer?.middleName + " " + proposer?.lastName
     const imageURL = proposer?.profileImage;
-    
+    const roleType = localStorage.getItem("roleType") ?? "";
+    const isCvtPoolRole = roleType === "CVT Pool";
+
     const handleOpen = (item: RiskCard) => {
         setSelectedCard(item);
         setOpen(true);
@@ -152,6 +154,35 @@ const Summary = () => {
         {
             label: "Product",
             value: `${policy?.productName ?? "-"} (${policy?.productType ?? "-"})`
+        },
+    ];
+
+    const formatFaceMatch = (value: string | number | null | undefined) => {
+        if (value === null || value === undefined || value === "") return "-";
+        if (typeof value === "number") return `${value}%`;
+        return value;
+    };
+
+    const profileHighlights = [
+        {
+            icon: NoteIcon,
+            label: "Document",
+            value: proposer?.document ?? currentSummary?.kycDetails?.identityProofType ?? "-",
+        },
+        {
+            icon: ScannerIcon,
+            label: "Face Match %",
+            value: formatFaceMatch(proposer?.faceMatchPercentage),
+        },
+        {
+            icon: GalleryIcon,
+            label: "Image Quality",
+            value: proposer?.imageQuality ?? "-",
+        },
+        {
+            icon: TextAlignLeftIcon,
+            label: "Remarks",
+            value: proposer?.documentRemarks ?? underwriting?.remarks ?? "-",
         },
     ];
 
@@ -402,6 +433,54 @@ const Summary = () => {
 
                                     <Divider sx={{ my: 1 }} />
 
+                                    {isCvtPoolRole && (
+                                        <>
+                                            <Box
+                                                sx={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: "repeat(4, 1fr)",
+                                                    gap: 2,
+                                                    borderRadius: "8px",
+                                                }}
+                                            >
+                                                {profileHighlights.map((item) => {
+                                                    const Icon = item.icon;
+                                                    return (
+                                                        <Box
+                                                            key={item.label}
+                                                            sx={{
+                                                                display: "flex",
+                                                                alignItems: "flex-start",
+                                                                gap: 1.5,
+                                                            }}
+                                                        >
+                                                            <Box sx={{ color: "#063E6F" }}>
+                                                                <Icon />
+                                                            </Box>
+
+                                                            <Box>
+                                                                <Typography sx={{ fontSize: "12px", color: "#444" }}>
+                                                                    {item.label}
+                                                                </Typography>
+                                                                <Typography
+                                                                    sx={{
+                                                                        fontSize: "14px",
+                                                                        color: "#161616",
+                                                                        fontWeight: 600,
+                                                                    }}
+                                                                >
+                                                                    {item.value}
+                                                                </Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    );
+                                                })}
+                                            </Box>
+
+                                            <Divider sx={{ my: 1 }} />
+                                        </>
+                                    )}
+
                                     <GridSection
                                         columns={5}
                                         items={proposerDetails}
@@ -487,7 +566,7 @@ const Summary = () => {
                                 fontSize: "16px",
                                 fontWeight: 700,
                             }}
-                           onClick={() => navigate(getMedicalPath("retail", "OB25175127") )}
+                            onClick={() => navigate(getMedicalPath("retail", "OB25175127"))}
                         >
                             View Medicals
                         </CustomButton>
@@ -501,7 +580,7 @@ const Summary = () => {
                                 fontSize: "16px",
                                 fontWeight: 700,
                             }}
-                        onClick={() => navigate(getFinancialPath("retail", "OB25175127") )}
+                            onClick={() => navigate(getFinancialPath("retail", "OB25175127"))}
                         >
                             View Financial Details
                         </CustomButton>

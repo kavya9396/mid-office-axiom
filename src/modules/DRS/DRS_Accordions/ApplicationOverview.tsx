@@ -35,6 +35,14 @@ const isExpanded = expandedRoles.includes(roleType);
       value: applicationOverview?.product?.name ?? "-",
     },
     {
+      label: "Product Code",
+      value: applicationOverview?.product?.productCode ?? "-"
+    },
+    {
+      label: "Face Value",
+      value: applicationOverview?.product?.faceValue ?? "-"
+    },
+    {
       label: "Sum Assured",
       value: applicationOverview?.product?.sumAssured?.toLocaleString("en-IN") ?? "-",
     },

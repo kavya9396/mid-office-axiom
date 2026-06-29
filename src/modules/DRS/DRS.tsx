@@ -45,7 +45,7 @@ const DRS = () => {
 
         dispatch(
             mastersThunk({
-                masters: ["gender", "nationality", "idProof", "addressProof", "state", "country"],
+                masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country"],
             })
         );
     }, [dispatch, applicationId, roleType]);

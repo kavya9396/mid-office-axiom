@@ -11,6 +11,7 @@
     {
       "memberType": "proposer",
       "proposerSummary": {
+        "title": "Mr.",
         "firstName": "Rudra",
         "middleName": "Kumar",
         "lastName": "Sangha",
@@ -18,7 +19,11 @@
         "age": 34.0,
         "gender": "Male",
         "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
-        "caseStatus": "Green Case"
+        "caseStatus": "Green Case",
+        "document": "Aadhaar Card",
+        "faceMatchPercentage": 76,
+        "imageQuality": "Good",
+        "documentRemarks": "Documents match"
       },
       "personalDetails": {
         "maritalStatus": "Married",
@@ -95,8 +100,8 @@
         "emailId": "test@ipru.com",
         "alternateMobile": "-",
         "landlineNumber": "",
-        "emailPref":"-",
-        "smsPref":""
+        "emailPref": "-",
+        "smsPref": ""
       },
       "applicantFinancialDetails": {
         "occupation": "Salaried",
@@ -110,20 +115,23 @@
         "weight": "70 Kgs",
         "diabetes": "No",
         "hypertension": "No",
-        "heartDisease": "No",
+        "heartDisease": "Yes",
         "cancer": "No",
         "kidneyDisease": "No",
         "liverDisease": "No",
         "lungDisease": "No",
-        "neurologicalDisorder": "No",
+        "neurologicalDisorder": "Yes",
         "mentalDisorder": "No",
         "hivAids": "No",
         "anySurgery": "No",
-        "hospitalization": "No",
+        "hospitalization": "Yes",
         "otherIllness": "No",
         "familyHeartDisease": "No",
         "familyCancer": "No",
-        "familyDiabetes": "No"
+        "familyDiabetes": "No",
+        "gynecologicalHistory": "Yes",
+        "pregnancyHistory": "Yes",
+        "miscarriageHistory": "Yes"
       },
       "lifestyleHabits": {
         "alcoholConsumption": "No",
@@ -190,6 +198,19 @@
         "existingEIANumber": "NA",
         "preferredRepository": "CDSL",
         "convertPolicies": "No"
+      },
+      "fundDetails": {
+        "allocationStrategy": "Self Allocation",
+        "totalAllocation": "100",
+        "atpOpted": "Yes",
+        "fundDetail": {
+          "name": "Equity Growth Fund",
+          "amount": "500000",
+          "sourceFund": "Balanced Fund",
+          "targetFund": "Equity Growth Fund",
+          "switchDate": "2026-06-29",
+          "transferPercentage": "25"
+        }
       }
     },
     {
@@ -202,7 +223,11 @@
         "age": 34.0,
         "gender": "Male",
         "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
-        "caseStatus": "Green Case"
+        "caseStatus": "Green Case",
+        "document": "Aadhaar Card",
+        "faceMatchPercentage": 76,
+        "imageQuality": "Good",
+        "documentRemarks": "Documents match"
       },
       "personalDetails": {
         "maritalStatus": "Married",
@@ -241,7 +266,9 @@
   "applicationOverview": {
     "product": {
       "name": "ICICI PRU IPROTECT SMART PLUS",
-      "sumAssured": 1000000
+      "sumAssured": 1000000,
+      "productCode": "IPROTECT-PLUS",
+      "faceValue": 1000000
     },
     "distribution": {
       "channel": "AG",
@@ -357,8 +384,8 @@
     "reason": "Customer not speaking",
     "userId": "sunil.sharma"
   },
-  "cvtDecision":{
-    "remark":"",
-    "decision":"Accept"
+  "cvtDecision": {
+    "remark": "",
+    "decision": "Accept"
   }
 }

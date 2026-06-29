@@ -274,6 +274,8 @@ export interface ApplicationOverview {
 export interface Product {
   name: string;
   sumAssured: number;
+  productCode: string;
+  faceValue: number;
 }
 
 export interface Distribution {
@@ -354,6 +356,7 @@ export type MasterOption = {
 };
 
 export type MasterKey =
+  | "title"
   | "gender"
   | "nationality"
   | "idProof"
@@ -421,9 +424,11 @@ export interface SummaryResponse {
   nominees: Nominee[];
   genericDetails: GenericDetails;
   eiaDetails: EiaDetails;
+  fundDetails: FundDetails;
 }
 
 export interface ProposerSummary {
+  title?: string;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -432,6 +437,10 @@ export interface ProposerSummary {
   gender: "Male" | "Female" | "Other";
   profileImage: string;
   caseStatus: string;
+  document?: string;
+  faceMatchPercentage?: string | number;
+  imageQuality?: string;
+  documentRemarks?: string;
 }
 
 export interface PersonalDetails {
@@ -543,6 +552,9 @@ export interface HealthInformation {
   familyHeartDisease: string;
   familyCancer: string;
   familyDiabetes: string;
+  gynecologicalHistory: string;
+  pregnancyHistory: string;
+  miscarriageHistory: string;
 }
 
 export interface LifestyleHabits {
@@ -589,6 +601,22 @@ export interface EiaDetails {
   convertPolicies: string;
 }
 
+export interface FundDetails {
+  allocationStrategy: string;
+  totalAllocation: string;
+  atpOpted: string;
+  fundDetail: FundDetail;
+}
+
+export interface FundDetail {
+  name: string;
+  amount: string;
+  sourceFund: string;
+  targetFund: string;
+  switchDate: string;
+  transferPercentage: string;
+}
+
 export interface ApplicantProfile {
   applicantDetails: ApplicantDetails;
   kycDetails: KycDetails;
@@ -610,7 +638,8 @@ export type ApplicantInfoTab =
   | "medicalLifestyle"
   | "nominee"
   | "generic"
-  | "eia";
+  | "eia"
+  | "fundDetails";
 
 export type NomineeRow = Nominee;
 
@@ -620,6 +649,7 @@ export type FieldProps = {
 };
 
 export interface ApplicantEditForm {
+  title: string;
   firstName: string;
   middleName: string;
   lastName: string;
