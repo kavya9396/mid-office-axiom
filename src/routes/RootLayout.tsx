@@ -8,7 +8,7 @@ export default function RootLayout() {
                 <Header />
             </header>
 
-            <main style={{backgroundColor: "#F0F3F8"}}>
+            <main style={{backgroundColor: "#F0F3F8", minHeight: "90vh"}}>
                 <Outlet />
             </main>
         </>
