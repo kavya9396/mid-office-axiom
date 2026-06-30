@@ -10,6 +10,7 @@ import ViewMedicals from "../modules/DRS/Medical/viewMedicals";
 import ViewFinancial from "../modules/DRS/Financial/ViewFinancial";
 import Grievance from "../modules/Grievance/Grievance";
 import GrievanceApplication from "../modules/Grievance/GrievanceApplication";
+import PreviousPolicy from "../modules/QuickLinks/PreviousPolicy";
 
 function BusinessTypeRedirect() {
     return <Navigate to="inbox" replace />;
@@ -38,6 +39,7 @@ export default function AppRoutes() {
                         <Route path={PATHS.DRS_FINANCIAL} element={<ViewFinancial />} />
                         <Route path={PATHS.GRIEVANCE_RAISE} element={<Grievance />} />
                         <Route path={PATHS.GRIEVANCE_APPLICATION} element={<GrievanceApplication />} />
+                        <Route path={PATHS.DRS_PREVIOUS} element={<PreviousPolicy />} />
 
                     </Route>
                 </Route>

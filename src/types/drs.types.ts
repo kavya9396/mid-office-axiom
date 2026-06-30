@@ -321,6 +321,27 @@ export type FinancialResponse = {
   summary: MedicalSummaryMember[];
 };
 
+export type PreviousPolicyItem = {
+  policyNumber?: string;
+  productName?: string;
+  productType?: string;
+  dateOfIssuance?: string;
+  dateOfIssue?: string;
+  issueDate?: string;
+  uwDecision?: string;
+  sumAssured?: string | number;
+  medicalsReceivedDate?: string;
+  medicalReceivedDate?: string;
+  validity?: string;
+};
+
+export type PreviousPoliciesResponse = {
+  applicationId?: string;
+  previousPolicies?: PreviousPolicyItem[];
+  policies?: PreviousPolicyItem[];
+  totalCount?: number;
+};
+
 export type MedicalSubmitRequest = {
   applicationId: string;
   roleType: string;

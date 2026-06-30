@@ -114,6 +114,7 @@
         "personalDetails": {
           "userImg":"",
           "UDSLink":"",
+            "salutation":"Mr",
           "firstName": "Test",
           "lastName": "User",
           "maritalStatus": "M",
@@ -249,6 +250,7 @@
         "personalDetails": {
           "userImg":"",
            "UDSLink":"",
+           "salutation":"Mr",
           "firstName": "JOINT",
           "lastName": "LAST",
           "maritalStatus": "M",
@@ -397,7 +399,12 @@
         "dob": "2001-06-07T00:00:00.0",
         "gender": "Female",
         "percentage": "",
-        "proposerNomineeRelation": "wife"
+        "proposerNomineeRelation": "wife",
+        "accountNumber":"",
+"IFSC":"",
+"appointeeName":"",
+"appointeeGender":"",
+"appointeeDOB":""
       }
     ],
     "appointee": [
