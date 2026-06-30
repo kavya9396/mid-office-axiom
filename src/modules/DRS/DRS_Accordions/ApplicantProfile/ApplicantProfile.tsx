@@ -166,6 +166,20 @@ const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
 const indiaPincodeRegex = /^\d{6}$/;
 const numericRegex = /^\d+$/;
 
+const getGenderByTitle = (title: string): ApplicantEditForm["gender"] | undefined => {
+    const normalizedTitle = title.trim().toLowerCase();
+
+    if (normalizedTitle === "mr" || normalizedTitle === "master") {
+        return "Male";
+    }
+
+    if (normalizedTitle === "miss" || normalizedTitle === "mrs") {
+        return "Female";
+    }
+
+    return undefined;
+};
+
 const buildFormData = (
     profile?: SummaryResponse
 ): ApplicantEditForm => ({
@@ -465,6 +479,13 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
                 nextFormData.permanentPincode = "";
             }
 
+            if (field === "title") {
+                const mappedGender = getGenderByTitle(value);
+                if (mappedGender) {
+                    nextFormData.gender = mappedGender;
+                }
+            }
+
             return nextFormData;
         });
 
@@ -475,6 +496,11 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
 
             const nextErrors = { ...prev };
             delete nextErrors[field];
+
+            if (field === "title") {
+                delete nextErrors.gender;
+            }
+
             return nextErrors;
         });
 
