@@ -15,6 +15,7 @@ import ApplicantProfile from "./ApplicantProfile/ApplicantProfile"
 import CustomDialog from "../../../components/ui/Dialog/Dialog"
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes"
 import { useNavigate } from "react-router-dom"
+import { formatDOB } from "../../../utils/helpers"
 
 const riskDetails: RiskCard[] = [
     {
@@ -130,7 +131,7 @@ const Summary = () => {
     const imageURL = "";
     const genderCode = String(personalDetails?.gender ?? "").toUpperCase();
     const gender = genderCode === "M" ? "Male" : genderCode === "F" ? "Female" : "Other";
-    const dob = String(personalDetails?.dob ?? "");
+    const dob = String(formatDOB(personalDetails?.dob) ?? "");
     const getAge = (value: string) => {
         if (!value) return 0;
         const date = new Date(value);

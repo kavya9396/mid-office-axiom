@@ -6,6 +6,7 @@ import { GridSection } from "../../../components/layout/GridSection";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import type { RiderRow } from "../../../types/drs.types";
+import { toDisplayValue } from "../../../utils/helpers";
 
 const riderColumns: Column<RiderRow>[] = [
   { key: "riderName", header: "Name", width: "30%" },
@@ -16,8 +17,22 @@ const riderColumns: Column<RiderRow>[] = [
   { key: "riderPPT", header: "PPT", width: "10%" },
 ];
 
+const formatNumberOrDash = (value: unknown) => {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric.toLocaleString("en-IN") : "-";
+};
+
 const ApplicationOverview = () => {
-  const { applicationOverview, riderDetails } = useSelector((state: RootState) => state.drs);
+  const { data } = useSelector((state: RootState) => state.drs);
+
+  const firstProduct = data?.productDetail?.[0];
+  const riderProducts = (data?.productDetail ?? []).filter(
+    (product) => String(product.type ?? "").toLowerCase() !== "base"
+  );
 
   const roleType = localStorage.getItem("roleType") ?? "";
   const expandedRoles = [
@@ -32,70 +47,66 @@ const ApplicationOverview = () => {
   const applicationDetails = [
     {
       label: "Product Name",
-      value: applicationOverview?.product?.name ?? "-",
+      value: firstProduct?.name ?? "-",
     },
     {
       label: "Product Code",
-      value: applicationOverview?.product?.productCode ?? "-"
+      value: firstProduct?.code ?? "-"
     },
     {
       label: "Sum Assured",
-      value: applicationOverview?.product?.sumAssured?.toLocaleString("en-IN") ?? "-",
+      value: formatNumberOrDash(firstProduct?.sumAssured),
     },
     {
       label: "Channel",
-      value: applicationOverview?.distribution?.channel ?? "-",
+      value: data?.sourcingDetail?.channelCode ?? "-",
     },
     {
       label: "Sub Channel",
-      value: applicationOverview?.distribution?.subChannel ?? "-",
+      value: data?.sourcingDetail?.drcChannelCode ?? "-",
     },
     {
       label: "Agent Code",
-      value: applicationOverview?.agent?.agentCode ?? "-",
+      value: data?.sourcingDetail?.agentCode ?? "-",
     },
     {
       label: "Agent Name",
-      value: applicationOverview?.agent?.agentName ?? "-",
+      value: "-",
     },
     {
       label: "Customer Type",
-      value: applicationOverview?.customer?.customerType ?? "-",
+      value: data?.applicationInfo?.proposerType ?? "-",
     },
     {
       label: "Policy Type",
-      value: applicationOverview?.customer?.policyType ?? "-",
+      value: data?.groupDetails?.coverageStatus ?? "-",
     },
     {
       label: "Modal Premium",
-      value:
-        applicationOverview?.policyDetails?.modalPremium?.toLocaleString(
-          "en-IN"
-        ) ?? "-",
+      value: formatNumberOrDash(firstProduct?.paymentAmount),
     },
     {
       label: "PT",
-      value: applicationOverview?.policyDetails?.policyTerm ?? "-",
+      value: toDisplayValue(firstProduct?.PT),
     },
     {
       label: "PPT",
-      value:
-        applicationOverview?.policyDetails?.premiumPaymentTerm ?? "-",
+      value: toDisplayValue(firstProduct?.PPT),
     },
     {
       label: "Payment Mode",
-      value: applicationOverview?.policyDetails?.paymentMode ?? "-",
+      value: firstProduct?.premiumModeFpd ?? "-",
     },
   ];
 
   const riderRows: RiderRow[] =
-    riderDetails?.map((rider) => ({
-      riderName: rider.riderName,
-      riderOption: rider.option,
-      riderPT: rider.policyTerm,
-      riderSumAssured: rider.sumAssured,
-      riderModalPremium: rider.modalPremium,
-      riderPPT: rider.premiumPaymentTerm,
+    riderProducts.map((rider) => ({
+      riderName: String(rider.name ?? "-"),
+      riderOption: String(rider.type ?? "-"),
+      riderPT: Number(rider.term ?? 0),
+      riderSumAssured: Number(rider.sumAssured ?? 0),
+      riderModalPremium: Number(rider.paymentAmount ?? 0),
+      riderPPT: Number(rider.premiumCessationTerm ?? 0),
     })) ?? [];
 
   return (

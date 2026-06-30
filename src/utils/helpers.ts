@@ -132,10 +132,24 @@ export const maskSensitive = (
   );
 };
 
-export const formatDOB = (dob: string): string => {
-  if (!dob) return "";
-  const [dd, mm, yyyy] = dob.split("-");
-  return `${yyyy}-${mm}-${dd}`;
+export const formatDOB = (dob?: string): string => {
+    if (!dob) return "";
+
+    const value = dob.trim();
+
+    // Handle API values like 1999-07-07T00:00:00.0 by taking the date portion.
+    const isoDatePart = value.split("T")[0];
+    if (/^\d{4}-\d{2}-\d{2}$/.test(isoDatePart)) {
+        return isoDatePart;
+    }
+
+    // Fallback for legacy dd-mm-yyyy values.
+    const [dd, mm, yyyy] = value.split("-");
+    if (dd && mm && yyyy) {
+        return `${yyyy}-${mm}-${dd}`;
+    }
+
+    return "";
 };
 
 type TripleFieldConfig<T> = {
@@ -184,3 +198,14 @@ export const buildTripleFields = <T,>(
         };
     });
 };
+
+export const toDisplayValue = (value: unknown): string => {
+  const text = String(value ?? "").trim();
+  return text || "-";
+};
+
+export const withDashFallback = (items: Array<{ label: string; value: unknown }>) =>
+    items.map((item) => ({
+        ...item,
+        value: toDisplayValue(item.value),
+    }));

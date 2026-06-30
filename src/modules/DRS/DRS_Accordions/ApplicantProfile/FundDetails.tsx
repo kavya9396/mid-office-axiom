@@ -1,25 +1,70 @@
+import { Box, Typography } from "@mui/material";
 import { GridSection, type GridItem } from "../../../../components/layout/GridSection";
+import { useSelector } from "react-redux";
+import type { Column } from "../../../../components/ui/Table/Table";
+import CustomTable from "../../../../components/ui/Table/Table";
+import type { RootState } from "../../../../store/store";
+import type { FundDetail } from "../../../../types/drs.types";
+import { toDisplayValue } from "../../../../utils/helpers";
 import { SectionCard, type ApplicantProfileProps } from "./ApplicantProfile";
 
+const fundDetailColumns: Column<FundDetail>[] = [
+    { key: "name", header: "Fund Name", width: "18%" },
+    { key: "amount", header: "Fund Amount", width: "14%" },
+    { key: "sourceFund", header: "Source Fund", width: "18%" },
+    { key: "targetFund", header: "Target Fund", width: "18%" },
+    { key: "switchDate", header: "Switch Date", width: "16%" },
+    { key: "transferPercentage", header: "Transfer Percentage", width: "16%" },
+];
+
 const FundDetails = ({ profile }: ApplicantProfileProps) => {
-    const fund = profile?.fundDetails;
+    const { data } = useSelector((state: RootState) => state.drs);
+
+    const fund = profile?.fundDetails ?? data?.fundDetails;
+    const fundDetailRows: FundDetail[] = Array.isArray(fund?.fundDetail)
+        ? fund.fundDetail.map((item) => ({
+            name: toDisplayValue(item.name),
+            amount: toDisplayValue(item.amount),
+            sourceFund: toDisplayValue(item.sourceFund),
+            targetFund: toDisplayValue(item.targetFund),
+            switchDate: toDisplayValue(item.switchDate),
+            transferPercentage: toDisplayValue(item.transferPercentage),
+        }))
+        : [];
 
     const fundDetails: GridItem[] = [
         { label: "Allocation Strategy", value: fund?.allocationStrategy ?? "-" },
         { label: "Total Allocation", value: fund?.totalAllocation ?? "-" },
         { label: "ATP Opted", value: fund?.atpOpted ?? "-" },
-        { label: "Fund Name", value: fund?.fundDetail?.name ?? "-" },
-        { label: "Fund Amount", value: fund?.fundDetail?.amount ?? "-" },
-        { label: "Source Fund", value: fund?.fundDetail?.sourceFund ?? "-" },
-        { label: "Target Fund", value: fund?.fundDetail?.targetFund ?? "-" },
-        { label: "Switch Date", value: fund?.fundDetail?.switchDate ?? "-" },
-        { label: "Transfer Percentage", value: fund?.fundDetail?.transferPercentage ?? "-" },
     ];
 
     return (
-        <SectionCard>
-            <GridSection columns={5} items={fundDetails} />
-        </SectionCard>
+        <>
+            <SectionCard>
+                <GridSection columns={3} items={fundDetails} />
+            </SectionCard>
+
+            <Box sx={{ mt: 2 }}>
+                {fundDetailRows.length > 0 ? (
+                    <CustomTable<FundDetail>
+                        title="Fund Detail"
+                        columns={fundDetailColumns}
+                        data={fundDetailRows}
+                    />
+                ) : (
+                    <Typography
+                        component="span"
+                        sx={{
+                            fontSize: "14px",
+                            fontWeight: 700,
+                        }}
+                    >
+                        No fund detail available
+                    </Typography>
+                )}
+            </Box>
+        </>
+
     );
 };
 

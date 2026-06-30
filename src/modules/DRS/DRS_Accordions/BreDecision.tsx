@@ -40,8 +40,31 @@ const truncateText = (text: string, limit: number) => {
 const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisionProps) => {
   const dispatch = useAppDispatch();
   const { applicationNumber } = useAppContext();
-  const { breDecision: drsBreDecision } = useSelector((state: RootState) => state.drs);
-  const breDecision = breDecisionOverride ?? drsBreDecision;
+  const { data } = useSelector((state: RootState) => state.drs);
+
+  const breOutput = data?.externalAPIs?.breOutput;
+
+  const drsBreDecision: BreDecisionResponse | null = breOutput
+    ? {
+      decision: breOutput.decisionTypes?.breDecision ?? null,
+      status: breOutput ? "Success" : "Failure",
+      remarks: breOutput.breRemarks ?? null,
+      discrepancy: breOutput.decisionTypes?.breRequirement ?? null,
+      timestamp: breOutput.systemDecisionDateTime ?? null,
+      initialDecision: breOutput.decisionTypes?.initialDecision ?? null,
+      retrigger: null,
+    }
+    : null;
+
+  console.log("drsBreDecision", drsBreDecision);
+
+  const breDecision =
+    drsBreDecision || breDecisionOverride
+      ? {
+        ...(drsBreDecision ?? {}),
+        ...(breDecisionOverride ?? {}),
+      }
+      : null;
   const navigate = useNavigate();
   const roleType = localStorage.getItem("roleType") ?? "";
   const applicationId = applicationNumber ?? "";
@@ -57,6 +80,8 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const [referToItError, setReferToItError] = useState<string | null>(null);
 
   const currentBreDecision = retriggeredBreDecision ?? breDecision;
+  const resolvedRemarks = currentBreDecision?.remarks ?? drsBreDecision?.remarks ?? "-";
+  const resolvedDiscrepancy = currentBreDecision?.discrepancy ?? drsBreDecision?.discrepancy ?? "-";
 
   const isBreSuccess = currentBreDecision?.status?.toLowerCase() === "success";
 
@@ -114,12 +139,16 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       value: currentBreDecision?.status ?? "-",
     },
     {
+      label: "Initial BRE Decision",
+      value: currentBreDecision?.initialDecision ?? "-",
+    },
+    {
       label: "BRE Remarks",
-      value: isBreSuccess ? "-" : currentBreDecision?.remarks ?? "-",
+      value: resolvedRemarks,
     },
     {
       label: "BRE Discrepancy",
-      value: isBreSuccess ? "-" : currentBreDecision?.discrepancy ?? "-",
+      value: resolvedDiscrepancy,
     },
     {
       label: "BRE Timestamp",
@@ -285,7 +314,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
           <Box
             sx={{
               display: "grid",
-              gridTemplateColumns: "0.8fr 2.5fr 2.5fr 1.5fr 0.5fr",
+              gridTemplateColumns: "0.5fr 0.8fr 2.5fr 2.5fr 0.8fr 0.5fr",
               gap: "16px",
             }}
           >

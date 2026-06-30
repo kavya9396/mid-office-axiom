@@ -24,7 +24,7 @@ import Eia from "./Eia"
 import { formatDOB } from "../../../../utils/helpers"
 import { useAppDispatch } from "../../../../store/hooks"
 import { applicantProfileSubmitThunk } from "../../../../store/thunks/applicantProfileSubmitThunk"
-import { updateApplicantProfile } from "../../../../store/slices/drsSlice"
+// import { updateApplicantProfile } from "../../../../store/slices/drsSlice"
 import { useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import type { RootState } from "../../../../store/store"
@@ -279,6 +279,7 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     const { applicationNumber } = useParams<{ applicationNumber: string }>();
     const dispatch = useAppDispatch();
     const masters = useSelector((state: RootState) => state.drs.masters);
+    const drsData = useSelector((state: RootState) => state.drs.data);
     const [applicantInfoTab, setApplicantInfoTab] = useState<ApplicantInfoTab>("personalKyc");
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
@@ -336,9 +337,17 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
         [personalKycFields, addressFields]
     );
 
+    const hasFundDetails = useMemo(() => {
+        if (displayProfile?.fundDetails?.fundDetail?.length) {
+            return true;
+        }
+
+        return Boolean(drsData?.fundDetails?.fundDetail?.length);
+    }, [displayProfile?.fundDetails, drsData?.fundDetails]);
+
     const visibleApplicantInfoTabs = useMemo(
-        () => displayProfile?.fundDetails ? applicantInfoTabs : applicantInfoTabs.filter((tab) => tab.key !== "fundDetails"),
-        [displayProfile?.fundDetails]
+        () => hasFundDetails ? applicantInfoTabs : applicantInfoTabs.filter((tab) => tab.key !== "fundDetails"),
+        [hasFundDetails]
     );
 
     const activeApplicantInfoTab = useMemo(
@@ -590,7 +599,7 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
             setSavedProfile(updatedProfile);
 
             // Update Redux store so Summary component reflects changes
-            dispatch(updateApplicantProfile(updatedProfile));
+            // dispatch(updateApplicantProfile(updatedProfile));
 
             setOpenEditDialog(false);
         } catch (error) {

@@ -1,8 +1,10 @@
 import { Box, Typography } from "@mui/material";
 import KeyValueTable from "../../../../components/ui/KeyValueTable/KeyValueTable";
 import { buildTripleFields } from "../../../../utils/helpers";
+import { useSelector } from "react-redux";
 import type { HealthInformation, LifestyleHabits } from "../../../../types/drs.types";
 import type { ApplicantProfileProps } from "./ApplicantProfile";
+import type { RootState } from "../../../../store/store";
 import { centerFlex } from "../../../../utils/styles";
 
 type TripleFieldConfig<T> = {
@@ -13,11 +15,6 @@ type TripleFieldConfig<T> = {
 
 type HealthFieldConfig = TripleFieldConfig<HealthInformation>;
 type LifestyleFieldConfig = TripleFieldConfig<LifestyleHabits>;
-
-const baseHealthFields: HealthFieldConfig[] = [
-    { label: "Height", key: "height" },
-    { label: "Weight", key: "weight" },
-];
 
 const conditionHealthFields: HealthFieldConfig[] = [
     { label: "Diabetes", key: "diabetes" },
@@ -41,7 +38,26 @@ const conditionHealthFields: HealthFieldConfig[] = [
     { label: "Miscarriage History", key: "miscarriageHistory" },
 ];
 
-const isYesValue = (value?: string) => String(value ?? "").trim().toLowerCase() === "yes";
+const normalizeText = (value: unknown) => String(value ?? "").trim();
+const isYesValue = (value: unknown) => {
+    const normalized = normalizeText(value).toLowerCase();
+    return normalized === "y" || normalized === "yes" || normalized === "true";
+};
+const formatYesValue = (value: unknown) => (isYesValue(value) ? "Yes" : "-");
+const formatHeight = (value: unknown) => {
+    const normalized = normalizeText(value);
+    return normalized ? `${normalized} Cms` : "-";
+};
+const formatWeight = (value: unknown) => {
+    const normalized = normalizeText(value);
+    return normalized ? `${normalized} Kgs` : "-";
+};
+const formatTextOrDash = (value: unknown) => normalizeText(value) || "-";
+
+const withFormat = <T,>(
+    fields: TripleFieldConfig<T>[],
+    format: (value: unknown) => string
+): TripleFieldConfig<T>[] => fields.map((field) => ({ ...field, format }));
 
 const toTripleRows = <T,>(fields: TripleFieldConfig<T>[], placeholderKey: keyof T) => {
     const placeholderField: TripleFieldConfig<T> = {
@@ -68,10 +84,73 @@ const toTripleRows = <T,>(fields: TripleFieldConfig<T>[], placeholderKey: keyof 
 };
 
 const MedicalLifestyle = ({ profile }: ApplicantProfileProps) => {
-    const health = profile?.healthInformation;
-    const lifestyle = profile?.lifestyleHabits;
+    const { data } = useSelector((state: RootState) => state.drs);
 
-    const positiveConditionFields = conditionHealthFields.filter((field) =>
+    const fallbackCustomer = data?.customerDetails?.[0];
+    const fallbackHealthDetail = (fallbackCustomer?.healthDetail ?? {}) as Record<string, unknown>;
+    const fallbackSubstanceConsumption = Array.isArray(fallbackHealthDetail["substanceConsumption"])
+        ? (fallbackHealthDetail["substanceConsumption"] as Array<Record<string, unknown>>)
+        : [];
+    const firstSubstance = fallbackSubstanceConsumption[0] ?? {};
+    const fallbackIllness = Array.isArray(fallbackHealthDetail["illnessOrImpairment"])
+        ? (fallbackHealthDetail["illnessOrImpairment"] as unknown[])
+            .map((item) => normalizeText(item))
+            .filter(Boolean)
+            .join(", ")
+        : "";
+
+    const health: HealthInformation = profile?.healthInformation ?? {
+        height: normalizeText(fallbackHealthDetail["height"]),
+        weight: normalizeText(fallbackHealthDetail["weight"]),
+        diabetes: "",
+        hypertension: "",
+        heartDisease: "",
+        cancer: "",
+        kidneyDisease: "",
+        liverDisease: "",
+        lungDisease: "",
+        neurologicalDisorder: "",
+        mentalDisorder: "",
+        hivAids: "",
+        anySurgery: "",
+        hospitalization: "",
+        otherIllness: fallbackIllness,
+        familyHeartDisease: "",
+        familyCancer: "",
+        familyDiabetes: "",
+        gynecologicalHistory: "",
+        pregnancyHistory: "",
+        miscarriageHistory: "",
+    };
+
+    const lifestyle: LifestyleHabits = profile?.lifestyleHabits ?? {
+        alcoholConsumption: "",
+        alcoholQuantity: "",
+        smoking: normalizeText(firstSubstance.substance) ? "Yes" : "",
+        smokingQuantity: normalizeText(
+            (firstSubstance.quantity as Record<string, unknown> | undefined)?.amount
+        ),
+        tobaccoGutka: "",
+        narcotics: "",
+        hazardousOccupation: normalizeText(fallbackHealthDetail["hazardousOccupation"]),
+        aviationActivities: "",
+        diving: "",
+        mountaineering: "",
+        otherHazardousActivities: "",
+        racing: "",
+    };
+
+    const formattedBaseHealthFields: HealthFieldConfig[] = [
+        { label: "Height", key: "height", format: formatHeight as (value: HealthInformation[keyof HealthInformation]) => string },
+        { label: "Weight", key: "weight", format: formatWeight as (value: HealthInformation[keyof HealthInformation]) => string },
+    ];
+
+    const formattedConditionHealthFields = withFormat<HealthInformation>(
+        conditionHealthFields,
+        formatYesValue
+    );
+
+    const positiveConditionFields = formattedConditionHealthFields.filter((field) =>
         isYesValue(health?.[field.key])
     );
 
@@ -82,7 +161,7 @@ const MedicalLifestyle = ({ profile }: ApplicantProfileProps) => {
     };
 
     const healthFieldsToDisplay = [
-        ...baseHealthFields,
+        ...formattedBaseHealthFields,
         ...(positiveConditionFields.length > 0 ? positiveConditionFields : [noMedicalHistoryField]),
     ];
 
@@ -91,7 +170,7 @@ const MedicalLifestyle = ({ profile }: ApplicantProfileProps) => {
         toTripleRows(healthFieldsToDisplay, "height")
     );
 
-    const lifestyleConditionFields: LifestyleFieldConfig[] = [
+    const lifestyleConditionFields: LifestyleFieldConfig[] = withFormat<LifestyleHabits>([
         { label: "Alcohol Consumption", key: "alcoholConsumption" },
         { label: "Smoking", key: "smoking" },
         { label: "Tobacco/Gutka", key: "tobaccoGutka" },
@@ -102,21 +181,37 @@ const MedicalLifestyle = ({ profile }: ApplicantProfileProps) => {
         { label: "Mountaineering", key: "mountaineering" },
         { label: "Other Hazardous Activities", key: "otherHazardousActivities" },
         { label: "Racing", key: "racing" },
-    ];
+    ], formatYesValue);
 
     const lifestyleFieldsToDisplay: LifestyleFieldConfig[] = [];
 
     if (isYesValue(lifestyle?.alcoholConsumption)) {
         lifestyleFieldsToDisplay.push(
-            { label: "Alcohol Consumption", key: "alcoholConsumption" },
-            { label: "Alcohol Quantity", key: "alcoholQuantity" }
+            {
+                label: "Alcohol Consumption",
+                key: "alcoholConsumption",
+                format: formatYesValue as (value: LifestyleHabits[keyof LifestyleHabits]) => string,
+            },
+            {
+                label: "Alcohol Quantity",
+                key: "alcoholQuantity",
+                format: formatTextOrDash as (value: LifestyleHabits[keyof LifestyleHabits]) => string,
+            }
         );
     }
 
     if (isYesValue(lifestyle?.smoking)) {
         lifestyleFieldsToDisplay.push(
-            { label: "Smoking", key: "smoking" },
-            { label: "Smoking Quantity", key: "smokingQuantity" }
+            {
+                label: "Smoking",
+                key: "smoking",
+                format: formatYesValue as (value: LifestyleHabits[keyof LifestyleHabits]) => string,
+            },
+            {
+                label: "Smoking Quantity",
+                key: "smokingQuantity",
+                format: formatTextOrDash as (value: LifestyleHabits[keyof LifestyleHabits]) => string,
+            }
         );
     }
 

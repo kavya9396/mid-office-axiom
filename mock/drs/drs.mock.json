@@ -238,7 +238,7 @@
         "lifeType": "LA",
         "jontFlag": true,
         "lifeNumber": "01",
-        "clientId": "",
+        "clientId": "CL0001",
         "proposerLaRelation": "joint",
         "jointLARelation": "",
         "jointPRRelation": "",
@@ -255,7 +255,7 @@
           "lastName": "LAST",
           "maritalStatus": "M",
           "gender": "M",
-          "nationality": "",
+          "nationality": "Indian",
           "residentStatus": "Indian",
           "pioStatus": "0",
           "highestQualification": "GRAD",
@@ -271,7 +271,7 @@
           "orgType": "PRIVATE LTD",
           "latestIncYear": 2026,
           "isPEP": false,
-          "panNo": "",
+          "panNo": "ABCDE1234F",
           "faceMatchScore": "75%",
           "imageQuality": "",
           "remarks": "",
@@ -288,8 +288,8 @@
             "landmark": "",
             "city": "NASHIK",
             "state": "MAHS",
-            "residingCountry": "India",
             "pinCode": "422002",
+            "residingCountry": "India",
             "topCity": "Y/N",
             "negativePinCode": "Y/N"
           }
@@ -298,10 +298,10 @@
           "mobileNo": "9850163180",
           "alternateMobileNo": "",
           "std": "",
-          "landlineNo": "",
-          "emailId": "",
-          "smsPref": "",
-          "emailPref": ""
+          "landlineNo": "022-23456789",
+          "emailId": "testuser@gmail.com",
+          "smsPref": "Yes",
+          "emailPref": "Yes"
         },
         "healthDetail": {
           "height": "154.9",
@@ -313,7 +313,7 @@
               "substance": "smoke",
               "consumedAs": "cigarette",
               "quantity": {
-                "amount": "",
+                "amount": "1",
                 "unit": "day/week"
               },
               "noOfYears": 1,
@@ -393,18 +393,18 @@
     },
     "nominee": [
       {
-        "relationWithLA": "",
+        "relationWithLA": "wife",
         "firstName": "NOMINEE",
         "lastName": "NAME",
         "dob": "2001-06-07T00:00:00.0",
         "gender": "Female",
-        "percentage": "",
-        "proposerNomineeRelation": "wife",
         "accountNumber":"",
-"IFSC":"",
-"appointeeName":"",
-"appointeeGender":"",
-"appointeeDOB":""
+        "IFSC":"",
+        "appointeeName":"",
+        "appointeeGender":"",
+        "appointeeDOB":"",
+        "percentage": "100",
+        "proposerNomineeRelation": "wife"
       }
     ],
     "appointee": [
@@ -418,17 +418,17 @@
       }
     ],
     "fundDetails": {
-      "allocationStrategy": "",
-      "totalAllocation": "",
-      "atpOpted": "",
+      "allocationStrategy": "Self Allocation",
+      "totalAllocation": "100",
+      "atpOpted": "Yes",
       "fundDetail": [
         {
-          "name": "",
-          "amount": "",
-          "sourceFund": "",
-          "targetFund": "",
-          "switchDate": "",
-          "transferPercentage": ""
+          "name": "Equity Growth Fund",
+          "amount": "500000",
+          "sourceFund": "Balanced Fund",
+          "targetFund": "Equity Growth Fund",
+          "switchDate": "2026-06-29",
+          "transferPercentage": "25"
         }
       ]
     },
@@ -468,9 +468,10 @@
         "systemDecision": "Non-STP",
         "decisionTypes": {
           "breInitialDecision": "STP",
+          "initialDecision": "RM",
           "breDecision": "RM",
           "breAction": "Regular Medical required",
-          "breRequirement": ""
+          "breRequirement": "Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs"
         },
         "requirements": [
           {
@@ -484,7 +485,7 @@
         ],
         "systemDecisionDateTime": "2026-04-10",
         "errorResp": "",
-        "breRemarks": ""
+        "breRemarks": "#ICICI Prudential Website#Check Basic KYC Document Attestations#Standard Age Proof Requiredi## UW Control DIGI IIB hit PSO not reguired#lB hit compulsory PSO and OID required##Model Output: Green#PTLR Modet output Green: UW Standard#Standard Age Proof Required For This Rider Type#Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs"
       },
       "medicalBreOutput": {
         "breOutput": {

@@ -234,6 +234,7 @@ export interface DRSExternalAPIs {
 export interface DRSBreOutput {
   systemDecision: string;
   decisionTypes: {
+    initialDecision: string;
     breDecision: string;
     breAction: string;
     breRequirement: string;
@@ -405,6 +406,7 @@ export type BreRetriggerResponse = {
 };
 
 export interface BreDecisionResponse {
+  initialDecision: string | null;
   decision: string | null;
   status: string | null;
   remarks: string | null;
@@ -754,7 +756,7 @@ export interface FundDetails {
   allocationStrategy: string;
   totalAllocation: string;
   atpOpted: string;
-  fundDetail: FundDetail;
+  fundDetail: FundDetail[];
 }
 
 export interface FundDetail {
