@@ -115,14 +115,143 @@ export type DRSRequest = {
 };
 
 export type DRSResponse = {
-  breDecision: BreDecisionResponse;
-  applicationOverview: ApplicationOverview;
-  summary: SummaryResponse[];
-  riderDetails: RiderDetail[];
-  requirements: AdditionalRequirementRow[];
-  auditTrail: AuditTrail;
-  pivvSection: PivvSection;
+  data: DRSData;
 };
+
+export interface DRSData {
+  applicationNumber: string;
+  submitDate: string;
+  totalPremium: number;
+  sourceSystem: string;
+  applicationInfo: DRSApplicationInfo;
+  sourcingDetail: DRSSourcingDetail;
+  groupDetails: DRSGroupDetails;
+  productDetail: DRSProductDetail[];
+  customerDetails: DRSCustomerDetail[];
+  producerDetails: Record<string, string>;
+  nominee: DRSNominee[];
+  appointee: DRSAppointee[];
+  fundDetails: DRSFundDetails;
+  payoutDetails: Record<string, string>;
+  advisorDetails: Record<string, string>;
+  questions: DRSQuestion[];
+  externalAPIs: DRSExternalAPIs;
+}
+
+export interface DRSApplicationInfo {
+  proposerType: string;
+  [key: string]: unknown;
+}
+
+export interface DRSSourcingDetail {
+  agentCode: string;
+  channelCode: string;
+  drcChannelCode: string;
+  [key: string]: unknown;
+}
+
+export interface DRSGroupDetails {
+  coverageStatus: string;
+  [key: string]: unknown;
+}
+
+export interface DRSProductDetail {
+  type: string;
+  code: string;
+  name: string;
+  term: string | number;
+  premiumCessationTerm: string | number;
+  paymentAmount: string | number;
+  premiumModeFpd: string;
+  sumAssured: string | number;
+  [key: string]: unknown;
+}
+
+export interface DRSCustomerDetail {
+  lifeType: string;
+  personalDetails: {
+    firstName: string;
+    middleName?: string;
+    lastName: string;
+    dob: string;
+    gender: string;
+    maritalStatus?: string;
+    nationality?: string;
+    [key: string]: unknown;
+  };
+  communicationDetails?: {
+    mobileNo?: string;
+    emailId?: string;
+    [key: string]: unknown;
+  };
+  [key: string]: unknown;
+}
+
+export interface DRSNominee {
+  relationWithLA: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  gender: string;
+  percentage: string;
+  proposerNomineeRelation: string;
+}
+
+export interface DRSAppointee {
+  relationWithLA: string;
+  firstName: string;
+  lastName: string;
+  dob: string;
+  gender: string;
+  relationWithNominee: string;
+}
+
+export interface DRSFundDetails {
+  allocationStrategy: string;
+  totalAllocation: string;
+  atpOpted: string;
+  fundDetail: FundDetail[];
+}
+
+export interface DRSQuestion {
+  quesCode: string;
+  quesFor: string;
+  quesType: string;
+  quesAns: string;
+}
+
+export interface DRSExternalAPIs {
+  breOutput: DRSBreOutput;
+  medicalBreOutput: Record<string, unknown>;
+  financialBreOutput: Record<string, unknown>;
+  risk: Record<string, unknown>;
+  iibOutput: Array<Record<string, unknown>>;
+  drcOutput: Record<string, unknown>;
+  ptlrOutput: Record<string, unknown>;
+  ptllOutput: Record<string, unknown>;
+}
+
+export interface DRSBreOutput {
+  systemDecision: string;
+  decisionTypes: {
+    breDecision: string;
+    breAction: string;
+    breRequirement: string;
+  };
+  requirements: DRSRequirement[];
+  systemDecisionDateTime: string;
+  errorResp: string;
+  breRemarks: string;
+}
+
+export interface DRSRequirement {
+  requirementType: string;
+  requirementValue: string;
+  ruleId: string;
+  ruleName: string;
+  isSTP: boolean;
+  metaphorName: string;
+}
 
 export type MedicalStatus = "normal" | "abnormal";
 
@@ -268,7 +397,7 @@ export interface ApplicationOverview {
   distribution: Distribution;
   agent: Agent;
   customer: Customer;
-  policyDetails: PolicyDetails;
+  policyDetails: ApplicationOverviewPolicyDetails;
 }
 
 export interface Product {
@@ -292,7 +421,7 @@ export interface Customer {
   policyType: string;
 }
 
-export interface PolicyDetails {
+export interface ApplicationOverviewPolicyDetails {
   modalPremium: number;
   policyTerm: number;
   premiumPaymentTerm: number;
@@ -410,7 +539,7 @@ export interface SummaryResponse {
   proposerSummary: ProposerSummary;
   personalDetails: PersonalDetails;
   financialDetails: FinancialDetails;
-  policyDetails: PolicyDetails;
+  policyDetails: SummaryPolicyDetails;
   underwriting: Underwriting;
   applicantDetails: ApplicantDetails;
   kycDetails: KycDetails;
@@ -466,7 +595,7 @@ export interface FinancialDetails {
   tfesa: number;
 }
 
-export interface PolicyDetails {
+export interface SummaryPolicyDetails {
   productName: string;
   productType: string;
   modalPremium: number;

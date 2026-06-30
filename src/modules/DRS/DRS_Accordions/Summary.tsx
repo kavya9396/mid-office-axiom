@@ -71,9 +71,27 @@ const riskDetails: RiskCard[] = [
 
 const Summary = () => {
     const navigate = useNavigate();
-    const { summary } = useSelector((state: RootState) => state.drs);
+    const { data } = useSelector((state: RootState) => state.drs);
+    const customerDetails = data?.customerDetails ?? [];
+    const firstProduct = data?.productDetail?.[0];
+    const breOutput = data?.externalAPIs?.breOutput;
+    const isLAPropSame = Boolean(data?.applicationInfo?.isLAPropSame);
 
-    const availableMemberTypes = summary?.map(item => item.memberType);
+    const mapMemberType = (lifeType: string | undefined, index: number): ApplicantTab => {
+        const normalized = lifeType?.trim().toUpperCase() ?? "";
+        if (normalized.includes("PR") || normalized.includes("PROPOSER")) return "proposer";
+        if (normalized.includes("LA") || normalized.includes("LIFE")) return index === 1 ? "lifeassured1" : "lifeassured2";
+        if (index === 0) return "proposer";
+        if (index === 1) return "lifeassured1";
+        return "lifeassured2";
+    };
+
+    const customerWithTabs = customerDetails.map((customer, index) => ({
+        customer,
+        memberType: mapMemberType(String(customer.lifeType ?? ""), index),
+    }));
+
+    const availableMemberTypes = customerWithTabs.map((item) => item.memberType);
 
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
     const [openPhotoDialog, setOpenPhotoDialog] = useState(false);
@@ -81,26 +99,59 @@ const Summary = () => {
     const [selectedCard, setSelectedCard] = useState<RiskCard | null>(null);
     const [selectedPhotoSrc, setSelectedPhotoSrc] = useState("");
 
+    const visibleTabs = isLAPropSame
+        ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
+        : applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key));
+
+    const activeApplicantTab: ApplicantTab = isLAPropSame
+        ? "lifeassured1"
+        : (visibleTabs.find((tab) => tab.key === applicantTab)?.key ?? visibleTabs[0]?.key ?? "proposer");
+
     useEffect(() => {
-        localStorage.setItem("drsSelectedApplicantTab", applicantTab);
-    }, [applicantTab]);
+        localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);
+    }, [activeApplicantTab]);
 
-    const visibleTabs = applicantTabs.filter(tab =>
-        availableMemberTypes?.includes(tab.key)
-    );
+    const currentCustomer = customerWithTabs.find(
+        (item) => item.memberType === activeApplicantTab
+    )?.customer ?? customerDetails[0];
+    const personalDetails = currentCustomer?.personalDetails;
+    const addresses = Array.isArray(currentCustomer?.address) ? currentCustomer.address : [];
+    const permanentAddress =
+        addresses.find((item) => String(item.type).toLowerCase() === "permanent") ??
+        addresses[0];
+    const firstDoc = Array.isArray(currentCustomer?.documentDetails)
+        ? currentCustomer?.documentDetails?.[0]
+        : undefined;
 
-    const currentSummary = summary?.find(
-        (item) => item.memberType === applicantTab
-    );
+    const firstName = String(personalDetails?.firstName ?? "");
+    const middleName = String(personalDetails?.middleName ?? "");
+    const lastName = String(personalDetails?.lastName ?? "");
+    const name = [firstName, middleName, lastName].filter(Boolean).join(" ");
+    const imageURL = "";
+    const genderCode = String(personalDetails?.gender ?? "").toUpperCase();
+    const gender = genderCode === "M" ? "Male" : genderCode === "F" ? "Female" : "Other";
+    const dob = String(personalDetails?.dob ?? "");
+    const getAge = (value: string) => {
+        if (!value) return 0;
+        const date = new Date(value);
+        if (Number.isNaN(date.getTime())) return 0;
+        const today = new Date();
+        let age = today.getFullYear() - date.getFullYear();
+        const monthDiff = today.getMonth() - date.getMonth();
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < date.getDate())) {
+            age -= 1;
+        }
+        return age < 0 ? 0 : age;
+    };
+    const age = getAge(dob);
+    const annualIncome = Number(personalDetails?.netIncomeAmt ?? 0);
+    const appliedSumAssured = Number(firstProduct?.sumAssured ?? 0);
+    const trsa = Number(data?.applicationInfo?.simultaneousLifeSA ?? 0);
+    const tfesa = Number(data?.applicationInfo?.otherPolicySA ?? 0);
+    const maritalCode = String(personalDetails?.maritalStatus ?? "").toUpperCase();
+    const maritalStatus =
+        maritalCode === "M" ? "Married" : maritalCode === "D" ? "Divorced" : maritalCode === "W" ? "Widowed" : "Single";
 
-    const proposer = currentSummary?.proposerSummary;
-    const personal = currentSummary?.personalDetails;
-    const financial = currentSummary?.financialDetails;
-    const policy = currentSummary?.policyDetails;
-    const underwriting = currentSummary?.underwriting;
-
-    const name = proposer?.title + " " + proposer?.firstName + " " + proposer?.middleName + " " + proposer?.lastName
-    const imageURL = proposer?.profileImage;
     const roleType = localStorage.getItem("roleType") ?? "";
     const isCvtPoolRole = roleType === "CVT Pool";
 
@@ -114,46 +165,46 @@ const Summary = () => {
         setSelectedCard(null);
     };
 
-    const currentApplicant = applicantTabs.find(
-        (tab) => tab.key === applicantTab
+    const currentApplicant = visibleTabs.find(
+        (tab) => tab.key === activeApplicantTab
     );
 
     const proposerDetails = [
         {
             label: "Marital Status",
-            value: personal?.maritalStatus ?? "-"
+            value: maritalStatus ?? "-"
         },
         {
             label: "Location",
-            value: `${personal?.location?.city ?? "-"}, ${personal?.location?.country ?? "-"}`
+            value: `${permanentAddress?.city ?? "-"}, ${permanentAddress?.residingCountry ?? "-"}`
         },
         {
             label: "Annual Income",
-            value: `₹ ${financial?.annualIncome?.toLocaleString("en-IN") ?? "-"}`
+            value: `₹ ${annualIncome?.toLocaleString("en-IN") ?? "-"}`
         },
         {
             label: "Occupation",
-            value: `${personal?.occupation?.type ?? "-"} - ${personal?.occupation?.designation ?? "-"} ${personal?.occupation?.organization ?? "-"}`
+            value: `${personalDetails?.occupationType ?? "-"} - ${personalDetails?.occupationType ?? "-"} ${personalDetails?.orgName ?? "-"}`
         },
         {
             label: "Applied SA",
-            value: `₹ ${financial?.appliedSumAssured?.toLocaleString("en-IN") ?? "-"}`
+            value: `₹ ${appliedSumAssured?.toLocaleString("en-IN") ?? "-"}`
         },
         {
             label: "Modal Premium/Channel",
-            value: `${policy?.modalPremium ?? "-"}/${policy?.channel ?? "-"}`
+            value: `${firstProduct?.paymentAmount ?? "-"}/${data?.sourcingDetail?.channelCode ?? "-"}`
         },
         {
             label: "TRSA",
-            value: `₹ ${financial?.trsa?.toLocaleString("en-IN") ?? "-"}`
+            value: `₹ ${trsa?.toLocaleString("en-IN") ?? "-"}`
         },
         {
             label: "TFESA",
-            value: `₹ ${financial?.tfesa?.toLocaleString("en-IN") ?? "-"}`
+            value: `₹ ${tfesa?.toLocaleString("en-IN") ?? "-"}`
         },
         {
             label: "Product",
-            value: `${policy?.productName ?? "-"} (${policy?.productType ?? "-"})`
+            value: `${firstProduct?.name ?? "-"} (${firstProduct?.type ?? "-"})`
         },
     ];
 
@@ -167,22 +218,22 @@ const Summary = () => {
         {
             icon: NoteIcon,
             label: "Document",
-            value: proposer?.document ?? currentSummary?.kycDetails?.identityProofType ?? "-",
+            value: firstDoc?.documentType ?? "-",
         },
         {
             icon: ScannerIcon,
             label: "Face Match %",
-            value: formatFaceMatch(proposer?.faceMatchPercentage),
+            value: formatFaceMatch(""),
         },
         {
             icon: GalleryIcon,
             label: "Image Quality",
-            value: proposer?.imageQuality ?? "-",
+            value: "-",
         },
         {
             icon: TextAlignLeftIcon,
             label: "Remarks",
-            value: proposer?.documentRemarks ?? underwriting?.remarks ?? "-",
+            value: breOutput?.breRemarks ?? "-",
         },
     ];
 
@@ -193,8 +244,12 @@ const Summary = () => {
                     <Box sx={{ display: "flex", justifyContent: "center" }}>
                         <CustomTabs
                             tabs={visibleTabs}
-                            value={applicantTab}
-                            onChange={setApplicantTab}
+                            value={activeApplicantTab}
+                            onChange={(tab) => {
+                                if (!isLAPropSame) {
+                                    setApplicantTab(tab);
+                                }
+                            }}
                         />
                     </Box>
 
@@ -378,7 +433,7 @@ const Summary = () => {
                                         />
                                     </Box>
                                     <Badge
-                                        label={proposer?.caseStatus ?? ""}
+                                        label={breOutput?.systemDecision ?? ""}
                                         icon={<TickIcon width={16} height={16} />}
                                         sx={{
                                             backgroundColor: "#35A224",
@@ -420,12 +475,12 @@ const Summary = () => {
                                                     color: "#444444",
                                                 }}
                                             >
-                                                DOB {proposer?.dob}
+                                                DOB {dob}
                                             </Typography>
                                         </Box>
 
                                         <Badge
-                                            label={`${proposer?.gender}, ${proposer?.age} Years`}
+                                            label={`${gender}, ${age} Years`}
                                             variant="Neutral"
                                             size="medium"
                                         />
@@ -511,7 +566,7 @@ const Summary = () => {
                                                 fontSize: "14px",
                                             }}
                                         >
-                                            {underwriting?.remarks}
+                                            {breOutput?.breRemarks}
                                         </Typography>
                                     </Box>
                                     <Box
@@ -534,7 +589,7 @@ const Summary = () => {
                                                     pr: 0.5,
                                                 }}
                                             >
-                                                {underwriting?.breDecision.status}
+                                                {breOutput?.systemDecision ?? "-"}
                                             </Typography>
                                             <Typography
                                                 component="span"
@@ -544,7 +599,7 @@ const Summary = () => {
                                                     fontSize: "16px",
                                                 }}
                                             >
-                                                - {underwriting?.breDecision.category} ({underwriting?.breDecision.coverage})
+                                                - {breOutput?.decisionTypes?.breDecision ?? "-"} ({breOutput?.decisionTypes?.breAction ?? "-"})
                                             </Typography>
                                         </Typography>
                                     </Box>
@@ -553,7 +608,7 @@ const Summary = () => {
                         </Box>
                     </Box>
 
-                    <ApplicantProfile profile={currentSummary} />
+                    <ApplicantProfile profile={undefined} />
 
                     <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
                         <CustomButton

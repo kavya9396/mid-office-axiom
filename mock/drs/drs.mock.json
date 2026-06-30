@@ -98,6 +98,122 @@
     ],
     "customerDetails": [
       {
+        "lifeType": "Proposer",
+        "jontFlag": true,
+        "lifeNumber": "01",
+        "clientId": "",
+        "proposerLaRelation": "joint",
+        "jointLARelation": "",
+        "jointPRRelation": "",
+        "nriFlag": "True/False",
+        "fatfFlag": "True/False",
+        "personalDetails": {
+          "firstName": "Test",
+          "lastName": "User",
+          "maritalStatus": "M",
+          "gender": "M",
+          "nationality": "",
+          "residentStatus": "Indian",
+          "pioStatus": "0",
+          "highestQualification": "GRAD",
+          "graduationFlag": "",
+          "orgName": "",
+          "yearsInServiceOrBusiness": 1,
+          "industryType": "",
+          "dob": "1999-07-07T00:00:00.0",
+          "birthCountry": "IND",
+          "occupationType": "SPVT",
+          "netIncomeAmt": 3000000,
+          "immigrationStatus": "Indian Resident",
+          "orgType": "PRIVATE LTD",
+          "latestIncYear": 2026,
+          "isPEP": false,
+          "panNo": ""
+        },
+        "address": [
+          {
+            "type": "permanent",
+            "addressLine1": "PA ADD",
+            "addressLine2": "",
+            "addressLine3": "",
+            "landmark": "",
+            "city": "NASHIK",
+            "state": "MAHS",
+            "residingCountry": "India",
+            "pinCode": "422002",
+            "topCity": "Y/N",
+            "negativePinCode": "Y/N"
+          }
+        ],
+        "communicationDetails": {
+          "mobileNo": "9850163180",
+          "std": "",
+          "landlineNo": "",
+          "emailId": "",
+          "smsPref": "",
+          "emailPref": ""
+        },
+        "healthDetail": {
+          "height": "154.9",
+          "weight": "56.0",
+          "hazardousOccupation": "",
+          "illnessOrImpairment": [""],
+          "substanceConsumption": [
+            {
+              "substance": "smoke",
+              "consumedAs": "cigarette",
+              "quantity": {
+                "amount": "",
+                "unit": "day/week"
+              },
+              "noOfYears": 1,
+              "advisedByDoctorForAbstinence": ""
+            }
+          ],
+          "medicalQuestionnaire": [
+            {
+              "qtid": "",
+              "value": "",
+              "remar": "",
+              "subQts": [
+                {
+                  "qtid": "",
+                  "value": "",
+                  "remark": ""
+                }
+              ]
+            }
+          ]
+        },
+        "financialDetail": {
+          "panNo": "",
+          "annualIncome": "",
+          "latestIncomeYear": ""
+        },
+        "documentDetails": [
+          {
+            "documentType": "AGE_PROOF",
+            "documentName": "AGE_PROOF",
+            "documentId": "AAAAA1111A",
+            "validityDate": "2099-12-31T00:00:00.0"
+          }
+        ],
+        "bureauDetails": {
+          "cibilScore": "",
+          "cibilIncomeSegment": "",
+          "cibilEligibilityStatus": "Y",
+          "cibilServiceStatus": "Y",
+          "experianScore": "",
+          "experianIncomeSegment": "",
+          "experianEligibilityStatus": "Y",
+          "experianServiceStatus": "Y",
+          "payuScore": "",
+          "payuIncomeSegment": "",
+          "payuEligibilityStatus": "Y",
+          "payuServiceStatus": "Y"
+        }
+      },
+      {
         "lifeType": "LA",
         "jontFlag": true,
         "lifeNumber": "01",
