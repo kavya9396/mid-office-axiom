@@ -275,7 +275,6 @@ export interface Product {
   name: string;
   sumAssured: number;
   productCode: string;
-  faceValue: number;
 }
 
 export interface Distribution {

@@ -19,15 +19,15 @@ const riderColumns: Column<RiderRow>[] = [
 const ApplicationOverview = () => {
   const { applicationOverview, riderDetails } = useSelector((state: RootState) => state.drs);
 
- const roleType = localStorage.getItem("roleType") ?? "";
-const expandedRoles = [
-  'Ready For Issuance Pool',
-  'System Wait Pool - Non medical',
-  'AMR - Non medical',
-  'CPT Pool'
-];
+  const roleType = localStorage.getItem("roleType") ?? "";
+  const expandedRoles = [
+    'Ready For Issuance Pool',
+    'System Wait Pool - Non medical',
+    'AMR - Non medical',
+    'CPT Pool'
+  ];
 
-const isExpanded = expandedRoles.includes(roleType);
+  const isExpanded = expandedRoles.includes(roleType);
 
   const applicationDetails = [
     {
@@ -37,10 +37,6 @@ const isExpanded = expandedRoles.includes(roleType);
     {
       label: "Product Code",
       value: applicationOverview?.product?.productCode ?? "-"
-    },
-    {
-      label: "Face Value",
-      value: applicationOverview?.product?.faceValue ?? "-"
     },
     {
       label: "Sum Assured",

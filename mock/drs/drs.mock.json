@@ -267,8 +267,7 @@
     "product": {
       "name": "ICICI PRU IPROTECT SMART PLUS",
       "sumAssured": 1000000,
-      "productCode": "IPROTECT-PLUS",
-      "faceValue": 1000000
+      "productCode": "IPROTECT-PLUS"
     },
     "distribution": {
       "channel": "AG",
