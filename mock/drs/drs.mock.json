@@ -25,8 +25,12 @@
       "taggedAppNo": "",
       "taggedRelation": "",
       "spousePolicyNo": "",
-      "agentName": ""
+      "agentName": "",
+
+"PT":"",
+"PPT":""
     },
+"riderDetails":[{"name":"","type":"","term":"","sumAssured":"","paymentAmount":"","PPT":""}],
     "sourcingDetail": {
       "agentCode": "00151875",
       "bankCode": "005",
@@ -110,11 +114,11 @@
         "fatfFlag": "True/False",
         "selfProposed": "",
         "typeOfProposal": "",
-
+"isGreen":"yes",
         "personalDetails": {
           "userImg":"",
           "UDSLink":"",
-            "salutation":"Mr",
+"salutation":"Mr",
           "firstName": "Test",
           "lastName": "User",
           "maritalStatus": "M",
@@ -246,11 +250,11 @@
         "fatfFlag": "True/False",
         "selfProposed": "",
         "typeOfProposal": "",
-
+"isGreen":"yes",
         "personalDetails": {
           "userImg":"",
            "UDSLink":"",
-           "salutation":"Mr",
+"salutation":"Mr",
           "firstName": "JOINT",
           "lastName": "LAST",
           "maritalStatus": "M",
@@ -398,13 +402,12 @@
         "lastName": "NAME",
         "dob": "2001-06-07T00:00:00.0",
         "gender": "Female",
-        "accountNumber":"",
-        "IFSC":"",
-        "appointeeName":"",
-        "appointeeGender":"",
-        "appointeeDOB":"",
-        "percentage": "100",
-        "proposerNomineeRelation": "wife"
+        "percentage": "",
+        "proposerNomineeRelation": "wife",
+"IFSC":"",
+"appointeeName":"",
+"appointeeGender":"",
+"appointeeDOB":""
       }
     ],
     "appointee": [
