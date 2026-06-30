@@ -1,22 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LeftPanel from "./LeftPanel";
-
-jest.mock("../../components/ui/Accordion/Accordion", () => {
-  type AccordionProps = {
-    title: string;
-    children: React.ReactNode;
-  };
-
-  return function MockAccordion({ title, children }: AccordionProps) {
-    return (
-      <section>
-        <h3>{title}</h3>
-        {children}
-      </section>
-    );
-  };
-});
+import type { tableData } from "../../types/inbox";
 
 jest.mock("./LastLogin", () => {
   return function MockLastLogin() {
@@ -32,6 +17,8 @@ jest.mock("../../icons/Icons", () => ({
 }));
 
 describe("LeftPanel", () => {
+  const poolRow = {} as tableData;
+
   beforeEach(() => {
     window.scrollTo = jest.fn();
   });
@@ -43,12 +30,7 @@ describe("LeftPanel", () => {
         toggle={false}
         setToggle={jest.fn()}
         onSelectPool={jest.fn()}
-        mode="accordion"
-        role="admin"
-        roles={[]}
-        rows={[]}
         poolData={{}}
-        poolCounts={{}}
       />,
     );
 
@@ -65,16 +47,10 @@ describe("LeftPanel", () => {
         toggle={false}
         setToggle={jest.fn()}
         onSelectPool={onSelectPool}
-        mode="accordion"
-        role="uw"
-        roles={[{ name: "UW", pools: ["Pool A", "Pool B"] }]}
-        rows={[]}
-        poolData={{}}
-        poolCounts={{ "Pool A": 2, "Pool B": 0 }}
+        poolData={{ "Pool A": [poolRow, poolRow], "Pool B": [] }}
       />,
     );
 
-    expect(screen.getByText("UW")).toBeInTheDocument();
     expect(screen.getByText("Pool A (2)")).toBeInTheDocument();
 
     await userEvent.click(screen.getByText("Pool B"));

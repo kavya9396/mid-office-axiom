@@ -1,65 +1,131 @@
 {
-  "userId": "ipru1234",
-  "username": "Username",
-  "businessType": "retail",
-  "roleType": "cops",
-  "roles": [
-    {
-      "name": "Active Pools",
-      "pools": [
-        "CVT Pool",
-        "CPT Pool",
-        "PIVV Pool",
-        "Pre Issuance Servicing Pool",
-        "Exceptional Pool"
-      ]
-    },
-    {
-      "name": "Pending Pools",
-      "pools": [
-        "System Wait Pool - Non medical",
-        "AMR - Non medical",
-        "Reconsideration Pool",
-        "Reject Pool",
-        "Ready For Issuance Pool",
-        "Issuance Pool"
-      ]
-    },
-    {
-      "name": "User Handle",
-      "pools": ["Allocation Details", "Leave Management"]
-    },
-    {
-      "name": "Case Handle",
-      "pools": ["Reassign/Transfer Cases", "Force Close Case"]
-    }
-  ],
+  "userId":"ipru74685",
   "poolData": {
-    "CVT Pool": [
+    "CVT_TASK": [
+      {
+        "taskId": "2078.18755",
+
+        "applicationNo": "NB0000025",
+
+        "isMedical": false,
+
+        "roleType": "CVT_TASK",
+
+        "role": "RETAIL_CVT_USER",
+
+        "businessType": "RETAIL"
+      },
+
       {
         "id": 1,
-        "applicationNo": "OB25175127",
-        "breDecision":"STD",
-        "channel": "AG",
-        "sumAssured": 100000,
-        "product": "Life Insurance",
-        "premium": 1000,
+
+        "taskId": "2078.18763",
+
+        "applicationNo": "NB0000026",
+
+        "productCode": "I19",
+
+        "sumAssured": 0,
+
+        "appliedSa": 0,
+
+        "annualPremium": 876863872,
+
+        "productType": "I19",
+
+        "isMedical": false,
+
+        "channel": "0TTB",
+
+        "roleType": "CVT_TASK",
+
+        "role": "RETAIL_CVT_USER",
+
+        "businessType": "RETAIL",
+
+        "state": "DRAFT",
+
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+
+        "displayName": "ARYAYAN Khan",
+
         "clientType": "Individual",
-        "caseType": "New Business",
-        "roleType": "CVT Pool"
+
+        "caseType": "PROP",
+
+        "uwName": "case-intiation-orchestrator",
+
+        "userId": "case-intiation-orchestrator",
+
+        "endDate": "2026-06-19",
+
+        "status": "DRAFT",
+
+        "premium": "876863872",
+
+        "nameOfProposer": "ARYAYAN Khan",
+
+        "nameOfLifeAssured": "ARYAYAN Khan",
+
+        "caseStatus": "DRAFT",
+        "breDecision":"STD"
       },
+
       {
-        "id": 2,
-        "applicationNo": "OB25175128",
-        "breDecision":"STD",
-        "channel": "AG",
-        "sumAssured": 100000,
-        "product": "Life Insurance",
-        "premium": 1000,
-        "clientType": "Individual",
-        "caseType": "New Business",
-        "roleType": "CVT Pool"
+        "taskId": "2078.18771",
+
+        "applicationNo": "NB0000027",
+
+        "isMedical": false,
+
+        "roleType": "CVT_TASK",
+
+        "role": "RETAIL_CVT_USER",
+
+        "businessType": "RETAIL"
+      },
+
+      {
+        "taskId": "2078.18779",
+
+        "applicationNo": "NB0000028",
+
+        "isMedical": false,
+
+        "roleType": "CVT_TASK",
+
+        "role": "RETAIL_CVT_USER",
+
+        "businessType": "RETAIL"
+      },
+
+      {
+        "taskId": "2078.18791",
+
+        "applicationNo": "NB0000028",
+
+        "isMedical": false,
+
+        "roleType": "CVT_TASK",
+
+        "role": "RETAIL_CVT_USER",
+
+        "businessType": "RETAIL"
       }
-    ]
+    ],
+    "CPT_TASK":[
+      {
+        "taskId": "2078.18771",
+
+        "applicationNo": "NB0000027",
+
+        "isMedical": false,
+
+        "roleType": "CPT_TASK",
+
+        "role": "RETAIL_CPT_USER",
+
+        "businessType": "RETAIL"
+      }]
   }
 }

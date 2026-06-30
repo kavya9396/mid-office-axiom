@@ -2,11 +2,10 @@ import { Alert, Box, Grid, Snackbar } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LeftPanel from "./LeftPanel";
-import type { RoleGroup, tableData } from "../../types/inbox";
+import type { tableData } from "../../types/inbox";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
 import { useAppDispatch } from "../../store/hooks";
 import RightPanel from "./RightPanel";
-import { poolThunk } from "../../store/thunks/poolThunk";
 
 const Inbox = () => {
   const dispatch = useAppDispatch();
@@ -14,20 +13,13 @@ const Inbox = () => {
   const navigate = useNavigate();
 
   const [toggle, setToggle] = useState(false);
-  const [roleList, setRoleList] = useState<RoleGroup[]>([]);
   const [selectedPool, setSelectedPool] = useState("");
-  const [userRole, setUserRole] = useState("");
-  const [panelMode, setPanelMode] = useState<"simple" | "accordion">("simple");
 
   const [poolData, setPoolData] = useState<Record<string, tableData[]>>({});
-  const [poolCounts, setPoolCounts] = useState<Record<string, number>>({});
   const snackbarMessage = (location.state as { snackbarMessage?: string } | null)?.snackbarMessage ?? "";
   const snackbarOpen = Boolean(snackbarMessage);
 
   const didFetch = useRef(false);
-
-  // 🚫 prevents poolThunk from running on initial auto-selection
-  const skipInitialPoolFetch = useRef(true);
 
   // ---------------- INITIAL LOAD ----------------
   useEffect(() => {
@@ -39,34 +31,11 @@ const Inbox = () => {
         const username = localStorage.getItem("username") ?? "";
         const roleResponse = await dispatch(fetchInboxThunk({ username })).unwrap();
 
-        const role = roleResponse.roleType ?? "admin";
-
-        const roleGroups: RoleGroup[] = roleResponse.roles
-          ? roleResponse.roles
-          : Object.entries(roleResponse.pools ?? {}).map(([name, pools]) => ({
-              name,
-              pools: pools as string[],
-            }));
-
-        setRoleList(roleGroups);
-        setUserRole(role);
-        setPanelMode("accordion");
-
-        const allPools = roleGroups.flatMap((group) => group.pools);
-        const firstPool = allPools[0];
-
         const poolDataFromAPI = roleResponse.poolData ?? {};
+        const firstPool = Object.keys(poolDataFromAPI)[0];
 
         setPoolData(poolDataFromAPI);
 
-        // set counts only (no table binding needed)
-        const initialCounts: Record<string, number> = {};
-        Object.keys(poolDataFromAPI).forEach((pool) => {
-          initialCounts[pool] = poolDataFromAPI[pool]?.length ?? 0;
-        });
-        setPoolCounts(initialCounts);
-
-        // set default selected pool ONLY (no API call triggered)
         if (firstPool) {
           setSelectedPool(firstPool);
         }
@@ -78,46 +47,6 @@ const Inbox = () => {
     loadData();
   }, [dispatch]);
 
-  // ---------------- FETCH ONLY ON USER CLICK ----------------
-  useEffect(() => {
-    if (!selectedPool || !userRole) return;
-
-    // 🚫 skip first auto-selection from initial load
-    if (skipInitialPoolFetch.current) {
-      skipInitialPoolFetch.current = false;
-      return;
-    }
-
-    const loadPoolData = async () => {
-      try {
-        const username = localStorage.getItem("username") ?? "";
-        const response = await dispatch(
-          poolThunk({
-            roleName: userRole,
-            poolname: selectedPool,
-            userId:username
-          })
-        ).unwrap();
-
-        const rows = response.poolData[selectedPool] ?? [];
-
-        setPoolData((prev) => ({
-          ...prev,
-          ...response.poolData,
-        }));
-
-        setPoolCounts((prev) => ({
-          ...prev,
-          [selectedPool]: rows.length,
-        }));
-      } catch (error) {
-        console.error("Failed to load pool data", error);
-      }
-    };
-
-    loadPoolData();
-  }, [selectedPool, dispatch, userRole]);
-
   // ---------------- UI ----------------
   return (
     <Box>
@@ -127,12 +56,7 @@ const Inbox = () => {
           toggle={toggle}
           setToggle={setToggle}
           onSelectPool={setSelectedPool}
-          mode={panelMode}
-          role={userRole}
-          roles={roleList}
-          rows={[]}
           poolData={poolData}
-          poolCounts={poolCounts}
         />
 
         <Box sx={{ flex: 1 }}>

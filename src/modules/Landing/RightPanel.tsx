@@ -389,7 +389,7 @@ const RightPanel = ({
           }}
         >
           <Typography component="span" className="gap-1">
-            {selectedPool ? selectedPool : ""}
+            {selectedPool ? selectedPool.replace(/_/g, " ") : ""}
           </Typography>
           {(selectedPool == "Leave Management" ||
             selectedPool == "UW Details") && (
