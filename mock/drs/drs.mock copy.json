@@ -1,0 +1,390 @@
+{
+  "breDecision": {
+    "decision": "STD",
+    "status": "Failure",
+    "remarks": "#ICICI Prudential Website#Check Basic KYC Document Attestations#Standard Age Proof Requiredi## UW Control DIGI IIB hit PSO not reguired#lB hit compulsory PSO and OID required##Model Output: Green#PTLR Modet output Green: UW Standard#Standard Age Proof Required For This Rider Type#Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs",
+    "discrepancy": "Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs",
+    "timestamp": "01/04/2026, 1300hrs",
+    "retrigger": false
+  },
+  "summary": [
+    {
+      "memberType": "proposer",
+      "proposerSummary": {
+        "title": "Mr.",
+        "firstName": "Rudra",
+        "middleName": "Kumar",
+        "lastName": "Sangha",
+        "dob": "22-02-1992",
+        "age": 34.0,
+        "gender": "Male",
+        "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
+        "caseStatus": "Green Case",
+        "document": "Aadhaar Card",
+        "faceMatchPercentage": 76,
+        "imageQuality": "Good",
+        "documentRemarks": "Documents match"
+      },
+      "personalDetails": {
+        "maritalStatus": "Married",
+        "location": {
+          "city": "Mumbai",
+          "country": "India"
+        },
+        "occupation": {
+          "type": "Salaried",
+          "designation": "",
+          "organization": "SBI LIFE INSURANCE COMPANY LTD"
+        }
+      },
+      "financialDetails": {
+        "annualIncome": 650000,
+        "appliedSumAssured": 10000000,
+        "trsa": 10000000,
+        "tfesa": 10000000
+      },
+      "policyDetails": {
+        "productName": "ICICI Pru iProtect Smart Plus",
+        "productType": "Life",
+        "modalPremium": 14916,
+        "channel": "Proprietary"
+      },
+      "underwriting": {
+        "remarks": "No adverse findings in family history, avocation, occupation, or personal habits; no existing insurance. Medicals non-adverse; financials adequate and viable for full cover; no other risks identified.",
+        "breDecision": {
+          "status": "Accept",
+          "category": "Standard",
+          "coverage": "Full Cover"
+        }
+      },
+      "applicantDetails": {
+        "dateOfBirth": "22-02-1992",
+        "gender": "Male",
+        "maritalStatus": "Married",
+        "nationality": "Indian",
+        "countryOfResidence": "India",
+        "education": "GRAD"
+      },
+      "kycDetails": {
+        "panNumber": "APJP3224R",
+        "identityProofType": "Aadhaar Card",
+        "identityProofNumber": "987654328236",
+        "addressProof": "Aadhaar Card",
+        "incomeProof": "Form 16",
+        "existingCkycNumber": "NA",
+        "pep": "No",
+        "criminalProceedings": "No"
+      },
+      "communicationAddressDetails": {
+        "addressLine1": "PRISM Towers",
+        "addressLine2": "Mindspace",
+        "addressLine3": "Malad west",
+        "landmark": "Behind Inorbit Mall",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "country": "India",
+        "pincode": "400064"
+      },
+      "permanentAddressDetails": {
+        "addressLine1": "PRISM Towers",
+        "addressLine2": "Mindspace",
+        "addressLine3": "Malad west",
+        "landmark": "Behind Inorbit Mall",
+        "city": "Mumbai",
+        "state": "Maharashtra",
+        "country": "India",
+        "pincode": "400064"
+      },
+      "contactDetails": {
+        "mobileNumber": "9898989898",
+        "emailId": "test@ipru.com",
+        "alternateMobile": "-",
+        "landlineNumber": "",
+        "emailPref": "-",
+        "smsPref": ""
+      },
+      "applicantFinancialDetails": {
+        "occupation": "Salaried",
+        "annualIncome": 500000,
+        "gstin": "-",
+        "organisationType": "Public",
+        "organisationName": "ICICI Bank"
+      },
+      "healthInformation": {
+        "height": "170 Cms",
+        "weight": "70 Kgs",
+        "diabetes": "No",
+        "hypertension": "No",
+        "heartDisease": "Yes",
+        "cancer": "No",
+        "kidneyDisease": "No",
+        "liverDisease": "No",
+        "lungDisease": "No",
+        "neurologicalDisorder": "Yes",
+        "mentalDisorder": "No",
+        "hivAids": "No",
+        "anySurgery": "No",
+        "hospitalization": "Yes",
+        "otherIllness": "No",
+        "familyHeartDisease": "No",
+        "familyCancer": "No",
+        "familyDiabetes": "No",
+        "gynecologicalHistory": "Yes",
+        "pregnancyHistory": "Yes",
+        "miscarriageHistory": "Yes"
+      },
+      "lifestyleHabits": {
+        "alcoholConsumption": "No",
+        "alcoholQuantity": "No",
+        "smoking": "No",
+        "smokingQuantity": "No",
+        "tobaccoGutka": "No",
+        "narcotics": "No",
+        "hazardousOccupation": "No",
+        "aviationActivities": "No",
+        "diving": "No",
+        "mountaineering": "No",
+        "otherHazardousActivities": "No",
+        "racing": "No"
+      },
+      "nominees": [
+        {
+          "nomineeName": "Tanaya Sharma",
+          "nomineeDOB": "21/02/1996",
+          "gender": "Female",
+          "relationship": "Spouse",
+          "accountNumber": "1234AW",
+          "ifsc": "ICIC231400",
+          "sharePercentage": 50,
+          "appointeeName": "NA",
+          "appointeeGender": "NA",
+          "appointeeDOB": "NA"
+        },
+        {
+          "nomineeName": "Aryan Sangha",
+          "nomineeDOB": "15/08/2012",
+          "gender": "Male",
+          "relationship": "Son",
+          "accountNumber": "5678ZX",
+          "ifsc": "HDFC0002451",
+          "sharePercentage": 30,
+          "appointeeName": "Tanaya Sharma",
+          "appointeeGender": "Female",
+          "appointeeDOB": "21/02/1996"
+        },
+        {
+          "nomineeName": "Meera Sangha",
+          "nomineeDOB": "09/11/2016",
+          "gender": "Female",
+          "relationship": "Daughter",
+          "accountNumber": "8901KL",
+          "ifsc": "SBIN0001122",
+          "sharePercentage": 20,
+          "appointeeName": "Tanaya Sharma",
+          "appointeeGender": "Female",
+          "appointeeDOB": "21/02/1996"
+        }
+      ],
+      "genericDetails": {
+        "existingPolicyNumber": "NA",
+        "clientId": "NA",
+        "selfProposed": "Yes",
+        "typeOfProposer": "Individual",
+        "relationshipWithLifeAssured": "Self",
+        "typeOfProposal": "Individual"
+      },
+      "eiaDetails": {
+        "openEIA": "No",
+        "existingEIANumber": "NA",
+        "preferredRepository": "CDSL",
+        "convertPolicies": "No"
+      },
+      "fundDetails": {
+        "allocationStrategy": "Self Allocation",
+        "totalAllocation": "100",
+        "atpOpted": "Yes",
+        "fundDetail": {
+          "name": "Equity Growth Fund",
+          "amount": "500000",
+          "sourceFund": "Balanced Fund",
+          "targetFund": "Equity Growth Fund",
+          "switchDate": "2026-06-29",
+          "transferPercentage": "25"
+        }
+      }
+    },
+    {
+      "memberType": "lifeassured1",
+      "proposerSummary": {
+        "firstName": "Rudra",
+        "middleName": "Kumar",
+        "lastName": "Sangha",
+        "dob": "22-02-1992",
+        "age": 34.0,
+        "gender": "Male",
+        "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
+        "caseStatus": "Green Case",
+        "document": "Aadhaar Card",
+        "faceMatchPercentage": 76,
+        "imageQuality": "Good",
+        "documentRemarks": "Documents match"
+      },
+      "personalDetails": {
+        "maritalStatus": "Married",
+        "location": {
+          "city": "Mumbai",
+          "country": "India"
+        },
+        "occupation": {
+          "type": "Salaried",
+          "designation": "",
+          "organization": "SBI LIFE INSURANCE COMPANY LTD"
+        }
+      },
+      "financialDetails": {
+        "annualIncome": 650000,
+        "appliedSumAssured": 10000000,
+        "trsa": 10000000,
+        "tfesa": 10000000
+      },
+      "policyDetails": {
+        "productName": "ICICI Pru iProtect Smart Plus",
+        "productType": "Life",
+        "modalPremium": 20004,
+        "channel": "Proprietary"
+      },
+      "underwriting": {
+        "remarks": "No adverse findings in family history, avocation, occupation, or personal habits; no existing insurance. Medicals non-adverse; financials adequate and viable for full cover; no other risks identified.",
+        "breDecision": {
+          "status": "Accept",
+          "category": "Standard",
+          "coverage": "Full Cover"
+        }
+      }
+    }
+  ],
+  "applicationOverview": {
+    "product": {
+      "name": "ICICI PRU IPROTECT SMART PLUS",
+      "sumAssured": 1000000,
+      "productCode": "IPROTECT-PLUS"
+    },
+    "distribution": {
+      "channel": "AG",
+      "subChannel": "AG1"
+    },
+    "agent": {
+      "agentCode": "00000046",
+      "agentName": "Agent Company Mumbai"
+    },
+    "customer": {
+      "customerType": "non HNI",
+      "policyType": "Retail - New Business"
+    },
+    "policyDetails": {
+      "modalPremium": 14916,
+      "policyTerm": 36,
+      "premiumPaymentTerm": 36,
+      "paymentMode": "Yearly"
+    }
+  },
+  "riderDetails": [
+    {
+      "riderName": "ICICI Pru Non-Linked Accidental Death and Disability Rider",
+      "option": "Accidental Total and Permanent Disability",
+      "policyTerm": 36,
+      "sumAssured": 5000000,
+      "modalPremium": 2300,
+      "premiumPaymentTerm": 44
+    },
+    {
+      "riderName": "ICICI Pru Non-Linked Accidental Death and Disability Rider",
+      "option": "Accidental Death Benefit",
+      "policyTerm": 36,
+      "sumAssured": 5000000,
+      "modalPremium": 3300,
+      "premiumPaymentTerm": 44
+    },
+    {
+      "riderName": "ICICI Pru Non-Linked Health Protect Rider",
+      "option": "Critical Illness - 60CI package",
+      "policyTerm": 36,
+      "sumAssured": 5000000,
+      "modalPremium": 3876,
+      "premiumPaymentTerm": 20
+    }
+  ],
+  "requirements": [
+    {
+      "team": "Team 1",
+      "profile": "Profile 1",
+      "category": "Cate 1",
+      "subCategory": "Sub Cate 1",
+      "document": "Aadhar",
+      "specialTest": "Blood Test",
+      "reason": "Reason 1",
+      "fupCode": "fupCode 1",
+      "description": "Additional identity verification required",
+      "status": "Pending",
+      "raisedDate": "2025-01-10",
+      "raisedBy": "John Doe",
+      "receivedDate": "2025-01-12",
+      "receivedBy": "Jane Smith",
+      "validity": "30 Days",
+      "userId": "USR001",
+      "remarks": "Awaiting document validation",
+      "udsLink": "https://uds.example.com/req/001"
+    },
+    {
+      "team": "Team 2",
+      "profile": "Profile 2",
+      "category": "Cate 2",
+      "subCategory": "Sub Cate 2",
+      "document": "PAN",
+      "specialTest": "ECG",
+      "reason": "Reason 2",
+      "fupCode": "fupCode 2",
+      "description": "Financial verification required",
+      "status": "Received",
+      "raisedDate": "2025-01-15",
+      "raisedBy": "Michael Brown",
+      "receivedDate": "2025-01-17",
+      "receivedBy": "Sarah Wilson",
+      "validity": "45 Days",
+      "userId": "USR002",
+      "remarks": "Documents received and under review",
+      "udsLink": "https://uds.example.com/req/002"
+    },
+    {
+      "team": "Team 3",
+      "profile": "Profile 3",
+      "category": "Cate 3",
+      "subCategory": "Sub Cate 3",
+      "document": "Voter",
+      "specialTest": "X-Ray",
+      "reason": "Reason 3",
+      "fupCode": "fupCode 3",
+      "description": "Address proof verification required",
+      "status": "Completed",
+      "raisedDate": "2025-01-20",
+      "raisedBy": "David Lee",
+      "receivedDate": "2025-01-22",
+      "receivedBy": "Emily Davis",
+      "validity": "60 Days",
+      "userId": "USR003",
+      "remarks": "Requirement successfully completed",
+      "udsLink": "https://uds.example.com/req/003"
+    }
+  ],
+  "pivvSection": {
+    "title": "PIVV Pool Remarks",
+    "remarks": "Applicant is a 40-year-old non-smoker with no significant medical history. Financials and occupation details are satisfactory as per underwriting guidelines. Case is referred to HoD for final review and approval.",
+    "decision": "Reject",
+    "reason": "Customer not speaking",
+    "userId": "sunil.sharma"
+  },
+  "cvtDecision": {
+    "remark": "",
+    "decision": "Accept"
+  }
+}
