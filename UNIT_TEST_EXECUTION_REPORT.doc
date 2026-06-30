@@ -1,0 +1,34 @@
+Unit Test Execution Report
+
+Project: mid-office-axiom
+Generated On: 2026-06-30
+Command: npm test -- --coverage
+
+Execution Summary
+- Status: SUCCESS
+- Exit Code: 0
+- Test Suites: 10 total | 10 passed | 0 failed
+- Tests: 20 total | 20 passed | 0 failed
+- Snapshots: 0 total
+- Total Time: 35.721 s
+
+Resolved Issues
+1. Updated DRS unit test expectation in src/modules/DRS/DRS.test.tsx to include "title" in masters payload.
+2. Added TextEncoder/TextDecoder polyfill in src/setupTests.ts for jsdom compatibility.
+3. Wrapped Inbox unit tests with MemoryRouter in src/modules/Landing/Inbox.test.tsx for useLocation/useNavigate context.
+
+Coverage Snapshot
+- All files:        Statements 69.59% | Branches 51.40% | Functions 46.19% | Lines 73.34%
+- modules/DRS:      Statements 96.15% | Branches 50.00% | Functions 100.00% | Lines 96.15%
+- modules/Grievance:Statements 57.43% | Branches 45.86% | Functions 25.00% | Lines 61.88%
+- modules/Landing:  Statements 70.27% | Branches 55.00% | Functions 55.14% | Lines 73.74%
+- modules/Login:    Statements 97.05% | Branches 50.00% | Functions 100.00% | Lines 97.05%
+- store:            Statements 100.00% | Branches 100.00% | Functions 100.00% | Lines 100.00%
+- utils:            Statements 94.87% | Branches 33.33% | Functions 100.00% | Lines 100.00%
+- validations:      Statements 100.00% | Branches 100.00% | Functions 100.00% | Lines 100.00%
+
+Outcome
+- All unit test suites are passing.
+- Report reflects latest successful execution.
+
+End of Report

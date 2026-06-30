@@ -80,7 +80,7 @@ describe("DRS", () => {
         roleType: "CVT Pool",
       });
       expect(mockMastersThunk).toHaveBeenCalledWith({
-        masters: ["gender", "nationality", "idProof", "addressProof", "state", "country"],
+        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country"],
       });
       expect(dispatch).toHaveBeenCalledTimes(2);
     });

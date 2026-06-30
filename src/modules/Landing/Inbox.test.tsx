@@ -1,5 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import Inbox from "./Inbox";
 import { useAppDispatch } from "../../store/hooks";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
@@ -100,7 +101,11 @@ describe("Inbox", () => {
 
     mockDispatch.mockReturnValueOnce(makeDispatchResult(inboxResponse));
 
-    render(<Inbox />);
+    render(
+      <MemoryRouter>
+        <Inbox />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(mockFetchInboxThunk).toHaveBeenCalledWith({
@@ -138,7 +143,11 @@ describe("Inbox", () => {
       .mockReturnValueOnce(makeDispatchResult(inboxResponse))
       .mockReturnValueOnce(makeDispatchResult(poolResponse));
 
-    render(<Inbox />);
+    render(
+      <MemoryRouter>
+        <Inbox />
+      </MemoryRouter>
+    );
 
     await waitFor(() => {
       expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool A");

@@ -24,7 +24,8 @@
       "isTagged": "",
       "taggedAppNo": "",
       "taggedRelation": "",
-      "spousePolicyNo": ""
+      "spousePolicyNo": "",
+      "agentName": ""
     },
     "sourcingDetail": {
       "agentCode": "00151875",
@@ -107,7 +108,12 @@
         "jointPRRelation": "",
         "nriFlag": "True/False",
         "fatfFlag": "True/False",
+        "selfProposed": "",
+        "typeOfProposal": "",
+
         "personalDetails": {
+          "userImg":"",
+          "UDSLink":"",
           "firstName": "Test",
           "lastName": "User",
           "maritalStatus": "M",
@@ -128,7 +134,13 @@
           "orgType": "PRIVATE LTD",
           "latestIncYear": 2026,
           "isPEP": false,
-          "panNo": ""
+          "panNo": "",
+          "faceMatchScore": "75%",
+          "imageQuality": "",
+          "remarks": "",
+          "ckycNumber": "",
+          "criminalProceeding": "",
+          "incomeProof":""
         },
         "address": [
           {
@@ -147,6 +159,7 @@
         ],
         "communicationDetails": {
           "mobileNo": "9850163180",
+          "alternateMobileNo": "",
           "std": "",
           "landlineNo": "",
           "emailId": "",
@@ -188,7 +201,8 @@
         "financialDetail": {
           "panNo": "",
           "annualIncome": "",
-          "latestIncomeYear": ""
+          "latestIncomeYear": "",
+          "gstin": ""
         },
         "documentDetails": [
           {
@@ -211,6 +225,12 @@
           "payuIncomeSegment": "",
           "payuEligibilityStatus": "Y",
           "payuServiceStatus": "Y"
+        },
+        "eia": {
+          "openEia": "",
+          "existingEiaNumber": "",
+          "preferredRepository": "",
+          "convertPolicies": []
         }
       },
       {
@@ -223,7 +243,12 @@
         "jointPRRelation": "",
         "nriFlag": "True/False",
         "fatfFlag": "True/False",
+        "selfProposed": "",
+        "typeOfProposal": "",
+
         "personalDetails": {
+          "userImg":"",
+           "UDSLink":"",
           "firstName": "JOINT",
           "lastName": "LAST",
           "maritalStatus": "M",
@@ -244,7 +269,13 @@
           "orgType": "PRIVATE LTD",
           "latestIncYear": 2026,
           "isPEP": false,
-          "panNo": ""
+          "panNo": "",
+          "faceMatchScore": "75%",
+          "imageQuality": "",
+          "remarks": "",
+           "ckycNumber": "",
+          "criminalProceeding": "",
+          "incomeProof":""
         },
         "address": [
           {
@@ -263,6 +294,7 @@
         ],
         "communicationDetails": {
           "mobileNo": "9850163180",
+          "alternateMobileNo": "",
           "std": "",
           "landlineNo": "",
           "emailId": "",
@@ -304,7 +336,8 @@
         "financialDetail": {
           "panNo": "",
           "annualIncome": "",
-          "latestIncomeYear": ""
+          "latestIncomeYear": "",
+          "gstin": ""
         },
         "documentDetails": [
           {
@@ -327,6 +360,12 @@
           "payuIncomeSegment": "",
           "payuEligibilityStatus": "Y",
           "payuServiceStatus": "Y"
+        },
+        "eia": {
+          "openEia": "",
+          "existingEiaNumber": "",
+          "preferredRepository": "",
+          "convertPolicies": []
         }
       }
     ],
@@ -410,10 +449,18 @@
         "quesAns": "no"
       }
     ],
+    "PIVV": {
+      "pivvPoolRemarks": "",
+      "pivvPoolDecision": "",
+      "reason": "",
+      "userId": ""
+    },
+    "cvtDecision": { "cvtDecision": "", "cvtRemarks": "" },
     "externalAPIs": {
       "breOutput": {
         "systemDecision": "Non-STP",
         "decisionTypes": {
+          "breInitialDecision": "STP",
           "breDecision": "RM",
           "breAction": "Regular Medical required",
           "breRequirement": ""
@@ -432,9 +479,74 @@
         "errorResp": "",
         "breRemarks": ""
       },
-      "medicalBreOutput":{},
-      "financialBreOutput":{},
-      "risk":{},
+      "medicalBreOutput": {
+        "breOutput": {
+          "systemDecision": "Non-STP",
+          "decisionTypes": {
+            "breInitialDecision": "STP",
+            "breDecision": "RM",
+            "breAction": "Regular Medical required",
+            "breRequirement": ""
+          },
+          "requirements": [
+            {
+              "requirementType": "IDM",
+              "requirementValue": "IDM",
+              "ruleId": "",
+              "ruleName": "AML_Compliance-Rule1,General_Action_trigger_Rules-Rule38,AML_Compliance-Rule1,PostProcessing_Action_Rules-Rule 431_1",
+              "isSTP": false,
+              "metaphorName": "AML_Compliance"
+            }
+          ],
+          "systemDecisionDateTime": "2026-04-10",
+          "errorResp": "",
+          "breRemarks": ""
+        }
+      },
+      "financialBreOutput": {
+        "breOutput": {
+          "systemDecision": "Non-STP",
+          "decisionTypes": {
+            "breInitialDecision": "STP",
+            "breDecision": "RM",
+            "breAction": "Regular Medical required",
+            "breRequirement": ""
+          },
+          "requirements": [
+            {
+              "requirementType": "IDM",
+              "requirementValue": "IDM",
+              "ruleId": "",
+              "ruleName": "AML_Compliance-Rule1,General_Action_trigger_Rules-Rule38,AML_Compliance-Rule1,PostProcessing_Action_Rules-Rule 431_1",
+              "isSTP": false,
+              "metaphorName": "AML_Compliance"
+            }
+          ],
+          "systemDecisionDateTime": "2026-04-10",
+          "errorResp": "",
+          "breRemarks": ""
+        }
+      },
+      "risk": {
+        "ptlrResponse": "Maroon",
+        "drcResponse": "Standard",
+        "adverseIib": "No",
+        "criminalQuestionResponseLa": "No",
+        "pepQuestionResponseLa": "No",
+        "criminalQuestionResponsePr": "No",
+        "pepQuestionResponsePr": "No",
+        "previousPolicySubstandard": "No",
+        "avocationRelatedDisclosure": "No",
+        "healthQuestionPositive": "No",
+        "employmentRiskInIndustry": "No",
+        "fatfOfacCountryLogin": "No",
+        "hazardousOccupation": "No",
+        "eddFlag": "No",
+        "claimRiskIndicator": "No",
+        "faceMatchScore": "No",
+        "tobacco": "No",
+        "narcotics": "No"
+      },
       "iibOutput": [
         {
           "questDbNo": 7476759121,
