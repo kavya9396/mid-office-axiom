@@ -53,6 +53,7 @@
       {
         "id": 1,
         "applicationNo": "OB25175127",
+         "breDecision":"STD",
         "channel": "AG",
         "sumAssured": 100000,
         "product": "Life Insurance",
@@ -64,6 +65,7 @@
       {
         "id": 2,
         "applicationNo": "OB25175128",
+         "breDecision":"STD",
         "channel": "AG",
         "sumAssured": 100000,
         "product": "Life Insurance",

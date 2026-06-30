@@ -19,6 +19,7 @@ const formatDateTime = (date: Date) =>
 
 const Header = () => {
     const navigate = useNavigate();
+    const username = localStorage.getItem("username") ?? "";
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [currentTime, setCurrentTime] = useState(() => formatDateTime(new Date()));
     const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(
@@ -97,7 +98,7 @@ return(
                   color: "#9A2529",
                 }}
               >
-                Username
+                {username}
               </Typography>
               {/* <Typography sx={{ color: "#323232", fontSize: 10 }}>
                 UW1234

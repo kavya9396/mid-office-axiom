@@ -15,6 +15,7 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("../../routes/routes", () => ({
   getDRSPath: jest.fn(),
+  getGrievanceApplicationPath: jest.fn(),
 }));
 
 jest.mock("../../components/ui/Button/Button", () => {
@@ -159,6 +160,20 @@ describe("RightPanel", () => {
     render(<RightPanel selectedPool="UW Pool" rows={[]} />);
 
     expect(screen.getByText("No Data Found!")).toBeInTheDocument();
+    expect(screen.queryAllByRole("columnheader")).toHaveLength(0);
+
+    expect(screen.getByTestId("search-toggle")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    expect(screen.getByTestId("filter-toggle")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
+    expect(screen.getByTestId("settings-toggle")).toHaveAttribute(
+      "aria-disabled",
+      "true",
+    );
   });
 
   it("navigates to DRS page when application number is clicked", async () => {

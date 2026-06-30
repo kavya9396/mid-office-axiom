@@ -18,7 +18,7 @@ const baseColumnsCops = [
 ] as const;
 
 export const poolAllowedColumns: Record<string, string[]> = {
-  "CVT Pool": [...baseColumnsCops],
+  "CVT Pool": [...baseColumnsCops,"breDecision"],
 
   "CPT Pool": [...baseColumnsCops,"medicalReceivedDate","financialReceivedDate","poolTAT"],
 

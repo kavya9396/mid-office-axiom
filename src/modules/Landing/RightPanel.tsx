@@ -52,8 +52,8 @@ const RightPanel = ({
 
   // ---------------- STATES ----------------
 
-  const userId = "abc";
-  const { config, updateConfig } = useColumnConfig(userId, selectedPool);
+   const username = localStorage.getItem("username") ?? "";
+  const { config, updateConfig } = useColumnConfig(username, selectedPool);
 
   const [left, setLeft] = useState<string[]>([]);
   const [right, setRight] = useState<string[]>([]);
@@ -73,8 +73,7 @@ const RightPanel = ({
   const visibleColumns = allColumns.filter((col) =>
     config.visible.includes(col.key),
   );
-
-  console.log("Left datat", left)
+  const hasTableData = rows.length > 0;
   // ---------------- OPEN DIALOG ----------------
   const openColumnDialog = () => {
     const leftColumns = allColumns.filter((col) =>
@@ -463,9 +462,15 @@ const RightPanel = ({
                       display: "flex",
                       justifyContent: "center",
                       flexShrink: 0,
-                      cursor: "pointer",
+                      cursor: hasTableData ? "pointer" : "not-allowed",
+                      opacity: hasTableData ? 1 : 0.4,
                     }}
-                    onClick={() => setIsSearchOpen((prev) => !prev)}
+                    onClick={() => {
+                      if (!hasTableData) return;
+                      setIsSearchOpen((prev) => !prev);
+                    }}
+                    aria-disabled={!hasTableData}
+                    data-testid="search-toggle"
                   >
                     <SearchIcon />
                   </Box>
@@ -474,17 +479,31 @@ const RightPanel = ({
               {/* Right icons */}
               <Box sx={{ display: "flex", gap: 1 }}>
                 <Box
-                  sx={{ cursor: "pointer" }}
-                  onClick={() => setOpenFilterDialog(true)}
+                  sx={{
+                    cursor: hasTableData ? "pointer" : "not-allowed",
+                    opacity: hasTableData ? 1 : 0.4,
+                  }}
+                  onClick={() => {
+                    if (!hasTableData) return;
+                    setOpenFilterDialog(true);
+                  }}
+                  aria-disabled={!hasTableData}
+                  data-testid="filter-toggle"
                 >
                   <FilterIcon />
                 </Box>
                 <Box
-                  sx={{ cursor: "pointer" }}
+                  sx={{
+                    cursor: hasTableData ? "pointer" : "not-allowed",
+                    opacity: hasTableData ? 1 : 0.4,
+                  }}
                   onClick={() => {
+                    if (!hasTableData) return;
                     openColumnDialog();
                     setOpenTransferDialog(true);
                   }}
+                  aria-disabled={!hasTableData}
+                  data-testid="settings-toggle"
                 >
                   <SettingsIcon />
                 </Box>
@@ -507,9 +526,11 @@ const RightPanel = ({
                 }}
               >
                 <Table sx={{ tableLayout: "auto" }} stickyHeader>
-                  <TableHead sx={{ backgroundColor: "#E9EEF3" }}>
-                    {headerContent()}
-                  </TableHead>
+                  {hasTableData && (
+                    <TableHead sx={{ backgroundColor: "#E9EEF3" }}>
+                      {headerContent()}
+                    </TableHead>
+                  )}
                   <TableBody>
                     {paginatedRows.map((row) => (
                       <TableRow
