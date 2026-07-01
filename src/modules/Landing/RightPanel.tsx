@@ -40,6 +40,10 @@ import { toFilterComparableValue } from "../../utils/filter";
 
 type SortDirection = "asc" | "desc";
 
+const roleMapper = {
+  "CVT_TASK": "CVT Pool",
+}
+
 const RightPanel = ({
   selectedPool,
   rows,
@@ -571,9 +575,13 @@ const RightPanel = ({
                                   onClick={(e) => {
                                     e.preventDefault();
                                     e.stopPropagation();
+                                    const mappedRoleType =
+                                      roleMapper[
+                                        row.roleType as keyof typeof roleMapper
+                                      ] ?? row.roleType;
                                     localStorage.setItem(
                                       "roleType",
-                                      row.roleType,
+                                      mappedRoleType,
                                     );
                                     const targetPath = row.roleType === "Grievance Pool"
                                       ? getGrievanceApplicationPath("retail", row.applicationNo)
