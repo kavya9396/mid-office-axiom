@@ -1,9 +1,11 @@
 import {
+  Alert,
   Box,
   List,
   ListItem,
   MenuItem,
   Paper,
+  Snackbar,
   Select,
   Table,
   TableBody,
@@ -29,7 +31,6 @@ import SearchBar from "../../components/ui/SearchBar/SearchBar";
 import { useMemo, useState } from "react";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
-//import { poolAllowedColumns } from "../../store/pool.columns.config";
 import { useColumnConfig } from "../../hooks/useColumnConfig";
 import Badge from "../../components/ui/Badge/Badge";
 import { useNavigate } from "react-router-dom";
@@ -37,6 +38,8 @@ import FilterTable from "./FilterTable";
 import { getDRSPath, getGrievanceApplicationPath } from "../../routes/routes";
 import SearchApplication from "./SearchApplication";
 import { toFilterComparableValue } from "../../utils/filter";
+import { useAppDispatch } from "../../store/hooks";
+import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
 
 type SortDirection = "asc" | "desc";
 
@@ -52,12 +55,14 @@ const RightPanel = ({
   selectedPool: string;
   rows: tableData[];
 }) => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [openFilterDialog, setOpenFilterDialog] = useState<boolean>(false);
 
   // ---------------- STATES ----------------
 
-   const username = localStorage.getItem("username") ?? "";
+  const username = localStorage.getItem("username") ?? "";
+  const password = localStorage.getItem("password") ?? "";
   const { config, updateConfig } = useColumnConfig(username, selectedPool);
 
   const [left, setLeft] = useState<string[]>([]);
@@ -71,9 +76,57 @@ const RightPanel = ({
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sortKey, setSortKey] = useState<keyof tableData | "">("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [claimError, setClaimError] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
     {},
   );
+
+  const handleApplicationClick = async (
+    e: React.MouseEvent,
+    row: tableData,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const claimTaskId = row.taskId?.includes(".")
+      ? row.taskId.split(".").pop() ?? ""
+      : row.taskId ?? "";
+    if (!claimTaskId) {
+      setClaimError("Task id is missing. Unable to claim this case.");
+      return;
+    }
+
+    try {
+      const claimResponse = await dispatch(
+        claimTaskThunk({ username, password, taskId: claimTaskId }),
+      ).unwrap();
+
+      const isClaimed =
+        claimResponse.success === true ||
+        claimResponse.state?.toLowerCase() === "claimed";
+
+      if (!isClaimed) {
+        setClaimError(claimResponse.message || "Failed to claim task.");
+        return;
+      }
+
+      const mappedRoleType =
+        roleMapper[row.roleType as keyof typeof roleMapper] ?? row.roleType;
+
+      localStorage.setItem("roleType", mappedRoleType);
+
+      const targetPath =
+        row.roleType === "Grievance Pool"
+          ? getGrievanceApplicationPath("retail", row.applicationNo)
+          : getDRSPath("retail", row.applicationNo);
+
+      navigate(targetPath);
+    } catch (error) {
+      setClaimError(
+        error instanceof Error ? error.message : "Failed to claim task.",
+      );
+    }
+  };
 
   const visibleColumns = allColumns.filter((col) =>
     config.visible.includes(col.key),
@@ -580,20 +633,7 @@ const RightPanel = ({
                                     "&:hover": { textDecoration: "underline" },
                                   }}
                                   onClick={(e) => {
-                                    e.preventDefault();
-                                    e.stopPropagation();
-                                    const mappedRoleType =
-                                      roleMapper[
-                                        row.roleType as keyof typeof roleMapper
-                                      ] ?? row.roleType;
-                                    localStorage.setItem(
-                                      "roleType",
-                                      mappedRoleType,
-                                    );
-                                    const targetPath = row.roleType === "Grievance Pool"
-                                      ? getGrievanceApplicationPath("retail", row.applicationNo)
-                                      : getDRSPath("retail", row.applicationNo);
-                                    navigate(targetPath);
+                                    void handleApplicationClick(e, row);
                                   }}
                                 >
                                   {row.applicationNo}
@@ -786,6 +826,21 @@ const RightPanel = ({
           </>
         )}
       </Box>
+      <Snackbar
+        open={Boolean(claimError)}
+        autoHideDuration={3000}
+        onClose={() => setClaimError("")}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setClaimError("")}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {claimError}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

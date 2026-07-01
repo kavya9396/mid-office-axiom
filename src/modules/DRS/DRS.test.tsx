@@ -5,6 +5,8 @@ import { useDispatch } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import { mastersThunk } from "../../store/thunks/mastersThunk";
+import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
+import { setBreOutput } from "../../store/slices/drsSlice";
 
 jest.mock("react-redux", () => ({
   useDispatch: jest.fn(),
@@ -21,6 +23,14 @@ jest.mock("../../store/thunks/drsThunk", () => ({
 
 jest.mock("../../store/thunks/mastersThunk", () => ({
   mastersThunk: jest.fn(),
+}));
+
+jest.mock("../../store/thunks/breRetriggerThunk", () => ({
+  breRetriggerThunk: jest.fn(),
+}));
+
+jest.mock("../../store/slices/drsSlice", () => ({
+  setBreOutput: jest.fn(),
 }));
 
 jest.mock("../../components/layout/BackButton", () => {
@@ -49,6 +59,8 @@ const mockUseNavigate = useNavigate as unknown as jest.Mock;
 const mockUseParams = useParams as unknown as jest.Mock;
 const mockDrsThunk = drsThunk as unknown as jest.Mock;
 const mockMastersThunk = mastersThunk as unknown as jest.Mock;
+const mockBreRetriggerThunk = breRetriggerThunk as unknown as jest.Mock;
+const mockSetBreOutput = setBreOutput as unknown as jest.Mock;
 
 describe("DRS", () => {
   beforeEach(() => {
@@ -62,27 +74,90 @@ describe("DRS", () => {
       type: "drsThunk",
       payload,
     }));
+    mockBreRetriggerThunk.mockImplementation((payload) => ({
+      type: "breRetriggerThunk",
+      payload,
+    }));
     mockMastersThunk.mockImplementation((payload) => ({
       type: "mastersThunk",
       payload,
     }));
+    mockSetBreOutput.mockImplementation((payload) => ({
+      type: "setBreOutput",
+      payload,
+    }));
   });
 
-  it("dispatches DRS and master fetches when application number is present", async () => {
-    const dispatch = jest.fn();
+  it("dispatches DRS, BRE retrigger, and masters fetch when application number is present", async () => {
+    const mockDrsData = {
+      applicationNumber: "APP-123",
+      externalAPIs: {
+        breOutput: {
+          systemDecision: "STP",
+          decisionTypes: {
+            initialDecision: "STD",
+            breDecision: "STD",
+            breAction: "Standard",
+            breRequirement: "-",
+          },
+          requirements: [],
+          systemDecisionDateTime: "2026-04-10",
+          errorResp: "",
+          breRemarks: "-",
+        },
+        medicalBreOutput: {},
+        financialBreOutput: {},
+        risk: {},
+        iibOutput: [],
+        drcOutput: {},
+        ptlrOutput: {},
+        ptllOutput: {},
+      },
+    };
+
+    const dispatch = jest
+      .fn()
+      .mockReturnValueOnce({
+        unwrap: () => Promise.resolve({ data: mockDrsData }),
+      })
+      .mockReturnValueOnce({
+        unwrap: () =>
+          Promise.resolve({
+            data: {
+              breOutput: {
+                systemDecision: "Non-STP",
+                decisionTypes: {
+                  initialDecision: "RM",
+                  breDecision: "RM",
+                  breAction: "Regular Medical required",
+                  breRequirement: "IDM",
+                },
+                requirements: [],
+                systemDecisionDateTime: "2026-04-10",
+                errorResp: "",
+                breRemarks: "Updated",
+              },
+            },
+          }),
+      })
+      .mockReturnValueOnce({});
+
     mockUseDispatch.mockReturnValue(dispatch);
 
     render(<DRS />);
 
     await waitFor(() => {
       expect(mockDrsThunk).toHaveBeenCalledWith({
-        applicationId: "APP-123",
-        roleType: "CVT Pool",
+        applicationNumber: "APP-123",
       });
+      expect(mockBreRetriggerThunk).toHaveBeenCalledWith({
+        data: mockDrsData,
+      });
+      expect(mockSetBreOutput).toHaveBeenCalled();
       expect(mockMastersThunk).toHaveBeenCalledWith({
         masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country"],
       });
-      expect(dispatch).toHaveBeenCalledTimes(2);
+      expect(dispatch).toHaveBeenCalledTimes(4);
     });
 
     expect(screen.getByText("Application Overview Accordion")).toBeInTheDocument();
@@ -91,7 +166,62 @@ describe("DRS", () => {
 
   it("navigates back to inbox", async () => {
     const navigate = jest.fn();
+    const dispatch = jest
+      .fn()
+      .mockReturnValueOnce({
+        unwrap: () =>
+          Promise.resolve({
+            data: {
+              applicationNumber: "APP-123",
+              externalAPIs: {
+                breOutput: {
+                  systemDecision: "STP",
+                  decisionTypes: {
+                    initialDecision: "STD",
+                    breDecision: "STD",
+                    breAction: "Standard",
+                    breRequirement: "-",
+                  },
+                  requirements: [],
+                  systemDecisionDateTime: "2026-04-10",
+                  errorResp: "",
+                  breRemarks: "-",
+                },
+                medicalBreOutput: {},
+                financialBreOutput: {},
+                risk: {},
+                iibOutput: [],
+                drcOutput: {},
+                ptlrOutput: {},
+                ptllOutput: {},
+              },
+            },
+          }),
+      })
+      .mockReturnValueOnce({
+        unwrap: () =>
+          Promise.resolve({
+            data: {
+              breOutput: {
+                systemDecision: "STP",
+                decisionTypes: {
+                  initialDecision: "STD",
+                  breDecision: "STD",
+                  breAction: "Standard",
+                  breRequirement: "-",
+                },
+                requirements: [],
+                systemDecisionDateTime: "2026-04-10",
+                errorResp: "",
+                breRemarks: "-",
+              },
+            },
+          }),
+      })
+      .mockReturnValueOnce({});
+
     mockUseNavigate.mockReturnValue(navigate);
+    mockUseDispatch.mockReturnValue(dispatch);
 
     render(<DRS />);
 

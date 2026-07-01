@@ -109,6 +109,10 @@ export interface CVTRequirementRow {
   udsLink: string;
 };
 
+export type DRSViewRequest = {
+  applicationNumber: string;
+};
+
 export type DRSRequest = {
   applicationId: string;
   roleType: string;
@@ -250,6 +254,7 @@ export interface DRSExternalAPIs {
 export interface DRSBreOutput {
   systemDecision: string;
   decisionTypes: {
+    breInitialDecision?: string;
     initialDecision: string;
     breDecision: string;
     breAction: string;
@@ -404,20 +409,12 @@ export type ReferToITResponse = {
 };
 
 export type BreRetriggerRequest = {
-  applicationId: string;
-  roleType: string;
+  data: DRSData;
 };
 
 export type BreRetriggerResponse = {
-  breDecision: BreDecisionResponse & {
-    medicalDecision?: string | null;
-    medicalDecisionDate?: string | null;
-    medicalDiscrepancy?: string | null;
-    medicalRemarks?: string | null;
-    financialDecision?: string | null;
-    financialDecisionDate?: string | null;
-    financialDiscrepancy?: string | null;
-    financialRemarks?: string | null;
+  data: {
+    breOutput: DRSBreOutput;
   };
 };
 

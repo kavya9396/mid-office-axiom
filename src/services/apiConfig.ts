@@ -63,6 +63,12 @@ const apiUrls = {
     mock: "/mock/drs/userList.json",
   },
 
+  //Claim Task
+  claimTask: {
+    real: "/api/inbox/claimTask.mock.json",
+    mock: "/mock/inbox/claimTask.mock.json"
+  },
+
   // Medical
   medicalView: {
     real: "/api/medical/view",

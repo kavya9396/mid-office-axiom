@@ -26,6 +26,8 @@ export type PoolProps = {
 export interface tableData {
   id: number;
 
+  taskId?: string;
+
   applicationNo: string;
 
   productCode?:string;
@@ -135,3 +137,16 @@ export interface PoolRequest {
 export interface PoolResponse {
   poolData: Record<string, tableData[]>;
 }
+
+export type ClaimTaskRequest = {
+  username: string;
+  password: string;
+  taskId: string;
+};
+
+export type ClaimTaskResponse = {
+  id?: string;
+  state?: string;
+  message?: string;
+  success?: boolean;
+};

@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type {
   DRSData,
+  DRSBreOutput,
   MastersData,
 } from "../../types/drs.types";
 import { drsThunk } from "../thunks/drsThunk";
@@ -27,7 +28,16 @@ const initialState: DrsState = {
 const drsSlice = createSlice({
   name: "drs",
   initialState,
-  reducers: {},
+  reducers: {
+    setBreOutput: (state, action: { payload: DRSBreOutput }) => {
+      if (!state.data) return;
+
+      state.data.externalAPIs = {
+        ...state.data.externalAPIs,
+        breOutput: action.payload,
+      };
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(drsThunk.pending, (state) => {
@@ -62,4 +72,5 @@ const drsSlice = createSlice({
   },
 });
 
+export const { setBreOutput } = drsSlice.actions;
 export default drsSlice.reducer;

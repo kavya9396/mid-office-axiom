@@ -9,11 +9,12 @@ import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import CustomButton from "../../../components/ui/Button/Button";
 import type { RootState } from "../../../store/store";
 import { useSelector } from "react-redux";
-import type { BreDecisionResponse } from "../../../types/drs.types";
+import type { BreDecisionResponse, DRSBreOutput } from "../../../types/drs.types";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppDispatch } from "../../../store/hooks";
 import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
 import { referToItThunk } from "../../../store/thunks/referToItThunk";
+import { setBreOutput } from "../../../store/slices/drsSlice";
 
 type SelectedItem = {
   label: string;
@@ -37,6 +38,19 @@ const truncateText = (text: string, limit: number) => {
   return truncated.slice(0, truncated.lastIndexOf(" "));
 };
 
+const mapBreOutputToDecision = (breOutput: DRSBreOutput): BreDecisionResponse => ({
+  decision: breOutput.decisionTypes?.breDecision ?? null,
+  status: "Success",
+  remarks: breOutput.breRemarks ?? null,
+  discrepancy: breOutput.decisionTypes?.breRequirement ?? null,
+  timestamp: breOutput.systemDecisionDateTime ?? null,
+  initialDecision:
+    breOutput.decisionTypes?.initialDecision ??
+    breOutput.decisionTypes?.breInitialDecision ??
+    null,
+  retrigger: null,
+});
+
 const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisionProps) => {
   const dispatch = useAppDispatch();
   const { applicationNumber } = useAppContext();
@@ -45,15 +59,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const breOutput = data?.externalAPIs?.breOutput;
 
   const drsBreDecision: BreDecisionResponse | null = breOutput
-    ? {
-      decision: breOutput.decisionTypes?.breDecision ?? null,
-      status: breOutput ? "Success" : "Failure",
-      remarks: breOutput.breRemarks ?? null,
-      discrepancy: breOutput.decisionTypes?.breRequirement ?? null,
-      timestamp: breOutput.systemDecisionDateTime ?? null,
-      initialDecision: breOutput.decisionTypes?.initialDecision ?? null,
-      retrigger: null,
-    }
+    ? mapBreOutputToDecision(breOutput)
     : null;
 
   console.log("drsBreDecision", drsBreDecision);
@@ -71,7 +77,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [bredialogOpen, setBreDialogOpen] = useState(false);
-  const [retriggerCount, setRetriggerCount] = useState(0);
+  const retriggerCount = 0;
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [retriggeredBreDecision, setRetriggeredBreDecision] = useState<BreDecisionResponse | null>(null);
   const [breRetriggerLoading, setBreRetriggerLoading] = useState(false);
@@ -172,8 +178,8 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       return;
     }
 
-    if (!applicationId || !roleType) {
-      setBreRetriggerError("Missing application or role information.");
+    if (!data) {
+      setBreRetriggerError("Missing DRS response. Unable to retrigger BRE.");
       return;
     }
 
@@ -183,22 +189,18 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
 
       const response = await dispatch(
         breRetriggerThunk({
-          applicationId,
-          roleType,
+          data,
         }),
       ).unwrap();
 
-      setRetriggeredBreDecision(response.breDecision);
-
-      if (response.breDecision.status?.toLowerCase() !== "success") {
-        const nextCount = retriggerCount + 1;
-        setRetriggerCount(nextCount);
-
-        if (nextCount >= 3) {
-          setReferToItError(null);
-          setBreDialogOpen(true);
-        }
+      const updatedBreOutput = response.data?.breOutput;
+      if (!updatedBreOutput) {
+        setBreRetriggerError("BRE retrigger did not return updated data.");
+        return;
       }
+
+      dispatch(setBreOutput(updatedBreOutput));
+      setRetriggeredBreDecision(mapBreOutputToDecision(updatedBreOutput));
     } catch (error) {
       setBreRetriggerError(error instanceof Error ? error.message : "Failed to retrigger BRE.");
     } finally {

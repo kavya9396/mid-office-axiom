@@ -1,10 +1,28 @@
 {
-  "breDecision": {
-    "decision": "STD",
-    "status": "Failure",
-    "remarks": "BRE retrigger completed but validation rules still returned failure.",
-    "discrepancy": "Income proof verification remains pending.",
-    "timestamp": "27/06/2026, 1130hrs",
-    "retrigger": true
+  "data": {
+    "breOutput": {
+      "systemDecision": "Non-STP",
+      "decisionTypes": {
+        "breInitialDecision": "STP",
+        "initialDecision": "RM",
+        "breDecision": "RM",
+        "breAction": "Regular Medical required",
+        "breRequirement": "Videography Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection"
+      },
+      "requirements": [
+        {
+          "requirementType": "IDM",
+          "requirementValue": "IDM",
+          "ruleId": "",
+          "ruleName": "AML_Compliance-Rule1",
+          "isSTP": false,
+          "metaphorName": "AML_Compliance"
+        }
+      ],
+      "systemDecisionDateTime": "2026-04-10",
+      "reTriggerCount": 1,
+      "errorResp": "",
+      "breRemarks": "#ICICI Prudential Website#Check Basic KYC Document Attestations"
+    }
   }
 }

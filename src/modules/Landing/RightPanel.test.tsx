@@ -4,6 +4,8 @@ import RightPanel from "./RightPanel";
 import { useColumnConfig } from "../../hooks/useColumnConfig";
 import { useNavigate } from "react-router-dom";
 import { getDRSPath } from "../../routes/routes";
+import { useAppDispatch } from "../../store/hooks";
+import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
 
 jest.mock("../../hooks/useColumnConfig", () => ({
   useColumnConfig: jest.fn(),
@@ -16,6 +18,14 @@ jest.mock("react-router-dom", () => ({
 jest.mock("../../routes/routes", () => ({
   getDRSPath: jest.fn(),
   getGrievanceApplicationPath: jest.fn(),
+}));
+
+jest.mock("../../store/hooks", () => ({
+  useAppDispatch: jest.fn(),
+}));
+
+jest.mock("../../store/thunks/claimTaskThunk", () => ({
+  claimTaskThunk: jest.fn(),
 }));
 
 jest.mock("../../components/ui/Button/Button", () => {
@@ -119,6 +129,8 @@ jest.mock("../../icons/Icons", () => ({
 const mockUseColumnConfig = useColumnConfig as jest.Mock;
 const mockUseNavigate = useNavigate as jest.Mock;
 const mockGetDRSPath = getDRSPath as jest.Mock;
+const mockUseAppDispatch = useAppDispatch as jest.Mock;
+const mockClaimTaskThunk = claimTaskThunk as unknown as jest.Mock;
 
 const rows = [
   {
@@ -135,12 +147,22 @@ const rows = [
     munichReMedicalDecision: "Clear",
     hniFlag: false,
     roleType: "underwriter",
+    taskId: "2078.18763",
   },
 ];
 
 describe("RightPanel", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
+    localStorage.setItem("username", "ipru74685");
+    localStorage.setItem("password", "secret");
+    mockClaimTaskThunk.mockImplementation((payload) => payload);
+    mockUseAppDispatch.mockReturnValue(
+      jest.fn(() => ({
+        unwrap: () => Promise.resolve({ success: true, message: "ok" }),
+      })),
+    );
     mockUseColumnConfig.mockReturnValue({
       config: {
         visible: ["applicationNo", "drc", "roleType"],
@@ -181,10 +203,15 @@ describe("RightPanel", () => {
     mockUseNavigate.mockReturnValue(navigate);
     mockGetDRSPath.mockReturnValue("/drs/retail/APP-1");
 
-    render(<RightPanel selectedPool="UW Pool" rows={rows as any} />);
+    render(<RightPanel selectedPool="UW Pool" rows={rows} />);
 
     await userEvent.click(screen.getByText("APP-1"));
 
+    expect(mockClaimTaskThunk).toHaveBeenCalledWith({
+      username: "ipru74685",
+      password: "secret",
+      taskId: "18763",
+    });
     expect(localStorage.getItem("roleType")).toBe("underwriter");
     expect(mockGetDRSPath).toHaveBeenCalledWith("retail", "APP-1");
     expect(navigate).toHaveBeenCalledWith("/drs/retail/APP-1");

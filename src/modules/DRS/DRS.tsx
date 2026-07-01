@@ -6,6 +6,8 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import { mastersThunk } from "../../store/thunks/mastersThunk";
+import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
+import { setBreOutput } from "../../store/slices/drsSlice";
 
 const mapper = {
     "CVT Pool": "RETAIL_CVT_POOL",
@@ -29,27 +31,48 @@ const DRS = () => {
     const navigate = useNavigate();
 
     const dispatch = useDispatch<AppDispatch>();
-    const applicationId = applicationNumber ?? "";
-    
+    const safeApplicationNumber = applicationNumber ?? "";
 
     useEffect(() => {
-        if (!applicationId) {
+        if (!safeApplicationNumber) {
             return;
         }
 
-        dispatch(
-            drsThunk({
-                applicationId,
-                roleType,
-            })
-        );
+        const loadDRSAndBRE = async () => {
+            try {
+                const drsResponse = await dispatch(
+                    drsThunk({
+                        applicationNumber: safeApplicationNumber,
+                    }),
+                ).unwrap();
 
-        dispatch(
-            mastersThunk({
-                masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country"],
-            })
-        );
-    }, [dispatch, applicationId, roleType]);
+                try {
+                    const breResponse = await dispatch(
+                        breRetriggerThunk({
+                            data: drsResponse.data,
+                        }),
+                    ).unwrap();
+
+                    const updatedBreOutput = breResponse.data?.breOutput;
+                    if (updatedBreOutput) {
+                        dispatch(setBreOutput(updatedBreOutput));
+                    }
+                } catch (error) {
+                    console.error("Failed to retrigger BRE from DRS response:", error);
+                }
+            } catch (error) {
+                console.error("Failed to load DRS:", error);
+            } finally {
+                dispatch(
+                    mastersThunk({
+                        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country"],
+                    }),
+                );
+            }
+        };
+
+        void loadDRSAndBRE();
+    }, [dispatch, safeApplicationNumber]);
 
 
     return (
