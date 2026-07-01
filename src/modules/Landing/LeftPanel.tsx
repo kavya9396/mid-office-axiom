@@ -1,10 +1,5 @@
 import { Box, List, Paper, Typography } from "@mui/material";
-import type {
-  PoolItemProps,
-  PoolProps,
-  RoleGroup,
-  tableData,
-} from "../../types/inbox";
+import type { PoolItemProps, PoolProps, tableData } from "../../types/inbox";
 import {
   InboxIcon,
   KeyRightArrowIcon,
@@ -12,16 +7,10 @@ import {
   TaskIcon,
 } from "../../icons/Icons";
 import { columnFlex, hoverSx, selectedSx } from "../../utils/styles";
-import CustomAccordion from "../../components/ui/Accordion/Accordion";
 import LastLogin from "./LastLogin";
 
 type LeftPanelProps = PoolProps & {
-  mode?: "simple" | "accordion";
-  role?: string;
-  roles: RoleGroup[];
-  rows: tableData[];
   poolData: Record<string, tableData[]>;
-  poolCounts: Record<string, number>;
 };
 
 const PoolItem = ({
@@ -37,7 +26,8 @@ const PoolItem = ({
     window.scrollTo({ top: 0, behavior: "smooth" });
     onClick(value);
   };
-
+const str = label;
+const taskName = str.replace(/_/g, " ");
   return (
     <Box
       onClick={handlePoolClick}
@@ -61,7 +51,7 @@ const PoolItem = ({
         }}
       >
 
-        {label}{" "}
+        {taskName}{" "}
         {selectedPool != "User Management" &&
           showCount &&
           count !== undefined && count > 0 &&
@@ -75,16 +65,11 @@ const PoolItem = ({
 const LeftPanel = ({
   toggle,
   setToggle,
-  mode,
-  roles,
   selectedPool,
   onSelectPool,
-  poolCounts,
+  poolData,
 }: LeftPanelProps) => {
-  const isAccordion = mode === "accordion";
-
-  const poolEntries = roles.filter((group) => group.pools?.length > 0);
-  const allPools = poolEntries.flatMap((group) => group.pools);
+  const poolNames = Object.keys(poolData);
   const searchItem = (
     <PoolItem
       label="Search Applications"
@@ -94,7 +79,7 @@ const LeftPanel = ({
       showCount={false}
     />
   );
-  const getPoolCount = (pool: string) => poolCounts[pool] ?? '';
+  const getPoolCount = (pool: string) => poolData[pool]?.length ?? 0;
   return (
     <Box
       sx={{
@@ -133,39 +118,13 @@ const LeftPanel = ({
             <>
               {searchItem}
 
-              {poolEntries.length === 0 ? (
+              {poolNames.length === 0 ? (
                 <Typography sx={{ p: 2, color: "#999" }}>
                   No work pools available.
                 </Typography>
-              ) : isAccordion ? (
-                <>
-                  {poolEntries.map((group, index) => (
-                    <CustomAccordion
-                      key={group.name}
-                      title={group.name.toUpperCase()}
-                      titleFontSize={14}
-                      titleColor="#5D5D5D"
-                      detailPadding={0}
-                      defaultExpanded={index === 0}
-                    >
-                      <List disablePadding>
-                        {group.pools.map((pool) => (
-                          <PoolItem
-                            key={pool}
-                            label={pool}
-                            value={pool}
-                            selectedPool={selectedPool}
-                            onClick={onSelectPool}
-                            count={getPoolCount(pool)}
-                          />
-                        ))}
-                      </List>
-                    </CustomAccordion>
-                  ))}
-                </>
               ) : (
                 <List disablePadding>
-                  {allPools.map((pool) => (
+                  {poolNames.map((pool) => (
                     <PoolItem
                       key={pool}
                       label={pool}

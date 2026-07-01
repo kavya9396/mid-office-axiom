@@ -4,7 +4,6 @@ import { MemoryRouter } from "react-router-dom";
 import Inbox from "./Inbox";
 import { useAppDispatch } from "../../store/hooks";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
-import { poolThunk } from "../../store/thunks/poolThunk";
 
 jest.mock("../../store/hooks", () => ({
   useAppDispatch: jest.fn(),
@@ -14,24 +13,24 @@ jest.mock("../../store/thunks/inboxThunk", () => ({
   fetchInboxThunk: jest.fn(),
 }));
 
-jest.mock("../../store/thunks/poolThunk", () => ({
-  poolThunk: jest.fn(),
-}));
-
 jest.mock("./LeftPanel", () => {
   type LeftPanelProps = {
     selectedPool: string;
     onSelectPool: (pool: string) => void;
+    poolData: Record<string, Array<unknown>>;
   };
 
   return function LeftPanelMock({
     selectedPool,
     onSelectPool,
+    poolData,
   }: LeftPanelProps) {
     return (
       <div>
         <div data-testid="left-selected">{selectedPool}</div>
-        <button onClick={() => onSelectPool("Pool B")}>Select Pool B</button>
+        {Object.keys(poolData).map((pool) => (
+          <button key={pool} onClick={() => onSelectPool(pool)}>{pool}</button>
+        ))}
       </div>
     );
   };
@@ -51,7 +50,6 @@ jest.mock("./RightPanel", () => {
 const mockDispatch = jest.fn();
 const mockUseAppDispatch = useAppDispatch as jest.Mock;
 const mockFetchInboxThunk = fetchInboxThunk as unknown as jest.Mock;
-const mockPoolThunk = poolThunk as unknown as jest.Mock;
 
 const makeDispatchResult = (value: unknown) => ({
   unwrap: jest.fn().mockResolvedValue(value),
@@ -84,18 +82,13 @@ describe("Inbox", () => {
       type: "fetchInboxThunk",
       payload,
     }));
-    mockPoolThunk.mockImplementation((payload) => ({
-      type: "poolThunk",
-      payload,
-    }));
   });
 
-  it("loads inbox data on mount and does not fetch pool data for initial auto-selection", async () => {
+  it("loads inbox data on mount and renders the first pool from the initial payload", async () => {
     const inboxResponse = {
-      roleType: "underwriter",
-      roles: [{ name: "UW", pools: ["Pool A", "Pool B"] }],
       poolData: {
         "Pool A": [baseRow],
+        "Pool B": [],
       },
     };
 
@@ -117,21 +110,12 @@ describe("Inbox", () => {
       expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool A");
       expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool A:1");
     });
-
-    expect(mockPoolThunk).not.toHaveBeenCalled();
   });
 
-  it("fetches pool data when the user selects a different pool", async () => {
+  it("switches rows immediately when the user selects a different pool", async () => {
     const inboxResponse = {
-      roleType: "underwriter",
-      roles: [{ name: "UW", pools: ["Pool A", "Pool B"] }],
       poolData: {
         "Pool A": [baseRow],
-      },
-    };
-
-    const poolResponse = {
-      poolData: {
         "Pool B": [
           { ...baseRow, id: 2, applicationNo: "APP-2" },
           { ...baseRow, id: 3, applicationNo: "APP-3" },
@@ -139,9 +123,7 @@ describe("Inbox", () => {
       },
     };
 
-    mockDispatch
-      .mockReturnValueOnce(makeDispatchResult(inboxResponse))
-      .mockReturnValueOnce(makeDispatchResult(poolResponse));
+    mockDispatch.mockReturnValueOnce(makeDispatchResult(inboxResponse));
 
     render(
       <MemoryRouter>
@@ -153,18 +135,12 @@ describe("Inbox", () => {
       expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool A");
     });
 
-    await userEvent.click(screen.getByRole("button", { name: "Select Pool B" }));
-
-    await waitFor(() => {
-      expect(mockPoolThunk).toHaveBeenCalledWith({
-        roleName: "underwriter",
-        poolname: "Pool B",
-        userId: "test-user",
-      });
-    });
+    await userEvent.click(screen.getByRole("button", { name: "Pool B" }));
 
     await waitFor(() => {
       expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool B:2");
     });
+
+    expect(fetchInboxThunk).toHaveBeenCalledTimes(1);
   });
 });
