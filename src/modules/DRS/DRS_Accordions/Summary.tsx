@@ -16,6 +16,7 @@ import CustomDialog from "../../../components/ui/Dialog/Dialog"
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes"
 import { useNavigate } from "react-router-dom"
 import { formatDOB } from "../../../utils/helpers"
+import defaultUserProfileImage from "../../../assets/user-profile.svg"
 
 const riskDetails: RiskCard[] = [
     {
@@ -124,11 +125,13 @@ const Summary = () => {
         ? currentCustomer?.documentDetails?.[0]
         : undefined;
 
+    const title = String(personalDetails?.title ?? "");
     const firstName = String(personalDetails?.firstName ?? "");
     const middleName = String(personalDetails?.middleName ?? "");
     const lastName = String(personalDetails?.lastName ?? "");
-    const name = [firstName, middleName, lastName].filter(Boolean).join(" ");
-    const imageURL = "";
+    const name = [title, firstName, middleName, lastName].filter(Boolean).join(" ");
+    const udsLink = String(personalDetails?.UDSLink ?? "").trim();
+    const imageURL = udsLink || defaultUserProfileImage;
     const genderCode = String(personalDetails?.gender ?? "").toUpperCase();
     const gender = genderCode === "M" ? "Male" : genderCode === "F" ? "Female" : "Other";
     const dob = String(formatDOB(personalDetails?.dob) ?? "");

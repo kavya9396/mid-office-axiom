@@ -112,9 +112,9 @@
         "typeOfProposal": "",
 
         "personalDetails": {
-          "userImg":"",
-          "UDSLink":"",
-            "salutation":"Mr",
+          "userImg": "",
+          "UDSLink": "",
+          "title": "Mr",
           "firstName": "Test",
           "lastName": "User",
           "maritalStatus": "M",
@@ -141,7 +141,7 @@
           "remarks": "",
           "ckycNumber": "",
           "criminalProceeding": "",
-          "incomeProof":""
+          "incomeProof": ""
         },
         "address": [
           {
@@ -248,9 +248,9 @@
         "typeOfProposal": "",
 
         "personalDetails": {
-          "userImg":"",
-           "UDSLink":"",
-           "salutation":"Mr",
+          "userImg": "",
+          "UDSLink": "",
+          "title": "Mr",
           "firstName": "JOINT",
           "lastName": "LAST",
           "maritalStatus": "M",
@@ -275,9 +275,9 @@
           "faceMatchScore": "75%",
           "imageQuality": "",
           "remarks": "",
-           "ckycNumber": "",
+          "ckycNumber": "",
           "criminalProceeding": "",
-          "incomeProof":""
+          "incomeProof": ""
         },
         "address": [
           {
@@ -398,11 +398,11 @@
         "lastName": "NAME",
         "dob": "2001-06-07T00:00:00.0",
         "gender": "Female",
-        "accountNumber":"",
-        "IFSC":"",
-        "appointeeName":"",
-        "appointeeGender":"",
-        "appointeeDOB":"",
+        "accountNumber": "",
+        "IFSC": "",
+        "appointeeName": "",
+        "appointeeGender": "",
+        "appointeeDOB": "",
         "percentage": "100",
         "proposerNomineeRelation": "wife"
       }
@@ -456,7 +456,7 @@
         "quesAns": "no"
       }
     ],
-    "PIVV": {
+    "pivv": {
       "pivvPoolRemarks": "",
       "pivvPoolDecision": "",
       "reason": "",
