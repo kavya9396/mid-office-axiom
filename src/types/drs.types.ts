@@ -79,12 +79,12 @@ export type GrievanceApplicationSubmitResponse = {
 };
 
 export type RiderRow = {
-  riderName: string;
-  riderOption: string;
-  riderPT: number;
-  riderSumAssured: number;
-  riderModalPremium: number;
-  riderPPT: number;
+  name: string;
+  type: string;
+  term: string;
+  sumAssured: string;
+  paymentAmount: string;
+  ppt: string;
 };
 
 export interface CVTRequirementRow {
@@ -124,6 +124,7 @@ export interface DRSData {
   totalPremium: number;
   sourceSystem: string;
   applicationInfo: DRSApplicationInfo;
+  riderDetails?: DRSRiderDetail[];
   sourcingDetail: DRSSourcingDetail;
   groupDetails: DRSGroupDetails;
   productDetail: DRSProductDetail[];
@@ -164,6 +165,21 @@ export interface DRSProductDetail {
   paymentAmount: string | number;
   premiumModeFpd: string;
   sumAssured: string | number;
+  [key: string]: unknown;
+}
+
+export interface DRSRiderDetail {
+  name?: string;
+  type?: string;
+  term?: string | number;
+  sumAssured?: string | number;
+  paymentAmount?: string | number;
+  ppt?: string | number;
+  riderName?: string;
+  option?: string;
+  policyTerm?: string | number;
+  modalPremium?: string | number;
+  premiumPaymentTerm?: string | number;
   [key: string]: unknown;
 }
 

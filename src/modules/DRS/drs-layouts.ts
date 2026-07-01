@@ -1,6 +1,7 @@
 import ApplicationOverview from "./DRS_Accordions/ApplicationOverview";
 import BreDecision from "./DRS_Accordions/BreDecision";
 import CVTDecision from "./DRS_Accordions/CVTDecision";
+import DVTDecision from "./DRS_Accordions/DVTDecision";
 import PIVVSection from "./DRS_Accordions/PIVVSection";
 import RequirementManagement from "./DRS_Accordions/RequirementManagement";
 import Summary from "./DRS_Accordions/Summary";
@@ -17,7 +18,8 @@ export const accordionRegistry = {
   cvtDecision: CVTDecision,
   summary: Summary,
   quickLinks: QuickLinks,
-  uwToolkit: UWToolkit
+  uwToolkit: UWToolkit,
+  dvtDecision:DVTDecision
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
@@ -66,6 +68,6 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
     "applicationOverview",
      "summary",
      "requirementManagement",
-  ]
-  // GROUP_CVT_ADMIN: ["applicationOverview"]
+  ],
+   GROUP_DVT_POOL: ["breDecision","summary","applicationOverview", "requirementManagement","dvtDecision"]
 };

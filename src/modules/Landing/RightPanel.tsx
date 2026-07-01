@@ -42,6 +42,7 @@ type SortDirection = "asc" | "desc";
 
 const roleMapper = {
   "CVT_TASK": "CVT Pool",
+  "DVT_TASK": "DVT Pool",
 }
 
 const RightPanel = ({
@@ -193,6 +194,7 @@ const RightPanel = ({
             width: column.width,
             padding: 0.5,
             userSelect: "none",
+            whiteSpace: "nowrap",
           }}
         >
           <Box
@@ -201,11 +203,16 @@ const RightPanel = ({
               alignItems: "center",
               justifyContent: column.numeric ? "flex-end" : "flex-start",
               gap: 0.5,
+              flexWrap: "nowrap",
             }}
           >
             <Typography
               component="span"
-              sx={{ fontSize: "13px", fontWeight: "bold" }}
+              sx={{
+                fontSize: "13px",
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+              }}
             >
               {column.label}
             </Typography>
@@ -526,10 +533,10 @@ const RightPanel = ({
                 component={Paper}
                 sx={{
                   flexGrow: 1,
-                  overflowX: "hidden",
+                  overflowX: "auto",
                 }}
               >
-                <Table sx={{ tableLayout: "auto" }} stickyHeader>
+                <Table sx={{ tableLayout: "auto", minWidth: "max-content" }} stickyHeader>
                   {hasTableData && (
                     <TableHead sx={{ backgroundColor: "#E9EEF3" }}>
                       {headerContent()}

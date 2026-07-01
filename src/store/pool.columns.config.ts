@@ -16,11 +16,21 @@ const baseColumnsCops = [
   "clientType",
   "caseType",
 ] as const;
+const baseColumnsGops = [
+  "applicationNo",
+  "productCode",
+  "masterPlanNo",
+  "poolTAT",
+  "productType",
+  "typeOfGroupBusiness",
+  "sumAssured",
+  "caseReceivedDate"
+] as const;
 
 export const poolAllowedColumns: Record<string, string[]> = {
   "CVT_TASK": [...baseColumnsCops,"breDecision"],
 
-  "CPT_TASK": [...baseColumnsCops,"medicalReceivedDate","financialReceivedDate","poolTAT"],
+  "CPT Pool": [...baseColumnsCops,"medicalReceivedDate","financialReceivedDate","poolTAT"],
 
   "PIVV Pool": [...baseColumnsCops],
 
@@ -95,4 +105,5 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "requirementRaisedDate",
     "userId",
   ],
+   "DVT_TASK": [...baseColumnsGops],
 };

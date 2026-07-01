@@ -1,10 +1,8 @@
 import { createApiThunk } from "./createApiThunk";
+import { url } from "../../services/apiConfig";
 import type { DRSRequest, DRSResponse } from "../../types/drs.types";
 
 export const drsThunk = createApiThunk<DRSResponse, DRSRequest>(
-  "/mock/drs/drs.mock.json",
-  {
-    url: "/mock/drs/drs.mock.json",
-    method: "POST",
-  },
+  "drs/view",
+  { url: url("drs"), method: "POST" },
 );

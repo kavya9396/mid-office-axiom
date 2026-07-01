@@ -1,4 +1,5 @@
 import { createApiThunk } from "./createApiThunk";
+import { url } from "../../services/apiConfig";
 import type {
   ApplicantProfileSubmitRequest,
   ApplicantProfileSubmitResponse,
@@ -7,7 +8,4 @@ import type {
 export const applicantProfileSubmitThunk = createApiThunk<
   ApplicantProfileSubmitResponse,
   ApplicantProfileSubmitRequest
->("/mock/drs/applicantProfileSubmit.mock.json", {
-  url: "/mock/drs/applicantProfileSubmit.mock.json",
-  method: "POST",
-});
+>("drs/applicantProfileSubmit", { url: url("applicantProfileSubmit"), method: "POST" });

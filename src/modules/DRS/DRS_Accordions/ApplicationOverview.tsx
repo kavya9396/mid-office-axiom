@@ -9,12 +9,12 @@ import type { RiderRow } from "../../../types/drs.types";
 import { toDisplayValue } from "../../../utils/helpers";
 
 const riderColumns: Column<RiderRow>[] = [
-  { key: "riderName", header: "Name", width: "30%" },
-  { key: "riderOption", header: "Option", width: "20%" },
-  { key: "riderPT", header: "PT", width: "5%" },
-  { key: "riderSumAssured", header: "Sum Assured", width: "15%" },
-  { key: "riderModalPremium", header: "Modal Premium", width: "15%" },
-  { key: "riderPPT", header: "PPT", width: "10%" },
+  { key: "name", header: "Name", width: "30%" },
+  { key: "type", header: "Option", width: "20%" },
+  { key: "term", header: "PT", width: "5%" },
+  { key: "sumAssured", header: "Sum Assured", width: "15%" },
+  { key: "paymentAmount", header: "Modal Premium", width: "15%" },
+  { key: "ppt", header: "PPT", width: "10%" },
 ];
 
 const formatNumberOrDash = (value: unknown) => {
@@ -30,9 +30,7 @@ const ApplicationOverview = () => {
   const { data } = useSelector((state: RootState) => state.drs);
 
   const firstProduct = data?.productDetail?.[0];
-  const riderProducts = (data?.productDetail ?? []).filter(
-    (product) => String(product.type ?? "").toLowerCase() !== "base"
-  );
+  const riderDetails = data?.riderDetails ?? [];
 
   const roleType = localStorage.getItem("roleType") ?? "";
   const expandedRoles = [
@@ -100,13 +98,13 @@ const ApplicationOverview = () => {
   ];
 
   const riderRows: RiderRow[] =
-    riderProducts.map((rider) => ({
-      riderName: String(rider.name ?? "-"),
-      riderOption: String(rider.type ?? "-"),
-      riderPT: Number(rider.term ?? 0),
-      riderSumAssured: Number(rider.sumAssured ?? 0),
-      riderModalPremium: Number(rider.paymentAmount ?? 0),
-      riderPPT: Number(rider.premiumCessationTerm ?? 0),
+    riderDetails.map((rider) => ({
+      name: toDisplayValue(rider.name ?? rider.riderName),
+      type: toDisplayValue(rider.type ?? rider.option),
+      term: formatNumberOrDash(rider.term ?? rider.policyTerm),
+      sumAssured: formatNumberOrDash(rider.sumAssured),
+      paymentAmount: formatNumberOrDash(rider.paymentAmount ?? rider.modalPremium),
+      ppt: formatNumberOrDash(rider.ppt ?? rider.premiumPaymentTerm),
     })) ?? [];
 
   return (

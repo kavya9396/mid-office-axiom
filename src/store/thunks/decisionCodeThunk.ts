@@ -1,4 +1,5 @@
 import { createApiThunk } from "./createApiThunk";
+import { url } from "../../services/apiConfig";
 import type {
   DecisionCodeRequest,
   DecisionCodeResponse,
@@ -8,9 +9,6 @@ export const decisionCodeThunk = createApiThunk<
   DecisionCodeResponse,
   DecisionCodeRequest
 >(
-  "/mock/drs/decisionCodes.json",
-  {
-    url: "/mock/drs/decisionCodes.json",
-    method: "POST",
-  }
+  "drs/decisionCodes",
+  { url: url("decisionCodes"), method: "POST" },
 );

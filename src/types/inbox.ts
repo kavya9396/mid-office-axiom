@@ -14,6 +14,7 @@ poolData?: Record<string, tableData[]>;
 };
 export type InboxRequest = {
   username: string;
+  password:string;
 }
 export type PoolProps = {
   onSelectPool: (pool: string) => void;
@@ -87,7 +88,7 @@ export interface tableData {
   planOpted?:string;
   assignedTpa?:string;
   grievanceRaisedDate?:string;
-  
+  caseReceivedDate?:string;
 }
 export type PoolItemProps = {
   label: string;

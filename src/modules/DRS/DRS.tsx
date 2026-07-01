@@ -16,7 +16,8 @@ const mapper = {
     "Reconsideration Pool":"RETAIL_RECONSIDERATION_POOL",
     "Pre Issuance Servicing Pool": "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
     "Exceptional Pool": "RETAIL_EXCEPTIONAL_POOL",
-    "PIVV Pool": "RETAIL_PIVV_POOL"
+    "PIVV Pool": "RETAIL_PIVV_POOL",
+    "DVT Pool":"GROUP_DVT_POOL"
 }
 
 const DRS = () => {

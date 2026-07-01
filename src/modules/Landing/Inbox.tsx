@@ -29,7 +29,8 @@ const Inbox = () => {
     const loadData = async () => {
       try {
         const username = localStorage.getItem("username") ?? "";
-        const roleResponse = await dispatch(fetchInboxThunk({ username })).unwrap();
+        const password = localStorage.getItem("password") ?? "";
+        const roleResponse = await dispatch(fetchInboxThunk({ username,password })).unwrap();
 
         const poolDataFromAPI = roleResponse.poolData ?? {};
         const firstPool = Object.keys(poolDataFromAPI)[0];

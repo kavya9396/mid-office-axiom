@@ -1,12 +1,8 @@
 import { createApiThunk } from "./createApiThunk";
-import { apiEndpoints } from "../../services/endpoints";
+import { url } from "../../services/apiConfig";
 import type { MerSubmitRequest, MerSubmitResponse } from "../../types/drs.types";
 
 export const merSubmitThunk = createApiThunk<
   MerSubmitResponse,
   MerSubmitRequest
->("medical/mer/submit", {
-  url: apiEndpoints.merSubmit,
-  method: "POST",
-  fallbackUrl: "/mock/drs/merSubmit.mock.json",
-});
+>("medical/mer/submit", { url: url("merSubmit"), method: "POST" });

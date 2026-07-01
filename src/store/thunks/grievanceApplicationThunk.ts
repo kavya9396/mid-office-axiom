@@ -1,5 +1,5 @@
 import { createApiThunk } from "./createApiThunk";
-import { apiEndpoints } from "../../services/endpoints";
+import { url } from "../../services/apiConfig";
 import type {
   GrievanceApplicationRequest,
   GrievanceApplicationResponse,
@@ -8,8 +8,4 @@ import type {
 export const grievanceApplicationThunk = createApiThunk<
   GrievanceApplicationResponse,
   GrievanceApplicationRequest
->("grievance/application/view", {
-  url: apiEndpoints.grievanceApplicationView,
-  method: "POST",
-  fallbackUrl: "/mock/drs/grievanceApplication.mock.json",
-});
+>("grievance/application/view", { url: url("grievanceApplicationView"), method: "POST" });
