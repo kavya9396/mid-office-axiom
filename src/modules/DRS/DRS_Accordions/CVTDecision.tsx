@@ -8,6 +8,8 @@ import CustomButton from "../../../components/ui/Button/Button";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useNavigate } from "react-router-dom";
 import RequirementManagementTable from "./RequirementManagementTable";
+import { useAppContext } from "../../../hooks/useAppContext";
+import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 
 const CVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
@@ -15,6 +17,11 @@ const CVTDecision = () => {
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
     const navigate = useNavigate();
     const isSubmitEnabled = uwDecisionRemarks.trim().length > 0 && decision.trim().length > 0;
+    const { businessType } = useAppContext();
+    const safeBusinessType =
+        normalizeBusinessType(businessType) ??
+        normalizeBusinessType(localStorage.getItem("businessType")) ??
+        "retail";
 
     return (
         <Container disableGutters>
@@ -112,7 +119,7 @@ const CVTDecision = () => {
                     open={confirmationDialogOpen}
                     message="Do you want to submit the case?"
                     onClose={() => setConfirmationDialogOpen(false)}
-                    onConfirm={() => navigate("/retail/inbox")}
+                    onConfirm={() => navigate(getInboxPath(safeBusinessType))}
                 />
             </Box>
         </Container>

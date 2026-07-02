@@ -15,6 +15,7 @@ import { useAppDispatch } from "../../../store/hooks";
 import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
 import { referToItThunk } from "../../../store/thunks/referToItThunk";
 import { setBreOutput } from "../../../store/slices/drsSlice";
+import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 
 type SelectedItem = {
   label: string;
@@ -53,7 +54,7 @@ const mapBreOutputToDecision = (breOutput: DRSBreOutput): BreDecisionResponse =>
 
 const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisionProps) => {
   const dispatch = useAppDispatch();
-  const { applicationNumber } = useAppContext();
+  const { applicationNumber, businessType } = useAppContext();
   const { data } = useSelector((state: RootState) => state.drs);
 
   const breOutput = data?.externalAPIs?.breOutput;
@@ -72,6 +73,10 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       }
       : null;
   const navigate = useNavigate();
+  const safeBusinessType =
+    normalizeBusinessType(businessType) ??
+    normalizeBusinessType(localStorage.getItem("businessType")) ??
+    "retail";
   const roleType = localStorage.getItem("roleType") ?? "";
   const applicationId = applicationNumber ?? "";
 
@@ -227,7 +232,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       ).unwrap();
 
       setBreDialogOpen(false);
-      navigate("/retail/inbox", {
+      navigate(getInboxPath(safeBusinessType), {
         state: {
           snackbarMessage: "Case has been referred to IT successfully",
         },

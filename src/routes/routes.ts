@@ -1,22 +1,31 @@
 import { PATHS } from "./paths";
 
+const VALID_BUSINESS_TYPES = ["retail", "group"] as const;
+
+export const normalizeBusinessType = (businessType?: string | null) => {
+  const normalized = (businessType ?? "").trim().toLowerCase();
+  return VALID_BUSINESS_TYPES.includes(normalized as (typeof VALID_BUSINESS_TYPES)[number])
+    ? normalized
+    : undefined;
+};
+
 //Create other paths
 export const getInboxPath = (businessType: string) =>
-  `/${businessType}/${PATHS.INBOX}`;
+  `/${normalizeBusinessType(businessType) ?? "retail"}/${PATHS.INBOX}`;
 
 export const getDRSPath = (businessType: string, appNo: string) =>
-  `/${businessType}/app/${appNo}/drs`;
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs`;
 
 export const getPreviousPoliciesPath = (businessType: string, appNo: string) =>
-  `/${businessType}/app/${appNo}/drs/previousPolicies`;
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs/previousPolicies`;
 
 export const getMedicalPath = (businessType: string, appNo: string) =>
-  `/${businessType}/app/${appNo}/drs/medical`;
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs/medical`;
 
 export const getFinancialPath = (businessType: string, appNo: string) =>
-  `/${businessType}/app/${appNo}/drs/financial`;
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs/financial`;
 
 export const getGrievanceRaisePath = (businessType: string, appNo: string) =>
-  `/${businessType}/app/${appNo}/grievance/raise`;
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/grievance/raise`;
 export const getGrievanceApplicationPath = (businessType: string, appNo: string) =>
-  `/${businessType}/app/${appNo}/grievance/application`;
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/grievance/application`;

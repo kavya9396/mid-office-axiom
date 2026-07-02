@@ -50,6 +50,7 @@ export interface tableData {
   hniFlag: boolean;
 
   roleType: string;
+  businessType?: string;
   state?: string;
 
   poolTAT?: string;

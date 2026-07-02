@@ -19,55 +19,88 @@ export const accordionRegistry = {
   summary: Summary,
   quickLinks: QuickLinks,
   uwToolkit: UWToolkit,
-  dvtDecision:DVTDecision
+  dvtDecision: DVTDecision,
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
 
 export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
-  RETAIL_CVT_POOL : [
+  RETAIL_CVT_POOL: [
     "breDecision",
     "summary",
     "applicationOverview",
     "pivvSection",
     "cvtDecision",
-    "quickLinks"
-  ],
-  RETAIL_CPT_POOL: [
-    "applicationOverview",
     "quickLinks",
-    "uwToolkit"
   ],
-  RETAIL_PRE_ISSUANCE_SERVICING_POOL: [
-    "applicationOverview"
-  ],
-  RETAIL_EXCEPTIONAL_POOL: [
-    "applicationOverview"
-  ],
+  RETAIL_CPT_POOL: ["applicationOverview", "quickLinks", "uwToolkit"],
+  RETAIL_PRE_ISSUANCE_SERVICING_POOL: ["applicationOverview"],
+  RETAIL_EXCEPTIONAL_POOL: ["applicationOverview"],
   RETAIL_PIVV_POOL: [
     "applicationOverview",
     "requirementManagement",
     "quickLinks",
-    "uwToolkit"
+    "uwToolkit",
   ],
-  RETAIL_READY_FOR_ISSUANCE_POOL :[
+  RETAIL_READY_FOR_ISSUANCE_POOL: [
     "breDecision",
-    "applicationOverview",
-    "requirementManagement"
-  ],
-  RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL :[
     "applicationOverview",
     "requirementManagement",
   ],
-  RETAIL_AMR_NON_MEDICAL:[
+  RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL: [
     "applicationOverview",
     "requirementManagement",
   ],
-  RETAIL_RECONSIDERATION_POOL:[
+  RETAIL_AMR_NON_MEDICAL: ["applicationOverview", "requirementManagement"],
+  RETAIL_RECONSIDERATION_POOL: [
     "breDecision",
     "applicationOverview",
-     "summary",
-     "requirementManagement",
+    "summary",
+    "requirementManagement",
   ],
-   GROUP_DVT_POOL: ["breDecision","summary","applicationOverview", "requirementManagement","dvtDecision"]
+  RETAIL_CUW_CLAIM_AUDIT: ["applicationOverview", "claimSection", "quickLinks"],
+  RETAIL_REINSTATEMENT_SUW: [
+    "applicationOverview",
+    "postIssuanceServicing",
+    "pdrSection",
+    "requirementManagement",
+    "suwDecision",
+    "quickLinks",
+  ],
+  RETAIL_POST_ISSUANCE_SUW: [
+    "applicationOverview",
+    "postIssuanceServicing",
+    "pdrSection",
+    "requirementManagement",
+    "suwDecision",
+    "quickLinks",
+  ],
+  RETAIL_REQUIREMENT_REVIEW_POOL: ["quickLinks"],
+  RETAIL_TELE_VIDEO_POOL: ["quickLinks"],
+  RETAIL_ISSUANCE_POOL: ["quickLinks"],
+  RETAIL_REJECT_POOL: ["quickLinks"],
+  RETAIL_SUW_POOL: ["quickLinks"],
+  RETAIL_CUW_POOL: ["quickLinks"],
+  RETAIL_SWISS_RE_POOL: ["quickLinks"],
+  RETAIL_RGA_POOL: ["quickLinks"],
+  RETAIL_MUNICH_RE_POOL: ["quickLinks"],
+  RETAIL_SCORE_RE_POOL: ["quickLinks"],
+  RETAIL_HANNOVER_RE_POOL: ["quickLinks"],
+  RETAIL_HOD_POOL:["quickLinks"],
+  RETAIL_SR_UW_POOL:["quickLinks"],
+  RETAIL_RISK_POOL:["quickLinks"],
+  RETAIL_CMO_POOL:["quickLinks"],
+  RETAIL_ACCUITY_POOL:["quickLinks"],
+  RETAIL_REINSURER_POOL:["quickLinks"],
+  RETAIL_IT_POOL:["quickLinks"],
+  GROUP_DVT_POOL: [
+    "breDecision",
+    "summary",
+    "applicationOverview",
+    "requirementManagement",
+    "dvtDecision",
+    "quickLinks",
+  ],
+  GROUP_GUW_POOL: ["breDecision","summary","applicationOverview","requirementManagement","uwDecision","quickLinks"],
+  GROUP_GOPS_POOL: ["breDecision","summary","requirementManagement","uwDecision","applicationOverview","quickLinks"],
 };
