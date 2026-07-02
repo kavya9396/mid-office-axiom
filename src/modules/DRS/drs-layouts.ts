@@ -69,5 +69,35 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
      "summary",
      "requirementManagement",
   ],
-   GROUP_DVT_POOL: ["breDecision","summary","applicationOverview", "requirementManagement","dvtDecision"]
+  RETAIL_CUW_CLAIM_AUDIT:[
+    "applicationOverview",
+    "claimSection",
+    "quickLinks"
+  ],
+  RETAIL_REINSTATEMENT_SUW:[
+    "applicationOverview",
+    "postIssuanceServicing",
+    "pdrSection",
+    "requirementManagement",
+    "suwDecision"
+  ],
+  RETAIL_POST_ISSUANCE_SUW:[ "applicationOverview",
+    "postIssuanceServicing",
+    "pdrSection",
+    "requirementManagement",
+    "suwDecision"],
+    RETAIL_REQUIREMENT_REVIEW_POOL:[],
+    RETAIL_TELE_VIDEO_POOL:[],
+     RETAIL_ISSUANCE_POOL:[],
+     RETAIL_REJECT_POOL:[],
+     RETAIL_SUW_POOL:[],
+     RETAIL_CUW_POOL:[],
+     RETAIL_SWISS_RE_POOL:[],
+     RETAIL_RGA_POOL:[],
+     RETAIL_MUNICH_RE_POOL:[],
+     RETAIL_SCORE_RE_POOL:[],
+     RETAIL_HANNOVER_RE_POOL:[],
+   GROUP_DVT_POOL: ["breDecision","summary","applicationOverview", "requirementManagement","dvtDecision"],
+   GROUP_GUW_POOL:[],
+   GROUP_GOPS_POOL:[]
 };
