@@ -86,6 +86,13 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
   RETAIL_MUNICH_RE_POOL: ["quickLinks"],
   RETAIL_SCORE_RE_POOL: ["quickLinks"],
   RETAIL_HANNOVER_RE_POOL: ["quickLinks"],
+  RETAIL_HOD_POOL:["quickLinks"],
+  RETAIL_SR_UW_POOL:["quickLinks"],
+  RETAIL_RISK_POOL:["quickLinks"],
+  RETAIL_CMO_POOL:["quickLinks"],
+  RETAIL_ACCUITY_POOL:["quickLinks"],
+  RETAIL_REINSURER_POOL:["quickLinks"],
+  RETAIL_IT_POOL:["quickLinks"],
   GROUP_DVT_POOL: [
     "breDecision",
     "summary",
@@ -94,6 +101,6 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
     "dvtDecision",
     "quickLinks",
   ],
-  GROUP_GUW_POOL: ["quickLinks"],
-  GROUP_GOPS_POOL: ["quickLinks"],
+  GROUP_GUW_POOL: ["breDecision","summary","applicationOverview","requirementManagement","uwDecision","quickLinks"],
+  GROUP_GOPS_POOL: ["breDecision","summary","requirementManagement","uwDecision","applicationOverview","quickLinks"],
 };
