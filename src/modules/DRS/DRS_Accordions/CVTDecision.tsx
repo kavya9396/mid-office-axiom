@@ -14,6 +14,7 @@ const CVTDecision = () => {
     const [decision, setDecision] = useState<string>("");
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
     const navigate = useNavigate();
+    const isSubmitEnabled = uwDecisionRemarks.trim().length > 0 && decision.trim().length > 0;
 
     return (
         <Container disableGutters>
@@ -92,6 +93,7 @@ const CVTDecision = () => {
                     >
                         <CustomButton
                             variant="contained"
+                            disabled={!isSubmitEnabled}
                             onClick={() => setConfirmationDialogOpen(true)}
                             sx={{
                                 minWidth: 200,

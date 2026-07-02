@@ -5,9 +5,11 @@ import { applicantInfoTabs } from "../../../../utils/constant"
 import { useMemo, useState } from "react"
 import type {
     ApplicantEditForm,
+    ApplicantTab,
     ApplicantInfoTab,
     MasterOption,
     ApplicantProfileSubmitRequest,
+    DRSData,
     SummaryResponse,
 } from "../../../../types/drs.types"
 import CustomDialog from "../../../../components/ui/Dialog/Dialog"
@@ -31,7 +33,7 @@ import type { RootState } from "../../../../store/store"
 import FundDetails from "./FundDetails"
 
 export interface ApplicantProfileProps {
-    profile?: SummaryResponse;
+    profile?: Partial<SummaryResponse>;
 }
 
 type FormField = {
@@ -180,8 +182,170 @@ const getGenderByTitle = (title: string): ApplicantEditForm["gender"] | undefine
     return undefined;
 };
 
+const getStoredApplicantTab = (): ApplicantTab => {
+    const storedApplicantTab = localStorage.getItem("drsSelectedApplicantTab");
+
+    if (
+        storedApplicantTab === "proposer" ||
+        storedApplicantTab === "lifeassured1" ||
+        storedApplicantTab === "lifeassured2"
+    ) {
+        return storedApplicantTab;
+    }
+
+    return "proposer";
+};
+
+const mapGenderToDisplayValue = (gender?: string): ApplicantEditForm["gender"] => {
+    const normalizedGender = gender?.trim().toUpperCase();
+
+    if (normalizedGender === "M") {
+        return "Male";
+    }
+
+    if (normalizedGender === "F") {
+        return "Female";
+    }
+
+    if (normalizedGender === "MALE") {
+        return "Male";
+    }
+
+    if (normalizedGender === "FEMALE") {
+        return "Female";
+    }
+
+    if (normalizedGender === "OTHER") {
+        return "Other";
+    }
+
+    return "";
+};
+
+const mapMemberType = (lifeType: string | undefined, index: number): ApplicantTab => {
+    const normalizedLifeType = lifeType?.trim().toUpperCase() ?? "";
+
+    if (normalizedLifeType.includes("PR") || normalizedLifeType.includes("PROPOSER")) {
+        return "proposer";
+    }
+
+    if (normalizedLifeType.includes("LA") || normalizedLifeType.includes("LIFE")) {
+        return index === 1 ? "lifeassured1" : "lifeassured2";
+    }
+
+    if (index === 0) {
+        return "proposer";
+    }
+
+    if (index === 1) {
+        return "lifeassured1";
+    }
+
+    return "lifeassured2";
+};
+
+const buildProfileFromReduxData = (data?: DRSData | null): Partial<SummaryResponse> | undefined => {
+    const customerDetails = data?.customerDetails ?? [];
+
+    if (customerDetails.length === 0) {
+        return undefined;
+    }
+
+    const selectedApplicantTab = getStoredApplicantTab();
+    const customerWithTabs = customerDetails.map((customer, index) => ({
+        customer,
+        memberType: mapMemberType(String(customer.lifeType ?? ""), index),
+    }));
+
+    const currentCustomer =
+        customerWithTabs.find((item) => item.memberType === selectedApplicantTab)?.customer ??
+        customerDetails[0];
+    const personalDetails = currentCustomer?.personalDetails;
+    const addresses = Array.isArray(currentCustomer?.address) ? currentCustomer.address : [];
+    const permanentAddress = addresses.find((item) => String(item.type).toLowerCase() === "permanent") ?? addresses[0] ?? {};
+    const communicationAddress =
+        addresses.find((item) => String(item.type).toLowerCase() === "communication") ??
+        addresses.find((item) => String(item.type).toLowerCase() === "correspondence") ??
+        permanentAddress;
+    const fallbackDocument = Array.isArray(currentCustomer?.documentDetails)
+        ? currentCustomer.documentDetails[0]
+        : undefined;
+
+    return {
+        memberType: selectedApplicantTab,
+        proposerSummary: {
+            title: String(personalDetails?.title ?? ""),
+            firstName: String(personalDetails?.firstName ?? ""),
+            middleName: String(personalDetails?.middleName ?? ""),
+            lastName: String(personalDetails?.lastName ?? ""),
+            dob: String(personalDetails?.dob ?? ""),
+            age: 0,
+            gender: mapGenderToDisplayValue(String(personalDetails?.gender ?? "")),
+            profileImage: "",
+            caseStatus: "",
+        },
+        applicantDetails: {
+            dateOfBirth: String(personalDetails?.dob ?? ""),
+            gender: mapGenderToDisplayValue(String(personalDetails?.gender ?? "")),
+            maritalStatus: String(personalDetails?.maritalStatus ?? ""),
+            nationality: String(personalDetails?.nationality ?? ""),
+            countryOfResidence: String(personalDetails?.residentStatus ?? ""),
+            education: String(personalDetails?.highestQualification ?? ""),
+        },
+        kycDetails: {
+            panNumber: String(personalDetails?.panNo ?? ""),
+            identityProofType: String(fallbackDocument?.documentType ?? ""),
+            identityProofNumber: String(fallbackDocument?.documentId ?? ""),
+            addressProof: String(fallbackDocument?.documentName ?? ""),
+            incomeProof: "",
+            existingCkycNumber: "",
+            pep: Boolean(personalDetails?.isPEP),
+            criminalProceedings: "",
+        },
+        communicationAddressDetails: {
+            addressLine1: String(communicationAddress.addressLine1 ?? ""),
+            addressLine2: String(communicationAddress.addressLine2 ?? ""),
+            addressLine3: String(communicationAddress.addressLine3 ?? ""),
+            landmark: String(communicationAddress.landmark ?? ""),
+            city: String(communicationAddress.city ?? ""),
+            state: String(communicationAddress.state ?? ""),
+            country: String(communicationAddress.residingCountry ?? ""),
+            pincode: String(communicationAddress.pinCode ?? ""),
+        },
+        permanentAddressDetails: {
+            addressLine1: String(permanentAddress.addressLine1 ?? ""),
+            addressLine2: String(permanentAddress.addressLine2 ?? ""),
+            addressLine3: String(permanentAddress.addressLine3 ?? ""),
+            landmark: String(permanentAddress.landmark ?? ""),
+            city: String(permanentAddress.city ?? ""),
+            state: String(permanentAddress.state ?? ""),
+            country: String(permanentAddress.residingCountry ?? ""),
+            pincode: String(permanentAddress.pinCode ?? ""),
+        },
+        contactDetails: {
+            mobileNumber: String(currentCustomer?.communicationDetails?.mobileNo ?? ""),
+            emailId: String(currentCustomer?.communicationDetails?.emailId ?? ""),
+            alternateMobile: String(currentCustomer?.communicationDetails?.mobileNo ?? ""),
+            landlineNumber: String(currentCustomer?.communicationDetails?.landlineNo ?? ""),
+            emailPref: String(currentCustomer?.communicationDetails?.emailPref ?? ""),
+            smsPref: String(currentCustomer?.communicationDetails?.smsPref ?? ""),
+        },
+        applicantFinancialDetails: {
+            occupation: String(personalDetails?.occupationType ?? ""),
+            annualIncome: Number(
+                (currentCustomer?.financialDetail as Record<string, unknown> | undefined)?.annualIncome ??
+                    personalDetails?.netIncomeAmt ??
+                    0
+            ),
+            gstin: String((data?.producerDetails as Record<string, string> | undefined)?.gstInNumber ?? ""),
+            organisationType: String(personalDetails?.orgType ?? ""),
+            organisationName: String(personalDetails?.orgName ?? ""),
+        },
+    } as Partial<SummaryResponse>;
+};
+
 const buildFormData = (
-    profile?: SummaryResponse
+    profile?: Partial<SummaryResponse>
 ): ApplicantEditForm => ({
     title: profile?.proposerSummary?.title ?? "",
     firstName: profile?.proposerSummary?.firstName ?? "",
@@ -211,52 +375,52 @@ const buildFormData = (
 });
 
 const applyUpdatedDetailsToProfile = (
-    profile: SummaryResponse,
+    profile: Partial<SummaryResponse>,
     updatedDetails: Partial<ApplicantEditForm>
-): SummaryResponse => ({
+): Partial<SummaryResponse> => ({
     ...profile,
     proposerSummary: {
         ...profile.proposerSummary,
-        title: updatedDetails.title ?? profile.proposerSummary.title,
-        firstName: updatedDetails.firstName ?? profile.proposerSummary.firstName,
-        middleName: updatedDetails.middleName ?? profile.proposerSummary.middleName,
-        lastName: updatedDetails.lastName ?? profile.proposerSummary.lastName,
-        dob: updatedDetails.dob ?? profile.proposerSummary.dob,
+        title: updatedDetails.title ?? profile.proposerSummary?.title ?? "",
+        firstName: updatedDetails.firstName ?? profile.proposerSummary?.firstName ?? "",
+        middleName: updatedDetails.middleName ?? profile.proposerSummary?.middleName ?? "",
+        lastName: updatedDetails.lastName ?? profile.proposerSummary?.lastName ?? "",
+        dob: updatedDetails.dob ?? profile.proposerSummary?.dob ?? "",
     },
     applicantDetails: {
         ...profile.applicantDetails,
-        dateOfBirth: updatedDetails.dob ?? profile.applicantDetails.dateOfBirth,
-        gender: updatedDetails.gender ?? profile.applicantDetails.gender,
-        nationality: updatedDetails.nationality ?? profile.applicantDetails.nationality,
+        dateOfBirth: updatedDetails.dob ?? profile.applicantDetails?.dateOfBirth ?? "",
+        gender: updatedDetails.gender ?? profile.applicantDetails?.gender ?? "",
+        nationality: updatedDetails.nationality ?? profile.applicantDetails?.nationality ?? "",
     },
     kycDetails: {
         ...profile.kycDetails,
-        panNumber: updatedDetails.panNumber ?? profile.kycDetails.panNumber,
-        identityProofType: updatedDetails.identityProofType ?? profile.kycDetails.identityProofType,
-        identityProofNumber: updatedDetails.identityProofNumber ?? profile.kycDetails.identityProofNumber,
-        addressProof: updatedDetails.addressProof ?? profile.kycDetails.addressProof,
+        panNumber: updatedDetails.panNumber ?? profile.kycDetails?.panNumber ?? "",
+        identityProofType: updatedDetails.identityProofType ?? profile.kycDetails?.identityProofType ?? "",
+        identityProofNumber: updatedDetails.identityProofNumber ?? profile.kycDetails?.identityProofNumber ?? "",
+        addressProof: updatedDetails.addressProof ?? profile.kycDetails?.addressProof ?? "",
     },
     communicationAddressDetails: {
         ...profile.communicationAddressDetails,
-        addressLine1: updatedDetails.communicationAddressLine1 ?? profile.communicationAddressDetails.addressLine1,
-        addressLine2: updatedDetails.communicationAddressLine2 ?? profile.communicationAddressDetails.addressLine2,
-        addressLine3: updatedDetails.communicationAddressLine3 ?? profile.communicationAddressDetails.addressLine3,
-        city: updatedDetails.communicationCity ?? profile.communicationAddressDetails.city,
-        state: updatedDetails.communicationState ?? profile.communicationAddressDetails.state,
-        country: updatedDetails.communicationCountry ?? profile.communicationAddressDetails.country,
-        pincode: updatedDetails.communicationPincode ?? profile.communicationAddressDetails.pincode,
+        addressLine1: updatedDetails.communicationAddressLine1 ?? profile.communicationAddressDetails?.addressLine1 ?? "",
+        addressLine2: updatedDetails.communicationAddressLine2 ?? profile.communicationAddressDetails?.addressLine2 ?? "",
+        addressLine3: updatedDetails.communicationAddressLine3 ?? profile.communicationAddressDetails?.addressLine3 ?? "",
+        city: updatedDetails.communicationCity ?? profile.communicationAddressDetails?.city ?? "",
+        state: updatedDetails.communicationState ?? profile.communicationAddressDetails?.state ?? "",
+        country: updatedDetails.communicationCountry ?? profile.communicationAddressDetails?.country ?? "",
+        pincode: updatedDetails.communicationPincode ?? profile.communicationAddressDetails?.pincode ?? "",
     },
     permanentAddressDetails: {
         ...profile.permanentAddressDetails,
-        addressLine1: updatedDetails.permanentAddressLine1 ?? profile.permanentAddressDetails.addressLine1,
-        addressLine2: updatedDetails.permanentAddressLine2 ?? profile.permanentAddressDetails.addressLine2,
-        addressLine3: updatedDetails.permanentAddressLine3 ?? profile.permanentAddressDetails.addressLine3,
-        city: updatedDetails.permanentCity ?? profile.permanentAddressDetails.city,
-        state: updatedDetails.permanentState ?? profile.permanentAddressDetails.state,
-        country: updatedDetails.permanentCountry ?? profile.permanentAddressDetails.country,
-        pincode: updatedDetails.permanentPincode ?? profile.permanentAddressDetails.pincode,
+        addressLine1: updatedDetails.permanentAddressLine1 ?? profile.permanentAddressDetails?.addressLine1 ?? "",
+        addressLine2: updatedDetails.permanentAddressLine2 ?? profile.permanentAddressDetails?.addressLine2 ?? "",
+        addressLine3: updatedDetails.permanentAddressLine3 ?? profile.permanentAddressDetails?.addressLine3 ?? "",
+        city: updatedDetails.permanentCity ?? profile.permanentAddressDetails?.city ?? "",
+        state: updatedDetails.permanentState ?? profile.permanentAddressDetails?.state ?? "",
+        country: updatedDetails.permanentCountry ?? profile.permanentAddressDetails?.country ?? "",
+        pincode: updatedDetails.permanentPincode ?? profile.permanentAddressDetails?.pincode ?? "",
     },
-});
+} as Partial<SummaryResponse>);
 
 export const SectionCard = ({
     children,
@@ -284,12 +448,17 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
-    const [savedProfile, setSavedProfile] = useState<SummaryResponse | undefined>(undefined);
+    const [savedProfile, setSavedProfile] = useState<Partial<SummaryResponse> | undefined>(undefined);
+
+    const fallbackProfile = useMemo(
+        () => buildProfileFromReduxData(drsData),
+        [drsData]
+    );
 
     const displayProfile =
         savedProfile && profile && savedProfile.memberType === profile.memberType
             ? savedProfile
-            : profile;
+            : profile ?? fallbackProfile;
 
     const initialFormData = useMemo(
         () => buildFormData(displayProfile),
@@ -459,7 +628,6 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     };
 
     const handleOpenEdit = () => {
-        // initializeFormFromDisplay();
         setFieldErrors({});
         setSubmitError(null);
         setFormData(buildFormData(displayProfile));
