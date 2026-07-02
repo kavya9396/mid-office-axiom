@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import RightPanel from "./RightPanel";
 import { useColumnConfig } from "../../hooks/useColumnConfig";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { getDRSPath } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
 import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
@@ -13,11 +13,13 @@ jest.mock("../../hooks/useColumnConfig", () => ({
 
 jest.mock("react-router-dom", () => ({
   useNavigate: jest.fn(),
+  useParams: jest.fn(),
 }));
 
 jest.mock("../../routes/routes", () => ({
   getDRSPath: jest.fn(),
   getGrievanceApplicationPath: jest.fn(),
+  normalizeBusinessType: (value: string) => value,
 }));
 
 jest.mock("../../store/hooks", () => ({
@@ -128,6 +130,7 @@ jest.mock("../../icons/Icons", () => ({
 
 const mockUseColumnConfig = useColumnConfig as jest.Mock;
 const mockUseNavigate = useNavigate as jest.Mock;
+const mockUseParams = useParams as jest.Mock;
 const mockGetDRSPath = getDRSPath as jest.Mock;
 const mockUseAppDispatch = useAppDispatch as jest.Mock;
 const mockClaimTaskThunk = claimTaskThunk as unknown as jest.Mock;
@@ -170,6 +173,7 @@ describe("RightPanel", () => {
       },
       updateConfig: jest.fn(),
     });
+    mockUseParams.mockReturnValue({ businessType: "retail" });
   });
 
   it("renders SearchApplication component for Search Applications pool", () => {

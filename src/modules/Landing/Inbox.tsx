@@ -6,11 +6,14 @@ import type { tableData } from "../../types/inbox";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
 import { useAppDispatch } from "../../store/hooks";
 import RightPanel from "./RightPanel";
+import { useAppContext } from "../../hooks/useAppContext";
+import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 
 const Inbox = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
   const navigate = useNavigate();
+  const { businessType } = useAppContext();
 
   const [toggle, setToggle] = useState(false);
   const [selectedPool, setSelectedPool] = useState("");
@@ -31,8 +34,28 @@ const Inbox = () => {
         const username = localStorage.getItem("username") ?? "";
         const password = localStorage.getItem("password") ?? "";
         const roleResponse = await dispatch(fetchInboxThunk({ username,password })).unwrap();
-
         const poolDataFromAPI = roleResponse.poolData ?? {};
+        const businessTypeFromPoolData = normalizeBusinessType(
+          Object.values(poolDataFromAPI)
+            .find((rows) => rows.length > 0)
+            ?.at(0)
+            ?.businessType,
+        );
+
+        const currentBusinessType = normalizeBusinessType(businessType);
+        const responseBusinessType = normalizeBusinessType(roleResponse.businessType);
+        const resolvedBusinessType =
+          responseBusinessType ??
+          businessTypeFromPoolData ??
+          currentBusinessType ??
+          "retail";
+
+        localStorage.setItem("businessType", resolvedBusinessType);
+
+        if (currentBusinessType !== resolvedBusinessType) {
+          navigate(getInboxPath(resolvedBusinessType), { replace: true });
+        }
+
         const firstPool = Object.keys(poolDataFromAPI)[0];
 
         setPoolData(poolDataFromAPI);
@@ -46,7 +69,7 @@ const Inbox = () => {
     };
 
     loadData();
-  }, [dispatch]);
+  }, [businessType, dispatch, navigate]);
 
   // ---------------- UI ----------------
   return (

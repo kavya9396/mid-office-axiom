@@ -1,6 +1,6 @@
 import { accordionRegistry, DRS_LAYOUTS } from "./drs-layouts";
 import BackButton from "../../components/layout/BackButton";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
@@ -8,6 +8,8 @@ import { drsThunk } from "../../store/thunks/drsThunk";
 import { mastersThunk } from "../../store/thunks/mastersThunk";
 import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
 import { setBreOutput } from "../../store/slices/drsSlice";
+import { useAppContext } from "../../hooks/useAppContext";
+import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 
 const mapper = {
     "CVT Pool": "RETAIL_CVT_POOL",
@@ -24,11 +26,15 @@ const mapper = {
 
 const DRS = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
-    const { applicationNumber } = useParams<{ applicationNumber: string }>();
+    const { applicationNumber, businessType } = useAppContext();
 
     const layout = mapper[roleType as keyof typeof mapper];
     const accordions = layout ? DRS_LAYOUTS[layout] : [];
     const navigate = useNavigate();
+    const safeBusinessType =
+        normalizeBusinessType(businessType) ??
+        normalizeBusinessType(localStorage.getItem("businessType")) ??
+        "retail";
 
     const dispatch = useDispatch<AppDispatch>();
     const safeApplicationNumber = applicationNumber ?? "";
@@ -77,7 +83,7 @@ const DRS = () => {
 
     return (
         <>
-            <BackButton label="Back to inbox" onClick={() => navigate("/retail/inbox")} />
+            <BackButton label="Back to inbox" onClick={() => navigate(getInboxPath(safeBusinessType))} />
             {accordions.map((accordionId) => {
                 const AccordionComponent = accordionRegistry[accordionId];
                 return (

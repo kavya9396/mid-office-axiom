@@ -103,6 +103,7 @@ describe("Inbox", () => {
     await waitFor(() => {
       expect(mockFetchInboxThunk).toHaveBeenCalledWith({
         username: "test-user",
+        password: "",
       });
     });
 

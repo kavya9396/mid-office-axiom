@@ -35,11 +35,16 @@ import { useColumnConfig } from "../../hooks/useColumnConfig";
 import Badge from "../../components/ui/Badge/Badge";
 import { useNavigate } from "react-router-dom";
 import FilterTable from "./FilterTable";
-import { getDRSPath, getGrievanceApplicationPath } from "../../routes/routes";
+import {
+  getDRSPath,
+  getGrievanceApplicationPath,
+  normalizeBusinessType,
+} from "../../routes/routes";
 import SearchApplication from "./SearchApplication";
 import { toFilterComparableValue } from "../../utils/filter";
 import { useAppDispatch } from "../../store/hooks";
 import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
+import { useAppContext } from "../../hooks/useAppContext";
 
 type SortDirection = "asc" | "desc";
 
@@ -57,12 +62,17 @@ const RightPanel = ({
 }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { businessType } = useAppContext();
   const [openFilterDialog, setOpenFilterDialog] = useState<boolean>(false);
 
   // ---------------- STATES ----------------
 
   const username = localStorage.getItem("username") ?? "";
   const password = localStorage.getItem("password") ?? "";
+  const safeBusinessType =
+    normalizeBusinessType(businessType) ??
+    normalizeBusinessType(localStorage.getItem("businessType")) ??
+    "retail";
   const { config, updateConfig } = useColumnConfig(username, selectedPool);
 
   const [left, setLeft] = useState<string[]>([]);
@@ -115,10 +125,13 @@ const RightPanel = ({
 
       localStorage.setItem("roleType", mappedRoleType);
 
+      const targetBusinessType =
+        normalizeBusinessType(row.businessType) ?? safeBusinessType;
+
       const targetPath =
         row.roleType === "Grievance Pool"
-          ? getGrievanceApplicationPath("retail", row.applicationNo)
-          : getDRSPath("retail", row.applicationNo);
+          ? getGrievanceApplicationPath(targetBusinessType, row.applicationNo)
+          : getDRSPath(targetBusinessType, row.applicationNo);
 
       navigate(targetPath);
     } catch (error) {

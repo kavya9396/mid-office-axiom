@@ -13,6 +13,8 @@ import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { decisionCodeThunk } from "../../../store/thunks/decisionCodeThunk";
+import { useAppContext } from "../../../hooks/useAppContext";
+import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 
 const referralRoleMap: Record<string, string> = {
     "Refer to HoD": "HoD",
@@ -26,6 +28,11 @@ const UWDecision = () => {
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes)
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
+    const { businessType } = useAppContext();
+    const safeBusinessType =
+        normalizeBusinessType(businessType) ??
+        normalizeBusinessType(localStorage.getItem("businessType")) ??
+        "retail";
 
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
     const [caseUWDecision, setCaseUWDecision] = useState("");
@@ -344,7 +351,7 @@ const UWDecision = () => {
                             : dialogMessage
                     }
                     onClose={() => setConfirmationDialogOpen(false)}
-                    onConfirm={() => navigate("/group/inbox")}
+                    onConfirm={() => navigate(getInboxPath(safeBusinessType))}
                 />
 
                 {/* Threshold Dialog */}
