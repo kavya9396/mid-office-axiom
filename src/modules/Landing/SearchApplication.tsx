@@ -13,7 +13,7 @@ import { GridSection } from "../../components/layout/GridSection";
 import RequirementManagement from "../DRS/DRS_Accordions/RequirementManagement";
 import AuditTrailAccordion from "../DRS/DRS_Accordions/AuditTrail";
 import { getDRSPath } from "../../routes/routes";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 
 interface SearchApplicationPageProps {
   data: SearchResponse;
@@ -23,6 +23,8 @@ const SearchApplicationPage = ({
   data,
 }: SearchApplicationPageProps) => {
   const navigate = useNavigate();
+  const { businessType } = useParams();
+  const safeBusinessType = String(businessType ?? "retail").toLowerCase();
      const applicationDetailsItems = data.applicationDetails
     ? applicationDetailsFields.map(({ label, key }) => ({
       label,
@@ -109,7 +111,7 @@ const SearchApplicationPage = ({
                 </CustomButton>
                 <CustomButton
                   variant="contained"
-                  onClick={() => navigate( getDRSPath("retail", data.applicationDetails.applicationId))}
+                  onClick={() => navigate(getDRSPath(safeBusinessType, data.applicationDetails.applicationId))}
                   sx={{
                     borderRadius: "50px",
                     px: 8,

@@ -3,7 +3,7 @@ import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
-import { cvtDecisionOptions } from "../../../utils/constant";
+import {  dvtDecisionOptions } from "../../../utils/constant";
 import CustomButton from "../../../components/ui/Button/Button";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +25,7 @@ const DVTDecision = () => {
     return (
         <Container disableGutters>
             <Box sx={{ mt: 2 }}>
-                <CustomAccordion title="CVT Decision" defaultExpanded>
+                <CustomAccordion title="DVT Decision" defaultExpanded>
                     <Box
                         sx={{
                             backgroundColor: "#F6F6F6",
@@ -41,7 +41,7 @@ const DVTDecision = () => {
                                 fontWeight: 400,
                                 color: "#444",
                                 mb: 1,
-                            }}>CVT Remarks</Typography>
+                            }}>DVT Remarks</Typography>
 
                         <CustomTextField
                             fullWidth
@@ -74,10 +74,10 @@ const DVTDecision = () => {
                             }}
                         >
                             <CustomSelect
-                                label="CVT Decision"
+                                label="DVT Decision"
                                 value={decision}
                                 onChange={setDecision}
-                                options={cvtDecisionOptions}
+                                options={dvtDecisionOptions}
                             />
                         </Box>
 

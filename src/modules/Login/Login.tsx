@@ -17,6 +17,7 @@ import { Controller, useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { loginThunk } from "../../store/thunks/authThunk";
 import { useAppDispatch } from "../../store/hooks";
+import { getInboxPath } from "../../routes/routes";
 
 type LoginForm = {
   username: string;
@@ -39,11 +40,13 @@ const navigate = useNavigate();
 
     // mock response: { ldapsuresponse: "success" }
     if (res?.ldapAuthentication === "Success") {
+       const normalizedBusinessType = "retail";
        localStorage.setItem("token", res?.token);
        localStorage.setItem("username", data.username);
        localStorage.setItem("password", data.password);
+       localStorage.setItem("businessType", normalizedBusinessType);
 
-      navigate("/retail/inbox");
+      navigate(getInboxPath(normalizedBusinessType));
     }
   } catch (err) {
     console.error("Login failed", err);
@@ -67,7 +70,7 @@ const navigate = useNavigate();
           }}
         />
 
-        <Box
+        {/* <Box
           sx={{
             position: "absolute",
             bottom: "8.33%",
@@ -83,7 +86,7 @@ const navigate = useNavigate();
             Streamline your insurance underwriting process with our
             comprehensive platform designed for efficiency and accuracy.
           </Typography>
-        </Box>
+        </Box> */}
       </Box>
 
       {/* Right Section */}

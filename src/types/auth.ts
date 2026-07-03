@@ -9,4 +9,5 @@ export interface LoginResponse {
   token: string;
   userId: string;
   ldapAuthentication:string;
+  businessType?: string;
 }
