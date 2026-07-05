@@ -66,6 +66,10 @@ const apiUrls = {
     real: "/api/drs/pivv-decision/submit",
     mock: "/mock/drs/pivvDecisionSubmit.mock.json",
   },
+  preIssuanceRequestChangeSubmit: {
+    real: "/api/drs/pre-issuance-request-change/submit",
+    mock: "/mock/drs/preIssuanceRequestChangeSubmit.mock.json",
+  },
   referralUsers: {
     real: "/api/drs/user-list",
     mock: "/mock/drs/userList.json",

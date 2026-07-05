@@ -155,7 +155,7 @@ describe("DRS", () => {
       });
       expect(mockSetBreOutput).toHaveBeenCalled();
       expect(mockMastersThunk).toHaveBeenCalledWith({
-        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country"],
+        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country", "exceptionDecision"],
       });
       expect(dispatch).toHaveBeenCalledTimes(4);
     });

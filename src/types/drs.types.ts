@@ -440,6 +440,28 @@ export type PivvDecisionSubmitResponse = {
   message: string;
 };
 
+export type PreIssuanceRequestChangeAttachment = {
+  fileName: string;
+  mimeType: string;
+  size: number;
+};
+
+export type PreIssuanceRequestChangeSubmitRequest = {
+  applicationId: string;
+  roleType: string;
+  taskId: string;
+  existingAddressPincode: string;
+  changedAddressPincode: string;
+  documentProof: string;
+  remarks: string;
+  additionalFiles: PreIssuanceRequestChangeAttachment[];
+};
+
+export type PreIssuanceRequestChangeSubmitResponse = {
+  success: boolean;
+  message: string;
+};
+
 export type BreRetriggerRequest = {
   data: DRSData;
 };
@@ -558,7 +580,8 @@ export type MasterKey =
   | "idProof"
   | "addressProof"
   | "state"
-  | "country";
+  | "country"
+  | "exceptionDecision";
 
 export type MastersData = Partial<Record<MasterKey, MasterOption[]>>;
 

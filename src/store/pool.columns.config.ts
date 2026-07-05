@@ -36,7 +36,7 @@ export const poolAllowedColumns: Record<string, string[]> = {
 
   "PRE_ISSUANCE_SERVICING_TASK": [...baseColumnsCops],
 
-  "Exceptional Pool": [...baseColumnsCops, "lastPool"],
+  "EXCEPTIONAL_TASK": [...baseColumnsCops, "lastPool"],
   "System Wait Pool - Non medical": [
     ...baseColumnsCops,
     "lastPool",

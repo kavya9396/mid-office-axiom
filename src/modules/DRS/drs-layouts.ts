@@ -2,8 +2,11 @@ import ApplicationOverview from "./DRS_Accordions/ApplicationOverview";
 import BreDecision from "./DRS_Accordions/BreDecision";
 import CVTDecision from "./DRS_Accordions/CVTDecision";
 import DVTDecision from "./DRS_Accordions/DVTDecision";
+import ExceptionDecision from "./DRS_Accordions/ExceptionDecision";
+import OpenOtherTasksAccordion from "./DRS_Accordions/OpenOtherTasks";
 import PIVVSection from "./DRS_Accordions/PIVVSection";
 import PIVVDecision from "./DRS_Accordions/PIVVDecision";
+import PreIssuanceRequestChange from "./DRS_Accordions/PreIssuanceRequestChange";
 import RequirementManagement from "./DRS_Accordions/RequirementManagement";
 import Summary from "./DRS_Accordions/Summary";
 import SupportingDocuments from "./DRS_Accordions/SupportingDocuments";
@@ -19,6 +22,9 @@ export const accordionRegistry = {
   pivvSection: PIVVSection,
   pivvDecision: PIVVDecision,
   cvtDecision: CVTDecision,
+  exceptionDecision: ExceptionDecision,
+  openOtherTasks: OpenOtherTasksAccordion,
+  preIssuanceRequestChange: PreIssuanceRequestChange,
   summary: Summary,
   supportingDocuments: SupportingDocuments,
   quickLinks: QuickLinks,

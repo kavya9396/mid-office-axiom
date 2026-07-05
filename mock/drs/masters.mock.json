@@ -438,6 +438,16 @@
       { "label": "Yemen", "value": "Yemen" },
       { "label": "Zambia", "value": "Zambia" },
       { "label": "Zimbabwe", "value": "Zimbabwe" }
+    ],
+    "exceptionDecision": [
+      {
+        "label": "Sent back to last UW",
+        "value": "Sent back to last UW"
+      },
+      {
+        "label": "Refer to IT",
+        "value": "Refer to IT"
+      }
     ]
   }
 }

@@ -53,7 +53,8 @@ const roleMapper = {
   "CPT_TASK": "CPT Pool",
   "DVT_TASK": "DVT Pool",
   "PIVV_TASK":"PIVV Pool",
-  "PRE_ISSUANCE_SERVICING_TASK":"Pre Issuance Servicing Pool"
+  "PRE_ISSUANCE_SERVICING_TASK":"Pre Issuance Servicing Pool",
+  "EXCEPTIONAL_TASK":"Exceptional Pool"
 }
 
 const RightPanel = ({

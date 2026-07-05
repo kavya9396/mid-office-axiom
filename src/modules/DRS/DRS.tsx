@@ -72,7 +72,7 @@ const DRS = () => {
             } finally {
                 dispatch(
                     mastersThunk({
-                        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country"],
+                        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country", "exceptionDecision"],
                     }),
                 );
             }
