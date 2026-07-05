@@ -108,6 +108,11 @@ export const cvtDecisionOptions = [
   { label: "Reraise PIVV", value: "Reraise PIVV" },
   { label: "Refer to CUW", value: "Refer to CUW" },
 ];
+export const dvtDecisionOptions = [
+  { label: "Raise Requirements", value: "Raise Requirements" },
+  { label: "Refer to IT", value: "Refer to IT" },
+  { label: "Hold", value: "Hold" },
+];
 
 export const applicantTabs: { key: ApplicantTab; label: string }[] = [
   { key: "proposer", label: "Proposer" },

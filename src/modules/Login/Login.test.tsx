@@ -118,7 +118,7 @@ describe("Login", () => {
   it("submits credentials and navigates after a successful login", async () => {
     const navigate = jest.fn();
     const dispatch = jest.fn().mockReturnValue(
-      makeDispatchResult({ ldapAuthentication: "Success", token: "token-123" }),
+      makeDispatchResult({ ldapAuthentication: "Success", token: "token-123", businessType: "GROUP" }),
     );
 
     mockUseNavigate.mockReturnValue(navigate);
@@ -137,6 +137,7 @@ describe("Login", () => {
       });
       expect(localStorage.getItem("token")).toBe("token-123");
       expect(localStorage.getItem("username")).toBe("demouser");
+      expect(localStorage.getItem("businessType")).toBe("retail");
       expect(navigate).toHaveBeenCalledWith("/retail/inbox");
     });
   });
