@@ -30,11 +30,11 @@ const baseColumnsGops = [
 export const poolAllowedColumns: Record<string, string[]> = {
   "CVT_TASK": [...baseColumnsCops,"breDecision"],
 
-  "CPT Pool": [...baseColumnsCops,"medicalReceivedDate","financialReceivedDate","poolTAT"],
+  "CPT_TASK": [...baseColumnsCops,"medicalReceivedDate","financialReceivedDate","poolTAT"],
 
-  "PIVV Pool": [...baseColumnsCops],
+  "PIVV_TASK": [...baseColumnsCops],
 
-  "Pre Issuance Servicing Pool": [...baseColumnsCops],
+  "PRE_ISSUANCE_SERVICING_TASK": [...baseColumnsCops],
 
   "Exceptional Pool": [...baseColumnsCops, "lastPool"],
   "System Wait Pool - Non medical": [

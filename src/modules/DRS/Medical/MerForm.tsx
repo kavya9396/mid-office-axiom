@@ -20,6 +20,8 @@ const MerForm = ({ applicationId, roleType, memberType, isEditable = true }: Mer
       submitLabel="Submit MER"
       defaultExpandedSection="MER"
       isEditable={isEditable}
+      submitConfirmationTitle="Confirmation"
+      submitConfirmationMessage="Do you want to submit the case?"
       onSubmit={async ({ testCode, fields }) => {
         const response = await dispatch(merSubmitThunk({
           applicationId,

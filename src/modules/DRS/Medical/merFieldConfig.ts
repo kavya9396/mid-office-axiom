@@ -145,4 +145,6 @@ export const merFieldConfig: MedicalFieldConfig[] = [
   { row: 143, id: "mer_143", testCode: "MER/CHM", section: "Question table", type: "21.b", field: "Remarks", dataType: "", options: "", mandatory: "Non Mandatory" },
   { row: 144, id: "mer_144", testCode: "MER/CHM", section: "Question table", type: "21.c", field: "Are there any points on which you suggest further information be obtained", dataType: "Yes/No", options: "", mandatory: "Non Mandatory" },
   { row: 145, id: "mer_145", testCode: "MER/CHM", section: "Question table", type: "21.c", field: "Remarks", dataType: "", options: "", mandatory: "Non Mandatory" },
+  { row: 146, id: "mer_146", testCode: "MER/CHM", section: "TUW Details", type: "TUW Details", field: "TUW Status", dataType: "Dropdown", options: "TU Done", mandatory: "Yes" },
+  { row: 147, id: "mer_147", testCode: "MER/CHM", section: "TUW Details", type: "TUW Details", field: "Remarks", dataType: "Free Text", options: "", mandatory: "Yes" },
 ];

@@ -408,6 +408,38 @@ export type ReferToITResponse = {
   message: string;
 };
 
+export type SupportingDocumentItem = {
+  fileName: string;
+  mimeType: string;
+  size: number;
+};
+
+export type SupportingDocumentsSubmitRequest = {
+  applicationId: string;
+  roleType: string;
+  remarks: string;
+  documents: SupportingDocumentItem[];
+};
+
+export type SupportingDocumentsSubmitResponse = {
+  success: boolean;
+  message: string;
+};
+
+export type PivvDecisionSubmitRequest = {
+  applicationId: string;
+  roleType: string;
+  taskId: string;
+  decision: string;
+  remarks: string;
+  workflowPool: string;
+};
+
+export type PivvDecisionSubmitResponse = {
+  success: boolean;
+  message: string;
+};
+
 export type BreRetriggerRequest = {
   data: DRSData;
 };

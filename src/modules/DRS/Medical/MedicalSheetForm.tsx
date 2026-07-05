@@ -4,6 +4,7 @@ import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTextField from "../../../components/ui/TextField/TextField";
+import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import type { MedicalFieldConfig } from "./medicalFieldConfig";
 
 type FormValues = Record<string, string>;
@@ -24,6 +25,8 @@ type MedicalSheetFormProps = {
   defaultExpandedSection?: string;
   showTestSelector?: boolean;
   isEditable?: boolean;
+  submitConfirmationMessage?: string;
+  submitConfirmationTitle?: string;
   onSubmit: (payload: { testCode: string; fields: SubmitFieldValue[] }) => Promise<string>;
 };
 
@@ -174,12 +177,15 @@ const MedicalSheetForm = ({
   defaultExpandedSection,
   showTestSelector = false,
   isEditable = true,
+  submitConfirmationMessage,
+  submitConfirmationTitle,
   onSubmit,
 }: MedicalSheetFormProps) => {
   const [formValues, setFormValues] = useState<FormValues>({});
   const [formErrors, setFormErrors] = useState<FormErrors>({});
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [openSubmitConfirmation, setOpenSubmitConfirmation] = useState(false);
 
   const testOptions = useMemo(() => {
     const seen = new Map<string, { label: string; value: string }>();
@@ -359,7 +365,7 @@ const MedicalSheetForm = ({
     return Object.keys(nextErrors).length === 0;
   };
 
-  const handleSubmit = async () => {
+  const submitForm = async () => {
     if (!validateForm()) {
       setSubmitMessage("Please resolve the highlighted fields.");
       return;
@@ -384,6 +390,15 @@ const MedicalSheetForm = ({
     } finally {
       setSubmitLoading(false);
     }
+  };
+
+  const handleSubmitClick = () => {
+    if (submitConfirmationMessage) {
+      setOpenSubmitConfirmation(true);
+      return;
+    }
+
+    void submitForm();
   };
 
   if (activeConfig.length === 0) {
@@ -453,10 +468,22 @@ const MedicalSheetForm = ({
       )}
 
       <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 0.5 }}>
-        <CustomButton onClick={handleSubmit} disabled={submitLoading} sx={{ minWidth: 140, borderRadius: "999px" }}>
+        <CustomButton onClick={handleSubmitClick} disabled={submitLoading} sx={{ minWidth: 140, borderRadius: "999px" }}>
           {submitLoading ? "Submitting..." : submitLabel}
         </CustomButton>
       </Box>
+
+      {submitConfirmationMessage && (
+        <ConfirmationDialog
+          open={openSubmitConfirmation}
+          title={submitConfirmationTitle ?? "Confirmation"}
+          message={submitConfirmationMessage}
+          onClose={() => setOpenSubmitConfirmation(false)}
+          onConfirm={() => {
+            void submitForm();
+          }}
+        />
+      )}
     </Box>
   );
 };

@@ -86,7 +86,10 @@ const DRS = () => {
         <>
             <BackButton label="Back to inbox" onClick={() => navigate(getInboxPath(safeBusinessType))} />
             {accordions.map((accordionId) => {
-                const AccordionComponent = accordionRegistry[accordionId];
+                const AccordionComponent = accordionRegistry[accordionId as keyof typeof accordionRegistry];
+                if (!AccordionComponent) {
+                    return null;
+                }
                 return (
                     <AccordionComponent
                         key={accordionId}

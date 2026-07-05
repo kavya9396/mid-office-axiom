@@ -1,0 +1,226 @@
+import { Box, Container, Typography } from "@mui/material";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import CustomAccordion from "../../../components/ui/Accordion/Accordion";
+import CustomButton from "../../../components/ui/Button/Button";
+import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
+import CustomSelect from "../../../components/ui/Select/Select";
+import CustomTextField from "../../../components/ui/TextField/TextField";
+import { useAppContext } from "../../../hooks/useAppContext";
+import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { pivvDecisionSubmitThunk } from "../../../store/thunks/pivvDecisionSubmitThunk";
+
+type PivvDecisionOption = {
+  label: string;
+  value: string;
+  workflowPool: "COPS Pool" | "CUW Pool";
+};
+
+const pivvDecisionMapping: PivvDecisionOption[] = [
+  { label: "Customer not speaking", value: "Customer not speaking", workflowPool: "COPS Pool" },
+  { label: "Another person spoken", value: "Another person spoken", workflowPool: "COPS Pool" },
+  { label: "Pre-recorded video", value: "Pre-recorded video", workflowPool: "COPS Pool" },
+  { label: "Customer didn't complete full script - a. Application", value: "Customer didn't complete full script - a. Application", workflowPool: "COPS Pool" },
+  { label: "Customer didn't complete full script - b. Premium", value: "Customer didn't complete full script - b. Premium", workflowPool: "COPS Pool" },
+  { label: "Customer didn't complete full script - c. Policy term", value: "Customer didn't complete full script - c. Policy term", workflowPool: "COPS Pool" },
+  { label: "Customer didn't complete full script - d. Premium paying term", value: "Customer didn't complete full script - d. Premium paying term", workflowPool: "COPS Pool" },
+  { label: "Customer didn't complete full script - e. Sum assured", value: "Customer didn't complete full script - e. Sum assured", workflowPool: "COPS Pool" },
+  { label: "Problematic case - Customer physical condition not good", value: "Problematic case - Customer physical condition not good", workflowPool: "CUW Pool" },
+  { label: "Customer weight different with application form", value: "Customer weight different with application form", workflowPool: "CUW Pool" },
+  { label: "Customer profile is not ok", value: "Customer profile is not ok", workflowPool: "CUW Pool" },
+  { label: "Customer face not clear in video", value: "Customer face not clear in video", workflowPool: "COPS Pool" },
+  { label: "Voice is not audible", value: "Voice is not audible", workflowPool: "COPS Pool" },
+  { label: "PDF not generated to check script", value: "PDF not generated to check script", workflowPool: "COPS Pool" },
+  { label: "New PDF not generated as per latest PIVV", value: "New PDF not generated as per latest PIVV", workflowPool: "COPS Pool" },
+  { label: "PIVV Done", value: "PIVV Done", workflowPool: "COPS Pool" },
+];
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const PIVVDecision = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const { applicationNumber, businessType } = useAppContext();
+  const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
+
+  const [decision, setDecision] = useState("");
+  const [remarks, setRemarks] = useState("");
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+
+  const roleType = localStorage.getItem("roleType") ?? "";
+  const safeBusinessType =
+    normalizeBusinessType(businessType) ??
+    normalizeBusinessType(localStorage.getItem("businessType")) ??
+    "retail";
+
+  const taskId = useMemo(() => {
+    const root = toRecord(drsData);
+    const appInfo = toRecord(root.applicationInfo);
+
+    const fromRoot = String(root.taskId ?? root.taskID ?? "").trim();
+    if (fromRoot) return fromRoot;
+
+    const fromApplicationInfo = String(appInfo.taskId ?? appInfo.taskID ?? "").trim();
+    if (fromApplicationInfo) return fromApplicationInfo;
+
+    return String(localStorage.getItem("taskId") ?? "").trim();
+  }, [drsData]);
+
+  const workflowPool = useMemo(() => {
+    const matched = pivvDecisionMapping.find((item) => item.value === decision);
+    return matched?.workflowPool ?? "";
+  }, [decision]);
+
+  const decisionOptions = pivvDecisionMapping.map((item) => ({
+    label: item.label,
+    value: item.value,
+  }));
+
+  const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;
+
+  const handleSubmit = async () => {
+    if (!applicationNumber || !roleType || !taskId || !workflowPool) {
+      setSubmitMessage("Missing required case information. Please open the case from inbox again.");
+      return;
+    }
+
+    try {
+      setSubmitLoading(true);
+      setSubmitMessage(null);
+
+      const response = await dispatch(
+        pivvDecisionSubmitThunk({
+          applicationId: applicationNumber,
+          roleType,
+          taskId,
+          decision,
+          remarks: remarks.trim(),
+          workflowPool,
+        }),
+      ).unwrap();
+
+      setSubmitMessage(response.message || "PIVV decision submitted successfully.");
+      navigate(getInboxPath(safeBusinessType), {
+        state: {
+          snackbarMessage: response.message || "PIVV decision submitted successfully.",
+        },
+      });
+    } catch (error) {
+      setSubmitMessage(error instanceof Error ? error.message : "Failed to submit PIVV decision.");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  return (
+    <Container disableGutters>
+      <Box sx={{ mt: 2 }}>
+        <CustomAccordion title="PIVV Decision" defaultExpanded>
+          <Box
+            sx={{
+              backgroundColor: "#F6F6F6",
+              p: 2,
+              mt: 1,
+              borderRadius: "8px",
+            }}
+          >
+            <CustomSelect
+              label="PIVV Pool Decision"
+              value={decision}
+              onChange={(value: string) => {
+                setDecision(value);
+                setSubmitMessage(null);
+              }}
+              options={decisionOptions}
+            />
+
+            <Typography
+              sx={{
+                fontSize: "14px",
+                fontWeight: 400,
+                color: "#444",
+                mt: 2,
+                mb: 1,
+              }}
+            >
+              Remarks
+            </Typography>
+
+            <CustomTextField
+              fullWidth
+              multiline
+              minRows={3}
+              placeholder="Enter remarks..."
+              value={remarks}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value.length <= 10000) {
+                  setRemarks(value);
+                  setSubmitMessage(null);
+                }
+              }}
+              sx={{ backgroundColor: "#fff" }}
+            />
+
+            <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "12px", color: "#888", mt: 0.5 }}>
+              {remarks.length}/10000
+            </Typography>
+
+            {!taskId && (
+              <Typography sx={{ mt: 1, fontSize: 13, color: "#DE2C3B" }}>
+                Task ID is missing. Please open the case from inbox again.
+              </Typography>
+            )}
+
+            {submitMessage && (
+              <Typography
+                sx={{
+                  mt: 1,
+                  fontSize: 13,
+                  color: submitMessage.toLowerCase().includes("success") ? "#0F8A3D" : "#DE2C3B",
+                }}
+              >
+                {submitMessage}
+              </Typography>
+            )}
+          </Box>
+
+          <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+            <CustomButton
+              variant="contained"
+              disabled={!isSubmitEnabled || !taskId || submitLoading}
+              onClick={() => setConfirmationDialogOpen(true)}
+              sx={{
+                minWidth: 200,
+                height: 44,
+                borderRadius: "50px",
+                fontWeight: 600,
+                px: 3,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {submitLoading ? "Submitting..." : "Submit"}
+            </CustomButton>
+          </Box>
+        </CustomAccordion>
+
+        <ConfirmationDialog
+          open={confirmationDialogOpen}
+          message="Do you want to submit the case?"
+          onClose={() => setConfirmationDialogOpen(false)}
+          onConfirm={() => {
+            void handleSubmit();
+          }}
+        />
+      </Box>
+    </Container>
+  );
+};
+
+export default PIVVDecision;

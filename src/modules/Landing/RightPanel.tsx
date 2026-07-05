@@ -50,7 +50,10 @@ type SortDirection = "asc" | "desc";
 
 const roleMapper = {
   "CVT_TASK": "CVT Pool",
+  "CPT_TASK": "CPT Pool",
   "DVT_TASK": "DVT Pool",
+  "PIVV_TASK":"PIVV Pool",
+  "PRE_ISSUANCE_SERVICING_TASK":"Pre Issuance Servicing Pool"
 }
 
 const RightPanel = ({
@@ -124,6 +127,7 @@ const RightPanel = ({
         roleMapper[row.roleType as keyof typeof roleMapper] ?? row.roleType;
 
       localStorage.setItem("roleType", mappedRoleType);
+      localStorage.setItem("taskId", claimTaskId);
 
       const targetBusinessType =
         normalizeBusinessType(row.businessType) ?? safeBusinessType;
