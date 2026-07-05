@@ -11,6 +11,9 @@ import ViewFinancial from "../modules/DRS/Financial/ViewFinancial";
 import Grievance from "../modules/Grievance/Grievance";
 import GrievanceApplication from "../modules/Grievance/GrievanceApplication";
 import PreviousPolicy from "../modules/QuickLinks/PreviousPolicy";
+import AuditTrailPage from "../modules/QuickLinks/AuditTrailPage";
+import RiskDetailsPage from "../modules/QuickLinks/RiskDetailsPage";
+import OpenTasksPage from "../modules/QuickLinks/OpenTasksPage";
 
 function BusinessTypeRedirect() {
     return <Navigate to="inbox" replace />;
@@ -37,6 +40,9 @@ export default function AppRoutes() {
                         <Route path={PATHS.DRS} element={<DRS />} />
                         <Route path={PATHS.DRS_MEDICAL} element={<ViewMedicals />} />
                         <Route path={PATHS.DRS_FINANCIAL} element={<ViewFinancial />} />
+                        <Route path={PATHS.DRS_AUDIT_TRAIL} element={<AuditTrailPage />} />
+                        <Route path={PATHS.DRS_OPEN_TASKS} element={<OpenTasksPage />} />
+                        <Route path={PATHS.DRS_RISK_DETAILS} element={<RiskDetailsPage />} />
                         <Route path={PATHS.GRIEVANCE_RAISE} element={<Grievance />} />
                         <Route path={PATHS.GRIEVANCE_APPLICATION} element={<GrievanceApplication />} />
                         <Route path={PATHS.DRS_PREVIOUS} element={<PreviousPolicy />} />

@@ -132,7 +132,12 @@
           "remarks": "Profile verified",
           "ckycNumber": "CKYC00991",
           "criminalProceeding": "No",
-          "incomeProof": "Form 16"
+          "incomeProof": "Form 16",
+          "designation":"",
+          "disabled":"",
+          "percentageOfImpairment":"",
+          "typeOfImpairment":"",
+          "udidNumber":""
         },
         "financialDetails": {
           "annualIncome": 700000,
@@ -162,7 +167,12 @@
           "incomeProof": "Form 16",
           "existingCkycNumber": "NA",
           "pep": "No",
-          "criminalProceedings": "No"
+          "criminalProceedings": "No",
+          "panFlag":"",
+          "panAadharSeedingStatus":"",
+          "identityProofExpiryDate":"",
+          "pranNo":"",
+          "pranNoVerifivation":""
         },
         "address": [
           {

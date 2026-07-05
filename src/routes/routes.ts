@@ -16,6 +16,15 @@ export const getInboxPath = (businessType: string) =>
 export const getDRSPath = (businessType: string, appNo: string) =>
   `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs`;
 
+export const getAuditTrailPath = (businessType: string, appNo: string) =>
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs/auditTrail`;
+
+export const getOpenTasksPath = (businessType: string, appNo: string) =>
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs/openTasks`;
+
+export const getRiskDetailsPath = (businessType: string, appNo: string) =>
+  `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs/riskDetails`;
+
 export const getPreviousPoliciesPath = (businessType: string, appNo: string) =>
   `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs/previousPolicies`;
 

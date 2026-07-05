@@ -589,6 +589,8 @@ export interface SummaryResponse {
   genericDetails: GenericDetails;
   eiaDetails: EiaDetails;
   fundDetails: FundDetails;
+  paymentDetails: PaymentDetails;
+  payoutDetails: PayoutDetails;
 }
 
 export interface ProposerSummary {
@@ -656,6 +658,13 @@ export interface ApplicantDetails {
   nationality: string;
   countryOfResidence: string;
   education: string;
+  residentStatus:string;
+  designation:string;
+  disabled:string;
+  percentageOfImpairment:string;
+  typeOfImpairment:string;
+  udidNumber:string;
+  udsLink?: string;
 }
 
 export interface KycDetails {
@@ -667,6 +676,12 @@ export interface KycDetails {
   existingCkycNumber: string;
   pep: boolean;
   criminalProceedings: string;
+  panFlag:string;
+  panAadharSeedingStatus:string;
+  identityProofExpiryDate:string;
+  pranNo:string;
+  pranNoVerifivation:string;
+
 }
 
 export interface AddressDetails {
@@ -681,12 +696,13 @@ export interface AddressDetails {
 }
 
 export interface ContactDetails {
-  mobileNumber: string;
+  mobileNumber: number;
   emailId: string;
-  alternateMobile: string;
-  landlineNumber: string;
+  alternateMobile: number;
+  landlineNumber: number;
   emailPref: string;
   smsPref: string;
+  std:number;
 }
 
 export interface ApplicantFinancialDetails {
@@ -747,6 +763,7 @@ export interface Nominee {
   appointeeName: string;
   appointeeGender: string;
   appointeeDOB: string;
+  appointeeRelationship: string;
 }
 
 export interface GenericDetails {
@@ -781,6 +798,20 @@ export interface FundDetail {
   transferPercentage: string;
 }
 
+export interface PaymentDetails {
+  isThirdPartyPayment: string;
+}
+
+export interface PayoutDetails {
+  accountType: string;
+  bankType: string;
+  branch: string;
+  micrCode: string;
+  ifscCode: string;
+  accountNumber: string;
+  paymentOptions: string;
+}
+
 export interface ApplicantProfile {
   applicantDetails: ApplicantDetails;
   kycDetails: KycDetails;
@@ -803,7 +834,8 @@ export type ApplicantInfoTab =
   | "nominee"
   | "generic"
   | "eia"
-  | "fundDetails";
+  | "fundDetails"
+  | "paymentPayoutDetails";
 
 export type NomineeRow = Nominee;
 
@@ -869,6 +901,77 @@ export type AuditTrailRow = {
 };
 
 export type AuditTrail = AuditTrailRow[];
+
+export type AuditTrailRequest = {
+  applicationId: string;
+  roleType?: string;
+};
+
+export type AuditTrailResponse = {
+  auditTrail?: AuditTrail;
+  auditTrailData?: AuditTrail;
+  data?: {
+    auditTrail?: AuditTrail;
+  };
+};
+
+export type OpenOtherTaskRow = {
+  serviceID: string;
+  ct: string;
+  st: string;
+  breDate: string;
+  breDecision: string;
+  breDiscrepancy: string;
+  breRemarks: string;
+  userPool: string;
+};
+
+export type OpenOtherTasks = OpenOtherTaskRow[];
+
+export type OpenOtherTasksRequest = {
+  applicationId: string;
+  roleType?: string;
+};
+
+export type OpenOtherTasksResponse = {
+  openOtherTasks?: OpenOtherTasks;
+  data?: {
+    openOtherTasks?: OpenOtherTasks;
+    quickLinks?: {
+      openOtherTasks?: OpenOtherTasks;
+    };
+  };
+  quickLinks?: {
+    openOtherTasks?: OpenOtherTasks;
+  };
+};
+
+export type RiskDetailsRow = {
+  riskReferralDate: string;
+  riskRevertDate: string;
+  riskDecision: string;
+  riskReportValues: string;
+};
+
+export type RiskDetails = RiskDetailsRow[];
+
+export type RiskDetailsRequest = {
+  applicationId: string;
+  roleType?: string;
+};
+
+export type RiskDetailsResponse = {
+  riskDetails?: RiskDetails;
+  data?: {
+    riskDetails?: RiskDetails;
+    quickLinks?: {
+      riskDetails?: RiskDetails;
+    };
+  };
+  quickLinks?: {
+    riskDetails?: RiskDetails;
+  };
+};
 
 export interface ApplicationDetails {
   applicationId: string;

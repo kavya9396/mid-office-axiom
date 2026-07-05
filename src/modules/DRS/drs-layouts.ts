@@ -31,8 +31,7 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
     "applicationOverview",
     "pivvSection",
     "cvtDecision",
-    "quickLinks",
-    "uW",
+    "quickLinks"
   ],
   RETAIL_CPT_POOL: [
     "applicationOverview",

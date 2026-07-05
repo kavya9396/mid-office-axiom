@@ -129,6 +129,7 @@ export const applicantInfoTabs: { key: ApplicantInfoTab; label: string }[] = [
   { key: "generic", label: "Generic" },
   { key: "eia", label: "eIA" },
   { key: "fundDetails", label: "Fund Details" },
+  { key: "paymentPayoutDetails", label: "Payment & Payout Details" },
 ];
 
 export const GenderOptions = [

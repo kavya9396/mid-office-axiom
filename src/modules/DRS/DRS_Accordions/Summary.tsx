@@ -187,6 +187,8 @@ const Summary = () => {
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
     const [openPhotoDialog, setOpenPhotoDialog] = useState(false);
     const [open, setOpen] = useState(false);
+    const [openRemarksDialog, setOpenRemarksDialog] = useState(false);
+    const [fullRemarksText, setFullRemarksText] = useState("");
     const [selectedCard, setSelectedCard] = useState<RiskCardItem | null>(null);
     const [selectedPhotoSrc, setSelectedPhotoSrc] = useState("");
 
@@ -432,6 +434,20 @@ const Summary = () => {
         },
     ];
 
+    const getTruncatedRemarks = (value: string, maxLength: number) => {
+        if (value.length <= maxLength) {
+            return {
+                text: value,
+                truncated: false,
+            };
+        }
+
+        return {
+            text: `${value.slice(0, maxLength)}...`,
+            truncated: true,
+        };
+    };
+
     return (
         <Container disableGutters>
             <Box sx={{ mt: 2 }}>
@@ -576,7 +592,7 @@ const Summary = () => {
                                 fontWeight: 700,
                             }}
                         >
-                            UW Summary for {currentApplicant?.label}
+                            Summary for {currentApplicant?.label}
                         </Typography>
                     </Box>
 
@@ -699,6 +715,11 @@ const Summary = () => {
                                             >
                                                 {profileHighlights.map((item) => {
                                                     const Icon = item.icon;
+                                                    const itemValue = asDisplayValue(item.value);
+                                                    const shouldTruncateRemarks = item.label === "Remarks";
+                                                    const remarksDisplay = shouldTruncateRemarks
+                                                        ? getTruncatedRemarks(itemValue, 30)
+                                                        : { text: itemValue, truncated: false };
                                                     return (
                                                         <Box
                                                             key={item.label}
@@ -723,7 +744,25 @@ const Summary = () => {
                                                                         fontWeight: 600,
                                                                     }}
                                                                 >
-                                                                    {item.value}
+                                                                    {remarksDisplay.text}
+                                                                    {shouldTruncateRemarks && remarksDisplay.truncated && (
+                                                                        <Box
+                                                                            component="span"
+                                                                            sx={{
+                                                                                color: "#063E6F",
+                                                                                cursor: "pointer",
+                                                                                fontWeight: 500,
+                                                                                textDecoration: "underline",
+                                                                                ml: 0.5,
+                                                                            }}
+                                                                            onClick={() => {
+                                                                                setFullRemarksText(itemValue);
+                                                                                setOpenRemarksDialog(true);
+                                                                            }}
+                                                                        >
+                                                                            show more
+                                                                        </Box>
+                                                                    )}
                                                                 </Typography>
                                                             </Box>
                                                         </Box>
@@ -929,6 +968,30 @@ const Summary = () => {
                         ))}
                     </Box>
                 </Box>
+            </CustomDialog>
+
+            <CustomDialog
+                open={openRemarksDialog}
+                onClose={() => setOpenRemarksDialog(false)}
+                title={
+                    <Typography sx={{ ...modalTitleStyles }}>
+                        Remarks
+                    </Typography>
+                }
+                maxWidth="sm"
+                fullWidth
+            >
+                <Typography
+                    sx={{
+                        fontSize: "14px",
+                        color: "#20242c",
+                        fontWeight: 500,
+                        whiteSpace: "pre-wrap",
+                        wordBreak: "break-word",
+                    }}
+                >
+                    {fullRemarksText}
+                </Typography>
             </CustomDialog>
         </Container>
     )

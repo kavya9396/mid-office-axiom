@@ -93,12 +93,24 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         nationality: String(summaryPersonal?.nationality ?? fallbackPersonal?.nationality ?? ""),
         countryOfResidence: String(summaryPersonal?.residentStatus ?? fallbackPersonal?.residentStatus ?? ""),
         education: String(summaryPersonal?.highestQualification ?? fallbackPersonal?.highestQualification ?? ""),
+        residentStatus: String(summaryPersonal?.residentStatus ?? fallbackPersonal?.residentStatus ?? ""),
+        designation: String(summaryPersonal?.designation ?? fallbackPersonal?.designation ?? ""),
+        disabled: String(summaryPersonal?.disabled ?? fallbackPersonal?.disabled ?? ""),
+        percentageOfImpairment: String(summaryPersonal?.percentageOfImpairment ?? fallbackPersonal?.percentageOfImpairment ?? ""),
+        typeOfImpairment: String(summaryPersonal?.typeOfImpairment ?? fallbackPersonal?.typeOfImpairment ?? ""),
+        udidNumber: String(summaryPersonal?.udidNumber ?? fallbackPersonal?.udidNumber ?? ""),
+        udsLink: String(summaryPersonal?.UDSLink ?? fallbackPersonal?.UDSLink ?? ""),
     };
 
     const kyc = profile?.kycDetails ?? {
+        pranNo: String(summaryKyc?.pranNo ?? summaryPersonal?.pranNo ?? fallbackPersonal?.pranNo ?? ""),
+        pranNoVerifivation: String(summaryKyc?.pranNoVerifivation ?? summaryPersonal?.pranNoVerifivation ?? fallbackPersonal?.pranNoVerifivation ?? ""),
         panNumber: String(summaryKyc?.panNumber ?? summaryPersonal?.panNo ?? fallbackPersonal?.panNo ?? ""),
+        panFlag: String(summaryKyc?.panFlag ?? summaryPersonal?.panFlag ?? fallbackPersonal?.panFlag ?? ""),
+        panAadharSeedingStatus: String(summaryKyc?.panAadharSeedingStatus ?? summaryPersonal?.panAadharSeedingStatus ?? fallbackPersonal?.panAadharSeedingStatus ?? ""),
         identityProofType: String(summaryKyc?.identityProofType ?? primaryDocument?.documentType ?? ""),
         identityProofNumber: String(summaryKyc?.identityProofNumber ?? primaryDocument?.documentId ?? ""),
+        identityProofExpiryDate: String(summaryKyc?.identityProofExpiryDate ?? primaryDocument?.identityProofExpiryDate ?? ""),
         addressProof: String(summaryKyc?.addressProof ?? primaryDocument?.documentName ?? ""),
         incomeProof: String(summaryKyc?.incomeProof ?? summaryPersonal?.incomeProof ?? ""),
         existingCkycNumber: String(summaryKyc?.existingCkycNumber ?? summaryPersonal?.ckycNumber ?? ""),
@@ -119,15 +131,34 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         { label: "Nationality", key: "nationality" },
         { label: "Country of Residence", key: "countryOfResidence" },
         { label: "Education", key: "education" },
+        { label: "Resident Status", key: "residentStatus" },
+        { label: "Designation", key: "designation" },
+        { label: "Disabled", key: "disabled" },
+        { label: "Percentage Of Impairment", key: "percentageOfImpairment" },
+        { label: "Type Of Impairment", key: "typeOfImpairment" },
+        { label: "UDID Number", key: "udidNumber" },
+        { label: "UDS Link", key: "udsLink" },
     ]));
 
     const kycDetails = withDashFallback(buildFields(kyc, [
+        {
+            label: "PRAN Number",
+            key: "pranNo",
+            format: (value) => maskPAN(String(value ?? "")),
+        },
+        {
+            label: "PRAN Number Verification",
+            key: "pranNoVerifivation"
+        },
         {
             label: "PAN Number",
             key: "panNumber",
             format: (value) => maskPAN(String(value ?? "")),
         },
+        { label: "PAN Flag", key: "panFlag" },
+        { label: "PAN Aadhar Seeding Status", key: "panAadharSeedingStatus" },
         { label: "Identity Proof Type", key: "identityProofType" },
+        { label: "Identity Proof Expiry Date", key: "identityProofExpiryDate" },
         {
             label: "Identity Proof Number",
             key: "identityProofNumber",

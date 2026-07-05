@@ -3,26 +3,79 @@ import { KeyRightArrowIcon, LinkIcon, PlusIcon } from "../../icons/Icons";
 import { centerFlex, columnFlex } from "../../utils/styles";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useState } from "react";
-import { getFinancialPath, getMedicalPath, getPreviousPoliciesPath } from "../../routes/routes";
+import {
+    getAuditTrailPath,
+    getFinancialPath,
+    getInboxPath,
+    getMedicalPath,
+    getOpenTasksPath,
+    getPreviousPoliciesPath,
+    getRiskDetailsPath,
+    normalizeBusinessType,
+} from "../../routes/routes";
 import { useAppContext } from "../../hooks/useAppContext";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import { referToItThunk } from "../../store/thunks/referToItThunk";
+import CustomDialog from "../../components/ui/Dialog/Dialog";
+import CustomButton from "../../components/ui/Button/Button";
+import { modalTitleStyles } from "../../utils/styles";
 
 const QuickLinks = () => {
     const navigate = useNavigate();
+    const dispatch = useAppDispatch();
     const [isOpen, setIsOpen] = useState(false);
+    const [openReferToItDialog, setOpenReferToItDialog] = useState(false);
+    const [referToItLoading, setReferToItLoading] = useState(false);
+    const [referToItError, setReferToItError] = useState<string | null>(null);
     const { businessType, applicationNumber } = useAppContext();
+    const drsData = useAppSelector((state) => state.drs.data);
 
-    const safeBusinessType = businessType ?? "retail";
+    const safeBusinessType =
+        normalizeBusinessType(businessType) ??
+        normalizeBusinessType(localStorage.getItem("businessType")) ??
+        "retail";
     const safeApplicationNumber = applicationNumber ?? "";
     const roleType = localStorage.getItem("roleType") ?? "";
     const isCvtPoolRole = roleType === "CVT Pool";
     const selectedApplicantTab = localStorage.getItem("drsSelectedApplicantTab") ?? "proposer";
 
+    const summaryEntries = (drsData as unknown as { summary?: Array<Record<string, unknown>> } | null)?.summary ?? [];
+
+    const selectedSummary = summaryEntries.find((entry, index) => {
+        const memberType = String(entry.memberType ?? "").trim().toUpperCase();
+
+        if (memberType === "PROPOSER" || memberType.includes("PR")) {
+            return selectedApplicantTab === "proposer";
+        }
+
+        if (memberType === "LIFEASSURED1" || memberType === "LIFE ASSURED 1") {
+            return selectedApplicantTab === "lifeassured1";
+        }
+
+        if (memberType === "LIFEASSURED2" || memberType === "LIFE ASSURED 2") {
+            return selectedApplicantTab === "lifeassured2";
+        }
+
+        if (memberType.includes("LA") || memberType.includes("LIFE")) {
+            return (index === 1 && selectedApplicantTab === "lifeassured1") || (index > 1 && selectedApplicantTab === "lifeassured2");
+        }
+
+        return index === 0 && selectedApplicantTab === "proposer";
+    }) ?? summaryEntries[0];
+
+    const summaryPersonal = (selectedSummary?.personalDetails as Record<string, unknown> | undefined) ?? {};
+    const proposerFormLink = String(
+        (drsData as unknown as { quickLinks?: { proposerForm?: string } } | null)?.quickLinks?.proposerForm ??
+        summaryPersonal.UDSLink ??
+        "",
+    ).trim();
+
     const quickLinks = [
-        { label: "Proposal Form", path: "" },
+        { label: "Proposal Form", path: proposerFormLink },
         { label: "Previous Policies", path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "" },
-        { label: "Open Tasks", path: "" },
-        { label: "Risk Details", path: "" },
-        { label: "Audit Trail", path: "" },
+        { label: "Open Tasks", path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "" },
+        { label: "Risk Details", path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "" },
+        { label: "Audit Trail", path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "" },
         { label: "Refer to IT", path: "" },
         ...(!isCvtPoolRole
             ? [
@@ -36,8 +89,51 @@ const QuickLinks = () => {
         setIsOpen((prev) => !prev);
     }, []);
 
+    const handleReferToIt = useCallback(async () => {
+        if (!safeApplicationNumber || !roleType) {
+            setReferToItError("Missing application or role information.");
+            return;
+        }
+
+        try {
+            setReferToItLoading(true);
+            setReferToItError(null);
+
+            await dispatch(
+                referToItThunk({
+                    applicationId: safeApplicationNumber,
+                    roleType,
+                    decision: "Refer to IT",
+                }),
+            ).unwrap();
+
+            setOpenReferToItDialog(false);
+            navigate(getInboxPath(safeBusinessType), {
+                state: {
+                    snackbarMessage: "Case has been referred to IT successfully",
+                },
+            });
+        } catch (error) {
+            setReferToItError(error instanceof Error ? error.message : "Failed to refer to IT.");
+        } finally {
+            setReferToItLoading(false);
+        }
+    }, [dispatch, navigate, roleType, safeApplicationNumber, safeBusinessType]);
+
     const handleNavigate = useCallback(
-        (path: string) => {
+        (label: string, path: string) => {
+            if (label === "Proposal Form") {
+                if (!path) return;
+                window.open(path, "_blank", "noopener,noreferrer");
+                return;
+            }
+
+            if (label === "Refer to IT") {
+                setReferToItError(null);
+                setOpenReferToItDialog(true);
+                return;
+            }
+
             if (!path) return;
 
             const shouldPassApplicantTab = path.includes("/drs/medical");
@@ -100,7 +196,7 @@ const QuickLinks = () => {
                         {quickLinks.map(({ label, path }, index) => (
                             <Box key={label}>
                                 <Box
-                                    onClick={() => handleNavigate(path)}
+                                    onClick={() => handleNavigate(label, path)}
                                     sx={{
                                         px: 2,
                                         py: 1.5,
@@ -171,6 +267,56 @@ const QuickLinks = () => {
                     </Box>
                 </Box>
             </Box>
+
+            <CustomDialog
+                open={openReferToItDialog}
+                showCloseIcon={false}
+                onClose={() => setOpenReferToItDialog(true)}
+                title={
+                    <Typography
+                        sx={{
+                            ...modalTitleStyles,
+                        }}
+                    >
+                        Refer to IT
+                    </Typography>
+                }
+                actionsSx={{
+                    justifyContent: "center",
+                    pb: 2,
+                }}
+                actions={
+                    <CustomButton
+                        onClick={() => {
+                            void handleReferToIt();
+                        }}
+                        disabled={referToItLoading}
+                        sx={{ borderRadius: "50px", paddingX: "40px" }}
+                    >
+                        {referToItLoading ? "Submitting..." : "Refer to IT"}
+                    </CustomButton>
+                }
+            >
+                <Typography
+                    sx={{
+                        fontSize: "14px",
+                        color: "#161616",
+                    }}
+                >
+                    Kindly refer this ticket to IT Team.
+                </Typography>
+                {referToItError && (
+                    <Typography
+                        sx={{
+                            mt: 1,
+                            fontSize: "13px",
+                            color: "#DE2C3B",
+                        }}
+                    >
+                        {referToItError}
+                    </Typography>
+                )}
+            </CustomDialog>
         </Box>
     );
 };

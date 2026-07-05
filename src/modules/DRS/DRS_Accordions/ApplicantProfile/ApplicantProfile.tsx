@@ -31,6 +31,7 @@ import { useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
 import type { RootState } from "../../../../store/store"
 import FundDetails from "./FundDetails"
+import PaymentPayoutDetails from "./PaymentPayoutDetails"
 
 export interface ApplicantProfileProps {
     profile?: Partial<SummaryResponse>;
@@ -289,6 +290,7 @@ const buildProfileFromReduxData = (
     const summaryContact = toRecord(summaryRecord.contactDetails);
     const summaryApplicantFinancial = toRecord(summaryRecord.applicantFinancialDetails);
     const summaryFundDetails = toRecord(summaryRecord.fundDetails);
+    const summaryPayoutDetails = toRecord(summaryRecord.payoutDetails);
 
     const personalDetails = Object.keys(summaryPersonal).length > 0
         ? summaryPersonal
@@ -328,9 +330,16 @@ const buildProfileFromReduxData = (
         : {};
 
     const topLevelFundDetails = toRecord((data as unknown as Record<string, unknown>)?.fundDetails);
+    const topLevelPayoutDetails = toRecord((data as unknown as Record<string, unknown>)?.payoutDetails);
+    const producerDetails = toRecord((data as unknown as Record<string, unknown>)?.producerDetails);
+    const groupDetails = toRecord((data as unknown as Record<string, unknown>)?.groupDetails);
+    const sourcingDetail = toRecord((data as unknown as Record<string, unknown>)?.sourcingDetail);
     const resolvedFundDetails = Object.keys(summaryFundDetails).length > 0
         ? summaryFundDetails
         : topLevelFundDetails;
+    const resolvedPayoutDetails = Object.keys(summaryPayoutDetails).length > 0
+        ? summaryPayoutDetails
+        : topLevelPayoutDetails;
     const rawFundDetail = resolvedFundDetails.fundDetail;
     const fundDetailItems = Array.isArray(rawFundDetail)
         ? rawFundDetail
@@ -356,6 +365,7 @@ const buildProfileFromReduxData = (
             nationality: String(personalDetails?.nationality ?? ""),
             countryOfResidence: String(personalDetails?.residentStatus ?? ""),
             education: String(personalDetails?.highestQualification ?? ""),
+            udsLink: String(personalDetails?.UDSLink ?? ""),
         },
         kycDetails: {
             panNumber: String(resolvedKyc?.panNumber ?? personalDetails?.panNo ?? ""),
@@ -423,7 +433,29 @@ const buildProfileFromReduxData = (
                 };
             }),
         },
-    } as Partial<SummaryResponse>;
+        paymentDetails: {
+            isThirdPartyPayment: String(
+                resolvedPayoutDetails?.isThirdPartyPayment ??
+                resolvedPayoutDetails?.thirdPartyPayment ??
+                resolvedPayoutDetails?.thirdPartyIndicator ??
+                ""
+            ),
+        },
+        payoutDetails: {
+            accountType: String(resolvedPayoutDetails?.accountType ?? ""),
+            bankType: String(resolvedPayoutDetails?.bankType ?? groupDetails?.bankType ?? ""),
+            branch: String(resolvedPayoutDetails?.branchName ?? sourcingDetail?.branch ?? ""),
+            micrCode: String(resolvedPayoutDetails?.micr ?? resolvedPayoutDetails?.micrCode ?? ""),
+            ifscCode: String(resolvedPayoutDetails?.ifsc ?? resolvedPayoutDetails?.ifscCode ?? ""),
+            accountNumber: String(resolvedPayoutDetails?.accountNo ?? resolvedPayoutDetails?.accountNumber ?? ""),
+            paymentOptions: String(
+                resolvedPayoutDetails?.paymentOptions ??
+                resolvedPayoutDetails?.paymentOption ??
+                producerDetails?.premiumPaymentOption ??
+                ""
+            ),
+        },
+    } as unknown as Partial<SummaryResponse>;
 };
 
 const buildFormData = (
@@ -614,9 +646,41 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
         return hasAnyFundData(profileFund) || hasAnyFundData(drsFund);
     }, [displayProfile?.fundDetails, drsData?.fundDetails]);
 
+    const hasPaymentPayoutDetails = useMemo(() => {
+        const hasAnyPayoutData = (details?: Record<string, unknown>) => {
+            if (!details) return false;
+
+            return Boolean(
+                String(details.accountType ?? "").trim() ||
+                String(details.bankType ?? "").trim() ||
+                String(details.branchName ?? details.branch ?? "").trim() ||
+                String(details.micr ?? details.micrCode ?? "").trim() ||
+                String(details.ifsc ?? details.ifscCode ?? "").trim() ||
+                String(details.accountNo ?? details.accountNumber ?? "").trim() ||
+                String(details.paymentOptions ?? details.paymentOption ?? "").trim() ||
+                String(details.isThirdPartyPayment ?? details.thirdPartyPayment ?? details.thirdPartyIndicator ?? "").trim()
+            );
+        };
+
+        const profilePayout = (displayProfile?.payoutDetails as unknown as Record<string, unknown> | undefined);
+        const drsPayout = (drsData?.payoutDetails as unknown as Record<string, unknown> | undefined);
+
+        return hasAnyPayoutData(profilePayout) || hasAnyPayoutData(drsPayout);
+    }, [displayProfile?.payoutDetails, drsData?.payoutDetails]);
+
     const visibleApplicantInfoTabs = useMemo(
-        () => hasFundDetails ? applicantInfoTabs : applicantInfoTabs.filter((tab) => tab.key !== "fundDetails"),
-        [hasFundDetails]
+        () => applicantInfoTabs.filter((tab) => {
+            if (tab.key === "fundDetails") {
+                return hasFundDetails;
+            }
+
+            if (tab.key === "paymentPayoutDetails") {
+                return hasPaymentPayoutDetails;
+            }
+
+            return true;
+        }),
+        [hasFundDetails, hasPaymentPayoutDetails]
     );
 
     const activeApplicantInfoTab = useMemo(
@@ -925,6 +989,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
         generic: <Generic profile={displayProfile} />,
         eia: <Eia profile={displayProfile} />,
         fundDetails: <FundDetails profile={displayProfile}/>,
+        paymentPayoutDetails: <PaymentPayoutDetails profile={displayProfile} />,
     };
 
     return (

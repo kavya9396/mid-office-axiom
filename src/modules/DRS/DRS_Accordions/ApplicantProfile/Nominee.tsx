@@ -31,6 +31,7 @@ const nomineeColumns: Column<NomineeRow>[] = [
     { key: "appointeeName", header: "Appointee Name", width: "14%" },
     { key: "appointeeGender", header: "Appointee Gender", width: "12%" },
     { key: "appointeeDOB", header: "Appointee DOB", width: "12%" },
+    { key: "appointeeRelationship", header: "Appointee Relationship", width: "12%" },
 ];
 
 const Nominee = ({ profile }: ApplicantProfileProps) => {
@@ -68,7 +69,7 @@ const Nominee = ({ profile }: ApplicantProfileProps) => {
             nomineeName: toDisplayValue([item.firstName, item.lastName].filter(Boolean).join(" ")),
             nomineeDOB: toDisplayValue(formatDOB(item.dob)),
             gender: toDisplayValue(item.gender),
-            relationship: toDisplayValue(item.proposerNomineeRelation || item.relationWithLA),
+            relationship: toDisplayValue(item.proposerNomineeRelation),
             accountNumber: "-",
             ifsc: "-",
             sharePercentage: Number(item.percentage ?? 0),
@@ -77,6 +78,7 @@ const Nominee = ({ profile }: ApplicantProfileProps) => {
                 : "-",
             appointeeGender: appointee ? toDisplayValue(appointee.gender) : "-",
             appointeeDOB: appointee ? toDisplayValue(formatDOB(appointee.dob)) : "-",
+             appointeeRelationship: toDisplayValue(item.relationWithLA),
         };
     });
 

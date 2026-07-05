@@ -62,6 +62,18 @@ const apiUrls = {
     real: "/api/drs/user-list",
     mock: "/mock/drs/userList.json",
   },
+  auditTrail: {
+    real: "/api/drs/audit-trail",
+    mock: "/mock/inbox/auditTrail.json",
+  },
+  openOtherTasks: {
+    real: "/api/drs/open-other-tasks",
+    mock: "/mock/drs/drs.mock.json",
+  },
+  riskDetails: {
+    real: "/api/drs/risk-details",
+    mock: "/mock/drs/drs.mock.json",
+  },
 
   //Claim Task
   claimTask: {

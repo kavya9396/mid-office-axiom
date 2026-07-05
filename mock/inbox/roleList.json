@@ -126,6 +126,46 @@
         "role": "RETAIL_CPT_USER",
 
         "businessType": "RETAIL"
+      }],
+      "PIVV_TASK":[
+      {
+        "taskId": "2078.18771",
+
+        "applicationNo": "NB0000027",
+
+        "isMedical": false,
+
+        "roleType": "PIVV_TASK",
+
+        "role": "RETAIL_PIVV_USER",
+
+        "businessType": "RETAIL"
+      }],"PRE_ISSUANCE_SERVICING_TASK":[
+      {
+        "taskId": "2078.18771",
+
+        "applicationNo": "NB0000027",
+
+        "isMedical": false,
+
+        "roleType": "PRE_ISSUANCE_SERVICING_TASK",
+
+        "role": "RETAIL_PRE_ISSUANCE_SERVICING_USER",
+
+        "businessType": "RETAIL"
+      }],"EXCEPTIONAL_TASK":[
+      {
+        "taskId": "2078.18771",
+
+        "applicationNo": "NB0000027",
+
+        "isMedical": false,
+
+        "roleType": "EXCEPTIONAL_TASK",
+
+        "role": "RETAIL_EXCEPTIONAL_USER",
+
+        "businessType": "RETAIL"
       }]
   }
 }

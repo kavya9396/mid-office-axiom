@@ -72,6 +72,7 @@ const FinanceAndProfession = ({ profile }: ApplicantProfileProps) => {
             0,
         ),
         gstin: String(summaryApplicantFinancial?.gstin ?? fallbackProducer?.gstInNumber ?? ""),
+         industryType: String(summaryPersonal?.industryType ?? ""),
         organisationType: String(summaryApplicantFinancial?.organisationType ?? summaryPersonal?.orgType ?? fallbackPersonal?.orgType ?? ""),
         organisationName: String(summaryApplicantFinancial?.organisationName ?? summaryPersonal?.orgName ?? fallbackPersonal?.orgName ?? ""),
     };
