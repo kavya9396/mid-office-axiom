@@ -25,7 +25,7 @@ type SelectedItem = {
 type BreDecisionExtraField = {
   label: string;
   value?: string | null;
-  visibleWhen?: "always" | "success" | "failure";
+  visibleWhen?: "success" | "failure";
 };
 
 interface BreDecisionProps {
@@ -94,7 +94,15 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const resolvedRemarks = currentBreDecision?.remarks ?? drsBreDecision?.remarks ?? "-";
   const resolvedDiscrepancy = currentBreDecision?.discrepancy ?? drsBreDecision?.discrepancy ?? "-";
 
-  const isBreSuccess = currentBreDecision?.status?.toLowerCase() === "success";
+  const hasValue = (value: unknown) =>
+    value !== null && value !== undefined && String(value).trim() !== "";
+
+  const hasBreResponse =
+    !!currentBreDecision && Object.values(currentBreDecision).some((value) => hasValue(value));
+
+  const resolvedBreStatus = hasBreResponse ? "Success" : "Failure";
+
+  const isBreSuccess = resolvedBreStatus.toLowerCase() === "success";
 
   // This count should come from backend.
   const isRetriggerDisabled = isBreSuccess || retriggerCount >= 3 || breRetriggerLoading;
@@ -109,9 +117,6 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       label: item.label,
       value: item.value ?? "-",
     }));
-
-  const hasValue = (value: unknown) =>
-    value !== null && value !== undefined && String(value).trim() !== "";
 
   const breDecisionParams = currentBreDecision as Record<string, unknown> | null;
 
@@ -147,7 +152,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const coreBreDetails = [
     {
       label: "BRE Status",
-      value: currentBreDecision?.status ?? "-",
+      value: resolvedBreStatus,
     },
     {
       label: "Initial BRE Decision",

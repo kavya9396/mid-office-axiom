@@ -3,9 +3,14 @@ import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import LastUWRemarks from "../LastUWRemarks";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
+import { formatDateWithOrdinalTime } from "../../../utils/helpers";
 
 const PIVVSection = () => {
-  const { pivvSection } = useSelector((state: RootState) => state.drs);
+  const { data } = useSelector((state: RootState) => state.drs);
+  const pivvSection = (data as unknown as Record<string, unknown> | null)?.pivvSection as
+    | Record<string, unknown>
+    | undefined;
+  const formattedRemarkDate = formatDateWithOrdinalTime(pivvSection?.remarkDate);
 
   return (
     <>
@@ -22,13 +27,14 @@ const PIVVSection = () => {
             >
               <LastUWRemarks
                 title="PIVV Pool Remarks"
-                remarks={pivvSection?.remarks}
+                date={formattedRemarkDate}
+                remarks={String(pivvSection?.pivvPoolRemarks ?? pivvSection?.remarks ?? "")}
                 firstFieldLabel="PIVV Pool Decision"
-                firstFieldValue={pivvSection?.decision}
+                firstFieldValue={String(pivvSection?.pivvPoolDecision ?? pivvSection?.decision ?? "")}
                 secondFieldLabel="Reason"
-                secondFieldValue={pivvSection?.reason}
+                secondFieldValue={String(pivvSection?.reason ?? "")}
                 thirdFieldLabel="User ID"
-                thirdFieldValue={pivvSection?.userId}
+                thirdFieldValue={String(pivvSection?.userId ?? "")}
               />
             </Box>
           </CustomAccordion>

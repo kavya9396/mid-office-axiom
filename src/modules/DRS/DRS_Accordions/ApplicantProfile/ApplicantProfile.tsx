@@ -34,6 +34,7 @@ import FundDetails from "./FundDetails"
 
 export interface ApplicantProfileProps {
     profile?: Partial<SummaryResponse>;
+    selectedApplicantTab?: ApplicantTab;
 }
 
 type FormField = {
@@ -167,6 +168,7 @@ const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
 const indiaPincodeRegex = /^\d{6}$/;
 const numericRegex = /^\d+$/;
+const optionalFormFields: Array<keyof ApplicantEditForm> = ["middleName"];
 
 const getGenderByTitle = (title: string): ApplicantEditForm["gender"] | undefined => {
     const normalizedTitle = title.trim().toLowerCase();
@@ -244,14 +246,34 @@ const mapMemberType = (lifeType: string | undefined, index: number): ApplicantTa
     return "lifeassured2";
 };
 
-const buildProfileFromReduxData = (data?: DRSData | null): Partial<SummaryResponse> | undefined => {
+const toRecord = (value: unknown): Record<string, unknown> =>
+    value && typeof value === "object" && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : {};
+
+const buildProfileFromReduxData = (
+    data?: DRSData | null,
+    selectedApplicantTab: ApplicantTab = getStoredApplicantTab()
+): Partial<SummaryResponse> | undefined => {
+    const dataRecord = data as unknown as Record<string, unknown>;
+    const summaryEntries = Array.isArray(dataRecord?.summary)
+        ? (dataRecord.summary as Array<Record<string, unknown>>)
+        : [];
     const customerDetails = data?.customerDetails ?? [];
 
-    if (customerDetails.length === 0) {
+    if (summaryEntries.length === 0 && customerDetails.length === 0) {
         return undefined;
     }
 
-    const selectedApplicantTab = getStoredApplicantTab();
+    const summaryWithTabs = summaryEntries.map((entry, index) => ({
+        entry,
+        memberType: mapMemberType(String(entry.memberType ?? ""), index),
+    }));
+
+    const selectedSummaryEntry =
+        summaryWithTabs.find((item) => item.memberType === selectedApplicantTab)?.entry ??
+        summaryEntries[0];
+
     const customerWithTabs = customerDetails.map((customer, index) => ({
         customer,
         memberType: mapMemberType(String(customer.lifeType ?? ""), index),
@@ -260,16 +282,59 @@ const buildProfileFromReduxData = (data?: DRSData | null): Partial<SummaryRespon
     const currentCustomer =
         customerWithTabs.find((item) => item.memberType === selectedApplicantTab)?.customer ??
         customerDetails[0];
-    const personalDetails = currentCustomer?.personalDetails;
-    const addresses = Array.isArray(currentCustomer?.address) ? currentCustomer.address : [];
+
+    const summaryRecord = toRecord(selectedSummaryEntry);
+    const summaryPersonal = toRecord(summaryRecord.personalDetails);
+    const summaryKyc = toRecord(summaryRecord.kycDetails);
+    const summaryContact = toRecord(summaryRecord.contactDetails);
+    const summaryApplicantFinancial = toRecord(summaryRecord.applicantFinancialDetails);
+    const summaryFundDetails = toRecord(summaryRecord.fundDetails);
+
+    const personalDetails = Object.keys(summaryPersonal).length > 0
+        ? summaryPersonal
+        : toRecord(currentCustomer?.personalDetails);
+
+    const summaryAddresses = Array.isArray(summaryRecord.address)
+        ? (summaryRecord.address as Array<Record<string, unknown>>)
+        : [];
+    const addresses = summaryAddresses.length > 0
+        ? summaryAddresses
+        : (Array.isArray(currentCustomer?.address) ? currentCustomer.address : []);
+
     const permanentAddress = addresses.find((item) => String(item.type).toLowerCase() === "permanent") ?? addresses[0] ?? {};
     const communicationAddress =
         addresses.find((item) => String(item.type).toLowerCase() === "communication") ??
         addresses.find((item) => String(item.type).toLowerCase() === "correspondence") ??
         permanentAddress;
+
+    const summaryDocument = Array.isArray(summaryRecord.documentDetails)
+        ? summaryRecord.documentDetails[0]
+        : undefined;
     const fallbackDocument = Array.isArray(currentCustomer?.documentDetails)
         ? currentCustomer.documentDetails[0]
         : undefined;
+    const resolvedDocument = summaryDocument ?? fallbackDocument;
+
+    const resolvedContact = Object.keys(summaryContact).length > 0
+        ? summaryContact
+        : toRecord(currentCustomer?.communicationDetails);
+
+    const resolvedKyc = Object.keys(summaryKyc).length > 0
+        ? summaryKyc
+        : {};
+
+    const resolvedApplicantFinancial = Object.keys(summaryApplicantFinancial).length > 0
+        ? summaryApplicantFinancial
+        : {};
+
+    const topLevelFundDetails = toRecord((data as unknown as Record<string, unknown>)?.fundDetails);
+    const resolvedFundDetails = Object.keys(summaryFundDetails).length > 0
+        ? summaryFundDetails
+        : topLevelFundDetails;
+    const rawFundDetail = resolvedFundDetails.fundDetail;
+    const fundDetailItems = Array.isArray(rawFundDetail)
+        ? rawFundDetail
+        : (rawFundDetail && typeof rawFundDetail === "object" ? [rawFundDetail] : []);
 
     return {
         memberType: selectedApplicantTab,
@@ -293,14 +358,14 @@ const buildProfileFromReduxData = (data?: DRSData | null): Partial<SummaryRespon
             education: String(personalDetails?.highestQualification ?? ""),
         },
         kycDetails: {
-            panNumber: String(personalDetails?.panNo ?? ""),
-            identityProofType: String(fallbackDocument?.documentType ?? ""),
-            identityProofNumber: String(fallbackDocument?.documentId ?? ""),
-            addressProof: String(fallbackDocument?.documentName ?? ""),
-            incomeProof: "",
-            existingCkycNumber: "",
-            pep: Boolean(personalDetails?.isPEP),
-            criminalProceedings: "",
+            panNumber: String(resolvedKyc?.panNumber ?? personalDetails?.panNo ?? ""),
+            identityProofType: String(resolvedKyc?.identityProofType ?? resolvedDocument?.documentType ?? ""),
+            identityProofNumber: String(resolvedKyc?.identityProofNumber ?? resolvedDocument?.documentId ?? ""),
+            addressProof: String(resolvedKyc?.addressProof ?? resolvedDocument?.documentName ?? ""),
+            incomeProof: String(resolvedKyc?.incomeProof ?? personalDetails?.incomeProof ?? ""),
+            existingCkycNumber: String(resolvedKyc?.existingCkycNumber ?? personalDetails?.ckycNumber ?? ""),
+            pep: String(resolvedKyc?.pep ?? personalDetails?.isPEP ?? "").toLowerCase() === "yes" || Boolean(personalDetails?.isPEP),
+            criminalProceedings: String(resolvedKyc?.criminalProceedings ?? personalDetails?.criminalProceeding ?? ""),
         },
         communicationAddressDetails: {
             addressLine1: String(communicationAddress.addressLine1 ?? ""),
@@ -323,23 +388,40 @@ const buildProfileFromReduxData = (data?: DRSData | null): Partial<SummaryRespon
             pincode: String(permanentAddress.pinCode ?? ""),
         },
         contactDetails: {
-            mobileNumber: String(currentCustomer?.communicationDetails?.mobileNo ?? ""),
-            emailId: String(currentCustomer?.communicationDetails?.emailId ?? ""),
-            alternateMobile: String(currentCustomer?.communicationDetails?.mobileNo ?? ""),
-            landlineNumber: String(currentCustomer?.communicationDetails?.landlineNo ?? ""),
-            emailPref: String(currentCustomer?.communicationDetails?.emailPref ?? ""),
-            smsPref: String(currentCustomer?.communicationDetails?.smsPref ?? ""),
+            mobileNumber: String(resolvedContact?.mobileNo ?? ""),
+            emailId: String(resolvedContact?.emailId ?? ""),
+            alternateMobile: String(resolvedContact?.alternateMobileNo ?? resolvedContact?.mobileNo ?? ""),
+            landlineNumber: String(resolvedContact?.landlineNo ?? ""),
+            emailPref: String(resolvedContact?.emailPref ?? ""),
+            smsPref: String(resolvedContact?.smsPref ?? ""),
         },
         applicantFinancialDetails: {
-            occupation: String(personalDetails?.occupationType ?? ""),
+            occupation: String(resolvedApplicantFinancial?.occupation ?? personalDetails?.occupationType ?? ""),
             annualIncome: Number(
-                (currentCustomer?.financialDetail as Record<string, unknown> | undefined)?.annualIncome ??
+                resolvedApplicantFinancial?.annualIncome ??
+                    (toRecord(currentCustomer?.financialDetail).annualIncome) ??
                     personalDetails?.netIncomeAmt ??
                     0
             ),
-            gstin: String((data?.producerDetails as Record<string, string> | undefined)?.gstInNumber ?? ""),
-            organisationType: String(personalDetails?.orgType ?? ""),
-            organisationName: String(personalDetails?.orgName ?? ""),
+            gstin: String(resolvedApplicantFinancial?.gstin ?? (data?.producerDetails as Record<string, string> | undefined)?.gstInNumber ?? ""),
+            organisationType: String(resolvedApplicantFinancial?.organisationType ?? personalDetails?.orgType ?? ""),
+            organisationName: String(resolvedApplicantFinancial?.organisationName ?? personalDetails?.orgName ?? ""),
+        },
+        fundDetails: {
+            allocationStrategy: String(resolvedFundDetails?.allocationStrategy ?? ""),
+            totalAllocation: String(resolvedFundDetails?.totalAllocation ?? ""),
+            atpOpted: String(resolvedFundDetails?.atpOpted ?? ""),
+            fundDetail: fundDetailItems.map((item) => {
+                const detail = toRecord(item);
+                return {
+                    name: String(detail?.name ?? ""),
+                    amount: String(detail?.amount ?? ""),
+                    sourceFund: String(detail?.sourceFund ?? ""),
+                    targetFund: String(detail?.targetFund ?? ""),
+                    switchDate: String(detail?.switchDate ?? ""),
+                    transferPercentage: String(detail?.transferPercentage ?? ""),
+                };
+            }),
         },
     } as Partial<SummaryResponse>;
 };
@@ -438,7 +520,7 @@ export const SectionCard = ({
     </Box>
 );
 
-const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
+const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfileProps) => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const { applicationNumber } = useParams<{ applicationNumber: string }>();
     const dispatch = useAppDispatch();
@@ -449,16 +531,18 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     const [submitLoading, setSubmitLoading] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
     const [savedProfile, setSavedProfile] = useState<Partial<SummaryResponse> | undefined>(undefined);
+    const resolvedApplicantTab = selectedApplicantTab ?? getStoredApplicantTab();
 
     const fallbackProfile = useMemo(
-        () => buildProfileFromReduxData(drsData),
-        [drsData]
+        () => buildProfileFromReduxData(drsData, resolvedApplicantTab),
+        [drsData, resolvedApplicantTab]
     );
 
+    const baseProfile = profile ?? fallbackProfile;
     const displayProfile =
-        savedProfile && profile && savedProfile.memberType === profile.memberType
+        savedProfile?.memberType === resolvedApplicantTab
             ? savedProfile
-            : profile ?? fallbackProfile;
+            : baseProfile;
 
     const initialFormData = useMemo(
         () => buildFormData(displayProfile),
@@ -507,11 +591,27 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
     );
 
     const hasFundDetails = useMemo(() => {
-        if (displayProfile?.fundDetails?.fundDetail?.length) {
-            return true;
-        }
+        const hasAnyFundData = (fund?: Record<string, unknown>) => {
+            if (!fund) return false;
 
-        return Boolean(drsData?.fundDetails?.fundDetail?.length);
+            const rawFundDetail = fund.fundDetail;
+            const hasFundRows = Array.isArray(rawFundDetail)
+                ? rawFundDetail.length > 0
+                : Boolean(rawFundDetail && typeof rawFundDetail === "object");
+
+            if (hasFundRows) return true;
+
+            return Boolean(
+                String(fund.allocationStrategy ?? "").trim() ||
+                String(fund.totalAllocation ?? "").trim() ||
+                String(fund.atpOpted ?? "").trim()
+            );
+        };
+
+        const profileFund = displayProfile?.fundDetails as unknown as Record<string, unknown> | undefined;
+        const drsFund = drsData?.fundDetails as unknown as Record<string, unknown> | undefined;
+
+        return hasAnyFundData(profileFund) || hasAnyFundData(drsFund);
     }, [displayProfile?.fundDetails, drsData?.fundDetails]);
 
     const visibleApplicantInfoTabs = useMemo(
@@ -551,6 +651,9 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
 
         allDialogFields.forEach((field) => {
             const value = String(formData[field.name] ?? "").trim();
+            if (optionalFormFields.includes(field.name)) {
+                return;
+            }
             if (!value) {
                 errors[field.name] = `${field.label} is required`;
             }
@@ -745,7 +848,7 @@ const ApplicantProfile = ({ profile }: ApplicantProfileProps) => {
             const payload: ApplicantProfileSubmitRequest = {
                 applicationId: applicationNumber,
                 roleType,
-                memberType: displayProfile?.memberType ?? "proposer",
+                memberType: resolvedApplicantTab,
                 updatedDetails,
             };
 

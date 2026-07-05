@@ -3,7 +3,7 @@ import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTabs from "../../../components/ui/Tabs/Tabs"
 import { applicantTabs } from "../../../utils/constant"
 import { useEffect, useState } from "react"
-import type { ApplicantTab, RiskCard } from "../../../types/drs.types"
+import type { ApplicantTab } from "../../../types/drs.types"
 import { GalleryIcon, HeartIcon, InfoIcon, NoteIcon, ScannerIcon, TextAlignLeftIcon, TickIcon, WalletIcon } from "../../../icons/Icons"
 import { centerFlex, columnFlex, modalTitleStyles } from "../../../utils/styles"
 import { useSelector } from "react-redux"
@@ -18,70 +18,149 @@ import { useNavigate } from "react-router-dom"
 import { formatDOB } from "../../../utils/helpers"
 import defaultUserProfileImage from "../../../assets/user-profile.svg"
 
-const riskDetails: RiskCard[] = [
-    {
-        title: "Medical",
-        desc: "BRE Medical Decision - STD",
-        detailedDescTitle: "medical risk analytics",
-        detailedDesc: [
-            "Adverse medical report",
-            "Adverse medical value",
-            "BRE Medical decision",
-            "BRE Medical date",
-            "BRE Medical Reasons",
-            "BRE Medical discrepancy",
-            "Extra Premium rating",
-            "Reference for Rating",
-            "Extra Premium rating reasons",
-        ],
-        type: "medical",
-        status: "success",
+type RiskStatus = "success" | "warning";
+
+type RiskDetailItem = {
+    label: string;
+    value: string;
+};
+
+type RiskCardItem = {
+    title: string;
+    desc: string;
+    detailedDescTitle: string;
+    detailedDesc: RiskDetailItem[];
+    type: "medical" | "financial" | "other";
+    status: RiskStatus;
+};
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+    value && typeof value === "object" && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : {};
+
+const asDisplayValue = (value: unknown) => {
+    if (value === null || value === undefined) return "-";
+    const normalized = String(value).trim();
+    return normalized === "" ? "-" : normalized;
+};
+
+const riskValueConfigs = {
+    medical: [
+        { key: "brePhysicalMedicalDecision", label: "BRE Physical Medical Decision" },
+        { key: "brePhysicalMedicalRemark", label: "BRE Physical Medical Remark" },
+        { key: "breTeleVideoMerDecision", label: "BRE Tele/Video MER Decision" },
+        { key: "breTeleVideoMerRemark", label: "BRE Tele/Video MER Remark" },
+        { key: "munichReMedicalDecision", label: "MunichRe Medical decision" },
+        { key: "munichReRating", label: "MunichRe Rating" },
+        { key: "biuMedicalStatus", label: "BIU Medical status (Match/Mismatch)" },
+    ],
+    financial: [
+        { key: "breFinancialDecision", label: "BRE Financial decision" },
+        { key: "breRemark", label: "BRE Remark" },
+        { key: "financialEligibility", label: "Financial Eligibility" },
+        { key: "derivedIncome", label: "Derived Income" },
+        { key: "counterOfferValue", label: "CounterOffer Value" },
+        { key: "additionalSA", label: "Additional SA" },
+        { key: "biuFinancialStatus", label: "BIU Financial status (Match/Mismatch)" },
+    ],
+    other: [
+        { key: "ptlrResponse", label: "PTLR Response" },
+        { key: "drcResponse", label: "DRC Response" },
+        { key: "adverseIIB", label: "Adverse IIB" },
+        { key: "criminalQuestionResponseLA", label: "Criminal Question Response (LA)" },
+        { key: "pepQuestionResponseLA", label: "PEP Question Response (LA)" },
+        { key: "criminalQuestionResponsePR", label: "Criminal Question Response (PR)" },
+        { key: "pepQuestionResponsePR", label: "PEP Question Response (PR)" },
+        { key: "previousPolicySubstandard", label: "Previous Policy Substandard" },
+        { key: "avocationRelatedDisclosure", label: "Avocation Related Disclosure" },
+        { key: "healthQuestionPositive", label: "Health Question Positive" },
+        { key: "employmentInRiskyIndustry", label: "Employment in Risky Industry" },
+        { key: "fatfOfacCountryLogin", label: "FATF/OFAC Country Login" },
+        { key: "hazardousOccupation", label: "Hazardous Occupation" },
+        { key: "eddFlag", label: "EDD Flag" },
+        { key: "claimRiskIndicator", label: "Claim Risk Indicator" },
+        { key: "faceMatchScore", label: "Face Match Score" },
+        { key: "tobacco", label: "Tobacco" },
+        { key: "narcotics", label: "Narcotics" },
+    ],
+} as const;
+
+const successBaseline = {
+    medical: {
+        brePhysicalMedicalDecision: "STP",
+        brePhysicalMedicalRemark: "",
+        breTeleVideoMerDecision: "Standard_1",
+        breTeleVideoMerRemark: "",
+        munichReMedicalDecision: "",
+        munichReRating: "",
+        biuMedicalStatus: "N",
     },
-    {
-        title: "Financial",
-        desc: "BRE Financial Decision - STD",
-        detailedDescTitle: "financial risk analytics",
-        detailedDesc: [
-            "Financial Findings",
-            "BRE Financial Decision",
-            "BRE Financial Date",
-            "BRE Financial Reasons",
-            "BRE Financial Discrepancy"
-        ],
-        type: "financial",
-        status: "success",
+    financial: {
+        breFinancialDecision: "FSTP",
+        breRemark: "",
+        financialEligibility: "",
+        derivedIncome: "",
+        counterOfferValue: "",
+        additionalSA: "",
+        biuFinancialStatus: "N",
     },
-    {
-        title: "Other Risks",
-        desc: "BRE Decision - STD",
-        detailedDescTitle: "other risk analytics",
-        detailedDesc: [
-            "Avocation",
-            "Lifestyle",
-            "Personal Habits",
-            "PEP",
-            "Criminal Proceedings",
-            "Adverse API findings",
-            "Family History",
-            "Residential Risk",
-            "Occupation Risk",
-        ],
-        type: "other",
-        status: "success",
+    other: {
+        ptlrResponse: "Standard",
+        drcResponse: "No",
+        adverseIIB: "No",
+        criminalQuestionResponseLA: "No",
+        pepQuestionResponseLA: "No",
+        criminalQuestionResponsePR: "No",
+        pepQuestionResponsePR: "No",
+        previousPolicySubstandard: "No",
+        avocationRelatedDisclosure: "No",
+        healthQuestionPositive: "No",
+        employmentInRiskyIndustry: "No",
+        fatfOfacCountryLogin: "No",
+        hazardousOccupation: "No",
+        eddFlag: "No",
+        claimRiskIndicator: "No",
+        faceMatchScore: ">75%",
+        tobacco: "No",
+        narcotics: "No",
     },
-];
+} as const;
+
+const normalizeCompare = (value: unknown) => String(value ?? "").trim().toLowerCase();
+
+const getRiskStatus = (
+    section: "medical" | "financial" | "other",
+    sectionData: Record<string, unknown>,
+): RiskStatus => {
+    const baseline = successBaseline[section] as Record<string, string>;
+    const hasWarning = Object.entries(baseline).some(([key, expectedValue]) => {
+        const actualValue = normalizeCompare(sectionData[key]);
+        const baselineValue = normalizeCompare(expectedValue);
+        return actualValue !== baselineValue;
+    });
+
+    return hasWarning ? "warning" : "success";
+};
 
 const Summary = () => {
     const navigate = useNavigate();
     const { data } = useSelector((state: RootState) => state.drs);
     const customerDetails = data?.customerDetails ?? [];
+    const summaryRoot = data as unknown as Record<string, unknown> | null;
+    const summaryEntries = Array.isArray(summaryRoot?.summary)
+        ? (summaryRoot.summary as Array<Record<string, unknown>>)
+        : [];
+    const topLevelBreDecision = toRecord(summaryRoot?.breDecision);
     const firstProduct = data?.productDetail?.[0];
     const breOutput = data?.externalAPIs?.breOutput;
     const isLAPropSame = Boolean(data?.applicationInfo?.isLAPropSame);
 
-    const mapMemberType = (lifeType: string | undefined, index: number): ApplicantTab => {
-        const normalized = lifeType?.trim().toUpperCase() ?? "";
-        if (normalized.includes("PR") || normalized.includes("PROPOSER")) return "proposer";
+    const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
+        const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
+        if (normalized === "PROPOSER" || normalized.includes("PR")) return "proposer";
+        if (normalized === "LIFEASSURED1" || normalized === "LIFE ASSURED 1") return "lifeassured1";
+        if (normalized === "LIFEASSURED2" || normalized === "LIFE ASSURED 2") return "lifeassured2";
         if (normalized.includes("LA") || normalized.includes("LIFE")) return index === 1 ? "lifeassured1" : "lifeassured2";
         if (index === 0) return "proposer";
         if (index === 1) return "lifeassured1";
@@ -93,12 +172,22 @@ const Summary = () => {
         memberType: mapMemberType(String(customer.lifeType ?? ""), index),
     }));
 
-    const availableMemberTypes = customerWithTabs.map((item) => item.memberType);
+    const summaryWithTabs = summaryEntries.map((item, index) => ({
+        customer: item,
+        memberType: mapMemberType(String(item.memberType ?? ""), index),
+    }));
+
+    const availableMemberTypes = Array.from(
+        new Set([
+            ...customerWithTabs.map((item) => item.memberType),
+            ...summaryWithTabs.map((item) => item.memberType),
+        ]),
+    );
 
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
     const [openPhotoDialog, setOpenPhotoDialog] = useState(false);
     const [open, setOpen] = useState(false);
-    const [selectedCard, setSelectedCard] = useState<RiskCard | null>(null);
+    const [selectedCard, setSelectedCard] = useState<RiskCardItem | null>(null);
     const [selectedPhotoSrc, setSelectedPhotoSrc] = useState("");
 
     const visibleTabs = isLAPropSame
@@ -109,6 +198,10 @@ const Summary = () => {
         ? "lifeassured1"
         : (visibleTabs.find((tab) => tab.key === applicantTab)?.key ?? visibleTabs[0]?.key ?? "proposer");
 
+    const activeSummaryEntry = summaryEntries.find((item) =>
+        String(item.memberType ?? "").toLowerCase() === activeApplicantTab.toLowerCase(),
+    ) ?? summaryEntries[0];
+
     useEffect(() => {
         localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);
     }, [activeApplicantTab]);
@@ -116,13 +209,25 @@ const Summary = () => {
     const currentCustomer = customerWithTabs.find(
         (item) => item.memberType === activeApplicantTab
     )?.customer ?? customerDetails[0];
-    const personalDetails = currentCustomer?.personalDetails;
-    const addresses = Array.isArray(currentCustomer?.address) ? currentCustomer.address : [];
+
+    const activeSummaryRecord = toRecord(activeSummaryEntry);
+    const customerRecord = toRecord(currentCustomer);
+    const profileSource = Object.keys(activeSummaryRecord).length > 0 ? activeSummaryRecord : customerRecord;
+
+    const personalDetails = toRecord(profileSource.personalDetails);
+    const financialDetails = toRecord(profileSource.financialDetails);
+    const policyDetails = toRecord(profileSource.policyDetails);
+    const underwriting = toRecord(profileSource.underwriting);
+    const underwritingBreDecision = toRecord(underwriting.breDecision);
+    const faceMatchDetails = toRecord(profileSource.faceMatchDetails);
+    const kycDetails = toRecord(profileSource.kycDetails);
+
+    const addresses = Array.isArray(profileSource.address) ? profileSource.address : [];
     const permanentAddress =
         addresses.find((item) => String(item.type).toLowerCase() === "permanent") ??
         addresses[0];
-    const firstDoc = Array.isArray(currentCustomer?.documentDetails)
-        ? currentCustomer?.documentDetails?.[0]
+    const firstDoc = Array.isArray(profileSource.documentDetails)
+        ? profileSource.documentDetails?.[0]
         : undefined;
 
     const title = String(personalDetails?.title ?? "");
@@ -131,10 +236,12 @@ const Summary = () => {
     const lastName = String(personalDetails?.lastName ?? "");
     const name = [title, firstName, middleName, lastName].filter(Boolean).join(" ");
     const udsLink = String(personalDetails?.UDSLink ?? "").trim();
-    const imageURL = udsLink || defaultUserProfileImage;
+    const profileImage = String(personalDetails?.profileImage ?? "").trim();
+    const imageURL = udsLink || profileImage || defaultUserProfileImage;
     const genderCode = String(personalDetails?.gender ?? "").toUpperCase();
     const gender = genderCode === "M" ? "Male" : genderCode === "F" ? "Female" : "Other";
-    const dob = String(formatDOB(personalDetails?.dob) ?? "");
+    const rawDob = typeof personalDetails?.dob === "string" ? personalDetails.dob : undefined;
+    const dob = String(formatDOB(rawDob) ?? "");
     const getAge = (value: string) => {
         if (!value) return 0;
         const date = new Date(value);
@@ -148,10 +255,10 @@ const Summary = () => {
         return age < 0 ? 0 : age;
     };
     const age = getAge(dob);
-    const annualIncome = Number(personalDetails?.netIncomeAmt ?? 0);
-    const appliedSumAssured = Number(firstProduct?.sumAssured ?? 0);
-    const trsa = Number(data?.applicationInfo?.simultaneousLifeSA ?? 0);
-    const tfesa = Number(data?.applicationInfo?.otherPolicySA ?? 0);
+    const annualIncome = Number(financialDetails?.annualIncome ?? personalDetails?.netIncomeAmt ?? 0);
+    const appliedSumAssured = Number(financialDetails?.appliedSumAssured ?? firstProduct?.sumAssured ?? 0);
+    const trsa = Number(financialDetails?.trsa ?? data?.applicationInfo?.simultaneousLifeSA ?? 0);
+    const tfesa = Number(financialDetails?.tfesa ?? data?.applicationInfo?.otherPolicySA ?? 0);
     const maritalCode = String(personalDetails?.maritalStatus ?? "").toUpperCase();
     const maritalStatus =
         maritalCode === "M" ? "Married" : maritalCode === "D" ? "Divorced" : maritalCode === "W" ? "Widowed" : "Single";
@@ -159,7 +266,85 @@ const Summary = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const isCvtPoolRole = roleType === "CVT Pool";
 
-    const handleOpen = (item: RiskCard) => {
+    const systemDecision = String(
+        underwritingBreDecision.status ?? breOutput?.systemDecision ?? topLevelBreDecision.decision ?? "-",
+    );
+    const decisionCategory = String(
+        underwritingBreDecision.category ?? breOutput?.decisionTypes?.breDecision ?? topLevelBreDecision.initialDecision ?? "-",
+    );
+    const decisionAction = String(
+        underwritingBreDecision.coverage ?? breOutput?.decisionTypes?.breAction ?? topLevelBreDecision.action ?? "-",
+    );
+    const summaryRemarks = String(
+        underwriting.remarks ?? breOutput?.breRemarks ?? topLevelBreDecision.remarks ?? "-",
+    );
+
+    const fallbackSummaryEntryWithRisk = summaryEntries.find((item) =>
+        Array.isArray(item.riskAnalytics) && item.riskAnalytics.length > 0,
+    );
+
+    const customerRiskAnalytics = Array.isArray((currentCustomer as Record<string, unknown> | undefined)?.riskAnalytics)
+        ? ((currentCustomer as Record<string, unknown>).riskAnalytics as Array<Record<string, unknown>>)
+        : [];
+
+    const summaryRiskAnalytics = Array.isArray(activeSummaryEntry?.riskAnalytics)
+        ? (activeSummaryEntry.riskAnalytics as Array<Record<string, unknown>>)
+        : [];
+
+    const fallbackSummaryRiskAnalytics = Array.isArray(fallbackSummaryEntryWithRisk?.riskAnalytics)
+        ? (fallbackSummaryEntryWithRisk.riskAnalytics as Array<Record<string, unknown>>)
+        : [];
+
+    const riskSource =
+        customerRiskAnalytics[0] ??
+        summaryRiskAnalytics[0] ??
+        fallbackSummaryRiskAnalytics[0] ??
+        {};
+    const medicalRisk = toRecord(riskSource.medicalRisk);
+    const financialRisk = toRecord(riskSource.financialRisk);
+    const otherRisk = toRecord(riskSource.otherRisk);
+
+    const riskDetails: RiskCardItem[] = [
+        {
+            title: "Medical",
+            desc: `BRE Medical Decision - ${asDisplayValue(medicalRisk.brePhysicalMedicalDecision)}`,
+            detailedDescTitle: "medical risk analytics",
+            detailedDesc: riskValueConfigs.medical.map((item) => ({
+                label: item.label,
+                value: asDisplayValue(medicalRisk[item.key]),
+            })),
+            type: "medical" as const,
+            status: getRiskStatus("medical", medicalRisk),
+        },
+        {
+            title: "Financial",
+            desc: `BRE Financial Decision - ${asDisplayValue(financialRisk.breFinancialDecision)}`,
+            detailedDescTitle: "financial risk analytics",
+            detailedDesc: riskValueConfigs.financial.map((item) => ({
+                label: item.label,
+                value: asDisplayValue(financialRisk[item.key]),
+            })),
+            type: "financial" as const,
+            status: getRiskStatus("financial", financialRisk),
+        },
+        {
+            title: "Other Risks",
+            desc: `BRE Decision - ${asDisplayValue(otherRisk.ptlrResponse)}`,
+            detailedDescTitle: "other risk analytics",
+            detailedDesc: riskValueConfigs.other.map((item) => ({
+                label: item.label,
+                value: asDisplayValue(otherRisk[item.key]),
+            })),
+            type: "other" as const,
+            status: getRiskStatus("other", otherRisk),
+        },
+    ].filter((card) => {
+        if (card.type === "medical") return Boolean(medicalRisk.isMedical);
+        if (card.type === "financial") return Boolean(financialRisk.isFinancial);
+        return Boolean(otherRisk.isOthers);
+    });
+
+    const handleOpen = (item: RiskCardItem) => {
         setSelectedCard(item);
         setOpen(true);
     };
@@ -188,7 +373,7 @@ const Summary = () => {
         },
         {
             label: "Occupation",
-            value: `${personalDetails?.occupationType ?? "-"} - ${personalDetails?.occupationType ?? "-"} ${personalDetails?.orgName ?? "-"}`
+            value: `${personalDetails?.occupationType ?? "-"} - ${personalDetails?.orgName ?? "-"}`
         },
         {
             label: "Applied SA",
@@ -196,7 +381,7 @@ const Summary = () => {
         },
         {
             label: "Modal Premium/Channel",
-            value: `${firstProduct?.paymentAmount ?? "-"}/${data?.sourcingDetail?.channelCode ?? "-"}`
+            value: `${policyDetails?.modalPremium ?? firstProduct?.paymentAmount ?? "-"}/${policyDetails?.channel ?? data?.sourcingDetail?.channelCode ?? "-"}`
         },
         {
             label: "TRSA",
@@ -208,7 +393,7 @@ const Summary = () => {
         },
         {
             label: "Product",
-            value: `${firstProduct?.name ?? "-"} (${firstProduct?.type ?? "-"})`
+            value: `${policyDetails?.productName ?? firstProduct?.name ?? "-"} (${policyDetails?.productType ?? firstProduct?.type ?? "-"})`
         },
     ];
 
@@ -218,26 +403,32 @@ const Summary = () => {
         return value;
     };
 
+    const rawFaceMatchScore = faceMatchDetails?.faceMatchScore ?? personalDetails?.faceMatchScore;
+    const faceMatchScore =
+        typeof rawFaceMatchScore === "string" || typeof rawFaceMatchScore === "number"
+            ? rawFaceMatchScore
+            : undefined;
+
     const profileHighlights = [
         {
             icon: NoteIcon,
             label: "Document",
-            value: firstDoc?.documentType ?? "-",
+            value: faceMatchDetails?.document ?? kycDetails?.identityProofType ?? firstDoc?.documentType ?? "-",
         },
         {
             icon: ScannerIcon,
             label: "Face Match %",
-            value: formatFaceMatch(""),
+            value: formatFaceMatch(faceMatchScore),
         },
         {
             icon: GalleryIcon,
             label: "Image Quality",
-            value: "-",
+            value: asDisplayValue(faceMatchDetails?.imageQuality ?? personalDetails?.imageQuality),
         },
         {
             icon: TextAlignLeftIcon,
             label: "Remarks",
-            value: breOutput?.breRemarks ?? "-",
+            value: asDisplayValue(faceMatchDetails?.remarks ?? personalDetails?.remarks ?? summaryRemarks),
         },
     ];
 
@@ -257,119 +448,123 @@ const Summary = () => {
                         />
                     </Box>
 
-                    <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                        <Typography
-                            component="span"
-                            sx={{
-                                fontSize: "14px",
-                                fontWeight: 700,
-                            }}
-                        >
-                            Risk Analytics
-                        </Typography>
-                    </Box>
+                    {riskDetails.length > 0 && (
+                        <>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                <Typography
+                                    component="span"
+                                    sx={{
+                                        fontSize: "14px",
+                                        fontWeight: 700,
+                                    }}
+                                >
+                                    Risk Analytics
+                                </Typography>
+                            </Box>
 
-                    <Box
-                        sx={{
-                            display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 2,
-                            padding: 1,
-                            borderRadius: "8px",
-                        }}
-                    >
-                        {riskDetails.map((item, index) => (
                             <Box
-                                key={index}
-                                onClick={() => handleOpen(item)}
                                 sx={{
-                                    border: "1px solid #d7d7d7",
-                                    borderRadius: "10px",
-                                    borderLeft: `6px solid ${item.status === "success" ? "#39b54a" : "#9A2529"
-                                        }`,
-                                    px: 2,
-                                    py: 1.5,
-                                    backgroundColor: "#ffffff",
-                                    cursor: "pointer",
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(3, 1fr)",
+                                    gap: 2,
+                                    padding: 1,
+                                    borderRadius: "8px",
                                 }}
                             >
-                                <Box
-                                    sx={{
-                                        display: "flex",
-                                        justifyContent: "space-between",
-                                        gap: "8px",
-                                    }}
-                                >
+                                {riskDetails.map((item, index) => (
                                     <Box
+                                        key={index}
+                                        onClick={() => handleOpen(item)}
                                         sx={{
-                                            display: "flex",
-                                            alignItems: "center",
-                                            gap: "8px",
+                                            border: "1px solid #d7d7d7",
+                                            borderRadius: "10px",
+                                            borderLeft: `6px solid ${item.status === "success" ? "#39b54a" : "#9A2529"
+                                                }`,
+                                            px: 2,
+                                            py: 1.5,
+                                            backgroundColor: "#ffffff",
+                                            cursor: "pointer",
                                         }}
                                     >
-                                        {item.type === "medical" && <HeartIcon />}
-                                        {item.type === "financial" && <WalletIcon />}
-                                        {item.type === "other" && <InfoIcon />}
-                                        <Typography
-                                            component="span"
+                                        <Box
                                             sx={{
-                                                fontSize: "14px",
-                                                fontWeight: 700,
-                                                color: "#20242c",
-                                                fontFamily: "Mulish, sans-serif",
+                                                display: "flex",
+                                                justifyContent: "space-between",
+                                                gap: "8px",
                                             }}
                                         >
-                                            {item.title}
-                                        </Typography>
+                                            <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    gap: "8px",
+                                                }}
+                                            >
+                                                {item.type === "medical" && <HeartIcon />}
+                                                {item.type === "financial" && <WalletIcon />}
+                                                {item.type === "other" && <InfoIcon />}
+                                                <Typography
+                                                    component="span"
+                                                    sx={{
+                                                        fontSize: "14px",
+                                                        fontWeight: 700,
+                                                        color: "#20242c",
+                                                        fontFamily: "Mulish, sans-serif",
+                                                    }}
+                                                >
+                                                    {item.title}
+                                                </Typography>
+                                            </Box>
+
+                                            {item.status === "success" ? (
+                                                <Box
+                                                    component="span"
+                                                    sx={{
+                                                        color: "#35A224",
+                                                    }}
+                                                >
+                                                    <TickIcon />
+                                                </Box>
+                                            ) : (
+                                                <Box
+                                                    component="span"
+                                                    sx={{
+                                                        color: "#9A2529",
+                                                    }}
+                                                >
+                                                    <InfoIcon />
+                                                </Box>
+                                            )}
+                                        </Box>
+
+                                        <Box
+                                            sx={{
+                                                display: "inline-flex",
+                                                mt: 1,
+                                                px: 1.5,
+                                                py: 0.5,
+                                                borderRadius: "999px",
+                                                border: "1px solid #d7d7d7",
+                                                backgroundColor: "#f7f7f7",
+                                            }}
+                                        >
+                                            <Typography
+                                                component="span"
+                                                sx={{
+                                                    fontSize: "12px",
+                                                    color: "#5f5f5f",
+                                                    lineHeight: 1.2,
+                                                    fontFamily: "Mulish, sans-serif",
+                                                }}
+                                            >
+                                                {item.desc}
+                                            </Typography>
+                                        </Box>
                                     </Box>
-
-                                    {item.status === "success" ? (
-                                        <Box
-                                            component="span"
-                                            sx={{
-                                                color: "#35A224",
-                                            }}
-                                        >
-                                            <TickIcon />
-                                        </Box>
-                                    ) : (
-                                        <Box
-                                            component="span"
-                                            sx={{
-                                                color: "#9A2529",
-                                            }}
-                                        >
-                                            <InfoIcon />
-                                        </Box>
-                                    )}
-                                </Box>
-
-                                <Box
-                                    sx={{
-                                        display: "inline-flex",
-                                        mt: 1,
-                                        px: 1.5,
-                                        py: 0.5,
-                                        borderRadius: "999px",
-                                        border: "1px solid #d7d7d7",
-                                        backgroundColor: "#f7f7f7",
-                                    }}
-                                >
-                                    <Typography
-                                        component="span"
-                                        sx={{
-                                            fontSize: "12px",
-                                            color: "#5f5f5f",
-                                            lineHeight: 1.2,
-                                            fontFamily: "Mulish, sans-serif",
-                                        }}
-                                    >
-                                        {item.desc}
-                                    </Typography>
-                                </Box>
+                                ))}
                             </Box>
-                        ))}
-                    </Box>
+                        </>
+                    )}
 
                     <Divider sx={{ my: 2, px: 2 }} />
 
@@ -437,7 +632,7 @@ const Summary = () => {
                                         />
                                     </Box>
                                     <Badge
-                                        label={breOutput?.systemDecision ?? ""}
+                                        label={systemDecision}
                                         icon={<TickIcon width={16} height={16} />}
                                         sx={{
                                             backgroundColor: "#35A224",
@@ -570,7 +765,7 @@ const Summary = () => {
                                                 fontSize: "14px",
                                             }}
                                         >
-                                            {breOutput?.breRemarks}
+                                            {summaryRemarks}
                                         </Typography>
                                     </Box>
                                     <Box
@@ -593,7 +788,7 @@ const Summary = () => {
                                                     pr: 0.5,
                                                 }}
                                             >
-                                                {breOutput?.systemDecision ?? "-"}
+                                                {systemDecision}
                                             </Typography>
                                             <Typography
                                                 component="span"
@@ -603,7 +798,7 @@ const Summary = () => {
                                                     fontSize: "16px",
                                                 }}
                                             >
-                                                - {breOutput?.decisionTypes?.breDecision ?? "-"} ({breOutput?.decisionTypes?.breAction ?? "-"})
+                                                - {decisionCategory} ({decisionAction})
                                             </Typography>
                                         </Typography>
                                     </Box>
@@ -612,38 +807,40 @@ const Summary = () => {
                         </Box>
                     </Box>
 
-                    <ApplicantProfile profile={undefined} />
+                    <ApplicantProfile profile={undefined} selectedApplicantTab={activeApplicantTab} />
 
-                    <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
-                        <CustomButton
-                            variant="outlined"
-                            sx={{
-                                borderRadius: "50px",
-                                px: 8,
-                                py: 1,
-                                width: "240px",
-                                fontSize: "16px",
-                                fontWeight: 700,
-                            }}
-                            onClick={() => navigate(getMedicalPath("retail", "OB25175127"))}
-                        >
-                            View Medicals
-                        </CustomButton>
-                        <CustomButton
-                            variant="outlined"
-                            sx={{
-                                borderRadius: "50px",
-                                px: 4,
-                                py: 1,
-                                width: "240px",
-                                fontSize: "16px",
-                                fontWeight: 700,
-                            }}
-                            onClick={() => navigate(getFinancialPath("retail", "OB25175127"))}
-                        >
-                            View Financial Details
-                        </CustomButton>
-                    </Box>
+                    {!isCvtPoolRole && (
+                        <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
+                            <CustomButton
+                                variant="outlined"
+                                sx={{
+                                    borderRadius: "50px",
+                                    px: 8,
+                                    py: 1,
+                                    width: "240px",
+                                    fontSize: "16px",
+                                    fontWeight: 700,
+                                }}
+                                onClick={() => navigate(getMedicalPath("retail", "OB25175127"))}
+                            >
+                                View Medicals
+                            </CustomButton>
+                            <CustomButton
+                                variant="outlined"
+                                sx={{
+                                    borderRadius: "50px",
+                                    px: 4,
+                                    py: 1,
+                                    width: "240px",
+                                    fontSize: "16px",
+                                    fontWeight: 700,
+                                }}
+                                onClick={() => navigate(getFinancialPath("retail", "OB25175127"))}
+                            >
+                                View Financial Details
+                            </CustomButton>
+                        </Box>
+                    )}
 
                 </CustomAccordion>
             </Box>
@@ -697,19 +894,38 @@ const Summary = () => {
                 fullWidth
             >
                 <Box sx={{ py: 1 }}>
-                    <Box component="ul" sx={{ pl: 2, m: 0 }}>
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: "minmax(220px, 1fr) minmax(180px, 1fr)",
+                            columnGap: 3,
+                            rowGap: 1.5,
+                            alignItems: "start",
+                        }}
+                    >
                         {selectedCard?.detailedDesc.map((detail, index) => (
-                            <Box
-                                component="li"
-                                key={index}
-                                sx={{
-                                    fontSize: "14px",
-                                    color: "#20242c",
-                                    mb: 1,
-                                }}
-                            >
-                                {detail}
-                            </Box>
+                            <>
+                                <Typography
+                                    key={`${detail.label}-${index}-label`}
+                                    sx={{
+                                        fontSize: "14px",
+                                        color: "#5f5f5f",
+                                        fontWeight: 400,
+                                    }}
+                                >
+                                    {detail.label}
+                                </Typography>
+                                <Typography
+                                    key={`${detail.label}-${index}-value`}
+                                    sx={{
+                                        fontSize: "14px",
+                                        color: "#20242c",
+                                        fontWeight: 700,
+                                    }}
+                                >
+                                    {detail.value}
+                                </Typography>
+                            </>
                         ))}
                     </Box>
                 </Box>

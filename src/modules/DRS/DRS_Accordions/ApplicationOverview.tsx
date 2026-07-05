@@ -29,8 +29,23 @@ const formatNumberOrDash = (value: unknown) => {
 const ApplicationOverview = () => {
   const { data } = useSelector((state: RootState) => state.drs);
 
-  const firstProduct = data?.productDetail?.[0];
-  const riderDetails = data?.riderDetails ?? [];
+  const applicationOverview = (data as unknown as Record<string, unknown> | null)?.applicationOverview as
+    | Record<string, unknown>
+    | undefined;
+
+  const sourcingDetail = (applicationOverview?.sourcingDetail as Record<string, unknown> | undefined)
+    ?? (data?.sourcingDetail as unknown as Record<string, unknown> | undefined);
+  const groupDetails = (applicationOverview?.groupDetails as Record<string, unknown> | undefined)
+    ?? (data?.groupDetails as unknown as Record<string, unknown> | undefined);
+
+  const productDetails = Array.isArray(applicationOverview?.productDetail)
+    ? (applicationOverview.productDetail as Array<Record<string, unknown>>)
+    : ((data?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
+  const firstProduct = productDetails[0];
+
+  const riderDetails = Array.isArray(applicationOverview?.riderDetails)
+    ? (applicationOverview.riderDetails as Array<Record<string, unknown>>)
+    : ((data?.riderDetails as unknown as Array<Record<string, unknown>> | undefined) ?? []);
 
   const roleType = localStorage.getItem("roleType") ?? "";
   const expandedRoles = [
@@ -45,11 +60,11 @@ const ApplicationOverview = () => {
   const applicationDetails = [
     {
       label: "Product Name",
-      value: firstProduct?.name ?? "-",
+      value: String(firstProduct?.name ?? "-"),
     },
     {
       label: "Product Code",
-      value: firstProduct?.code ?? "-"
+      value: String(firstProduct?.code ?? "-")
     },
     {
       label: "Sum Assured",
@@ -57,27 +72,27 @@ const ApplicationOverview = () => {
     },
     {
       label: "Channel",
-      value: data?.sourcingDetail?.channelCode ?? "-",
+      value: String(sourcingDetail?.channelCode ?? "-"),
     },
     {
       label: "Sub Channel",
-      value: data?.sourcingDetail?.drcChannelCode ?? "-",
+      value: String(sourcingDetail?.drcChannelCode ?? sourcingDetail?.subChannelCode ?? "-"),
     },
     {
       label: "Agent Code",
-      value: data?.sourcingDetail?.agentCode ?? "-",
+      value: String(sourcingDetail?.agentCode ?? "-"),
     },
     {
       label: "Agent Name",
-      value: "-",
+      value: String(sourcingDetail?.agentName ?? "-"),
     },
     {
       label: "Customer Type",
-      value: data?.applicationInfo?.proposerType ?? "-",
+      value: String(data?.applicationInfo?.proposerType ?? "-"),
     },
     {
       label: "Policy Type",
-      value: data?.groupDetails?.coverageStatus ?? "-",
+      value: String(groupDetails?.coverageStatus ?? "-"),
     },
     {
       label: "Modal Premium",
@@ -85,15 +100,15 @@ const ApplicationOverview = () => {
     },
     {
       label: "PT",
-      value: toDisplayValue(firstProduct?.PT),
+      value: toDisplayValue(firstProduct?.term),
     },
     {
       label: "PPT",
-      value: toDisplayValue(firstProduct?.PPT),
+      value: toDisplayValue(firstProduct?.premiumCessationTerm ?? firstProduct?.premiumPaymentTerm),
     },
     {
       label: "Payment Mode",
-      value: firstProduct?.premiumModeFpd ?? "-",
+      value: String(firstProduct?.premiumModeFpd ?? "-"),
     },
   ];
 

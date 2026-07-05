@@ -1,146 +1,124 @@
 {
   "data": {
-    "applicationNumber": "OS31229864",
-    "submitDate": "2026-03-17T00:00:00.0",
-    "totalPremium": 24,
-    "sourceSystem": "",
+    "basicDetails": {
+      "applicationNumber": "APP123456789",
+      "lastLoginDate": "2026-05-15T10:30:00",
+      "submitDate": "2026-03-17T00:00:00.0",
+      "totalPremium": 24,
+      "sourceSystem": "UW_PORTAL"
+    },
     "applicationInfo": {
-      "applicationDate": "",
+      "applicationDate": "2026-03-17T00:00:00.0",
       "comboFlag": "no",
-      "storyCode": "",
-      "pbRiskScore": "",
+      "storyCode": "ST-1024",
+      "pbRiskScore": "Green",
       "comboNumber": "OS31229864",
       "lifeCount": 2,
       "proposerType": "Individual",
       "umCode": "00151772",
       "source": "BRHL",
       "simultaneousPolicies": false,
-      "simultaneousLifeSA": 0,
+      "simultaneousLifeSA": 78675,
       "isLAPropSame": false,
       "otherPolicySA": 879653,
       "lifeType": "Main Life",
       "coApplicationFlag": "no",
-      "gaVisitorId": "",
-      "isTagged": "",
-      "taggedAppNo": "",
-      "taggedRelation": "",
-      "spousePolicyNo": "",
-      "agentName": "",
-
-      "PT": "",
-      "PPT": ""
+      "gaVisitorId": "GA-8843021",
+      "isTagged": "No",
+      "taggedAppNo": "NA",
+      "taggedRelation": "NA",
+      "spousePolicyNo": "NA"
     },
-    "riderDetails": [
-      {
-        "name": "",
-        "type": "",
-        "term": "",
-        "sumAssured": "",
-        "paymentAmount": "",
-        "ppt": ""
-      }
-    ],
-    "sourcingDetail": {
-      "agentCode": "00151875",
-      "bankCode": "005",
-      "corporateAgent": "",
-      "negativeAdvisor": "0",
-      "agencyType": "CA",
-      "areaCode": "",
-      "partnerType": "",
-      "lanNumber": "LBNMU00007211286",
-      "partnerBank": "",
-      "salesChannel": "",
-      "fscfsm": "01494804",
-      "cafosCode": "99999999",
-      "companyCode": "NCOMBO",
-      "spCode": "7194746",
-      "csrlim": "X999Y999Z999",
-      "bank": "IBNK",
-      "branch": "IPIL",
-      "channelCode": "ICICI Bank",
-      "drcChannelCode": "ICICI Bank"
+    "breDecision": {
+      "decision": "RM",
+      "initialDecision": "RM",
+      "remarks": "# TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML#",
+      "discrepancy": "-",
+      "timestamp": "01/04/2026, 1300hrs",
+      "action": "Regular Medical required",
+      "reTriggerCount": 1
     },
-    "groupDetails": {
-      "coverageOption": "Reducing Cover",
-      "coverageStatus": "JOINT",
-      "moratorium": "No",
-      "loanType": "L1",
-      "bankType": "B1",
-      "loanTerm": 24,
-      "loanAmount": 10000,
-      "typeOfLoan": "Home Loan",
-      "dateOfLoanDisbursement": "2025-01-01T00:00:00.0",
-      "shareOfLoan": 100,
-      "applicantStatus": "Primary Borrower",
-      "shareOfLoanJl": 0,
-      "applicantStatusJl": "Co-Borrower"
-    },
-    "productDetail": [
+    "summary": [
       {
-        "type": "base",
-        "code": "GP1",
-        "name": "ICICI PRU SUPER PROTECT CREDIT",
-        "faceValue": "10000",
-        "coverageOption": "",
-        "term": "",
-        "premiumMode": "",
-        "renewalPremiumMode": "Credit Card",
-        "premiumFrequency": "00",
-        "annualPremium": 1000,
-        "installmentPremium": "",
-        "installmentPremiumWithTax": "",
-        "ratingFactor": "",
-        "isEligible": "",
-        "riskCessationTerm": 33,
-        "premiumCessationTerm": 7,
-        "paymentAmount": 24,
-        "premiumModeFpd": "Credit card",
-        "baseAnnualPremium": 6788,
-        "premium": 5000,
-        "sumAssured": 500000,
-        "loanLimit": 40000,
-        "deathBenefitPayoutOption": "",
-        "benefitOption": "",
-        "statCode": "",
-        "incomeBenefitFlag": "",
-        "lifeStageBenefitFlag": "",
-        "statCodeD": "",
-        "statCodeE": "",
-        "initialSumAssured": ""
-      }
-    ],
-    "customerDetails": [
-      {
-        "lifeType": "Proposer",
+        "memberType": "proposer",
         "jontFlag": true,
         "lifeNumber": "01",
-        "clientId": "",
+        "clientId": "CL0001",
         "proposerLaRelation": "joint",
-        "jointLARelation": "",
-        "jointPRRelation": "",
-        "nriFlag": "True/False",
-        "fatfFlag": "True/False",
-        "selfProposed": "",
-        "typeOfProposal": "",
-        "isGreen": "yes",
+        "jointLARelation": "Spouse",
+        "jointPRRelation": "Spouse",
+        "nriFlag": false,
+        "fatfFlag": false,
+        "riskAnalytics": [
+          {
+            "medicalRisk": {
+              "isMedical": true,
+              "brePhysicalMedicalDecision": "STP",
+              "brePhysicalMedicalRemark": "",
+              "breTeleVideoMerDecision": "Standard_1",
+              "breTeleVideoMerRemark": "",
+              "munichReMedicalDecision": "",
+              "munichReRating": "",
+              "biuMedicalStatus": "Y"
+            },
+            "financialRisk": {
+              "isFinancial": true,
+              "breFinancialDecision": "FSTP",
+              "breRemark": "",
+              "financialEligibility": "",
+              "derivedIncome": "",
+              "counterOfferValue": "",
+              "additionalSA": "",
+              "biuFinancialStatus": "N"
+            },
+            "otherRisk": {
+              "isOthers": true,
+              "ptlrResponse": "Standard",
+              "drcResponse": "No",
+              "adverseIIB": "No",
+              "criminalQuestionResponseLA": "No",
+              "pepQuestionResponseLA": "No",
+              "criminalQuestionResponsePR": "No",
+              "pepQuestionResponsePR": "No",
+              "previousPolicySubstandard": "No",
+              "avocationRelatedDisclosure": "No",
+              "healthQuestionPositive": "No",
+              "employmentInRiskyIndustry": "No",
+              "fatfOfacCountryLogin": "No",
+              "hazardousOccupation": "No",
+              "eddFlag": "No",
+              "claimRiskIndicator": "No",
+              "faceMatchScore": ">75%",
+              "tobacco": "No",
+              "narcotics": "No"
+            }
+          }
+        ],
+        "faceMatchDetails": {
+          "document": "Aadhar",
+          "faceMatchScore": 95,
+          "imageQuality": 90,
+          "remarks": "Face match successful with high confidence. No discrepancies found between the document and live image."
+        },
         "personalDetails": {
-          "userImg": "",
-          "UDSLink": "",
           "title": "Mr",
-          "firstName": "Test",
-          "lastName": "User",
-          "maritalStatus": "M",
+          "firstName": "Rajveer",
+          "middleName": "",
+          "lastName": "Singhal",
           "gender": "M",
-          "nationality": "",
-          "residentStatus": "Indian",
+          "maritalStatus": "Married",
+          "dob": "1999-07-07T00:00:00.0",
+          "age": 52,
+          "profileImage": "https://images.unsplash.com/photo-1740252117012-bb53ad05e370?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww%22",
+          "caseStatus": "Green Case",
+          "nationality": "Indian",
+          "residentStatus": "Resident",
           "pioStatus": "0",
           "highestQualification": "GRAD",
-          "graduationFlag": "",
-          "orgName": "",
+          "graduationFlag": "Yes",
+          "orgName": "ICICI Securities",
           "yearsInServiceOrBusiness": 1,
-          "industryType": "",
-          "dob": "1999-07-07T00:00:00.0",
+          "industryType": "Financial Services",
           "birthCountry": "IND",
           "occupationType": "SPVT",
           "netIncomeAmt": 3000000,
@@ -148,37 +126,88 @@
           "orgType": "PRIVATE LTD",
           "latestIncYear": 2026,
           "isPEP": false,
-          "panNo": "",
+          "panNo": "ABCDE1234F",
           "faceMatchScore": "75%",
-          "imageQuality": "",
-          "remarks": "",
-          "ckycNumber": "",
-          "criminalProceeding": "",
-          "incomeProof": ""
+          "imageQuality": "980",
+          "remarks": "Profile verified",
+          "ckycNumber": "CKYC00991",
+          "criminalProceeding": "No",
+          "incomeProof": "Form 16"
+        },
+        "financialDetails": {
+          "annualIncome": 700000,
+          "appliedSumAssured": 1500000,
+          "trsa": 1500000,
+          "tfesa": 1500000
+        },
+        "policyDetails": {
+          "productName": "ICICI Pru Super Protect Credit",
+          "productType": "Term Plan",
+          "modalPremium": 7515,
+          "channel": "AG"
+        },
+        "underwriting": {
+          "remarks": "No adverse findings in family history, avocation, occupation, or personal habits; no existing insurance. Medicals non-adverse; financials adequate and viable for full cover; no other risks identified.",
+          "breDecision": {
+            "status": "Accept",
+            "category": "Standard",
+            "coverage": "Full Cover"
+          }
+        },
+        "kycDetails": {
+          "panNumber": "APJP3224R",
+          "identityProofType": "Aadhaar Card",
+          "identityProofNumber": "987654328236",
+          "addressProof": "Aadhaar Card",
+          "incomeProof": "Form 16",
+          "existingCkycNumber": "NA",
+          "pep": "No",
+          "criminalProceedings": "No"
         },
         "address": [
           {
-            "type": "permanent",
+            "type": "communication",
             "addressLine1": "PA ADD",
-            "addressLine2": "",
-            "addressLine3": "",
-            "landmark": "",
+            "addressLine2": "malad",
+            "addressLine3": "malad west",
+            "landmark": "Malad Station",
             "city": "NASHIK",
             "state": "MAHS",
-            "residingCountry": "India",
             "pinCode": "422002",
+            "residingCountry": "India",
+            "topCity": "Y/N",
+            "negativePinCode": "Y/N"
+          },
+          {
+            "type": "permanent",
+            "addressLine1": "PA ADD",
+            "addressLine2": "malad",
+            "addressLine3": "malad west",
+            "landmark": "Malad Station",
+            "city": "NASHIK",
+            "state": "MAHS",
+            "pinCode": "422002",
+            "residingCountry": "India",
             "topCity": "Y/N",
             "negativePinCode": "Y/N"
           }
         ],
-        "communicationDetails": {
-          "mobileNo": "9850163180",
+        "contactDetails": {
+          "mobileNo": "9898989898",
           "alternateMobileNo": "",
-          "std": "",
-          "landlineNo": "",
-          "emailId": "",
-          "smsPref": "",
-          "emailPref": ""
+          "std": "022",
+          "landlineNo": "12345678",
+          "emailId": "test@ipru.com",
+          "emailPref": "",
+          "smsPref": ""
+        },
+        "applicantFinancialDetails": {
+          "occupation": "Salaried",
+          "annualIncome": 500000,
+          "gstin": "",
+          "lastIncomeYear": "",
+          "organisationType": "Public",
+          "organisationName": "ICICI Bank"
         },
         "healthDetail": {
           "height": "154.9",
@@ -202,21 +231,101 @@
               "qtid": "",
               "value": "",
               "remar": "",
-              "subQts": [
-                {
-                  "qtid": "",
-                  "value": "",
-                  "remark": ""
-                }
-              ]
+              "subQts": [{ "qtid": "", "value": "", "remark": "" }]
             }
           ]
         },
-        "financialDetail": {
-          "panNo": "",
-          "annualIncome": "",
-          "latestIncomeYear": "",
-          "gstin": ""
+        "nominee": [
+          {
+            "relationWithLA": "",
+            "firstName": "NOMINEE",
+            "lastName": "NAME",
+            "dob": "2001-06-07T00:00:00.0",
+            "gender": "Female",
+            "percentage": "",
+            "proposerNomineeRelation": "wife"
+          }
+        ],
+        "appointee": [
+          {
+            "relationWithLA": "",
+            "firstName": "",
+            "lastName": "",
+            "dob": "",
+            "gender": "",
+            "relationWithNominee": ""
+          }
+        ],
+        "genericDetails": {
+          "existingPolicyNumber": "NA",
+          "clientId": "NA",
+          "selfProposed": "Yes",
+          "typeOfProposer": "Individual",
+          "relationshipWithLifeAssured": "Self",
+          "typeOfProposal": "Individual"
+        },
+        "eiaDetails": {
+          "openEIA": "No",
+          "existingEIANumber": "NA",
+          "preferredRepository": "CDSL",
+          "convertPolicies": "No"
+        },
+        "fundDetails": {
+          "allocationStrategy": "Self Allocation",
+          "totalAllocation": "100",
+          "atpOpted": "Yes",
+          "fundDetail": [{
+            "name": "Equity Growth Fund",
+            "amount": "500000",
+            "sourceFund": "Balanced Fund",
+            "targetFund": "Equity Growth Fund",
+            "switchDate": "2026-06-29",
+            "transferPercentage": "25"
+          }]
+        },
+        "payoutDetails": {
+          "accountType": "Savings",
+          "bankName": "ICICI Bank",
+          "branchName": "Nashik Main",
+          "ifsc": "ICIC0001234",
+          "accountNo": "003401023456",
+          "micr": "422229002"
+        },
+        "advisorDetails": {
+          "relationWithAdvisor": "Client",
+          "acquaintanceDuration": "3 years",
+          "fileSentToCopsDate": "2026-03-18",
+          "branchUWDate": "2026-03-19",
+          "decalarationDate": "2026-03-17",
+          "declarationPlace": "Nashik"
+        },
+        "questions": [
+          {
+            "quesCode": "ILLIMPAIRMENT",
+            "quesFor": "LA",
+            "quesType": "HEALTH",
+            "quesAns": "no"
+          }
+        ],
+        "producerDetails": {
+          "perfiosBank": "Yes/No",
+          "premiumPaymentOption": "RP0",
+          "isecExperianCategory": "",
+          "gstInNumber": "27DHIPP7812H1Z5",
+          "pasaSegmentCitiesFlag": "Tier 1",
+          "productSource": "standalone",
+          "imputedMarker": "APS_INCOME/Experian",
+          "imputedIncome": "692904",
+          "prePopulatedValueEdited": "NA",
+          "fnaSumAssured": "250000",
+          "componentCode": "IWFL/PSPL",
+          "cdfWaiverFlag": "Yes/No",
+          "youthExpressFlag": "N",
+          "atsSource": "PASAIPS",
+          "ipsDiscountFlag": false,
+          "lumpSumPercentage": "0",
+          "accuityRiskIndicator": "",
+          "primaryLASumAssured": ""
         },
         "documentDetails": [
           {
@@ -227,56 +336,55 @@
           }
         ],
         "bureauDetails": {
-          "cibilScore": "",
-          "cibilIncomeSegment": "",
+          "cibilScore": "772",
+          "cibilIncomeSegment": "Medium",
           "cibilEligibilityStatus": "Y",
           "cibilServiceStatus": "Y",
-          "experianScore": "",
-          "experianIncomeSegment": "",
+          "experianScore": "789",
+          "experianIncomeSegment": "Medium",
           "experianEligibilityStatus": "Y",
           "experianServiceStatus": "Y",
-          "payuScore": "",
-          "payuIncomeSegment": "",
+          "payuScore": "741",
+          "payuIncomeSegment": "Medium",
           "payuEligibilityStatus": "Y",
           "payuServiceStatus": "Y"
-        },
-        "eia": {
-          "openEia": "",
-          "existingEiaNumber": "",
-          "preferredRepository": "",
-          "convertPolicies": []
         }
       },
       {
-        "lifeType": "LA",
+        "memberType": "lifeassured1",
         "jontFlag": true,
         "lifeNumber": "01",
         "clientId": "CL0001",
         "proposerLaRelation": "joint",
-        "jointLARelation": "",
-        "jointPRRelation": "",
-        "nriFlag": "True/False",
-        "fatfFlag": "True/False",
-        "selfProposed": "",
-        "typeOfProposal": "",
-        "isGreen": "yes",
+        "jointLARelation": "Spouse",
+        "jointPRRelation": "Spouse",
+        "nriFlag": false,
+        "fatfFlag": false,
+        "faceMatchDetails": {
+          "document": "Aadhar",
+          "faceMatchScore": 95,
+          "imageQuality": 90,
+          "remarks": "Face match successful with high confidence. No discrepancies found between the document and live image."
+        },
         "personalDetails": {
-          "userImg": "",
-          "UDSLink": "",
-          "title": "Mr",
-          "firstName": "JOINT",
-          "lastName": "LAST",
-          "maritalStatus": "M",
-          "gender": "M",
+          "title": "Mrs",
+          "firstName": "Sikha",
+          "middleName": "",
+          "lastName": "Singhal",
+          "gender": "F",
+          "maritalStatus": "Married",
+          "dob": "1999-07-07T00:00:00.0",
+          "age": 52,
+          "profileImage": "https://images.unsplash.com/photo-1740252117012-bb53ad05e370?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww%22",
+          "caseStatus": "Green Case",
           "nationality": "Indian",
-          "residentStatus": "Indian",
+          "residentStatus": "Resident",
           "pioStatus": "0",
           "highestQualification": "GRAD",
-          "graduationFlag": "",
-          "orgName": "",
+          "graduationFlag": "Yes",
+          "orgName": "ICICI Securities",
           "yearsInServiceOrBusiness": 1,
-          "industryType": "",
-          "dob": "1999-07-07T00:00:00.0",
+          "industryType": "Financial Services",
           "birthCountry": "IND",
           "occupationType": "SPVT",
           "netIncomeAmt": 3000000,
@@ -286,19 +394,62 @@
           "isPEP": false,
           "panNo": "ABCDE1234F",
           "faceMatchScore": "75%",
-          "imageQuality": "",
-          "remarks": "",
-          "ckycNumber": "",
-          "criminalProceeding": "",
-          "incomeProof": ""
+          "imageQuality": "980",
+          "remarks": "Profile verified",
+          "ckycNumber": "CKYC00991",
+          "criminalProceeding": "No",
+          "incomeProof": "Form 16"
+        },
+        "financialDetails": {
+          "annualIncome": 3200000,
+          "appliedSumAssured": 4000000,
+          "trsa": 4000000,
+          "tfesa": 4000000
+        },
+        "policyDetails": {
+          "productName": "ICICI Pru iProtect Smart",
+          "productType": "Term Plan",
+          "modalPremium": 9875,
+          "channel": "Online"
+        },
+        "underwriting": {
+          "remarks": "Healthy lifestyle declared with no smoking or alcohol habits. Medical examination within acceptable limits. Financial eligibility justified for requested sum assured.",
+          "breDecision": {
+            "status": "Accept",
+            "category": "Standard",
+            "coverage": "Full Cover"
+          }
+        },
+        "kycDetails": {
+          "panNumber": "APJP3224R",
+          "identityProofType": "Aadhaar Card",
+          "identityProofNumber": "987654328236",
+          "addressProof": "Aadhaar Card",
+          "incomeProof": "Form 16",
+          "existingCkycNumber": "NA",
+          "pep": "No",
+          "criminalProceedings": "No"
         },
         "address": [
           {
+            "type": "communication",
+            "addressLine1": "PA ADD",
+            "addressLine2": "malad",
+            "addressLine3": "malad west",
+            "landmark": "Malad Station",
+            "city": "NASHIK",
+            "state": "MAHS",
+            "pinCode": "422002",
+            "residingCountry": "India",
+            "topCity": "Y/N",
+            "negativePinCode": "Y/N"
+          },
+          {
             "type": "permanent",
             "addressLine1": "PA ADD",
-            "addressLine2": "",
-            "addressLine3": "",
-            "landmark": "",
+            "addressLine2": "malad",
+            "addressLine3": "malad west",
+            "landmark": "Malad Station",
             "city": "NASHIK",
             "state": "MAHS",
             "pinCode": "422002",
@@ -307,14 +458,22 @@
             "negativePinCode": "Y/N"
           }
         ],
-        "communicationDetails": {
-          "mobileNo": "9850163180",
+        "contactDetails": {
+          "mobileNo": "9898989898",
           "alternateMobileNo": "",
-          "std": "",
-          "landlineNo": "022-23456789",
-          "emailId": "testuser@gmail.com",
-          "smsPref": "Yes",
-          "emailPref": "Yes"
+          "std": "022",
+          "landlineNo": "12345678",
+          "emailId": "test@ipru.com",
+          "emailPref": "",
+          "smsPref": ""
+        },
+        "applicantFinancialDetails": {
+          "occupation": "Salaried",
+          "annualIncome": 500000,
+          "gstin": "",
+          "lastIncomeYear": "",
+          "organisationType": "Public",
+          "organisationName": "ICICI Bank"
         },
         "healthDetail": {
           "height": "154.9",
@@ -326,7 +485,7 @@
               "substance": "smoke",
               "consumedAs": "cigarette",
               "quantity": {
-                "amount": "1",
+                "amount": "",
                 "unit": "day/week"
               },
               "noOfYears": 1,
@@ -338,21 +497,101 @@
               "qtid": "",
               "value": "",
               "remar": "",
-              "subQts": [
-                {
-                  "qtid": "",
-                  "value": "",
-                  "remark": ""
-                }
-              ]
+              "subQts": [{ "qtid": "", "value": "", "remark": "" }]
             }
           ]
         },
-        "financialDetail": {
-          "panNo": "",
-          "annualIncome": "",
-          "latestIncomeYear": "",
-          "gstin": ""
+        "nominee": [
+          {
+            "relationWithLA": "",
+            "firstName": "NOMINEE",
+            "lastName": "NAME",
+            "dob": "2001-06-07T00:00:00.0",
+            "gender": "Female",
+            "percentage": "",
+            "proposerNomineeRelation": "wife"
+          }
+        ],
+        "appointee": [
+          {
+            "relationWithLA": "",
+            "firstName": "",
+            "lastName": "",
+            "dob": "",
+            "gender": "",
+            "relationWithNominee": ""
+          }
+        ],
+        "genericDetails": {
+          "existingPolicyNumber": "NA",
+          "clientId": "NA",
+          "selfProposed": "Yes",
+          "typeOfProposer": "Individual",
+          "relationshipWithLifeAssured": "Self",
+          "typeOfProposal": "Individual"
+        },
+        "eiaDetails": {
+          "openEIA": "No",
+          "existingEIANumber": "NA",
+          "preferredRepository": "CDSL",
+          "convertPolicies": "No"
+        },
+        "fundDetails": {
+          "allocationStrategy": "Self Allocation",
+          "totalAllocation": "100",
+          "atpOpted": "Yes",
+          "fundDetail": [{
+            "name": "Equity Growth Fund",
+            "amount": "500000",
+            "sourceFund": "Balanced Fund",
+            "targetFund": "Equity Growth Fund",
+            "switchDate": "2026-06-29",
+            "transferPercentage": "25"
+          }]
+        },
+        "payoutDetails": {
+          "accountType": "Savings",
+          "bankName": "ICICI Bank",
+          "branchName": "Nashik Main",
+          "ifsc": "ICIC0001234",
+          "accountNo": "003401023456",
+          "micr": "422229002"
+        },
+        "advisorDetails": {
+          "relationWithAdvisor": "Client",
+          "acquaintanceDuration": "3 years",
+          "fileSentToCopsDate": "2026-03-18",
+          "branchUWDate": "2026-03-19",
+          "decalarationDate": "2026-03-17",
+          "declarationPlace": "Nashik"
+        },
+        "questions": [
+          {
+            "quesCode": "ILLIMPAIRMENT",
+            "quesFor": "LA",
+            "quesType": "HEALTH",
+            "quesAns": "no"
+          }
+        ],
+        "producerDetails": {
+          "perfiosBank": "Yes/No",
+          "premiumPaymentOption": "RP0",
+          "isecExperianCategory": "",
+          "gstInNumber": "27DHIPP7812H1Z5",
+          "pasaSegmentCitiesFlag": "Tier 1",
+          "productSource": "standalone",
+          "imputedMarker": "APS_INCOME/Experian",
+          "imputedIncome": "692904",
+          "prePopulatedValueEdited": "NA",
+          "fnaSumAssured": "250000",
+          "componentCode": "IWFL/PSPL",
+          "cdfWaiverFlag": "Yes/No",
+          "youthExpressFlag": "N",
+          "atsSource": "PASAIPS",
+          "ipsDiscountFlag": false,
+          "lumpSumPercentage": "0",
+          "accuityRiskIndicator": "",
+          "primaryLASumAssured": ""
         },
         "documentDetails": [
           {
@@ -363,263 +602,211 @@
           }
         ],
         "bureauDetails": {
-          "cibilScore": "",
-          "cibilIncomeSegment": "",
+          "cibilScore": "772",
+          "cibilIncomeSegment": "Medium",
           "cibilEligibilityStatus": "Y",
           "cibilServiceStatus": "Y",
-          "experianScore": "",
-          "experianIncomeSegment": "",
+          "experianScore": "789",
+          "experianIncomeSegment": "Medium",
           "experianEligibilityStatus": "Y",
           "experianServiceStatus": "Y",
-          "payuScore": "",
-          "payuIncomeSegment": "",
+          "payuScore": "741",
+          "payuIncomeSegment": "Medium",
           "payuEligibilityStatus": "Y",
           "payuServiceStatus": "Y"
-        },
-        "eia": {
-          "openEia": "",
-          "existingEiaNumber": "",
-          "preferredRepository": "",
-          "convertPolicies": []
         }
       }
     ],
-    "producerDetails": {
-      "perfiosBank": "Yes/No",
-      "premiumPaymentOption": "RP0",
-      "isecExperianCategory": "",
-      "gstInNumber": "27DHIPP7812H1Z5",
-      "pasaSegmentCitiesFlag": "Tier 1",
-      "productSource": "standalone",
-      "imputedMarker": "APS_INCOME/Experian",
-      "imputedIncome": "692904",
-      "prePopulatedValueEdited": "NA",
-      "fnaSumAssured": "250000",
-      "componentCode": "IWFL/PSPL",
-      "cdfWaiverFlag": "Yes/No",
-      "youthExpressFlag": "N",
-      "atsSource": "PASAIPS",
-      "ipsDiscountFlag": "FALSE",
-      "lumpSumPercentage": "0",
-      "accuityRiskIndicator": "",
-      "primaryLASumAssured": ""
-    },
-    "nominee": [
-      {
-        "relationWithLA": "wife",
-        "firstName": "NOMINEE",
-        "lastName": "NAME",
-        "dob": "2001-06-07T00:00:00.0",
-        "gender": "Female",
-        "accountNumber": "",
-        "IFSC": "",
-        "appointeeName": "",
-        "appointeeGender": "",
-        "appointeeDOB": "",
-        "percentage": "100",
-        "proposerNomineeRelation": "wife"
-      }
-    ],
-    "appointee": [
-      {
-        "relationWithLA": "",
-        "firstName": "",
-        "lastName": "",
-        "dob": "",
-        "gender": "",
-        "relationWithNominee": ""
-      }
-    ],
-    "fundDetails": {
-      "allocationStrategy": "Self Allocation",
-      "totalAllocation": "100",
-      "atpOpted": "Yes",
-      "fundDetail": [
+    "applicationOverview": {
+      "sourcingDetail": {
+        "agentCode": "00151875",
+        "bankCode": "005",
+        "corporateAgent": "ICICI PARTNERS",
+        "negativeAdvisor": "0",
+        "agencyType": "CA",
+        "areaCode": "MUM",
+        "partnerType": "BANCASSURANCE",
+        "lanNumber": "LBNMU00007211286",
+        "partnerBank": "ICICI",
+        "salesChannel": "Digital Assisted",
+        "fscfsm": "01494804",
+        "cafosCode": "99999999",
+        "companyCode": "NCOMBO",
+        "spCode": "7194746",
+        "csrlim": "X999Y999Z999",
+        "bank": "IBNK",
+        "branch": "IPIL",
+        "channelCode": "ICICI Bank",
+        "drcChannelCode": "ICICI Bank",
+        "subChannelCode": "",
+        "agentName": ""
+      },
+      "groupDetails": {
+        "coverageOption": "Reducing Cover",
+        "coverageStatus": "JOINT",
+        "moratorium": "No",
+        "loanType": "L1",
+        "bankType": "B1",
+        "loanTerm": 24,
+        "loanAmount": 10000,
+        "typeOfLoan": "Home Loan",
+        "dateOfLoanDisbursement": "2025-01-01T00:00:00.0",
+        "shareOfLoan": 100,
+        "applicantStatus": "Primary Borrower",
+        "shareOfLoanJl": 0,
+        "applicantStatusJl": "Co-Borrower",
+        "masterPolicyNo": ""
+      },
+      "productDetail": [
         {
-          "name": "Equity Growth Fund",
-          "amount": "500000",
-          "sourceFund": "Balanced Fund",
-          "targetFund": "Equity Growth Fund",
-          "switchDate": "2026-06-29",
-          "transferPercentage": "25"
+          "type": "base",
+          "code": "GP1",
+          "name": "ICICI PRU SUPER PROTECT CREDIT",
+          "faceValue": "10000",
+          "coverageOption": "Reducing Cover",
+          "term": "24",
+          "premiumMode": "Monthly",
+          "renewalPremiumMode": "Credit Card",
+          "premiumFrequency": "00",
+          "annualPremium": 1000,
+          "installmentPremium": "24",
+          "installmentPremiumWithTax": "28",
+          "ratingFactor": "Standard",
+          "isEligible": "Y",
+          "riskCessationTerm": 33,
+          "premiumCessationTerm": 7,
+          "paymentAmount": 24,
+          "premiumModeFpd": "Credit card",
+          "baseAnnualPremium": 6788,
+          "premium": 5000,
+          "sumAssured": 500000,
+          "loanLimit": 40000,
+          "deathBenefitPayoutOption": "Lump Sum",
+          "benefitOption": "Level",
+          "statCode": "STD",
+          "incomeBenefitFlag": "No",
+          "lifeStageBenefitFlag": "No",
+          "statCodeD": "NA",
+          "statCodeE": "NA",
+          "initialSumAssured": "500000",
+          "customerType": "",
+          "policyType": "",
+          "modalPremium": "",
+          "policyTerm": "",
+          "premiumPaymentTerm": ""
+        }
+      ],
+      "riderDetails": [
+        {
+          "riderName": "ICICI Pru Non-Linked Accidental Death and Disability Rider",
+          "option": "Accidental Total and Permanent Disability",
+          "policyTerm": 44,
+          "sumAssured": 5000000,
+          "modalPremium": 2300,
+          "premiumPaymentTerm": 44
+        },
+        {
+          "riderName": "ICICI Pru Non-Linked Accidental Death and Disability Rider",
+          "option": "Accidental Death Benefit",
+          "policyTerm": 44,
+          "sumAssured": 5000000,
+          "modalPremium": 3300,
+          "premiumPaymentTerm": 44
+        },
+        {
+          "riderName": "ICICI Pru Non-Linked Health Protect Rider",
+          "option": "Critical Illness - 60CI package",
+          "policyTerm": 20,
+          "sumAssured": 1000000,
+          "modalPremium": 3876,
+          "premiumPaymentTerm": 20
         }
       ]
     },
-    "payoutDetails": {
-      "accountType": "",
-      "bankName": "",
-      "branchName": "",
-      "ifsc": "",
-      "accountNo": "",
-      "micr": ""
-    },
-    "advisorDetails": {
-      "relationWithAdvisor": "",
-      "acquaintanceDuration": "",
-      "fileSentToCopsDate": "",
-      "branchUWDate": "",
-      "decalarationDate": "",
-      "declarationPlace": ""
-    },
-    "questions": [
+    "requirementManagement": [
       {
-        "quesCode": "ILLIMPAIRMENT",
-        "quesFor": "LA",
-        "quesType": "HEALTH",
-        "quesAns": "no"
+        "team": "IPRU74685",
+        "profile": "Profile 1",
+        "category": "Cate 1",
+        "subCategory": "Sub Cate 1",
+        "document": "Aadhar",
+        "specialTest": "Blood Test",
+        "reason": "Reason 1",
+        "fupCode": "fupCode 1",
+        "description": "Additional identity verification required",
+        "status": "Accept",
+        "raisedDate": "2025-01-10",
+        "raisedBy": "BRE",
+        "receivedDate": "2025-01-12",
+        "receivedBy": "Biswajit Sahu",
+        "validity": "30 Days",
+        "userId": "USR001",
+        "remarks": "Awaiting document validation",
+        "udsLink": "https://uds.example.com/req/001"
       }
     ],
-    "pivv": {
-      "pivvPoolRemarks": "",
-      "pivvPoolDecision": "",
-      "reason": "",
-      "userId": ""
+    "pivvSection": {
+      "pivvPoolRemarks": "Applicant is a 38-year-old non-smoker with no significant medical history. Financials and occupation details are satisfactory as per underwriting guidelines. Case is referred to HoD for final review and approval.",
+      "remarkDate": "2026-05-15T10:30:00",
+      "pivvPoolDecision": "Reject",
+      "reason": "Customer not speaking",
+      "userId": "sunil.sharma"
     },
-    "cvtDecision": { "cvtDecision": "", "cvtRemarks": "" },
-    "dvtDecision": { "dvtDecision": "", "dvtRemarks": "" },
-    "externalAPIs": {
-      "breOutput": {
-        "systemDecision": "Non-STP",
-        "decisionTypes": {
-          "breInitialDecision": "STP",
-          "initialDecision": "RM",
-          "breDecision": "RM",
-          "breAction": "Regular Medical required",
-          "breRequirement": "Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs"
-        },
-        "requirements": [
-          {
-            "requirementType": "IDM",
-            "requirementValue": "IDM",
-            "ruleId": "",
-            "ruleName": "AML_Compliance-Rule1,General_Action_trigger_Rules-Rule38,AML_Compliance-Rule1,PostProcessing_Action_Rules-Rule 431_1",
-            "isSTP": false,
-            "metaphorName": "AML_Compliance"
-          }
-        ],
-        "systemDecisionDateTime": "2026-04-10",
-        "errorResp": "",
-        "breRemarks": "#ICICI Prudential Website#Check Basic KYC Document Attestations#Standard Age Proof Requiredi## UW Control DIGI IIB hit PSO not reguired#lB hit compulsory PSO and OID required##Model Output: Green#PTLR Modet output Green: UW Standard#Standard Age Proof Required For This Rider Type#Videogrephy Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection#Above Revised Tele Limit COVID guidelines# OTP compulsory#CCR waiver for BOL application#ICIC| bank iMobile/RIB floW#TopCQs"
-      },
-      "medicalBreOutput": {
-        "breOutput": {
-          "systemDecision": "Non-STP",
-          "decisionTypes": {
-            "breInitialDecision": "STP",
-            "breDecision": "RM",
-            "breAction": "Regular Medical required",
-            "breRequirement": ""
-          },
-          "requirements": [
-            {
-              "requirementType": "IDM",
-              "requirementValue": "IDM",
-              "ruleId": "",
-              "ruleName": "AML_Compliance-Rule1,General_Action_trigger_Rules-Rule38,AML_Compliance-Rule1,PostProcessing_Action_Rules-Rule 431_1",
-              "isSTP": false,
-              "metaphorName": "AML_Compliance"
-            }
-          ],
-          "systemDecisionDateTime": "2026-04-10",
-          "errorResp": "",
-          "breRemarks": ""
-        }
-      },
-      "financialBreOutput": {
-        "breOutput": {
-          "systemDecision": "Non-STP",
-          "decisionTypes": {
-            "breInitialDecision": "STP",
-            "breDecision": "RM",
-            "breAction": "Regular Medical required",
-            "breRequirement": ""
-          },
-          "requirements": [
-            {
-              "requirementType": "IDM",
-              "requirementValue": "IDM",
-              "ruleId": "",
-              "ruleName": "AML_Compliance-Rule1,General_Action_trigger_Rules-Rule38,AML_Compliance-Rule1,PostProcessing_Action_Rules-Rule 431_1",
-              "isSTP": false,
-              "metaphorName": "AML_Compliance"
-            }
-          ],
-          "systemDecisionDateTime": "2026-04-10",
-          "errorResp": "",
-          "breRemarks": ""
-        }
-      },
-      "risk": {
-        "ptlrResponse": "Maroon",
-        "drcResponse": "Standard",
-        "adverseIib": "No",
-        "criminalQuestionResponseLa": "No",
-        "pepQuestionResponseLa": "No",
-        "criminalQuestionResponsePr": "No",
-        "pepQuestionResponsePr": "No",
-        "previousPolicySubstandard": "No",
-        "avocationRelatedDisclosure": "No",
-        "healthQuestionPositive": "No",
-        "employmentRiskInIndustry": "No",
-        "fatfOfacCountryLogin": "No",
-        "hazardousOccupation": "No",
-        "eddFlag": "No",
-        "claimRiskIndicator": "No",
-        "faceMatchScore": "No",
-        "tobacco": "No",
-        "narcotics": "No"
-      },
-      "iibOutput": [
+    "quickLinks": {
+      "proposerForm": "https://uds.example.com/req/001",
+      "previousPolicies": [
         {
-          "questDbNo": 7476759121,
-          "inputMatchingParameter": "",
-          "questDobDoc": "2017-11-04",
-          "questSumAssured": 1222911,
-          "questPolicyStatus": 10,
-          "questDateOfExit": "",
-          "questDateOfDeath": "",
-          "questCauseOfDeath": "",
-          "questRecordLastUpdated": "2024-05-10",
-          "questEntityCautionStatus": "",
-          "questIntermediaryCaution": "",
-          "questCompanyNumber": 766,
-          "isNegativematch": "",
-          "ProductType": "cl",
-          "linkedNonLinked": "N",
-          "medicalNonMedical": "N",
-          "whetherStandardLife": "Y",
-          "reasonForDecline": "",
-          "reasonForPostpone": "",
-          "reasonForRepudiation": 12,
-          "isPotentialFraud": "",
-          "nonStandardReasonBroad": "",
-          "granularReason1": "",
-          "granularReason2": "",
-          "prismScore": "",
-          "persistencyScore": "",
-          "eligibilityStatus": "Y",
-          "serviceStatus": "Y"
+          "policyNumber": "POL123456789",
+          "productName": "ICICI Pru iProtect Smart",
+          "productType": "Term Plan",
+          "dateOfIssuance": "2020-05-15",
+          "decision": "Accept",
+          "sumAssured": 1200000,
+          "medicalReceivedDate": "2020-05-20",
+          "medicalValidity": "2020-06-21",
+          "financialReceivedDate": "2020-05-22",
+          "financialValidity": "2020-06-22"
         }
       ],
-      "drcOutput": {
-        "eligibilityStatus": "N",
-        "serviceStatus": "N",
-        "drcCategory": ""
-      },
-      "ptlrOutput": {
-        "modelOutput": "GREEN",
-        "finalAction": "PTLR STANDARD",
-        "modelName": "PTLR",
-        "eligibilityStatus": "Y",
-        "serviceStatus": "Y"
-      },
-      "ptllOutput": {
-        "modelOutput": "G",
-        "finalAction": "No_CCR",
-        "modelName": "PTLL",
-        "eligibilityStatus": "Y",
-        "serviceStatus": "Y"
-      }
-    }
+      "openOtherTasks": [
+        {
+          "status": "Open",
+          "serviceID": "SRV987654321",
+          "ct": "",
+          "st": "",
+          "breDate": "2026-05-10",
+          "breDiscrepancy": "Pending financial documents",
+          "breRemarks": "Awaiting bank statements for verification",
+          "userPool": "Financial Review Team",
+          "userName": "neha.patil"
+        }
+      ],
+      "riskDetails": [
+        {
+          "riskReferralDate": "2026-05-12",
+          "riskRevertDate": "2026-05-14",
+          "riskDecision": "Refer",
+          "riskReportValues": "Risk Score: 75, Financial Risk: High, Medical Risk: Medium"
+        }
+      ],
+      "auditTrail": [
+        {
+          "dateTime": "2026-05-15T10:30:00",
+          "fromPool": "UW Queue",
+          "fromPoolUser": "rahul.sharma",
+          "toPool": "Risk Queue",
+          "toPoolUser": "neha.patil",
+          "subPool": "Medical",
+          "userId": "rahul.sharma",
+          "decision": "Refer",
+          "breDecision": "Triggered",
+          "changeDataField": "Medical Report",
+          "updatedBreDecision": "Pending",
+          "remarks": "Medical report indicates potential health risk; further review required."
+        }
+      ]
+    },
+    "medicals": [{}],
+    "financials": [{}]
   }
 }

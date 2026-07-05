@@ -4,6 +4,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../../store/store";
 import { buildFields, formatDOB, maskAadhaar, maskPAN, withDashFallback } from "../../../../utils/helpers";
 import { SectionCard, type ApplicantProfileProps } from "./ApplicantProfile";
+import type { ApplicantTab } from "../../../../types/drs.types";
 
 const mapMaritalStatus = (value?: string): string => {
     const normalized = value?.trim().toUpperCase();
@@ -13,33 +14,98 @@ const mapMaritalStatus = (value?: string): string => {
     return "Single";
 };
 
+const toRecord = (value: unknown): Record<string, unknown> =>
+    value && typeof value === "object" && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : {};
+
+const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
+    const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
+
+    if (normalized === "PROPOSER" || normalized.includes("PR")) return "proposer";
+    if (normalized === "LIFEASSURED1" || normalized === "LIFE ASSURED 1") return "lifeassured1";
+    if (normalized === "LIFEASSURED2" || normalized === "LIFE ASSURED 2") return "lifeassured2";
+    if (normalized.includes("LA") || normalized.includes("LIFE")) return index === 1 ? "lifeassured1" : "lifeassured2";
+    if (index === 0) return "proposer";
+    if (index === 1) return "lifeassured1";
+    return "lifeassured2";
+};
+
+const mapGender = (value?: string): string => {
+    const normalized = value?.trim().toUpperCase();
+    if (normalized === "M" || normalized === "MALE") return "Male";
+    if (normalized === "F" || normalized === "FEMALE") return "Female";
+    return "Other";
+};
+
+const toBoolean = (value: unknown): boolean => {
+    if (typeof value === "boolean") return value;
+    const normalized = String(value ?? "").trim().toLowerCase();
+    return normalized === "y" || normalized === "yes" || normalized === "true";
+};
+
 const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
     const { data } = useSelector((state: RootState) => state.drs);
 
-    const fallbackCustomer = data?.customerDetails?.[0];
+    const selectedMemberType =
+        profile?.memberType ??
+        ((localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer");
+
+    const dataRecord = data as unknown as Record<string, unknown>;
+    const summaryEntries = Array.isArray(dataRecord?.summary)
+        ? (dataRecord.summary as Array<Record<string, unknown>>)
+        : [];
+
+    const summaryWithTabs = summaryEntries.map((entry, index) => ({
+        entry,
+        memberType: mapMemberType(String(entry.memberType ?? ""), index),
+    }));
+
+    const selectedSummaryEntry =
+        summaryWithTabs.find((item) => item.memberType === selectedMemberType)?.entry ??
+        summaryEntries[0];
+
+    const summaryRecord = toRecord(selectedSummaryEntry);
+    const summaryPersonal = toRecord(summaryRecord.personalDetails);
+    const summaryKyc = toRecord(summaryRecord.kycDetails);
+
+    const customerDetails = data?.customerDetails ?? [];
+    const customerWithTabs = customerDetails.map((customer, index) => ({
+        customer,
+        memberType: mapMemberType(String(customer.lifeType ?? ""), index),
+    }));
+    const fallbackCustomer =
+        customerWithTabs.find((item) => item.memberType === selectedMemberType)?.customer ??
+        customerDetails[0];
     const fallbackPersonal = fallbackCustomer?.personalDetails;
+    const summaryDocument = Array.isArray(summaryRecord.documentDetails)
+        ? summaryRecord.documentDetails[0]
+        : undefined;
     const fallbackDocument = Array.isArray(fallbackCustomer?.documentDetails)
         ? fallbackCustomer.documentDetails[0]
         : undefined;
+    const primaryDocument = summaryDocument ?? fallbackDocument;
 
     const personal = profile?.applicantDetails ?? {
-        dateOfBirth: String(fallbackPersonal?.dob ?? ""),
-        gender: String(fallbackPersonal?.gender ?? ""),
-        maritalStatus: mapMaritalStatus(String(fallbackPersonal?.maritalStatus ?? "")),
-        nationality: String(fallbackPersonal?.nationality ?? ""),
-        countryOfResidence: String(fallbackPersonal?.residentStatus ?? ""),
-        education: String(fallbackPersonal?.highestQualification ?? ""),
+        dateOfBirth: String(summaryPersonal?.dob ?? fallbackPersonal?.dob ?? ""),
+        gender: mapGender(String(summaryPersonal?.gender ?? fallbackPersonal?.gender ?? "")),
+        maritalStatus: mapMaritalStatus(String(summaryPersonal?.maritalStatus ?? fallbackPersonal?.maritalStatus ?? "")),
+        nationality: String(summaryPersonal?.nationality ?? fallbackPersonal?.nationality ?? ""),
+        countryOfResidence: String(summaryPersonal?.residentStatus ?? fallbackPersonal?.residentStatus ?? ""),
+        education: String(summaryPersonal?.highestQualification ?? fallbackPersonal?.highestQualification ?? ""),
     };
 
     const kyc = profile?.kycDetails ?? {
-        panNumber: String(fallbackPersonal?.panNo ?? ""),
-        identityProofType: String(fallbackDocument?.documentType ?? ""),
-        identityProofNumber: String(fallbackDocument?.documentId ?? ""),
-        addressProof: String(fallbackDocument?.documentName ?? ""),
-        incomeProof: "",
-        existingCkycNumber: "",
-        pep: Boolean(fallbackPersonal?.isPEP),
-        criminalProceedings: "",
+        panNumber: String(summaryKyc?.panNumber ?? summaryPersonal?.panNo ?? fallbackPersonal?.panNo ?? ""),
+        identityProofType: String(summaryKyc?.identityProofType ?? primaryDocument?.documentType ?? ""),
+        identityProofNumber: String(summaryKyc?.identityProofNumber ?? primaryDocument?.documentId ?? ""),
+        addressProof: String(summaryKyc?.addressProof ?? primaryDocument?.documentName ?? ""),
+        incomeProof: String(summaryKyc?.incomeProof ?? summaryPersonal?.incomeProof ?? ""),
+        existingCkycNumber: String(summaryKyc?.existingCkycNumber ?? summaryPersonal?.ckycNumber ?? ""),
+        pep: toBoolean(summaryKyc?.pep ?? summaryPersonal?.isPEP),
+        criminalProceedings: String(
+            summaryKyc?.criminalProceedings ?? summaryPersonal?.criminalProceeding ?? "",
+        ),
     };
 
     const personalDetails = withDashFallback(buildFields(personal, [

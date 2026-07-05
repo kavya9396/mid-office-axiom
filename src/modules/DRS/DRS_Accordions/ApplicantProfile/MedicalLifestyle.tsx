@@ -6,6 +6,7 @@ import type { HealthInformation, LifestyleHabits } from "../../../../types/drs.t
 import type { ApplicantProfileProps } from "./ApplicantProfile";
 import type { RootState } from "../../../../store/store";
 import { centerFlex } from "../../../../utils/styles";
+import type { ApplicantTab } from "../../../../types/drs.types";
 
 type TripleFieldConfig<T> = {
     label: string;
@@ -83,11 +84,53 @@ const toTripleRows = <T,>(fields: TripleFieldConfig<T>[], placeholderKey: keyof 
     return rows;
 };
 
+const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
+    const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
+
+    if (normalized === "PROPOSER" || normalized.includes("PR")) return "proposer";
+    if (normalized === "LIFEASSURED1" || normalized === "LIFE ASSURED 1") return "lifeassured1";
+    if (normalized === "LIFEASSURED2" || normalized === "LIFE ASSURED 2") return "lifeassured2";
+    if (normalized.includes("LA") || normalized.includes("LIFE")) return index === 1 ? "lifeassured1" : "lifeassured2";
+    if (index === 0) return "proposer";
+    if (index === 1) return "lifeassured1";
+    return "lifeassured2";
+};
+
 const MedicalLifestyle = ({ profile }: ApplicantProfileProps) => {
     const { data } = useSelector((state: RootState) => state.drs);
 
-    const fallbackCustomer = data?.customerDetails?.[0];
-    const fallbackHealthDetail = (fallbackCustomer?.healthDetail ?? {}) as Record<string, unknown>;
+    const selectedMemberType =
+        profile?.memberType ??
+        ((localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer");
+
+    const dataRecord = data as unknown as Record<string, unknown>;
+    const summaryEntries = Array.isArray(dataRecord?.summary)
+        ? (dataRecord.summary as Array<Record<string, unknown>>)
+        : [];
+
+    const summaryWithTabs = summaryEntries.map((entry, index) => ({
+        entry,
+        memberType: mapMemberType(String(entry.memberType ?? ""), index),
+    }));
+
+    const selectedSummaryEntry =
+        summaryWithTabs.find((item) => item.memberType === selectedMemberType)?.entry ??
+        summaryEntries[0];
+
+    const customerDetails = data?.customerDetails ?? [];
+    const customerWithTabs = customerDetails.map((customer, index) => ({
+        customer,
+        memberType: mapMemberType(String(customer.lifeType ?? ""), index),
+    }));
+
+    const fallbackCustomer =
+        customerWithTabs.find((item) => item.memberType === selectedMemberType)?.customer ??
+        customerDetails[0];
+
+    const summaryHealthDetail = (selectedSummaryEntry?.healthDetail ?? {}) as Record<string, unknown>;
+    const fallbackHealthDetail = Object.keys(summaryHealthDetail).length > 0
+        ? summaryHealthDetail
+        : ((fallbackCustomer?.healthDetail ?? {}) as Record<string, unknown>);
     const fallbackSubstanceConsumption = Array.isArray(fallbackHealthDetail["substanceConsumption"])
         ? (fallbackHealthDetail["substanceConsumption"] as Array<Record<string, unknown>>)
         : [];

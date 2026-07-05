@@ -21,16 +21,19 @@ const FundDetails = ({ profile }: ApplicantProfileProps) => {
     const { data } = useSelector((state: RootState) => state.drs);
 
     const fund = profile?.fundDetails ?? data?.fundDetails;
-    const fundDetailRows: FundDetail[] = Array.isArray(fund?.fundDetail)
-        ? fund.fundDetail.map((item) => ({
+    const rawFundDetail = fund?.fundDetail;
+    const fundDetailItems = Array.isArray(rawFundDetail)
+        ? rawFundDetail
+        : (rawFundDetail && typeof rawFundDetail === "object" ? [rawFundDetail] : []);
+
+    const fundDetailRows: FundDetail[] = fundDetailItems.map((item) => ({
             name: toDisplayValue(item.name),
             amount: toDisplayValue(item.amount),
             sourceFund: toDisplayValue(item.sourceFund),
             targetFund: toDisplayValue(item.targetFund),
             switchDate: toDisplayValue(item.switchDate),
             transferPercentage: toDisplayValue(item.transferPercentage),
-        }))
-        : [];
+        }));
 
     const fundDetails: GridItem[] = [
         { label: "Allocation Strategy", value: fund?.allocationStrategy ?? "-" },

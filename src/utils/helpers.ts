@@ -152,6 +152,35 @@ export const formatDOB = (dob?: string): string => {
     return "";
 };
 
+export const getOrdinalSuffix = (day: number) => {
+    if (day >= 11 && day <= 13) return "th";
+
+    const remainder = day % 10;
+    if (remainder === 1) return "st";
+    if (remainder === 2) return "nd";
+    if (remainder === 3) return "rd";
+    return "th";
+};
+
+export const formatDateWithOrdinalTime = (value: unknown) => {
+    const raw = String(value ?? "").trim();
+    if (!raw) return "";
+
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return "";
+
+    const day = date.getDate();
+    const month = date.toLocaleString("en-GB", { month: "long" });
+    const year = date.getFullYear();
+    const time = date.toLocaleString("en-GB", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    }).toUpperCase();
+
+    return `${day}${getOrdinalSuffix(day)} ${month} ${year}, ${time}`;
+};
+
 type TripleFieldConfig<T> = {
     first: {
         label: string;
