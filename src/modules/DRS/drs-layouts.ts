@@ -32,13 +32,35 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
     "pivvSection",
     "cvtDecision",
     "quickLinks",
+    "uW",
   ],
-  RETAIL_CPT_POOL: ["applicationOverview", "quickLinks", "uwToolkit"],
-  RETAIL_PRE_ISSUANCE_SERVICING_POOL: ["applicationOverview"],
-  RETAIL_EXCEPTIONAL_POOL: ["applicationOverview"],
+  RETAIL_CPT_POOL: [
+    "applicationOverview",
+    "requirementManagement",
+    "quickLinks",
+    "uwToolkit",
+  ],
+  RETAIL_PRE_ISSUANCE_SERVICING_POOL: [
+    "breDecision",
+    "summary",
+    "applicationOverview",
+    "pivvSection",
+    "openOtherTasks",
+    "preIssuanceRequestChange",
+    "quickLinks",
+  ],
+  RETAIL_EXCEPTIONAL_POOL: [
+    "breDecision",
+    "summary",
+    "applicationOverview",
+    "requirementManagement",
+    "exceptionDecision"
+  ],
   RETAIL_PIVV_POOL: [
     "applicationOverview",
     "requirementManagement",
+    "supportingDocuments",
+    "pivvDecision",
     "quickLinks",
     "uwToolkit",
   ],
@@ -50,15 +72,25 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
   RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL: [
     "applicationOverview",
     "requirementManagement",
+    "supportingDocuments"
   ],
-  RETAIL_AMR_NON_MEDICAL: ["applicationOverview", "requirementManagement"],
+  RETAIL_AMR_NON_MEDICAL: [
+    "applicationOverview", 
+    "requirementManagement", 
+    "supportingDocuments"
+  ],
   RETAIL_RECONSIDERATION_POOL: [
     "breDecision",
     "applicationOverview",
     "summary",
     "requirementManagement",
+    "reconsiderationPoolDecision"
   ],
-  RETAIL_CUW_CLAIM_AUDIT: ["applicationOverview", "claimSection", "quickLinks"],
+  RETAIL_CUW_CLAIM_AUDIT: [
+    "applicationOverview", 
+    "claimSection",
+    "quickLinks"
+  ],
   RETAIL_REINSTATEMENT_SUW: [
     "applicationOverview",
     "postIssuanceServicing",
@@ -86,13 +118,13 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
   RETAIL_MUNICH_RE_POOL: ["quickLinks"],
   RETAIL_SCORE_RE_POOL: ["quickLinks"],
   RETAIL_HANNOVER_RE_POOL: ["quickLinks"],
-  RETAIL_HOD_POOL:["quickLinks"],
-  RETAIL_SR_UW_POOL:["quickLinks"],
-  RETAIL_RISK_POOL:["quickLinks"],
-  RETAIL_CMO_POOL:["quickLinks"],
-  RETAIL_ACCUITY_POOL:["quickLinks"],
-  RETAIL_REINSURER_POOL:["quickLinks"],
-  RETAIL_IT_POOL:["quickLinks"],
+  RETAIL_HOD_POOL: ["quickLinks"],
+  RETAIL_SR_UW_POOL: ["quickLinks"],
+  RETAIL_RISK_POOL: ["quickLinks"],
+  RETAIL_CMO_POOL: ["quickLinks"],
+  RETAIL_ACCUITY_POOL: ["quickLinks"],
+  RETAIL_REINSURER_POOL: ["quickLinks"],
+  RETAIL_IT_POOL: ["quickLinks"],
   GROUP_DVT_POOL: [
     "breDecision",
     "summary",
@@ -101,6 +133,20 @@ export const DRS_LAYOUTS: Record<string, AccordionKey[]> = {
     "dvtDecision",
     "quickLinks",
   ],
-  GROUP_GUW_POOL: ["breDecision","summary","applicationOverview","requirementManagement","uwDecision","quickLinks"],
-  GROUP_GOPS_POOL: ["breDecision","summary","requirementManagement","uwDecision","applicationOverview","quickLinks"],
+  GROUP_GUW_POOL: [
+    "breDecision",
+    "summary",
+    "applicationOverview",
+    "requirementManagement",
+    "uwDecision",
+    "quickLinks",
+  ],
+  GROUP_GOPS_POOL: [
+    "breDecision",
+    "summary",
+    "requirementManagement",
+    "uwDecision",
+    "applicationOverview",
+    "quickLinks",
+  ],
 };
