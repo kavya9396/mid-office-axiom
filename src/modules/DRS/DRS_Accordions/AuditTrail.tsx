@@ -23,9 +23,12 @@ interface AuditTrailProps {
 }
 
 const AuditTrailAccordion = ({ auditTrail }: AuditTrailProps) => {
-  const reduxAuditTrail = useSelector(
-    (state: RootState) => state.drs.auditTrail
-  );
+  const reduxAuditTrail = useSelector((state: RootState) => {
+    const drsData = state.drs.data as unknown as Record<string, unknown> | null;
+    const quickLinks = (drsData?.quickLinks as Record<string, unknown> | undefined) ?? undefined;
+    const value = quickLinks?.auditTrail ?? drsData?.auditTrail;
+    return Array.isArray(value) ? (value as AuditTrail) : [];
+  });
 
   const finalAuditTrail = auditTrail ?? reduxAuditTrail ?? [];
 

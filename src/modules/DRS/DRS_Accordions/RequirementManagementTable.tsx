@@ -225,7 +225,11 @@ interface RequirementManagementTableProps {
 }
 
 const RequirementManagementTable = ({ requirements }: RequirementManagementTableProps) => {
-    const reduxRequirements = useSelector((state: RootState) => state.drs.requirements);
+    const reduxRequirements = useSelector((state: RootState) => {
+        const drsData = state.drs.data as unknown as Record<string, unknown> | null;
+        const value = drsData?.requirements;
+        return Array.isArray(value) ? (value as AdditionalRequirementRow[]) : [];
+    });
     const isVisible = localStorage.getItem("roleType") !== "Ready For Issuance Pool";
 
     const finalRequirements = requirements ?? reduxRequirements;

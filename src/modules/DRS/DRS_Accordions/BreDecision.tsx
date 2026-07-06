@@ -25,7 +25,7 @@ type SelectedItem = {
 type BreDecisionExtraField = {
   label: string;
   value?: string | null;
-  visibleWhen?: "success" | "failure";
+  visibleWhen?: "always" | "success" | "failure";
 };
 
 interface BreDecisionProps {
