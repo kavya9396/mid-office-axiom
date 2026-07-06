@@ -36,7 +36,11 @@ const QuickLinks = () => {
         "retail";
     const safeApplicationNumber = applicationNumber ?? "";
     const roleType = localStorage.getItem("roleType") ?? "";
-    const isCvtPoolRole = roleType === "CVT Pool";
+    const visibleButtons = [
+    'CPT Pool'
+  ];
+
+  const isPoolRole = visibleButtons.includes(roleType);
     const selectedApplicantTab = localStorage.getItem("drsSelectedApplicantTab") ?? "proposer";
 
     const summaryEntries = (drsData as unknown as { summary?: Array<Record<string, unknown>> } | null)?.summary ?? [];
@@ -77,7 +81,7 @@ const QuickLinks = () => {
         { label: "Risk Details", path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "" },
         { label: "Audit Trail", path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "" },
         { label: "Refer to IT", path: "" },
-        ...(!isCvtPoolRole
+        ...(isPoolRole
             ? [
                 { label: "View Medical", path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "" },
                 { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },

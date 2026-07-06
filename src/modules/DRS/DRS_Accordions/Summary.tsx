@@ -266,7 +266,11 @@ const Summary = () => {
         maritalCode === "M" ? "Married" : maritalCode === "D" ? "Divorced" : maritalCode === "W" ? "Widowed" : "Single";
 
     const roleType = localStorage.getItem("roleType") ?? "";
-    const isCvtPoolRole = roleType === "CVT Pool";
+     const visibleButtons = [
+    'CPT Pool'
+  ];
+
+  const isPoolRole = visibleButtons.includes(roleType);
 
     const systemDecision = String(
         underwritingBreDecision.status ?? breOutput?.systemDecision ?? topLevelBreDecision.decision ?? "-",
@@ -703,7 +707,7 @@ const Summary = () => {
 
                                     <Divider sx={{ my: 1 }} />
 
-                                    {isCvtPoolRole && (
+                                    {!isPoolRole && (
                                         <>
                                             <Box
                                                 sx={{
@@ -848,7 +852,7 @@ const Summary = () => {
 
                     <ApplicantProfile profile={undefined} selectedApplicantTab={activeApplicantTab} />
 
-                    {!isCvtPoolRole && (
+                    {isPoolRole && (
                         <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
                             <CustomButton
                                 variant="outlined"
