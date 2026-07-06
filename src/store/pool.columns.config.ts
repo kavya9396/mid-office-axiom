@@ -107,4 +107,5 @@ export const poolAllowedColumns: Record<string, string[]> = {
   ],
    "DVT_TASK": [...baseColumnsGops],
    "1st UW Pool": [...baseColumns],
+   "GUW_TASK":[...baseColumnsGops]
 };

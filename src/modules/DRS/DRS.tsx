@@ -22,7 +22,8 @@ const mapper = {
     "Exceptional Pool": "RETAIL_EXCEPTIONAL_POOL",
     "PIVV Pool": "RETAIL_PIVV_POOL",
     "DVT Pool":"GROUP_DVT_POOL",
-    "1st UW Pool":"RETAIL_CUW_POOL"
+    "1st UW Pool":"RETAIL_CUW_POOL",
+    "GUW Pool":"GROUP_GUW_POOL"
 }
 
 const DRS = () => {

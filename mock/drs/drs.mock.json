@@ -665,7 +665,7 @@
         "applicantStatus": "Primary Borrower",
         "shareOfLoanJl": 0,
         "applicantStatusJl": "Co-Borrower",
-        "masterPolicyNo": ""
+        "masterPolicyHolder": ""
       },
       "productDetail": [
         {

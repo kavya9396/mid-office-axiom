@@ -37,7 +37,8 @@ const QuickLinks = () => {
     const safeApplicationNumber = applicationNumber ?? "";
     const roleType = localStorage.getItem("roleType") ?? "";
     const visibleButtons = [
-    'CPT Pool'
+    'CPT Pool',
+    'DVT Pool'
   ];
 
   const isPoolRole = visibleButtons.includes(roleType);
@@ -77,8 +78,9 @@ const QuickLinks = () => {
     const quickLinks = [
         { label: "Proposal Form", path: proposerFormLink },
         { label: "Previous Policies", path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "" },
-        { label: "Open Tasks", path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "" },
+       ...(roleType !== 'DVT Pool' ? [ { label: "Open Tasks", path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "" },
         { label: "Risk Details", path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "" },
+       ]:[]),
         { label: "Audit Trail", path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "" },
         { label: "Refer to IT", path: "" },
         ...(isPoolRole

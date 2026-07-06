@@ -267,7 +267,8 @@ const Summary = () => {
 
     const roleType = localStorage.getItem("roleType") ?? "";
      const visibleButtons = [
-    'CPT Pool'
+    'CPT Pool',
+    'DVT Pool'
   ];
 
   const isPoolRole = visibleButtons.includes(roleType);

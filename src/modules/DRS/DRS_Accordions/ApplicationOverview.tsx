@@ -110,6 +110,16 @@ const ApplicationOverview = () => {
       label: "Payment Mode",
       value: String(firstProduct?.premiumModeFpd ?? "-"),
     },
+    {
+      label: "Master Policy Holder",
+      value: String(firstProduct?.masterPolicyHolder ?? "-"),
+    },{
+      label: "LAN Number",
+      value: String(firstProduct?.lanNumber ?? "-"),
+    },{
+      label: "Login Date",
+      value: String(firstProduct?.lastLoginDate ?? "-"),
+    }
   ];
 
   const riderRows: RiderRow[] =

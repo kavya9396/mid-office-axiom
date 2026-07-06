@@ -1,21 +1,7 @@
 {
   "userId":"ipru74685",
   "poolData": {
-    "CVT_TASK": [
-      {
-        "taskId": "2078.18755",
-
-        "applicationNo": "NB0000025",
-
-        "isMedical": false,
-
-        "roleType": "CVT_TASK",
-
-        "role": "RETAIL_CVT_USER",
-
-        "businessType": "RETAIL"
-      },
-
+    "DVT_TASK": [
       {
         "id": 1,
 
@@ -37,11 +23,11 @@
 
         "channel": "0TTB",
 
-        "roleType": "CVT_TASK",
+        "roleType": "DVT_TASK",
 
-        "role": "RETAIL_CVT_USER",
+        "role": "GROUP_DVT_USER",
 
-        "businessType": "RETAIL",
+        "businessType": "GROUP",
 
         "state": "DRAFT",
 
@@ -69,78 +55,8 @@
 
         "caseStatus": "DRAFT",
         "breDecision":"STD"
-      },
-
-      {
-        "taskId": "2078.18771",
-
-        "applicationNo": "NB0000027",
-
-        "isMedical": false,
-
-        "roleType": "CVT_TASK",
-
-        "role": "RETAIL_CVT_USER",
-
-        "businessType": "RETAIL"
-      },
-
-      {
-        "taskId": "2078.18779",
-
-        "applicationNo": "NB0000028",
-
-        "isMedical": false,
-
-        "roleType": "CVT_TASK",
-
-        "role": "RETAIL_CVT_USER",
-
-        "businessType": "RETAIL"
-      },
-
-      {
-        "taskId": "2078.18791",
-
-        "applicationNo": "NB0000028",
-
-        "isMedical": false,
-
-        "roleType": "CVT_TASK",
-
-        "role": "RETAIL_CVT_USER",
-
-        "businessType": "RETAIL"
       }
-    ],
-    "CPT_TASK":[
-      {
-        "taskId": "2078.18771",
-
-        "applicationNo": "NB0000027",
-
-        "isMedical": false,
-
-        "roleType": "CPT_TASK",
-
-        "role": "RETAIL_CPT_USER",
-
-        "businessType": "RETAIL"
-      }],
-      "PIVV_TASK":[
-      {
-        "taskId": "2078.18771",
-
-        "applicationNo": "NB0000027",
-
-        "isMedical": false,
-
-        "roleType": "PIVV_TASK",
-
-        "role": "RETAIL_PIVV_USER",
-
-        "businessType": "RETAIL"
-      }],"PRE_ISSUANCE_SERVICING_TASK":[
+    ],"PRE_ISSUANCE_SERVICING_TASK":[
       {
         "taskId": "2078.18771",
 
@@ -150,22 +66,64 @@
 
         "roleType": "PRE_ISSUANCE_SERVICING_TASK",
 
-        "role": "RETAIL_PRE_ISSUANCE_SERVICING_USER",
+        "role": "GROUP_PRE_ISSUANCE_SERVICING_USER",
 
-        "businessType": "RETAIL"
-      }],"EXCEPTIONAL_TASK":[
+        "businessType": "GROUP"
+      }], "GUW_TASK": [
       {
-        "taskId": "2078.18771",
+        "id": 1,
 
-        "applicationNo": "NB0000027",
+        "taskId": "18763",
+
+        "applicationNo": "NB0000026",
+
+        "productCode": "I19",
+
+        "sumAssured": 0,
+
+        "appliedSa": 0,
+
+        "annualPremium": 876863872,
+
+        "productType": "I19",
 
         "isMedical": false,
 
-        "roleType": "EXCEPTIONAL_TASK",
+        "channel": "0TTB",
 
-        "role": "RETAIL_EXCEPTIONAL_USER",
+        "roleType": "GUW_TASK",
 
-        "businessType": "RETAIL"
-      }]
+        "role": "GROUP_GUW_USER",
+
+        "businessType": "GROUP",
+
+        "state": "DRAFT",
+
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+
+        "displayName": "ARYAYAN Khan",
+
+        "clientType": "Individual",
+
+        "caseType": "PROP",
+
+        "uwName": "case-intiation-orchestrator",
+
+        "userId": "case-intiation-orchestrator",
+
+        "endDate": "2026-06-19",
+
+        "status": "DRAFT",
+
+        "premium": "876863872",
+
+        "nameOfProposer": "ARYAYAN Khan",
+
+        "nameOfLifeAssured": "ARYAYAN Khan",
+
+        "caseStatus": "DRAFT",
+        "breDecision":"STD"
+      }
+    ]
   }
 }
