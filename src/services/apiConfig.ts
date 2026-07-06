@@ -5,23 +5,23 @@
 //  When USE_MOCK = true  → every thunk hits its mock JSON file.
 //  When USE_MOCK = false → every thunk hits the real API URL.
 // ============================================================
-
+ 
 export const USE_MOCK = true; // <-- flip this one flag to switch modes
-
+ 
 // --------------- URL registry --------------------------------
 // Add or edit URLs here; thunk files need no further changes.
 // -------------------------------------------------------------
-
+ 
 const apiUrls = {
   // Auth
   login: {
-    real: "/api/auth/login",
+    real: "/mock/auth/login.json",
     mock: "/mock/auth/login.json",
   },
-
+ 
   // Inbox
   roleList: {
-    real: "/api/inbox/role-list",
+    real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/role-list",
     mock: "/mock/inbox/roleList.json",
   },
   poolData: {
@@ -32,14 +32,14 @@ const apiUrls = {
     real: "/api/inbox/search",
     mock: "/mock/inbox/search-application.json",
   },
-
-  // DRS
+ 
+   // DRS
   drs: {
-    real: "/api/drs/view",
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
     mock: "/mock/drs/drs.mock.json",
   },
   masters: {
-    real: "/api/drs/masters",
+    real: "/mock/drs/masters.mock.json",
     mock: "/mock/drs/masters.mock.json",
   },
   decisionCodes: {
@@ -47,7 +47,7 @@ const apiUrls = {
     mock: "/mock/drs/decisionCodes.json",
   },
   breRetrigger: {
-    real: "/api/drs/bre-retrigger",
+    real: "/mock/drs/breRetrigger.mock.json",
     mock: "/mock/drs/breRetrigger.mock.json",
   },
   applicantProfileSubmit: {
@@ -86,13 +86,14 @@ const apiUrls = {
     real: "/api/drs/risk-details",
     mock: "/mock/drs/drs.mock.json",
   },
-
+ 
   //Claim Task
-  claimTask: {
-    real: "/api/inbox/claimTask.mock.json",
+    claimTask: {
+    real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/user-tasks/claim",
     mock: "/mock/inbox/claimTask.mock.json"
   },
-
+ 
+ 
   // Medical
   medicalView: {
     real: "/api/medical/view",
@@ -114,19 +115,19 @@ const apiUrls = {
     real: "/api/medical/special/submit",
     mock: "/mock/drs/specialMedicalSubmit.mock.json",
   },
-
+ 
   // Financial
   financialView: {
     real: "/api/financial/view",
     mock: "/mock/drs/financial.mock.json",
   },
-
+ 
   // Previous Policies
   previousPoliciesView: {
     real: "/api/previousPolicies/view",
     mock: "/mock/drs/previousPolicies.mock.json",
   },
-
+ 
   // Grievance
   grievanceView: {
     real: "/api/grievance/view",
@@ -145,9 +146,11 @@ const apiUrls = {
     mock: "/mock/drs/grievanceApplicationSubmit.mock.json",
   },
 } as const;
-
+ 
 export type ApiKey = keyof typeof apiUrls;
-
+ 
 /** Returns the resolved URL based on the USE_MOCK flag. */
 export const url = (key: ApiKey): string =>
   USE_MOCK ? apiUrls[key].mock : apiUrls[key].real;
+ 
+ 

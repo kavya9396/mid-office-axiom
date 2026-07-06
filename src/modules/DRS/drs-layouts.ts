@@ -10,6 +10,8 @@ import PreIssuanceRequestChange from "./DRS_Accordions/PreIssuanceRequestChange"
 import RequirementManagement from "./DRS_Accordions/RequirementManagement";
 import Summary from "./DRS_Accordions/Summary";
 import SupportingDocuments from "./DRS_Accordions/SupportingDocuments";
+import UACChecklist from "./DRS_Accordions/UACChecklist";
+import UWChecklist from "./DRS_Accordions/UWChecklist";
 import UWDecision from "./DRS_Accordions/UWDecision";
 import QuickLinks from "./QuickLinks";
 import UWToolkit from "./UWToolkit";
@@ -30,6 +32,8 @@ export const accordionRegistry = {
   quickLinks: QuickLinks,
   uwToolkit: UWToolkit,
   dvtDecision: DVTDecision,
+  uacChecklist: UACChecklist,
+  uwChecklist: UWChecklist,
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
@@ -147,6 +151,8 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "summary",
     "applicationOverview",
     "requirementManagement",
+    "uwChecklist",
+    "uacChecklist",
     "uwDecision",
     "quickLinks",
   ],
