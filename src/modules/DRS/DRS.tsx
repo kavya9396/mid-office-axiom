@@ -1,7 +1,7 @@
 import { accordionRegistry, DRS_LAYOUTS } from "./drs-layouts";
 import BackButton from "../../components/layout/BackButton";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
@@ -28,10 +28,12 @@ const mapper = {
 
 const DRS = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
+    const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
     const { applicationNumber, businessType } = useAppContext();
 
     const layout = mapper[roleType as keyof typeof mapper];
-    const accordions = layout ? DRS_LAYOUTS[layout] : [];
+    const accordions = useMemo(() => (layout ? DRS_LAYOUTS[layout] : []), [layout]);
+    const sections = useMemo(() => accordions.map((accordion) => String(accordion)), [accordions]);
     const navigate = useNavigate();
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
@@ -42,7 +44,7 @@ const DRS = () => {
     const safeApplicationNumber = applicationNumber ?? "";
 
     useEffect(() => {
-        if (!safeApplicationNumber) {
+        if (!safeApplicationNumber || !userId || !roleType) {
             return;
         }
 
@@ -50,7 +52,10 @@ const DRS = () => {
             try {
                 const drsResponse = await dispatch(
                     drsThunk({
-                        applicationNumber: safeApplicationNumber,
+                        applicationNo: safeApplicationNumber,
+                        userId,
+                        roleType,
+                        sections,
                     }),
                 ).unwrap();
 
@@ -80,7 +85,7 @@ const DRS = () => {
         };
 
         void loadDRSAndBRE();
-    }, [dispatch, safeApplicationNumber]);
+    }, [dispatch, roleType, safeApplicationNumber, sections, userId]);
 
 
     return (

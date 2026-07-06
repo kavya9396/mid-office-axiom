@@ -110,7 +110,10 @@ export interface CVTRequirementRow {
 };
 
 export type DRSViewRequest = {
-  applicationNumber: string;
+  applicationNo: string;
+  userId: string;
+  roleType: string;
+  sections: string[];
 };
 
 export type DRSRequest = {
