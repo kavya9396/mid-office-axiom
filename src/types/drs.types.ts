@@ -462,6 +462,20 @@ export type PreIssuanceRequestChangeSubmitResponse = {
   message: string;
 };
 
+export type CompleteTaskRequest = {
+  taskId: string;
+  userId: string;
+  appNo: string;
+  instanceId: string;
+  remarks: string;
+  decision: string;
+};
+
+export type CompleteTaskResponse = {
+  success: boolean;
+  message: string;
+};
+
 export type BreRetriggerRequest = {
   data: DRSData;
 };

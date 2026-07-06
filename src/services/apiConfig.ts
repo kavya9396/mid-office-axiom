@@ -70,6 +70,10 @@ const apiUrls = {
     real: "/api/drs/pre-issuance-request-change/submit",
     mock: "/mock/drs/preIssuanceRequestChangeSubmit.mock.json",
   },
+  completeTask: {
+    real: "/api/drs/complete-task",
+    mock: "/mock/drs/completeTask.mock.json",
+  },
   referralUsers: {
     real: "/api/drs/user-list",
     mock: "/mock/drs/userList.json",

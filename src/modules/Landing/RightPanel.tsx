@@ -103,9 +103,13 @@ const RightPanel = ({
     e.preventDefault();
     e.stopPropagation();
 
-    const claimTaskId = row.taskId?.includes(".")
-      ? row.taskId.split(".").pop() ?? ""
-      : row.taskId ?? "";
+    const rawTaskId = String(row.taskId ?? "").trim();
+    const [instanceFromTaskId = "", taskFromTaskId = ""] = rawTaskId.includes(".")
+      ? rawTaskId.split(".")
+      : ["", rawTaskId];
+    const claimTaskId = taskFromTaskId;
+    const rowData = row as unknown as Record<string, unknown>;
+    const instanceId = String(rowData.instanceId ?? rowData.instanceID ?? instanceFromTaskId).trim();
     if (!claimTaskId) {
       setClaimError("Task id is missing. Unable to claim this case.");
       return;
@@ -129,7 +133,20 @@ const RightPanel = ({
         roleMapper[row.roleType as keyof typeof roleMapper] ?? row.roleType;
 
       localStorage.setItem("roleType", mappedRoleType);
+      localStorage.setItem("taskCompositeId", rawTaskId);
       localStorage.setItem("taskId", claimTaskId);
+      if (instanceId) {
+        localStorage.setItem("instanceId", instanceId);
+      }
+      localStorage.setItem(
+        "selectedCaseContext",
+        JSON.stringify({
+          applicationNo: String(row.applicationNo ?? "").trim(),
+          taskId: claimTaskId,
+          instanceId,
+          taskCompositeId: rawTaskId,
+        }),
+      );
 
       const targetBusinessType =
         normalizeBusinessType(row.businessType) ?? safeBusinessType;
