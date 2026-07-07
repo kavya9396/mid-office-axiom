@@ -37,6 +37,30 @@ const drsSlice = createSlice({
         breOutput: action.payload,
       };
     },
+    setProductFaceValue: (state, action: { payload: string }) => {
+      if (!state.data) return;
+
+      const nextFaceValue = action.payload;
+      const dataRecord = state.data as unknown as Record<string, unknown>;
+      const appOverview = dataRecord.applicationOverview as Record<string, unknown> | undefined;
+      const appOverviewProducts = Array.isArray(appOverview?.productDetail)
+        ? (appOverview!.productDetail as Array<Record<string, unknown>>)
+        : [];
+
+      if (appOverviewProducts.length > 0) {
+        appOverviewProducts[0] = {
+          ...appOverviewProducts[0],
+          faceValue: nextFaceValue,
+        };
+      }
+
+      if (Array.isArray(state.data.productDetail) && state.data.productDetail.length > 0) {
+        state.data.productDetail[0] = {
+          ...state.data.productDetail[0],
+          faceValue: nextFaceValue,
+        };
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -72,5 +96,5 @@ const drsSlice = createSlice({
   },
 });
 
-export const { setBreOutput } = drsSlice.actions;
+export const { setBreOutput, setProductFaceValue } = drsSlice.actions;
 export default drsSlice.reducer;

@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import type { Column } from "../../../components/ui/Table/Table";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTable from "../../../components/ui/Table/Table";
@@ -47,6 +47,7 @@ const ApplicationOverview = () => {
     ? (applicationOverview.riderDetails as Array<Record<string, unknown>>)
     : ((data?.riderDetails as unknown as Array<Record<string, unknown>> | undefined) ?? []);
 
+  const faceValue = String(firstProduct?.faceValue ?? "");
   const roleType = localStorage.getItem("roleType") ?? "";
   const expandedRoles = [
     'Ready For Issuance Pool',
@@ -138,6 +139,35 @@ const ApplicationOverview = () => {
         {/* <CustomAccordion title="Application Overview" defaultExpanded={userRole ==='CPT'?true:false}> */}
         <CustomAccordion title="Application Overview" defaultExpanded={isExpanded}>
           <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(6, 1fr)",
+                gap: 2,
+                backgroundColor: "#f6f6f6",
+                borderRadius: 2,
+                mb: 2,
+              }}
+            >
+              <Box>
+                <Typography sx={{ color: "#444", fontSize: 14, fontWeight: 400 }}>Product Name</Typography>
+                <Typography sx={{ color: "#161616", fontWeight: 600, fontSize: 12 }}>
+                  {String(firstProduct?.name ?? "-")}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography sx={{ color: "#444", fontSize: 14, fontWeight: 400 }}>Product Code</Typography>
+                <Typography sx={{ color: "#161616", fontWeight: 600, fontSize: 12 }}>
+                  {String(firstProduct?.code ?? "-")}
+                </Typography>
+              </Box>
+              <Box>
+                <Typography sx={{ color: "#444", fontSize: 14, fontWeight: 400 }}>Face Value</Typography>
+                <Typography sx={{ color: "#161616", fontWeight: 600, fontSize: 12 }}>
+                  {faceValue || "-"}
+                </Typography>
+              </Box>
+            </Box>
             <GridSection columns={6} items={applicationDetails} />
           </Box>
           {riderRows.length > 0 && (

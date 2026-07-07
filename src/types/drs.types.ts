@@ -930,6 +930,8 @@ export interface ApplicantEditForm {
   identityProofNumber: string;
   addressProof: string;
 
+  faceValue: string;
+
   communicationAddressLine1: string;
   communicationAddressLine2: string;
   communicationAddressLine3: string;
