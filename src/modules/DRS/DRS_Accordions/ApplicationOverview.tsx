@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container } from "@mui/material";
 import type { Column } from "../../../components/ui/Table/Table";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTable from "../../../components/ui/Table/Table";
@@ -7,6 +7,8 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import type { RiderRow } from "../../../types/drs.types";
 import { toDisplayValue } from "../../../utils/helpers";
+import { useAppContext } from "../../../hooks/useAppContext";
+import { normalizeBusinessType } from "../../../routes/routes";
 
 const riderColumns: Column<RiderRow>[] = [
   { key: "name", header: "Name", width: "30%" },
@@ -28,6 +30,7 @@ const formatNumberOrDash = (value: unknown) => {
 
 const ApplicationOverview = () => {
   const { data } = useSelector((state: RootState) => state.drs);
+  const { businessType } = useAppContext();
 
   const applicationOverview = (data as unknown as Record<string, unknown> | null)?.applicationOverview as
     | Record<string, unknown>
@@ -47,7 +50,11 @@ const ApplicationOverview = () => {
     ? (applicationOverview.riderDetails as Array<Record<string, unknown>>)
     : ((data?.riderDetails as unknown as Array<Record<string, unknown>> | undefined) ?? []);
 
-  const faceValue = String(firstProduct?.faceValue ?? "");
+  const normalizedBusinessType =
+    normalizeBusinessType(businessType) ??
+    normalizeBusinessType(localStorage.getItem("businessType"));
+  const isGroupBusiness = normalizedBusinessType === "group";
+
   const roleType = localStorage.getItem("roleType") ?? "";
   const expandedRoles = [
     'Ready For Issuance Pool',
@@ -66,6 +73,10 @@ const ApplicationOverview = () => {
     {
       label: "Product Code",
       value: String(firstProduct?.code ?? "-")
+    },
+    {
+      label: "Face Value",
+      value: String(firstProduct?.faceValue ?? "-")
     },
     {
       label: "Sum Assured",
@@ -91,10 +102,12 @@ const ApplicationOverview = () => {
       label: "Customer Type",
       value: String(data?.applicationInfo?.proposerType ?? "-"),
     },
-    {
-      label: "Policy Type",
-      value: String(groupDetails?.coverageStatus ?? "-"),
-    },
+    ...(isGroupBusiness
+      ? [{
+        label: "Policy Type",
+        value: String(groupDetails?.coverageStatus ?? "-"),
+      }]
+      : []),
     {
       label: "Modal Premium",
       value: formatNumberOrDash(firstProduct?.paymentAmount),
@@ -111,16 +124,19 @@ const ApplicationOverview = () => {
       label: "Payment Mode",
       value: String(firstProduct?.premiumModeFpd ?? "-"),
     },
+    ...(isGroupBusiness
+      ? [{
+        label: "Master Policy Holder",
+        value: String(firstProduct?.masterPolicyHolder ?? "-"),
+      },
     {
-      label: "Master Policy Holder",
-      value: String(firstProduct?.masterPolicyHolder ?? "-"),
-    },{
       label: "LAN Number",
       value: String(firstProduct?.lanNumber ?? "-"),
-    },{
+    }, {
       label: "Login Date",
       value: String(firstProduct?.lastLoginDate ?? "-"),
-    }
+    }]
+      : [])
   ];
 
   const riderRows: RiderRow[] =
@@ -139,7 +155,7 @@ const ApplicationOverview = () => {
         {/* <CustomAccordion title="Application Overview" defaultExpanded={userRole ==='CPT'?true:false}> */}
         <CustomAccordion title="Application Overview" defaultExpanded={isExpanded}>
           <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
-            <Box
+            {/* <Box
               sx={{
                 display: "grid",
                 gridTemplateColumns: "repeat(6, 1fr)",
@@ -167,7 +183,7 @@ const ApplicationOverview = () => {
                   {faceValue || "-"}
                 </Typography>
               </Box>
-            </Box>
+            </Box> */}
             <GridSection columns={6} items={applicationDetails} />
           </Box>
           {riderRows.length > 0 && (
