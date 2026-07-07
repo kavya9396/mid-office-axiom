@@ -17,6 +17,7 @@ import { columnFlex, labelStyles, modalTitleStyles } from "../../../../utils/sty
 import CustomTextField from "../../../../components/ui/TextField/TextField"
 import CustomSelect from "../../../../components/ui/Select/Select"
 import PersonalKYC from "./PersonalKYC"
+import ImageDetails from "./ImageDetails"
 import ContactAndAddress from "./ContactAndAddress"
 import FinanceAndProfession from "./FinanceAndProfession"
 import MedicalLifestyle from "./MedicalLifestyle"
@@ -287,6 +288,8 @@ const buildProfileFromReduxData = (
 
     const summaryRecord = toRecord(selectedSummaryEntry);
     const summaryPersonal = toRecord(summaryRecord.personalDetails);
+    const summaryFaceMatchDetails = toRecord(summaryRecord.faceMatchDetails);
+    const summaryUnderwriting = toRecord(summaryRecord.underwriting);
     const summaryKyc = toRecord(summaryRecord.kycDetails);
     const summaryContact = toRecord(summaryRecord.contactDetails);
     const summaryApplicantFinancial = toRecord(summaryRecord.applicantFinancialDetails);
@@ -356,8 +359,12 @@ const buildProfileFromReduxData = (
             dob: String(personalDetails?.dob ?? ""),
             age: 0,
             gender: mapGenderToDisplayValue(String(personalDetails?.gender ?? "")),
-            profileImage: "",
-            caseStatus: "",
+            profileImage: String(personalDetails?.profileImage ?? ""),
+            caseStatus: String(personalDetails?.caseStatus ?? ""),
+            document: String(summaryFaceMatchDetails?.document ?? resolvedKyc?.identityProofType ?? resolvedDocument?.documentType ?? ""),
+            faceMatchPercentage: String(summaryFaceMatchDetails?.faceMatchScore ?? personalDetails?.faceMatchScore ?? ""),
+            imageQuality: String(summaryFaceMatchDetails?.imageQuality ?? personalDetails?.imageQuality ?? ""),
+            documentRemarks: String(summaryFaceMatchDetails?.remarks ?? personalDetails?.remarks ?? toRecord(summaryUnderwriting).remarks ?? ""),
         },
         applicantDetails: {
             dateOfBirth: String(personalDetails?.dob ?? ""),
@@ -566,7 +573,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
     const dispatch = useAppDispatch();
     const masters = useSelector((state: RootState) => state.drs.masters);
     const drsData = useSelector((state: RootState) => state.drs.data);
-    const [applicantInfoTab, setApplicantInfoTab] = useState<ApplicantInfoTab>("personalKyc");
+    const [applicantInfoTab, setApplicantInfoTab] = useState<ApplicantInfoTab>("imageDetails");
     const [openEditDialog, setOpenEditDialog] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [submitError, setSubmitError] = useState<string | null>(null);
@@ -1018,6 +1025,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
     };
 
     const tabComponents: Record<ApplicantInfoTab, React.ReactNode> = {
+        imageDetails: <ImageDetails profile={displayProfile} />,
         personalKyc: <PersonalKYC profile={displayProfile} />,
         contactAddress: <ContactAndAddress profile={displayProfile} />,
         financialProfession: <FinanceAndProfession profile={displayProfile} />,
@@ -1031,10 +1039,10 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
 
     return (
         <>
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 1 }}>
                 {
                     roleType === "CVT Pool" && (
-                        <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%", mt: 1 }}>
+                        <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%", mt: 0.5 }}>
                             <CustomButton
                                 variant="outlined"
                                 onClick={handleOpenEdit}
@@ -1046,7 +1054,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
                     )
                 }
 
-                <Box sx={{ display: "flex", justifyContent: "center", my: 2, width: "100%" }}>
+                <Box sx={{ display: "flex", justifyContent: "center", my: 1, width: "100%" }}>
                     <CustomTabs
                         tabs={visibleApplicantInfoTabs}
                         value={activeApplicantInfoTab}

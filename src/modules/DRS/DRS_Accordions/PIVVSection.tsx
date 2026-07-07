@@ -10,6 +10,12 @@ const PIVVSection = () => {
   const pivvSection = (data as unknown as Record<string, unknown> | null)?.pivvSection as
     | Record<string, unknown>
     | undefined;
+  const hasPivvSection = Boolean(pivvSection && Object.keys(pivvSection).length > 0);
+
+  if (!hasPivvSection) {
+    return null;
+  }
+
   const formattedRemarkDate = formatDateWithOrdinalTime(pivvSection?.remarkDate);
 
   return (

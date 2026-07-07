@@ -3,13 +3,20 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import Badge from "../../../components/ui/Badge/Badge";
-import { centerFlex, columnFlex, modalTitleStyles } from "../../../utils/styles";
+import {
+  centerFlex,
+  columnFlex,
+  modalTitleStyles,
+} from "../../../utils/styles";
 import { RefreshIcon } from "../../../icons/Icons";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import CustomButton from "../../../components/ui/Button/Button";
 import type { RootState } from "../../../store/store";
 import { useSelector } from "react-redux";
-import type { BreDecisionResponse, DRSBreOutput } from "../../../types/drs.types";
+import type {
+  BreDecisionResponse,
+  DRSBreOutput,
+} from "../../../types/drs.types";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppDispatch } from "../../../store/hooks";
 import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
@@ -39,7 +46,9 @@ const truncateText = (text: string, limit: number) => {
   return truncated.slice(0, truncated.lastIndexOf(" "));
 };
 
-const mapBreOutputToDecision = (breOutput: DRSBreOutput): BreDecisionResponse => ({
+const mapBreOutputToDecision = (
+  breOutput: DRSBreOutput,
+): BreDecisionResponse => ({
   decision: breOutput.decisionTypes?.breDecision ?? null,
   status: "Success",
   remarks: breOutput.breRemarks ?? null,
@@ -52,7 +61,10 @@ const mapBreOutputToDecision = (breOutput: DRSBreOutput): BreDecisionResponse =>
   retrigger: null,
 });
 
-const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisionProps) => {
+const BreDecision = ({
+  extraFields = [],
+  breDecisionOverride = null,
+}: BreDecisionProps) => {
   const dispatch = useAppDispatch();
   const { applicationNumber, businessType } = useAppContext();
   const { data } = useSelector((state: RootState) => state.drs);
@@ -68,9 +80,9 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const breDecision =
     drsBreDecision || breDecisionOverride
       ? {
-        ...(drsBreDecision ?? {}),
-        ...(breDecisionOverride ?? {}),
-      }
+          ...(drsBreDecision ?? {}),
+          ...(breDecisionOverride ?? {}),
+        }
       : null;
   const navigate = useNavigate();
   const safeBusinessType =
@@ -84,28 +96,35 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
   const [bredialogOpen, setBreDialogOpen] = useState(false);
   const retriggerCount = 0;
   const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
-  const [retriggeredBreDecision, setRetriggeredBreDecision] = useState<BreDecisionResponse | null>(null);
+  const [retriggeredBreDecision, setRetriggeredBreDecision] =
+    useState<BreDecisionResponse | null>(null);
   const [breRetriggerLoading, setBreRetriggerLoading] = useState(false);
-  const [breRetriggerError, setBreRetriggerError] = useState<string | null>(null);
+  const [breRetriggerError, setBreRetriggerError] = useState<string | null>(
+    null,
+  );
   const [referToItLoading, setReferToItLoading] = useState(false);
   const [referToItError, setReferToItError] = useState<string | null>(null);
 
   const currentBreDecision = retriggeredBreDecision ?? breDecision;
-  const resolvedRemarks = currentBreDecision?.remarks ?? drsBreDecision?.remarks ?? "-";
-  const resolvedDiscrepancy = currentBreDecision?.discrepancy ?? drsBreDecision?.discrepancy ?? "-";
+  const resolvedRemarks =
+    currentBreDecision?.remarks ?? drsBreDecision?.remarks ?? "-";
+  const resolvedDiscrepancy =
+    currentBreDecision?.discrepancy ?? drsBreDecision?.discrepancy ?? "-";
 
   const hasValue = (value: unknown) =>
     value !== null && value !== undefined && String(value).trim() !== "";
 
   const hasBreResponse =
-    !!currentBreDecision && Object.values(currentBreDecision).some((value) => hasValue(value));
+    !!currentBreDecision &&
+    Object.values(currentBreDecision).some((value) => hasValue(value));
 
   const resolvedBreStatus = hasBreResponse ? "Success" : "Failure";
 
   const isBreSuccess = resolvedBreStatus.toLowerCase() === "success";
 
   // This count should come from backend.
-  const isRetriggerDisabled = isBreSuccess || retriggerCount >= 3 || breRetriggerLoading;
+  const isRetriggerDisabled =
+    isBreSuccess || retriggerCount >= 3 || breRetriggerLoading;
 
   const conditionalFields = extraFields
     .filter((item) => {
@@ -118,11 +137,16 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       value: item.value ?? "-",
     }));
 
-  const breDecisionParams = currentBreDecision as Record<string, unknown> | null;
+  const breDecisionParams = currentBreDecision as Record<
+    string,
+    unknown
+  > | null;
 
   const getBreDecisionValue = (keys: string[]) => {
     if (!breDecisionParams) return undefined;
-    return keys.map((key) => breDecisionParams[key]).find((value) => hasValue(value));
+    return keys
+      .map((key) => breDecisionParams[key])
+      .find((value) => hasValue(value));
   };
 
   const conditionalBreDecisionParams = [
@@ -132,11 +156,17 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
     },
     {
       label: "Decision Date",
-      value: getBreDecisionValue(["medicalDecisionDate", "financialDecisionDate"]),
+      value: getBreDecisionValue([
+        "medicalDecisionDate",
+        "financialDecisionDate",
+      ]),
     },
     {
       label: "Discrepancy",
-      value: getBreDecisionValue(["medicalDiscrepancy", "financialDiscrepancy"]),
+      value: getBreDecisionValue([
+        "medicalDiscrepancy",
+        "financialDiscrepancy",
+      ]),
     },
     {
       label: "Remarks",
@@ -155,7 +185,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       value: resolvedBreStatus,
     },
     {
-      label: "Initial BRE Decision",
+      label: "BRE Decision",
       value: currentBreDecision?.initialDecision ?? "-",
     },
     {
@@ -171,6 +201,7 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       value: currentBreDecision?.timestamp ?? "-",
     },
   ];
+
 
   const additionalBreDetails = [
     ...conditionalBreDecisionParams,
@@ -212,7 +243,9 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
       dispatch(setBreOutput(updatedBreOutput));
       setRetriggeredBreDecision(mapBreOutputToDecision(updatedBreOutput));
     } catch (error) {
-      setBreRetriggerError(error instanceof Error ? error.message : "Failed to retrigger BRE.");
+      setBreRetriggerError(
+        error instanceof Error ? error.message : "Failed to retrigger BRE.",
+      );
     } finally {
       setBreRetriggerLoading(false);
     }
@@ -243,7 +276,9 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
         },
       });
     } catch (error) {
-      setReferToItError(error instanceof Error ? error.message : "Failed to refer to IT.");
+      setReferToItError(
+        error instanceof Error ? error.message : "Failed to refer to IT.",
+      );
     } finally {
       setReferToItLoading(false);
     }
@@ -253,7 +288,10 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
     return truncateText(text, 80);
   };
 
-  const renderBreDetail = (item: { label: string; value: string }, key: string) => {
+  const renderBreDetail = (
+    item: { label: string; value: string },
+    key: string,
+  ) => {
     const isLongText = item.value.length > 80;
 
     return (
@@ -323,36 +361,80 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
             borderRadius: "8px",
           }}
         >
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: "0.5fr 0.8fr 2.5fr 2.5fr 0.8fr 0.5fr",
-              gap: "16px",
-            }}
-          >
-            {coreBreDetails.map((item, index) => renderBreDetail(item, `core-${item.label}-${index}`))}
-
+          <Box sx={{ fontWeight: 700 }}>
+            Initial BRE
             <Box
               sx={{
-                ...centerFlex,
+                display: "grid",
+                gridTemplateColumns: "0.5fr 0.8fr 2.5fr 2.5fr 0.8fr 0.5fr",
+                gap: "16px",
               }}
             >
-              <Box
-                component="span"
-                onClick={() => {
-                  void handleRetrigger();
-                }}
+              {coreBreDetails.map((item, index) =>
+                renderBreDetail(item, `core-${item.label}-${index}`),
+              )}
+
+              {/* <Box
                 sx={{
-                  color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
-                  border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
-                  padding: 1,
-                  borderRadius: "8px",
-                  display: "flex",
-                  cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
-                  opacity: isRetriggerDisabled ? 0.5 : 1,
+                  ...centerFlex,
                 }}
               >
-                <RefreshIcon />
+                <Box
+                  component="span"
+                  onClick={() => {
+                    void handleRetrigger();
+                  }}
+                  sx={{
+                    color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
+                    border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
+                    padding: 1,
+                    borderRadius: "8px",
+                    display: "flex",
+                    cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
+                    opacity: isRetriggerDisabled ? 0.5 : 1,
+                  }}
+                >
+                  <RefreshIcon />
+                </Box>
+              </Box> */}
+            </Box>
+          </Box>
+
+          <Box sx={{ fontWeight: 700 }}>
+            Final BRE
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "0.5fr 0.8fr 2.5fr 2.5fr 0.8fr 0.5fr",
+                gap: "16px",
+              }}
+            >
+              {coreBreDetails.map((item, index) =>
+                renderBreDetail(item, `core-${item.label}-${index}`),
+              )}
+
+              <Box
+                sx={{
+                  ...centerFlex,
+                }}
+              >
+                <Box
+                  component="span"
+                  onClick={() => {
+                    void handleRetrigger();
+                  }}
+                  sx={{
+                    color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
+                    border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
+                    padding: 1,
+                    borderRadius: "8px",
+                    display: "flex",
+                    cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
+                    opacity: isRetriggerDisabled ? 0.5 : 1,
+                  }}
+                >
+                  <RefreshIcon />
+                </Box>
               </Box>
             </Box>
           </Box>
@@ -380,7 +462,9 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
                 gap: "16px",
               }}
             >
-              {additionalBreDetails.map((item, index) => renderBreDetail(item, `extra-${item.label}-${index}`))}
+              {additionalBreDetails.map((item, index) =>
+                renderBreDetail(item, `extra-${item.label}-${index}`),
+              )}
             </Box>
           )}
         </Box>
@@ -444,7 +528,8 @@ const BreDecision = ({ extraFields = [], breDecisionOverride = null }: BreDecisi
               color: "#161616",
             }}
           >
-            You have exhausted the retriggered of BRE. Kindly refer this ticket to IT Team.
+            You have exhausted the retriggered of BRE. Kindly refer this ticket
+            to IT Team.
           </Typography>
           {referToItError && (
             <Typography

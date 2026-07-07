@@ -104,7 +104,7 @@ export const cvtDecisionOptions = [
   { label: "Accept", value: "Accept" },
   { label: "Raise Requirements", value: "Raise Requirements" },
   { label: "Refer to Risk", value: "Refer to Risk" },
-  { label: "Refer to IT", value: "Refer to IT" },
+  // { label: "Refer to IT", value: "Refer to IT" },
   { label: "Reraise PIVV", value: "Reraise PIVV" },
   { label: "Refer to CUW", value: "Refer to CUW" },
 ];
@@ -121,6 +121,7 @@ export const applicantTabs: { key: ApplicantTab; label: string }[] = [
 ];
 
 export const applicantInfoTabs: { key: ApplicantInfoTab; label: string }[] = [
+  { key: "imageDetails", label: "Image Details" },
   { key: "personalKyc", label: "Personal & KYC" },
   { key: "contactAddress", label: "Contact & Address" },
   { key: "financialProfession", label: "Financial & Profession" },
@@ -129,7 +130,7 @@ export const applicantInfoTabs: { key: ApplicantInfoTab; label: string }[] = [
   { key: "generic", label: "Generic" },
   { key: "eia", label: "eIA" },
   { key: "fundDetails", label: "Fund Details" },
-  { key: "paymentPayoutDetails", label: "Payment & Payout Details" },
+  { key: "paymentPayoutDetails", label: "Payment & Payout" },
 ];
 
 export const GenderOptions = [

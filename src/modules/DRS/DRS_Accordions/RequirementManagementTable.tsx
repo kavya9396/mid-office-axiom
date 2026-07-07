@@ -12,11 +12,11 @@ import { useSelector } from "react-redux";
 
 const requirementColumns: Column<CVTRequirementRow>[] = [
     { key: "team", header: "Team", width: "10%" },
-    { key: "profile", header: "Profile", width: "10%" },
+    // { key: "profile", header: "Profile", width: "10%" },
     { key: "category", header: "Category", width: "10%" },
     { key: "subCategory", header: "Sub Category", width: "12%" },
     { key: "document", header: "Document", width: "10%" },
-    { key: "specialTest", header: "Special Test", width: "10%" },
+    // { key: "specialTest", header: "Special Test", width: "10%" },
     { key: "reason", header: "Reason", width: "10%" },
     { key: "fupCode", header: "FUP Code", width: "10%" },
     { key: "description", header: "Description", width: "15%" },
@@ -25,10 +25,10 @@ const requirementColumns: Column<CVTRequirementRow>[] = [
     { key: "raisedBy", header: "Raised By", width: "10%" },
     { key: "receivedDate", header: "Received Date", width: "10%" },
     { key: "receivedBy", header: "Received By", width: "10%" },
-    { key: "validity", header: "Validity", width: "10%" },
-    { key: "userId", header: "User ID", width: "10%" },
-    { key: "remarks", header: "Remarks", width: "15%" },
-    { key: "udsLink", header: "UDS Link", width: "15%" },
+    // { key: "validity", header: "Validity", width: "10%" },
+    // { key: "userId", header: "User ID", width: "10%" },
+    // { key: "remarks", header: "Remarks", width: "15%" },
+    // { key: "udsLink", header: "UDS Link", width: "15%" },
 ];
 
 const formFields = [

@@ -38,12 +38,56 @@ export const accordionRegistry = {
 
 type AccordionKey = keyof typeof accordionRegistry;
 
+type DrsDataRecord = Record<string, unknown>;
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const hasNonEmptyArray = (value: unknown): boolean => Array.isArray(value) && value.length > 0;
+
+const hasObjectContent = (value: unknown): boolean => {
+  const record = toRecord(value);
+  return Object.keys(record).length > 0;
+};
+
+const sectionAvailabilityCheck: Partial<Record<AccordionKey, (data: DrsDataRecord) => boolean>> = {
+  applicationOverview: (data) => hasObjectContent(data.applicationOverview),
+  summary: (data) => hasNonEmptyArray(data.summary) || hasNonEmptyArray(data.customerDetails),
+  pivvSection: (data) => hasObjectContent(data.pivvSection),
+  requirementManagement: (data) => hasNonEmptyArray(data.requirementManagement),
+  breDecision: (data) => hasObjectContent(data.breDecision) || hasObjectContent(toRecord(data.externalAPIs).breOutput),
+  quickLinks: (data) => hasObjectContent(data.quickLinks),
+};
+
+export const getPoolWiseAvailableAccordions = (
+  layoutKey: string | undefined,
+  data?: unknown,
+): AccordionKey[] => {
+  const baseAccordions = layoutKey ? DRS_LAYOUTS[layoutKey] ?? [] : [];
+
+  return baseAccordions.filter((accordion): accordion is AccordionKey => {
+    if (!(accordion in accordionRegistry)) {
+      return false;
+    }
+
+    const checker = sectionAvailabilityCheck[accordion as AccordionKey];
+    if (!checker || !data) {
+      return true;
+    }
+
+    return checker((data as DrsDataRecord) ?? {});
+  });
+};
+
 export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_CVT_POOL: [
     "breDecision",
-    "summary",
     "applicationOverview",
+    "summary",
     "pivvSection",
+    "requirementManagement",
     "cvtDecision",
     "quickLinks"
   ],

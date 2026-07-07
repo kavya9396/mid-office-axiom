@@ -31,8 +31,9 @@ const formatNumberOrDash = (value: unknown) => {
 const ApplicationOverview = () => {
   const { data } = useSelector((state: RootState) => state.drs);
   const { businessType } = useAppContext();
+  const dataRecord = (data as unknown as Record<string, unknown> | null) ?? {};
 
-  const applicationOverview = (data as unknown as Record<string, unknown> | null)?.applicationOverview as
+  const applicationOverview = dataRecord?.applicationOverview as
     | Record<string, unknown>
     | undefined;
 
@@ -45,6 +46,7 @@ const ApplicationOverview = () => {
     ? (applicationOverview.productDetail as Array<Record<string, unknown>>)
     : ((data?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
   const firstProduct = productDetails[0];
+  const applicationInfo = data?.applicationInfo;
 
   const riderDetails = Array.isArray(applicationOverview?.riderDetails)
     ? (applicationOverview.riderDetails as Array<Record<string, unknown>>)
@@ -54,16 +56,6 @@ const ApplicationOverview = () => {
     normalizeBusinessType(businessType) ??
     normalizeBusinessType(localStorage.getItem("businessType"));
   const isGroupBusiness = normalizedBusinessType === "group";
-
-  const roleType = localStorage.getItem("roleType") ?? "";
-  const expandedRoles = [
-    'Ready For Issuance Pool',
-    'System Wait Pool - Non medical',
-    'AMR - Non medical',
-    'CPT Pool'
-  ];
-
-  const isExpanded = expandedRoles.includes(roleType);
 
   const applicationDetails = [
     {
@@ -81,6 +73,18 @@ const ApplicationOverview = () => {
     {
       label: "Sum Assured",
       value: formatNumberOrDash(firstProduct?.sumAssured),
+    },
+    {
+      label: "Applied SA",
+      value: formatNumberOrDash(firstProduct?.sumAssured ?? applicationInfo?.sumAssured),
+    },
+    {
+      label: "TRSA",
+      value: formatNumberOrDash(applicationInfo?.simultaneousLifeSA),
+    },
+    {
+      label: "TFESA",
+      value: formatNumberOrDash(applicationInfo?.otherPolicySA),
     },
     {
       label: "Channel",
@@ -153,7 +157,7 @@ const ApplicationOverview = () => {
     <Container disableGutters>
       <Box sx={{ mt: 2 }}>
         {/* <CustomAccordion title="Application Overview" defaultExpanded={userRole ==='CPT'?true:false}> */}
-        <CustomAccordion title="Application Overview" defaultExpanded={isExpanded}>
+        <CustomAccordion title="Application Details" defaultExpanded>
           <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
             {/* <Box
               sx={{

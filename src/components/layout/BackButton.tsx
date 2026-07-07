@@ -2,6 +2,7 @@ import { Box, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { KeyLeftArrowIcon } from "../../icons/Icons";
 import CustomButton from "../ui/Button/Button";
+import type { ReactNode } from "react";
 
 type BackButtonProps = {
   to?: string;
@@ -9,6 +10,7 @@ type BackButtonProps = {
   onClick?: () => void;
   underline?: boolean;
   justify?: "flex-start" | "center" | "flex-end" | "space-between";
+  rightSlot?: ReactNode;
 };
 
 const BackButton = ({
@@ -17,6 +19,7 @@ const BackButton = ({
   onClick,
   underline = true,
   justify = "flex-start",
+  rightSlot,
 }: BackButtonProps) => {
   const navigate = useNavigate();
 
@@ -27,7 +30,7 @@ const BackButton = ({
 
   return (
     <Container disableGutters>
-      <Box sx={{ display: "flex", justifyContent: justify, mb: 2, pt:2 }}>
+      <Box sx={{ display: "flex", justifyContent: justify, alignItems: "center", mb: 2, pt: 2 }}>
         <CustomButton
           variant="text"
           size="small"
@@ -41,6 +44,8 @@ const BackButton = ({
           <KeyLeftArrowIcon />
           {label}
         </CustomButton>
+
+        {rightSlot}
       </Box>
     </Container>
   );

@@ -1,9 +1,11 @@
-import { accordionRegistry, DRS_LAYOUTS } from "./drs-layouts";
+import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "./drs-layouts";
 import BackButton from "../../components/layout/BackButton";
+import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
+import type { RootState } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import { mastersThunk } from "../../store/thunks/mastersThunk";
 import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
@@ -30,10 +32,15 @@ const DRS = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
     const { applicationNumber, businessType } = useAppContext();
+    const drsData = useSelector((state: RootState) => state.drs.data);
 
     const layout = mapper[roleType as keyof typeof mapper];
-    const accordions = useMemo(() => (layout ? DRS_LAYOUTS[layout] : []), [layout]);
-    const sections = useMemo(() => accordions.map((accordion) => String(accordion)), [accordions]);
+    const layoutAccordions = useMemo(() => (layout ? DRS_LAYOUTS[layout] : []), [layout]);
+    const sections = useMemo(() => layoutAccordions.map((accordion) => String(accordion)), [layoutAccordions]);
+    const visibleAccordions = useMemo(
+        () => getPoolWiseAvailableAccordions(layout, drsData),
+        [layout, drsData],
+    );
     const navigate = useNavigate();
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
@@ -90,8 +97,26 @@ const DRS = () => {
 
     return (
         <>
-            <BackButton label="Back to inbox" onClick={() => navigate(getInboxPath(safeBusinessType))} />
-            {accordions.map((accordionId) => {
+            <BackButton
+                label="Back to inbox"
+                justify="flex-start"
+                onClick={() => navigate(getInboxPath(safeBusinessType))}
+                rightSlot={
+                    <Typography
+                        sx={{
+                            flex: 1,
+                            textAlign: "center",
+                            fontSize: "18px",
+                            fontWeight: 800,
+                            color: "#161616",
+                            lineHeight: 1,
+                        }}
+                    >
+                       Application No. : {safeApplicationNumber}
+                    </Typography>
+                }
+            />
+            {visibleAccordions.map((accordionId) => {
                 const AccordionComponent = accordionRegistry[accordionId as keyof typeof accordionRegistry];
                 if (!AccordionComponent) {
                     return null;

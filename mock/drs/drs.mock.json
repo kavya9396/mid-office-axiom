@@ -108,7 +108,7 @@
           "gender": "M",
           "maritalStatus": "Married",
           "dob": "1999-07-07T00:00:00.0",
-          "age": 52,
+          "age": 25,
           "profileImage": "https://images.unsplash.com/photo-1740252117012-bb53ad05e370?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww%22",
           "caseStatus": "Green Case",
           "nationality": "Indian",
@@ -755,13 +755,7 @@
         "udsLink": "https://uds.example.com/req/001"
       }
     ],
-    "pivvSection": {
-      "pivvPoolRemarks": "Applicant is a 38-year-old non-smoker with no significant medical history. Financials and occupation details are satisfactory as per underwriting guidelines. Case is referred to HoD for final review and approval.",
-      "remarkDate": "2026-05-15T10:30:00",
-      "pivvPoolDecision": "Reject",
-      "reason": "Customer not speaking",
-      "userId": "sunil.sharma"
-    },
+   
     "quickLinks": {
       "proposerForm": "https://uds.example.com/req/001",
       "previousPolicies": [
@@ -784,7 +778,7 @@
           "serviceID": "SRV987654321",
           "ct": "",
           "st": "",
-          "breDate": "2026-05-10",
+          "breDate": "2026-05-10 10:15 PM",
           "breDiscrepancy": "Pending financial documents",
           "breRemarks": "Awaiting bank statements for verification",
           "userPool": "Financial Review Team",

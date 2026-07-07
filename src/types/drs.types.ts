@@ -899,6 +899,7 @@ export interface ApplicantProfile {
 }
 
 export type ApplicantInfoTab =
+  | "imageDetails"
   | "personalKyc"
   | "contactAddress"
   | "financialProfession"

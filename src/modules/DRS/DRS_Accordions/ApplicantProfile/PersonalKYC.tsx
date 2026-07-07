@@ -38,11 +38,32 @@ const mapGender = (value?: string): string => {
     return "Other";
 };
 
+const getAgeFromDob = (dobValue: string): string => {
+    const dob = new Date(dobValue);
+    if (Number.isNaN(dob.getTime())) return "-";
+
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const monthDiff = today.getMonth() - dob.getMonth();
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age -= 1;
+    }
+
+    return age >= 0 ? String(age) : "-";
+};
+
 const toBoolean = (value: unknown): boolean => {
     if (typeof value === "boolean") return value;
     const normalized = String(value ?? "").trim().toLowerCase();
     return normalized === "y" || normalized === "yes" || normalized === "true";
 };
+
+const buildApplicantName = (parts: Array<unknown>): string =>
+    parts
+        .map((part) => String(part ?? "").trim())
+        .filter(Boolean)
+        .join(" ");
 
 const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
     const { data } = useSelector((state: RootState) => state.drs);
@@ -86,8 +107,25 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         : undefined;
     const primaryDocument = summaryDocument ?? fallbackDocument;
 
-    const personal = profile?.applicantDetails ?? {
+    const derivedApplicantName = buildApplicantName([
+        summaryPersonal?.title ?? fallbackPersonal?.title,
+        summaryPersonal?.firstName ?? fallbackPersonal?.firstName,
+        summaryPersonal?.middleName ?? fallbackPersonal?.middleName,
+        summaryPersonal?.lastName ?? fallbackPersonal?.lastName,
+    ]);
+
+    const derivedDob = String(summaryPersonal?.dob ?? fallbackPersonal?.dob ?? profile?.applicantDetails?.dateOfBirth ?? "");
+    const apiAge = summaryPersonal?.age ?? fallbackPersonal?.age ?? profile?.proposerSummary?.age;
+    const normalizedApiAge = Number(apiAge);
+    const derivedAge = Number.isFinite(normalizedApiAge) && normalizedApiAge >= 0
+        ? String(normalizedApiAge)
+        : getAgeFromDob(derivedDob);
+
+    const personal = {
+        ...(profile?.applicantDetails ?? {}),
         dateOfBirth: String(summaryPersonal?.dob ?? fallbackPersonal?.dob ?? ""),
+        applicantName: derivedApplicantName,
+        age: derivedAge,
         gender: mapGender(String(summaryPersonal?.gender ?? fallbackPersonal?.gender ?? "")),
         maritalStatus: mapMaritalStatus(String(summaryPersonal?.maritalStatus ?? fallbackPersonal?.maritalStatus ?? "")),
         nationality: String(summaryPersonal?.nationality ?? fallbackPersonal?.nationality ?? ""),
@@ -120,12 +158,14 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         ),
     };
 
-    const personalDetails = withDashFallback(buildFields(personal, [
+    const personalDetails = withDashFallback(buildFields(personal as Record<string, unknown>, [
+        { label: "Applicant Name", key: "applicantName" },
         {
             label: "Date of Birth",
             key: "dateOfBirth",
             format: (value) => formatDOB(String(value ?? "")) || "-",
         },
+        { label: "Age", key: "age" },
         { label: "Gender", key: "gender" },
         { label: "Marital Status", key: "maritalStatus" },
         { label: "Nationality", key: "nationality" },
