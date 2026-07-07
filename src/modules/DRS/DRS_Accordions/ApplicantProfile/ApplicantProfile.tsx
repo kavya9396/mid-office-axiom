@@ -26,6 +26,7 @@ import Eia from "./Eia"
 import { formatDOB } from "../../../../utils/helpers"
 import { useAppDispatch } from "../../../../store/hooks"
 import { applicantProfileSubmitThunk } from "../../../../store/thunks/applicantProfileSubmitThunk"
+import { setProductFaceValue } from "../../../../store/slices/drsSlice"
 // import { updateApplicantProfile } from "../../../../store/slices/drsSlice"
 import { useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
@@ -458,6 +459,10 @@ const buildProfileFromReduxData = (
     } as unknown as Partial<SummaryResponse>;
 };
 
+const getProductFields = (): FormField[] => [
+    { name: "faceValue", label: "Face Value" },
+];
+
 const buildFormData = (
     profile?: Partial<SummaryResponse>
 ): ApplicantEditForm => ({
@@ -472,6 +477,7 @@ const buildFormData = (
     identityProofType: profile?.kycDetails?.identityProofType ?? "",
     identityProofNumber: profile?.kycDetails?.identityProofNumber ?? "",
     addressProof: profile?.kycDetails?.addressProof ?? "",
+    faceValue: "",
     communicationAddressLine1: profile?.communicationAddressDetails?.addressLine1 ?? "",
     communicationAddressLine2: profile?.communicationAddressDetails?.addressLine2 ?? "",
     communicationAddressLine3: profile?.communicationAddressDetails?.addressLine3 ?? "",
@@ -552,6 +558,8 @@ export const SectionCard = ({
     </Box>
 );
 
+const productFields = getProductFields();
+
 const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfileProps) => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const { applicationNumber } = useParams<{ applicationNumber: string }>();
@@ -577,8 +585,17 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
             : baseProfile;
 
     const initialFormData = useMemo(
-        () => buildFormData(displayProfile),
-        [displayProfile]
+        () => {
+            const appOverview = (drsData as unknown as Record<string, unknown> | null)?.applicationOverview as Record<string, unknown> | undefined;
+            const productList = Array.isArray(appOverview?.productDetail)
+                ? (appOverview!.productDetail as Array<Record<string, unknown>>)
+                : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
+            return {
+                ...buildFormData(displayProfile),
+                faceValue: String(productList[0]?.faceValue ?? ""),
+            };
+        },
+        [displayProfile, drsData]
     );
 
     const [formData, setFormData] = useState<ApplicantEditForm>(initialFormData);
@@ -795,9 +812,17 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
     };
 
     const handleOpenEdit = () => {
+        const appOverview = (drsData as unknown as Record<string, unknown> | null)?.applicationOverview as Record<string, unknown> | undefined;
+        const productList = Array.isArray(appOverview?.productDetail)
+            ? (appOverview!.productDetail as Array<Record<string, unknown>>)
+            : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
+        const currentFaceValue = String(productList[0]?.faceValue ?? "");
         setFieldErrors({});
         setSubmitError(null);
-        setFormData(buildFormData(displayProfile));
+        setFormData({
+            ...buildFormData(displayProfile),
+            faceValue: currentFaceValue,
+        });
         setOpenEditDialog(true);
     };
 
@@ -888,7 +913,14 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
             return;
         }
 
-        const baselineData = buildFormData(displayProfile);
+        const appOverview = (drsData as unknown as Record<string, unknown> | null)?.applicationOverview as Record<string, unknown> | undefined;
+        const productList = Array.isArray(appOverview?.productDetail)
+            ? (appOverview!.productDetail as Array<Record<string, unknown>>)
+            : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
+        const baselineData = {
+            ...buildFormData(displayProfile),
+            faceValue: String(productList[0]?.faceValue ?? ""),
+        };
         const updatedDetails = Object.entries(formData).reduce<Partial<ApplicantEditForm>>(
             (acc, [key, value]) => {
                 const formKey = key as keyof ApplicantEditForm;
@@ -920,9 +952,14 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
 
             const serverUpdatedDetails = response.updatedDetails;
             const finalUpdatedDetails = {
-                ...(serverUpdatedDetails ?? {}),
                 ...updatedDetails,
+                ...(serverUpdatedDetails ?? {}),
             };
+
+            const savedFaceValue = finalUpdatedDetails.faceValue;
+            if (typeof savedFaceValue === "string") {
+                dispatch(setProductFaceValue(savedFaceValue));
+            }
 
             // Calculate the updated profile
             if (!displayProfile) {
@@ -1083,6 +1120,24 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
                             }}
                         >
                             {addressFields.map((field) => (
+                                <Box key={field.name}>
+                                    {renderField(field)}
+                                </Box>
+                            ))}
+                        </Box>
+                    </Box>
+                    <Divider />
+                    <Box>
+                        <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>Product</Typography>
+                        <Box
+                            sx={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(3, 1fr)",
+                                gap: 2,
+                                mt: 1,
+                            }}
+                        >
+                            {productFields.map((field) => (
                                 <Box key={field.name}>
                                     {renderField(field)}
                                 </Box>
