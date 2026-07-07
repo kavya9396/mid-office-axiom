@@ -349,6 +349,7 @@ export type FinancialResponse = {
 export type PreviousPolicyItem = {
   policyNumber?: string;
   productName?: string;
+  companyName?: string;
   productType?: string;
   dateOfIssuance?: string;
   dateOfIssue?: string;
@@ -973,6 +974,7 @@ export type AuditTrailRow = {
   userId: string;
   uwDecision: string;
   breDecision: string;
+  remarks: string;
 };
 
 export type AuditTrail = AuditTrailRow[];

@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useSelector } from "react-redux";
 import type { Column } from "../../../../components/ui/Table/Table";
 import type { NomineeRow } from "../../../../types/drs.types";
@@ -20,7 +20,17 @@ const mapMemberType = (memberTypeValue: string | undefined, index: number): Appl
     return "lifeassured2";
 };
 
-const nomineeColumns: Column<NomineeRow>[] = [
+type NomineeTableRow = Pick<
+    NomineeRow,
+    "nomineeName" | "nomineeDOB" | "gender" | "relationship" | "accountNumber" | "ifsc" | "sharePercentage"
+>;
+
+type AppointeeTableRow = Pick<
+    NomineeRow,
+    "appointeeName" | "appointeeGender" | "appointeeDOB" | "appointeeRelationship"
+>;
+
+const nomineeColumns: Column<NomineeTableRow>[] = [
     { key: "nomineeName", header: "Nominee Name", width: "14%" },
     { key: "nomineeDOB", header: "Nominee DOB", width: "12%" },
     { key: "gender", header: "Gender", width: "10%" },
@@ -28,6 +38,9 @@ const nomineeColumns: Column<NomineeRow>[] = [
     { key: "accountNumber", header: "Account Number", width: "14%" },
     { key: "ifsc", header: "IFSC", width: "12%" },
     { key: "sharePercentage", header: "Share %", width: "10%" },
+];
+
+const appointeeColumns: Column<AppointeeTableRow>[] = [
     { key: "appointeeName", header: "Appointee Name", width: "14%" },
     { key: "appointeeGender", header: "Appointee Gender", width: "12%" },
     { key: "appointeeDOB", header: "Appointee DOB", width: "12%" },
@@ -62,32 +75,50 @@ const Nominee = ({ profile }: ApplicantProfileProps) => {
         ? selectedSummaryEntry.appointee
         : (Array.isArray(data?.appointee) ? data.appointee : []);
 
-    const mappedFallbackNominees: NomineeRow[] = fallbackNominees.map((item, index) => {
-        const appointee = fallbackAppointees[index] ?? fallbackAppointees[0];
+    const mappedFallbackNominees: NomineeTableRow[] = fallbackNominees.map((item) => ({
+        nomineeName: toDisplayValue([item.firstName, item.lastName].filter(Boolean).join(" ")),
+        nomineeDOB: toDisplayValue(formatDOB(item.dob)),
+        gender: toDisplayValue(item.gender),
+        relationship: toDisplayValue(item.proposerNomineeRelation),
+        accountNumber: "-",
+        ifsc: "-",
+        sharePercentage: Number(item.percentage ?? 0),
+    }));
 
-        return {
-            nomineeName: toDisplayValue([item.firstName, item.lastName].filter(Boolean).join(" ")),
-            nomineeDOB: toDisplayValue(formatDOB(item.dob)),
-            gender: toDisplayValue(item.gender),
-            relationship: toDisplayValue(item.proposerNomineeRelation),
-            accountNumber: "-",
-            ifsc: "-",
-            sharePercentage: Number(item.percentage ?? 0),
-            appointeeName: appointee
-                ? toDisplayValue([appointee.firstName, appointee.lastName].filter(Boolean).join(" "))
-                : "-",
-            appointeeGender: appointee ? toDisplayValue(appointee.gender) : "-",
-            appointeeDOB: appointee ? toDisplayValue(formatDOB(appointee.dob)) : "-",
-             appointeeRelationship: toDisplayValue(item.relationWithLA),
-        };
-    });
+    const mappedFallbackAppointees: AppointeeTableRow[] = fallbackAppointees.map((item) => ({
+        appointeeName: toDisplayValue([item.firstName, item.lastName].filter(Boolean).join(" ")),
+        appointeeGender: toDisplayValue(item.gender),
+        appointeeDOB: toDisplayValue(formatDOB(item.dob)),
+        appointeeRelationship: toDisplayValue(item.relationWithNominee),
+    }));
 
-    const nominees: NomineeRow[] =
+    const nominees: NomineeTableRow[] =
         profile?.nominees && profile.nominees.length > 0
-            ? profile.nominees
+            ? profile.nominees.map((item) => ({
+                nomineeName: toDisplayValue(item.nomineeName),
+                nomineeDOB: toDisplayValue(item.nomineeDOB),
+                gender: toDisplayValue(item.gender),
+                relationship: toDisplayValue(item.relationship),
+                accountNumber: toDisplayValue(item.accountNumber),
+                ifsc: toDisplayValue(item.ifsc),
+                sharePercentage: Number(item.sharePercentage ?? 0),
+            }))
             : mappedFallbackNominees;
 
-    if (nominees.length === 0) {
+    const profileAppointees: AppointeeTableRow[] = (profile?.nominees ?? []).map((item) => ({
+        appointeeName: toDisplayValue(item.appointeeName),
+        appointeeGender: toDisplayValue(item.appointeeGender),
+        appointeeDOB: toDisplayValue(item.appointeeDOB),
+        appointeeRelationship: toDisplayValue(item.appointeeRelationship),
+    }));
+
+    const hasProfileAppointeeData = profileAppointees.some((item) => item.appointeeName !== "-");
+    const appointees: AppointeeTableRow[] =
+        profile?.nominees && profile.nominees.length > 0 && hasProfileAppointeeData
+            ? profileAppointees
+            : mappedFallbackAppointees;
+
+    if (nominees.length === 0 && appointees.length === 0) {
         return (
             <Typography
                 component="span"
@@ -102,11 +133,45 @@ const Nominee = ({ profile }: ApplicantProfileProps) => {
     }
 
     return (
-        <CustomTable<NomineeRow>
-            title="Nominee Details"
-            columns={nomineeColumns}
-            data={nominees}
-        />
+        <>
+            {nominees.length > 0 ? (
+                <CustomTable<NomineeTableRow>
+                    title="Nominee Details"
+                    columns={nomineeColumns}
+                    data={nominees}
+                />
+            ) : (
+                <Typography
+                    component="span"
+                    sx={{
+                        fontSize: "14px",
+                        fontWeight: 700,
+                    }}
+                >
+                    No nominees have been selected
+                </Typography>
+            )}
+
+            <Box sx={{ mt: 2 }}>
+                {appointees.length > 0 ? (
+                    <CustomTable<AppointeeTableRow>
+                        title="Appointee Details"
+                        columns={appointeeColumns}
+                        data={appointees}
+                    />
+                ) : (
+                    <Typography
+                        component="span"
+                        sx={{
+                            fontSize: "14px",
+                            fontWeight: 700,
+                        }}
+                    >
+                        No appointees have been selected
+                    </Typography>
+                )}
+            </Box>
+        </>
     );
 };
 

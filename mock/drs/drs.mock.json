@@ -31,7 +31,7 @@
     },
     "breDecision": {
       "decision": "RM",
-      "initialDecision": "RM",
+      "initialDecision": "ST",
       "remarks": "# TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML#",
       "discrepancy": "-",
       "timestamp": "01/04/2026, 1300hrs",
