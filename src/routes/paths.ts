@@ -12,4 +12,6 @@ export const PATHS = {
   DRS_MEDICAL: "app/:applicationNumber/drs/medical",
   DRS_FINANCIAL: "app/:applicationNumber/drs/financial",
   DRS_PREVIOUS: "app/:applicationNumber/drs/previousPolicies",
+
+  USER_MANAGEMENT: "admin/userManagement"
 };

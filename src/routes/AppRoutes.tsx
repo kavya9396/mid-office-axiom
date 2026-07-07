@@ -14,6 +14,7 @@ import PreviousPolicy from "../modules/QuickLinks/PreviousPolicy";
 import AuditTrailPage from "../modules/QuickLinks/AuditTrailPage";
 import RiskDetailsPage from "../modules/QuickLinks/RiskDetailsPage";
 import OpenTasksPage from "../modules/QuickLinks/OpenTasksPage";
+import UserManagement from "../modules/DRS/UserManagement";
 
 function BusinessTypeRedirect() {
     return <Navigate to="inbox" replace />;
@@ -28,6 +29,12 @@ export default function AppRoutes() {
 
             {/* PROTECTED */}
             <Route element={<ProtectedRoute />}>
+
+             {/* Independent Route */}
+                <Route path={PATHS.USER_MANAGEMENT} element={<RootLayout />}>
+                    <Route index element={<UserManagement />} />
+                </Route>
+
                 <Route element={<BusinessTypeRoute />}>
 
                     {/* REDIRECT BASE BUSINESS TYPE */}
@@ -35,7 +42,6 @@ export default function AppRoutes() {
 
                     {/* APP ROUTES WITH LAYOUT */}
                     <Route path=":businessType" element={<RootLayout />}>
-
                         <Route path={PATHS.INBOX} element={<Inbox />} />
                         <Route path={PATHS.DRS} element={<DRS />} />
                         <Route path={PATHS.DRS_MEDICAL} element={<ViewMedicals />} />
@@ -46,7 +52,6 @@ export default function AppRoutes() {
                         <Route path={PATHS.GRIEVANCE_RAISE} element={<Grievance />} />
                         <Route path={PATHS.GRIEVANCE_APPLICATION} element={<GrievanceApplication />} />
                         <Route path={PATHS.DRS_PREVIOUS} element={<PreviousPolicy />} />
-
                     </Route>
                 </Route>
             </Route>
