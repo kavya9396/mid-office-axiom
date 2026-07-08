@@ -7,6 +7,7 @@ import { modalTitleStyles } from "../../../../utils/styles";
 
 type ImageDetailsProps = {
   profile?: Partial<SummaryResponse>;
+  isAccordionOpen?: boolean;
 };
 
 const toDisplay = (value: unknown) => {
