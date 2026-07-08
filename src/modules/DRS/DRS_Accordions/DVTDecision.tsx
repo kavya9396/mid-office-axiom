@@ -103,11 +103,7 @@ const DVTDecision = () => {
                             />
                         </Box>
 
-                        {!decision && (
-                            <Alert severity="info" sx={{ mt: 2, borderRadius: 2 }}>
-                                Please select a DVT Decision to proceed.
-                            </Alert>
-                        )}
+                       
                         {decision === "Raise Requirements" && !hasRequirements && (
                             <Alert severity="warning" sx={{ mt: 2, borderRadius: 2 }}>
                                 Please add at least one requirement in the <strong>Requirement Management</strong> section above before selecting "Raise Requirements".

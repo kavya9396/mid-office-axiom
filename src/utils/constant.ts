@@ -109,9 +109,9 @@ export const cvtDecisionOptions = [
   { label: "Refer to CUW", value: "Refer to CUW" },
 ];
 export const dvtDecisionOptions = [
+  { label: "Accept", value: "Accept" },
   { label: "Raise Requirements", value: "Raise Requirements" },
-  { label: "Refer to IT", value: "Refer to IT" },
-  { label: "Hold", value: "Hold" },
+  { label: "Refer to GUW", value: "Refer to GUW" },
 ];
 
 export const applicantTabs: { key: ApplicantTab; label: string }[] = [

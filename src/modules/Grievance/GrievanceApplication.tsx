@@ -11,7 +11,6 @@ import {
     Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
-import BackButton from "../../components/layout/BackButton";
 import CustomAccordion from "../../components/ui/Accordion/Accordion";
 import CustomButton from "../../components/ui/Button/Button";
 import {
@@ -196,12 +195,7 @@ const GrievanceApplication = () => {
 
     return (
         <Box sx={{ backgroundColor: "#F0F3F8", minHeight: "90vh", pb: 4 }}>
-            <Container disableGutters>
-                <BackButton
-                    label="Back to Inbox"
-                    onClick={() => navigate(getInboxPath(safeBusinessType))}
-                />
-            </Container>
+         
 
             <Container disableGutters>
                 <Typography sx={{ fontSize: 16, fontWeight: 700, mb:2 }}>
@@ -229,7 +223,7 @@ const GrievanceApplication = () => {
                         <Box>
                             <Typography sx={{ fontSize: 12, color: "#6B7280" }}>Application Number</Typography>
                             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
-                                {applicationData?.status ?? "-"}
+                                {applicationData?.applicationId ?? "-"}
                             </Typography>
                         </Box>
 

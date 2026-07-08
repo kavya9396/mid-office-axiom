@@ -11,9 +11,9 @@
 
         "productCode": "I19",
 
-        "sumAssured": 0,
+        "sumAssured": 100000,
 
-        "appliedSa": 0,
+        "appliedSa": 1000000,
 
         "annualPremium": 876863872,
 
@@ -54,9 +54,13 @@
         "nameOfLifeAssured": "ARYAYAN Khan",
 
         "caseStatus": "DRAFT",
-        "breDecision":"STD"
+        "breDecision":"STD",
+        "masterPlanNo":"MPH123",
+        "poolTAT":">2",
+        "typeOfGroupBusiness":"Term",
+        "caseReceivedDate":"01-07-2026"
       }
-    ],"PRE_ISSUANCE_SERVICING_TASK":[
+    ],"MMT_TASK":[
       {
         "taskId": "2078.18771",
 
@@ -64,66 +68,17 @@
 
         "isMedical": false,
 
-        "roleType": "PRE_ISSUANCE_SERVICING_TASK",
+        "roleType": "MMT_TASK",
 
-        "role": "GROUP_PRE_ISSUANCE_SERVICING_USER",
-
-        "businessType": "GROUP"
-      }], "GUW_TASK": [
-      {
-        "id": 1,
-
-        "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 0,
-
-        "appliedSa": 0,
-
-        "annualPremium": 876863872,
-
-        "productType": "I19",
-
-        "isMedical": false,
-
-        "channel": "0TTB",
-
-        "roleType": "GUW_TASK",
-
-        "role": "GROUP_GUW_USER",
+        "role": "GROUP_MMT_USER",
 
         "businessType": "GROUP",
-
-        "state": "DRAFT",
-
-        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
-        "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD"
-      }
-    ]
+        "clientType":"Individual",
+        "premium":"876863872",
+        "clientName":"Client",
+        "planOpted":"GP1",
+        "assignedTpa":"test",
+        "grievanceRaisedDate":"01-07-2026"
+      }]
   }
 }

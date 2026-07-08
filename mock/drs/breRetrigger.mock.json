@@ -3,7 +3,7 @@
     "breOutput": {
       "systemDecision": "Non-STP",
       "decisionTypes": {
-        "breInitialDecision": "RM",
+        "breInitialDecision": "ST",
         "breDecision": "RM",
         "breAction": "Regular Medical required",
         "breRequirement": "Videography Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection"

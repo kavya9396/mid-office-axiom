@@ -15,6 +15,7 @@ import UWChecklist from "./DRS_Accordions/UWChecklist";
 import UWDecision from "./DRS_Accordions/UWDecision";
 import QuickLinks from "./QuickLinks";
 import UWToolkit from "./UWToolkit";
+import GrievanceApplication from "../Grievance/GrievanceApplication";
 
 export const accordionRegistry = {
   breDecision: BreDecision,
@@ -34,6 +35,7 @@ export const accordionRegistry = {
   dvtDecision: DVTDecision,
   uacChecklist: UACChecklist,
   uwChecklist: UWChecklist,
+  greivance:GrievanceApplication
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
@@ -208,4 +210,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "applicationOverview",
     "quickLinks",
   ],
+  GROUP_MMT_POOL:[
+    "greivance"
+  ]
 };
