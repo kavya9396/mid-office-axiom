@@ -39,7 +39,6 @@ const normalizePolicies = (response: PreviousPoliciesResponse): PreviousPolicyIt
 
 const getIssueDate = (policy: PreviousPolicyItem) => policy.dateOfIssuance ?? policy.dateOfIssue ?? policy.issueDate ?? "-";
 
-const getMedicalReceivedDate = (policy: PreviousPolicyItem) => policy.medicalsReceivedDate ?? policy.medicalReceivedDate ?? "-";
 
 const PreviousPolicy = () => {
     const dispatch = useAppDispatch();
@@ -153,8 +152,6 @@ const PreviousPolicy = () => {
                                 <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>Date Of Issuance</TableCell>
                                 <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>UW Decision</TableCell>
                                 <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>Sum Assured</TableCell>
-                                <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>Medicals Received Date</TableCell>
-                                <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>Validity</TableCell>
                             </TableRow>
                         </TableHead>
 
@@ -182,8 +179,125 @@ const PreviousPolicy = () => {
                                         <TableCell>{getIssueDate(policy)}</TableCell>
                                         <TableCell>{policy.uwDecision ?? "-"}</TableCell>
                                         <TableCell>{formatCurrency(policy.sumAssured)}</TableCell>
-                                        <TableCell>{getMedicalReceivedDate(policy)}</TableCell>
-                                        <TableCell>{policy.validity ?? "-"}</TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+
+                <Box sx={{ borderTop: "1px solid #E0E0E0", px: 2, py: 1.5 }}>
+                    <Box
+                        sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            alignItems: "center",
+                            flexWrap: "wrap",
+                            gap: 2,
+                        }}
+                    >
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <Typography sx={{ fontSize: 14, color: "#444444" }}>Show</Typography>
+                            <Select
+                                value={rowsPerPage}
+                                size="small"
+                                onChange={(event) => {
+                                    setRowsPerPage(Number(event.target.value));
+                                    setPage(0);
+                                }}
+                                sx={{ minWidth: 80, height: 34, fontSize: 14 }}
+                            >
+                                <MenuItem value={10}>10</MenuItem>
+                                <MenuItem value={25}>25</MenuItem>
+                                <MenuItem value={50}>50</MenuItem>
+                                <MenuItem value={100}>100</MenuItem>
+                                <MenuItem value={-1}>All</MenuItem>
+                            </Select>
+                        </Box>
+
+                        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                            <CustomButton onClick={() => setPage(Math.max(0, page - 1))} disabled={page === 0}>
+                                <KeyLeftArrowIcon />
+                                Previous
+                            </CustomButton>
+
+                            <Typography sx={{ px: 1, color: "#444444" }}>{page + 1}</Typography>
+
+                            <CustomButton
+                                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
+                                disabled={page >= totalPages - 1}
+                            >
+                                Next
+                                <KeyRightArrowIcon />
+                            </CustomButton>
+                        </Box>
+
+                        <Typography sx={{ fontSize: 14, color: "#444444" }}>
+                            Showing {startRecord}-{endRecord} of {totalCount}
+                        </Typography>
+                    </Box>
+                </Box>
+            </Paper>
+            <Box sx={{ pt:2}}></Box>
+             <Paper
+                sx={{
+                    borderRadius: "20px",
+                    overflow: "hidden",
+                    border: "1px solid #D8D8D8",
+                   
+                }}
+            >
+                <Box
+                    sx={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        p: 1,
+                        pl: 2,
+                        backgroundColor: "#004A80",
+                        color: "#FFFFFF",
+                    }}
+                >
+                    <Typography sx={{ fontSize: "18px", fontWeight: 700 }}>
+                        Previous Policies - Non IPRU
+                    </Typography>
+                </Box>
+
+                <TableContainer>
+                    <Table size="small" sx={{ minWidth: 940 }}>
+                        <TableHead>
+                            <TableRow>
+                                <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>Policy Number</TableCell>
+                                <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>Company Name</TableCell>
+                                <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>Date Of Issuance</TableCell>
+                                <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>UW Decision</TableCell>
+                                <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>Sum Assured</TableCell>
+                            </TableRow>
+                        </TableHead>
+
+                        <TableBody>
+                            {loading ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} sx={{ py: 3 }}>
+                                        <Typography sx={{ color: "#6B7280" }}>Loading previous policies...</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ) : paginatedRows.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} sx={{ py: 3 }}>
+                                        <Typography sx={{ color: "#6B7280" }}>No previous policy data found.</Typography>
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                paginatedRows.map((policy, index) => (
+                                    <TableRow key={`${policy.policyNumber ?? "policy"}-${index}`}>
+                                        <TableCell sx={{ color: "#0E3762", textDecoration: "underline", fontWeight: 600 }}>
+                                            {policy.policyNumber ?? "-"}
+                                        </TableCell>
+                                        <TableCell>LIC</TableCell>
+                                        <TableCell>{getIssueDate(policy)}</TableCell>
+                                        <TableCell>{policy.uwDecision ?? "-"}</TableCell>
+                                        <TableCell>{formatCurrency(policy.sumAssured)}</TableCell>
                                     </TableRow>
                                 ))
                             )}

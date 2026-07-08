@@ -184,8 +184,8 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_IT_POOL: ["quickLinks"],
   GROUP_DVT_POOL: [
     "breDecision",
-    "summary",
     "applicationOverview",
+    "summary",
     "requirementManagement",
     "dvtDecision",
     "quickLinks",

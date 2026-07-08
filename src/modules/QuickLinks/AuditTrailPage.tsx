@@ -19,6 +19,8 @@ const auditTrailColumns: Column<AuditTrailRow>[] = [
   { key: "subPool", header: "Sub Pool", width: "10%" },
   { key: "userId", header: "User ID", width: "10%" },
   { key: "uwDecision", header: "UW Decision", width: "10%" },
+   { key: "breDecision", header: "BRE Decision", width: "10%" },
+  { key: "remarks", header: "BRE Remarks", width: "10%" },
 ];
 
 const toDisplay = (value: unknown) => {
@@ -44,6 +46,7 @@ const normalizeAuditTrailRows = (rows: unknown): AuditTrail => {
       userId: toDisplay(item.userId),
       uwDecision: toDisplay(item.uwDecision ?? item.decision),
       breDecision: toDisplay(item.breDecision),
+      remarks: toDisplay(item.remarks),
     };
   });
 };

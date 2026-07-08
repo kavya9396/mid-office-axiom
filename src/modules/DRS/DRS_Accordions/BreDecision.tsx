@@ -201,12 +201,44 @@ const BreDecision = ({
       value: currentBreDecision?.timestamp ?? "-",
     },
   ];
-
+  const coreFinalBreDetails = [
+    {
+      label: "BRE Status",
+      value: resolvedBreStatus,
+    },
+    {
+      label: "BRE Decision",
+      value: currentBreDecision?.decision ?? "-",
+    },
+    {
+      label: "BRE Remarks",
+      value: resolvedRemarks,
+    },
+    {
+      label: "BRE Discrepancy",
+      value: resolvedDiscrepancy,
+    },
+    {
+      label: "BRE Timestamp",
+      value: currentBreDecision?.timestamp ?? "-",
+    },
+  ];
 
   const additionalBreDetails = [
     ...conditionalBreDecisionParams,
     ...conditionalFields,
   ];
+
+  const normalizedInitialBreDecision = String(currentBreDecision?.initialDecision ?? "")
+    .trim()
+    .toLowerCase();
+  const normalizedFinalBreDecision = String(currentBreDecision?.decision ?? "")
+    .trim()
+    .toLowerCase();
+  const shouldShowInitialBreSection =
+    normalizedInitialBreDecision !== "" &&
+    normalizedFinalBreDecision !== "" &&
+    normalizedInitialBreDecision !== normalizedFinalBreDecision;
 
   const handleRetrigger = async () => {
     if (isBreSuccess || breRetriggerLoading) {
@@ -361,44 +393,46 @@ const BreDecision = ({
             borderRadius: "8px",
           }}
         >
-          <Box sx={{ fontWeight: 700 }}>
-            Initial BRE
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "0.5fr 0.8fr 2.5fr 2.5fr 0.8fr 0.5fr",
-                gap: "16px",
-              }}
-            >
-              {coreBreDetails.map((item, index) =>
-                renderBreDetail(item, `core-${item.label}-${index}`),
-              )}
-
-              {/* <Box
+          {shouldShowInitialBreSection && (
+            <Box sx={{ fontWeight: 700 }}>
+              Initial BRE
+              <Box
                 sx={{
-                  ...centerFlex,
+                  display: "grid",
+                  gridTemplateColumns: "0.5fr 0.8fr 2.5fr 2.5fr 0.8fr 0.5fr",
+                  gap: "16px",
                 }}
               >
-                <Box
-                  component="span"
-                  onClick={() => {
-                    void handleRetrigger();
-                  }}
+                {coreBreDetails.map((item, index) =>
+                  renderBreDetail(item, `core-${item.label}-${index}`),
+                )}
+
+                {/* <Box
                   sx={{
-                    color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
-                    border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
-                    padding: 1,
-                    borderRadius: "8px",
-                    display: "flex",
-                    cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
-                    opacity: isRetriggerDisabled ? 0.5 : 1,
+                    ...centerFlex,
                   }}
                 >
-                  <RefreshIcon />
-                </Box>
-              </Box> */}
+                  <Box
+                    component="span"
+                    onClick={() => {
+                      void handleRetrigger();
+                    }}
+                    sx={{
+                      color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
+                      border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
+                      padding: 1,
+                      borderRadius: "8px",
+                      display: "flex",
+                      cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
+                      opacity: isRetriggerDisabled ? 0.5 : 1,
+                    }}
+                  >
+                    <RefreshIcon />
+                  </Box>
+                </Box> */}
+              </Box>
             </Box>
-          </Box>
+          )}
 
           <Box sx={{ fontWeight: 700 }}>
             Final BRE
@@ -409,7 +443,7 @@ const BreDecision = ({
                 gap: "16px",
               }}
             >
-              {coreBreDetails.map((item, index) =>
+              {coreFinalBreDetails.map((item, index) =>
                 renderBreDetail(item, `core-${item.label}-${index}`),
               )}
 

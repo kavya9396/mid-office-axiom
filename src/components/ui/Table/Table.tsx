@@ -145,17 +145,23 @@ export default function CustomTable<T extends object>({
               <TableRow key={rowIndex}>
                 {columns.map((col) => {
                   const value = row[col.key];
+                  const content = col.render
+                    ? col.render(value, row, rowIndex)
+                    : (value as React.ReactNode);
 
                   return (
                     <TableCell key={String(col.key)} sx={{fontSize:"12px"}}>
-                       <Typography
-                      sx={{
-                        fontSize: "12px",
-                      }}
-                    >
-                      {col.render
-                        ? col.render(value, row, rowIndex)
-                        : (value as React.ReactNode)}</Typography>
+                      {col.render ? (
+                        content
+                      ) : (
+                        <Typography
+                          sx={{
+                            fontSize: "12px",
+                          }}
+                        >
+                          {content}
+                        </Typography>
+                      )}
                     </TableCell>
                   );
                 })}

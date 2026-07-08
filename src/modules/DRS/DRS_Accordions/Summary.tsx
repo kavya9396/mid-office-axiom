@@ -26,10 +26,7 @@ const mapMemberType = (memberTypeValue: string | undefined, index: number): Appl
 const Summary = () => {
     const navigate = useNavigate();
     const { data } = useSelector((state: RootState) => state.drs);
-    const dataRecord = (data as unknown as Record<string, unknown> | null) ?? {};
-    const applicationOverviewRecord = dataRecord?.applicationOverview as
-        | Record<string, unknown>
-        | undefined;
+  
 
     const customerDetails = data?.customerDetails ?? [];
     const summaryRoot = data as unknown as Record<string, unknown> | null;
@@ -37,9 +34,7 @@ const Summary = () => {
         ? (summaryRoot.summary as Array<Record<string, unknown>>)
         : [];
     const isLAPropSame = Boolean(data?.applicationInfo?.isLAPropSame);
-    const hasApplicationOverview =
-        Object.prototype.hasOwnProperty.call(dataRecord, "applicationOverview") &&
-        applicationOverviewRecord !== null;
+    
 
     const customerWithTabs = customerDetails.map((customer, index) => ({
         customer,
