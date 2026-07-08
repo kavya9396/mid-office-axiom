@@ -6,7 +6,7 @@ import { GridSection } from "../../../components/layout/GridSection";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import type { RiderRow } from "../../../types/drs.types";
-import { toDisplayValue } from "../../../utils/helpers";
+import { formatDateWithOrdinalTime, toDisplayValue } from "../../../utils/helpers";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { normalizeBusinessType } from "../../../routes/routes";
 
@@ -36,6 +36,7 @@ const ApplicationOverview = () => {
   const applicationOverview = dataRecord?.applicationOverview as
     | Record<string, unknown>
     | undefined;
+  const basicDetails = dataRecord?.basicDetails as Record<string, unknown> | undefined;
 
   const sourcingDetail = (applicationOverview?.sourcingDetail as Record<string, unknown> | undefined)
     ?? (data?.sourcingDetail as unknown as Record<string, unknown> | undefined);
@@ -56,35 +57,20 @@ const ApplicationOverview = () => {
     normalizeBusinessType(businessType) ??
     normalizeBusinessType(localStorage.getItem("businessType"));
   const isGroupBusiness = normalizedBusinessType === "group";
+  const isRetailBusiness = normalizedBusinessType === "retail";
 
   const applicationDetails = [
     {
       label: "Product Name",
       value: String(firstProduct?.name ?? "-"),
     },
-    {
-      label: "Product Code",
-      value: String(firstProduct?.code ?? "-")
-    },
-    {
-      label: "Face Value",
-      value: String(firstProduct?.faceValue ?? "-")
-    },
-    {
+     {
       label: "Sum Assured",
       value: formatNumberOrDash(firstProduct?.sumAssured),
     },
     {
       label: "Applied SA",
       value: formatNumberOrDash(firstProduct?.sumAssured ?? applicationInfo?.sumAssured),
-    },
-    {
-      label: "TRSA",
-      value: formatNumberOrDash(applicationInfo?.simultaneousLifeSA),
-    },
-    {
-      label: "TFESA",
-      value: formatNumberOrDash(applicationInfo?.otherPolicySA),
     },
     {
       label: "Channel",
@@ -94,7 +80,7 @@ const ApplicationOverview = () => {
       label: "Sub Channel",
       value: String(sourcingDetail?.drcChannelCode ?? sourcingDetail?.subChannelCode ?? "-"),
     },
-    {
+      {
       label: "Agent Code",
       value: String(sourcingDetail?.agentCode ?? "-"),
     },
@@ -106,12 +92,6 @@ const ApplicationOverview = () => {
       label: "Customer Type",
       value: String(data?.applicationInfo?.proposerType ?? "-"),
     },
-    ...(isGroupBusiness
-      ? [{
-        label: "Policy Type",
-        value: String(groupDetails?.coverageStatus ?? "-"),
-      }]
-      : []),
     {
       label: "Modal Premium",
       value: formatNumberOrDash(firstProduct?.paymentAmount),
@@ -128,17 +108,40 @@ const ApplicationOverview = () => {
       label: "Payment Mode",
       value: String(firstProduct?.premiumModeFpd ?? "-"),
     },
+     ...(isRetailBusiness ? [
+    {
+      label: "Product Code",
+      value: String(firstProduct?.code ?? "-")
+    },
+    {
+      label: "Face Value",
+      value: String(firstProduct?.faceValue ?? "-")
+    },
+   
+    {
+      label: "TRSA",
+      value: formatNumberOrDash(applicationInfo?.simultaneousLifeSA),
+    },
+    {
+      label: "TFESA",
+      value: formatNumberOrDash(applicationInfo?.otherPolicySA),
+    }] : []),
+    
+  
     ...(isGroupBusiness
       ? [{
+        label: "Policy Type",
+        value: String(groupDetails?.coverageStatus ?? "-"),
+      },{
         label: "Master Policy Holder",
-        value: String(firstProduct?.masterPolicyHolder ?? "-"),
+        value: toDisplayValue(groupDetails?.masterPolicyHolder ?? groupDetails?.masterPolicyHolder),
       },
     {
       label: "LAN Number",
-      value: String(firstProduct?.lanNumber ?? "-"),
+      value: toDisplayValue(sourcingDetail?.lanNumber ?? firstProduct?.lanNumber),
     }, {
       label: "Login Date",
-      value: String(firstProduct?.lastLoginDate ?? "-"),
+      value: formatDateWithOrdinalTime(basicDetails?.lastLoginDate ?? firstProduct?.lastLoginDate) || "-",
     }]
       : [])
   ];
