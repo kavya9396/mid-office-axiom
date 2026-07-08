@@ -6,7 +6,7 @@
         "breInitialDecision": "ST",
         "breDecision": "RM",
         "breAction": "Regular Medical required",
-        "breRequirement": "Videography Medical Examination Report eligible case###Web Aggregator Login#DRC_ Standard #Income Proof Required for Protection"
+        "breRequirement": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EID"
       },
       "requirements": [
         {
@@ -22,6 +22,27 @@
       "reTriggerCount": 1,
       "errorResp": "",
       "breRemarks": "From BRE retrigger mock #ICICI Prudential Website#Check Basic KYC Document Attestations"
+    },
+    "medicalBreOutput": {
+      "isMedical": true,
+      "breMedicalDecision": "STD",
+      "brePhysicalMedicalDecision": "STP",
+      "brePhysicalMedicalRemark": "",
+      "breTeleVideoMerDecision": "Standard_1",
+      "breTeleVideoMerRemark": "",
+      "munichReMedicalDecision": "",
+      "munichReRating": "",
+      "biuMedicalStatus": "Y"
+    },
+    "financialBreOutput": {
+      "isFinancial": true,
+      "breFinancialDecision": "STD",
+      "breRemark": "",
+      "financialEligibility": "",
+      "derivedIncome": "",
+      "counterOfferValue": "",
+      "additionalSA": "",
+      "biuFinancialStatus": "N"
     }
   }
 }

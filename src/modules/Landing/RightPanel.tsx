@@ -49,6 +49,8 @@ import { useAppContext } from "../../hooks/useAppContext";
 type SortDirection = "asc" | "desc";
 
 const roleMapper = {
+  "CUW_TASK": "CUW Pool",
+  "CMO_TASK": "CMO Pool",
   "CVT_TASK": "CVT Pool",
   "CPT_TASK": "CPT Pool",
   "DVT_TASK": "DVT Pool",
@@ -56,7 +58,13 @@ const roleMapper = {
   "PRE_ISSUANCE_SERVICING_TASK":"Pre Issuance Servicing Pool",
   "EXCEPTIONAL_TASK":"Exceptional Pool",
   "GUW_TASK":"GUW Pool",
-  "MMT_TASK":"MMT Pool"
+  "HOD_TASK":"HOD Pool",
+  "MMT_TASK":"MMT Pool",
+  "SR_UW_TASK":"Sr UW Pool",
+  "SUW_TASK":"SUW Pool",
+  "VENDOR_CMO_TASK":"Vendor CMO Pool",
+  "COPS_TASK":"COPS Pool",
+  "IT_TASK":"IT Pool"
 }
 
 const RightPanel = ({

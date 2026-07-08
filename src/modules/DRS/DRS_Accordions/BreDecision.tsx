@@ -52,7 +52,7 @@ const mapBreOutputToDecision = (
   decision: breOutput.decisionTypes?.breDecision ?? null,
   status: "Success",
   remarks: breOutput.breRemarks ?? null,
-  discrepancy: breOutput.decisionTypes?.breRequirement ?? null,
+  discrepancy: breOutput.decisionTypes?.breRequirement?.replace(/ /g, "#") ?? null,
   timestamp: breOutput.systemDecisionDateTime ?? null,
   initialDecision:
     breOutput.decisionTypes?.initialDecision ??
@@ -316,64 +316,66 @@ const BreDecision = ({
     }
   };
 
-  const getDisplayText = (text: string) => {
-    return truncateText(text, 80);
-  };
+  // const getDisplayText = (text: string) => {
+  //   return truncateText(text, 80);
+  // };
 
-  const renderBreDetail = (
-    item: { label: string; value: string },
-    key: string,
-  ) => {
-    const isLongText = item.value.length > 80;
+ const renderBreDetail = (
+  item: { label: string; value: string },
+  key: string,
+) => {
+  const limit = item.label === "BRE Discrepancy" ? 30 : 80;
+  const isLongText = item.value.length > limit;
 
-    return (
-      <Box key={key} sx={{ ...columnFlex }}>
-        <Typography
-          sx={{
-            color: "#444444",
-            fontSize: "12px",
-          }}
-        >
-          {item.label}
-        </Typography>
-        <Typography
-          sx={{
-            color: "#161616",
-            fontWeight: 600,
-            fontSize: "14px",
-            lineHeight: "20px",
-            maxHeight: "40px",
-            overflow: "hidden",
-          }}
-        >
-          {getDisplayText(item.value)}
+  return (
+    <Box key={key} sx={{ ...columnFlex }}>
+      <Typography
+        sx={{
+          color: "#444444",
+          fontSize: "12px",
+        }}
+      >
+        {item.label}
+      </Typography>
 
-          {isLongText && "... "}
+      <Typography
+        sx={{
+          color: "#161616",
+          fontWeight: 600,
+          fontSize: "14px",
+          lineHeight: "20px",
+          maxHeight: "40px",
+          overflow: "hidden",
+        }}
+      >
+        {truncateText(item.value, limit)}
 
-          {isLongText && (
-            <Box
-              component="span"
-              onClick={() => {
-                setSelectedItem({
-                  label: item.label,
-                  value: item.value,
-                });
-                setDialogOpen(true);
-              }}
-              sx={{
-                color: "#063E6F",
-                cursor: "pointer",
-                fontWeight: 500,
-                textDecoration: "underline",
-              }}
-            >
-              show more
-            </Box>
-          )}
-        </Typography>
-      </Box>
-    );
-  };
+        {isLongText && "... "}
+
+        {isLongText && (
+          <Box
+            component="span"
+            onClick={() => {
+              setSelectedItem({
+                label: item.label,
+                value: item.value,
+              });
+              setDialogOpen(true);
+            }}
+            sx={{
+              color: "#063E6F",
+              cursor: "pointer",
+              fontWeight: 500,
+              textDecoration: "underline",
+            }}
+          >
+            show more
+          </Box>
+        )}
+      </Typography>
+    </Box>
+  );
+};
 
   return (
     <Container disableGutters>

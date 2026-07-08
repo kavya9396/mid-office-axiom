@@ -1,8 +1,8 @@
-import { Box, Container, MenuItem, Select } from "@mui/material";
+import { Box, Container, MenuItem, Select, Typography } from "@mui/material";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import { applicantTabs } from "../../../utils/constant";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
@@ -10,6 +10,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import ApplicantProfile from "./ApplicantProfile/ApplicantProfile";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { useNavigate } from "react-router-dom";
+import CustomDialog from "../../../components/ui/Dialog/Dialog";
 
 const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
     const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
@@ -24,11 +25,129 @@ const mapMemberType = (memberTypeValue: string | undefined, index: number): Appl
 };
 
 type DvtLifeOption = "main" | "joint";
+type RiskSectionKey = "medical" | "financial" | "other";
+
+type RiskCardItem = {
+    key: RiskSectionKey;
+    label: string;
+    subLabel: string;
+    data: Record<string, unknown>;
+    isHealthy: boolean;
+    mismatches: string[];
+};
+
+const EXPECTED_RISK_PARAMETERS: Record<RiskSectionKey, Record<string, string[]>> = {
+    medical: {
+        brePhysicalMedicalDecision: ["STP", "STD", "STANDARD", "STANDARD 1"],
+        breTeleVideoMerDecision: ["STANDARD", "STANDARD 1", "STP", "STD"],
+        biuMedicalStatus: ["Y"],
+    },
+    financial: {
+        breFinancialDecision: ["FSTP", "STD", "STANDARD"],
+        biuFinancialStatus: ["N"],
+    },
+    other: {
+        ptlrResponse: ["STANDARD"],
+        drcResponse: ["NO"],
+        adverseIIB: ["NO"],
+        criminalQuestionResponseLA: ["NO"],
+        pepQuestionResponseLA: ["NO"],
+        criminalQuestionResponsePR: ["NO"],
+        pepQuestionResponsePR: ["NO"],
+        previousPolicySubstandard: ["NO"],
+        avocationRelatedDisclosure: ["NO"],
+        healthQuestionPositive: ["NO"],
+        employmentInRiskyIndustry: ["NO"],
+        fatfOfacCountryLogin: ["NO"],
+        hazardousOccupation: ["NO"],
+        eddFlag: ["NO"],
+        claimRiskIndicator: ["NO"],
+        tobacco: ["NO"],
+        narcotics: ["NO"],
+    },
+};
+
+const toRecord = (value: unknown): Record<string, unknown> | null => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) {
+        return null;
+    }
+
+    return value as Record<string, unknown>;
+};
+
+const hasObjectValues = (value: Record<string, unknown> | null): boolean => {
+    if (!value) return false;
+
+    return Object.values(value).some((item) => {
+        if (typeof item === "string") return item.trim() !== "";
+        return item !== null && item !== undefined;
+    });
+};
+
+const normalizeParamValue = (value: unknown): string =>
+    String(value ?? "")
+        .trim()
+        .toUpperCase()
+        .replace(/[_-]+/g, " ")
+        .replace(/\s+/g, " ");
+
+const toTitle = (value: string): string =>
+    value
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, (char) => char.toUpperCase())
+        .trim();
+
+const getFirstNonEmpty = (
+    source: Record<string, unknown>,
+    keys: string[],
+    fallback = "STD",
+): string => {
+    for (const key of keys) {
+        const value = source[key];
+        if (typeof value === "string" && value.trim() !== "") {
+            return value.trim();
+        }
+    }
+
+    return fallback;
+};
+
+const evaluateRiskStatus = (
+    section: RiskSectionKey,
+    payload: Record<string, unknown>,
+): { isHealthy: boolean; mismatches: string[] } => {
+    const expectedRules = EXPECTED_RISK_PARAMETERS[section];
+    const mismatches = Object.entries(expectedRules).reduce<string[]>((acc, [key, expectedValues]) => {
+        const currentValue = payload[key];
+        const normalizedCurrent = normalizeParamValue(currentValue);
+
+        if (normalizedCurrent === "") {
+            acc.push(`${toTitle(key)} missing`);
+            return acc;
+        }
+
+        const isExpected = expectedValues
+            .map((item) => normalizeParamValue(item))
+            .includes(normalizedCurrent);
+
+        if (!isExpected) {
+            acc.push(`${toTitle(key)}: ${String(currentValue)} (expected ${expectedValues.join(" / ")})`);
+        }
+
+        return acc;
+    }, []);
+
+    return {
+        isHealthy: mismatches.length === 0,
+        mismatches,
+    };
+};
 
 const Summary = () => {
     const navigate = useNavigate();
     const { data } = useSelector((state: RootState) => state.drs);
     const [isApplicantDetailsExpanded, setIsApplicantDetailsExpanded] = useState(false);
+    const [selectedRiskCard, setSelectedRiskCard] = useState<RiskCardItem | null>(null);
 
     const customerDetails = data?.customerDetails ?? [];
     const summaryRoot = data as unknown as Record<string, unknown> | null;
@@ -57,6 +176,7 @@ const Summary = () => {
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
     const roleType = localStorage.getItem("roleType") ?? "";
     const isDvtRole = roleType === "DVT Pool";
+    const canShowRiskAnalytics = roleType !== "DVT Pool" && roleType !== "CVT Pool";
     const inferredDvtLifeOption: DvtLifeOption = availableMemberTypes.includes("lifeassured2") ? "joint" : "main";
     const [selectedDvtLifeOption, setSelectedDvtLifeOption] = useState<DvtLifeOption | null>(null);
     const dvtLifeOption = selectedDvtLifeOption ?? inferredDvtLifeOption;
@@ -82,6 +202,69 @@ const Summary = () => {
 
     const visibleButtons = ["CPT Pool"];
     const isPoolRole = visibleButtons.includes(roleType);
+
+    const activeSummaryEntry = summaryWithTabs.find((item) => item.memberType === activeApplicantTab)?.customer;
+    const activeRiskAnalytics = useMemo(() => {
+        const riskAnalytics = activeSummaryEntry?.riskAnalytics;
+        if (!Array.isArray(riskAnalytics)) {
+            return null;
+        }
+
+        return toRecord(riskAnalytics[0]);
+    }, [activeSummaryEntry]);
+
+    const externalAPIs = toRecord(data?.externalAPIs);
+    const medicalBreOutput = hasObjectValues(toRecord(externalAPIs?.medicalBreOutput))
+        ? toRecord(externalAPIs?.medicalBreOutput)
+        : toRecord(activeRiskAnalytics?.medicalRisk);
+
+    const financialBreOutput = hasObjectValues(toRecord(externalAPIs?.financialBreOutput))
+        ? toRecord(externalAPIs?.financialBreOutput)
+        : toRecord(activeRiskAnalytics?.financialRisk);
+
+    const otherRiskOutput = toRecord(activeRiskAnalytics?.otherRisk);
+
+    const riskCards: RiskCardItem[] = useMemo(() => {
+        const cards: RiskCardItem[] = [];
+
+        if (hasObjectValues(medicalBreOutput)) {
+            const { isHealthy, mismatches } = evaluateRiskStatus("medical", medicalBreOutput!);
+            cards.push({
+                key: "medical",
+                label: "Medical",
+                subLabel: `BRE Medical Decision - ${getFirstNonEmpty(medicalBreOutput!, ["breMedicalDecision", "medicalDecision", "brePhysicalMedicalDecision"])}`,
+                data: medicalBreOutput!,
+                isHealthy,
+                mismatches,
+            });
+        }
+
+        if (hasObjectValues(financialBreOutput)) {
+            const { isHealthy, mismatches } = evaluateRiskStatus("financial", financialBreOutput!);
+            cards.push({
+                key: "financial",
+                label: "Financial",
+                subLabel: `BRE Financial Decision - ${getFirstNonEmpty(financialBreOutput!, ["breFinancialDecision", "financialDecision"])}`,
+                data: financialBreOutput!,
+                isHealthy,
+                mismatches,
+            });
+        }
+
+        if (hasObjectValues(otherRiskOutput)) {
+            const { isHealthy, mismatches } = evaluateRiskStatus("other", otherRiskOutput!);
+            cards.push({
+                key: "other",
+                label: "Other Risks",
+                subLabel: `BRE Decision - ${getFirstNonEmpty(otherRiskOutput!, ["ptlrResponse", "decision"])}`,
+                data: otherRiskOutput!,
+                isHealthy,
+                mismatches,
+            });
+        }
+
+        return cards;
+    }, [financialBreOutput, medicalBreOutput, otherRiskOutput]);
 
     return (
         <Container disableGutters>
@@ -124,6 +307,87 @@ const Summary = () => {
                         />
                     </Box>
 
+                    {canShowRiskAnalytics && riskCards.length > 0 && (
+                        <Box sx={{ mt: 2, mb: 3 }}>
+                            <Typography sx={{ fontSize: "22px", fontWeight: 700, color: "#2b2b2b", mb: 1.5, lineHeight: 1.2 }}>
+                                Risk Analytics
+                            </Typography>
+
+                            <Box
+                                sx={{
+                                    display: "grid",
+                                    gap: 2,
+                                    width: "100%",
+                                    gridTemplateColumns: {
+                                        xs: "1fr",
+                                        sm: "repeat(2, minmax(0, 1fr))",
+                                        lg: "repeat(3, minmax(0, 1fr))",
+                                    },
+                                }}
+                            >
+                                {riskCards.map((item) => {
+                                    const statusColor = item.isHealthy ? "#3AAE42" : "#D32F2F";
+
+                                    return (
+                                        <Box
+                                            key={item.key}
+                                            onClick={() => setSelectedRiskCard(item)}
+                                            sx={{
+                                                width: "100%",
+                                                border: "1px solid #dfdfdf",
+                                                borderLeft: `3px solid ${statusColor}`,
+                                                borderRadius: "8px",
+                                                backgroundColor: "#fff",
+                                                px: 2,
+                                                py: 1.5,
+                                                cursor: "pointer",
+                                            }}
+                                        >
+                                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+                                                <Typography sx={{ fontSize: "20px", fontWeight: 500, color: "#1f1f1f", lineHeight: 1.2 }}>
+                                                    {item.label}
+                                                </Typography>
+
+                                                <Box
+                                                    sx={{
+                                                        width: 18,
+                                                        height: 18,
+                                                        borderRadius: "50%",
+                                                        border: `1.5px solid ${statusColor}`,
+                                                        color: statusColor,
+                                                        display: "flex",
+                                                        alignItems: "center",
+                                                        justifyContent: "center",
+                                                        fontSize: "12px",
+                                                        fontWeight: 700,
+                                                        lineHeight: 1,
+                                                    }}
+                                                >
+                                                    {item.isHealthy ? "✓" : "!"}
+                                                </Box>
+                                            </Box>
+
+                                            <Typography
+                                                sx={{
+                                                    display: "inline-flex",
+                                                    borderRadius: "999px",
+                                                    border: "1px solid #dddddd",
+                                                    backgroundColor: "#f2f2f2",
+                                                    px: 1.5,
+                                                    py: 0.4,
+                                                    fontSize: "13px",
+                                                    color: "#4a4a4a",
+                                                }}
+                                            >
+                                                {item.subLabel}
+                                            </Typography>
+                                        </Box>
+                                    );
+                                })}
+                            </Box>
+                        </Box>
+                    )}
+
                     <ApplicantProfile
                         profile={undefined}
                         selectedApplicantTab={activeApplicantTab}
@@ -162,6 +426,55 @@ const Summary = () => {
                             </CustomButton>
                         </Box>
                     )}
+
+                    <CustomDialog
+                        open={Boolean(selectedRiskCard)}
+                        onClose={() => setSelectedRiskCard(null)}
+                        title={selectedRiskCard?.label ?? "Risk Details"}
+                        maxWidth="md"
+                    >
+                        {selectedRiskCard && (
+                            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2, minWidth: 420, py: 1 }}>
+                                <Typography sx={{ fontSize: "14px", fontWeight: 700 }}>
+                                    {selectedRiskCard.isHealthy ? "All parameters are within expected values." : "Some parameters are not as expected."}
+                                </Typography>
+
+                                {!selectedRiskCard.isHealthy && (
+                                    <Box sx={{ p: 1, borderRadius: "8px", backgroundColor: "#fff1f0", border: "1px solid #ffcdd2" }}>
+                                        <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#b71c1c", mb: 0.4 }}>
+                                            Mismatch Details
+                                        </Typography>
+                                        {selectedRiskCard.mismatches.map((entry, index) => (
+                                            <Typography key={`${selectedRiskCard.key}-mismatch-${index}`} sx={{ fontSize: "12px", color: "#b71c1c" }}>
+                                                {entry}
+                                            </Typography>
+                                        ))}
+                                    </Box>
+                                )}
+
+                                {Object.entries(selectedRiskCard.data).map(([key, value]) => (
+                                    <Box
+                                        key={`${selectedRiskCard.key}-${key}`}
+                                        sx={{
+                                            display: "grid",
+                                            gridTemplateColumns: "220px 1fr",
+                                            gap: 1,
+                                            alignItems: "start",
+                                            borderBottom: "1px solid #efefef",
+                                            pb: 1,
+                                        }}
+                                    >
+                                        <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                            {toTitle(key)}
+                                        </Typography>
+                                        <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                            {value === "" || value === null || value === undefined ? "-" : String(value)}
+                                        </Typography>
+                                    </Box>
+                                ))}
+                            </Box>
+                        )}
+                    </CustomDialog>
                 </CustomAccordion>
             </Box>
         </Container>

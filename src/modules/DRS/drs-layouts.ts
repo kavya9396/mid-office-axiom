@@ -84,7 +84,15 @@ export const getPoolWiseAvailableAccordions = (
 };
 
 export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
-  RETAIL_CVT_POOL: [
+  RETAIL_COPS_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "pivvSection",
+    "requirementManagement",
+    "cvtDecision",
+    "quickLinks"
+  ],RETAIL_CVT_POOL: [
     "breDecision",
     "applicationOverview",
     "summary",
@@ -170,20 +178,21 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_TELE_VIDEO_POOL: ["quickLinks"],
   RETAIL_ISSUANCE_POOL: ["quickLinks"],
   RETAIL_REJECT_POOL: ["quickLinks"],
-  RETAIL_SUW_POOL: ["quickLinks"],
-  RETAIL_CUW_POOL: ["quickLinks"],
+  RETAIL_SUW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
+  RETAIL_CUW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
   RETAIL_SWISS_RE_POOL: ["quickLinks"],
   RETAIL_RGA_POOL: ["quickLinks"],
   RETAIL_MUNICH_RE_POOL: ["quickLinks"],
   RETAIL_SCORE_RE_POOL: ["quickLinks"],
   RETAIL_HANNOVER_RE_POOL: ["quickLinks"],
-  RETAIL_HOD_POOL: ["quickLinks"],
-  RETAIL_SR_UW_POOL: ["quickLinks"],
+  RETAIL_HOD_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
+  RETAIL_SR_UW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
   RETAIL_RISK_POOL: ["quickLinks"],
-  RETAIL_CMO_POOL: ["quickLinks"],
+  RETAIL_CMO_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
   RETAIL_ACCUITY_POOL: ["quickLinks"],
   RETAIL_REINSURER_POOL: ["quickLinks"],
-  RETAIL_IT_POOL: ["quickLinks"],
+  RETAIL_IT_POOL:["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
+  RETAIL_VENDOR_CMO_POOL:["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
   GROUP_DVT_POOL: [
     "breDecision",
     "applicationOverview",

@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 import type {
   DRSData,
   DRSBreOutput,
+  DRSExternalAPIs,
   MastersData,
 } from "../../types/drs.types";
 import { drsThunk } from "../thunks/drsThunk";
@@ -35,6 +36,25 @@ const drsSlice = createSlice({
       state.data.externalAPIs = {
         ...state.data.externalAPIs,
         breOutput: action.payload,
+      };
+    },
+    setBreExternalApiOutputs: (
+      state,
+      action: {
+        payload: Partial<
+          Pick<DRSExternalAPIs, "breOutput" | "medicalBreOutput" | "financialBreOutput">
+        >;
+      },
+    ) => {
+      if (!state.data) return;
+
+      const { breOutput, medicalBreOutput, financialBreOutput } = action.payload;
+
+      state.data.externalAPIs = {
+        ...state.data.externalAPIs,
+        ...(breOutput ? { breOutput } : {}),
+        ...(medicalBreOutput ? { medicalBreOutput } : {}),
+        ...(financialBreOutput ? { financialBreOutput } : {}),
       };
     },
     setProductFaceValue: (state, action: { payload: string }) => {
@@ -96,5 +116,5 @@ const drsSlice = createSlice({
   },
 });
 
-export const { setBreOutput, setProductFaceValue } = drsSlice.actions;
+export const { setBreOutput, setBreExternalApiOutputs, setProductFaceValue } = drsSlice.actions;
 export default drsSlice.reducer;

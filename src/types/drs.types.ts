@@ -501,6 +501,8 @@ export type BreRetriggerRequest = {
 export type BreRetriggerResponse = {
   data: {
     breOutput: DRSBreOutput;
+    medicalBreOutput?: Record<string, unknown>;
+    financialBreOutput?: Record<string, unknown>;
   };
 };
 

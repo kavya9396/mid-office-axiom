@@ -6,6 +6,11 @@ const baseColumns = [
   "drc",
   "hniFlag",
   "isMedical",
+  "breDecision",
+  "munichReMedicalDecision",
+  "channel",
+  "ptlr",
+  "roleType",
 ] as const;
 const baseColumnsCops = [
   "applicationNo",
@@ -24,19 +29,48 @@ const baseColumnsGops = [
   "productType",
   "typeOfGroupBusiness",
   "sumAssured",
-  "caseReceivedDate"
+  "caseReceivedDate",
 ] as const;
 
 export const poolAllowedColumns: Record<string, string[]> = {
-  "CVT_TASK": [...baseColumnsCops,"breDecision"],
+  //retail
+  CMO_TASK: [...baseColumns],
+  CVT_TASK: [...baseColumnsCops, "breDecision"],
+  CPT_TASK: [
+    ...baseColumnsCops,
+    "medicalReceivedDate",
+    "financialReceivedDate",
+    "poolTAT",
+  ],
+  CUW_TASK: [...baseColumns],
+  HOD_TASK: [
+    ...baseColumns
+  ],
+  MMT_TASK: [
+    "applicationNo",
+    "clientName",
+    "clientType",
+    "planOpted",
+    "premium",
+    "assignedTpa",
+    "grievanceRaisedDate",
+  ],
+  SR_UW_TASK: [
+    ...baseColumns
+  ],
+  SUW_TASK: [
+    ...baseColumns
+  ],
+  VENDOR_CMO_TASK: [...baseColumns],
+  COPS_TASK: [...baseColumnsCops, "breDecision"],
+  IT_TASK: [...baseColumns],
 
-  "CPT_TASK": [...baseColumnsCops,"medicalReceivedDate","financialReceivedDate","poolTAT"],
+  //group
+  PIVV_TASK: [...baseColumnsCops],
 
-  "PIVV_TASK": [...baseColumnsCops],
+  PRE_ISSUANCE_SERVICING_TASK: [...baseColumnsCops],
 
-  "PRE_ISSUANCE_SERVICING_TASK": [...baseColumnsCops],
-
-  "EXCEPTIONAL_TASK": [...baseColumnsCops, "lastPool"],
+  EXCEPTIONAL_TASK: [...baseColumnsCops, "lastPool"],
   "System Wait Pool - Non medical": [
     ...baseColumnsCops,
     "lastPool",
@@ -57,10 +91,15 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "poolTAT",
     "dueDate",
   ],
-  "Reject Pool": [...baseColumnsCops, "lastPool", "userId",
-    "uwDecisionDate","laDecisionDate"],
+  "Reject Pool": [
+    ...baseColumnsCops,
+    "lastPool",
+    "userId",
+    "uwDecisionDate",
+    "laDecisionDate",
+  ],
   "Ready For Issuance Pool": [...baseColumnsCops, "lastPool"],
-  "Issuance Pool": [...baseColumnsCops, "uwDecisionDate","laDecisionDate"],
+  "Issuance Pool": [...baseColumnsCops, "uwDecisionDate", "laDecisionDate"],
   "Allocation Details": [...baseColumns],
   "Leave Management": [
     "uwName",
@@ -84,16 +123,8 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "reassignedUserId",
     "remarks",
   ],
-  "MMT_TASK":[
-    "applicationNo",
-    "clientName",
-    "clientType",
-    "planOpted",
-    "premium",
-    "assignedTpa",
-    "grievanceRaisedDate"
-  ],
-   "System Wait Pool": [
+
+  "System Wait Pool": [
     ...baseColumnsCops,
     "lastPool",
     "requirementRaisedDate",
@@ -105,7 +136,7 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "requirementRaisedDate",
     "userId",
   ],
-   "DVT_TASK": [...baseColumnsGops],
-   "1st UW Pool": [...baseColumns],
-   "GUW_TASK":[...baseColumnsGops]
+  DVT_TASK: [...baseColumnsGops],
+  "1st UW Pool": [...baseColumns],
+  GUW_TASK: [...baseColumnsGops],
 };

@@ -9,14 +9,18 @@ import type { RootState } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import { mastersThunk } from "../../store/thunks/mastersThunk";
 import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
-import { setBreOutput } from "../../store/slices/drsSlice";
+import { setBreExternalApiOutputs } from "../../store/slices/drsSlice";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import GroupPolicyDetails from "./DRS_Accordions/GroupPolicyDetails";
 
 const mapper = {
+    "CMO Pool": "RETAIL_CMO_POOL",
+    "CUW Pool": "RETAIL_CUW_POOL",
     "CVT Pool": "RETAIL_CVT_POOL",
     "CPT Pool":"RETAIL_CPT_POOL",
+    "HOD Pool":"RETAIL_HOD_POOL",
+    "Sr UW Pool":"RETAIL_SR_UW_POOL",
     "Ready For Issuance Pool":"RETAIL_READY_FOR_ISSUANCE_POOL",
     "System Wait Pool - Non medical":"RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
     "AMR - Non medical":"RETAIL_AMR_NON_MEDICAL",
@@ -27,7 +31,11 @@ const mapper = {
     "DVT Pool":"GROUP_DVT_POOL",
     "1st UW Pool":"RETAIL_CUW_POOL",
     "GUW Pool":"GROUP_GUW_POOL",
-    "MMT Pool":"GROUP_MMT_POOL"
+    "MMT Pool":"GROUP_MMT_POOL",
+    "SUW Pool":"RETAIL_SUW_POOL",
+    "Vendor CMO Pool":"RETAIL_VENDOR_CMO_POOL",
+    "COPS Pool":"RETAIL_COPS_POOL",
+    "IT Pool":"RETAIL_IT_POOL"
 }
 
 const DRS = () => {
@@ -76,9 +84,19 @@ const DRS = () => {
                         }),
                     ).unwrap();
 
-                    const updatedBreOutput = breResponse.data?.breOutput;
-                    if (updatedBreOutput) {
-                        dispatch(setBreOutput(updatedBreOutput));
+                    const updatedBrePayload = breResponse.data;
+                    if (
+                        updatedBrePayload?.breOutput ||
+                        updatedBrePayload?.medicalBreOutput ||
+                        updatedBrePayload?.financialBreOutput
+                    ) {
+                        dispatch(
+                            setBreExternalApiOutputs({
+                                breOutput: updatedBrePayload?.breOutput,
+                                medicalBreOutput: updatedBrePayload?.medicalBreOutput,
+                                financialBreOutput: updatedBrePayload?.financialBreOutput,
+                            }),
+                        );
                     }
                 } catch (error) {
                     console.error("Failed to retrigger BRE from DRS response:", error);
