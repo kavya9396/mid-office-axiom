@@ -665,7 +665,8 @@
         "applicantStatus": "Primary Borrower",
         "shareOfLoanJl": 0,
         "applicantStatusJl": "Co-Borrower",
-        "masterPolicyHolder": "MPH"
+        "masterPolicyHolder": "MPH",
+        "masterPolicyHolderCode": "MPH1"
       },
       "productDetail": [
         {

@@ -6,7 +6,7 @@ import { GridSection } from "../../../components/layout/GridSection";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import type { RiderRow } from "../../../types/drs.types";
-import { formatDateWithOrdinalTime, toDisplayValue } from "../../../utils/helpers";
+import { toDisplayValue } from "../../../utils/helpers";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { normalizeBusinessType } from "../../../routes/routes";
 
@@ -36,7 +36,6 @@ const ApplicationOverview = () => {
   const applicationOverview = dataRecord?.applicationOverview as
     | Record<string, unknown>
     | undefined;
-  const basicDetails = dataRecord?.basicDetails as Record<string, unknown> | undefined;
 
   const sourcingDetail = (applicationOverview?.sourcingDetail as Record<string, unknown> | undefined)
     ?? (data?.sourcingDetail as unknown as Record<string, unknown> | undefined);
@@ -132,16 +131,6 @@ const ApplicationOverview = () => {
       ? [{
         label: "Policy Type",
         value: String(groupDetails?.coverageStatus ?? "-"),
-      },{
-        label: "Master Policy Holder",
-        value: toDisplayValue(groupDetails?.masterPolicyHolder ?? groupDetails?.masterPolicyHolder),
-      },
-    {
-      label: "LAN Number",
-      value: toDisplayValue(sourcingDetail?.lanNumber ?? firstProduct?.lanNumber),
-    }, {
-      label: "Login Date",
-      value: formatDateWithOrdinalTime(basicDetails?.lastLoginDate ?? firstProduct?.lastLoginDate) || "-",
     }]
       : [])
   ];

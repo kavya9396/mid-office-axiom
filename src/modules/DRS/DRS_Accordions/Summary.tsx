@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box, Container, MenuItem, Select } from "@mui/material";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import { applicantTabs } from "../../../utils/constant";
@@ -22,6 +22,8 @@ const mapMemberType = (memberTypeValue: string | undefined, index: number): Appl
     if (index === 1) return "lifeassured1";
     return "lifeassured2";
 };
+
+type DvtLifeOption = "main" | "joint";
 
 const Summary = () => {
     const navigate = useNavigate();
@@ -54,10 +56,22 @@ const Summary = () => {
     );
 
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
+    const roleType = localStorage.getItem("roleType") ?? "";
+    const isDvtRole = roleType === "DVT Pool";
+    const inferredDvtLifeOption: DvtLifeOption = availableMemberTypes.includes("lifeassured2") ? "joint" : "main";
+    const [selectedDvtLifeOption, setSelectedDvtLifeOption] = useState<DvtLifeOption | null>(null);
+    const dvtLifeOption = selectedDvtLifeOption ?? inferredDvtLifeOption;
 
-    const visibleTabs = isLAPropSame
-        ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
-        : applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key));
+    const visibleTabs = isDvtRole
+        ? (dvtLifeOption === "main"
+            ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
+            : [
+                { key: "lifeassured1" as const, label: "Life Assured 1" },
+                { key: "lifeassured2" as const, label: "Life Assured 2" },
+            ])
+        : (isLAPropSame
+            ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
+            : applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key)));
 
     const activeApplicantTab: ApplicantTab = isLAPropSame
         ? "lifeassured1"
@@ -67,7 +81,6 @@ const Summary = () => {
         localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);
     }, [activeApplicantTab]);
 
-    const roleType = localStorage.getItem("roleType") ?? "";
     const visibleButtons = ["CPT Pool"];
     const isPoolRole = visibleButtons.includes(roleType);
 
@@ -75,12 +88,32 @@ const Summary = () => {
         <Container disableGutters>
             <Box sx={{ mt: 1 }}>
                 <CustomAccordion title="Applicant Details" defaultExpanded={false}>
+                    {isDvtRole && (
+                        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 1 }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                                <Select
+                                    size="small"
+                                    value={dvtLifeOption}
+                                    onChange={(event) => {
+                                        const selected = event.target.value as DvtLifeOption;
+                                        setSelectedDvtLifeOption(selected);
+                                        setApplicantTab(selected === "main" ? "lifeassured1" : "lifeassured1");
+                                    }}
+                                    sx={{ minWidth: 130, height: 32, fontSize: 13, backgroundColor: "#fff" }}
+                                >
+                                    <MenuItem value="main">Main Life</MenuItem>
+                                    <MenuItem value="joint">Joint Life</MenuItem>
+                                </Select>
+                            </Box>
+                        </Box>
+                    )}
+
                     <Box sx={{ display: "flex", justifyContent: "center" }}>
                         <CustomTabs
                             tabs={visibleTabs}
                             value={activeApplicantTab}
                             onChange={(tab) => {
-                                if (!isLAPropSame) {
+                                if (!isLAPropSame || isDvtRole) {
                                     setApplicantTab(tab);
                                 }
                             }}
