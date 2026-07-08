@@ -40,7 +40,7 @@
     },
     "summary": [
       {
-        "memberType": "proposer",
+        "memberType": "lifeassured1",
         "jontFlag": true,
         "lifeNumber": "01",
         "clientId": "CL0001",
@@ -361,7 +361,7 @@
         }
       },
       {
-        "memberType": "lifeassured1",
+        "memberType": "lifeassured2",
         "jontFlag": true,
         "lifeNumber": "01",
         "clientId": "CL0001",
@@ -734,26 +734,26 @@
       ]
     },
     "requirementManagement": [
-      {
-        "team": "IPRU74685",
-        "profile": "Profile 1",
-        "category": "Cate 1",
-        "subCategory": "Sub Cate 1",
-        "document": "Aadhar",
-        "specialTest": "Blood Test",
-        "reason": "Reason 1",
-        "fupCode": "fupCode 1",
-        "description": "Additional identity verification required",
-        "status": "Accept",
-        "raisedDate": "2025-01-10",
-        "raisedBy": "BRE",
-        "receivedDate": "2025-01-12",
-        "receivedBy": "Biswajit Sahu",
-        "validity": "30 Days",
-        "userId": "USR001",
-        "remarks": "Awaiting document validation",
-        "udsLink": "https://uds.example.com/req/001"
-      }
+     {
+      "team": "Gops",
+      "profile": "-",
+      "category": "Declaration",
+      "subCategory": "Customer Declaration Form",
+      "document": "CDF",
+      "specialTest": "-",
+      "reason": "Resubmit documents as Documents submitted not clear",
+      "fupCode": "GRD",
+      "description": "Rescan Group Customer Declaration",
+      "status": "Pending",
+      "raisedDate": "2025-01-10",
+      "raisedBy": "John Doe",
+      "receivedDate": "2025-01-12",
+      "receivedBy": "Jane Smith",
+      "validity": "30 Days",
+      "userId": "USR001",
+      "remarks": "Awaiting document validation",
+      "udsLink": "https://uds.example.com/req/001"
+    }
     ],
    
     "quickLinks": {

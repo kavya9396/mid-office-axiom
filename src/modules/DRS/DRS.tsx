@@ -26,7 +26,8 @@ const mapper = {
     "PIVV Pool": "RETAIL_PIVV_POOL",
     "DVT Pool":"GROUP_DVT_POOL",
     "1st UW Pool":"RETAIL_CUW_POOL",
-    "GUW Pool":"GROUP_GUW_POOL"
+    "GUW Pool":"GROUP_GUW_POOL",
+    "MMT Pool":"GROUP_MMT_POOL"
 }
 
 const DRS = () => {
@@ -103,7 +104,7 @@ const DRS = () => {
                 label="Back to inbox"
                 justify="flex-start"
                 onClick={() => navigate(getInboxPath(safeBusinessType))}
-                rightSlot={
+                rightSlot={roleType != 'MMT Pool' ? 
                     <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
                             <Typography
@@ -132,7 +133,7 @@ const DRS = () => {
                                 Business Type : {safeBusinessType.toUpperCase()}
                             </Typography>
                         </div>
-                    </div>
+                    </div>:''
                 }
             />
             {visibleAccordions.map((accordionId) => {

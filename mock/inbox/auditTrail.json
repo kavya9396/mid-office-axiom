@@ -21,7 +21,8 @@
       "subPool": "27/03/2026",
       "userId": "29/03/2026",
       "uwDecision": "29/03/2026",
-      "breDecision": "29/03/2026"
+      "breDecision": "29/03/2026",
+      "remarks":"test remarsks"
     },
     {
       "dateTime": "29/03/2026",
@@ -32,7 +33,8 @@
       "subPool": "27/03/2026",
       "userId": "29/03/2026",
       "uwDecision": "29/03/2026",
-      "breDecision": "29/03/2026"
+      "breDecision": "29/03/2026",
+      "remarks":"test remarsks"
     },
     {
       "dateTime": "29/03/2026",
@@ -43,7 +45,8 @@
       "subPool": "27/03/2026",
       "userId": "29/03/2026",
       "uwDecision": "29/03/2026",
-      "breDecision": "29/03/2026"
+      "breDecision": "29/03/2026",
+      "remarks":"test remarsks"
     }
   ]
 }

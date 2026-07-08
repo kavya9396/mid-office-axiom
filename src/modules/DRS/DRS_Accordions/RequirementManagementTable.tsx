@@ -55,12 +55,9 @@ const UI_TEAM_BY_MASTER: Record<RequirementMasterRow["team"], LookupTeam> = {
 
 const STATUS_OPTIONS: Option[] = [
     { label: "Pending", value: "Pending" },
-    { label: "Received", value: "Received" },
-    { label: "Cancelled", value: "Cancelled" },
     { label: "Waived", value: "Waived" },
     { label: "Rejected", value: "Rejected" },
     { label: "Accept", value: "Accept" },
-    { label: "Accepted", value: "Accepted" },
 ];
 
 const REQUIRED_SELECTION_FIELDS: Array<Exclude<EditableField, "status">> = [
