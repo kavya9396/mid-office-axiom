@@ -123,7 +123,7 @@ const ApplicationOverview = () => {
       value: formatNumberOrDash(applicationInfo?.simultaneousLifeSA),
     },
     {
-      label: "TFESA",
+      label: "TFSA",
       value: formatNumberOrDash(applicationInfo?.otherPolicySA),
     }] : []),
     

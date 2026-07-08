@@ -2,7 +2,7 @@ import { Box, Container } from "@mui/material";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import { applicantTabs } from "../../../utils/constant";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
@@ -10,6 +10,29 @@ import CustomButton from "../../../components/ui/Button/Button";
 import ApplicantProfile from "./ApplicantProfile/ApplicantProfile";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { useNavigate } from "react-router-dom";
+
+const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
+const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
+const DRS_TAB_VISIT_EVENT = "drsApplicantTabsVisitedChanged";
+
+const getStoredTabs = (key: string): ApplicantTab[] => {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+            ? parsed.map((value) => String(value) as ApplicantTab)
+            : [];
+    } catch {
+        return [];
+    }
+};
+
+const setStoredTabs = (key: string, tabs: ApplicantTab[]) => {
+    localStorage.setItem(key, JSON.stringify(Array.from(new Set(tabs))));
+    window.dispatchEvent(new Event(DRS_TAB_VISIT_EVENT));
+};
 
 const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
     const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
@@ -54,10 +77,15 @@ const Summary = () => {
     );
 
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
+    const [isApplicantDetailsExpanded, setIsApplicantDetailsExpanded] = useState(false);
 
-    const visibleTabs = isLAPropSame
-        ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
-        : applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key));
+    const visibleTabs = useMemo(
+        () => (isLAPropSame
+            ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
+            : applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key))),
+        [availableMemberTypes, isLAPropSame],
+    );
+    const visibleTabKeys = useMemo(() => visibleTabs.map((tab) => tab.key), [visibleTabs]);
 
     const activeApplicantTab: ApplicantTab = isLAPropSame
         ? "lifeassured1"
@@ -67,14 +95,28 @@ const Summary = () => {
         localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);
     }, [activeApplicantTab]);
 
+    useEffect(() => {
+        setStoredTabs(DRS_REQUIRED_APPLICANT_TABS_KEY, visibleTabKeys);
+
+        const storedVisitedTabs = getStoredTabs(DRS_VISITED_APPLICANT_TABS_KEY);
+        const filteredVisitedTabs = storedVisitedTabs.filter((tab) => visibleTabKeys.includes(tab));
+        const nextVisitedTabs = Array.from(new Set([...filteredVisitedTabs, activeApplicantTab]));
+
+        setStoredTabs(DRS_VISITED_APPLICANT_TABS_KEY, nextVisitedTabs);
+    }, [activeApplicantTab, visibleTabKeys]);
+
     const roleType = localStorage.getItem("roleType") ?? "";
     const visibleButtons = ["CPT Pool", "DVT Pool"];
     const isPoolRole = visibleButtons.includes(roleType);
 
     return (
         <Container disableGutters>
-            <Box sx={{ mt: 1 }}>
-                <CustomAccordion title="Applicant Details" defaultExpanded={false}>
+            <Box sx={{ mt: 2 }}>
+                <CustomAccordion
+                    title="Applicant Details"
+                    defaultExpanded={false}
+                    onChange={setIsApplicantDetailsExpanded}
+                >
                     <Box sx={{ display: "flex", justifyContent: "center" }}>
                         <CustomTabs
                             tabs={visibleTabs}
@@ -87,7 +129,11 @@ const Summary = () => {
                         />
                     </Box>
 
-                    <ApplicantProfile profile={undefined} selectedApplicantTab={activeApplicantTab} />
+                    <ApplicantProfile
+                        profile={undefined}
+                        selectedApplicantTab={activeApplicantTab}
+                        isApplicantDetailsExpanded={isApplicantDetailsExpanded}
+                    />
 
                     {isPoolRole && (
                         <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>

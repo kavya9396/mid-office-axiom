@@ -1,7 +1,7 @@
 import { Alert, Box, Container, Snackbar, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
 import { cvtDecisionOptions } from "../../../utils/constant";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -13,6 +13,40 @@ import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
+import type { ApplicantTab } from "../../../types/drs.types";
+
+const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
+const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
+const DRS_TAB_VISIT_EVENT = "drsApplicantTabsVisitedChanged";
+
+const APPLICANT_TAB_LABELS: Record<ApplicantTab, string> = {
+    proposer: "Proposer",
+    lifeassured1: "Life Assured 1",
+    lifeassured2: "Life Assured 2",
+};
+
+const getStoredTabs = (key: string): ApplicantTab[] => {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+            ? parsed.map((value) => String(value) as ApplicantTab)
+            : [];
+    } catch {
+        return [];
+    }
+};
+
+const formatPendingTabLabels = (tabs: ApplicantTab[]): string => {
+    const labels = tabs.map((tab) => APPLICANT_TAB_LABELS[tab] ?? tab);
+
+    if (labels.length <= 1) return labels[0] ?? "applicant section";
+    if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
+
+    return `${labels.slice(0, -1).join(", ")}, and ${labels[labels.length - 1]}`;
+};
 
 const toRecord = (value: unknown): Record<string, unknown> =>
     value && typeof value === "object" && !Array.isArray(value)
@@ -127,9 +161,37 @@ const CVTDecision = () => {
     const [submitLoading, setSubmitLoading] = useState(false);
     const [submitMessage, setSubmitMessage] = useState<string | null>(null);
     const [submitStatus, setSubmitStatus] = useState<"success" | "failure" | null>(null);
+    const [tabValidationMessage, setTabValidationMessage] = useState<string | null>(null);
+    const [tabValidationDismissed, setTabValidationDismissed] = useState(false);
     const [breActionDialogOpen, setBreActionDialogOpen] = useState(false);
+    const [requiredApplicantTabs, setRequiredApplicantTabs] = useState<ApplicantTab[]>(() =>
+        getStoredTabs(DRS_REQUIRED_APPLICANT_TABS_KEY),
+    );
+    const [visitedApplicantTabs, setVisitedApplicantTabs] = useState<ApplicantTab[]>(() =>
+        getStoredTabs(DRS_VISITED_APPLICANT_TABS_KEY),
+    );
     const navigate = useNavigate();
-    const isSubmitEnabled = uwDecisionRemarks.trim().length > 0 && decision.trim().length > 0;
+    const pendingApplicantTabs = useMemo(
+        () => requiredApplicantTabs.filter((tab) => !visitedApplicantTabs.includes(tab)),
+        [requiredApplicantTabs, visitedApplicantTabs],
+    );
+    const pendingApplicantTabsMessage = useMemo(() => {
+        if (pendingApplicantTabs.length === 0) return "";
+
+        const formattedTabs = formatPendingTabLabels(pendingApplicantTabs);
+        return `Please visit ${formattedTabs} at least once before submitting.`;
+    }, [pendingApplicantTabs]);
+    const hasVisitedAllApplicantTabs = pendingApplicantTabs.length === 0;
+    const isDecisionAndRemarksReady =
+        uwDecisionRemarks.trim().length > 0 &&
+        decision.trim().length > 0;
+    const isSubmitEnabled =
+        isDecisionAndRemarksReady &&
+        hasVisitedAllApplicantTabs;
+    const shouldShowTabValidationHint =
+        isDecisionAndRemarksReady &&
+        !hasVisitedAllApplicantTabs &&
+        !tabValidationDismissed;
     const { businessType, applicationNumber } = useAppContext();
     const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
     const breMandatoryGuidance = useMemo(() => getBreMandatoryGuidance(drsData), [drsData]);
@@ -196,6 +258,34 @@ const CVTDecision = () => {
         return "";
     }, [drsData, isSelectedCaseSameApplication, selectedCaseContext?.instanceId, selectedCaseContext?.taskCompositeId]);
 
+    const syncTabVisitState = () => {
+        setRequiredApplicantTabs(getStoredTabs(DRS_REQUIRED_APPLICANT_TABS_KEY));
+        setVisitedApplicantTabs(getStoredTabs(DRS_VISITED_APPLICANT_TABS_KEY));
+    };
+
+    useEffect(() => {
+        const onStorage = (event: StorageEvent) => {
+            if (
+                event.key === DRS_REQUIRED_APPLICANT_TABS_KEY ||
+                event.key === DRS_VISITED_APPLICANT_TABS_KEY
+            ) {
+                syncTabVisitState();
+            }
+        };
+
+        const onVisitEvent = () => {
+            syncTabVisitState();
+        };
+
+        window.addEventListener("storage", onStorage);
+        window.addEventListener(DRS_TAB_VISIT_EVENT, onVisitEvent);
+
+        return () => {
+            window.removeEventListener("storage", onStorage);
+            window.removeEventListener(DRS_TAB_VISIT_EVENT, onVisitEvent);
+        };
+    }, []);
+
     const handleSubmit = async () => {
         if (!taskId || !userId || !applicationNumber || !instanceId) {
             setSubmitMessage("Missing required case information. Please open the case from inbox again.");
@@ -240,6 +330,11 @@ const CVTDecision = () => {
     };
 
     const handleSubmitIntent = () => {
+        if (!hasVisitedAllApplicantTabs) {
+            setTabValidationMessage(pendingApplicantTabsMessage || "Please visit all applicant tabs at least once before submitting.");
+            return;
+        }
+
         const isAcceptDecision = decision.trim().toLowerCase() === "accept";
         if (isAcceptDecision && breMandatoryGuidance) {
             setBreActionDialogOpen(true);
@@ -282,6 +377,7 @@ const CVTDecision = () => {
                                     setUwDecisionRemarks(value);
                                     setSubmitMessage(null);
                                     setSubmitStatus(null);
+                                    setTabValidationDismissed(false);
                                 }
                             }} variant="outlined"
                             size="small"
@@ -309,6 +405,7 @@ const CVTDecision = () => {
                                     setDecision(value);
                                     setSubmitMessage(null);
                                     setSubmitStatus(null);
+                                    setTabValidationDismissed(false);
                                 }}
                                 options={cvtDecisionOptions}
                             />
@@ -375,6 +472,28 @@ const CVTDecision = () => {
                         sx={{ width: "100%" }}
                     >
                         {submitMessage}
+                    </Alert>
+                </Snackbar>
+
+                <Snackbar
+                    open={Boolean(tabValidationMessage) || shouldShowTabValidationHint}
+                    autoHideDuration={5000}
+                    onClose={() => {
+                        setTabValidationMessage(null);
+                        setTabValidationDismissed(true);
+                    }}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                >
+                    <Alert
+                        onClose={() => {
+                            setTabValidationMessage(null);
+                            setTabValidationDismissed(true);
+                        }}
+                        severity="warning"
+                        variant="filled"
+                        sx={{ width: "100%" }}
+                    >
+                        {tabValidationMessage ?? pendingApplicantTabsMessage ?? "Please visit all applicant tabs at least once before submitting."}
                     </Alert>
                 </Snackbar>
 

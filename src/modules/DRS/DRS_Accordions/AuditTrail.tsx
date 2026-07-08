@@ -17,6 +17,7 @@ const auditTrailColumns: Column<AuditTrailRow>[] = [
   { key: "uwDecision", header: "UW Decision", width: "10%" },
   { key: "breDecision", header: "BRE Decision", width: "10%" },
   { key: "remarks", header: "BRE Remarks", width: "10%" },
+  { key: "userRemarks", header: "User Remarks", width: "10%" },
 ];
 
 interface AuditTrailProps {

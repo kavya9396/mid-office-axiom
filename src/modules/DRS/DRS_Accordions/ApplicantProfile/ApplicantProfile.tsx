@@ -38,6 +38,7 @@ import PaymentPayoutDetails from "./PaymentPayoutDetails"
 export interface ApplicantProfileProps {
     profile?: Partial<SummaryResponse>;
     selectedApplicantTab?: ApplicantTab;
+    isApplicantDetailsExpanded?: boolean;
 }
 
 type FormField = {
@@ -567,7 +568,7 @@ export const SectionCard = ({
 
 const productFields = getProductFields();
 
-const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfileProps) => {
+const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExpanded = false }: ApplicantProfileProps) => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const { applicationNumber } = useParams<{ applicationNumber: string }>();
     const dispatch = useAppDispatch();
@@ -1025,7 +1026,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab }: ApplicantProfilePro
     };
 
     const tabComponents: Record<ApplicantInfoTab, React.ReactNode> = {
-        imageDetails: <ImageDetails profile={displayProfile} />,
+        imageDetails: <ImageDetails profile={displayProfile} isAccordionOpen={isApplicantDetailsExpanded} />,
         personalKyc: <PersonalKYC profile={displayProfile} />,
         contactAddress: <ContactAndAddress profile={displayProfile} />,
         financialProfession: <FinanceAndProfession profile={displayProfile} />,
