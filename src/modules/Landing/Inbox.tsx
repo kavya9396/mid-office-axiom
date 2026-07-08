@@ -1,5 +1,5 @@
 import { Alert, Box, Grid, Snackbar } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LeftPanel from "./LeftPanel";
 import type { tableData } from "../../types/inbox";
@@ -22,54 +22,70 @@ const Inbox = () => {
   const snackbarMessage = (location.state as { snackbarMessage?: string } | null)?.snackbarMessage ?? "";
   const snackbarOpen = Boolean(snackbarMessage);
 
-  const didFetch = useRef(false);
+  const isRefreshing = useRef(false);
 
-  // ---------------- INITIAL LOAD ----------------
-  useEffect(() => {
-    if (didFetch.current) return;
-    didFetch.current = true;
+  const loadData = useCallback(async () => {
+    if (isRefreshing.current) return;
+    isRefreshing.current = true;
 
-    const loadData = async () => {
-      try {
-        const username = localStorage.getItem("username") ?? "";
-        const password = localStorage.getItem("password") ?? "";
-        const roleResponse = await dispatch(fetchInboxThunk({ username,password })).unwrap();
-        const poolDataFromAPI = roleResponse.poolData ?? {};
-        const businessTypeFromPoolData = normalizeBusinessType(
-          Object.values(poolDataFromAPI)
-            .find((rows) => rows.length > 0)
-            ?.at(0)
-            ?.businessType,
-        );
+    try {
+      const username = localStorage.getItem("username") ?? "";
+      const password = localStorage.getItem("password") ?? "";
+      const roleResponse = await dispatch(fetchInboxThunk({ username, password })).unwrap();
+      const poolDataFromAPI = roleResponse.poolData ?? {};
+      const businessTypeFromPoolData = normalizeBusinessType(
+        Object.values(poolDataFromAPI)
+          .find((rows) => rows.length > 0)
+          ?.at(0)
+          ?.businessType,
+      );
 
-        const currentBusinessType = normalizeBusinessType(businessType);
-        const responseBusinessType = normalizeBusinessType(roleResponse.businessType);
-        const resolvedBusinessType =
-          responseBusinessType ??
-          businessTypeFromPoolData ??
-          currentBusinessType ??
-          "retail";
+      const currentBusinessType = normalizeBusinessType(businessType);
+      const responseBusinessType = normalizeBusinessType(roleResponse.businessType);
+      const resolvedBusinessType =
+        responseBusinessType ??
+        businessTypeFromPoolData ??
+        currentBusinessType ??
+        "retail";
 
-        localStorage.setItem("businessType", resolvedBusinessType);
+      localStorage.setItem("businessType", resolvedBusinessType);
 
-        if (currentBusinessType !== resolvedBusinessType) {
-          navigate(getInboxPath(resolvedBusinessType), { replace: true });
-        }
-
-        const firstPool = Object.keys(poolDataFromAPI)[0];
-
-        setPoolData(poolDataFromAPI);
-
-        if (firstPool) {
-          setSelectedPool(firstPool);
-        }
-      } catch (error) {
-        console.error("Failed to load data:", error);
+      if (currentBusinessType !== resolvedBusinessType) {
+        navigate(getInboxPath(resolvedBusinessType), { replace: true });
       }
-    };
 
-    loadData();
+      const firstPool = Object.keys(poolDataFromAPI)[0] ?? "";
+
+      setPoolData(poolDataFromAPI);
+      setSelectedPool((previousPool) => {
+        if (previousPool && poolDataFromAPI[previousPool]) {
+          return previousPool;
+        }
+        return firstPool;
+      });
+    } catch (error) {
+      console.error("Failed to load data:", error);
+    } finally {
+      isRefreshing.current = false;
+    }
   }, [businessType, dispatch, navigate]);
+
+  useEffect(() => {
+    const initialLoadTimeoutId = window.setTimeout(() => {
+      loadData();
+    }, 0);
+
+    const intervalId = window.setInterval(() => {
+      if (document.visibilityState === "visible") {
+        loadData();
+      }
+    }, 30000);
+
+    return () => {
+      window.clearTimeout(initialLoadTimeoutId);
+      window.clearInterval(intervalId);
+    };
+  }, [loadData]);
 
   // ---------------- UI ----------------
   return (
