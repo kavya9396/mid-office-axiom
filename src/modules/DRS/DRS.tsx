@@ -2,7 +2,7 @@ import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "
 import BackButton from "../../components/layout/BackButton";
 import { Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useEffect, useMemo } from "react";
+import { Fragment, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import type { RootState } from "../../store/store";
@@ -12,6 +12,7 @@ import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
 import { setBreOutput } from "../../store/slices/drsSlice";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
+import GroupPolicyDetails from "./DRS_Accordions/GroupPolicyDetails";
 
 const mapper = {
     "CVT Pool": "RETAIL_CVT_POOL",
@@ -41,6 +42,7 @@ const DRS = () => {
         () => getPoolWiseAvailableAccordions(layout, drsData),
         [layout, drsData],
     );
+    const showGroupPolicyDetails = layout === "GROUP_DVT_POOL";
     const navigate = useNavigate();
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
@@ -102,18 +104,35 @@ const DRS = () => {
                 justify="flex-start"
                 onClick={() => navigate(getInboxPath(safeBusinessType))}
                 rightSlot={
-                    <Typography
-                        sx={{
-                            flex: 1,
-                            textAlign: "center",
-                            fontSize: "18px",
-                            fontWeight: 800,
-                            color: "#161616",
-                            lineHeight: 1,
-                        }}
-                    >
-                       Application No. : {safeApplicationNumber}
-                    </Typography>
+                    <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
+                            <Typography
+                                sx={{
+                                    fontSize: "18px",
+                                    fontWeight: 800,
+                                    color: "#161616",
+                                    lineHeight: 1,
+                                }}
+                            >
+                                Application No. : {safeApplicationNumber}
+                            </Typography>
+                            <Typography
+                                sx={{
+                                    fontSize: "14px",
+                                    fontWeight: 700,
+                                    color: "#0f4c81",
+                                    backgroundColor: "#dcefff",
+                                    border: "1px solid #b8d8f4",
+                                    borderRadius: "999px",
+                                    px: 1.5,
+                                    py: 0.5,
+                                    lineHeight: 1,
+                                }}
+                            >
+                                Business Type : {safeBusinessType.toUpperCase()}
+                            </Typography>
+                        </div>
+                    </div>
                 }
             />
             {visibleAccordions.map((accordionId) => {
@@ -122,9 +141,10 @@ const DRS = () => {
                     return null;
                 }
                 return (
-                    <AccordionComponent
-                        key={accordionId}
-                    />
+                    <Fragment key={accordionId}>
+                        <AccordionComponent />
+                        {showGroupPolicyDetails && accordionId === "applicationOverview" && <GroupPolicyDetails />}
+                    </Fragment>
                 );
             })}
         </>

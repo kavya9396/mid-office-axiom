@@ -160,6 +160,20 @@ export interface DRSSourcingDetail {
 
 export interface DRSGroupDetails {
   coverageStatus: string;
+  coverageOption?: string;
+  moratorium?: string;
+  loanType?: string;
+  bankType?: string;
+  loanTerm?: string | number;
+  loanAmount?: string | number;
+  typeOfLoan?: string;
+  dateOfLoanDisbursement?: string;
+  shareOfLoan?: string | number;
+  applicantStatus?: string;
+  shareOfLoanJl?: string | number;
+  applicantStatusJl?: string;
+  masterPolicyHolder?: string;
+  masterPolicyHolderCode?: string;
   [key: string]: unknown;
 }
 

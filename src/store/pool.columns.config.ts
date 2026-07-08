@@ -84,7 +84,7 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "reassignedUserId",
     "remarks",
   ],
-  "Grievance Pool":[
+  "MMT_TASK":[
     "applicationNo",
     "clientName",
     "clientType",

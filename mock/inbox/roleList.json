@@ -56,7 +56,20 @@
         "caseStatus": "DRAFT",
         "breDecision":"STD"
       }
-    ],"PRE_ISSUANCE_SERVICING_TASK":[
+    ],"MMT_TASK":[
+      {
+        "taskId": "2078.18771",
+
+        "applicationNo": "NB0000027",
+
+        "isMedical": false,
+
+        "roleType": "MMT_TASK",
+
+        "role": "GROUP_MMT_USER",
+
+        "businessType": "GROUP"
+      }],"PRE_ISSUANCE_SERVICING_TASK":[
       {
         "taskId": "2078.18771",
 
