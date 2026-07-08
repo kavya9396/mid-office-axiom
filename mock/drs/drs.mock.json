@@ -96,7 +96,7 @@
         ],
         "faceMatchDetails": {
           "document": "Aadhar",
-          "faceMatchScore": 95,
+          "faceMatchScore": 65,
           "imageQuality": 90,
           "remarks": "Face match successful with high confidence. No discrepancies found between the document and live image."
         },
@@ -143,7 +143,7 @@
           "annualIncome": 700000,
           "appliedSumAssured": 1500000,
           "trsa": 1500000,
-          "tfesa": 1500000
+          "tfsa": 1500000
         },
         "policyDetails": {
           "productName": "ICICI Pru Super Protect Credit",
@@ -414,7 +414,7 @@
           "annualIncome": 3200000,
           "appliedSumAssured": 4000000,
           "trsa": 4000000,
-          "tfesa": 4000000
+          "tfsa": 4000000
         },
         "policyDetails": {
           "productName": "ICICI Pru iProtect Smart",

@@ -717,7 +717,7 @@ export interface FinancialDetails {
   annualIncome: number;
   appliedSumAssured: number;
   trsa: number;
-  tfesa: number;
+  tfsa: number;
 }
 
 export interface SummaryPolicyDetails {
@@ -989,6 +989,7 @@ export type AuditTrailRow = {
   uwDecision: string;
   breDecision: string;
   remarks: string;
+  userRemarks: string;
 };
 
 export type AuditTrail = AuditTrailRow[];

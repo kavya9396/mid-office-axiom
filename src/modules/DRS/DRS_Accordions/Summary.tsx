@@ -2,7 +2,7 @@ import { Box, Container, MenuItem, Select } from "@mui/material";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import { applicantTabs } from "../../../utils/constant";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
@@ -10,6 +10,29 @@ import CustomButton from "../../../components/ui/Button/Button";
 import ApplicantProfile from "./ApplicantProfile/ApplicantProfile";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { useNavigate } from "react-router-dom";
+
+const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
+const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
+const DRS_TAB_VISIT_EVENT = "drsApplicantTabsVisitedChanged";
+
+const getStoredTabs = (key: string): ApplicantTab[] => {
+    try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return [];
+
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed)
+            ? parsed.map((value) => String(value) as ApplicantTab)
+            : [];
+    } catch {
+        return [];
+    }
+};
+
+const setStoredTabs = (key: string, tabs: ApplicantTab[]) => {
+    localStorage.setItem(key, JSON.stringify(Array.from(new Set(tabs))));
+    window.dispatchEvent(new Event(DRS_TAB_VISIT_EVENT));
+};
 
 const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
     const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
@@ -120,7 +143,11 @@ const Summary = () => {
                         />
                     </Box>
 
-                    <ApplicantProfile profile={undefined} selectedApplicantTab={activeApplicantTab} />
+                    <ApplicantProfile
+                        profile={undefined}
+                        selectedApplicantTab={activeApplicantTab}
+                        isApplicantDetailsExpanded={isApplicantDetailsExpanded}
+                    />
 
                     {isPoolRole && (
                         <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
