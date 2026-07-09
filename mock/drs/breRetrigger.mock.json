@@ -21,7 +21,7 @@
       "systemDecisionDateTime": "2026-04-10 10:15 AM",
       "reTriggerCount": 1,
       "errorResp": "",
-      "breRemarks": "From BRE retrigger mock #ICICI Prudential Website#Check Basic KYC Document Attestations"
+      "breRemarks": "#Check#Basic#KYC#Document Attestations#Female life#Questions Answered In Positive#Standard Age Proof Required#Health Question any list"
     },
     "medicalBreOutput": {
       "isMedical": true,

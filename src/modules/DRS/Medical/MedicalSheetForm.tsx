@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -23,6 +23,7 @@ type MedicalSheetFormProps = {
   submitLabel: string;
   emptyMessage?: string;
   defaultExpandedSection?: string;
+  layout?: "accordion" | "split";
   showTestSelector?: boolean;
   isEditable?: boolean;
   submitConfirmationMessage?: string;
@@ -175,6 +176,7 @@ const MedicalSheetForm = ({
   submitLabel,
   emptyMessage = "No fields configured.",
   defaultExpandedSection,
+  layout = "accordion",
   showTestSelector = false,
   isEditable = true,
   submitConfirmationMessage,
@@ -237,6 +239,25 @@ const MedicalSheetForm = ({
       })),
     }));
   }, [activeConfig]);
+
+  const [activeSection, setActiveSection] = useState<string>("");
+
+  useEffect(() => {
+    if (sectionGroups.length === 0) {
+      if (activeSection !== "") {
+        setActiveSection("");
+      }
+      return;
+    }
+
+    const preferred = defaultExpandedSection && sectionGroups.some((section) => section.section === defaultExpandedSection)
+      ? defaultExpandedSection
+      : sectionGroups[0]?.section;
+
+    if (!activeSection || !sectionGroups.some((section) => section.section === activeSection)) {
+      setActiveSection(preferred ?? "");
+    }
+  }, [activeSection, defaultExpandedSection, sectionGroups]);
 
   const indicatorByGroup = useMemo(() => {
     const mapping = new Map<string, string>();
@@ -405,6 +426,30 @@ const MedicalSheetForm = ({
     return <Typography sx={{ color: "#6B7280", mt: 1 }}>{emptyMessage}</Typography>;
   }
 
+  const selectedSection = sectionGroups.find((section) => section.section === activeSection) ?? sectionGroups[0];
+
+  const renderFieldGrid = (fields: MedicalFieldConfig[]) => (
+    <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", lg: "repeat(3, minmax(0, 1fr))" }, gap: 1.5 }}>
+      {fields.map((field) => {
+        if (!getFieldVisibility(field)) {
+          return null;
+        }
+
+        return (
+          <MedicalField
+            key={field.id}
+            field={field}
+            value={displayedValue(field)}
+            error={formErrors[field.id]}
+            required={isRequiredField(field)}
+            disabled={isAutoDerived(field) || !isEditable}
+            onChange={handleValueChange}
+          />
+        );
+      })}
+    </Box>
+  );
+
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5, mt: 1 }}>
       {showTestSelector && testOptions.length > 1 && (
@@ -419,47 +464,107 @@ const MedicalSheetForm = ({
         </Box>
       )}
 
-      {sectionGroups.map((section) => (
-        <CustomAccordion
-          key={section.section}
-          title={section.section}
-          defaultExpanded={defaultExpandedSection ? section.section === defaultExpandedSection : true}
+      {layout === "split" ? (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "240px minmax(0, 1fr)" },
+            gap: 1.25,
+            alignItems: "start",
+          }}
         >
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {section.typeGroups.map((group) => (
-              <Box
-                key={`${section.section}__${group.type}`}
-                sx={{ p: 1.5, borderRadius: "8px", border: "1px solid #E6E6E6", backgroundColor: "#FAFAFA" }}
-              >
-                {group.type !== section.section && (
-                  <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#1E1E1E", mb: 1.25 }}>
-                    {group.type}
+          <Box
+            sx={{
+              borderRadius: "6px",
+              border: "1px solid #DCDCDC",
+              backgroundColor: "#F3F3F3",
+              p: 0.75,
+              maxHeight: { md: "70vh" },
+              overflowY: "auto",
+            }}
+          >
+            {sectionGroups.map((section) => {
+              const isActive = section.section === selectedSection?.section;
+              return (
+                <Box
+                  key={section.section}
+                  onClick={() => setActiveSection(section.section)}
+                  sx={{
+                    px: 1.25,
+                    py: 1,
+                    borderRadius: "4px",
+                    cursor: "pointer",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "space-between",
+                    borderLeft: isActive ? "3px solid #B3261E" : "3px solid transparent",
+                    backgroundColor: isActive ? "#FFFFFF" : "transparent",
+                    color: isActive ? "#B3261E" : "#8A8A8A",
+                    fontWeight: isActive ? 600 : 500,
+                    fontSize: 13,
+                  }}
+                >
+                  <Typography sx={{ fontSize: 13, fontWeight: "inherit", color: "inherit", pr: 1 }}>
+                    {section.section}
                   </Typography>
-                )}
-
-                <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" }, gap: 1.5 }}>
-                  {group.fields.map((field) => {
-                    if (!getFieldVisibility(field)) {
-                      return null;
-                    }
-                    return (
-                      <MedicalField
-                        key={field.id}
-                        field={field}
-                        value={displayedValue(field)}
-                        error={formErrors[field.id]}
-                        required={isRequiredField(field)}
-                        disabled={isAutoDerived(field) || !isEditable}
-                        onChange={handleValueChange}
-                      />
-                    );
-                  })}
+                  {isActive && <Typography sx={{ fontSize: 14, lineHeight: 1 }}>&rsaquo;</Typography>}
                 </Box>
-              </Box>
-            ))}
+              );
+            })}
           </Box>
-        </CustomAccordion>
-      ))}
+
+          <Box
+            sx={{
+              borderRadius: "6px",
+              border: "1px solid #E0E0E0",
+              backgroundColor: "#F7F7F7",
+              p: 1.25,
+            }}
+          >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+              {selectedSection?.typeGroups.map((group) => (
+                <Box
+                  key={`${selectedSection.section}__${group.type}`}
+                  sx={{ p: 1.25, borderRadius: "6px", border: "1px solid #E4E4E4", backgroundColor: "#FFFFFF" }}
+                >
+                  {group.type !== selectedSection.section && (
+                    <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#555", mb: 1 }}>
+                      {group.type}
+                    </Typography>
+                  )}
+
+                  {renderFieldGrid(group.fields)}
+                </Box>
+              ))}
+            </Box>
+          </Box>
+        </Box>
+      ) : (
+        sectionGroups.map((section) => (
+          <CustomAccordion
+            key={section.section}
+            title={section.section}
+            defaultExpanded={defaultExpandedSection ? section.section === defaultExpandedSection : true}
+          >
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {section.typeGroups.map((group) => (
+                <Box
+                  key={`${section.section}__${group.type}`}
+                  sx={{ p: 1.5, borderRadius: "8px", border: "1px solid #E6E6E6", backgroundColor: "#FAFAFA" }}
+                >
+                  {group.type !== section.section && (
+                    <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#1E1E1E", mb: 1.25 }}>
+                      {group.type}
+                    </Typography>
+                  )}
+
+                  {renderFieldGrid(group.fields)}
+                </Box>
+              ))}
+            </Box>
+          </CustomAccordion>
+        ))
+      )}
 
       {submitMessage && (
         <Typography sx={{ color: submitMessage.toLowerCase().includes("failed") || submitMessage.toLowerCase().includes("highlighted") ? "#DE2C3B" : "#0F8A3D" }}>

@@ -19,6 +19,7 @@ const MerForm = ({ applicationId, roleType, memberType, isEditable = true }: Mer
       config={merFieldConfig}
       submitLabel="Submit MER"
       defaultExpandedSection="MER"
+      layout="split"
       isEditable={isEditable}
       submitConfirmationTitle="Confirmation"
       submitConfirmationMessage="Do you want to submit the case?"

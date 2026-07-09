@@ -64,7 +64,13 @@ const roleMapper = {
   "SUW_TASK":"SUW Pool",
   "VENDOR_CMO_TASK":"Vendor CMO Pool",
   "COPS_TASK":"COPS Pool",
-  "IT_TASK":"IT Pool"
+  "IT_TASK":"IT Pool",
+  "RI_TASK":"RI Pool",
+  "SYSTEM_WAIT_POOL_AMR_MEDICAL":"System Wait Pool - Medical",
+  "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL":"System Wait Pool - Non Medical",
+  "REQUIREMENT_POOL":"Requirement Pool",
+  "CUW_CLAIM_AUDIT_TASK":"Claim Audit Pool",
+  "ACCUITY_TASK":"Accuity Pool"
 }
 
 const RightPanel = ({

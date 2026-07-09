@@ -35,7 +35,13 @@ const mapper = {
     "SUW Pool":"RETAIL_SUW_POOL",
     "Vendor CMO Pool":"RETAIL_VENDOR_CMO_POOL",
     "COPS Pool":"RETAIL_COPS_POOL",
-    "IT Pool":"RETAIL_IT_POOL"
+    "IT Pool":"RETAIL_IT_POOL",
+    "System Wait Pool - Medical":"RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
+    "System Wait Pool - Non Medical":"RETAIL_SYSTEM_WAIT_POOL_AMR_NON_MEDICAL",
+    "RI Pool":"RETAIL_REINSURER_POOL",
+    "Requirement Pool":"RETAIL_REQUIREMENT_REVIEW_POOL",
+    "Claim Audit Pool":"RETAIL_CUW_CLAIM_AUDIT",
+    "Accuity Pool":"RETAIL_ACCUITY_USER"
 }
 
 const DRS = () => {

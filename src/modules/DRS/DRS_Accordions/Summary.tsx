@@ -112,6 +112,73 @@ const getFirstNonEmpty = (
     return fallback;
 };
 
+const getDisplayValue = (data: Record<string, unknown>, keys: string[]): unknown => {
+    for (const key of keys) {
+        const value = data[key];
+        if (typeof value === "string") {
+            if (value.trim() !== "") return value;
+            continue;
+        }
+        if (value !== null && value !== undefined) return value;
+    }
+
+    return "-";
+};
+
+const getFinancialFieldsForDisplay = (data: Record<string, unknown>): Array<{ label: string; value: unknown }> => {
+    return [
+        { label: "Financial Decision", value: data.financialDecision || data.breFinancialDecision || "-" },
+        { label: "BRE Financial Decision", value: data.breFinancialDecision || "-" },
+        { label: "BRE Remark", value: data.breRemark || data.remarks || "-" },
+        { label: "Financial Eligibility", value: data.financialEligibility || "-" },
+        { label: "Derived Income", value: data.derivedIncome || "-" },
+        { label: "Counter Offer Value", value: data.counterOfferValue || "-" },
+        { label: "Additional SA", value: data.additionalSA || "-" },
+        {
+            label: "BIU Financial Status (Match/Mismatch)",
+            value: data.biuFinancialStatus === "N" ? "Match" : data.biuFinancialStatus === "Y" ? "Mismatch" : data.biuFinancialStatus || "-",
+        },
+    ];
+};
+
+const getMedicalFieldsForDisplay = (data: Record<string, unknown>): Array<{ label: string; value: unknown }> => {
+    return [
+        { label: "BRE Physical Medical Decision", value: data.brePhysicalMedicalDecision || "-" },
+        { label: "BRE Physical Medical Remark", value: data.brePhysicalMedicalRemark || "-" },
+        { label: "BRE Tele/Video MER Decision", value: data.breTeleVideoMerDecision || "-" },
+        { label: "BRE Tele/Video MER Remark", value: data.breTeleVideoMerRemark || "-" },
+        { label: "MunichRe Medical decision", value: data.munichReMedicalDecision || "-" },
+        { label: "MunichRe Rating", value: data.munichReRating || "-" },
+        {
+            label: "BIU Medical status (Match/Mismatch)",
+            value: data.biuMedicalStatus === "N" ? "Match" : data.biuMedicalStatus === "Y" ? "Mismatch" : data.biuMedicalStatus || "-",
+        },
+    ];
+};
+
+const getOtherRiskFieldsForDisplay = (data: Record<string, unknown>): Array<{ label: string; value: unknown }> => {
+    return [
+        { label: "PTLR Response", value: getDisplayValue(data, ["ptlrResponse"]) },
+        { label: "DRC Response", value: getDisplayValue(data, ["drcResponse"]) },
+        { label: "Adverse IIB", value: getDisplayValue(data, ["adverseIIB", "adverseIib"]) },
+        { label: "Criminal Question Response (LA)", value: getDisplayValue(data, ["criminalQuestionResponseLA", "criminalQuestionResponseLa"]) },
+        { label: "PEP Question Response (LA)", value: getDisplayValue(data, ["pepQuestionResponseLA", "pepQuestionResponseLa"]) },
+        { label: "Criminal Question Response (PR)", value: getDisplayValue(data, ["criminalQuestionResponsePR", "criminalQuestionResponsePr"]) },
+        { label: "PEP Question Response (PR)", value: getDisplayValue(data, ["pepQuestionResponsePR", "pepQuestionResponsePr"]) },
+        { label: "Previous Policy Substandard", value: getDisplayValue(data, ["previousPolicySubstandard"]) },
+        { label: "Avocation Related Disclosure", value: getDisplayValue(data, ["avocationRelatedDisclosure"]) },
+        { label: "Health Question Positive", value: getDisplayValue(data, ["healthQuestionPositive"]) },
+        { label: "Employment in Risky Industry", value: getDisplayValue(data, ["employmentInRiskyIndustry"]) },
+        { label: "FATF/OFAC Country Login", value: getDisplayValue(data, ["fatfOfacCountryLogin"]) },
+        { label: "Hazardous Occupation", value: getDisplayValue(data, ["hazardousOccupation"]) },
+        { label: "EDD Flag", value: getDisplayValue(data, ["eddFlag"]) },
+        { label: "Claim Risk Indicator", value: getDisplayValue(data, ["claimRiskIndicator"]) },
+        { label: "Face Match Score", value: getDisplayValue(data, ["faceMatchScore", "faceMatchingScore", "facematchScore"]) },
+        { label: "Tobacco", value: getDisplayValue(data, ["tobacco"]) },
+        { label: "Narcotics", value: getDisplayValue(data, ["narcotics"]) },
+    ];
+};
+
 const evaluateRiskStatus = (
     section: RiskSectionKey,
     payload: Record<string, unknown>,
@@ -200,8 +267,7 @@ const Summary = () => {
         localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);
     }, [activeApplicantTab]);
 
-    const visibleButtons = ["CPT Pool"];
-    const isPoolRole = visibleButtons.includes(roleType);
+    const canOpenMedicalFinancialViews = roleType !== "CPT Pool";
 
     const activeSummaryEntry = summaryWithTabs.find((item) => item.memberType === activeApplicantTab)?.customer;
     const activeRiskAnalytics = useMemo(() => {
@@ -394,7 +460,7 @@ const Summary = () => {
                         isApplicantDetailsExpanded={isApplicantDetailsExpanded}
                     />
 
-                    {isPoolRole && (
+                    {canOpenMedicalFinancialViews && (
                         <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
                             <CustomButton
                                 variant="outlined"
@@ -435,9 +501,7 @@ const Summary = () => {
                     >
                         {selectedRiskCard && (
                             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2, minWidth: 420, py: 1 }}>
-                                <Typography sx={{ fontSize: "14px", fontWeight: 700 }}>
-                                    {selectedRiskCard.isHealthy ? "All parameters are within expected values." : "Some parameters are not as expected."}
-                                </Typography>
+                              
 
                                 {!selectedRiskCard.isHealthy && (
                                     <Box sx={{ p: 1, borderRadius: "8px", backgroundColor: "#fff1f0", border: "1px solid #ffcdd2" }}>
@@ -452,26 +516,99 @@ const Summary = () => {
                                     </Box>
                                 )}
 
-                                {Object.entries(selectedRiskCard.data).map(([key, value]) => (
-                                    <Box
-                                        key={`${selectedRiskCard.key}-${key}`}
-                                        sx={{
-                                            display: "grid",
-                                            gridTemplateColumns: "220px 1fr",
-                                            gap: 1,
-                                            alignItems: "start",
-                                            borderBottom: "1px solid #efefef",
-                                            pb: 1,
-                                        }}
-                                    >
-                                        <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
-                                            {toTitle(key)}
-                                        </Typography>
-                                        <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
-                                            {value === "" || value === null || value === undefined ? "-" : String(value)}
-                                        </Typography>
-                                    </Box>
-                                ))}
+                                {selectedRiskCard.key === "financial" ? (
+                                    <>
+                                        {getFinancialFieldsForDisplay(selectedRiskCard.data).map(({ label, value }) => (
+                                            <Box
+                                                key={`${selectedRiskCard.key}-${label}`}
+                                                sx={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: "220px 1fr",
+                                                    gap: 1,
+                                                    alignItems: "start",
+                                                    borderBottom: "1px solid #efefef",
+                                                    pb: 1,
+                                                }}
+                                            >
+                                                <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                                    {label}
+                                                </Typography>
+                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                                    {value === "" || value === null || value === undefined ? "-" : String(value)}
+                                                </Typography>
+                                            </Box>
+                                        ))}
+                                    </>
+                                ) : selectedRiskCard.key === "medical" ? (
+                                    <>
+                                        {getMedicalFieldsForDisplay(selectedRiskCard.data).map(({ label, value }) => (
+                                            <Box
+                                                key={`${selectedRiskCard.key}-${label}`}
+                                                sx={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: "220px 1fr",
+                                                    gap: 1,
+                                                    alignItems: "start",
+                                                    borderBottom: "1px solid #efefef",
+                                                    pb: 1,
+                                                }}
+                                            >
+                                                <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                                    {label}
+                                                </Typography>
+                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                                    {value === "" || value === null || value === undefined ? "-" : String(value)}
+                                                </Typography>
+                                            </Box>
+                                        ))}
+                                    </>
+                                ) : selectedRiskCard.key === "other" ? (
+                                    <>
+                                        {getOtherRiskFieldsForDisplay(selectedRiskCard.data).map(({ label, value }) => (
+                                            <Box
+                                                key={`${selectedRiskCard.key}-${label}`}
+                                                sx={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: "220px 1fr",
+                                                    gap: 1,
+                                                    alignItems: "start",
+                                                    borderBottom: "1px solid #efefef",
+                                                    pb: 1,
+                                                }}
+                                            >
+                                                <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                                    {label}
+                                                </Typography>
+                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                                    {value === "" || value === null || value === undefined ? "-" : String(value)}
+                                                </Typography>
+                                            </Box>
+                                        ))}
+                                    </>
+                                ) : (
+                                    <>
+                                        {Object.entries(selectedRiskCard.data).map(([key, value]) => (
+                                            <Box
+                                                key={`${selectedRiskCard.key}-${key}`}
+                                                sx={{
+                                                    display: "grid",
+                                                    gridTemplateColumns: "220px 1fr",
+                                                    gap: 1,
+                                                    alignItems: "start",
+                                                    borderBottom: "1px solid #efefef",
+                                                    pb: 1,
+                                                }}
+                                            >
+                                                <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                                    {toTitle(key)}
+                                                </Typography>
+                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                                    {value === "" || value === null || value === undefined ? "-" : String(value)}
+                                                </Typography>
+                                            </Box>
+                                        ))}
+                                    </>
+                                )}
                             </Box>
                         )}
                     </CustomDialog>

@@ -12,7 +12,6 @@ import { useAppDispatch } from "../../../store/hooks";
 import { medicalThunk } from "../../../store/thunks/medicalThunk";
 import type { ApplicantTab, DRSRequest, MedicalResponse, MedicalSummaryMember } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
-import { getRoleAccess } from "../../../utils/roleAccess";
 import BreDecision from "../DRS_Accordions/BreDecision";
 import MerForm from "./MerForm";
 import OtherMedicalsForm from "./OtherMedicalsForm";
@@ -92,10 +91,11 @@ const ViewMedicals = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
-  const [activeMedicalSectionTab, setActiveMedicalSectionTab] = useState<MedicalSectionTab>("specialMedical");
+  const [activeMedicalSectionTab, setActiveMedicalSectionTab] = useState<MedicalSectionTab>("mer");
 
   const roleType = getRoleType();
-  const { canEditMedical } = getRoleAccess(roleType);
+  const isCptPool = roleType === "CPT Pool";
+  const isMedicalSectionsEditable = isCptPool;
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const isApplicationIdMissing = !safeApplicationId;
@@ -186,6 +186,11 @@ const ViewMedicals = () => {
         <Typography sx={{ color: "#DE2C3B", mb: 2 }}>{error}</Typography>
       )}
 
+      <BreDecision
+        extraFields={medicalData?.breAdditionalFields ?? []}
+        breDecisionOverride={medicalData?.breDecision ?? null}
+      />
+
       <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
         <CustomTabs
           tabs={visibleTabs}
@@ -198,7 +203,7 @@ const ViewMedicals = () => {
       </Box>
 
       <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1 }}>
-        <CustomAccordion title="Applicant Profile" defaultExpanded detailPadding={0}>
+        <CustomAccordion title="Applicant Profile" defaultExpanded={false} detailPadding={0}>
           <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
             <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
               <Box
@@ -265,11 +270,6 @@ const ViewMedicals = () => {
         </CustomAccordion>
       </Box>
 
-      <BreDecision
-        extraFields={medicalData?.breAdditionalFields ?? []}
-        breDecisionOverride={medicalData?.breDecision ?? null}
-      />
-
       <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
         <CustomTabs
           tabs={medicalSectionTabs}
@@ -281,13 +281,13 @@ const ViewMedicals = () => {
       {loading ? (
         <Typography sx={{ color: "#6B7280" }}>Loading medical details...</Typography>
       ) : activeMedicalSectionTab === "mer" ? (
-        <MerForm applicationId={safeApplicationId} roleType={roleType} memberType={currentApplicantTab} isEditable={canEditMedical} />
+        <MerForm applicationId={safeApplicationId} roleType={roleType} memberType={currentApplicantTab} isEditable={isMedicalSectionsEditable} />
       ) : activeMedicalSectionTab === "specialMedical" ? (
         <SpecialMedicalForm
           applicationId={safeApplicationId}
           roleType={roleType}
           memberType={currentApplicantTab}
-          isEditable={canEditMedical}
+          isEditable={isMedicalSectionsEditable}
           medicalSections={medicalData?.sections ?? []}
         />
       ) : activeMedicalSectionTab === "otherMedicals" ? (
@@ -296,7 +296,7 @@ const ViewMedicals = () => {
           roleType={roleType}
           memberType={currentApplicantTab}
           medicalSections={medicalData?.sections ?? []}
-          isEditable={canEditMedical}
+          isEditable={isMedicalSectionsEditable}
         />
       ) : (
         <Typography sx={{ color: "#6B7280", mt: 1 }}>

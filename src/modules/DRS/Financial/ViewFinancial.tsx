@@ -94,6 +94,7 @@ const ViewFinancial = () => {
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
+  const isCptPool = roleType === "CPT Pool";
   const { canEditFinancial } = getRoleAccess(roleType);
 
   
@@ -210,6 +211,10 @@ const ViewFinancial = () => {
   
 
   useEffect(() => {
+    if (isCptPool) {
+      return;
+    }
+
     // if (isApplicationIdMissing) {
     //   return;
     // }
@@ -233,7 +238,22 @@ const ViewFinancial = () => {
     };
 
     void fetchMedicals();
-  }, [dispatch, roleType, safeApplicationId]);
+  }, [dispatch, isCptPool, roleType, safeApplicationId]);
+
+  if (isCptPool) {
+    return (
+      <Container disableGutters>
+        <BackButton
+          label="Back to DRS"
+          onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
+        />
+        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
+          View Financial Details is not available for CPT Pool.
+        </Typography>
+      </Container>
+    );
+  }
+
   return (
     <Container disableGutters>
       <BackButton
