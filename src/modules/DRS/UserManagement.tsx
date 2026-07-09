@@ -91,7 +91,7 @@ const businessTypeOptions = [
 
 const parentRoleOptions = ["CUW", "COPS", "GOPS", "User Management", "SUW", "Admin"];
 const parentToSubRoleMap: Record<string, string[]> = {
-    CUW: ["1st UW", "Sr UW", "HOD", "CMO", "HO CMO"],
+    CUW: ["1st UW", "Sr UW", "HOD", "HO CMO"],
     COPS: ["CVT", "CPT"],
     GOPS: ["DVT"],
     "User Management": ["User Management"],
