@@ -265,6 +265,28 @@ const RightPanel = ({
     });
   };
 
+  const getPoolTatHours = (row: tableData) => {
+    const rowData = row as unknown as Record<string, unknown>;
+    const rawPoolTat = rowData.poolTAT;
+
+    if (rawPoolTat === null || rawPoolTat === undefined) {
+      return null;
+    }
+
+    const tatText = String(rawPoolTat).trim();
+    if (!tatText) {
+      return null;
+    }
+
+    const tatMatch = tatText.match(/-?\d+(\.\d+)?/);
+    if (!tatMatch) {
+      return null;
+    }
+
+    const tatHours = Number(tatMatch[0]);
+    return Number.isFinite(tatHours) ? tatHours : null;
+  };
+
   // ---------------- APPLY ----------------
   const handleApply = () => {
     updateConfig({
@@ -647,56 +669,68 @@ const RightPanel = ({
                     </TableHead>
                   )}
                   <TableBody>
-                    {paginatedRows.map((row) => (
-                      <TableRow
-                        key={row.id}
-                        hover
-                        sx={{
-                          cursor: "pointer",
-                          "&:hover": { backgroundColor: "#f5faff" },
-                        }}
-                      >
-                        {visibleColumns.map((col) => {
-                          const cellValue = row[col.key];
-                          return (
-                            <TableCell
-                              key={String(col.key)}
-                              sx={{ p: 1.5, pl: 2, fontSize: "13px" }}
-                            >
-                              {col.key === "drc" ? (
-                                <Badge
-                                  label={row.drc}
-                                  variant={
-                                    row.drc === "Medium"
-                                      ? "Medium"
-                                      : row.drc === "Low"
-                                        ? "Low"
-                                        : "High"
-                                  }
-                                />
-                              ) : col.key === "applicationNo" ? (
-                                <Typography
-                                  sx={{
-                                    cursor: "pointer",
-                                    fontWeight: 600,
-                                    fontSize: "13px",
-                                    color: "#0E3762",
-                                    "&:hover": { textDecoration: "underline" },
-                                  }}
-                                  onClick={(e) => {
-                                    void handleApplicationClick(e, row);
-                                  }}
-                                >
-                                  {row.applicationNo}
-                                </Typography>
-                              ) : (
-                                String(cellValue ?? "")
-                              )}
-                            </TableCell>
-                          );
-                        })}
-                      </TableRow>
-                    ))}
+                    {paginatedRows.map((row) => {
+                      const poolTatHours = getPoolTatHours(row);
+                      const isPoolTatCritical =
+                        poolTatHours !== null && poolTatHours <= 1;
+
+                      return (
+                        <TableRow
+                          key={row.id}
+                          hover
+                          sx={{
+                            cursor: "pointer",
+                            backgroundColor: isPoolTatCritical ? "#FDE8E8" : "inherit",
+                            "& td": {
+                              color: isPoolTatCritical ? "#9A2529" : "inherit",
+                            },
+                            "&:hover": {
+                              backgroundColor: isPoolTatCritical ? "#FDE8E8" : "#f5faff",
+                            },
+                          }}
+                        >
+                          {visibleColumns.map((col) => {
+                            const cellValue = row[col.key];
+                            return (
+                              <TableCell
+                                key={String(col.key)}
+                                sx={{ p: 1.5, pl: 2, fontSize: "13px" }}
+                              >
+                                {col.key === "drc" ? (
+                                  <Badge
+                                    label={row.drc}
+                                    variant={
+                                      row.drc === "Medium"
+                                        ? "Medium"
+                                        : row.drc === "Low"
+                                          ? "Low"
+                                          : "High"
+                                    }
+                                  />
+                                ) : col.key === "applicationNo" ? (
+                                  <Typography
+                                    sx={{
+                                      cursor: "pointer",
+                                      fontWeight: 600,
+                                      fontSize: "13px",
+                                      color: isPoolTatCritical ? "#9A2529" : "#0E3762",
+                                      "&:hover": { textDecoration: "underline" },
+                                    }}
+                                    onClick={(e) => {
+                                      void handleApplicationClick(e, row);
+                                    }}
+                                  >
+                                    {row.applicationNo}
+                                  </Typography>
+                                ) : (
+                                  String(cellValue ?? "")
+                                )}
+                              </TableCell>
+                            );
+                          })}
+                        </TableRow>
+                      );
+                    })}
                     {paginatedRows.length <= 0 && (
                      <TableRow>
                         <TableCell
