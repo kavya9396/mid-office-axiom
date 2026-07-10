@@ -11,6 +11,7 @@ const baseColumns = [
   "channel",
   "ptlr",
   "roleType",
+  "poolTAT"
 ] as const;
 const baseColumnsCops = [
   "applicationNo",

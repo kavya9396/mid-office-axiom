@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material"
+import { Box, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -23,6 +23,37 @@ const referralRoleMap: Record<string, string> = {
     "Refer to Reinsurer": "Reinsurer",
 };
 
+type CounterOfferRowKey = "baseSumAssured" | "riderSumAssured";
+type CounterOfferFieldKey =
+    | "changedSA"
+    | "changedPT"
+    | "changedPPT"
+    | "extraPremiumDecision"
+    | "revisedPremium"
+    | "gst"
+    | "reasons";
+
+const createCounterOfferTableState = () => ({
+    baseSumAssured: {
+        changedSA: "",
+        changedPT: "",
+        changedPPT: "",
+        extraPremiumDecision: "",
+        revisedPremium: "",
+        gst: "",
+        reasons: "",
+    },
+    riderSumAssured: {
+        changedSA: "",
+        changedPT: "",
+        changedPPT: "",
+        extraPremiumDecision: "",
+        revisedPremium: "",
+        gst: "",
+        reasons: "",
+    },
+});
+
 const UWDecision = () => {
     const users = useSelector((state: RootState) => state.referralUsers.users);
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes)
@@ -38,6 +69,12 @@ const UWDecision = () => {
     const [caseUWDecision, setCaseUWDecision] = useState("");
     const [uwDecision, setUwDecision] = useState("");
     const [decisionCode, setDecisionCode] = useState("");
+    const [rejectReason, setRejectReason] = useState("");
+    const [declineReasons, setDeclineReasons] = useState(["", "", ""]);
+    const [postponeReason, setPostponeReason] = useState("");
+    const [postponementPeriod, setPostponementPeriod] = useState("");
+    const [smokerStatus, setSmokerStatus] = useState("");
+    const [counterOfferTable, setCounterOfferTable] = useState(createCounterOfferTableState);
     const [parallelDecision, setParallelDecision] = useState("");
     const [holdReasons, setHoldReasons] = useState("");
     const [cuwReasons, setCuwReasons] = useState("");
@@ -56,7 +93,6 @@ const UWDecision = () => {
         "Reject",
         "Decline",
         "Postpone",
-        "Counter Offer",
     ].includes(caseUWDecision);
 
     const showParallelDecision = [
@@ -78,10 +114,70 @@ const UWDecision = () => {
         "Reject",
         "Decline",
         "Postpone",
-        "Counter Offer"
     ]);
 
     const showDecisionType = caseUWDecision === "Refer to Sr.UW" || caseUWDecision === "Refer to HoD";
+    const isAcceptDecision = caseUWDecision === "Accept";
+    const isRejectDecision = caseUWDecision === "Reject";
+    const isDeclineDecision = caseUWDecision === "Decline";
+    const isPostponeDecision = caseUWDecision === "Postpone";
+    const isCounterOfferDecision = caseUWDecision === "Counter Offer";
+    const resolvedDecisionCode = (isAcceptDecision || isRejectDecision || isDeclineDecision || isPostponeDecision)
+        ? (decisionCode || decisionCodes[0]?.value || "")
+        : decisionCode;
+    const resolvedSmokerStatus = isAcceptDecision
+        ? (smokerStatus || "Non Smoker")
+        : smokerStatus;
+
+    const rejectReasonOptions = [
+        { label: "Reason 1", value: "Reason 1" },
+        { label: "Reason 2", value: "Reason 2" },
+        { label: "Reason 3", value: "Reason 3" },
+    ];
+
+    const declineReasonOptions = [
+        { label: "Reason 1", value: "Reason 1" },
+        { label: "Reason 2", value: "Reason 2" },
+        { label: "Reason 3", value: "Reason 3" },
+    ];
+
+    const postponeReasonOptions = [
+        { label: "Reason 1", value: "Reason 1" },
+        { label: "Reason 2", value: "Reason 2" },
+        { label: "Reason 3", value: "Reason 3" },
+    ];
+
+    const postponementPeriodOptions = [
+        { label: "3 Months", value: "3 Months" },
+        { label: "6 Months", value: "6 Months" },
+        { label: "12 Months", value: "12 Months" },
+    ];
+
+    const getDeclineReasonOptions = (index: number) => {
+        const selectedInOtherDropdowns = new Set(
+            declineReasons
+                .filter((reason, reasonIndex) => reasonIndex !== index && reason)
+        );
+
+        return declineReasonOptions.filter(
+            (option) =>
+                !selectedInOtherDropdowns.has(option.value) || option.value === declineReasons[index]
+        );
+    };
+
+    const updateCounterOfferCell = (
+        rowKey: CounterOfferRowKey,
+        field: CounterOfferFieldKey,
+        value: string
+    ) => {
+        setCounterOfferTable((prev) => ({
+            ...prev,
+            [rowKey]: {
+                ...prev[rowKey],
+                [field]: value,
+            },
+        }));
+    };
 
     const dialogMessage = `Kindly reconfirm if you want to proceed with the case as "${caseUWDecision}"`;
     const thresholdMessage = `Threshold is achieved for this user, kindly refer the case to another ${caseUWDecision}`;
@@ -149,6 +245,11 @@ const UWDecision = () => {
         dispatch(referralUsersThunk({ role }));
     }, [caseUWDecision, dispatch]);
 
+    useEffect(() => {
+        if ((!isRejectDecision && !isDeclineDecision && !isPostponeDecision) || decisionCodes.length === 0) return;
+        setDecisionCode((prev) => prev || decisionCodes[0].value);
+    }, [isRejectDecision, isDeclineDecision, isPostponeDecision, decisionCodes]);
+
     return (
         <Container disableGutters>
             <Box sx={{ mt: 2 }}>
@@ -207,6 +308,16 @@ const UWDecision = () => {
                                 onChange={(value: string) => {
                                     setCaseUWDecision(value);
                                     setReferralValue("");
+                                    setRejectReason("");
+                                    setDeclineReasons(["", "", ""]);
+                                    setPostponeReason("");
+                                    setPostponementPeriod("");
+                                    setCounterOfferTable(createCounterOfferTableState());
+
+                                    if (!fetchDecisionCodes.has(value)) {
+                                        setDecisionCode("");
+                                        setSmokerStatus("");
+                                    }
 
                                     if (fetchDecisionCodes.has(value)) {
                                         dispatch(
@@ -220,12 +331,135 @@ const UWDecision = () => {
                             />
 
                             {showDecisionCode && (
+                                (isAcceptDecision || isRejectDecision || isDeclineDecision || isPostponeDecision) ? (
+                                    <Box>
+                                        <Typography
+                                            sx={{
+                                                fontSize: "14px",
+                                                fontWeight: 400,
+                                                color: "#444",
+                                                mb: 1,
+                                            }}
+                                        >
+                                            Decision Code
+                                        </Typography>
+                                        <CustomTextField
+                                            fullWidth
+                                            size="small"
+                                            value={resolvedDecisionCode}
+                                            disabled
+                                            sx={{
+                                                "& .MuiInputBase-root": {
+                                                    height: 40,
+                                                    borderRadius: "8px",
+                                                    backgroundColor: "#fff",
+                                                },
+                                            }}
+                                        />
+                                    </Box>
+                                ) : (
+                                    <CustomSelect
+                                        label="Decision Code"
+                                        value={resolvedDecisionCode}
+                                        onChange={setDecisionCode}
+                                        options={decisionCodes}
+                                    />
+                                )
+                            )}
+
+                            {isRejectDecision && (
                                 <CustomSelect
-                                    label="Decision Code"
-                                    value={decisionCode}
-                                    onChange={setDecisionCode}
-                                    options={decisionCodes}
+                                    label="Reject Reason"
+                                    value={rejectReason}
+                                    onChange={setRejectReason}
+                                    options={rejectReasonOptions}
                                 />
+                            )}
+
+                            {isDeclineDecision && (
+                                <>
+                                    <CustomSelect
+                                        label="Decline Reason 1"
+                                        value={declineReasons[0]}
+                                        onChange={(value: string) => {
+                                            setDeclineReasons((prev) => {
+                                                const next = [...prev];
+                                                next[0] = value;
+                                                return next;
+                                            });
+                                        }}
+                                        options={getDeclineReasonOptions(0)}
+                                    />
+                                    <CustomSelect
+                                        label="Decline Reason 2"
+                                        value={declineReasons[1]}
+                                        onChange={(value: string) => {
+                                            setDeclineReasons((prev) => {
+                                                const next = [...prev];
+                                                next[1] = value;
+                                                return next;
+                                            });
+                                        }}
+                                        options={getDeclineReasonOptions(1)}
+                                    />
+                                    <CustomSelect
+                                        label="Decline Reason 3"
+                                        value={declineReasons[2]}
+                                        onChange={(value: string) => {
+                                            setDeclineReasons((prev) => {
+                                                const next = [...prev];
+                                                next[2] = value;
+                                                return next;
+                                            });
+                                        }}
+                                        options={getDeclineReasonOptions(2)}
+                                    />
+                                </>
+                            )}
+
+                            {isPostponeDecision && (
+                                <>
+                                    <CustomSelect
+                                        label="Postpone Reason"
+                                        value={postponeReason}
+                                        onChange={setPostponeReason}
+                                        options={postponeReasonOptions}
+                                    />
+                                    <CustomSelect
+                                        label="Postponement Period"
+                                        value={postponementPeriod}
+                                        onChange={setPostponementPeriod}
+                                        options={postponementPeriodOptions}
+                                    />
+                                </>
+                            )}
+
+                            {isAcceptDecision && (
+                                <Box>
+                                    <Typography
+                                        sx={{
+                                            fontSize: "14px",
+                                            fontWeight: 400,
+                                            color: "#444",
+                                            mb: 1,
+                                        }}
+                                    >
+                                        Smoker Status
+                                    </Typography>
+                                    <CustomTextField
+                                        fullWidth
+                                        size="small"
+                                        value={resolvedSmokerStatus}
+                                        disabled
+                                        sx={{
+                                            "& .MuiInputBase-root": {
+                                                height: 40,
+                                                borderRadius: "8px",
+                                                backgroundColor: "#fff",
+                                            },
+                                        }}
+                                    />
+                                </Box>
                             )}
 
                             {selectedReferralConfig && (
@@ -306,6 +540,139 @@ const UWDecision = () => {
                                         { label: "Opinion", value: "opinion" },
                                     ]}
                                 />
+                            </Box>
+                        )}
+
+                        {isCounterOfferDecision && (
+                            <Box sx={{ mt: 3 }}>
+                                <Typography
+                                    sx={{
+                                        fontSize: "15px",
+                                        fontWeight: 600,
+                                        color: "#1f2937",
+                                        mb: 1.5,
+                                    }}
+                                >
+                                    Counter Offer Details
+                                </Typography>
+
+                                <TableContainer
+                                    sx={{
+                                        border: "1px solid #d7d7d7",
+                                        borderRadius: "10px",
+                                        overflowX: "auto",
+                                        backgroundColor: "#fff",
+                                    }}
+                                >
+                                    <Table size="small" sx={{ minWidth: 1900 }}>
+                                        <TableHead>
+                                            <TableRow>
+                                                {[
+                                                    "Application No.",
+                                                    "Proposer / Life Assured (auto filled)",
+                                                    "Applied SA (auto filled)",
+                                                    "Changed SA",
+                                                    "PT (auto filled)",
+                                                    "Changed PT",
+                                                    "PPT (auto filled)",
+                                                    "Changed PPT",
+                                                    "Extra Premium / Decision",
+                                                    "Premium Collected (auto filled)",
+                                                    "Revised Premium",
+                                                    "GST",
+                                                    "Reasons",
+                                                ].map((header) => (
+                                                    <TableCell
+                                                        key={header}
+                                                        sx={{
+                                                            backgroundColor: "#f3f7fc",
+                                                            fontSize: "12px",
+                                                            fontWeight: 600,
+                                                            color: "#2b2b2b",
+                                                            whiteSpace: "normal",
+                                                            minWidth: 130,
+                                                            borderRight: "1px solid #e3e3e3",
+                                                        }}
+                                                    >
+                                                        {header}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        </TableHead>
+
+                                        <TableBody>
+                                            {[
+                                                { key: "baseSumAssured", label: "Base Sum Assured" },
+                                                { key: "riderSumAssured", label: "Rider Sum Assured" },
+                                            ].map((row) => (
+                                                <TableRow key={row.key}>
+                                                    <TableCell sx={{ minWidth: 160, fontWeight: 600 }}>{row.label}</TableCell>
+                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                    <TableCell>
+                                                        <CustomTextField
+                                                            fullWidth
+                                                            size="small"
+                                                            value={counterOfferTable[row.key as CounterOfferRowKey].changedSA}
+                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedSA", e.target.value)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                    <TableCell>
+                                                        <CustomTextField
+                                                            fullWidth
+                                                            size="small"
+                                                            value={counterOfferTable[row.key as CounterOfferRowKey].changedPT}
+                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPT", e.target.value)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                    <TableCell>
+                                                        <CustomTextField
+                                                            fullWidth
+                                                            size="small"
+                                                            value={counterOfferTable[row.key as CounterOfferRowKey].changedPPT}
+                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPPT", e.target.value)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <CustomTextField
+                                                            fullWidth
+                                                            size="small"
+                                                            value={counterOfferTable[row.key as CounterOfferRowKey].extraPremiumDecision}
+                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "extraPremiumDecision", e.target.value)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                    <TableCell>
+                                                        <CustomTextField
+                                                            fullWidth
+                                                            size="small"
+                                                            value={counterOfferTable[row.key as CounterOfferRowKey].revisedPremium}
+                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "revisedPremium", e.target.value)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <CustomTextField
+                                                            fullWidth
+                                                            size="small"
+                                                            value={counterOfferTable[row.key as CounterOfferRowKey].gst}
+                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "gst", e.target.value)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <CustomTextField
+                                                            fullWidth
+                                                            size="small"
+                                                            value={counterOfferTable[row.key as CounterOfferRowKey].reasons}
+                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "reasons", e.target.value)}
+                                                        />
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
                             </Box>
                         )}
 
