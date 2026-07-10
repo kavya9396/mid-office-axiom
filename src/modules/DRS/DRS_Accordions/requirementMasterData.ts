@@ -1,5 +1,6 @@
 ﻿export type RequirementMasterRow = {
   team: "Gops" | "UW";
+  specialTest?: string;
   profile: string;
   category: string;
   subCategory: string;

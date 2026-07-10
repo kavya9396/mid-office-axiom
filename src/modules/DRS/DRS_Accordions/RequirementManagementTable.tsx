@@ -13,10 +13,19 @@ import {
     type RequirementMasterRow,
 } from "./requirementMasterData";
 
-type LookupTeam = "CVT Team" | "DVT Team";
+type BreRequirementRow = {
+    requirementType?: string;
+    requirementValue?: string;
+    ruleId?: string;
+    ruleName?: string;
+    metaphorName?: string;
+};
+
+type LookupTeam = "CVT Team" | "DVT Team" | "UW";
 
 type EditableField =
     | "team"
+    | "profile"
     | "category"
     | "subCategory"
     | "document"
@@ -38,19 +47,43 @@ type Option = {
     value: string;
 };
 
-const TEAM_OPTIONS: Option[] = [
-    { label: "CVT Team", value: "CVT Team" },
-    { label: "DVT Team", value: "DVT Team" },
-];
+const EditIcon = ({ size = 14 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25Z" fill="currentColor" />
+        <path d="M20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="currentColor" />
+    </svg>
+);
+
+const DeleteIcon = ({ size = 14 }: { size?: number }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M6 7H18L17 21H7L6 7Z" fill="currentColor" />
+        <path d="M9 4H15L16 6H8L9 4Z" fill="currentColor" />
+        <path d="M4 6H20V8H4V6Z" fill="currentColor" />
+    </svg>
+);
+
+const getTeamOptionsFromMaster = (roleType: string): Option[] => {
+    const normalizedRoleType = roleType.trim().toLowerCase();
+    const hasUW = requirementMasterRows.some((row) => row.team === "UW");
+    const hasGops = requirementMasterRows.some((row) => row.team === "Gops");
+    const options: Option[] = [];
+
+    if (hasUW) {
+        const uwLabel = normalizedRoleType.includes("cvt") ? "CVT Team" : "UW";
+        options.push({ label: uwLabel, value: uwLabel });
+    }
+
+    if (hasGops) {
+        options.push({ label: "DVT Team", value: "DVT Team" });
+    }
+
+    return options;
+};
 
 const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterRow["team"]> = {
     "CVT Team": "UW",
     "DVT Team": "Gops",
-};
-
-const UI_TEAM_BY_MASTER: Record<RequirementMasterRow["team"], LookupTeam> = {
-    UW: "CVT Team",
-    Gops: "DVT Team",
+    UW: "UW",
 };
 
 const STATUS_OPTIONS: Option[] = [
@@ -60,13 +93,18 @@ const STATUS_OPTIONS: Option[] = [
     { label: "Accept", value: "Accept" },
 ];
 
-const REQUIRED_SELECTION_FIELDS: Array<Exclude<EditableField, "status">> = [
+const REQUIRED_SELECTION_FIELDS: Array<Exclude<EditableField, "status" | "profile">> = [
     "team",
     "category",
     "subCategory",
     "document",
     "reason",
 ];
+
+const getRequiredSelectionFields = (requiresProfile: boolean) =>
+    (requiresProfile
+        ? (["team", "profile", "category", "subCategory", "document", "reason"] as const)
+        : REQUIRED_SELECTION_FIELDS) as Array<Exclude<EditableField, "status">>;
 
 const INITIAL_ROW_STATE: AdditionalRequirementRow = {
     team: "",
@@ -115,11 +153,15 @@ const clearErrors = (errors: RowErrors | undefined, keys: Array<keyof RowErrors>
 const getDefaultTeam = (): LookupTeam => {
     const roleType = String(localStorage.getItem("roleType") ?? "").toLowerCase();
 
+    if (roleType.includes("cvt")) {
+        return "CVT Team";
+    }
+
     if (roleType.includes("dvt") || roleType.includes("gops")) {
         return "DVT Team";
     }
 
-    return "CVT Team";
+    return "UW";
 };
 
 const mapStoredTeamToDisplay = (team: string): string => {
@@ -129,12 +171,16 @@ const mapStoredTeamToDisplay = (team: string): string => {
         return "";
     }
 
-    if (normalized === "uw" || normalized.includes("cvt")) {
-        return UI_TEAM_BY_MASTER.UW;
+    if (normalized.includes("cvt")) {
+        return "CVT Team";
     }
 
     if (normalized === "gops" || normalized.includes("dvt")) {
-        return UI_TEAM_BY_MASTER.Gops;
+        return "DVT Team";
+    }
+
+    if (normalized === "uw") {
+        return "UW";
     }
 
     return team;
@@ -150,7 +196,7 @@ const isPendingStatus = (status: string) => status.trim().toLowerCase() === "pen
 const getMasterTeamForUiValue = (team: string) => MASTER_TEAM_BY_UI[team as LookupTeam];
 
 const getScopedMasterRows = (
-    row: Pick<AdditionalRequirementRow, "team" | "category" | "subCategory" | "document" | "reason">,
+    row: Pick<AdditionalRequirementRow, "team" | "profile" | "category" | "subCategory" | "document" | "reason">,
 ) => {
     const masterTeam = getMasterTeamForUiValue(row.team);
     if (!masterTeam) {
@@ -160,6 +206,7 @@ const getScopedMasterRows = (
     return requirementMasterRows.filter(
         (entry) =>
             entry.team === masterTeam &&
+            (!row.profile || entry.profile === row.profile) &&
             (!row.category || entry.category === row.category) &&
             (!row.subCategory || entry.subCategory === row.subCategory) &&
             (!row.document || entry.document === row.document) &&
@@ -179,13 +226,14 @@ const getLookupMessage = (matches: RequirementMasterRow[]) => {
     return "";
 };
 
-const applyLookupToRow = (row: EditableRequirementRow): EditableRequirementRow => {
+const applyLookupToRow = (row: EditableRequirementRow, requiresProfile: boolean): EditableRequirementRow => {
     if (!row.__isDraft) {
         return row;
     }
 
     const nextErrors = clearErrors(row.__errors, ["lookup"]);
-    const hasCompleteSelection = REQUIRED_SELECTION_FIELDS.every((field) =>
+    const requiredSelectionFields = getRequiredSelectionFields(requiresProfile);
+    const hasCompleteSelection = requiredSelectionFields.every((field) =>
         String(row[field] ?? "").trim(),
     );
 
@@ -194,6 +242,7 @@ const applyLookupToRow = (row: EditableRequirementRow): EditableRequirementRow =
             ...row,
             fupCode: "",
             description: "",
+            specialTest: "",
             __lookupMessage: "",
             __errors: nextErrors,
         };
@@ -207,6 +256,7 @@ const applyLookupToRow = (row: EditableRequirementRow): EditableRequirementRow =
             ...row,
             fupCode: matches[0].fupCode,
             description: matches[0].description,
+            specialTest: String(matches[0].specialTest ?? ""),
             __lookupMessage: "",
             __errors: nextErrors,
         };
@@ -216,6 +266,7 @@ const applyLookupToRow = (row: EditableRequirementRow): EditableRequirementRow =
         ...row,
         fupCode: "",
         description: "",
+        specialTest: "",
         __lookupMessage: lookupMessage,
         __errors: lookupMessage ? { ...nextErrors, lookup: lookupMessage } : nextErrors,
     };
@@ -253,10 +304,24 @@ const normalizeExistingRow = (
     __lookupMessage: "",
 });
 
-const validateDraftRow = (row: EditableRequirementRow): RowErrors => {
-    const errors: RowErrors = {};
+const mapBreRequirementToRow = (requirement: BreRequirementRow): AdditionalRequirementRow => ({
+    ...INITIAL_ROW_STATE,
+    team: "UW",
+    profile: "",
+    category: String(requirement.requirementType ?? ""),
+    subCategory: String(requirement.requirementValue ?? ""),
+    document: String(requirement.ruleName ?? ""),
+    reason: String(requirement.metaphorName ?? ""),
+    fupCode: String(requirement.ruleId ?? ""),
+    description: String(requirement.ruleName ?? requirement.requirementValue ?? ""),
+    status: "Pending",
+});
 
-    REQUIRED_SELECTION_FIELDS.forEach((field) => {
+const validateDraftRow = (row: EditableRequirementRow, requiresProfile: boolean): RowErrors => {
+    const errors: RowErrors = {};
+    const requiredSelectionFields = getRequiredSelectionFields(requiresProfile);
+
+    requiredSelectionFields.forEach((field) => {
         if (!String(row[field] ?? "").trim()) {
             errors[field] = "Required";
         }
@@ -281,11 +346,25 @@ interface RequirementManagementTableProps {
 }
 
 const RequirementManagementTable = ({ requirements }: RequirementManagementTableProps) => {
+    const roleType = String(localStorage.getItem("roleType") ?? "");
+    const normalizedRoleType = roleType.trim().toLowerCase();
+    const isCvtOrDvtRole = normalizedRoleType.includes("cvt") || normalizedRoleType.includes("dvt");
+    const shouldShowProfileAndSpecialTest = !isCvtOrDvtRole;
     const reduxRequirements = useSelector((state: RootState) => {
         const drsData = state.drs.data as unknown as Record<string, unknown> | null;
         const directRequirements = drsData?.requirements;
         if (Array.isArray(directRequirements)) {
             return directRequirements as AdditionalRequirementRow[];
+        }
+
+        const breOutput = (drsData?.externalAPIs as Record<string, unknown> | undefined)?.breOutput as
+            | Record<string, unknown>
+            | undefined;
+        const breRequirements = breOutput?.requirements;
+        if (Array.isArray(breRequirements) && breRequirements.length > 0) {
+            return breRequirements.map((item) =>
+                mapBreRequirementToRow(item as BreRequirementRow),
+            );
         }
 
         const requirementManagement = drsData?.requirementManagement;
@@ -294,7 +373,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             : [];
     });
 
-    const isVisible = localStorage.getItem("roleType") !== "Ready For Issuance Pool";
+    const isVisible = roleType !== "Ready For Issuance Pool";
+    const teamOptions = useMemo(() => getTeamOptionsFromMaster(roleType), [roleType]);
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
         () => finalRequirements.map((row, index) => normalizeExistingRow(row, index)),
@@ -321,8 +401,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getCategoryOptions = (row: EditableRequirementRow) =>
         uniqueNonEmpty(
-            getScopedMasterRows({ ...row, category: "", subCategory: "", document: "", reason: "" }).map(
+            getScopedMasterRows({ ...row, profile: shouldShowProfileAndSpecialTest ? row.profile : "", category: "", subCategory: "", document: "", reason: "" }).map(
                 (entry) => entry.category,
+            ),
+        ).map(toOption);
+
+    const getProfileOptions = (row: EditableRequirementRow) =>
+        uniqueNonEmpty(
+            getScopedMasterRows({ ...row, profile: "", category: "", subCategory: "", document: "", reason: "" }).map(
+                (entry) => entry.profile,
             ),
         ).map(toOption);
 
@@ -417,6 +504,21 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         __errors: nextErrors,
                     };
                     break;
+                case "profile":
+                    nextRow = {
+                        ...row,
+                        profile: value,
+                        category: "",
+                        subCategory: "",
+                        document: "",
+                        reason: "",
+                        fupCode: "",
+                        description: "",
+                        specialTest: "",
+                        __lookupMessage: "",
+                        __errors: nextErrors,
+                    };
+                    break;
                 case "subCategory":
                     nextRow = {
                         ...row,
@@ -459,14 +561,14 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     break;
             }
 
-            return applyLookupToRow(nextRow);
+            return applyLookupToRow(nextRow, shouldShowProfileAndSpecialTest);
         });
     };
 
     const handleSave = (rowId: string) => {
         updateRow(rowId, (row) => {
-            const preparedRow = applyLookupToRow(row);
-            const errors = validateDraftRow(preparedRow);
+            const preparedRow = applyLookupToRow(row, shouldShowProfileAndSpecialTest);
+            const errors = validateDraftRow(preparedRow, shouldShowProfileAndSpecialTest);
 
             if (Object.keys(errors).length > 0) {
                 return {
@@ -486,6 +588,21 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const handleDelete = (rowId: string) => {
         setLocalRows((previousRows) => previousRows.filter((row) => row.__rowId !== rowId));
+    };
+
+    const handleEditLocalSaved = (rowId: string) => {
+        setLocalRows((previousRows) =>
+            previousRows.map((row) =>
+                row.__rowId === rowId
+                    ? {
+                          ...row,
+                          __isDraft: true,
+                          __errors: {},
+                          __lookupMessage: "",
+                      }
+                    : row,
+            ),
+        );
     };
 
     const renderEditableSelect = (
@@ -549,10 +666,16 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const savedColumns: Column<EditableRequirementRow>[] = [
         { key: "team", header: "Team", width: "9%" },
+        ...(shouldShowProfileAndSpecialTest
+            ? ([{ key: "profile", header: "Profile", width: "9%" }] as Column<EditableRequirementRow>[])
+            : []),
         { key: "category", header: "Category", width: "9%" },
         { key: "subCategory", header: "Sub Category", width: "10%" },
         { key: "document", header: "Document", width: "9%" },
         { key: "reason", header: "Reason", width: "11%" },
+        ...(shouldShowProfileAndSpecialTest
+            ? ([{ key: "specialTest", header: "Special Test", width: "10%" }] as Column<EditableRequirementRow>[])
+            : []),
         { key: "fupCode", header: "FUP Code", width: "7%" },
         { key: "description", header: "Description", width: "13%" },
         {
@@ -575,6 +698,58 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         { key: "raisedBy", header: "Raised By", width: "8%" },
         { key: "receivedDate", header: "Received Date", width: "8%" },
         { key: "receivedBy", header: "Received By", width: "8%" },
+        {
+            key: "__rowId",
+            header: "Actions",
+            width: "96px",
+            sticky: "right",
+            render: (_value, row) => {
+                if (!row.__isLocal) {
+                    return (
+                        <Typography sx={{ fontSize: 12, color: "#94A3B8" }}>
+                            -
+                        </Typography>
+                    );
+                }
+
+                return (
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, whiteSpace: "nowrap" }}>
+                        <Box
+                            component="button"
+                            type="button"
+                            onClick={() => handleEditLocalSaved(row.__rowId)}
+                            sx={{
+                                border: "none",
+                                background: "transparent",
+                                cursor: "pointer",
+                                color: "#0F4C81",
+                                display: "inline-flex",
+                                p: 0,
+                            }}
+                            aria-label="Edit requirement"
+                        >
+                            <EditIcon />
+                        </Box>
+                        <Box
+                            component="button"
+                            type="button"
+                            onClick={() => handleDelete(row.__rowId)}
+                            sx={{
+                                border: "none",
+                                background: "transparent",
+                                cursor: "pointer",
+                                color: "#9A2529",
+                                display: "inline-flex",
+                                p: 0,
+                            }}
+                            aria-label="Delete requirement"
+                        >
+                            <DeleteIcon />
+                        </Box>
+                    </Box>
+                );
+            },
+        },
     ];
 
     return (
@@ -650,14 +825,29 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                 <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#334155", mb: 1.25 }}>
                                     Saved Requirements
                                 </Typography>
-                                <CustomTable<EditableRequirementRow>
-                                    columns={savedColumns}
-                                    data={savedRows}
-                                />
+                                <Box
+                                    sx={{
+                                        width: "100%",
+                                        overflowX: "auto",
+                                        borderRadius: 2,
+                                    }}
+                                >
+                                    <Box
+                                        sx={{
+                                            minWidth: shouldShowProfileAndSpecialTest ? 1800 : 1500,
+                                        }}
+                                    >
+                                        <CustomTable<EditableRequirementRow>
+                                            columns={savedColumns}
+                                            data={savedRows}
+                                        />
+                                    </Box>
+                                </Box>
                             </Box>
                         ) : null}
 
                         {draftRows.map((row, rowIndex) => {
+                            const profileOptions = getProfileOptions(row);
                             const categoryOptions = getCategoryOptions(row);
                             const subCategoryOptions = getSubCategoryOptions(row);
                             const documentOptions = getDocumentOptions(row);
@@ -765,14 +955,28 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             {renderField(
                                                 "Team",
                                                 row.__isDraft
-                                                    ? renderEditableSelect(row, "team", TEAM_OPTIONS)
+                                                    ? renderEditableSelect(row, "team", teamOptions)
                                                     : renderReadOnlyField(row.team),
                                                 true,
                                             )}
+                                            {shouldShowProfileAndSpecialTest
+                                                ? renderField(
+                                                      "Profile",
+                                                      row.__isDraft
+                                                          ? renderEditableSelect(row, "profile", profileOptions, !row.team)
+                                                          : renderReadOnlyField(row.profile),
+                                                      true,
+                                                  )
+                                                : null}
                                             {renderField(
                                                 "Category",
                                                 row.__isDraft
-                                                    ? renderEditableSelect(row, "category", categoryOptions, !row.team)
+                                                    ? renderEditableSelect(
+                                                          row,
+                                                          "category",
+                                                          categoryOptions,
+                                                          !row.team || (shouldShowProfileAndSpecialTest && !row.profile),
+                                                      )
                                                     : renderReadOnlyField(row.category),
                                                 true,
                                             )}
@@ -797,6 +1001,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                     : renderReadOnlyField(row.reason),
                                                 true,
                                             )}
+                                            {shouldShowProfileAndSpecialTest
+                                                ? renderField(
+                                                      "Special Test",
+                                                      renderReadOnlyField(row.specialTest),
+                                                  )
+                                                : null}
                                             {renderField(
                                                 "FUP Code",
                                                 renderReadOnlyField(row.fupCode, row.__isDraft ? row.__lookupMessage : undefined),

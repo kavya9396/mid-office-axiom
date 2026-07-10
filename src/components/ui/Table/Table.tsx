@@ -15,6 +15,7 @@ export type Column<T> = {
   key: keyof T;
   header?: string;
   width?: string;
+  sticky?: "left" | "right";
   render?: (value: T[keyof T], row: T, rowIndex: number) => React.ReactNode;
   headerRender?: () => React.ReactNode;
   renderSelectAll?: () => void;
@@ -94,7 +95,20 @@ export default function CustomTable<T extends object>({
           <TableHead>
             <TableRow>
               {columns.map((col) => (
-                <TableCell key={String(col.key)} sx={{ width: col.width }}>
+                <TableCell
+                  key={String(col.key)}
+                  sx={{
+                    width: col.width,
+                    ...(col.sticky
+                      ? {
+                          position: "sticky",
+                          [col.sticky]: 0,
+                          zIndex: 3,
+                          backgroundColor: "#E9EEF3",
+                        }
+                      : {}),
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",
@@ -150,7 +164,20 @@ export default function CustomTable<T extends object>({
                     : (value as React.ReactNode);
 
                   return (
-                    <TableCell key={String(col.key)} sx={{fontSize:"12px"}}>
+                    <TableCell
+                      key={String(col.key)}
+                      sx={{
+                        fontSize: "12px",
+                        ...(col.sticky
+                          ? {
+                              position: "sticky",
+                              [col.sticky]: 0,
+                              zIndex: 2,
+                              backgroundColor: "#FFFFFF",
+                            }
+                          : {}),
+                      }}
+                    >
                       {col.render ? (
                         content
                       ) : (
