@@ -47,6 +47,7 @@ import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
 import { useAppContext } from "../../hooks/useAppContext";
 
 type SortDirection = "asc" | "desc";
+type PoolStatusFilter = "All" | "Active" | "Error";
 
 const roleMapper = {
   "CUW_TASK": "CUW Pool",
@@ -54,23 +55,33 @@ const roleMapper = {
   "CVT_TASK": "CVT Pool",
   "CPT_TASK": "CPT Pool",
   "DVT_TASK": "DVT Pool",
-  "PIVV_TASK":"PIVV Pool",
-  "PRE_ISSUANCE_SERVICING_TASK":"Pre Issuance Servicing Pool",
-  "EXCEPTIONAL_TASK":"Exceptional Pool",
-  "GUW_TASK":"GUW Pool",
-  "HOD_TASK":"HOD Pool",
-  "MMT_TASK":"MMT Pool",
-  "SR_UW_TASK":"Sr UW Pool",
-  "SUW_TASK":"SUW Pool",
-  "VENDOR_CMO_TASK":"Vendor CMO Pool",
-  "COPS_TASK":"COPS Pool",
-  "IT_TASK":"IT Pool",
-  "RI_TASK":"RI Pool",
-  "SYSTEM_WAIT_POOL_AMR_MEDICAL":"System Wait Pool - Medical",
-  "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL":"System Wait Pool - Non Medical",
-  "REQUIREMENT_POOL":"Requirement Pool",
-  "CUW_CLAIM_AUDIT_TASK":"Claim Audit Pool",
-  "ACCUITY_TASK":"Accuity Pool"
+  "PIVV_TASK": "PIVV Pool",
+  "PRE_ISSUANCE_SERVICING_TASK": "Pre Issuance Servicing Pool",
+  "EXCEPTIONAL_TASK": "Exceptional Pool",
+  "GUW_TASK": "GUW Pool",
+  "HOD_TASK": "HOD Pool",
+  "MMT_TASK": "MMT Pool",
+  "SR_UW_TASK": "Sr UW Pool",
+  "SUW_TASK": "SUW Pool",
+  "VENDOR_CMO_TASK": "Vendor CMO Pool",
+  "COPS_TASK": "COPS Pool",
+  "IT_TASK": "IT Pool",
+  "RI_TASK": "RI Pool",
+  "SYSTEM_WAIT_POOL_AMR_MEDICAL": "System Wait Pool - Medical",
+  "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL": "System Wait Pool - Non Medical",
+  "REQUIREMENT_POOL": "Requirement Pool",
+  "CUW_CLAIM_AUDIT_TASK": "Claim Audit Pool",
+  "ACCUITY_TASK": "Accuity Pool",
+
+  "ECG_TASK": "ECG Pool",
+  "TMT_TASK": "TMT Pool",
+  "GRIEVANCE_TASK": "Grievance Pool",
+  "RECONSIDERATION_TASK": "Reconsideration Pool",
+  "REJECT_TASK": "Reject Pool",
+  "READY_FOR_ISSUANCE_TASK": "Ready For Issuance Pool",
+
+  "GUW_FORMAL_TASK": "GUW Formal Pool",
+  "DVT_FORMAL_TASK": "DVT Formal Pool",
 }
 
 const RightPanel = ({
@@ -106,10 +117,18 @@ const RightPanel = ({
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sortKey, setSortKey] = useState<keyof tableData | "">("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [poolStatusFilter, setPoolStatusFilter] =
+    useState<PoolStatusFilter>("All");
   const [claimError, setClaimError] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
     {},
   );
+
+  const hasPoolStatus = rows.some((row) => {
+    const rowData = row as unknown as Record<string, unknown>;
+    const poolStatus = rowData.poolStatus;
+    return typeof poolStatus === "string" && poolStatus.trim().length > 0;
+  });
 
   const handleApplicationClick = async (
     e: React.MouseEvent,
@@ -186,8 +205,8 @@ const RightPanel = ({
   // ---------------- OPEN DIALOG ----------------
   const openColumnDialog = () => {
     const leftColumns = allColumns.filter((col) =>
-    config.hidden.includes(col.key),
-  ).map((col) => String(col.key));
+      config.hidden.includes(col.key),
+    ).map((col) => String(col.key));
     setLeft(leftColumns);
     setRight(config.visible);
     setOpenTransferDialog(true);
@@ -386,6 +405,14 @@ const RightPanel = ({
   );
   const filteredRows = rows
     .filter((row) => {
+      if (poolStatusFilter === "All") return true;
+
+      const rowData = row as unknown as Record<string, unknown>;
+      const poolStatus = String(rowData.poolStatus ?? "").trim().toLowerCase();
+
+      return poolStatus === poolStatusFilter.toLowerCase();
+    })
+    .filter((row) => {
       const activeFilters = Object.entries(filterValues);
 
       if (!activeFilters.length) return true;
@@ -559,8 +586,47 @@ const RightPanel = ({
                 right: 24,
                 gap: 1,
                 backgroundColor: "#fff",
+                px: 2,
               }}
             >
+              {hasPoolStatus && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <CustomButton
+                    variant={poolStatusFilter === "Active" ? "contained" : "outlined"}
+                    size="small"
+                    onClick={() => {
+                      setPoolStatusFilter((prev) =>
+                        prev === "Active" ? "All" : "Active",
+                      );
+                      setPage(0);
+                    }}
+                    sx={{
+                      borderRadius: "999px",
+                      textTransform: "none",
+                      minWidth: "100px",
+                    }}
+                  >
+                    Active Pool
+                  </CustomButton>
+                  <CustomButton
+                    variant={poolStatusFilter === "Error" ? "contained" : "outlined"}
+                    size="small"
+                    onClick={() => {
+                      setPoolStatusFilter((prev) =>
+                        prev === "Error" ? "All" : "Error",
+                      );
+                      setPage(0);
+                    }}
+                    sx={{
+                      borderRadius: "999px",
+                      textTransform: "none",
+                      minWidth: "100px",
+                    }}
+                  >
+                    Error Pool
+                  </CustomButton>
+                </Box>
+              )}
               {/* Search bar , Filter Icon , Settings Icon */}
               <Box
                 sx={{
@@ -568,6 +634,7 @@ const RightPanel = ({
                   alignItems: "center",
                   gap: 1,
                   width: "100%",
+                  justifyContent: "flex-end",
                 }}
               >
                 {/* Search container */}
@@ -579,23 +646,27 @@ const RightPanel = ({
                     flex: 1,
                   }}
                 >
-                  {/* Search input (expands to left) */}
+                  {/* Search input */}
                   <Box
                     sx={{
-                      overflow: isSearchOpen ? "" : "hidden",
-                      width: isSearchOpen ? 240 : 0,
-                      transition: "width 0.3s ease",
+                      width: isSearchOpen ? 280 : 0,
+                      opacity: isSearchOpen ? 1 : 0,
+                      overflow: "hidden",
+                      whiteSpace: "nowrap",
+                      transition: "width 300ms ease-in-out, opacity 200ms ease-in-out",
                       ml: isSearchOpen ? 1 : 0,
-                      mr: isSearchOpen ? 8 : 0,
+                      mr: isSearchOpen ? 2 : 0,
+                      pointerEvents: isSearchOpen ? "auto" : "none",
+                      willChange: "width, opacity",
                     }}
                   >
-                    <SearchBar onSearch={setSearchText} focusColor="#004A80" />
+                    <SearchBar onSearch={setSearchText} />
                   </Box>
 
                   {/* Search icon */}
                   <Box
                     sx={{
-                      width: 40, // 👈 important
+                      width: 40,
                       display: "flex",
                       justifyContent: "center",
                       flexShrink: 0,
@@ -606,19 +677,16 @@ const RightPanel = ({
                       if (!hasTableData) return;
                       setIsSearchOpen((prev) => !prev);
                     }}
-                    aria-disabled={!hasTableData}
                     data-testid="search-toggle"
                   >
                     <SearchIcon />
                   </Box>
                 </Box>
-              </Box>
-              {/* Right icons */}
-              <Box sx={{ display: "flex", gap: 1 }}>
                 <Box
                   sx={{
                     cursor: hasTableData ? "pointer" : "not-allowed",
                     opacity: hasTableData ? 1 : 0.4,
+                    mt: 0.7
                   }}
                   onClick={() => {
                     if (!hasTableData) return;
@@ -633,6 +701,7 @@ const RightPanel = ({
                   sx={{
                     cursor: hasTableData ? "pointer" : "not-allowed",
                     opacity: hasTableData ? 1 : 0.4,
+                    mt: 0.7
                   }}
                   onClick={() => {
                     if (!hasTableData) return;
@@ -732,7 +801,7 @@ const RightPanel = ({
                       );
                     })}
                     {paginatedRows.length <= 0 && (
-                     <TableRow>
+                      <TableRow>
                         <TableCell
                           colSpan={visibleColumns.length}
                           sx={{
@@ -743,13 +812,13 @@ const RightPanel = ({
                         >
                           No Data Found!
                         </TableCell>
-                        </TableRow>
+                      </TableRow>
                     )}
                   </TableBody>
                 </Table>
               </TableContainer>
               {/* Footer Pagination */}
-              {paginatedRows.length > 0 && ( <Box
+              {paginatedRows.length > 0 && (<Box
                 sx={{
                   borderTop: "1px solid #e0e0e0",
                   px: 2,
@@ -822,7 +891,7 @@ const RightPanel = ({
                   </Typography>
                 </Box>
               </Box>)}
-             
+
             </Paper>
             {/*  ------- Filter table ------------ */}
 

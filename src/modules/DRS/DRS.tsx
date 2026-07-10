@@ -41,7 +41,13 @@ const mapper = {
     "RI Pool":"RETAIL_REINSURER_POOL",
     "Requirement Pool":"RETAIL_REQUIREMENT_REVIEW_POOL",
     "Claim Audit Pool":"RETAIL_CUW_CLAIM_AUDIT",
-    "Accuity Pool":"RETAIL_ACCUITY_USER"
+    "Accuity Pool":"RETAIL_ACCUITY_USER",
+    "ECG Pool":"RETAIL_ECG_POOL",
+    "TMT Pool":"RETAIL_TMT_POOL",
+    "Grievance Pool":"RETAIL_GRIEVANCE_POOL",
+    "Reject Pool":"RETAIL_REJECT_POOL",
+    "GUW Formal Pool":"GROUP_GUW_FORMAL_POOL",
+    "DVT Formal Pool": "GROUP_DVT_FORMAL_POOL",
 }
 
 const DRS = () => {
