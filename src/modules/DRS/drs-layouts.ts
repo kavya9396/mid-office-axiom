@@ -244,9 +244,20 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "greivance"
   ], 
   GROUP_GUW_FORMAL_POOL: [
-    "greivance"
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "uwDecision",
+    "decisionHistory",
+    "quickLinks"
   ],
   GROUP_DVT_FORMAL_POOL: [
-    "greivance"
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "dvtDecision",
+    "quickLinks"
   ]
 };

@@ -34,6 +34,7 @@ import { useSelector } from "react-redux"
 import type { RootState } from "../../../../store/store"
 import FundDetails from "./FundDetails"
 import PaymentPayoutDetails from "./PaymentPayoutDetails"
+import FormalMemberProfile from "./FormalMemberProfile";
 
 export interface ApplicantProfileProps {
     profile?: Partial<SummaryResponse>;
@@ -715,6 +716,9 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         [visibleApplicantInfoTabs, applicantInfoTab]
     );
 
+    const normalizedRoleType = roleType.trim().toUpperCase().replace(/\s+/g, " ");
+    const isFormalRole = normalizedRoleType === "GUW FORMAL POOL" || normalizedRoleType === "DVT FORMAL POOL";
+
     const allowedIdProofValues = useMemo(
         () => new Set(idProofOptions.map((option) => option.value)),
         [idProofOptions]
@@ -1037,6 +1041,10 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         fundDetails: <FundDetails profile={displayProfile}/>,
         paymentPayoutDetails: <PaymentPayoutDetails profile={displayProfile} />,
     };
+
+    if (isFormalRole) {
+        return <FormalMemberProfile profile={displayProfile} />;
+    }
 
     return (
         <>

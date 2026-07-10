@@ -461,7 +461,7 @@ const BreDecision = ({
   return (
     <Container disableGutters>
       <CustomAccordion
-        title="BRE Decision"
+        title={roleType == 'GUW Formal Pool' || roleType =='DVT Formal Pool' ? "WegaPlus BRE Decision" : "BRE Decision"}
         chip={
           currentBreDecision?.decision ? (
             <Badge label={currentBreDecision.decision} variant="Low" />

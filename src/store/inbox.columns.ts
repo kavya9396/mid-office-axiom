@@ -122,4 +122,7 @@ export const allColumns: TableColumn<tableData>[] = [
   { key: "assignedTpa", label: "Assigned TPA" },
   { key: "grievanceRaisedDate", label: "Grievance Raised Date" },
   { key: "caseReceivedDate", label: "Case Received Date" },
+  { key: "policyNo", label: "Policy No" },
+  { key: "memberName", label: "Member Name" },
+  { key: "appliedCover", label: "Applied Cover" },
 ];

@@ -92,6 +92,9 @@ export interface tableData {
   assignedTpa?:string;
   grievanceRaisedDate?:string;
   caseReceivedDate?:string;
+  policyNo?:string;
+  memberName?:string;
+  appliedCover?:string;
 }
 export type PoolItemProps = {
   label: string;

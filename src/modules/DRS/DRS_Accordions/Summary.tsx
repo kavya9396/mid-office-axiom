@@ -243,12 +243,15 @@ const Summary = () => {
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
     const roleType = localStorage.getItem("roleType") ?? "";
     const isDvtRole = roleType === "DVT Pool";
-    const canShowRiskAnalytics = roleType !== "DVT Pool" && roleType !== "CVT Pool";
+    const isFormalRole = roleType === "DVT Formal Pool" || roleType === "GUW Formal Pool";
+    const canShowRiskAnalytics = roleType !== "DVT Pool" && roleType !== "CVT Pool" && roleType !== "DVT Formal Pool" && roleType !== "GUW Formal Pool";
     const inferredDvtLifeOption: DvtLifeOption = availableMemberTypes.includes("lifeassured2") ? "joint" : "main";
     const [selectedDvtLifeOption, setSelectedDvtLifeOption] = useState<DvtLifeOption | null>(null);
     const dvtLifeOption = selectedDvtLifeOption ?? inferredDvtLifeOption;
 
-    const visibleTabs = isDvtRole
+    const visibleTabs = isFormalRole
+        ? []
+        : isDvtRole
         ? (dvtLifeOption === "main"
             ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
             : [
@@ -261,13 +264,15 @@ const Summary = () => {
 
     const activeApplicantTab: ApplicantTab = isLAPropSame
         ? "lifeassured1"
+        : isFormalRole
+        ? (availableMemberTypes[0] ?? "proposer")
         : (visibleTabs.find((tab) => tab.key === applicantTab)?.key ?? visibleTabs[0]?.key ?? "proposer");
 
     useEffect(() => {
         localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);
     }, [activeApplicantTab]);
 
-    const canOpenMedicalFinancialViews = roleType !== "CPT Pool";
+    const canOpenMedicalFinancialViews = roleType !== "CPT Pool" && roleType !== "DVT Formal Pool" && roleType !== "GUW Formal Pool";
 
     const activeSummaryEntry = summaryWithTabs.find((item) => item.memberType === activeApplicantTab)?.customer;
     const activeRiskAnalytics = useMemo(() => {
@@ -336,12 +341,12 @@ const Summary = () => {
         <Container disableGutters>
             <Box sx={{ mt: 1 }}>
                 <CustomAccordion
-                    title="Applicant Details"
+                    title="Member Details"
                     defaultExpanded={false}
                     expanded={isApplicantDetailsExpanded}
                     onChange={setIsApplicantDetailsExpanded}
                 >
-                    {isDvtRole && (
+                    {isDvtRole && !isFormalRole && (
                         <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 1 }}>
                             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                                 <Select
@@ -361,17 +366,19 @@ const Summary = () => {
                         </Box>
                     )}
 
-                    <Box sx={{ display: "flex", justifyContent: "center" }}>
-                        <CustomTabs
-                            tabs={visibleTabs}
-                            value={activeApplicantTab}
-                            onChange={(tab) => {
-                                if (!isLAPropSame || isDvtRole) {
-                                    setApplicantTab(tab);
-                                }
-                            }}
-                        />
-                    </Box>
+                    {!isFormalRole && (
+                        <Box sx={{ display: "flex", justifyContent: "center" }}>
+                            <CustomTabs
+                                tabs={visibleTabs}
+                                value={activeApplicantTab}
+                                onChange={(tab) => {
+                                    if (!isLAPropSame || isDvtRole) {
+                                        setApplicantTab(tab);
+                                    }
+                                }}
+                            />
+                        </Box>
+                    )}
 
                     {canShowRiskAnalytics && riskCards.length > 0 && (
                         <Box sx={{ mt: 2, mb: 3 }}>

@@ -210,10 +210,13 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         { label: "PEP", key: "pep", format: (value) => (value ? "Yes" : "No") },
         { label: "Criminal Proceedings", key: "criminalProceedings" },
     ]));
-
+const roleType = localStorage.getItem("roleType") ?? "";
+const isVisibleDetails = roleType != 'GUW Formal Pool' && roleType != 'DVT Formal Pool' 
     return (
         <SectionCard>
             <GridSection columns={6} items={personalDetails} />
+            {isVisibleDetails && (
+                <>
             <Divider sx={{ marginY: "20px", bgcolor: "#737373" }} />
             <Box sx={{ display: "flex", alignItems: "center", gap: "8px" }}>
                 <Typography
@@ -228,6 +231,8 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
             </Box>
             <Box sx={{ marginY: 1 }} />
             <GridSection columns={6} items={kycDetails} />
+            </>
+                )}
         </SectionCard>
     )
 };

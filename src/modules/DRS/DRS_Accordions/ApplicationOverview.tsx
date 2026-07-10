@@ -34,8 +34,10 @@ type ApplicationDetailItem = {
 };
 
 type ApplicationDetailKey =
+  | "policyNumber"
   | "productName"
   | "sumAssured"
+  | "appliedSumAssured"
   | "appliedSA"
   | "channel"
   | "subChannel"
@@ -43,6 +45,11 @@ type ApplicationDetailKey =
   | "agentName"
   | "customerType"
   | "modalPremium"
+  | "premium"
+  | "coverRequested"
+  | "coverProvided"
+  | "freeCover"
+  | "coverAboveFCL"
   | "pt"
   | "ppt"
   | "paymentMode"
@@ -58,10 +65,23 @@ const normalizeRoleType = (value: string | null | undefined) =>
     .toUpperCase()
     .replace(/\s+/g, "_");
 
+type RoleTypeDisplayKey = "DEFAULT" | "CVT_POOL" | "DVT_POOL" | "FORMAL_POOL";
+
+const roleTypeToDisplayKeyMap: Record<string, RoleTypeDisplayKey> = {
+  CVT_POOL: "CVT_POOL",
+  DVT_POOL: "DVT_POOL",
+  DVT_FORMAL_POOL: "FORMAL_POOL",
+  GUW_POOL: "DVT_POOL",
+  GUW_FORMAL_POOL: "FORMAL_POOL",
+};
+
 const getRoleTypeDisplayKey = (value: string | null | undefined) => {
   const normalized = normalizeRoleType(value);
+  if (roleTypeToDisplayKeyMap[normalized]) {
+    return roleTypeToDisplayKeyMap[normalized];
+  }
   if (normalized.includes("CVT")) return "CVT_POOL";
-  if (normalized.includes("DVT")) return "DVT_POOL";
+  if (normalized.includes("DVT") || normalized.includes("GUW")) return "DVT_POOL";
   return "DEFAULT";
 };
 
@@ -76,6 +96,8 @@ const ApplicationOverview = () => {
 
   const sourcingDetail = (applicationOverview?.sourcingDetail as Record<string, unknown> | undefined)
     ?? (data?.sourcingDetail as unknown as Record<string, unknown> | undefined);
+  const basicDetails = (applicationOverview?.basicDetails as Record<string, unknown> | undefined)
+    ?? (dataRecord?.basicDetails as Record<string, unknown> | undefined);
   const groupDetails = (applicationOverview?.groupDetails as Record<string, unknown> | undefined)
     ?? (data?.groupDetails as unknown as Record<string, unknown> | undefined);
 
@@ -84,6 +106,11 @@ const ApplicationOverview = () => {
     : ((data?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
   const firstProduct = productDetails[0];
   const applicationInfo = data?.applicationInfo;
+  const quickLinks = (dataRecord?.quickLinks as Record<string, unknown> | undefined) ?? {};
+  const previousPolicies = Array.isArray(quickLinks.previousPolicies)
+    ? (quickLinks.previousPolicies as Array<Record<string, unknown>>)
+    : [];
+  const firstPreviousPolicy = previousPolicies[0];
 
   const riderDetails = Array.isArray(applicationOverview?.riderDetails)
     ? (applicationOverview.riderDetails as Array<Record<string, unknown>>)
@@ -97,6 +124,15 @@ const ApplicationOverview = () => {
   const roleType = localStorage.getItem("roleType");
 
   const applicationDetailsByKey: Record<ApplicationDetailKey, ApplicationDetailItem> = {
+    policyNumber: {
+      label: "Policy No.",
+      value: String(
+        data?.applicationInfo?.policyNumber ??
+          firstProduct?.policyNumber ??
+          firstPreviousPolicy?.policyNumber ??
+          "-"
+      ),
+    },
     productName: {
       label: "Product Name",
       value: String(firstProduct?.name ?? "-"),
@@ -107,6 +143,10 @@ const ApplicationOverview = () => {
     },
     appliedSA: {
       label: "Applied SA",
+      value: formatNumberOrDash(firstProduct?.sumAssured ?? applicationInfo?.sumAssured),
+    },
+    appliedSumAssured: {
+      label: "Applied Sum Assured",
       value: formatNumberOrDash(firstProduct?.sumAssured ?? applicationInfo?.sumAssured),
     },
     channel: {
@@ -132,6 +172,46 @@ const ApplicationOverview = () => {
     modalPremium: {
       label: "Modal Premium",
       value: formatNumberOrDash(firstProduct?.paymentAmount),
+    },
+    premium: {
+      label: "Premium",
+      value: formatNumberOrDash(firstProduct?.paymentAmount ?? firstProduct?.premium ?? basicDetails?.totalPremium),
+    },
+    coverRequested: {
+      label: "Cover Requested",
+      value: formatNumberOrDash(
+        groupDetails?.coverRequested ??
+          groupDetails?.requestedCover ??
+          firstProduct?.coverRequested ??
+          firstProduct?.sumAssured
+      ),
+    },
+    coverProvided: {
+      label: "Cover Provided",
+      value: formatNumberOrDash(
+        groupDetails?.coverProvided ??
+          groupDetails?.providedCover ??
+          firstProduct?.coverProvided ??
+          firstProduct?.sumAssured
+      ),
+    },
+    freeCover: {
+      label: "Free Cover",
+      value: formatNumberOrDash(
+        groupDetails?.freeCover ??
+          groupDetails?.fcl ??
+          firstProduct?.freeCover ??
+          firstProduct?.loanLimit
+      ),
+    },
+    coverAboveFCL: {
+      label: "Cover above FCL",
+      value: formatNumberOrDash(
+        groupDetails?.coverAboveFCL ??
+          groupDetails?.coverAboveFcl ??
+          groupDetails?.coverAboveFclAmount ??
+          firstProduct?.coverAboveFCL
+      ),
     },
     pt: {
       label: "PT",
@@ -167,7 +247,7 @@ const ApplicationOverview = () => {
     },
   };
 
-  const roleTypeWiseDisplayKeys: Record<string, ApplicationDetailKey[]> = {
+  const roleTypeWiseDisplayKeys: Record<RoleTypeDisplayKey, ApplicationDetailKey[]> = {
     // Update these arrays as per business requirement.
     DEFAULT: [
       "productName",
@@ -212,6 +292,19 @@ const ApplicationOverview = () => {
       "paymentMode",
       ...(isRetailBusiness ? (["productCode", "faceValue", "trsa", "tfsa"] as ApplicationDetailKey[]) : []),
       ...(isGroupBusiness ? (["policyType"] as ApplicationDetailKey[]) : []),
+    ],
+    FORMAL_POOL: [
+      "policyNumber",
+      "appliedSumAssured",
+      "channel",
+      "subChannel",
+      "agentCode",
+      "agentName",
+      "premium",
+      "coverRequested",
+      "coverProvided",
+      "freeCover",
+      "coverAboveFCL",
     ],
   };
 

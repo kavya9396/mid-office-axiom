@@ -11,6 +11,7 @@ import {
     Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
+import CustomTextField from "../../components/ui/TextField/TextField";
 import CustomAccordion from "../../components/ui/Accordion/Accordion";
 import CustomButton from "../../components/ui/Button/Button";
 import {
@@ -81,6 +82,7 @@ const GrievanceApplication = () => {
     const [uploadedDocuments, setUploadedDocuments] = useState<UploadedDocument[]>(
         [],
     );
+    const [remarks, setRemarks] = useState("");
     const [loading, setLoading] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [fetchError, setFetchError] = useState<string | null>(null);
@@ -325,6 +327,34 @@ const GrievanceApplication = () => {
                             </TableContainer>
                         </Box>
                     </Paper>
+                </Box>
+
+                <Box sx={{ mt: 2 }}>
+                    <CustomAccordion title="Remarks" defaultExpanded>
+                        <Box sx={{ backgroundColor: "#F6F6F6", borderRadius: "8px", p: 2 }}>
+                            <Typography sx={{ fontSize: "14px", fontWeight: 400, color: "#444", mb: 1 }}>
+                                Remarks
+                            </Typography>
+                            <CustomTextField
+                                fullWidth
+                                multiline
+                                minRows={3}
+                                placeholder="Enter remarks..."
+                                value={remarks}
+                                onChange={(e) => {
+                                    if (e.target.value.length <= 10000) {
+                                        setRemarks(e.target.value);
+                                    }
+                                }}
+                                variant="outlined"
+                                size="small"
+                                sx={{ backgroundColor: "#fff", borderRadius: "10px" }}
+                            />
+                            <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "12px", color: "#888", mt: 0.5 }}>
+                                {remarks.length}/10000
+                            </Typography>
+                        </Box>
+                    </CustomAccordion>
                 </Box>
 
                 <Box sx={{ mt: 2 }}>

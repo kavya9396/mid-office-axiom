@@ -113,6 +113,11 @@ export const dvtDecisionOptions = [
   { label: "Raise Requirements", value: "Raise Requirements" },
   { label: "Refer to GUW", value: "Refer to GUW" },
 ];
+export const dvtFormalDecisionOptions = [
+  { label: "Accept", value: "Accept" },
+  { label: "Raise Requirements", value: "Raise Requirements" },
+  { label: "Hold", value: "Hold" },
+];
 
 export const applicantTabs: { key: ApplicantTab; label: string }[] = [
   { key: "proposer", label: "Proposer" },

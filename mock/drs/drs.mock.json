@@ -252,18 +252,44 @@
             "lastName": "NAME",
             "dob": "2001-06-07T00:00:00.0",
             "gender": "Female",
-            "percentage": "",
+            "percentage": "40",
             "proposerNomineeRelation": "wife"
+          },
+          {
+            "relationWithLA": "",
+            "firstName": "AARAV",
+            "lastName": "SINGHAL",
+            "dob": "2010-02-11T00:00:00.0",
+            "gender": "Male",
+            "percentage": "35",
+            "proposerNomineeRelation": "son"
+          },
+          {
+            "relationWithLA": "",
+            "firstName": "KAVYA",
+            "lastName": "SINGHAL",
+            "dob": "2013-09-21T00:00:00.0",
+            "gender": "Female",
+            "percentage": "25",
+            "proposerNomineeRelation": "daughter"
           }
         ],
         "appointee": [
           {
             "relationWithLA": "",
-            "firstName": "",
-            "lastName": "",
-            "dob": "",
-            "gender": "",
-            "relationWithNominee": ""
+            "firstName": "MEERA",
+            "lastName": "SINGHAL",
+            "dob": "1988-05-16T00:00:00.0",
+            "gender": "Female",
+            "relationWithNominee": "Mother"
+          },
+          {
+            "relationWithLA": "",
+            "firstName": "ROHAN",
+            "lastName": "SINGHAL",
+            "dob": "1985-11-09T00:00:00.0",
+            "gender": "Male",
+            "relationWithNominee": "Father"
           }
         ],
         "genericDetails": {
@@ -518,18 +544,44 @@
             "lastName": "NAME",
             "dob": "2001-06-07T00:00:00.0",
             "gender": "Female",
-            "percentage": "",
+            "percentage": "40",
             "proposerNomineeRelation": "wife"
+          },
+          {
+            "relationWithLA": "",
+            "firstName": "AARAV",
+            "lastName": "SINGHAL",
+            "dob": "2010-02-11T00:00:00.0",
+            "gender": "Male",
+            "percentage": "35",
+            "proposerNomineeRelation": "son"
+          },
+          {
+            "relationWithLA": "",
+            "firstName": "KAVYA",
+            "lastName": "SINGHAL",
+            "dob": "2013-09-21T00:00:00.0",
+            "gender": "Female",
+            "percentage": "25",
+            "proposerNomineeRelation": "daughter"
           }
         ],
         "appointee": [
           {
             "relationWithLA": "",
-            "firstName": "",
-            "lastName": "",
-            "dob": "",
-            "gender": "",
-            "relationWithNominee": ""
+            "firstName": "MEERA",
+            "lastName": "SINGHAL",
+            "dob": "1988-05-16T00:00:00.0",
+            "gender": "Female",
+            "relationWithNominee": "Mother"
+          },
+          {
+            "relationWithLA": "",
+            "firstName": "ROHAN",
+            "lastName": "SINGHAL",
+            "dob": "1985-11-09T00:00:00.0",
+            "gender": "Male",
+            "relationWithNominee": "Father"
           }
         ],
         "genericDetails": {
