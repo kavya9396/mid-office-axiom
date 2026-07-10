@@ -130,7 +130,7 @@ const QuickLinks = () => {
 
     const handleNavigate = useCallback(
         (label: string, path: string) => {
-            if (label === "Proposal Form") {
+            if (label === "Proposal Form & Documents") {
                 if (!path) return;
                 window.open(path, "_blank", "noopener,noreferrer");
                 return;
@@ -144,20 +144,9 @@ const QuickLinks = () => {
 
             if (!path) return;
 
-            const shouldPassApplicantTab = path.includes("/drs/medical");
-
-            if (shouldPassApplicantTab) {
-                navigate(path, {
-                    state: {
-                        selectedApplicantTab,
-                    },
-                });
-                return;
-            }
-
-            navigate(path);
+            window.open(path, "_blank", "noopener,noreferrer");
         },
-        [navigate, selectedApplicantTab]
+        []
     );
 
     return (
@@ -211,7 +200,7 @@ const QuickLinks = () => {
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "space-between",
-                                        cursor: path ? "pointer" : "default",
+                                        cursor: path || label === "Refer to IT" ? "pointer" : "default",
                                     }}
                                 >
                                     <Typography sx={{ fontSize: 14, color: "#444" }}>

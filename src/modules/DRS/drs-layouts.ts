@@ -82,7 +82,11 @@ export const getPoolWiseAvailableAccordions = (
 ): AccordionKey[] => {
   const baseAccordions = layoutKey ? DRS_LAYOUTS[layoutKey] ?? [] : [];
 
-  return baseAccordions.filter((accordion): accordion is AccordionKey => {
+  const accordionsWithQuickLinks = baseAccordions.includes("quickLinks")
+    ? baseAccordions
+    : [...baseAccordions, "quickLinks"];
+
+  return accordionsWithQuickLinks.filter((accordion): accordion is AccordionKey => {
     if (!(accordion in accordionRegistry)) {
       return false;
     }
