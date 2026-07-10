@@ -13,5 +13,6 @@ export const PATHS = {
   DRS_FINANCIAL: "app/:applicationNumber/drs/financial",
   DRS_PREVIOUS: "app/:applicationNumber/drs/previousPolicies",
 
-  USER_MANAGEMENT: "admin/userManagement"
+  USER_MANAGEMENT: "admin/userManagement",
+  SEARCH_APPLICATION: "search/application"
 };

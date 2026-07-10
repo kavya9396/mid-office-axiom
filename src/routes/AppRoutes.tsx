@@ -15,6 +15,7 @@ import AuditTrailPage from "../modules/QuickLinks/AuditTrailPage";
 import RiskDetailsPage from "../modules/QuickLinks/RiskDetailsPage";
 import OpenTasksPage from "../modules/QuickLinks/OpenTasksPage";
 import UserManagement from "../modules/DRS/UserManagement";
+import SearchApplication from "../modules/Landing/SearchApplication";
 
 function BusinessTypeRedirect() {
     return <Navigate to="inbox" replace />;
@@ -33,6 +34,9 @@ export default function AppRoutes() {
              {/* Independent Route */}
                 <Route path={PATHS.USER_MANAGEMENT} element={<RootLayout />}>
                     <Route index element={<UserManagement />} />
+                </Route>
+                <Route path={PATHS.SEARCH_APPLICATION} element={<RootLayout />}>
+                    <Route index element={<SearchApplication />} />
                 </Route>
 
                 <Route element={<BusinessTypeRoute />}>

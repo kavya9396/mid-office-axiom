@@ -11,6 +11,7 @@ import {
     getOpenTasksPath,
     getPreviousPoliciesPath,
     getRiskDetailsPath,
+    getSearchApplicationPath,
     normalizeBusinessType,
 } from "../../routes/routes";
 import { useAppContext } from "../../hooks/useAppContext";
@@ -37,10 +38,10 @@ const QuickLinks = () => {
     const safeApplicationNumber = applicationNumber ?? "";
     const roleType = localStorage.getItem("roleType") ?? "";
     const visibleButtons = [
-    'CPT Pool',
-  ];
+        'CPT Pool',
+    ];
 
-  const isPoolRole = visibleButtons.includes(roleType);
+    const isPoolRole = visibleButtons.includes(roleType);
     const selectedApplicantTab = localStorage.getItem("drsSelectedApplicantTab") ?? "proposer";
 
     const summaryEntries = (drsData as unknown as { summary?: Array<Record<string, unknown>> } | null)?.summary ?? [];
@@ -77,10 +78,10 @@ const QuickLinks = () => {
     const quickLinks = [
         { label: "Proposal Form & Documents", path: proposerFormLink },
         { label: "Previous Policies", path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "" },
-       { label: "Open Tasks", path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "" },
-        ...(roleType !== 'DVT Pool' ? [ 
-        { label: "Risk Details", path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "" },
-       ]:[]),
+        { label: "Open Tasks", path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "" },
+        ...(roleType !== 'DVT Pool' ? [
+            { label: "Risk Details", path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "" },
+        ] : []),
         { label: "Audit Trail", path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "" },
         { label: "Refer to IT", path: "" },
         ...(isPoolRole
@@ -89,6 +90,7 @@ const QuickLinks = () => {
                 { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
             ]
             : []),
+        { label: "Search Application", path: getSearchApplicationPath() },
     ];
 
     const toggleQuickLinks = useCallback(() => {

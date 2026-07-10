@@ -13,6 +13,8 @@ export const normalizeBusinessType = (businessType?: string | null) => {
 export const getInboxPath = (businessType: string) =>
   `/${normalizeBusinessType(businessType) ?? "retail"}/${PATHS.INBOX}`;
 
+export const getSearchApplicationPath = () => `/${PATHS.SEARCH_APPLICATION}`;
+
 export const getDRSPath = (businessType: string, appNo: string) =>
   `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs`;
 
