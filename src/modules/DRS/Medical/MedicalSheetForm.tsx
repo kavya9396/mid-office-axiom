@@ -50,18 +50,36 @@ const getGroupKey = (field: MedicalFieldConfig) => `${field.section}__${field.ty
 
 const isDateField = (field: MedicalFieldConfig) => {
   const value = normalizeString(field.dataType).toUpperCase();
-  return value === "YYYY-MM-DD" || value === "DD/MM/YYYY";
+  return value === "YYYY-MM-DD" || value === "DD/MM/YYYY" || value === "CALENDAR";
 };
 
-const isNumericField = (field: MedicalFieldConfig) => normalizeString(field.dataType).toLowerCase() === "numeric";
+const isNumericField = (field: MedicalFieldConfig) => {
+  const dataType = normalizeString(field.dataType).toLowerCase();
+  return dataType === "numeric" || dataType === "numerical";
+};
+const isAlphabetOnlyField = (field: MedicalFieldConfig) => {
+  const dataType = normalizeString(field.dataType).toLowerCase();
+  return dataType.includes("alphabet");
+};
 const isAutoDerived = (field: MedicalFieldConfig) => {
   const dataType = normalizeString(field.dataType).toLowerCase();
   const options = normalizeString(field.options).toLowerCase();
-  return dataType.includes("auto fill") || options.includes("auto derived") || options.includes("normal / abnormal");
+  return dataType.includes("auto fill")
+    || dataType.includes("auto calculate")
+    || dataType.includes("auto populate")
+    || options.includes("auto derived")
+    || options.includes("normal / abnormal");
 };
 const isRequiredField = (field: MedicalFieldConfig) => {
   const requiredValue = normalizeString(field.mandatory).toLowerCase();
-  return requiredValue === "yes" || requiredValue.startsWith("yes (") || requiredValue.startsWith("mandatory");
+  if (!requiredValue || requiredValue.includes("non-mandatory") || requiredValue.includes("non mandatory")) {
+    return false;
+  }
+
+  return requiredValue === "yes"
+    || requiredValue.startsWith("yes (")
+    || requiredValue.startsWith("mandatory")
+    || requiredValue.includes("- mandatory");
 };
 const isConditionalYes = (field: MedicalFieldConfig) => {
   const mandatoryValue = normalizeString(field.mandatory).toLowerCase();
@@ -85,7 +103,12 @@ const parseDropdownOptions = (field: MedicalFieldConfig) => {
     return [];
   }
 
-  const cleaned = raw.replace(/^,+/, "").replace(/[()]/g, "").trim();
+  const cleaned = raw
+    .replace(/^,+/, "")
+    .replace(/[()]/g, "")
+    .replace(/\r?\n/g, ",")
+    .replace(/\s*\/\s*/g, ",")
+    .trim();
   let parts: string[] = [];
 
   if (cleaned.includes(",")) {
@@ -99,6 +122,8 @@ const parseDropdownOptions = (field: MedicalFieldConfig) => {
   return parts
     .map((item) => item.trim())
     .filter(Boolean)
+    .filter((item) => !item.toLowerCase().startsWith("dropdown"))
+    .filter((item) => item.toLowerCase() !== "--select--")
     .filter((item) => !item.toLowerCase().includes("mandatory"))
     .filter((item) => !item.toLowerCase().includes("auto derived"))
     .map((option) => ({ label: option, value: option }));
@@ -120,6 +145,12 @@ const getDateError = (field: MedicalFieldConfig, value: string) => {
 
   if (normalizedType === "DD/MM/YYYY") {
     return /^\d{2}\/\d{2}\/\d{4}$/.test(value) ? "" : "Use DD/MM/YYYY format.";
+  }
+
+  if (normalizedType === "CALENDAR") {
+    return /^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/.test(value)
+      ? ""
+      : "Use YYYY-MM-DD or DD/MM/YYYY format.";
   }
 
   return "";
@@ -374,10 +405,41 @@ const MedicalSheetForm = ({
         nextErrors[field.id] = "Enter a valid number.";
         continue;
       }
+      if (normalizeString(value) && isAlphabetOnlyField(field) && !/^[A-Za-z\s.]+$/.test(value)) {
+        nextErrors[field.id] = "Use alphabets only.";
+        continue;
+      }
       if (normalizeString(value) && isDateField(field)) {
         const dateError = getDateError(field, value);
         if (dateError) {
           nextErrors[field.id] = dateError;
+        }
+      }
+    }
+
+    const measurementFields = activeConfig.filter((field) => {
+      const mandatoryValue = normalizeString(field.mandatory).toLowerCase();
+      return mandatoryValue.includes("either") && mandatoryValue.includes("cms") && mandatoryValue.includes("fts") && mandatoryValue.includes("inch");
+    });
+
+    if (measurementFields.length > 0) {
+      const cmsField = measurementFields.find((field) => normalizeString(field.field).toLowerCase().includes("cms"));
+      const ftsField = measurementFields.find((field) => normalizeString(field.field).toLowerCase().includes("fts"));
+      const inchesField = measurementFields.find((field) => normalizeString(field.field).toLowerCase().includes("inch"));
+
+      const hasCms = cmsField ? Boolean(normalizeString(displayedValue(cmsField))) : false;
+      const hasFts = ftsField ? Boolean(normalizeString(displayedValue(ftsField))) : false;
+      const hasInches = inchesField ? Boolean(normalizeString(displayedValue(inchesField))) : false;
+
+      if (!hasCms && !(hasFts && hasInches)) {
+        if (cmsField) {
+          nextErrors[cmsField.id] = "Provide Height in CMS or provide FTS and Inches.";
+        }
+        if (ftsField) {
+          nextErrors[ftsField.id] = "Provide Height in CMS or provide FTS and Inches.";
+        }
+        if (inchesField) {
+          nextErrors[inchesField.id] = "Provide Height in CMS or provide FTS and Inches.";
         }
       }
     }

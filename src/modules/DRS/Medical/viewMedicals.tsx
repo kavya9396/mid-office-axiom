@@ -1,32 +1,306 @@
 import { Box, Container, Divider, Typography } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
 import Badge from "../../../components/ui/Badge/Badge";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
+import CustomSelect from "../../../components/ui/Select/Select";
+import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { BriefcaseIcon, PhoneIcon, SmsIcon, WalletIcon } from "../../../icons/Icons";
-import { getDRSPath } from "../../../routes/routes";
-import { useAppDispatch } from "../../../store/hooks";
-import { medicalThunk } from "../../../store/thunks/medicalThunk";
-import type { ApplicantTab, DRSRequest, MedicalResponse, MedicalSummaryMember } from "../../../types/drs.types";
+import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
+import type { ApplicantTab, MedicalResponse, MedicalSection, MedicalSummaryMember, MedicalTestRow } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
 import BreDecision from "../DRS_Accordions/BreDecision";
-import MerForm from "./MerForm";
-import OtherMedicalsForm from "./OtherMedicalsForm";
-import SpecialMedicalForm from "./SpecialMedicalForm.tsx";
+import { merFieldConfig } from "./merFieldConfig";
+import type { MedicalFieldConfig } from "./medicalFieldConfig";
+import { otherMedicalViewFieldConfig } from "./otherMedicalViewFieldConfig";
+import { specialMedicalViewFieldConfig } from "./specialMedicalViewFieldConfig";
+import medicalMockData from "../../../../mock/drs/medical.mock.json";
 
-const getRoleType = () => localStorage.getItem("roleType") ?? "";
 const getStoredApplicantTab = () => (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
 
 type MedicalSectionTab = "mer" | "specialMedical" | "otherMedicals";
+type DRSViewTab = "medical" | "financial";
+
+const drsViewTabs: { key: DRSViewTab; label: string }[] = [
+  { key: "medical", label: "View Medical" },
+  { key: "financial", label: "View Financial" },
+];
 
 const medicalSectionTabs: { key: MedicalSectionTab; label: string }[] = [
   { key: "mer", label: "MER" },
   { key: "specialMedical", label: "Special Medical" },
   { key: "otherMedicals", label: "Other Medicals" },
 ];
+
+type MedicalMenuItem = {
+  id: string;
+  title: string;
+  category: MedicalSectionTab;
+  section: MedicalSection;
+  fallbackFields: MedicalFieldConfig[];
+};
+
+const normalizeKey = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+const buildConfigSectionMap = (config: MedicalFieldConfig[]) => {
+  const mapping = new Map<string, MedicalFieldConfig[]>();
+
+  for (const field of config) {
+    const key = normalizeKey(field.section);
+    if (!key) {
+      continue;
+    }
+
+    if (!mapping.has(key)) {
+      mapping.set(key, []);
+    }
+
+    mapping.get(key)?.push(field);
+  }
+
+  for (const values of mapping.values()) {
+    values.sort((a, b) => a.row - b.row);
+  }
+
+  return mapping;
+};
+
+const merViewConfigBySection = buildConfigSectionMap(merFieldConfig);
+const specialViewConfigBySection = buildConfigSectionMap(specialMedicalViewFieldConfig);
+const otherViewConfigBySection = buildConfigSectionMap(otherMedicalViewFieldConfig);
+
+const SPECIAL_SECTION_KEYS = new Set(
+  specialMedicalViewFieldConfig
+    .map((field) => normalizeKey(field.section))
+    .filter(Boolean)
+);
+
+const OTHER_SECTION_KEYS = new Set(
+  otherMedicalViewFieldConfig
+    .map((field) => normalizeKey(field.section))
+    .filter(Boolean)
+);
+
+const SPECIAL_SECTION_ALIAS_KEYS = new Set([
+  "completebloodcountcbc",
+  "lipidprofile",
+  "liverfunctiontestlft",
+  "kidneyfunctiontestkft",
+  "diabetespanel",
+  "thyroidfunction",
+  "cardiacmarkers",
+  "vitaminminerals",
+  "bloodsugarrandom",
+  "fastingbloodsugarfbs",
+  "postprandialbloodsugarppbs",
+  "hba1c",
+  "hbsag",
+  "antihcvantibody",
+  "hivelisa",
+  "hivwesternblot",
+  "erythrocytesedimentationrate",
+]);
+
+const SPECIAL_CONFIG_TO_DATA_KEY_MAP: Record<string, string[]> = {
+  cbcgroup: ["completebloodcountcbc"],
+  lipids: ["lipidprofile"],
+  sma12group: ["liverfunctiontestlft", "kidneyfunctiontestkft", "diabetespanel", "thyroidfunction"],
+};
+
+const resolveMedicalCategory = (title: string): MedicalSectionTab => {
+  const key = normalizeKey(title);
+
+  if (key.includes("mer")) {
+    return "mer";
+  }
+
+  if (OTHER_SECTION_KEYS.has(key)) {
+    return "otherMedicals";
+  }
+
+  if (SPECIAL_SECTION_KEYS.has(key) || SPECIAL_SECTION_ALIAS_KEYS.has(key)) {
+    return "specialMedical";
+  }
+
+  return "mer";
+};
+
+const getStatusColors = (status: string) => {
+  const normalized = status.toLowerCase();
+  if (normalized === "abnormal" || normalized === "positive" || normalized === "positive/reactive") {
+    return { text: "#B42318", bg: "#FEF3F2" };
+  }
+
+  if (normalized === "normal" || normalized === "negative" || normalized === "negative/non reactive") {
+    return { text: "#067647", bg: "#ECFDF3" };
+  }
+
+  return { text: "#475467", bg: "#F2F4F7" };
+};
+
+const getStatusDotColor = (status: string) => {
+  const normalized = status.toLowerCase().trim();
+  if (normalized === "normal" || normalized === "green" || normalized === "negative" || normalized === "negative/non reactive") {
+    return "#2FA641";
+  }
+  if (normalized === "abnormal" || normalized === "red" || normalized === "positive" || normalized === "positive/reactive") {
+    return "#DE2C3B";
+  }
+  return "#98A2B3";
+};
+
+const uniqSectionTitles = (titles: string[]) => {
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const title of titles) {
+    const trimmed = title.trim();
+    if (!trimmed) {
+      continue;
+    }
+
+    const key = normalizeKey(trimmed);
+    if (!key || seen.has(key)) {
+      continue;
+    }
+
+    seen.add(key);
+    result.push(trimmed);
+  }
+
+  return result;
+};
+
+const getConfigFieldsBySection = (sectionMap: Map<string, MedicalFieldConfig[]>, sectionTitle: string) => {
+  const normalizedSection = normalizeKey(sectionTitle);
+  return normalizedSection ? (sectionMap.get(normalizedSection) ?? []) : [];
+};
+
+const normalizeFieldText = (value?: string) => (value ?? "").trim();
+
+const parseConfigDropdownOptions = (field: MedicalFieldConfig) => {
+  const raw = normalizeFieldText(field.options);
+  if (!raw) {
+    return [] as { label: string; value: string }[];
+  }
+
+  const parts = raw
+    .replace(/\r?\n/g, ",")
+    .replace(/\s*\/\s*/g, ",")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .filter((item) => item.toLowerCase() !== "dropdown")
+    .filter((item) => item.toLowerCase() !== "--select--")
+    .filter((item) => item.toLowerCase() !== "---select---");
+
+  return parts.map((item) => ({ label: item, value: item }));
+};
+
+const isDropdownConfigField = (field: MedicalFieldConfig) => {
+  const type = normalizeFieldText(field.dataType).toLowerCase();
+  return type.includes("dropdown") || type.includes("yes/no") || parseConfigDropdownOptions(field).length > 0;
+};
+
+const isDateConfigField = (field: MedicalFieldConfig) => {
+  const type = normalizeFieldText(field.dataType).toLowerCase();
+  return type.includes("calendar") || type.includes("yyyy-mm-dd") || type.includes("dd/mm/yyyy");
+};
+
+const isNumericConfigField = (field: MedicalFieldConfig) => {
+  const type = normalizeFieldText(field.dataType).toLowerCase();
+  return type.includes("numeric") || type.includes("numerical");
+};
+
+const isMandatoryConfigField = (field: MedicalFieldConfig) => {
+  const mandatory = normalizeFieldText(field.mandatory).toLowerCase();
+  if (!mandatory || mandatory.includes("non-mandatory") || mandatory.includes("non mandatory")) {
+    return false;
+  }
+
+  return mandatory.includes("mandatory") || mandatory === "yes" || mandatory.startsWith("yes (") || mandatory.includes("- mandatory");
+};
+
+const getRangeBounds = (normalRange: string) => {
+  const value = normalizeFieldText(normalRange);
+  if (!value.includes("-")) {
+    return { from: "", to: "" };
+  }
+
+  const [from, to] = value.split("-").map((part) => part.trim());
+  return { from: from ?? "", to: to ?? "" };
+};
+
+const getSectionRowByField = (rows: MedicalTestRow[], field: MedicalFieldConfig) => {
+  const fieldKey = normalizeKey(field.field);
+  const typeKey = normalizeKey(field.type);
+
+  return rows.find((row) => {
+    const parameterKey = normalizeKey(row.parameter);
+    return parameterKey === fieldKey || parameterKey === typeKey || parameterKey.includes(typeKey) || typeKey.includes(parameterKey);
+  });
+};
+
+const getFallbackFieldValue = (
+  field: MedicalFieldConfig,
+  rows: MedicalTestRow[],
+  applicationId: string,
+  applicant: ReturnType<typeof getApplicantHeaderData>
+) => {
+  const row = getSectionRowByField(rows, field);
+  const fieldLabel = normalizeKey(field.field);
+
+  if (row) {
+    if (fieldLabel.includes("findings") || fieldLabel.includes("status") || fieldLabel.includes("result")) {
+      return normalizeFieldText(row.status).toUpperCase();
+    }
+    if (fieldLabel.includes("unit")) {
+      return row.unit;
+    }
+    if (fieldLabel === "from") {
+      return getRangeBounds(row.normalRange).from;
+    }
+    if (fieldLabel === "to") {
+      return getRangeBounds(row.normalRange).to;
+    }
+    if (fieldLabel.includes("value") || fieldLabel.includes("fraction") || fieldLabel.includes("rate")) {
+      return row.value;
+    }
+
+    return row.value;
+  }
+
+  if (fieldLabel.includes("applicationno")) {
+    return applicationId;
+  }
+  if (fieldLabel.includes("firstname")) {
+    return normalizeFieldText(applicant.name).split(" ")[0] ?? "";
+  }
+  if (fieldLabel.includes("lastname")) {
+    const nameParts = normalizeFieldText(applicant.name).split(" ").filter(Boolean);
+    return nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+  }
+  if (fieldLabel.includes("examineename") || fieldLabel.includes("nameofme")) {
+    return applicant.name;
+  }
+  if (fieldLabel.includes("dob") || fieldLabel.includes("dateofbirth")) {
+    return String(applicant.dob ?? "");
+  }
+  if (fieldLabel.includes("gender")) {
+    return String(applicant.gender ?? "").toUpperCase();
+  }
+  if (fieldLabel.includes("age")) {
+    return String(applicant.age ?? "");
+  }
+  if (fieldLabel.includes("contactno") || fieldLabel.includes("mobile")) {
+    return applicant.mobile;
+  }
+
+  return "";
+};
 
 const formatCurrencyINR = (value?: number | string) => {
   if (value === undefined || value === null || value === "") {
@@ -79,7 +353,6 @@ const getApplicantHeaderData = (summary?: MedicalSummaryMember) => {
 };
 
 const ViewMedicals = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
@@ -87,44 +360,15 @@ const ViewMedicals = () => {
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
     getStoredApplicantTab();
 
-  const [medicalData, setMedicalData] = useState<MedicalResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const medicalData = medicalMockData as MedicalResponse;
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
-  const [activeMedicalSectionTab, setActiveMedicalSectionTab] = useState<MedicalSectionTab>("mer");
+  const [activeSectionId, setActiveSectionId] = useState<string>("");
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const roleType = getRoleType();
-  const isCptPool = roleType === "CPT Pool";
-  const isMedicalSectionsEditable = isCptPool;
   const safeBusinessType = businessType ?? "retail";
-  const safeApplicationId = applicationNumber ?? "";
+  const safeApplicationId = applicationNumber ?? medicalData.applicationId ?? "";
   const isApplicationIdMissing = !safeApplicationId;
-
-  useEffect(() => {
-    if (isApplicationIdMissing) {
-      return;
-    }
-
-    const payload: DRSRequest = {
-      applicationId: safeApplicationId,
-      roleType,
-    };
-
-    const fetchMedicals = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-        const response = await dispatch(medicalThunk(payload)).unwrap();
-        setMedicalData(response);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch medical details.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    void fetchMedicals();
-  }, [dispatch, isApplicationIdMissing, roleType, safeApplicationId]);
 
   const availableMemberTypes = useMemo(
     () => medicalData?.summary?.map((item) => item.memberType) ?? [],
@@ -169,6 +413,172 @@ const ViewMedicals = () => {
     [applicantData.annualIncome, applicantData.email, applicantData.mobile, applicantData.occupation]
   );
 
+  const medicalMenuItems = useMemo<MedicalMenuItem[]>(
+    () => {
+      const dataSections = medicalData?.sections ?? [];
+      const dataSectionMap = new Map<string, MedicalSection>();
+
+      dataSections.forEach((section) => {
+        const key = normalizeKey(section.title);
+        if (key && !dataSectionMap.has(key)) {
+          dataSectionMap.set(key, section);
+        }
+      });
+
+      const buildItems = (titles: string[], category: MedicalSectionTab) =>
+        titles.map((title, index) => {
+          const normalizedTitle = normalizeKey(title);
+          let matchedSection = dataSectionMap.get(normalizedTitle);
+          const sectionConfigMap = category === "mer"
+            ? merViewConfigBySection
+            : category === "specialMedical"
+              ? specialViewConfigBySection
+              : otherViewConfigBySection;
+
+          if (!matchedSection && category === "specialMedical") {
+            const fallbackKeys = SPECIAL_CONFIG_TO_DATA_KEY_MAP[normalizedTitle] ?? [];
+            matchedSection = fallbackKeys.map((key) => dataSectionMap.get(key)).find(Boolean);
+          }
+
+          return {
+            id: `${category}-${index}-${normalizedTitle || "test"}`,
+            title,
+            category,
+            section: matchedSection ?? { title, rows: [] },
+            fallbackFields: getConfigFieldsBySection(sectionConfigMap, title),
+          } as MedicalMenuItem;
+        });
+
+      const merCatalog = uniqSectionTitles(merFieldConfig.map((field) => field.section));
+      const specialCatalog = uniqSectionTitles(specialMedicalViewFieldConfig.map((field) => field.section));
+      const otherCatalog = uniqSectionTitles(otherMedicalViewFieldConfig.map((field) => field.section));
+
+      const catalogItems = [
+        ...buildItems(merCatalog, "mer"),
+        ...buildItems(specialCatalog, "specialMedical"),
+        ...buildItems(otherCatalog, "otherMedicals"),
+      ];
+
+      const existingCatalogKeys = new Set(catalogItems.map((item) => `${item.category}-${normalizeKey(item.title)}`));
+
+      const fallbackDataItems = dataSections
+        .map((section, index) => {
+          const category = resolveMedicalCategory(section.title);
+          return {
+            id: `${category}-data-${index}-${normalizeKey(section.title) || "test"}`,
+            title: section.title,
+            category,
+            section,
+            fallbackFields: [],
+          } as MedicalMenuItem;
+        })
+        .filter((item) => !existingCatalogKeys.has(`${item.category}-${normalizeKey(item.title)}`));
+
+      return [...catalogItems, ...fallbackDataItems];
+    },
+    [medicalData?.sections]
+  );
+
+  const groupedMedicalMenuItems = useMemo(
+    () =>
+      medicalSectionTabs
+        .map((group) => ({ ...group, items: medicalMenuItems.filter((item) => item.category === group.key) }))
+        .filter((group) => group.items.length > 0),
+    [medicalMenuItems]
+  );
+
+  const resolvedActiveSectionId = useMemo(
+    () => (medicalMenuItems.some((item) => item.id === activeSectionId) ? activeSectionId : (medicalMenuItems[0]?.id ?? "")),
+    [activeSectionId, medicalMenuItems]
+  );
+
+  useEffect(() => {
+    if (!resolvedActiveSectionId) {
+      return;
+    }
+
+    const menuContainer = menuContainerRef.current;
+    if (!menuContainer) {
+      return;
+    }
+
+    const activeMenuItem = menuContainer.querySelector(
+      `[data-medical-menu-id="${resolvedActiveSectionId}"]`
+    ) as HTMLElement | null;
+
+    if (!activeMenuItem) {
+      return;
+    }
+
+    const containerRect = menuContainer.getBoundingClientRect();
+    const itemRect = activeMenuItem.getBoundingClientRect();
+
+    if (itemRect.top < containerRect.top || itemRect.bottom > containerRect.bottom) {
+      activeMenuItem.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [resolvedActiveSectionId]);
+
+  useEffect(() => {
+    if (!medicalMenuItems.length) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visibleEntries = entries
+          .filter((entry) => entry.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+
+        if (visibleEntries.length === 0) {
+          return;
+        }
+
+        const nextActiveSection = visibleEntries[0].target.getAttribute("data-medical-section");
+        if (nextActiveSection) {
+          setActiveSectionId(nextActiveSection);
+        }
+      },
+      {
+        root: null,
+        rootMargin: "-160px 0px -55% 0px",
+        threshold: [0.1, 0.35, 0.6],
+      }
+    );
+
+    medicalMenuItems.forEach((section) => {
+      const sectionNode = sectionRefs.current[section.id];
+      if (sectionNode) {
+        observer.observe(sectionNode);
+      }
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [medicalMenuItems, currentApplicantTab]);
+
+  const handleMedicalSectionMenuClick = (sectionId: string) => {
+    setActiveSectionId(sectionId);
+    sectionRefs.current[sectionId]?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const handleDRSViewTabChange = (value: DRSViewTab) => {
+    if (!safeApplicationId) {
+      return;
+    }
+
+    if (value === "medical") {
+      navigate(getMedicalPath(safeBusinessType, safeApplicationId), {
+        state: { selectedApplicantTab: currentApplicantTab },
+      });
+      return;
+    }
+
+    navigate(getFinancialPath(safeBusinessType, safeApplicationId), {
+      state: { selectedApplicantTab: currentApplicantTab },
+    });
+  };
+
   return (
     <Container disableGutters sx={{ pb: 4 }}>
       <BackButton
@@ -182,9 +592,13 @@ const ViewMedicals = () => {
         </Typography>
       )}
 
-      {error && (
-        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>{error}</Typography>
-      )}
+      <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
+        <CustomTabs
+          tabs={drsViewTabs}
+          value="medical"
+          onChange={(value: DRSViewTab) => handleDRSViewTabChange(value)}
+        />
+      </Box>
 
       <BreDecision
         extraFields={medicalData?.breAdditionalFields ?? []}
@@ -195,7 +609,7 @@ const ViewMedicals = () => {
         <CustomTabs
           tabs={visibleTabs}
           value={currentApplicantTab}
-          onChange={(value) => {
+          onChange={(value: ApplicantTab) => {
             setActiveApplicantTab(value);
             localStorage.setItem("drsSelectedApplicantTab", value);
           }}
@@ -270,39 +684,278 @@ const ViewMedicals = () => {
         </CustomAccordion>
       </Box>
 
-      <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
-        <CustomTabs
-          tabs={medicalSectionTabs}
-          value={activeMedicalSectionTab}
-          onChange={setActiveMedicalSectionTab}
-        />
-      </Box>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 1.5,
+          alignItems: "flex-start",
+          mt: 1,
+        }}
+      >
+          <Box
+            ref={menuContainerRef}
+            sx={{
+              width: { xs: "100%", md: 208 },
+              position: { xs: "static", md: "sticky" },
+              top: { md: 124 },
+              alignSelf: "flex-start",
+              borderRadius: 1,
+              overflow: "hidden",
+              border: "1px solid #D6D8DC",
+              backgroundColor: "#F8F9FB",
+              maxHeight: { md: "calc(100vh - 180px)" },
+              overflowY: { md: "auto" },
+            }}
+          >
+            {groupedMedicalMenuItems.map((group) => (
+              <Box key={group.key}>
+                <Typography
+                  sx={{
+                    px: 1.5,
+                    py: 1,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#344054",
+                    backgroundColor: "#EEF2F6",
+                    borderBottom: "1px solid #E4E7EC",
+                    textTransform: "uppercase",
+                    letterSpacing: 0.35,
+                  }}
+                >
+                  {group.label}
+                </Typography>
 
-      {loading ? (
-        <Typography sx={{ color: "#6B7280" }}>Loading medical details...</Typography>
-      ) : activeMedicalSectionTab === "mer" ? (
-        <MerForm applicationId={safeApplicationId} roleType={roleType} memberType={currentApplicantTab} isEditable={isMedicalSectionsEditable} />
-      ) : activeMedicalSectionTab === "specialMedical" ? (
-        <SpecialMedicalForm
-          applicationId={safeApplicationId}
-          roleType={roleType}
-          memberType={currentApplicantTab}
-          isEditable={isMedicalSectionsEditable}
-          medicalSections={medicalData?.sections ?? []}
-        />
-      ) : activeMedicalSectionTab === "otherMedicals" ? (
-        <OtherMedicalsForm
-          applicationId={safeApplicationId}
-          roleType={roleType}
-          memberType={currentApplicantTab}
-          medicalSections={medicalData?.sections ?? []}
-          isEditable={isMedicalSectionsEditable}
-        />
-      ) : (
-        <Typography sx={{ color: "#6B7280", mt: 1 }}>
-          No test details configured for {medicalSectionTabs.find((tab) => tab.key === activeMedicalSectionTab)?.label}.
-        </Typography>
-      )}
+                {group.items.map((item) => {
+                  const isActive = item.id === resolvedActiveSectionId;
+
+                  return (
+                    <Box
+                      key={item.id}
+                      data-medical-menu-id={item.id}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleMedicalSectionMenuClick(item.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleMedicalSectionMenuClick(item.id);
+                        }
+                      }}
+                      sx={{
+                        px: 1.5,
+                        py: 1.25,
+                        borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
+                        borderBottom: "1px solid #EAECEF",
+                        backgroundColor: isActive ? "#FFFFFF" : "transparent",
+                        color: isActive ? "#B42318" : "#667085",
+                        fontSize: 13,
+                        fontWeight: isActive ? 600 : 500,
+                        lineHeight: 1.3,
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit" }}>
+                        {item.title}
+                      </Typography>
+                      <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
+                        {"\u203A"}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+            ))}
+          </Box>
+
+          <Box sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
+            {medicalMenuItems.length === 0 ? (
+              <Typography sx={{ color: "#6B7280" }}>
+                No medical sections found.
+              </Typography>
+            ) : (
+              medicalMenuItems.map((item) => (
+                <Box
+                  key={item.id}
+                  data-medical-section={item.id}
+                  ref={(node) => {
+                    sectionRefs.current[item.id] = node as HTMLDivElement | null;
+                  }}
+                  sx={{
+                    scrollMarginTop: "160px",
+                    border: "1px solid #E4E7EC",
+                    borderRadius: 1.5,
+                    backgroundColor: "#FFFFFF",
+                    boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      px: { xs: 1.5, md: 2 },
+                      py: 1.25,
+                      borderBottom: "1px solid #E4E7EC",
+                      backgroundColor: "#F8FAFC",
+                    }}
+                  >
+                    <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>
+                      {item.title}
+                    </Typography>
+                  </Box>
+
+                  <Box sx={{ px: { xs: 1, md: 1.5 }, py: 1.25 }}>
+                    {item.section.rows.length === 0 ? (
+                      item.fallbackFields.length > 0 ? (
+                        item.id !== resolvedActiveSectionId ? (
+                          <Typography sx={{ color: "#667085", fontSize: 13 }}>
+                            Select this section to load details.
+                          </Typography>
+                        ) : (
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+                            gap: 1.25,
+                            px: 1,
+                          }}
+                        >
+                          {item.fallbackFields.map((field) => {
+                            const isDropdown = isDropdownConfigField(field);
+                            const isDate = isDateConfigField(field);
+                            const isNumeric = isNumericConfigField(field);
+                            const required = isMandatoryConfigField(field);
+                            const label = `${field.field}${required ? " *" : ""}`;
+                            const fieldValue = getFallbackFieldValue(field, item.section.rows, safeApplicationId, applicantData);
+                            const baseOptions = parseConfigDropdownOptions(field);
+                            const options = isDropdown && fieldValue && !baseOptions.some((option) => option.value === fieldValue)
+                              ? [...baseOptions, { label: fieldValue, value: fieldValue }]
+                              : baseOptions;
+
+                            return (
+                              <Box key={`${item.id}-${field.id}`}>
+                                {isDropdown ? (
+                                  <CustomSelect
+                                    label={label}
+                                    value={fieldValue}
+                                    onChange={() => undefined}
+                                    options={options}
+                                    placeholder="Select"
+                                    disabled
+                                  />
+                                ) : (
+                                  <Box>
+                                    <Typography sx={{ fontSize: "14px", fontWeight: 400, color: "#444", mb: 1 }}>{label}</Typography>
+                                    <CustomTextField
+                                      fullWidth
+                                      size="small"
+                                      type={isDate ? "date" : (isNumeric ? "number" : "text")}
+                                      value={fieldValue}
+                                      disabled
+                                      placeholder={isDate ? "YYYY-MM-DD" : ""}
+                                    />
+                                  </Box>
+                                )}
+                              </Box>
+                            );
+                          })}
+                        </Box>
+                        )
+                      ) : (
+                        <Typography sx={{ color: "#667085", fontSize: 13 }}>
+                          No details available for this test.
+                        </Typography>
+                      )
+                    ) : (
+                      <Box>
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: { xs: "2fr 1fr 1fr", md: "2fr 1fr 1fr 1.25fr 1fr" },
+                            gap: 1,
+                            px: 1,
+                            pb: 0.75,
+                          }}
+                        >
+                          <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Parameter</Typography>
+                          <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Value</Typography>
+                          <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Unit</Typography>
+                          <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 12, fontWeight: 700, color: "#475467" }}>
+                            Normal Range
+                          </Typography>
+                          <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 12, fontWeight: 700, color: "#475467" }}>
+                            Status
+                          </Typography>
+                        </Box>
+
+                        {item.section.rows.map((row, index) => {
+                          const statusColor = getStatusColors(row.status);
+                          const statusDotColor = getStatusDotColor(row.status);
+
+                          return (
+                            <Box
+                              key={`${item.id}-${row.parameter}-${index}`}
+                              sx={{
+                                display: "grid",
+                                gridTemplateColumns: { xs: "2fr 1fr 1fr", md: "2fr 1fr 1fr 1.25fr 1fr" },
+                                gap: 1,
+                                alignItems: "center",
+                                px: 1,
+                                py: 1,
+                                borderTop: "1px solid #F2F4F7",
+                                backgroundColor: index % 2 === 0 ? "#FCFCFD" : "#FFFFFF",
+                              }}
+                            >
+                              <Typography sx={{ fontSize: 13, color: "#344054" }}>{row.parameter || "-"}</Typography>
+                              <Typography sx={{ fontSize: 13, color: "#101828", fontWeight: 600 }}>{row.value || "-"}</Typography>
+                              <Typography sx={{ fontSize: 13, color: "#344054" }}>{row.unit || "-"}</Typography>
+                              <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 13, color: "#344054" }}>
+                                {row.normalRange || "-"}
+                              </Typography>
+                              <Box sx={{ display: { xs: "none", md: "flex" } }}>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      width: 8,
+                                      height: 8,
+                                      borderRadius: "50%",
+                                      bgcolor: statusDotColor,
+                                      flexShrink: 0,
+                                    }}
+                                  />
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      px: 1,
+                                      py: 0.25,
+                                      borderRadius: "999px",
+                                      fontSize: 12,
+                                      fontWeight: 600,
+                                      color: statusColor.text,
+                                      backgroundColor: statusColor.bg,
+                                      textTransform: "capitalize",
+                                    }}
+                                  >
+                                    {row.status || "-"}
+                                  </Box>
+                                </Box>
+                              </Box>
+                            </Box>
+                          );
+                        })}
+                      </Box>
+                    )}
+                  </Box>
+                </Box>
+              ))
+            )}
+          </Box>
+        </Box>
     </Container>
   );
 };

@@ -23,6 +23,7 @@
         "state": "DRAFT",
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
         "displayName": "ARYAYAN Khan",
+        "poolTAT":"2",
         "status": "DRAFT"
       },
       {
@@ -34,7 +35,7 @@
         "annualPremium": 876863872,
         "productType": "I19",
         "isMedical": false,
-        "drc": "Low",
+        "drc": "High",
         "hniFlag": "Yes",
         "channel": "0TTB",
         "breDecision": "STD",
