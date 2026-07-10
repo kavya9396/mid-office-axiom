@@ -3,10 +3,9 @@
     "breOutput": {
       "systemDecision": "Non-STP",
       "decisionTypes": {
-        "breInitialDecision": "ST",
         "breDecision": "RM",
         "breAction": "Regular Medical required",
-        "breRequirement": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EID"
+        "breRequirement": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1"
       },
       "requirements": [
         {
@@ -22,6 +21,28 @@
       "reTriggerCount": 1,
       "errorResp": "",
       "breRemarks": "#Check#Basic#KYC#Document Attestations#Female life#Questions Answered In Positive#Standard Age Proof Required#Health Question any list"
+    },
+    "initialBreOutput": {
+      "systemDecision": "STP",
+      "decisionTypes": {
+        "breDecision": "ST",
+        "breAction": "-",
+        "breRequirement": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EID"
+      },
+      "requirements": [
+        {
+          "requirementType": "IDM",
+          "requirementValue": "IDM",
+          "ruleId": "",
+          "ruleName": "AML_Compliance-Rule1",
+          "isSTP": false,
+          "metaphorName": "AML_Compliance"
+        }
+      ],
+      "systemDecisionDateTime": "2026-04-10 10:15 AM",
+      "reTriggerCount": 1,
+      "errorResp": "",
+      "breRemarks": "-"
     },
     "medicalBreOutput": {
       "isMedical": true,

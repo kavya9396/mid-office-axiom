@@ -42,17 +42,22 @@ const drsSlice = createSlice({
       state,
       action: {
         payload: Partial<
-          Pick<DRSExternalAPIs, "breOutput" | "medicalBreOutput" | "financialBreOutput">
+          Pick<
+            DRSExternalAPIs,
+            "breOutput" | "initialBreOutput" | "medicalBreOutput" | "financialBreOutput"
+          >
         >;
       },
     ) => {
       if (!state.data) return;
 
-      const { breOutput, medicalBreOutput, financialBreOutput } = action.payload;
+      const { breOutput, initialBreOutput, medicalBreOutput, financialBreOutput } =
+        action.payload;
 
       state.data.externalAPIs = {
         ...state.data.externalAPIs,
         ...(breOutput ? { breOutput } : {}),
+        ...(initialBreOutput ? { initialBreOutput } : {}),
         ...(medicalBreOutput ? { medicalBreOutput } : {}),
         ...(financialBreOutput ? { financialBreOutput } : {}),
       };

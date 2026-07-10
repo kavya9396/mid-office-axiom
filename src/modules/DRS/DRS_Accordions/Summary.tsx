@@ -375,7 +375,7 @@ const Summary = () => {
 
                     {canShowRiskAnalytics && riskCards.length > 0 && (
                         <Box sx={{ mt: 2, mb: 3 }}>
-                            <Typography sx={{ fontSize: "22px", fontWeight: 700, color: "#2b2b2b", mb: 1.5, lineHeight: 1.2 }}>
+                            <Typography sx={{ fontSize: "14px", fontWeight: 700, color: "#2b2b2b", mb: 1.5, lineHeight: 1.2 }}>
                                 Risk Analytics
                             </Typography>
 
@@ -410,7 +410,7 @@ const Summary = () => {
                                             }}
                                         >
                                             <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
-                                                <Typography sx={{ fontSize: "20px", fontWeight: 500, color: "#1f1f1f", lineHeight: 1.2 }}>
+                                                <Typography sx={{ fontSize: "12px", fontWeight: 700, color: "#1f1f1f", lineHeight: 1.2 }}>
                                                     {item.label}
                                                 </Typography>
 

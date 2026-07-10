@@ -21,7 +21,7 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppDispatch } from "../../../store/hooks";
 import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
 import { referToItThunk } from "../../../store/thunks/referToItThunk";
-import { setBreOutput } from "../../../store/slices/drsSlice";
+import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 
 type SelectedItem = {
@@ -48,6 +48,7 @@ const truncateText = (text: string, limit: number) => {
 
 const mapBreOutputToDecision = (
   breOutput: DRSBreOutput,
+  initialBreOutput?: DRSBreOutput | null,
 ): BreDecisionResponse => ({
   decision: breOutput.decisionTypes?.breDecision ?? null,
   status: "Success",
@@ -55,11 +56,18 @@ const mapBreOutputToDecision = (
   discrepancy: breOutput.decisionTypes?.breRequirement?.replace(/ /g, "#") ?? null,
   timestamp: breOutput.systemDecisionDateTime ?? null,
   initialDecision:
+    initialBreOutput?.decisionTypes?.breDecision ??
     breOutput.decisionTypes?.initialDecision ??
     breOutput.decisionTypes?.breInitialDecision ??
     null,
   retrigger: null,
 });
+
+const normalizeValue = (value: string | null | undefined) =>
+  String(value ?? "").trim().toLowerCase();
+
+const normalizeDiscrepancy = (value: string | null | undefined) =>
+  normalizeValue(value).replace(/#/g, " ").replace(/\s+/g, " ").trim();
 
 const BreDecision = ({
   extraFields = [],
@@ -69,13 +77,12 @@ const BreDecision = ({
   const { applicationNumber, businessType } = useAppContext();
   const { data } = useSelector((state: RootState) => state.drs);
 
+  const initialBreOutput = data?.externalAPIs?.initialBreOutput;
   const breOutput = data?.externalAPIs?.breOutput;
 
   const drsBreDecision: BreDecisionResponse | null = breOutput
-    ? mapBreOutputToDecision(breOutput)
+    ? mapBreOutputToDecision(breOutput, initialBreOutput)
     : null;
-
-  console.log("drsBreDecision", drsBreDecision);
 
   const breDecision =
     drsBreDecision || breDecisionOverride
@@ -179,6 +186,61 @@ const BreDecision = ({
       value: String(item.value),
     }));
 
+  const initialBreDecisionValue =
+    initialBreOutput?.decisionTypes?.breDecision ?? "-";
+  const finalBreDecisionValue =
+    breOutput?.decisionTypes?.breDecision ?? currentBreDecision?.decision ?? "-";
+  const initialBreRemarksValue = initialBreOutput?.breRemarks ?? "-";
+  const finalBreRemarksValue = breOutput?.breRemarks ?? resolvedRemarks;
+  const initialBreDiscrepancyValue =
+    initialBreOutput?.decisionTypes?.breRequirement?.replace(/ /g, "#") ??
+    "-";
+  const finalBreDiscrepancyValue =
+    breOutput?.decisionTypes?.breRequirement?.replace(/ /g, "#") ??
+    resolvedDiscrepancy;
+  const initialBreTimestampValue =
+    initialBreOutput?.systemDecisionDateTime ?? "-";
+  const finalBreTimestampValue =
+    breOutput?.systemDecisionDateTime ?? currentBreDecision?.timestamp ?? "-";
+
+  const normalizedInitialBreDecision = normalizeValue(
+    initialBreOutput?.decisionTypes?.breDecision ?? "",
+  );
+  const normalizedFinalBreDecision = normalizeValue(
+    breOutput?.decisionTypes?.breDecision ?? "",
+  );
+  const normalizedInitialRemarks = normalizeValue(
+    initialBreOutput?.breRemarks ?? "",
+  );
+  const normalizedFinalRemarks = normalizeValue(finalBreRemarksValue);
+  const normalizedInitialDiscrepancy = normalizeDiscrepancy(
+    initialBreOutput?.decisionTypes?.breRequirement ?? "",
+  );
+  const normalizedFinalDiscrepancy = normalizeDiscrepancy(
+    breOutput?.decisionTypes?.breRequirement ?? "",
+  );
+
+  const hasInitialBreComparableValues =
+    normalizedInitialBreDecision !== "" ||
+    normalizedInitialRemarks !== "" ||
+    normalizedInitialDiscrepancy !== "";
+  const hasDecisionChanged =
+    normalizedInitialBreDecision !== "" &&
+    normalizedFinalBreDecision !== "" &&
+    normalizedInitialBreDecision !== normalizedFinalBreDecision;
+  const hasRemarksChanged =
+    normalizedInitialRemarks !== "" &&
+    normalizedFinalRemarks !== "" &&
+    normalizedInitialRemarks !== normalizedFinalRemarks;
+  const hasDiscrepancyChanged =
+    normalizedInitialDiscrepancy !== "" &&
+    normalizedFinalDiscrepancy !== "" &&
+    normalizedInitialDiscrepancy !== normalizedFinalDiscrepancy;
+
+  const shouldShowInitialBreSection =
+    hasInitialBreComparableValues &&
+    (hasDecisionChanged || hasRemarksChanged || hasDiscrepancyChanged);
+
   const coreBreDetails = [
     {
       label: "BRE Status",
@@ -186,21 +248,25 @@ const BreDecision = ({
     },
     {
       label: "BRE Decision",
-      value: currentBreDecision?.initialDecision ?? "-",
+      value: initialBreDecisionValue,
+      highlight: false,
     },
     {
       label: "BRE Remarks",
-      value: resolvedRemarks,
+      value: initialBreRemarksValue,
+      highlight: shouldShowInitialBreSection && hasRemarksChanged,
     },
     {
       label: "BRE Discrepancy",
-      value: resolvedDiscrepancy,
+      value: initialBreDiscrepancyValue,
+      highlight: shouldShowInitialBreSection && hasDiscrepancyChanged,
     },
     {
       label: "BRE Timestamp",
-      value: currentBreDecision?.timestamp ?? "-",
+      value: initialBreTimestampValue,
     },
   ];
+
   const coreFinalBreDetails = [
     {
       label: "BRE Status",
@@ -208,19 +274,22 @@ const BreDecision = ({
     },
     {
       label: "BRE Decision",
-      value: currentBreDecision?.decision ?? "-",
+      value: finalBreDecisionValue,
+      highlight: false,
     },
     {
       label: "BRE Remarks",
-      value: resolvedRemarks,
+      value: finalBreRemarksValue,
+      highlight: shouldShowInitialBreSection && hasRemarksChanged,
     },
     {
       label: "BRE Discrepancy",
-      value: resolvedDiscrepancy,
+      value: finalBreDiscrepancyValue,
+      highlight: shouldShowInitialBreSection && hasDiscrepancyChanged,
     },
     {
       label: "BRE Timestamp",
-      value: currentBreDecision?.timestamp ?? "-",
+      value: finalBreTimestampValue,
     },
   ];
 
@@ -228,17 +297,6 @@ const BreDecision = ({
     ...conditionalBreDecisionParams,
     ...conditionalFields,
   ];
-
-  const normalizedInitialBreDecision = String(currentBreDecision?.initialDecision ?? "")
-    .trim()
-    .toLowerCase();
-  const normalizedFinalBreDecision = String(currentBreDecision?.decision ?? "")
-    .trim()
-    .toLowerCase();
-  const shouldShowInitialBreSection =
-    normalizedInitialBreDecision !== "" &&
-    normalizedFinalBreDecision !== "" &&
-    normalizedInitialBreDecision !== normalizedFinalBreDecision;
 
   const handleRetrigger = async () => {
     if (isBreSuccess || breRetriggerLoading) {
@@ -271,9 +329,20 @@ const BreDecision = ({
         setBreRetriggerError("BRE retrigger did not return updated data.");
         return;
       }
+      const updatedInitialBreOutput = response.data?.initialBreOutput;
 
-      dispatch(setBreOutput(updatedBreOutput));
-      setRetriggeredBreDecision(mapBreOutputToDecision(updatedBreOutput));
+      dispatch(
+        setBreExternalApiOutputs({
+          breOutput: updatedBreOutput,
+          initialBreOutput: updatedInitialBreOutput,
+        }),
+      );
+      setRetriggeredBreDecision(
+        mapBreOutputToDecision(
+          updatedBreOutput,
+          updatedInitialBreOutput ?? initialBreOutput,
+        ),
+      );
     } catch (error) {
       setBreRetriggerError(
         error instanceof Error ? error.message : "Failed to retrigger BRE.",
@@ -321,7 +390,7 @@ const BreDecision = ({
   // };
 
  const renderBreDetail = (
-  item: { label: string; value: string },
+  item: { label: string; value: string; highlight?: boolean },
   key: string,
 ) => {
   const limit = item.label === "BRE Discrepancy" ? 30 : 80;
@@ -348,9 +417,21 @@ const BreDecision = ({
           overflow: "hidden",
         }}
       >
-        {truncateText(item.value, limit)}
-
-        {isLongText && "... "}
+        <Box
+          component="span"
+          sx={
+            item.highlight
+              ? {
+                  backgroundColor: "#FFF59D",
+                  px: 0.5,
+                  borderRadius: "2px",
+                }
+              : undefined
+          }
+        >
+          {truncateText(item.value, limit)}
+          {isLongText && "... "}
+        </Box>
 
         {isLongText && (
           <Box
@@ -517,12 +598,19 @@ const BreDecision = ({
               {selectedItem?.label?.replace("BRE ", "")}
             </Typography>
           }
-          contentSx={{ whiteSpace: "pre-wrap" }}
+          contentSx={{
+            whiteSpace: "pre-wrap",
+            overflowWrap: "anywhere",
+            wordBreak: "break-word",
+          }}
         >
           <Typography
             sx={{
               fontSize: "14px",
               color: "#161616",
+              whiteSpace: "pre-wrap",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
             }}
           >
             {selectedItem?.value}

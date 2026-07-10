@@ -259,6 +259,7 @@ export interface DRSQuestion {
 
 export interface DRSExternalAPIs {
   breOutput: DRSBreOutput;
+  initialBreOutput?: DRSBreOutput;
   medicalBreOutput: Record<string, unknown>;
   financialBreOutput: Record<string, unknown>;
   risk: Record<string, unknown>;
@@ -272,7 +273,7 @@ export interface DRSBreOutput {
   systemDecision: string;
   decisionTypes: {
     breInitialDecision?: string;
-    initialDecision: string;
+    initialDecision?: string;
     breDecision: string;
     breAction: string;
     breRequirement: string;
@@ -501,6 +502,7 @@ export type BreRetriggerRequest = {
 export type BreRetriggerResponse = {
   data: {
     breOutput: DRSBreOutput;
+    initialBreOutput?: DRSBreOutput;
     medicalBreOutput?: Record<string, unknown>;
     financialBreOutput?: Record<string, unknown>;
   };

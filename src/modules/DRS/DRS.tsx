@@ -93,12 +93,14 @@ const DRS = () => {
                     const updatedBrePayload = breResponse.data;
                     if (
                         updatedBrePayload?.breOutput ||
+                        updatedBrePayload?.initialBreOutput ||
                         updatedBrePayload?.medicalBreOutput ||
                         updatedBrePayload?.financialBreOutput
                     ) {
                         dispatch(
                             setBreExternalApiOutputs({
                                 breOutput: updatedBrePayload?.breOutput,
+                                initialBreOutput: updatedBrePayload?.initialBreOutput,
                                 medicalBreOutput: updatedBrePayload?.medicalBreOutput,
                                 financialBreOutput: updatedBrePayload?.financialBreOutput,
                             }),

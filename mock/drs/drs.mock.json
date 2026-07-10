@@ -40,7 +40,7 @@
     },
     "summary": [
       {
-        "memberType": "lifeassured1",
+        "memberType": "propser",
         "jontFlag": true,
         "lifeNumber": "01",
         "clientId": "CL0001",
@@ -361,7 +361,7 @@
         }
       },
       {
-        "memberType": "lifeassured2",
+        "memberType": "lifeassured1",
         "jontFlag": true,
         "lifeNumber": "01",
         "clientId": "CL0001",
