@@ -6,12 +6,21 @@ import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTable from "../../../components/ui/Table/Table";
 import type { Column } from "../../../components/ui/Table/Table";
 import type { AdditionalRequirementRow } from "../../../types/drs.types";
+import {
+    rm_category,
+    rm_document,
+    rm_profile,
+    rm_reason,
+    rm_sub_category,
+    rm_team,
+} from "../../../utils/constant";
 import { toDisplayValue } from "../../../utils/helpers";
 import type { RootState } from "../../../store/store";
 import {
     requirementMasterRows,
     type RequirementMasterRow,
 } from "./requirementMasterData";
+import { CloseIcon, EditIcon } from "../../../icons/Icons";
 
 type BreRequirementRow = {
     requirementType?: string;
@@ -46,21 +55,6 @@ type Option = {
     label: string;
     value: string;
 };
-
-const EditIcon = ({ size = 14 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M3 17.25V21H6.75L17.81 9.94L14.06 6.19L3 17.25Z" fill="currentColor" />
-        <path d="M20.71 7.04C21.1 6.65 21.1 6.02 20.71 5.63L18.37 3.29C17.98 2.9 17.35 2.9 16.96 3.29L15.13 5.12L18.88 8.87L20.71 7.04Z" fill="currentColor" />
-    </svg>
-);
-
-const DeleteIcon = ({ size = 14 }: { size?: number }) => (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M6 7H18L17 21H7L6 7Z" fill="currentColor" />
-        <path d="M9 4H15L16 6H8L9 4Z" fill="currentColor" />
-        <path d="M4 6H20V8H4V6Z" fill="currentColor" />
-    </svg>
-);
 
 const getTeamOptionsFromMaster = (roleType: string): Option[] => {
     const normalizedRoleType = roleType.trim().toLowerCase();
@@ -132,14 +126,47 @@ const uniqueNonEmpty = (values: string[]) =>
 
 const toOption = (value: string): Option => ({ label: value, value });
 
+const mapTeamValueToUi = (team: string, roleType: string): string => {
+    const normalizedTeam = team.trim().toLowerCase();
+    const normalizedRoleType = roleType.trim().toLowerCase();
+
+    if (!normalizedTeam) {
+        return "";
+    }
+
+    if (normalizedTeam === "gops" || normalizedTeam.includes("dvt")) {
+        return "DVT Team";
+    }
+
+    if (normalizedTeam === "uw") {
+        return normalizedRoleType.includes("cvt") ? "CVT Team" : "UW";
+    }
+
+    return team;
+};
+
+const toOptionsFromList = (items: Array<{ label: string; value: string }>): Option[] =>
+    uniqueNonEmpty(items.map((item) => String(item.value ?? item.label ?? ""))).map(toOption);
+
+const FALLBACK_PROFILE_OPTIONS = toOptionsFromList(rm_profile);
+const FALLBACK_CATEGORY_OPTIONS = toOptionsFromList(rm_category);
+const FALLBACK_SUB_CATEGORY_OPTIONS = toOptionsFromList(rm_sub_category);
+const FALLBACK_DOCUMENT_OPTIONS = toOptionsFromList(rm_document);
+const FALLBACK_REASON_OPTIONS = toOptionsFromList(rm_reason);
+
+const getFallbackTeamOptions = (roleType: string): Option[] =>
+    uniqueNonEmpty(rm_team.map((item) => mapTeamValueToUi(String(item.value ?? item.label ?? ""), roleType))).map(
+        toOption,
+    );
+
 const getTodayDate = () => new Date().toISOString().slice(0, 10);
 
 const getCurrentActor = () =>
     String(
         localStorage.getItem("username") ??
-            localStorage.getItem("userName") ??
-            localStorage.getItem("userId") ??
-            "System",
+        localStorage.getItem("userName") ??
+        localStorage.getItem("userId") ??
+        "System",
     ).trim() || "System";
 
 const clearErrors = (errors: RowErrors | undefined, keys: Array<keyof RowErrors>): RowErrors => {
@@ -183,6 +210,10 @@ const mapStoredTeamToDisplay = (team: string): string => {
         return "UW";
     }
 
+    if (normalized === "system requirement") {
+        return "System Requirement";
+    }
+
     return team;
 };
 
@@ -214,18 +245,6 @@ const getScopedMasterRows = (
     );
 };
 
-const getLookupMessage = (matches: RequirementMasterRow[]) => {
-    if (matches.length === 0) {
-        return "No matching FUP code was found in the GOPS/CUW master for this selection.";
-    }
-
-    if (matches.length > 1) {
-        return `This selection maps to ${matches.length} FUP codes in the GOPS/CUW master. Refine the combination before saving.`;
-    }
-
-    return "";
-};
-
 const applyLookupToRow = (row: EditableRequirementRow, requiresProfile: boolean): EditableRequirementRow => {
     if (!row.__isDraft) {
         return row;
@@ -249,7 +268,6 @@ const applyLookupToRow = (row: EditableRequirementRow, requiresProfile: boolean)
     }
 
     const matches = getScopedMasterRows(row);
-    const lookupMessage = getLookupMessage(matches);
 
     if (matches.length === 1) {
         return {
@@ -264,11 +282,11 @@ const applyLookupToRow = (row: EditableRequirementRow, requiresProfile: boolean)
 
     return {
         ...row,
-        fupCode: "",
+        fupCode: "TRS",
         description: "",
         specialTest: "",
-        __lookupMessage: lookupMessage,
-        __errors: lookupMessage ? { ...nextErrors, lookup: lookupMessage } : nextErrors,
+        __lookupMessage: "",
+        __errors: nextErrors,
     };
 };
 
@@ -331,10 +349,6 @@ const validateDraftRow = (row: EditableRequirementRow, requiresProfile: boolean)
         errors.status = "Required";
     }
 
-    if (!row.fupCode || !row.description) {
-        errors.lookup = row.__lookupMessage || "Select a valid master-mapped combination.";
-    }
-
     return errors;
 };
 
@@ -374,7 +388,14 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     });
 
     const isVisible = roleType !== "Ready For Issuance Pool";
-    const teamOptions = useMemo(() => getTeamOptionsFromMaster(roleType), [roleType]);
+    const teamOptions = useMemo(() => {
+        const masterOptions = getTeamOptionsFromMaster(roleType);
+        const fallbackOptions = getFallbackTeamOptions(roleType);
+        return uniqueNonEmpty([
+            ...masterOptions.map((item) => item.value),
+            ...fallbackOptions.map((item) => item.value),
+        ]).map(toOption);
+    }, [roleType]);
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
         () => finalRequirements.map((row, index) => normalizeExistingRow(row, index)),
@@ -399,36 +420,51 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
 
-    const getCategoryOptions = (row: EditableRequirementRow) =>
-        uniqueNonEmpty(
+    const getCategoryOptions = (row: EditableRequirementRow) => {
+        const options = uniqueNonEmpty(
             getScopedMasterRows({ ...row, profile: shouldShowProfileAndSpecialTest ? row.profile : "", category: "", subCategory: "", document: "", reason: "" }).map(
                 (entry) => entry.category,
             ),
         ).map(toOption);
 
-    const getProfileOptions = (row: EditableRequirementRow) =>
-        uniqueNonEmpty(
+        return options.length > 0 ? options : FALLBACK_CATEGORY_OPTIONS;
+    };
+
+    const getProfileOptions = (row: EditableRequirementRow) => {
+        const options = uniqueNonEmpty(
             getScopedMasterRows({ ...row, profile: "", category: "", subCategory: "", document: "", reason: "" }).map(
                 (entry) => entry.profile,
             ),
         ).map(toOption);
 
-    const getSubCategoryOptions = (row: EditableRequirementRow) =>
-        uniqueNonEmpty(
+        return options.length > 0 ? options : FALLBACK_PROFILE_OPTIONS;
+    };
+
+    const getSubCategoryOptions = (row: EditableRequirementRow) => {
+        const options = uniqueNonEmpty(
             getScopedMasterRows({ ...row, subCategory: "", document: "", reason: "" }).map(
                 (entry) => entry.subCategory,
             ),
         ).map(toOption);
 
-    const getDocumentOptions = (row: EditableRequirementRow) =>
-        uniqueNonEmpty(
+        return options.length > 0 ? options : FALLBACK_SUB_CATEGORY_OPTIONS;
+    };
+
+    const getDocumentOptions = (row: EditableRequirementRow) => {
+        const options = uniqueNonEmpty(
             getScopedMasterRows({ ...row, document: "", reason: "" }).map((entry) => entry.document),
         ).map(toOption);
 
-    const getReasonOptions = (row: EditableRequirementRow) =>
-        uniqueNonEmpty(
+        return options.length > 0 ? options : FALLBACK_DOCUMENT_OPTIONS;
+    };
+
+    const getReasonOptions = (row: EditableRequirementRow) => {
+        const options = uniqueNonEmpty(
             getScopedMasterRows({ ...row, reason: "" }).map((entry) => entry.reason),
         ).map(toOption);
+
+        return options.length > 0 ? options : FALLBACK_REASON_OPTIONS;
+    };
 
     const updateRow = (rowId: string, updater: (row: EditableRequirementRow) => EditableRequirementRow) => {
         const currentRow = rows.find((row) => row.__rowId === rowId);
@@ -595,11 +631,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             previousRows.map((row) =>
                 row.__rowId === rowId
                     ? {
-                          ...row,
-                          __isDraft: true,
-                          __errors: {},
-                          __lookupMessage: "",
-                      }
+                        ...row,
+                        __isDraft: true,
+                        __errors: {},
+                        __lookupMessage: "",
+                    }
                     : row,
             ),
         );
@@ -744,7 +780,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             }}
                             aria-label="Delete requirement"
                         >
-                            <DeleteIcon />
+                            <CloseIcon />
                         </Box>
                     </Box>
                 );
@@ -965,22 +1001,22 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             )}
                                             {shouldShowProfileAndSpecialTest
                                                 ? renderField(
-                                                      "Profile",
-                                                      row.__isDraft
-                                                          ? renderEditableSelect(row, "profile", profileOptions, !row.team)
-                                                          : renderReadOnlyField(row.profile),
-                                                      true,
-                                                  )
+                                                    "Profile",
+                                                    row.__isDraft
+                                                        ? renderEditableSelect(row, "profile", profileOptions, !row.team)
+                                                        : renderReadOnlyField(row.profile),
+                                                    true,
+                                                )
                                                 : null}
                                             {renderField(
                                                 "Category",
                                                 row.__isDraft
                                                     ? renderEditableSelect(
-                                                          row,
-                                                          "category",
-                                                          categoryOptions,
-                                                          !row.team || (shouldShowProfileAndSpecialTest && !row.profile),
-                                                      )
+                                                        row,
+                                                        "category",
+                                                        categoryOptions,
+                                                        !row.team || (shouldShowProfileAndSpecialTest && !row.profile),
+                                                    )
                                                     : renderReadOnlyField(row.category),
                                                 true,
                                             )}
@@ -1007,9 +1043,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             )}
                                             {shouldShowProfileAndSpecialTest
                                                 ? renderField(
-                                                      "Special Test",
-                                                      renderReadOnlyField(row.specialTest),
-                                                  )
+                                                    "Special Test",
+                                                    renderReadOnlyField(row.specialTest),
+                                                )
                                                 : null}
                                             {renderField(
                                                 "FUP Code",
@@ -1031,11 +1067,34 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             {renderField("Received By", renderReadOnlyField(row.receivedBy))}
                                         </Box>
                                     </Box>
+
+
                                 </Box>
                             );
                         })}
                     </Box>
                 )}
+                <Box
+                    sx={{
+                        display: "flex",
+                        gap: 2,
+                        mt: 2,
+                    }}
+                >
+                    <CustomButton
+                        variant="contained"
+                        sx={{
+                            minWidth: 200,
+                            height: 44,
+                            borderRadius: "50px",
+                            fontWeight: 600,
+                            px: 3,
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        Submit
+                    </CustomButton>
+                </Box>
             </Box>
         </Paper>
     );
