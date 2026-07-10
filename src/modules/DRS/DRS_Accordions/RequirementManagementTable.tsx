@@ -665,23 +665,23 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     );
 
     const savedColumns: Column<EditableRequirementRow>[] = [
-        { key: "team", header: "Team", width: "9%" },
+        { key: "team", header: "Team", width: "2%" },
         ...(shouldShowProfileAndSpecialTest
-            ? ([{ key: "profile", header: "Profile", width: "9%" }] as Column<EditableRequirementRow>[])
+            ? ([{ key: "profile", header: "Profile", width: "4%" }] as Column<EditableRequirementRow>[])
             : []),
-        { key: "category", header: "Category", width: "9%" },
-        { key: "subCategory", header: "Sub Category", width: "10%" },
-        { key: "document", header: "Document", width: "9%" },
-        { key: "reason", header: "Reason", width: "11%" },
+        { key: "category", header: "Category", width: "4%" },
+        { key: "subCategory", header: "Sub Category", width: "7%" },
+        { key: "document", header: "Document", width: "5%" },
+        { key: "reason", header: "Reason", width: "5%" },
         ...(shouldShowProfileAndSpecialTest
-            ? ([{ key: "specialTest", header: "Special Test", width: "10%" }] as Column<EditableRequirementRow>[])
+            ? ([{ key: "specialTest", header: "Special Test", width: "6%" }] as Column<EditableRequirementRow>[])
             : []),
-        { key: "fupCode", header: "FUP Code", width: "7%" },
-        { key: "description", header: "Description", width: "13%" },
+        { key: "fupCode", header: "FUP Code", width: "5%" },
+        { key: "description", header: "Description", width: "8%" },
         {
             key: "status",
             header: "Status",
-            width: "8%",
+            width: "6%",
             render: (_value, row) => {
                 if (!isPendingStatus(row.status)) {
                     return (
@@ -694,14 +694,14 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 return renderEditableSelect(row, "status", STATUS_OPTIONS, false);
             },
         },
-        { key: "raisedDate", header: "Raised Date", width: "8%" },
-        { key: "raisedBy", header: "Raised By", width: "8%" },
-        { key: "receivedDate", header: "Received Date", width: "8%" },
-        { key: "receivedBy", header: "Received By", width: "8%" },
+        { key: "raisedDate", header: "Raised Date", width: "6%" },
+        { key: "raisedBy", header: "Raised By", width: "6%" },
+        { key: "receivedDate", header: "Received Date", width: "7%" },
+        { key: "receivedBy", header: "Received By", width: "6%" },
         {
             key: "__rowId",
             header: "Actions",
-            width: "96px",
+            width: "2%",
             sticky: "right",
             render: (_value, row) => {
                 if (!row.__isLocal) {
@@ -819,7 +819,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         </Typography>
                     </Box>
                 ) : (
-                    <Box sx={{ display: "grid", gap: 2 }}>
+                    <Box sx={{ display: "grid", gap: 2, overflowX: "auto" }}>
                         {savedRows.length > 0 ? (
                             <Box>
                                 <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#334155", mb: 1.25 }}>
@@ -863,6 +863,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                         backgroundColor: "#FFFFFF",
                                         boxShadow: row.__isDraft ? "0 10px 24px rgba(154, 37, 41, 0.08)" : "none",
                                         overflow: "hidden",
+                                        width: "89vw",
+                                        position: "sticky",
+                                        left: 0,
+                                        zIndex: 1,
                                     }}
                                 >
                                     <Box
