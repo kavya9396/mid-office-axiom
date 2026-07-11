@@ -233,6 +233,7 @@ const ApplicationOverview = () => {
       label: "Face Value",
       value: String(firstProduct?.faceValue ?? "-"),
     },
+   
     trsa: {
       label: "TRSA",
       value: formatNumberOrDash(applicationInfo?.simultaneousLifeSA),

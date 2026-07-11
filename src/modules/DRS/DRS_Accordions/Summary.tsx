@@ -210,6 +210,25 @@ const evaluateRiskStatus = (
     };
 };
 
+const riskDetailGridSx = {
+    display: "grid",
+    gap: 1.5,
+    gridTemplateColumns: {
+        xs: "1fr",
+        sm: "repeat(2, minmax(0, 1fr))",
+        md: "repeat(4, minmax(0, 1fr))",
+    },
+};
+
+const riskDetailItemSx = {
+    display: "flex",
+    flexDirection: "column" as const,
+    gap: 0.25,
+    minWidth: 0,
+    borderBottom: "1px solid #efefef",
+    pb: 1,
+};
+
 const Summary = () => {
     const navigate = useNavigate();
     const { data } = useSelector((state: RootState) => state.drs);
@@ -507,7 +526,7 @@ const Summary = () => {
                         maxWidth="md"
                     >
                         {selectedRiskCard && (
-                            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2, minWidth: 420, py: 1 }}>
+                            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2, minWidth: { xs: 320, md: 760 }, py: 1 }}>
                               
 
                                 {!selectedRiskCard.isHealthy && (
@@ -525,95 +544,83 @@ const Summary = () => {
 
                                 {selectedRiskCard.key === "financial" ? (
                                     <>
+                                        <Box sx={riskDetailGridSx}>
                                         {getFinancialFieldsForDisplay(selectedRiskCard.data).map(({ label, value }) => (
                                             <Box
                                                 key={`${selectedRiskCard.key}-${label}`}
                                                 sx={{
-                                                    display: "grid",
-                                                    gridTemplateColumns: "220px 1fr",
-                                                    gap: 1,
-                                                    alignItems: "start",
-                                                    borderBottom: "1px solid #efefef",
-                                                    pb: 1,
+                                                    ...riskDetailItemSx,
                                                 }}
                                             >
                                                 <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
                                                     {label}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f", fontWeight: 700 }}>
                                                     {value === "" || value === null || value === undefined ? "-" : String(value)}
                                                 </Typography>
                                             </Box>
                                         ))}
+                                        </Box>
                                     </>
                                 ) : selectedRiskCard.key === "medical" ? (
                                     <>
+                                        <Box sx={riskDetailGridSx}>
                                         {getMedicalFieldsForDisplay(selectedRiskCard.data).map(({ label, value }) => (
                                             <Box
                                                 key={`${selectedRiskCard.key}-${label}`}
                                                 sx={{
-                                                    display: "grid",
-                                                    gridTemplateColumns: "220px 1fr",
-                                                    gap: 1,
-                                                    alignItems: "start",
-                                                    borderBottom: "1px solid #efefef",
-                                                    pb: 1,
+                                                    ...riskDetailItemSx,
                                                 }}
                                             >
                                                 <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
                                                     {label}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f", fontWeight: 700 }}>
                                                     {value === "" || value === null || value === undefined ? "-" : String(value)}
                                                 </Typography>
                                             </Box>
                                         ))}
+                                        </Box>
                                     </>
                                 ) : selectedRiskCard.key === "other" ? (
                                     <>
+                                        <Box sx={riskDetailGridSx}>
                                         {getOtherRiskFieldsForDisplay(selectedRiskCard.data).map(({ label, value }) => (
                                             <Box
                                                 key={`${selectedRiskCard.key}-${label}`}
                                                 sx={{
-                                                    display: "grid",
-                                                    gridTemplateColumns: "220px 1fr",
-                                                    gap: 1,
-                                                    alignItems: "start",
-                                                    borderBottom: "1px solid #efefef",
-                                                    pb: 1,
+                                                    ...riskDetailItemSx,
                                                 }}
                                             >
                                                 <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
                                                     {label}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f", fontWeight: 700 }}>
                                                     {value === "" || value === null || value === undefined ? "-" : String(value)}
                                                 </Typography>
                                             </Box>
                                         ))}
+                                        </Box>
                                     </>
                                 ) : (
                                     <>
+                                        <Box sx={riskDetailGridSx}>
                                         {Object.entries(selectedRiskCard.data).map(([key, value]) => (
                                             <Box
                                                 key={`${selectedRiskCard.key}-${key}`}
                                                 sx={{
-                                                    display: "grid",
-                                                    gridTemplateColumns: "220px 1fr",
-                                                    gap: 1,
-                                                    alignItems: "start",
-                                                    borderBottom: "1px solid #efefef",
-                                                    pb: 1,
+                                                    ...riskDetailItemSx,
                                                 }}
                                             >
                                                 <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
                                                     {toTitle(key)}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f" }}>
+                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f", fontWeight: 700 }}>
                                                     {value === "" || value === null || value === undefined ? "-" : String(value)}
                                                 </Typography>
                                             </Box>
                                         ))}
+                                        </Box>
                                     </>
                                 )}
                             </Box>
