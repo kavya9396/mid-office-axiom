@@ -80,8 +80,8 @@ const roleMapper = {
   "REJECT_TASK": "Reject Pool",
   "READY_FOR_ISSUANCE_TASK": "Ready For Issuance Pool",
 
-  "GUW_FORMAL_TASK": "GUW Formal Pool",
-  "DVT_FORMAL_TASK": "DVT Formal Pool",
+  "GUW_FORMAL_TASK": "GUW_FORMAL_TASK",
+  "DVT_FORMAL_TASK": "DVT_FORMAL_TASK",
 }
 
 const RightPanel = ({

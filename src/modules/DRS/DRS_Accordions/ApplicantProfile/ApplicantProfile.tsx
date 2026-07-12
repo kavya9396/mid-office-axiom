@@ -717,7 +717,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     );
 
     const normalizedRoleType = roleType.trim().toUpperCase().replace(/\s+/g, " ");
-    const isFormalRole = normalizedRoleType === "GUW FORMAL POOL" || normalizedRoleType === "DVT FORMAL POOL";
+    const isFormalRole = normalizedRoleType === "GUW_FORMAL_TASK" || normalizedRoleType === "DVT_FORMAL_TASK";
 
     const allowedIdProofValues = useMemo(
         () => new Set(idProofOptions.map((option) => option.value)),

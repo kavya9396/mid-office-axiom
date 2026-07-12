@@ -39,8 +39,8 @@ const QuickLinks = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const visibleButtons = [
         'CPT Pool',
-        'GUW Formal Pool',
-        'DVT Formal Pool'
+        'GUW_FORMAL_TASK',
+        'DVT_FORMAL_TASK'
     ];
 
     const isPoolRole = visibleButtons.includes(roleType);

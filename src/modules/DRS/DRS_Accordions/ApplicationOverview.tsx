@@ -7,8 +7,6 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import type { RiderRow } from "../../../types/drs.types";
 import { toDisplayValue } from "../../../utils/helpers";
-import { useAppContext } from "../../../hooks/useAppContext";
-import { normalizeBusinessType } from "../../../routes/routes";
 
 const riderColumns: Column<RiderRow>[] = [
   { key: "name", header: "Name", width: "30%" },
@@ -59,35 +57,8 @@ type ApplicationDetailKey =
   | "tfsa"
   | "policyType";
 
-const normalizeRoleType = (value: string | null | undefined) =>
-  String(value ?? "")
-    .trim()
-    .toUpperCase()
-    .replace(/\s+/g, "_");
-
-type RoleTypeDisplayKey = "DEFAULT" | "CVT_POOL" | "DVT_POOL" | "FORMAL_POOL";
-
-const roleTypeToDisplayKeyMap: Record<string, RoleTypeDisplayKey> = {
-  CVT_POOL: "CVT_POOL",
-  DVT_POOL: "DVT_POOL",
-  DVT_FORMAL_POOL: "FORMAL_POOL",
-  GUW_POOL: "DVT_POOL",
-  GUW_FORMAL_POOL: "FORMAL_POOL",
-};
-
-const getRoleTypeDisplayKey = (value: string | null | undefined) => {
-  const normalized = normalizeRoleType(value);
-  if (roleTypeToDisplayKeyMap[normalized]) {
-    return roleTypeToDisplayKeyMap[normalized];
-  }
-  if (normalized.includes("CVT")) return "CVT_POOL";
-  if (normalized.includes("DVT") || normalized.includes("GUW")) return "DVT_POOL";
-  return "DEFAULT";
-};
-
 const ApplicationOverview = () => {
   const { data } = useSelector((state: RootState) => state.drs);
-  const { businessType } = useAppContext();
   const dataRecord = (data as unknown as Record<string, unknown> | null) ?? {};
 
   const applicationOverview = dataRecord?.applicationOverview as
@@ -116,12 +87,12 @@ const ApplicationOverview = () => {
     ? (applicationOverview.riderDetails as Array<Record<string, unknown>>)
     : ((data?.riderDetails as unknown as Array<Record<string, unknown>> | undefined) ?? []);
 
-  const normalizedBusinessType =
-    normalizeBusinessType(businessType) ??
-    normalizeBusinessType(localStorage.getItem("businessType"));
-  const isGroupBusiness = normalizedBusinessType === "group";
-  const isRetailBusiness = normalizedBusinessType === "retail";
-  const roleType = localStorage.getItem("roleType");
+  const businessType = String(localStorage.getItem("businessType") ?? "")
+    .trim()
+    .toLowerCase();
+  const isGroupBusiness = businessType === "group";
+  const isRetailBusiness = businessType === "retail";
+  const roleType = localStorage.getItem("roleType") ?? "";
 
   const applicationDetailsByKey: Record<ApplicationDetailKey, ApplicationDetailItem> = {
     policyNumber: {
@@ -248,9 +219,21 @@ const ApplicationOverview = () => {
     },
   };
 
-  const roleTypeWiseDisplayKeys: Record<RoleTypeDisplayKey, ApplicationDetailKey[]> = {
-    // Update these arrays as per business requirement.
-    DEFAULT: [
+  const formalPoolDisplayKeys: ApplicationDetailKey[] = [
+    "policyNumber",
+    "appliedSumAssured",
+    "channel",
+    "subChannel",
+    "agentCode",
+    "agentName",
+    "premium",
+    "coverRequested",
+    "coverProvided",
+    "freeCover",
+    "coverAboveFCL",
+  ];
+
+  const defaultDisplayKeys: ApplicationDetailKey[] = [
       "productName",
       "sumAssured",
       "appliedSA",
@@ -265,8 +248,9 @@ const ApplicationOverview = () => {
       "paymentMode",
       ...(isRetailBusiness ? (["productCode", "faceValue", "trsa", "tfsa"] as ApplicationDetailKey[]) : []),
       ...(isGroupBusiness ? (["policyType"] as ApplicationDetailKey[]) : []),
-    ],
-    CVT_POOL: [
+    ];
+
+  const cvtPoolDisplayKeys: ApplicationDetailKey[] = [
       "productName",
       "appliedSA",
       "channel",
@@ -277,8 +261,9 @@ const ApplicationOverview = () => {
       "paymentMode",
       ...(isRetailBusiness ? (["productCode", "faceValue"] as ApplicationDetailKey[]) : []),
       ...(isGroupBusiness ? (["policyType"] as ApplicationDetailKey[]) : []),
-    ],
-    DVT_POOL: [
+    ];
+
+  const dvtPoolDisplayKeys: ApplicationDetailKey[] = [
       "productName",
       "sumAssured",
       "appliedSA",
@@ -293,25 +278,22 @@ const ApplicationOverview = () => {
       "paymentMode",
       ...(isRetailBusiness ? (["productCode", "faceValue", "trsa", "tfsa"] as ApplicationDetailKey[]) : []),
       ...(isGroupBusiness ? (["policyType"] as ApplicationDetailKey[]) : []),
-    ],
-    FORMAL_POOL: [
-      "policyNumber",
-      "appliedSumAssured",
-      "channel",
-      "subChannel",
-      "agentCode",
-      "agentName",
-      "premium",
-      "coverRequested",
-      "coverProvided",
-      "freeCover",
-      "coverAboveFCL",
-    ],
-  };
+    ];
 
-  const selectedDisplayKey = getRoleTypeDisplayKey(roleType);
-  const selectedApplicationDetailKeys =
-    roleTypeWiseDisplayKeys[selectedDisplayKey] ?? roleTypeWiseDisplayKeys.DEFAULT;
+  let selectedApplicationDetailKeys: ApplicationDetailKey[] = defaultDisplayKeys;
+
+  if (isGroupBusiness && (roleType === "DVT_FORMAL_TASK" || roleType === "GUW_FORMAL_TASK")) {
+    selectedApplicationDetailKeys = formalPoolDisplayKeys;
+  } else if (roleType === "CVT_POOL" || roleType === "CVT Pool") {
+    selectedApplicationDetailKeys = cvtPoolDisplayKeys;
+  } else if (
+    roleType === "DVT_POOL" ||
+    roleType === "DVT Pool" ||
+    roleType === "GUW_POOL" ||
+    roleType === "GUW Pool"
+  ) {
+    selectedApplicationDetailKeys = dvtPoolDisplayKeys;
+  }
 
   const applicationDetails = selectedApplicationDetailKeys
     .map((key) => applicationDetailsByKey[key])

@@ -243,7 +243,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   GROUP_MMT_POOL:[
     "greivance"
   ], 
-  GROUP_GUW_FORMAL_POOL: [
+  GUW_FORMAL_TASK: [
     "breDecision",
     "applicationOverview",
     "summary",
@@ -252,7 +252,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "decisionHistory",
     "quickLinks"
   ],
-  GROUP_DVT_FORMAL_POOL: [
+  DVT_FORMAL_TASK: [
     "breDecision",
     "applicationOverview",
     "summary",

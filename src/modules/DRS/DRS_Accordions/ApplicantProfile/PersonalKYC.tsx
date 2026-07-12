@@ -211,7 +211,7 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         { label: "Criminal Proceedings", key: "criminalProceedings" },
     ]));
 const roleType = localStorage.getItem("roleType") ?? "";
-const isVisibleDetails = roleType != 'GUW Formal Pool' && roleType != 'DVT Formal Pool' 
+const isVisibleDetails = roleType != 'GUW_FORMAL_TASK' && roleType != 'DVT_FORMAL_TASK' 
     return (
         <SectionCard>
             <GridSection columns={6} items={personalDetails} />

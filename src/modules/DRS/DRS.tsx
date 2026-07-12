@@ -46,8 +46,8 @@ const mapper = {
     "TMT Pool":"RETAIL_TMT_POOL",
     "Grievance Pool":"RETAIL_GRIEVANCE_POOL",
     "Reject Pool":"RETAIL_REJECT_POOL",
-    "GUW Formal Pool":"GROUP_GUW_FORMAL_POOL",
-    "DVT Formal Pool": "GROUP_DVT_FORMAL_POOL",
+    "GUW_FORMAL_TASK":"GUW_FORMAL_TASK",
+    "DVT_FORMAL_TASK": "DVT_FORMAL_TASK",
 }
 
 const DRS = () => {
@@ -57,7 +57,7 @@ const DRS = () => {
     const drsData = useSelector((state: RootState) => state.drs.data);
 
     const layout = mapper[roleType as keyof typeof mapper];
-    const layoutAccordions = useMemo(() => (layout ? DRS_LAYOUTS[layout] : []), [layout]);
+    const layoutAccordions = useMemo(() => (layout ? (DRS_LAYOUTS[layout] ?? []) : []), [layout]);
     const sections = useMemo(() => layoutAccordions.map((accordion) => String(accordion)), [layoutAccordions]);
     const visibleAccordions = useMemo(
         () => getPoolWiseAvailableAccordions(layout, drsData),

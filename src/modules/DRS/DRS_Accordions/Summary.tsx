@@ -262,8 +262,8 @@ const Summary = () => {
     const [applicantTab, setApplicantTab] = useState<ApplicantTab>("proposer");
     const roleType = localStorage.getItem("roleType") ?? "";
     const isDvtRole = roleType === "DVT Pool";
-    const isFormalRole = roleType === "DVT Formal Pool" || roleType === "GUW Formal Pool";
-    const canShowRiskAnalytics = roleType !== "DVT Pool" && roleType !== "CVT Pool" && roleType !== "DVT Formal Pool" && roleType !== "GUW Formal Pool";
+    const isFormalRole = roleType === "DVT_FORMAL_TASK" || roleType === "GUW_FORMAL_TASK";
+    const canShowRiskAnalytics = roleType !== "DVT Pool" && roleType !== "CVT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW Formal Pool";
     const inferredDvtLifeOption: DvtLifeOption = availableMemberTypes.includes("lifeassured2") ? "joint" : "main";
     const [selectedDvtLifeOption, setSelectedDvtLifeOption] = useState<DvtLifeOption | null>(null);
     const dvtLifeOption = selectedDvtLifeOption ?? inferredDvtLifeOption;
@@ -291,7 +291,7 @@ const Summary = () => {
         localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);
     }, [activeApplicantTab]);
 
-    const canOpenMedicalFinancialViews = roleType !== "CPT Pool" && roleType !== "DVT Formal Pool" && roleType !== "GUW Formal Pool";
+    const canOpenMedicalFinancialViews = roleType !== "CPT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
 
     const activeSummaryEntry = summaryWithTabs.find((item) => item.memberType === activeApplicantTab)?.customer;
     const activeRiskAnalytics = useMemo(() => {
