@@ -1,8 +1,10 @@
-import { Box, Container, Divider, Typography } from "@mui/material";
+import { Box, Checkbox, Container, Divider, FormControlLabel, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
 import Badge from "../../../components/ui/Badge/Badge";
+import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -10,9 +12,14 @@ import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { BriefcaseIcon, PhoneIcon, SmsIcon, WalletIcon } from "../../../icons/Icons";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
+import { apiRequest } from "../../../services/api";
+import { url } from "../../../services/apiConfig";
+import type { RootState } from "../../../store/store";
 import type { ApplicantTab, MedicalResponse, MedicalSection, MedicalSummaryMember, MedicalTestRow } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
 import BreDecision from "../DRS_Accordions/BreDecision";
+import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
+import { buildFormalMemberProfile, getFormalHeaderData, isFormalTaskRole } from "../formalProfileHelpers";
 import { merFieldConfig } from "./merFieldConfig";
 import type { MedicalFieldConfig } from "./medicalFieldConfig";
 import { otherMedicalViewFieldConfig } from "./otherMedicalViewFieldConfig";
@@ -20,6 +27,7 @@ import { specialMedicalViewFieldConfig } from "./specialMedicalViewFieldConfig";
 import medicalMockData from "../../../../mock/drs/medical.mock.json";
 
 const getStoredApplicantTab = () => (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
+const getRoleType = () => localStorage.getItem("roleType") ?? "";
 
 type MedicalSectionTab = "mer" | "specialMedical" | "otherMedicals";
 type DRSViewTab = "medical" | "financial";
@@ -41,6 +49,11 @@ type MedicalMenuItem = {
   category: MedicalSectionTab;
   section: MedicalSection;
   fallbackFields: MedicalFieldConfig[];
+};
+
+type SubmitResponse = {
+  success?: boolean;
+  message?: string;
 };
 
 const normalizeKey = (value: string) => value.toLowerCase().replace(/[^a-z0-9]/g, "");
@@ -356,6 +369,7 @@ const ViewMedicals = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
+  const drsData = useSelector((state: RootState) => state.drs.data);
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
     getStoredApplicantTab();
@@ -363,12 +377,21 @@ const ViewMedicals = () => {
   const medicalData = medicalMockData as MedicalResponse;
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
   const [activeSectionId, setActiveSectionId] = useState<string>("");
+  const [isEditable, setIsEditable] = useState(false);
+  const [doNotPayForTpa, setDoNotPayForTpa] = useState(false);
+  const [medicalFieldValues, setMedicalFieldValues] = useState<Record<string, string>>({});
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? medicalData.applicationId ?? "";
   const isApplicationIdMissing = !safeApplicationId;
+  const roleType = getRoleType();
+  const isFormalRole = isFormalTaskRole(roleType);
+  const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
 
   const availableMemberTypes = useMemo(
     () => medicalData?.summary?.map((item) => item.memberType) ?? [],
@@ -401,7 +424,9 @@ const ViewMedicals = () => {
     return medicalData?.summary?.[0];
   }, [currentApplicantTab, medicalData, visibleTabs]);
 
-  const applicantData = getApplicantHeaderData(selectedApplicantSummary);
+  const applicantData = isFormalRole
+    ? getFormalHeaderData(formalMemberProfile)
+    : getApplicantHeaderData(selectedApplicantSummary);
 
   const applicantInfoItems = useMemo(
     () => [
@@ -579,6 +604,49 @@ const ViewMedicals = () => {
     });
   };
 
+  const getMedicalFieldValue = (key: string, fallback: string) => medicalFieldValues[key] ?? fallback;
+
+  const handleMedicalFieldChange = (key: string, value: string) => {
+    setMedicalFieldValues((currentValues) => ({
+      ...currentValues,
+      [key]: value,
+    }));
+  };
+
+  const handleDisagree = () => {
+    setSubmitMessage(null);
+    setSubmitError(null);
+    setIsEditable(true);
+  };
+
+  const handleAgree = async () => {
+    try {
+      setSubmitLoading(true);
+      setSubmitMessage(null);
+      setSubmitError(null);
+
+      const response = await apiRequest<SubmitResponse, unknown>({
+        url: url("medicalSubmit"),
+        method: "POST",
+        body: {
+          applicationId: safeApplicationId,
+          roleType: getRoleType(),
+          applicantTab: currentApplicantTab,
+          agreed: true,
+          doNotPayForTpa,
+          fields: medicalFieldValues,
+        },
+      });
+
+      setSubmitMessage(response.message ?? "Medical details submitted successfully.");
+      setIsEditable(false);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to submit medical details.");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
   return (
     <Container disableGutters sx={{ pb: 4 }}>
       <BackButton
@@ -605,19 +673,26 @@ const ViewMedicals = () => {
         breDecisionOverride={medicalData?.breDecision ?? null}
       />
 
-      <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
-        <CustomTabs
-          tabs={visibleTabs}
-          value={currentApplicantTab}
-          onChange={(value: ApplicantTab) => {
-            setActiveApplicantTab(value);
-            localStorage.setItem("drsSelectedApplicantTab", value);
-          }}
-        />
-      </Box>
+      {!isFormalRole && (
+        <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
+          <CustomTabs
+            tabs={visibleTabs}
+            value={currentApplicantTab}
+            onChange={(value: ApplicantTab) => {
+              setActiveApplicantTab(value);
+              localStorage.setItem("drsSelectedApplicantTab", value);
+            }}
+          />
+        </Box>
+      )}
 
-      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1 }}>
-        <CustomAccordion title="Applicant Profile" defaultExpanded={false} detailPadding={0}>
+      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1 ,mt:2}}>
+        <CustomAccordion title={isFormalRole ? "Member Profile" : "Applicant Profile"} defaultExpanded={false} detailPadding={0}>
+          {isFormalRole ? (
+            <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+              <FormalMemberProfile profile={formalMemberProfile} />
+            </Box>
+          ) : (
           <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
             <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
               <Box
@@ -681,6 +756,7 @@ const ViewMedicals = () => {
               </Box>
             </Box>
           </Box>
+          )}
         </CustomAccordion>
       </Box>
 
@@ -811,7 +887,7 @@ const ViewMedicals = () => {
                   <Box sx={{ px: { xs: 1, md: 1.5 }, py: 1.25 }}>
                     {item.section.rows.length === 0 ? (
                       item.fallbackFields.length > 0 ? (
-                        item.id !== resolvedActiveSectionId ? (
+                        item.id !== resolvedActiveSectionId && !isEditable ? (
                           <Typography sx={{ color: "#667085", fontSize: 13 }}>
                             Select this section to load details.
                           </Typography>
@@ -831,9 +907,11 @@ const ViewMedicals = () => {
                             const required = isMandatoryConfigField(field);
                             const label = `${field.field}${required ? " *" : ""}`;
                             const fieldValue = getFallbackFieldValue(field, item.section.rows, safeApplicationId, applicantData);
+                            const fieldKey = `${item.id}-field-${field.id}`;
+                            const editableValue = getMedicalFieldValue(fieldKey, fieldValue);
                             const baseOptions = parseConfigDropdownOptions(field);
-                            const options = isDropdown && fieldValue && !baseOptions.some((option) => option.value === fieldValue)
-                              ? [...baseOptions, { label: fieldValue, value: fieldValue }]
+                            const options = isDropdown && editableValue && !baseOptions.some((option) => option.value === editableValue)
+                              ? [...baseOptions, { label: editableValue, value: editableValue }]
                               : baseOptions;
 
                             return (
@@ -841,11 +919,11 @@ const ViewMedicals = () => {
                                 {isDropdown ? (
                                   <CustomSelect
                                     label={label}
-                                    value={fieldValue}
-                                    onChange={() => undefined}
+                                    value={editableValue}
+                                    onChange={(value) => handleMedicalFieldChange(fieldKey, value)}
                                     options={options}
                                     placeholder="Select"
-                                    disabled
+                                    disabled={!isEditable}
                                   />
                                 ) : (
                                   <Box>
@@ -854,8 +932,9 @@ const ViewMedicals = () => {
                                       fullWidth
                                       size="small"
                                       type={isDate ? "date" : (isNumeric ? "number" : "text")}
-                                      value={fieldValue}
-                                      disabled
+                                      value={editableValue}
+                                      onChange={(event) => handleMedicalFieldChange(fieldKey, event.target.value)}
+                                      disabled={!isEditable}
                                       placeholder={isDate ? "YYYY-MM-DD" : ""}
                                     />
                                   </Box>
@@ -893,8 +972,18 @@ const ViewMedicals = () => {
                         </Box>
 
                         {item.section.rows.map((row, index) => {
-                          const statusColor = getStatusColors(row.status);
-                          const statusDotColor = getStatusDotColor(row.status);
+                          const parameterKey = `${item.id}-row-${index}-parameter`;
+                          const valueKey = `${item.id}-row-${index}-value`;
+                          const unitKey = `${item.id}-row-${index}-unit`;
+                          const normalRangeKey = `${item.id}-row-${index}-normalRange`;
+                          const statusKey = `${item.id}-row-${index}-status`;
+                          const parameterValue = getMedicalFieldValue(parameterKey, row.parameter);
+                          const valueValue = getMedicalFieldValue(valueKey, row.value);
+                          const unitValue = getMedicalFieldValue(unitKey, row.unit);
+                          const normalRangeValue = getMedicalFieldValue(normalRangeKey, row.normalRange);
+                          const statusValue = getMedicalFieldValue(statusKey, row.status);
+                          const statusColor = getStatusColors(statusValue);
+                          const statusDotColor = getStatusDotColor(statusValue);
 
                           return (
                             <Box
@@ -910,40 +999,66 @@ const ViewMedicals = () => {
                                 backgroundColor: index % 2 === 0 ? "#FCFCFD" : "#FFFFFF",
                               }}
                             >
-                              <Typography sx={{ fontSize: 13, color: "#344054" }}>{row.parameter || "-"}</Typography>
-                              <Typography sx={{ fontSize: 13, color: "#101828", fontWeight: 600 }}>{row.value || "-"}</Typography>
-                              <Typography sx={{ fontSize: 13, color: "#344054" }}>{row.unit || "-"}</Typography>
-                              <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 13, color: "#344054" }}>
-                                {row.normalRange || "-"}
-                              </Typography>
+                              {isEditable ? (
+                                <CustomTextField fullWidth size="small" value={parameterValue} onChange={(event) => handleMedicalFieldChange(parameterKey, event.target.value)} />
+                              ) : (
+                                <Typography sx={{ fontSize: 13, color: "#344054" }}>{parameterValue || "-"}</Typography>
+                              )}
+                              {isEditable ? (
+                                <CustomTextField fullWidth size="small" value={valueValue} onChange={(event) => handleMedicalFieldChange(valueKey, event.target.value)} />
+                              ) : (
+                                <Typography sx={{ fontSize: 13, color: "#101828", fontWeight: 600 }}>{valueValue || "-"}</Typography>
+                              )}
+                              {isEditable ? (
+                                <CustomTextField fullWidth size="small" value={unitValue} onChange={(event) => handleMedicalFieldChange(unitKey, event.target.value)} />
+                              ) : (
+                                <Typography sx={{ fontSize: 13, color: "#344054" }}>{unitValue || "-"}</Typography>
+                              )}
+                              {isEditable ? (
+                                <CustomTextField
+                                  fullWidth
+                                  size="small"
+                                  value={normalRangeValue}
+                                  onChange={(event) => handleMedicalFieldChange(normalRangeKey, event.target.value)}
+                                  sx={{ display: { xs: "none", md: "block" } }}
+                                />
+                              ) : (
+                                <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 13, color: "#344054" }}>
+                                  {normalRangeValue || "-"}
+                                </Typography>
+                              )}
                               <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                                  <Box
-                                    component="span"
-                                    sx={{
-                                      width: 8,
-                                      height: 8,
-                                      borderRadius: "50%",
-                                      bgcolor: statusDotColor,
-                                      flexShrink: 0,
-                                    }}
-                                  />
-                                  <Box
-                                    component="span"
-                                    sx={{
-                                      px: 1,
-                                      py: 0.25,
-                                      borderRadius: "999px",
-                                      fontSize: 12,
-                                      fontWeight: 600,
-                                      color: statusColor.text,
-                                      backgroundColor: statusColor.bg,
-                                      textTransform: "capitalize",
-                                    }}
-                                  >
-                                    {row.status || "-"}
+                                {isEditable ? (
+                                  <CustomTextField fullWidth size="small" value={statusValue} onChange={(event) => handleMedicalFieldChange(statusKey, event.target.value)} />
+                                ) : (
+                                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                                    <Box
+                                      component="span"
+                                      sx={{
+                                        width: 8,
+                                        height: 8,
+                                        borderRadius: "50%",
+                                        bgcolor: statusDotColor,
+                                        flexShrink: 0,
+                                      }}
+                                    />
+                                    <Box
+                                      component="span"
+                                      sx={{
+                                        px: 1,
+                                        py: 0.25,
+                                        borderRadius: "999px",
+                                        fontSize: 12,
+                                        fontWeight: 600,
+                                        color: statusColor.text,
+                                        backgroundColor: statusColor.bg,
+                                        textTransform: "capitalize",
+                                      }}
+                                    >
+                                      {statusValue || "-"}
+                                    </Box>
                                   </Box>
-                                </Box>
+                                )}
                               </Box>
                             </Box>
                           );
@@ -956,6 +1071,34 @@ const ViewMedicals = () => {
             )}
           </Box>
         </Box>
+
+      <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
+        <FormControlLabel
+          control={(
+            <Checkbox
+              checked={doNotPayForTpa}
+              onChange={(event) => setDoNotPayForTpa(event.target.checked)}
+              sx={{ color: "#9A2529", "&.Mui-checked": { color: "#9A2529" } }}
+            />
+          )}
+          label="Do not pay for TPA"
+        />
+
+        {(submitMessage || submitError) && (
+          <Typography sx={{ mt: 1, color: submitError ? "#DE2C3B" : "#067647", fontSize: 13 }}>
+            {submitError ?? submitMessage}
+          </Typography>
+        )}
+
+        <Box sx={{ mt: 1.5, display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
+          <CustomButton variant="outlined" onClick={handleDisagree} disabled={submitLoading} sx={{ minWidth: 120 }}>
+            Disagree
+          </CustomButton>
+          <CustomButton onClick={handleAgree} disabled={submitLoading || !safeApplicationId} sx={{ minWidth: 120 }}>
+            Agree
+          </CustomButton>
+        </Box>
+      </Box>
     </Container>
   );
 };

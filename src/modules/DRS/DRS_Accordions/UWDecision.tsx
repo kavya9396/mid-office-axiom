@@ -15,6 +15,7 @@ import CustomTextField from "../../../components/ui/TextField/TextField";
 import { decisionCodeThunk } from "../../../store/thunks/decisionCodeThunk";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
+import { openRequirementManagement } from "./requirementManagementEvents";
 
 const referralRoleMap: Record<string, string> = {
     "Refer to HoD": "HoD",
@@ -253,7 +254,7 @@ const UWDecision = () => {
     return (
         <Container disableGutters>
             <Box sx={{ mt: 2 }}>
-                <CustomAccordion title="UW Decision" defaultExpanded>
+                <CustomAccordion title="UW Decision" defaultExpanded={false}>
                     <Box
                         sx={{
                             mt: 1,
@@ -325,6 +326,10 @@ const UWDecision = () => {
                                                 decision: value,
                                             })
                                         );
+                                    }
+
+                                    if (value === "Raise Requirement") {
+                                        openRequirementManagement(true);
                                     }
                                 }}
                                 options={caseUWDecisionOptions}

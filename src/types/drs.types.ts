@@ -260,6 +260,7 @@ export interface DRSQuestion {
 export interface DRSExternalAPIs {
   breOutput: DRSBreOutput;
   initialBreOutput?: DRSBreOutput;
+  breRetriggerStatus?: "success" | "failure";
   medicalBreOutput: Record<string, unknown>;
   financialBreOutput: Record<string, unknown>;
   risk: Record<string, unknown>;

@@ -8,6 +8,7 @@ import CustomTable from "../../../../components/ui/Table/Table";
 import type { ApplicantTab, SummaryResponse } from "../../../../types/drs.types";
 import type { RootState } from "../../../../store/store";
 import { formatDOB, toDisplayValue } from "../../../../utils/helpers";
+import CustomButton from "../../../../components/ui/Button/Button";
 
 type RiskSectionKey = "medical" | "financial" | "other";
 
@@ -65,6 +66,7 @@ const evalRisk = (section: RiskSectionKey, payload: Record<string, unknown>): bo
 
 type FormalMemberProfileProps = {
   profile?: Partial<SummaryResponse>;
+  onEdit?: () => void;
 };
 
 type MemberSectionTab = "personalKyc" | "contactAddress" | "nominee";
@@ -135,7 +137,7 @@ const calculateAgeFromDob = (dobValue: string | undefined): number | "-" => {
   return age >= 0 ? age : "-";
 };
 
-const FormalMemberProfile = ({ profile }: FormalMemberProfileProps) => {
+const FormalMemberProfile = ({ profile, onEdit }: FormalMemberProfileProps) => {
   const [activeSectionTab, setActiveSectionTab] = useState<MemberSectionTab>("personalKyc");
   const { data } = useSelector((state: RootState) => state.drs);
   const roleType = localStorage.getItem("roleType") ?? "";
@@ -376,6 +378,17 @@ const FormalMemberProfile = ({ profile }: FormalMemberProfileProps) => {
 
   return (
     <Box sx={{ mt: 1 }}>
+      {roleType === "DVT_FORMAL_TASK" && onEdit && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%", mt: 0.5 }}>
+          <CustomButton
+            variant="outlined"
+            onClick={onEdit}
+            sx={{ borderRadius: "50px", paddingX: "24px" }}
+          >
+            Edit
+          </CustomButton>
+        </Box>
+      )}
       <Box sx={{ display: "flex", justifyContent: "center", my: 1, width: "100%" }}>
         <CustomTabs
           tabs={memberSectionTabs}

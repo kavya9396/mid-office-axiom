@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
 import type { AdditionalRequirementRow } from "../../../types/drs.types";
 import { decisionCodeThunk } from "../../../store/thunks/decisionCodeThunk";
+import { openRequirementManagement } from "./requirementManagementEvents";
 
 const DVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
@@ -72,7 +73,7 @@ const DVTDecision = () => {
     return (
         <Container disableGutters>
             <Box sx={{ mt: 2 }}>
-                <CustomAccordion title="DVT Decision" defaultExpanded>
+                <CustomAccordion title="DVT Decision" defaultExpanded={false}>
                     <Box
                         sx={{
                             backgroundColor: "#F6F6F6",
@@ -125,6 +126,10 @@ const DVTDecision = () => {
                                 value={decision}
                                 onChange={(value) => {
                                     setDecision(value);
+
+                                    if (value === "Raise Requirements") {
+                                        openRequirementManagement(true);
+                                    }
                                 }}
                                 options={dvtDecisionOptions}
                             />

@@ -63,6 +63,41 @@ const mapBreOutputToDecision = (
   retrigger: null,
 });
 
+const toText = (value: unknown) => String(value ?? "").trim();
+
+const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
+  const record = value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+  if (!record) {
+    return null;
+  }
+
+  const decision = toText(record.decision);
+  const initialDecision = toText(record.initialDecision);
+  const remarks = toText(record.remarks);
+  const discrepancy = toText(record.discrepancy);
+
+  if (!decision && !initialDecision && !remarks && !discrepancy) {
+    return null;
+  }
+
+  return {
+    systemDecision: decision,
+    decisionTypes: {
+      breDecision: decision,
+      breAction: toText(record.action),
+      breRequirement: discrepancy,
+      initialDecision,
+    },
+    requirements: [],
+    systemDecisionDateTime: toText(record.timestamp),
+    errorResp: "",
+    breRemarks: remarks,
+  };
+};
+
 const normalizeValue = (value: string | null | undefined) =>
   String(value ?? "").trim().toLowerCase();
 
@@ -79,6 +114,10 @@ const BreDecision = ({
 
   const initialBreOutput = data?.externalAPIs?.initialBreOutput;
   const breOutput = data?.externalAPIs?.breOutput;
+  const isBreRetriggerFailure = data?.externalAPIs?.breRetriggerStatus === "failure";
+  const legacyBreOutput = mapLegacyBreDecisionToOutput(
+    (data as unknown as Record<string, unknown> | null)?.breDecision,
+  );
 
   const drsBreDecision: BreDecisionResponse | null = breOutput
     ? mapBreOutputToDecision(breOutput, initialBreOutput)
@@ -114,20 +153,24 @@ const BreDecision = ({
 
   const currentBreDecision = retriggeredBreDecision ?? breDecision;
   const resolvedRemarks =
-    currentBreDecision?.remarks ?? drsBreDecision?.remarks ?? "-";
+    isBreRetriggerFailure ? "-" : currentBreDecision?.remarks ?? drsBreDecision?.remarks ?? "-";
   const resolvedDiscrepancy =
-    currentBreDecision?.discrepancy ?? drsBreDecision?.discrepancy ?? "-";
+    isBreRetriggerFailure ? "-" : currentBreDecision?.discrepancy ?? drsBreDecision?.discrepancy ?? "-";
+  const initialBreSource = initialBreOutput ?? legacyBreOutput;
+  const finalBreSource = isBreRetriggerFailure ? undefined : breOutput;
 
   const hasValue = (value: unknown) =>
     value !== null && value !== undefined && String(value).trim() !== "";
 
-  const hasBreResponse =
+  const hasFinalBreResponse =
+    !isBreRetriggerFailure &&
     !!currentBreDecision &&
     Object.values(currentBreDecision).some((value) => hasValue(value));
 
-  const resolvedBreStatus = hasBreResponse ? "Success" : "Failure";
+  const resolvedFinalBreStatus = hasFinalBreResponse ? "Success" : "Failure";
+  const resolvedInitialBreStatus = initialBreSource ? "Success" : "Failure";
 
-  const isBreSuccess = resolvedBreStatus.toLowerCase() === "success";
+  const isBreSuccess = resolvedFinalBreStatus.toLowerCase() === "success";
 
   // This count should come from backend.
   const isRetriggerDisabled =
@@ -187,43 +230,39 @@ const BreDecision = ({
     }));
 
   const initialBreDecisionValue =
-    initialBreOutput?.decisionTypes?.breDecision ?? "-";
+    initialBreSource?.decisionTypes?.breDecision ?? "-";
   const finalBreDecisionValue =
-    breOutput?.decisionTypes?.breDecision ?? currentBreDecision?.decision ?? "-";
-  const initialBreRemarksValue = initialBreOutput?.breRemarks ?? "-";
-  const finalBreRemarksValue = breOutput?.breRemarks ?? resolvedRemarks;
+    finalBreSource?.decisionTypes?.breDecision ?? currentBreDecision?.decision ?? "-";
+  const initialBreRemarksValue = initialBreSource?.breRemarks ?? "-";
+  const finalBreRemarksValue = finalBreSource?.breRemarks ?? resolvedRemarks;
   const initialBreDiscrepancyValue =
-    initialBreOutput?.decisionTypes?.breRequirement?.replace(/ /g, "#") ??
+    initialBreSource?.decisionTypes?.breRequirement?.replace(/ /g, "#") ??
     "-";
   const finalBreDiscrepancyValue =
-    breOutput?.decisionTypes?.breRequirement?.replace(/ /g, "#") ??
+    finalBreSource?.decisionTypes?.breRequirement?.replace(/ /g, "#") ??
     resolvedDiscrepancy;
   const initialBreTimestampValue =
-    initialBreOutput?.systemDecisionDateTime ?? "-";
+    initialBreSource?.systemDecisionDateTime ?? "-";
   const finalBreTimestampValue =
-    breOutput?.systemDecisionDateTime ?? currentBreDecision?.timestamp ?? "-";
+    finalBreSource?.systemDecisionDateTime ?? currentBreDecision?.timestamp ?? "-";
 
   const normalizedInitialBreDecision = normalizeValue(
-    initialBreOutput?.decisionTypes?.breDecision ?? "",
+    initialBreSource?.decisionTypes?.breDecision ?? "",
   );
   const normalizedFinalBreDecision = normalizeValue(
-    breOutput?.decisionTypes?.breDecision ?? "",
+    finalBreSource?.decisionTypes?.breDecision ?? currentBreDecision?.decision ?? "",
   );
   const normalizedInitialRemarks = normalizeValue(
-    initialBreOutput?.breRemarks ?? "",
+    initialBreSource?.breRemarks ?? "",
   );
   const normalizedFinalRemarks = normalizeValue(finalBreRemarksValue);
   const normalizedInitialDiscrepancy = normalizeDiscrepancy(
-    initialBreOutput?.decisionTypes?.breRequirement ?? "",
+    initialBreSource?.decisionTypes?.breRequirement ?? "",
   );
   const normalizedFinalDiscrepancy = normalizeDiscrepancy(
-    breOutput?.decisionTypes?.breRequirement ?? "",
+    finalBreSource?.decisionTypes?.breRequirement ?? resolvedDiscrepancy,
   );
 
-  const hasInitialBreComparableValues =
-    normalizedInitialBreDecision !== "" ||
-    normalizedInitialRemarks !== "" ||
-    normalizedInitialDiscrepancy !== "";
   const hasDecisionChanged =
     normalizedInitialBreDecision !== "" &&
     normalizedFinalBreDecision !== "" &&
@@ -238,13 +277,12 @@ const BreDecision = ({
     normalizedInitialDiscrepancy !== normalizedFinalDiscrepancy;
 
   const shouldShowInitialBreSection =
-    hasInitialBreComparableValues &&
-    (hasDecisionChanged || hasRemarksChanged || hasDiscrepancyChanged);
+    Boolean(initialBreSource) && (isBreRetriggerFailure || hasDecisionChanged);
 
   const coreBreDetails = [
     {
       label: "BRE Status",
-      value: resolvedBreStatus,
+      value: resolvedInitialBreStatus,
     },
     {
       label: "BRE Decision",
@@ -270,7 +308,7 @@ const BreDecision = ({
   const coreFinalBreDetails = [
     {
       label: "BRE Status",
-      value: resolvedBreStatus,
+      value: resolvedFinalBreStatus,
     },
     {
       label: "BRE Decision",
@@ -330,20 +368,28 @@ const BreDecision = ({
         return;
       }
       const updatedInitialBreOutput = response.data?.initialBreOutput;
+      const preservedInitialBreOutput = initialBreOutput ?? breOutput;
 
       dispatch(
         setBreExternalApiOutputs({
           breOutput: updatedBreOutput,
-          initialBreOutput: updatedInitialBreOutput,
+          initialBreOutput: preservedInitialBreOutput ?? updatedInitialBreOutput,
+          breRetriggerStatus: "success",
         }),
       );
       setRetriggeredBreDecision(
         mapBreOutputToDecision(
           updatedBreOutput,
-          updatedInitialBreOutput ?? initialBreOutput,
+          preservedInitialBreOutput ?? updatedInitialBreOutput,
         ),
       );
     } catch (error) {
+      dispatch(
+        setBreExternalApiOutputs({
+          initialBreOutput: initialBreOutput ?? breOutput ?? legacyBreOutput ?? undefined,
+          breRetriggerStatus: "failure",
+        }),
+      );
       setBreRetriggerError(
         error instanceof Error ? error.message : "Failed to retrigger BRE.",
       );

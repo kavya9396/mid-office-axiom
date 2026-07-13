@@ -1,19 +1,27 @@
 import { Box, Container, Divider, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
 import Badge from "../../../components/ui/Badge/Badge";
+import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
+import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { BriefcaseIcon, PhoneIcon, SmsIcon, WalletIcon } from "../../../icons/Icons";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
+import { apiRequest } from "../../../services/api";
+import { url } from "../../../services/apiConfig";
 import { useAppDispatch } from "../../../store/hooks";
+import type { RootState } from "../../../store/store";
 import { financialThunk } from "../../../store/thunks/financialThunk";
 import type { ApplicantTab, DRSRequest, FinancialResponse, MedicalSummaryMember } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
 import { formatCurrencyINR } from "../../../utils/helpers";
 import BreDecision from "../DRS_Accordions/BreDecision";
+import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
+import { buildFormalMemberProfile, getFormalHeaderData, isFormalTaskRole } from "../formalProfileHelpers";
 import {
   financialSections,
   type FinancialField,
@@ -129,9 +137,28 @@ const FORM_16_BOTTOM_LABELS = [
   "Company Name",
 ];
 
+type SubmitResponse = {
+  success?: boolean;
+  message?: string;
+};
+
+const renderFieldValue = (
+  value: string,
+  isEditable: boolean,
+  onChange: (value: string) => void,
+) => {
+  if (isEditable) {
+    return <CustomTextField fullWidth size="small" value={value} onChange={(event) => onChange(event.target.value)} />;
+  }
+
+  return <Box sx={readOnlyBoxSx}>{value}</Box>;
+};
+
 const renderForm16Section = (
   section: FinancialSectionConfig,
-  values: Record<FinancialSectionKey, Record<string, string>>
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
 ) => {
   const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
     accumulator[item.label.toLowerCase()] = item;
@@ -162,6 +189,10 @@ const renderForm16Section = (
         {FORM_16_TABLE_LABELS.map((label, index) => {
           const item = byLabel[label.toLowerCase()];
           const value = getFieldValue(values, section.key, item?.label ?? label, item?.value);
+          const year2Label = `${label} Year 2`;
+          const year3Label = `${label} Year 3`;
+          const year2Value = getFieldValue(values, section.key, year2Label, "NA");
+          const year3Value = getFieldValue(values, section.key, year3Label, "NA");
 
           return (
             <Box
@@ -174,9 +205,15 @@ const renderForm16Section = (
               }}
             >
               <Typography sx={{ px: 1.5, py: 0.8, fontSize: 13, color: "#475467" }}>{label}</Typography>
-              <Typography sx={{ px: 1.5, py: 0.8, fontSize: 13, color: "#344054" }}>{value}</Typography>
-              <Typography sx={{ px: 1.5, py: 0.8, fontSize: 13, color: "#667085" }}>NA</Typography>
-              <Typography sx={{ px: 1.5, py: 0.8, fontSize: 13, color: "#667085" }}>NA</Typography>
+              <Box sx={{ px: 1.5, py: 0.8 }}>
+                {renderFieldValue(value, isEditable, (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue))}
+              </Box>
+              <Box sx={{ px: 1.5, py: 0.8 }}>
+                {renderFieldValue(year2Value, isEditable, (nextValue) => onFieldValueChange(section.key, year2Label, nextValue))}
+              </Box>
+              <Box sx={{ px: 1.5, py: 0.8 }}>
+                {renderFieldValue(year3Value, isEditable, (nextValue) => onFieldValueChange(section.key, year3Label, nextValue))}
+              </Box>
             </Box>
           );
         })}
@@ -191,7 +228,7 @@ const renderForm16Section = (
             return (
               <Box key={label}>
                 <Typography sx={{ fontSize: 12, color: "#475467", mb: 0.5 }}>{label}</Typography>
-                <Box sx={readOnlyBoxSx}>{value}</Box>
+                {renderFieldValue(value, isEditable, (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue))}
               </Box>
             );
           })}
@@ -203,7 +240,9 @@ const renderForm16Section = (
 
 const renderStandardSection = (
   section: FinancialSectionConfig,
-  values: Record<FinancialSectionKey, Record<string, string>>
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
 ) => {
   return (
     <Box
@@ -222,7 +261,7 @@ const renderStandardSection = (
         return (
           <Box key={`${section.key}-${item.label}`}>
             <Typography sx={{ fontSize: 12, color: "#475467", mb: 0.5 }}>{item.label}</Typography>
-            <Box sx={readOnlyBoxSx}>{value}</Box>
+            {renderFieldValue(value, isEditable, (nextValue) => onFieldValueChange(section.key, item.label, nextValue))}
           </Box>
         );
       })}
@@ -235,6 +274,7 @@ const ViewFinancial = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
+  const drsData = useSelector((state: RootState) => state.drs.data);
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
@@ -244,10 +284,14 @@ const ViewFinancial = () => {
   const [error, setError] = useState<string | null>(null);
   const [financialData, setFinancialData] = useState<FinancialResponse | null>(null);
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
-  const [financialFieldValues] = useState<Record<FinancialSectionKey, Record<string, string>>>(
+  const [financialFieldValues, setFinancialFieldValues] = useState<Record<FinancialSectionKey, Record<string, string>>>(
     buildInitialFieldValues
   );
   const [activeSectionId, setActiveSectionId] = useState<string>(financialSections[0]?.key ?? "");
+  const [isEditable, setIsEditable] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -255,6 +299,8 @@ const ViewFinancial = () => {
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
   const isCptPool = roleType === "CPT Pool";
+  const isFormalRole = isFormalTaskRole(roleType);
+  const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
 
   useEffect(() => {
     if (isCptPool) {
@@ -313,7 +359,9 @@ const ViewFinancial = () => {
     return financialData?.summary?.[0];
   }, [currentApplicantTab, financialData, visibleTabs]);
 
-  const applicantData = getApplicantHeaderData(selectedApplicantSummary);
+  const applicantData = isFormalRole
+    ? getFormalHeaderData(formalMemberProfile)
+    : getApplicantHeaderData(selectedApplicantSummary);
 
   const applicantInfoItems = useMemo(
     () => [
@@ -438,7 +486,50 @@ const ViewFinancial = () => {
     });
   };
 
-  if (!isCptPool) {
+  const handleFieldValueChange = (sectionKey: FinancialSectionKey, label: string, value: string) => {
+    setFinancialFieldValues((currentValues) => ({
+      ...currentValues,
+      [sectionKey]: {
+        ...currentValues[sectionKey],
+        [label]: value,
+      },
+    }));
+  };
+
+  const handleDisagree = () => {
+    setSubmitMessage(null);
+    setSubmitError(null);
+    setIsEditable(true);
+  };
+
+  const handleAgree = async () => {
+    try {
+      setSubmitLoading(true);
+      setSubmitMessage(null);
+      setSubmitError(null);
+
+      const response = await apiRequest<SubmitResponse, unknown>({
+        url: url("financialSubmit"),
+        method: "POST",
+        body: {
+          applicationId: safeApplicationId,
+          roleType,
+          applicantTab: currentApplicantTab,
+          agreed: true,
+          fields: financialFieldValues,
+        },
+      });
+
+      setSubmitMessage(response.message ?? "Financial details submitted successfully.");
+      setIsEditable(false);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to submit financial details.");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  if (isCptPool) {
     return (
       <Container disableGutters>
         <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
@@ -466,19 +557,26 @@ const ViewFinancial = () => {
         breDecisionOverride={financialData?.breDecision ?? null}
       />
 
-      <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
-        <CustomTabs
-          tabs={visibleTabs}
-          value={currentApplicantTab}
-          onChange={(value: ApplicantTab) => {
-            setActiveApplicantTab(value);
-            localStorage.setItem("drsSelectedApplicantTab", value);
-          }}
-        />
-      </Box>
+      {!isFormalRole && (
+        <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
+          <CustomTabs
+            tabs={visibleTabs}
+            value={currentApplicantTab}
+            onChange={(value: ApplicantTab) => {
+              setActiveApplicantTab(value);
+              localStorage.setItem("drsSelectedApplicantTab", value);
+            }}
+          />
+        </Box>
+      )}
 
-      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1 }}>
-        <CustomAccordion title="Applicant Profile" defaultExpanded={false} detailPadding={0}>
+      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1,mt:2 }}>
+        <CustomAccordion title={isFormalRole ? "Member Profile" : "Applicant Profile"} defaultExpanded={false} detailPadding={0}>
+          {isFormalRole ? (
+            <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+              <FormalMemberProfile profile={formalMemberProfile} />
+            </Box>
+          ) : (
           <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
             <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
               <Box
@@ -556,6 +654,7 @@ const ViewFinancial = () => {
               </Box>
             </Box>
           </Box>
+          )}
         </CustomAccordion>
       </Box>
 
@@ -661,11 +760,28 @@ const ViewFinancial = () => {
 
               <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
                 {section.key === "form16"
-                  ? renderForm16Section(section, financialFieldValues)
-                  : renderStandardSection(section, financialFieldValues)}
+                  ? renderForm16Section(section, financialFieldValues, isEditable, handleFieldValueChange)
+                  : renderStandardSection(section, financialFieldValues, isEditable, handleFieldValueChange)}
               </Box>
             </Box>
           ))}
+        </Box>
+      </Box>
+
+      <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
+        {(submitMessage || submitError) && (
+          <Typography sx={{ mb: 1.5, color: submitError ? "#DE2C3B" : "#067647", fontSize: 13 }}>
+            {submitError ?? submitMessage}
+          </Typography>
+        )}
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
+          <CustomButton variant="outlined" onClick={handleDisagree} disabled={submitLoading} sx={{ minWidth: 120 }}>
+            Disagree
+          </CustomButton>
+          <CustomButton onClick={handleAgree} disabled={submitLoading || !safeApplicationId} sx={{ minWidth: 120 }}>
+            Agree
+          </CustomButton>
         </Box>
       </Box>
     </Container>

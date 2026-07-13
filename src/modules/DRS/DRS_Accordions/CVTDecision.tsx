@@ -14,6 +14,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import type { ApplicantTab } from "../../../types/drs.types";
+import { openRequirementManagement } from "./requirementManagementEvents";
 
 const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
 const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
@@ -406,6 +407,10 @@ const CVTDecision = () => {
                                     setSubmitMessage(null);
                                     setSubmitStatus(null);
                                     setTabValidationDismissed(false);
+
+                                    if (value === "Raise Requirements") {
+                                        openRequirementManagement(true);
+                                    }
                                 }}
                                 options={cvtDecisionOptions}
                             />

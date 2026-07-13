@@ -4,13 +4,15 @@
   "previousPolicies": [
     {
       "policyNumber": "OB25175112",
-      "companyName": "LIC",
+      "companyName": "ICICI Medical Insurance",
       "productType": "Term",
       "dateOfIssuance": "01/02/2025",
       "uwDecision": "Accept",
       "sumAssured": 5000000,
       "medicalsReceivedDate": "02/01/2025",
-      "validity": "3 Months"
+      "validityMedical": "3 Months",
+      "financialsReceivedDate": "02/01/2025",
+      "validityFinancial": "3 Months"
     },
     {
       "policyNumber": "OB25175113",
@@ -19,98 +21,10 @@
       "dateOfIssuance": "03/02/2025",
       "uwDecision": "Accept",
       "sumAssured": 4000000,
-      "medicalsReceivedDate": "03/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175114",
-      "productName": "ICICI Medical Insurance",
-      "productType": "Term",
-      "dateOfIssuance": "06/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 4500000,
-      "medicalsReceivedDate": "05/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175115",
-      "productName": "ICICI Health Secure",
-      "productType": "ULIP",
-      "dateOfIssuance": "08/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 5500000,
-      "medicalsReceivedDate": "07/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175116",
-      "productName": "ICICI Medical Insurance",
-      "productType": "Term",
-      "dateOfIssuance": "11/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 3500000,
-      "medicalsReceivedDate": "08/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175117",
-      "productName": "ICICI Smart Protect",
-      "productType": "Term",
-      "dateOfIssuance": "14/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 6000000,
-      "medicalsReceivedDate": "11/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175118",
-      "productName": "ICICI Medical Insurance",
-      "productType": "Term",
-      "dateOfIssuance": "18/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 5000000,
-      "medicalsReceivedDate": "12/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175119",
-      "productName": "ICICI Medical Insurance",
-      "productType": "Term",
-      "dateOfIssuance": "20/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 5000000,
-      "medicalsReceivedDate": "13/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175120",
-      "productName": "ICICI Elite Protect",
-      "productType": "Term",
-      "dateOfIssuance": "22/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 6500000,
-      "medicalsReceivedDate": "16/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175121",
-      "productName": "ICICI Health Shield",
-      "productType": "ULIP",
-      "dateOfIssuance": "25/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 3000000,
-      "medicalsReceivedDate": "18/01/2025",
-      "validity": "3 Months"
-    },
-    {
-      "policyNumber": "OB25175122",
-      "productName": "ICICI Medical Insurance",
-      "productType": "Term",
-      "dateOfIssuance": "27/02/2025",
-      "uwDecision": "Accept",
-      "sumAssured": 7000000,
-      "medicalsReceivedDate": "21/01/2025",
-      "validity": "3 Months"
+       "medicalsReceivedDate": "02/01/2025",
+      "validityMedical": "3 Months",
+      "financialsReceivedDate": "02/01/2025",
+      "validityFinancial": "3 Months"
     },
     {
       "policyNumber": "OB25175123",
@@ -119,8 +33,46 @@
       "dateOfIssuance": "01/03/2025",
       "uwDecision": "Accept",
       "sumAssured": 5000000,
-      "medicalsReceivedDate": "23/01/2025",
-      "validity": "3 Months"
+      "medicalsReceivedDate": "02/01/2025",
+      "validityMedical": "3 Months",
+      "financialsReceivedDate": "02/01/2025",
+      "validityFinancial": "3 Months"
     }
-  ]
+  ],
+  "iibPolicies":[{
+      "policyNumber": "OB25175112",
+      "companyName": "LIC",
+      "productType": "Term",
+      "dateOfIssuance": "01/02/2025",
+      "uwDecision": "Accept",
+      "sumAssured": 5000000,
+      "medicalsReceivedDate": "02/01/2025",
+      "validityMedical": "3 Months",
+      "financialsReceivedDate": "02/01/2025",
+      "validityFinancial": "3 Months"
+    },
+    {
+      "policyNumber": "OB25175113",
+      "productName": "LIC",
+      "productType": "Term",
+      "dateOfIssuance": "03/02/2025",
+      "uwDecision": "Accept",
+      "sumAssured": 4000000,
+       "medicalsReceivedDate": "02/01/2025",
+      "validityMedical": "3 Months",
+      "financialsReceivedDate": "02/01/2025",
+      "validityFinancial": "3 Months"
+    },
+    {
+      "policyNumber": "OB25175123",
+      "productName": "LIC",
+      "productType": "Term",
+      "dateOfIssuance": "01/03/2025",
+      "uwDecision": "Accept",
+      "sumAssured": 5000000,
+      "medicalsReceivedDate": "02/01/2025",
+      "validityMedical": "3 Months",
+      "financialsReceivedDate": "02/01/2025",
+      "validityFinancial": "3 Months"
+    }]
 }

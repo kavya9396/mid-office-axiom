@@ -30,7 +30,7 @@
       "spousePolicyNo": "NA"
     },
     "breDecision": {
-      "decision": "RM",
+      "decision": "ST",
       "initialDecision": "ST",
       "remarks": "# TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML#",
       "discrepancy": "-",

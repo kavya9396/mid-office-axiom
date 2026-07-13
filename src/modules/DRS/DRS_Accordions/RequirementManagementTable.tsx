@@ -1,5 +1,5 @@
 import { Alert, Box, Chip, Paper, Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -21,6 +21,10 @@ import {
     type RequirementMasterRow,
 } from "./requirementMasterData";
 import { CloseIcon, EditIcon } from "../../../icons/Icons";
+import {
+    OPEN_REQUIREMENT_MANAGEMENT_EVENT,
+    type OpenRequirementManagementEvent,
+} from "./requirementManagementEvents";
 
 type BreRequirementRow = {
     requirementType?: string;
@@ -169,6 +173,30 @@ const getCurrentActor = () =>
         "System",
     ).trim() || "System";
 
+const getCurrentUserId = () =>
+    String(localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+
+const normalizeIdentifier = (value: string) => value.trim().toLowerCase();
+
+const getCurrentUserIdentifiers = () =>
+    uniqueNonEmpty([
+        String(localStorage.getItem("userId") ?? ""),
+        String(localStorage.getItem("username") ?? ""),
+        String(localStorage.getItem("userName") ?? ""),
+    ]).map(normalizeIdentifier);
+
+const isRaisedByCurrentUser = (row: Pick<AdditionalRequirementRow, "raisedBy" | "userId">) => {
+    const currentUserIdentifiers = getCurrentUserIdentifiers();
+
+    if (currentUserIdentifiers.length === 0) {
+        return false;
+    }
+
+    return [row.userId, row.raisedBy]
+        .map((value) => normalizeIdentifier(String(value ?? "")))
+        .some((value) => value && currentUserIdentifiers.includes(value));
+};
+
 const clearErrors = (errors: RowErrors | undefined, keys: Array<keyof RowErrors>): RowErrors => {
     const next = { ...(errors ?? {}) };
     keys.forEach((key) => {
@@ -296,6 +324,7 @@ const createDraftRow = (): EditableRequirementRow => ({
     status: "Pending",
     raisedDate: getTodayDate(),
     raisedBy: getCurrentActor(),
+    userId: getCurrentUserId(),
     __rowId: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     __isDraft: true,
     __isLocal: true,
@@ -419,6 +448,29 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     );
     const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
+
+    useEffect(() => {
+        const handleOpenRequirementManagement = (event: Event) => {
+            const { openAddRequirement } = (event as OpenRequirementManagementEvent).detail ?? {};
+
+            if (!openAddRequirement || !isVisible) {
+                return;
+            }
+
+            setLocalRows((previousRows) => {
+                const currentUserHasRaisedRequirement = [...normalizedExistingRows, ...previousRows].some(
+                    isRaisedByCurrentUser,
+                );
+                return currentUserHasRaisedRequirement ? previousRows : [...previousRows, createDraftRow()];
+            });
+        };
+
+        window.addEventListener(OPEN_REQUIREMENT_MANAGEMENT_EVENT, handleOpenRequirementManagement);
+
+        return () => {
+            window.removeEventListener(OPEN_REQUIREMENT_MANAGEMENT_EVENT, handleOpenRequirementManagement);
+        };
+    }, [isVisible, normalizedExistingRows]);
 
     const getCategoryOptions = (row: EditableRequirementRow) => {
         const options = uniqueNonEmpty(

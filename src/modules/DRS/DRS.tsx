@@ -13,6 +13,42 @@ import { setBreExternalApiOutputs } from "../../store/slices/drsSlice";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import GroupPolicyDetails from "./DRS_Accordions/GroupPolicyDetails";
+import type { DRSBreOutput } from "../../types/drs.types";
+
+const toText = (value: unknown) => String(value ?? "").trim();
+
+const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
+    const record = value && typeof value === "object" && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : null;
+
+    if (!record) {
+        return null;
+    }
+
+    const decision = toText(record.decision);
+    const initialDecision = toText(record.initialDecision);
+    const remarks = toText(record.remarks);
+    const discrepancy = toText(record.discrepancy);
+
+    if (!decision && !initialDecision && !remarks && !discrepancy) {
+        return null;
+    }
+
+    return {
+        systemDecision: decision,
+        decisionTypes: {
+            breDecision: decision,
+            breAction: toText(record.action),
+            breRequirement: discrepancy,
+            initialDecision,
+        },
+        requirements: [],
+        systemDecisionDateTime: toText(record.timestamp),
+        errorResp: "",
+        breRemarks: remarks,
+    };
+};
 
 const mapper = {
     "CMO Pool": "RETAIL_CMO_POOL",
@@ -97,6 +133,10 @@ const DRS = () => {
                     ).unwrap();
 
                     const updatedBrePayload = breResponse.data;
+                    const dataRecord = drsResponse.data as unknown as Record<string, unknown>;
+                    const originalBreOutput =
+                        drsResponse.data.externalAPIs?.breOutput ??
+                        mapLegacyBreDecisionToOutput(dataRecord.breDecision);
                     if (
                         updatedBrePayload?.breOutput ||
                         updatedBrePayload?.initialBreOutput ||
@@ -106,13 +146,26 @@ const DRS = () => {
                         dispatch(
                             setBreExternalApiOutputs({
                                 breOutput: updatedBrePayload?.breOutput,
-                                initialBreOutput: updatedBrePayload?.initialBreOutput,
+                                initialBreOutput: originalBreOutput ?? updatedBrePayload?.initialBreOutput,
+                                breRetriggerStatus: "success",
                                 medicalBreOutput: updatedBrePayload?.medicalBreOutput,
                                 financialBreOutput: updatedBrePayload?.financialBreOutput,
                             }),
                         );
                     }
                 } catch (error) {
+                    const dataRecord = drsResponse.data as unknown as Record<string, unknown>;
+                    const originalBreOutput =
+                        drsResponse.data.externalAPIs?.initialBreOutput ??
+                        drsResponse.data.externalAPIs?.breOutput ??
+                        mapLegacyBreDecisionToOutput(dataRecord.breDecision);
+
+                    dispatch(
+                        setBreExternalApiOutputs({
+                            initialBreOutput: originalBreOutput ?? undefined,
+                            breRetriggerStatus: "failure",
+                        }),
+                    );
                     console.error("Failed to retrigger BRE from DRS response:", error);
                 }
             } catch (error) {

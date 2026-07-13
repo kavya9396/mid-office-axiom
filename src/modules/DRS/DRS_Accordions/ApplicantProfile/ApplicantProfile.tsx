@@ -617,10 +617,28 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     const addressProofOptions = masters.addressProof ?? emptyOptions;
     const stateOptions = masters.state ?? emptyOptions;
     const countryOptions = masters.country ?? emptyOptions;
+    const normalizedRoleType = roleType.trim().toUpperCase().replace(/\s+/g, " ");
+    const isFormalRole = normalizedRoleType === "GUW_FORMAL_TASK" || normalizedRoleType === "DVT_FORMAL_TASK";
+    const isDvtFormalTask = normalizedRoleType === "DVT_FORMAL_TASK";
+    const isCVTTask = normalizedRoleType === "CVT Pool";
 
     const personalKycFields = useMemo(
         () => getPersonalKycFields({ titleOptions, genderOptions, nationalityOptions, idProofOptions }),
         [titleOptions, genderOptions, nationalityOptions, idProofOptions]
+    );
+
+    const editablePersonalKycFields = useMemo(
+        () => isDvtFormalTask
+            ? personalKycFields.filter((field) => (
+                field.name === "title" ||
+                field.name === "firstName" ||
+                field.name === "middleName" ||
+                field.name === "lastName" ||
+                field.name === "dob" ||
+                field.name === "gender"
+            ))
+            : personalKycFields,
+        [isDvtFormalTask, personalKycFields]
     );
 
     const communicationIsIndia = formData.communicationCountry.trim().toLowerCase() === "india";
@@ -644,8 +662,10 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     );
 
     const allDialogFields = useMemo(
-        () => [...personalKycFields, ...addressFields],
-        [personalKycFields, addressFields]
+        () => isDvtFormalTask
+            ? editablePersonalKycFields
+            : [...editablePersonalKycFields, ...addressFields],
+        [isDvtFormalTask, editablePersonalKycFields, addressFields]
     );
 
     const hasFundDetails = useMemo(() => {
@@ -716,9 +736,6 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         [visibleApplicantInfoTabs, applicantInfoTab]
     );
 
-    const normalizedRoleType = roleType.trim().toUpperCase().replace(/\s+/g, " ");
-    const isFormalRole = normalizedRoleType === "GUW_FORMAL_TASK" || normalizedRoleType === "DVT_FORMAL_TASK";
-
     const allowedIdProofValues = useMemo(
         () => new Set(idProofOptions.map((option) => option.value)),
         [idProofOptions]
@@ -752,16 +769,21 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             }
         });
 
+        if (titleOptions.length > 0 && formData.title && !allowedTitleValues.has(formData.title)) {
+            errors.title = "Select a valid Title";
+        }
+
+        if (isDvtFormalTask) {
+            setFieldErrors(errors);
+            return Object.keys(errors).length === 0;
+        }
+
         if (formData.panNumber.trim() && !panRegex.test(formData.panNumber.trim().toUpperCase())) {
             errors.panNumber = "Enter a valid PAN number (e.g. ABCDE1234F)";
         }
 
         if (idProofOptions.length > 0 && formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
             errors.identityProofType = "Select a valid Identity Proof";
-        }
-
-        if (titleOptions.length > 0 && formData.title && !allowedTitleValues.has(formData.title)) {
-            errors.title = "Select a valid Title";
         }
 
         if (addressProofOptions.length > 0 && formData.addressProof && !allowedAddressProofValues.has(formData.addressProof)) {
@@ -1042,15 +1064,119 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         paymentPayoutDetails: <PaymentPayoutDetails profile={displayProfile} />,
     };
 
-    if (isFormalRole) {
-        return <FormalMemberProfile profile={displayProfile} />;
-    }
+    const editDialog = (
+        <CustomDialog
+            open={openEditDialog}
+            onClose={() => {
+                if (!submitLoading) {
+                    setOpenEditDialog(false)
+                }
+            }}
+            maxWidth="md"
+            title={
+                <Typography
+                    sx={{
+                        ...modalTitleStyles
+                    }}
+                >
+                    Edit APPLICANT PROFILE
+                </Typography>
+            }
+            actionsSx={{ justifyContent: "center", pb: 2 }}
+            actions={
+                <CustomButton
+                    onClick={handleSave}
+                    disabled={submitLoading}
+                    sx={{ borderRadius: "50px", paddingX: "40px" }}
+                >
+                    {submitLoading ? "Saving..." : "Save"}
+                </CustomButton>
+            }
+        >
+            <Box sx={{ backgroundColor: "#F6F6F6", borderRadius: 2, p: 2, ...columnFlex, gap: 2 }}>
+                {submitError && (
+                    <Typography sx={{ color: "#DE2C3B", fontSize: "14px", fontWeight: 500 }}>
+                        {submitError}
+                    </Typography>
+                )}
+                <Box>
+                    <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>
+                        {isDvtFormalTask ? "Personal Details" : "Personal & KYC"}
+                    </Typography>
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, 1fr)",
+                            gap: 2,
+                            mt: 1,
+                        }}
+                    >
+                        {editablePersonalKycFields.map((field) => (
+                            <Box key={field.name}>
+                                {renderField(field)}
+                            </Box>
+                        ))}
+                    </Box>
+                </Box>
+                
+                        <Divider />
+                        <Box>
+                            <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>Contact & Address</Typography>
+                            <Box
+                                sx={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(3, 1fr)",
+                                    gap: 2,
+                                    mt: 1,
+                                }}
+                            >
+                                {addressFields.map((field) => (
+                                    <Box key={field.name}>
+                                        {renderField(field)}
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Box>
+                        {isCVTTask && (
+                    <>
+                        <Divider />
+                        <Box>
+                            <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>Product</Typography>
+                            <Box
+                                sx={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(3, 1fr)",
+                                    gap: 2,
+                                    mt: 1,
+                                }}
+                            >
+                                {productFields.map((field) => (
+                                    <Box key={field.name}>
+                                        {renderField(field)}
+                                    </Box>
+                                ))}
+                            </Box>
+                        </Box>
+                    </>
+                )}
+            </Box>
+        </CustomDialog>
+    );
 
+    if (isFormalRole) {
+        return (
+            <>
+                <FormalMemberProfile profile={displayProfile} onEdit={handleOpenEdit} />
+                {editDialog}
+            </>
+        );
+    }
+console.log('roleType',roleType);
     return (
         <>
             <Box sx={{ mt: 1 }}>
                 {
-                    roleType === "CVT Pool" && (
+                    (roleType === "CVT Pool" || roleType == "DVT_FORMAL_TASK" || roleType == "DVT Pool") && (
                         <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%", mt: 0.5 }}>
                             <CustomButton
                                 variant="outlined"
@@ -1074,95 +1200,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
                 {tabComponents[activeApplicantInfoTab]}
             </Box>
 
-            <CustomDialog
-                open={openEditDialog}
-                onClose={() => {
-                    if (!submitLoading) {
-                        setOpenEditDialog(false)
-                    }
-                }}
-                maxWidth="md"
-                title={
-                    <Typography
-                        sx={{
-                            ...modalTitleStyles
-                        }}
-                    >
-                        Edit APPLICANT PROFILE
-                    </Typography>
-                }
-                actionsSx={{ justifyContent: "center", pb: 2 }}
-                actions={
-                    <CustomButton
-                        onClick={handleSave}
-                        disabled={submitLoading}
-                        sx={{ borderRadius: "50px", paddingX: "40px" }}
-                    >
-                        {submitLoading ? "Saving..." : "Save"}
-                    </CustomButton>
-                }
-            >
-                <Box sx={{ backgroundColor: "#F6F6F6", borderRadius: 2, p: 2, ...columnFlex, gap: 2 }}>
-                    {submitError && (
-                        <Typography sx={{ color: "#DE2C3B", fontSize: "14px", fontWeight: 500 }}>
-                            {submitError}
-                        </Typography>
-                    )}
-                    <Box>
-                        <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>Personal & KYC</Typography>
-                        <Box
-                            sx={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(3, 1fr)",
-                                gap: 2,
-                                mt: 1,
-                            }}
-                        >
-                            {personalKycFields.map((field) => (
-                                <Box key={field.name}>
-                                    {renderField(field)}
-                                </Box>
-                            ))}
-                        </Box>
-                    </Box>
-                    <Divider />
-                    <Box>
-                        <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>Contact & Address</Typography>
-                        <Box
-                            sx={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(3, 1fr)",
-                                gap: 2,
-                                mt: 1,
-                            }}
-                        >
-                            {addressFields.map((field) => (
-                                <Box key={field.name}>
-                                    {renderField(field)}
-                                </Box>
-                            ))}
-                        </Box>
-                    </Box>
-                    <Divider />
-                    <Box>
-                        <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>Product</Typography>
-                        <Box
-                            sx={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(3, 1fr)",
-                                gap: 2,
-                                mt: 1,
-                            }}
-                        >
-                            {productFields.map((field) => (
-                                <Box key={field.name}>
-                                    {renderField(field)}
-                                </Box>
-                            ))}
-                        </Box>
-                    </Box>
-                </Box>
-            </CustomDialog>
+            {editDialog}
         </>
     )
 }

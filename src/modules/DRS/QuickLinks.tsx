@@ -40,7 +40,6 @@ const QuickLinks = () => {
     const visibleButtons = [
         'CPT Pool',
         'GUW_FORMAL_TASK',
-        'DVT_FORMAL_TASK'
     ];
 
     const isPoolRole = visibleButtons.includes(roleType);
@@ -134,7 +133,7 @@ const QuickLinks = () => {
         (label: string, path: string) => {
             if (label === "Proposal Form & Documents") {
                 if (!path) return;
-                window.open(path, "_blank", "noopener,noreferrer");
+                window.open(path, "_blank");
                 return;
             }
 
@@ -146,7 +145,8 @@ const QuickLinks = () => {
 
             if (!path) return;
 
-            window.open(path, "_blank", "noopener,noreferrer");
+            const targetUrl = new URL(path, window.location.origin).toString();
+            window.open(targetUrl, "_blank");
         },
         []
     );

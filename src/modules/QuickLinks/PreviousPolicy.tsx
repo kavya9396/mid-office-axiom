@@ -85,27 +85,20 @@ const IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Product Type", keys: ["productType", "product_type"] },
   { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
   { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision"] },
-  { header: "Applied Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
+  { header: "Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
   { header: "Medicals Received date", keys: ["medicalsReceivedDate", "medicalReceivedDate", "medicals_received_date", "medicalsDate"] },
-  { header: "Validity", keys: ["validity", "validityPeriod"] },
+  { header: "Validity", keys: ["validityMedical", "validityPeriod"] },
   { header: "Financials Received date", keys: ["financialsReceivedDate", "financialReceivedDate", "financials_received_date", "financialDate"] },
-  { header: "TMSAR", keys: ["tmsar", "TMSAR"] },
-  { header: "TFSAR", keys: ["tfsar", "TFSAR"] },
+  { header: "Validity", keys: ["validityFinancial", "validityPeriod"] },
 ];
 
 const IIB_NON_IPRU_COLUMNS: ColumnSpec[] = [
-  { header: "IB Match", keys: ["ibMatch", "iibMatch", "ib_match"] },
-  { header: "QUESTDBNO", keys: ["questDbNo", "questdbno", "questDbNumber", "quest_db_no"] },
-  { header: "Quest Sum Assured", keys: ["questSumAssured", "quest_sum_assured"], formatter: formatCurrency },
-  { header: "Quest Policy Status", keys: ["questPolicyStatus", "quest_policy_status"] },
-  { header: "Quest Company Number", keys: ["questCompanyNumber", "quest_company_number"] },
-  { header: "Matching Parameter", keys: ["matchingParameter", "matching_parameter"] },
-  { header: "Quest DOP DOC", keys: ["questDopDoc", "quest_dop_doc"] },
-  { header: "Quest Date Of Death", keys: ["questDateOfDeath", "quest_date_of_death"] },
-  { header: "Quest Cause Of Death", keys: ["questCauseOfDeath", "quest_cause_of_death"] },
-  { header: "Quest Record Last Updated", keys: ["questRecordLastUpdated", "quest_record_last_updated"] },
-  { header: "Quest Entity Caution Status", keys: ["questEntityCautionStatus", "quest_entity_caution_status"] },
-  { header: "Intermediary Caution Status", keys: ["intermediaryCautionStatus", "intermediary_caution_status"] },
+ { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
+  { header: "Product name", keys: ["productName", "product", "product_name", "companyName"] },
+  { header: "Product Type", keys: ["productType", "product_type"] },
+  { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
+  { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision"] },
+  { header: "Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
 ];
 
 const NEGATIVE_MATCH_COLUMNS: ColumnSpec[] = [
@@ -275,7 +268,12 @@ const PreviousPolicy = () => {
         ? totalCount
         : Math.min((page + 1) * rowsPerPage, totalCount);
 
-  const renderPolicyTable = (columns: ColumnSpec[], rows: PreviousPolicyItem[], emptyState: string) => {
+  const renderPolicyTable = (
+    columns: ColumnSpec[],
+    rows: PreviousPolicyItem[],
+    emptyState: string,
+    fitToPage = false
+  ) => {
     const paginatedRows =
       rowsPerPage === -1
         ? rows
@@ -286,15 +284,27 @@ const PreviousPolicy = () => {
       sx={{
         border: "1px solid #D8D8D8",
         borderRadius: "8px",
-        overflowX: "auto",
+        overflowX: fitToPage ? "hidden" : "auto",
         overflowY: "hidden",
       }}
     >
-      <Table size="small" sx={{ minWidth: Math.max(1900, columns.length * 170) }}>
+      <Table
+        size="small"
+        sx={{
+          minWidth: fitToPage ? "100%" : Math.max(1900, columns.length * 170),
+          tableLayout: fitToPage ? "fixed" : "auto",
+        }}
+      >
         <TableHead>
           <TableRow>
             {columns.map((column) => (
-              <TableCell key={column.header} sx={tableHeaderCellSx}>
+              <TableCell
+                key={column.header}
+                sx={{
+                  ...tableHeaderCellSx,
+                  whiteSpace: fitToPage ? "normal" : tableHeaderCellSx.whiteSpace,
+                }}
+              >
                 {column.header}
               </TableCell>
             ))}
@@ -387,8 +397,8 @@ const PreviousPolicy = () => {
           <Typography sx={{ fontSize: "26px", fontWeight: 700, mt: 3, mb: 1.5, color: "#0E3762" }}>
             IIB/ Non IPRU
           </Typography>
-          {renderPolicyTable(IIB_NON_IPRU_COLUMNS, iibNonIpruRows, "No IIB/Non IPRU policy data found.")}
-
+          {renderPolicyTable(IIB_NON_IPRU_COLUMNS, iibNonIpruRows, "No IIB/Non IPRU policy data found.", true)}
+{roleType !== 'DVT_FORMAL_TASK' && (<>
           <Box sx={{ mt: 2 }}>
             {renderPolicyTable(NEGATIVE_MATCH_COLUMNS, negativeMatchRows, "No negative match data found.")}
           </Box>
@@ -397,6 +407,7 @@ const PreviousPolicy = () => {
         Application form details
           </Typography>
           {renderPolicyTable(APP_FORM_DETAILS_COLUMNS, appFormRows, "No application form policy details found.")}
+        </>)}
         </Box>
 
         <Box sx={{ borderTop: "1px solid #E0E0E0", px: 2, py: 1.5 }}>
