@@ -360,7 +360,7 @@ const Summary = () => {
         <Container disableGutters>
             <Box sx={{ mt: 1 }}>
                 <CustomAccordion
-                    title="Member Details"
+                    title={isFormalRole ? "Member Details":"Applicant Details"}
                     defaultExpanded={false}
                     expanded={isApplicantDetailsExpanded}
                     onChange={setIsApplicantDetailsExpanded}
