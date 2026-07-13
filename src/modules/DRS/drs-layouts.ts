@@ -211,7 +211,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   
   RETAIL_ECG_POOL: ["quickLinks"],
   RETAIL_TMT_POOL: ["quickLinks"],
-  RETAIL_GRIEVANCE_POOL: ["quickLinks"],
+  RETAIL_GRIEVANCE_POOL: ["greivance"],
   
 
   GROUP_DVT_POOL: [
@@ -241,7 +241,10 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks",
   ],
   GROUP_MMT_POOL:[
-    "greivance"
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "quickLinks"
   ], 
   GUW_FORMAL_TASK: [
     "breDecision",

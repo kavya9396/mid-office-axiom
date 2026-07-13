@@ -95,6 +95,8 @@ export interface tableData {
   policyNo?:string;
   memberName?:string;
   appliedCover?:string;
+  productOpted?:string;
+  medicalRaisedDate?:string;
 }
 export type PoolItemProps = {
   label: string;

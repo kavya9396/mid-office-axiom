@@ -438,7 +438,7 @@ const ViewFinancial = () => {
     });
   };
 
-  if (isCptPool) {
+  if (!isCptPool) {
     return (
       <Container disableGutters>
         <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />

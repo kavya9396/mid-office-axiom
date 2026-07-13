@@ -49,12 +49,11 @@ export const poolAllowedColumns: Record<string, string[]> = {
   ],
   MMT_TASK: [
     "applicationNo",
-    "clientName",
-    "clientType",
-    "planOpted",
-    "premium",
-    "assignedTpa",
-    "grievanceRaisedDate",
+    "nameOfProposer",
+    "nameOfLifeAssured",
+    "productOpted",
+    "medicalRaisedDate",
+    "planOpted"
   ],
   SR_UW_TASK: [
     ...baseColumns
@@ -141,5 +140,10 @@ export const poolAllowedColumns: Record<string, string[]> = {
   "1st UW Pool": [...baseColumns],
   GUW_TASK: [...baseColumnsGops],
   DVT_FORMAL_TASK:["policyNo","applicationNo","productCode","memberName","poolTAT","appliedCover"],
-  GUW_FORMAL_TASK:["policyNo","applicationNo","productCode","memberName","poolTAT","appliedCover"]
+  GUW_FORMAL_TASK:["policyNo","applicationNo","productCode","memberName","poolTAT","appliedCover"],
+  GRIEVANCE_TASK:[ "applicationNo",
+    "nameOfProposer",
+    "nameOfLifeAssured",
+    "grievanceRaisedDate",
+  ]
 };

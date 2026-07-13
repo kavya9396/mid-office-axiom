@@ -117,18 +117,18 @@ const RightPanel = ({
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sortKey, setSortKey] = useState<keyof tableData | "">("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
-  const [poolStatusFilter, setPoolStatusFilter] =
+  const [poolStatusFilter] =
     useState<PoolStatusFilter>("All");
   const [claimError, setClaimError] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
     {},
   );
 
-  const hasPoolStatus = rows.some((row) => {
-    const rowData = row as unknown as Record<string, unknown>;
-    const poolStatus = rowData.poolStatus;
-    return typeof poolStatus === "string" && poolStatus.trim().length > 0;
-  });
+  // const hasPoolStatus = rows.some((row) => {
+  //   const rowData = row as unknown as Record<string, unknown>;
+  //   const poolStatus = rowData.poolStatus;
+  //   return typeof poolStatus === "string" && poolStatus.trim().length > 0;
+  // });
 
   const handleApplicationClick = async (
     e: React.MouseEvent,
@@ -589,7 +589,7 @@ const RightPanel = ({
                 px: 2,
               }}
             >
-              {hasPoolStatus && (
+              {/* {hasPoolStatus && (
                 <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                   <CustomButton
                     variant={poolStatusFilter === "Active" ? "contained" : "outlined"}
@@ -626,7 +626,7 @@ const RightPanel = ({
                     Error Pool
                   </CustomButton>
                 </Box>
-              )}
+              )} */}
               {/* Search bar , Filter Icon , Settings Icon */}
               <Box
                 sx={{

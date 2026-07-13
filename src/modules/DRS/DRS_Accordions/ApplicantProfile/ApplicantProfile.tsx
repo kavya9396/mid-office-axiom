@@ -1050,7 +1050,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         <>
             <Box sx={{ mt: 1 }}>
                 {
-                    roleType === "DVT Pool" && (
+                    roleType === "CVT Pool" && (
                         <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%", mt: 0.5 }}>
                             <CustomButton
                                 variant="outlined"
