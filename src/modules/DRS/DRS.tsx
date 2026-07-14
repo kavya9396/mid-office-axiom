@@ -229,7 +229,7 @@ const DRS = () => {
                 return (
                     <Fragment key={accordionId}>
                         <AccordionComponent />
-                        {showGroupPolicyDetails && accordionId === "applicationOverview" && <GroupPolicyDetails />}
+                        {/* {showGroupPolicyDetails && accordionId === "applicationOverview" && <GroupPolicyDetails />} */}
                     </Fragment>
                 );
             })}

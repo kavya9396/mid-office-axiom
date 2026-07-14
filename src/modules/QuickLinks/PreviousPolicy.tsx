@@ -14,18 +14,16 @@ import {
   Typography,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import BackButton from "../../components/layout/BackButton";
 import { KeyLeftArrowIcon, KeyRightArrowIcon } from "../../icons/Icons";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getDRSPath } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
-import { previousPoliciesThunk } from "../../store/thunks/previousPoliciesThunk";
-import type {
-  DRSRequest,
-  PreviousPoliciesResponse,
-  PreviousPolicyItem,
-} from "../../types/drs.types";
+import { drsThunk } from "../../store/thunks/drsThunk";
+import type { PreviousPolicyItem } from "../../types/drs.types";
 import CustomButton from "../../components/ui/Button/Button";
+import type { RootState } from "../../store/store";
 
 const defaultRowsPerPage = 25;
 
@@ -42,7 +40,7 @@ type ColumnSpec = {
 };
 
 const getFirstSectionRows = (
-  response: PreviousPoliciesResponse | null,
+  response: Record<string, unknown> | null,
   keys: string[]
 ): PreviousPolicyItem[] => {
   if (!response) {
@@ -84,12 +82,12 @@ const IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Product name", keys: ["productName", "product", "product_name", "companyName"] },
   { header: "Product Type", keys: ["productType", "product_type"] },
   { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
-  { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision"] },
+  { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision", "decision"] },
   { header: "Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
   { header: "Medicals Received date", keys: ["medicalsReceivedDate", "medicalReceivedDate", "medicals_received_date", "medicalsDate"] },
-  { header: "Validity", keys: ["validityMedical", "validityPeriod"] },
+  { header: "Validity", keys: ["validityMedical", "medicalValidity", "validityPeriod"] },
   { header: "Financials Received date", keys: ["financialsReceivedDate", "financialReceivedDate", "financials_received_date", "financialDate"] },
-  { header: "Validity", keys: ["validityFinancial", "validityPeriod"] },
+  { header: "Validity", keys: ["validityFinancial", "financialValidity", "validityPeriod"] },
 ];
 
 const IIB_NON_IPRU_COLUMNS: ColumnSpec[] = [
@@ -97,7 +95,7 @@ const IIB_NON_IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Product name", keys: ["productName", "product", "product_name", "companyName"] },
   { header: "Product Type", keys: ["productType", "product_type"] },
   { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
-  { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision"] },
+  { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision", "decision"] },
   { header: "Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
 ];
 
@@ -130,18 +128,6 @@ const APP_FORM_DETAILS_COLUMNS: ColumnSpec[] = [
   { header: "Remarks", keys: ["remarks"] },
 ];
 
-const normalizePolicies = (response: PreviousPoliciesResponse): PreviousPolicyItem[] => {
-  if (Array.isArray(response.previousPolicies)) {
-    return response.previousPolicies;
-  }
-
-  if (Array.isArray(response.policies)) {
-    return response.policies;
-  }
-
-  return [];
-};
-
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -169,11 +155,11 @@ const PreviousPolicy = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { businessType, applicationNumber } = useAppContext();
+  const drsData = useSelector((state: RootState) => state.drs.data);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [apiResponse, setApiResponse] = useState<PreviousPoliciesResponse | null>(null);
-  const [policies, setPolicies] = useState<PreviousPolicyItem[]>([]);
+  const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
   const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
   const [page, setPage] = useState(0);
 
@@ -181,38 +167,50 @@ const PreviousPolicy = () => {
   const safeApplicationId = applicationNumber ?? "";
   const roleType = localStorage.getItem("roleType") ?? "";
   const isApplicationIdMissing = !safeApplicationId;
+  const reduxQuickLinks = useMemo(
+    () => toRecord((drsData as unknown as Record<string, unknown> | null)?.quickLinks),
+    [drsData],
+  );
+  const hasReduxPreviousPolicies = Array.isArray(reduxQuickLinks.previousPolicies);
+  const effectiveQuickLinksData = isApplicationIdMissing
+    ? null
+    : hasReduxPreviousPolicies
+      ? reduxQuickLinks
+      : quickLinksData;
 
   useEffect(() => {
-    if (isApplicationIdMissing) {
+    if (isApplicationIdMissing || hasReduxPreviousPolicies) {
       return;
     }
-
-    const payload: DRSRequest = {
-      applicationId: safeApplicationId,
-      roleType,
-    };
 
     const fetchPreviousPolicies = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await dispatch(previousPoliciesThunk(payload)).unwrap();
-        setApiResponse(response);
-        setPolicies(normalizePolicies(response));
+        const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "System").trim() || "System";
+        const response = await dispatch(
+          drsThunk({
+            applicationNo: safeApplicationId,
+            userId,
+            roleType,
+            sections: ["quickLinks"],
+          }),
+        ).unwrap();
+
+        setQuickLinksData(toRecord((response.data as unknown as Record<string, unknown>)?.quickLinks));
       } catch (fetchError) {
-        setError(fetchError instanceof Error ? fetchError.message : "Failed to fetch previous policies.");
-        setApiResponse(null);
-        setPolicies([]);
+        setError(fetchError instanceof Error ? fetchError.message : "Failed to fetch previous policies from DRS quick links.");
+        setQuickLinksData(null);
       } finally {
         setLoading(false);
       }
     };
 
     void fetchPreviousPolicies();
-  }, [dispatch, isApplicationIdMissing, roleType, safeApplicationId]);
+  }, [dispatch, hasReduxPreviousPolicies, isApplicationIdMissing, roleType, safeApplicationId]);
 
   const ipruRows = useMemo(() => {
-    const sectionRows = getFirstSectionRows(apiResponse, [
+    return getFirstSectionRows(effectiveQuickLinksData, [
       "ipru",
       "ipruPolicies",
       "ipruPreviousPolicies",
@@ -220,41 +218,40 @@ const PreviousPolicy = () => {
       "previousPolicies",
       "policies",
     ]);
-    return sectionRows.length > 0 ? sectionRows : policies;
-  }, [apiResponse, policies]);
+  }, [effectiveQuickLinksData]);
 
   const iibNonIpruRows = useMemo(
     () =>
-      getFirstSectionRows(apiResponse, [
+      getFirstSectionRows(effectiveQuickLinksData, [
         "iibNonIpru",
         "iibNonIpruPolicies",
         "iibSection",
         "iibPolicies",
         "nonIpruPolicies",
       ]),
-    [apiResponse]
+    [effectiveQuickLinksData]
   );
 
   const negativeMatchRows = useMemo(
     () =>
-      getFirstSectionRows(apiResponse, [
+      getFirstSectionRows(effectiveQuickLinksData, [
         "negativeMatch",
         "negativeMatches",
         "negativeMatchPolicies",
         "negativeMatchSection",
       ]),
-    [apiResponse]
+    [effectiveQuickLinksData]
   );
 
   const appFormRows = useMemo(
     () =>
-      getFirstSectionRows(apiResponse, [
+      getFirstSectionRows(effectiveQuickLinksData, [
         "applicationFormDetails",
         "detailsAsPerApplicationForm",
         "appFormDetails",
         "applicationFormSection",
       ]),
-    [apiResponse]
+    [effectiveQuickLinksData]
   );
 
   const totalCount = ipruRows.length;

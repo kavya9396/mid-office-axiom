@@ -823,6 +823,18 @@
           "medicalValidity": "2020-06-21",
           "financialReceivedDate": "2020-05-22",
           "financialValidity": "2020-06-22"
+        },
+        {
+          "policyNumber": "POL123456789",
+          "productName": "ICICI Pru iProtect Smart",
+          "productType": "Term Plan",
+          "dateOfIssuance": "2020-05-15",
+          "decision": "Accept",
+          "sumAssured": 1200000,
+          "medicalReceivedDate": "2020-05-20",
+          "medicalValidity": "2020-06-21",
+          "financialReceivedDate": "2020-05-22",
+          "financialValidity": "2020-06-22"
         }
       ],
       "openOtherTasks": [

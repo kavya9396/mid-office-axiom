@@ -23,6 +23,7 @@ import AccuityDecision from "./DRS_Accordions/AccuityDecision";
 import QuickLinks from "./QuickLinks";
 import UWToolkit from "./UWToolkit";
 import GrievanceApplication from "../Grievance/GrievanceApplication";
+import GroupPolicyDetails from "./DRS_Accordions/GroupPolicyDetails";
 
 export const accordionRegistry = {
   breDecision: BreDecision,
@@ -49,6 +50,7 @@ export const accordionRegistry = {
   accuityDecision: AccuityDecision,
   greivance: GrievanceApplication,
   decisionHistory: DecisionHistory,
+  groupPolicyDetails:GroupPolicyDetails
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
@@ -217,6 +219,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   GROUP_DVT_POOL: [
     "breDecision",
     "applicationOverview",
+    "groupPolicyDetails",
     "summary",
     "requirementManagement",
     "dvtDecision",
