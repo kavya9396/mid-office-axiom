@@ -174,6 +174,16 @@ const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
 const indiaPincodeRegex = /^\d{6}$/;
 const numericRegex = /^\d+$/;
 const optionalFormFields: Array<keyof ApplicantEditForm> = ["middleName"];
+const communicationAddressFieldNames = new Set<keyof ApplicantEditForm>([
+    "addressProof",
+    "communicationAddressLine1",
+    "communicationAddressLine2",
+    "communicationAddressLine3",
+    "communicationCountry",
+    "communicationState",
+    "communicationCity",
+    "communicationPincode",
+]);
 
 const getGenderByTitle = (title: string): ApplicantEditForm["gender"] | undefined => {
     const normalizedTitle = title.trim().toLowerCase();
@@ -661,11 +671,16 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         ]
     );
 
-    const allDialogFields = useMemo(
+    const visibleAddressFields = useMemo(
         () => isDvtFormalTask
-            ? editablePersonalKycFields
-            : [...editablePersonalKycFields, ...addressFields],
-        [isDvtFormalTask, editablePersonalKycFields, addressFields]
+            ? addressFields.filter((field) => !communicationAddressFieldNames.has(field.name))
+            : addressFields,
+        [isDvtFormalTask, addressFields]
+    );
+
+    const allDialogFields = useMemo(
+        () => [...editablePersonalKycFields, ...visibleAddressFields],
+        [editablePersonalKycFields, visibleAddressFields]
     );
 
     const hasFundDetails = useMemo(() => {
@@ -1130,7 +1145,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
                                     mt: 1,
                                 }}
                             >
-                                {addressFields.map((field) => (
+                                {visibleAddressFields.map((field) => (
                                     <Box key={field.name}>
                                         {renderField(field)}
                                     </Box>

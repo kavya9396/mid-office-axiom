@@ -11,9 +11,12 @@ import { toDisplayValue } from "../../../utils/helpers";
 const riderColumns: Column<RiderRow>[] = [
   { key: "name", header: "Name", width: "30%" },
   { key: "type", header: "Option", width: "20%" },
-  { key: "term", header: "PT", width: "5%" },
   { key: "sumAssured", header: "Sum Assured", width: "15%" },
   { key: "paymentAmount", header: "Modal Premium", width: "15%" },
+];
+
+const riderTermAndPptColumns: Column<RiderRow>[] = [
+  { key: "term", header: "PT", width: "5%" },
   { key: "ppt", header: "PPT", width: "10%" },
 ];
 
@@ -93,6 +96,17 @@ const ApplicationOverview = () => {
   const isGroupBusiness = businessType === "group";
   const isRetailBusiness = businessType === "retail";
   const roleType = localStorage.getItem("roleType") ?? "";
+  const shouldShowRiderTermAndPpt = roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
+  const selectedRiderColumns = shouldShowRiderTermAndPpt
+    ? [
+        riderColumns[0],
+        riderColumns[1],
+        riderTermAndPptColumns[0],
+        riderColumns[2],
+        riderColumns[3],
+        riderTermAndPptColumns[1],
+      ]
+    : riderColumns;
 
   const applicationDetailsByKey: Record<ApplicationDetailKey, ApplicationDetailItem> = {
     policyNumber: {
@@ -350,7 +364,7 @@ const ApplicationOverview = () => {
             <Box sx={{ mt: 2 }}>
               <CustomTable<RiderRow>
                 title="Rider Details"
-                columns={riderColumns}
+                columns={selectedRiderColumns}
                 data={riderRows}
               />
             </Box>

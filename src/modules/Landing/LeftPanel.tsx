@@ -70,15 +70,15 @@ const LeftPanel = ({
   poolData,
 }: LeftPanelProps) => {
   const poolNames = Object.keys(poolData);
-  // const searchItem = (
-  //   <PoolItem
-  //     label="Search Applications"
-  //     value="Search Applications"
-  //     selectedPool={selectedPool}
-  //     onClick={onSelectPool}
-  //     showCount={false}
-  //   />
-  // );
+  const searchItem = (
+    <PoolItem
+      label="Search Applications"
+      value="Search Applications"
+      selectedPool={selectedPool}
+      onClick={onSelectPool}
+      showCount={false}
+    />
+  );
   const getPoolCount = (pool: string) => poolData[pool]?.length ?? 0;
   return (
     <Box
@@ -116,7 +116,7 @@ const LeftPanel = ({
             </Box>
           ) : (
             <>
-              {/* {searchItem} */}
+              {searchItem}
 
               {poolNames.length === 0 ? (
                 <Typography sx={{ p: 2, color: "#999" }}>

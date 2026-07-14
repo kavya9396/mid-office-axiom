@@ -230,12 +230,13 @@ const FormalMemberProfile = ({ profile, onEdit }: FormalMemberProfileProps) => {
     : calculateAgeFromDob(resolvedDob);
 
   const personalItems: GridItem[] = [
-    { label: "First Name", value: toDisplayValue(profile?.proposerSummary?.firstName) },
-    { label: "Middle Name", value: toDisplayValue(profile?.proposerSummary?.middleName) },
-    { label: "Last Name", value: toDisplayValue(profile?.proposerSummary?.lastName) },
+    { label: "Title", value: toDisplayValue(profile?.proposerSummary?.title ?? selectedPersonalDetails.title) },
+    { label: "First Name", value: toDisplayValue(profile?.proposerSummary?.firstName ?? selectedPersonalDetails.firstName) },
+    { label: "Middle Name", value: toDisplayValue(profile?.proposerSummary?.middleName ?? selectedPersonalDetails.middleName) },
+    { label: "Last Name", value: toDisplayValue(profile?.proposerSummary?.lastName ?? selectedPersonalDetails.lastName) },
     { label: "DOB", value: toDisplayValue(formatDOB(resolvedDob)) },
     { label: "Age", value: toDisplayValue(resolvedAge) },
-    { label: "Gender", value: toDisplayValue(profile?.proposerSummary?.gender) },
+    { label: "Gender", value: toDisplayValue(profile?.proposerSummary?.gender ?? selectedPersonalDetails.gender) },
     { label: "Member Id", value: toDisplayValue(selectedSummaryEntry.clientId ?? selectedSummaryEntry.memberId) },
   ];
 
@@ -247,24 +248,6 @@ const FormalMemberProfile = ({ profile, onEdit }: FormalMemberProfileProps) => {
     summaryAddresses.find((item) => String(item.type ?? "").toLowerCase() === "permanent") ??
     summaryAddresses[0] ??
     {};
-
-  const communicationAddressFallback =
-    summaryAddresses.find((item) => String(item.type ?? "").toLowerCase() === "communication") ??
-    summaryAddresses.find((item) => String(item.type ?? "").toLowerCase() === "correspondence") ??
-    permanentAddressFallback;
-
-  const communicationAddressItems: GridItem[] = [
-    { label: "Address Line 1", value: toDisplayValue(profile?.communicationAddressDetails?.addressLine1 ?? communicationAddressFallback.addressLine1) },
-    { label: "Address Line 2", value: toDisplayValue(profile?.communicationAddressDetails?.addressLine2 ?? communicationAddressFallback.addressLine2) },
-    { label: "Landmark", value: toDisplayValue(profile?.communicationAddressDetails?.landmark ?? communicationAddressFallback.landmark) },
-    { label: "City", value: toDisplayValue(profile?.communicationAddressDetails?.city ?? communicationAddressFallback.city) },
-    { label: "State", value: toDisplayValue(profile?.communicationAddressDetails?.state ?? communicationAddressFallback.state) },
-    {
-      label: "Country of Residence",
-      value: toDisplayValue(profile?.communicationAddressDetails?.country ?? communicationAddressFallback.residingCountry),
-    },
-    { label: "Pincode", value: toDisplayValue(profile?.communicationAddressDetails?.pincode ?? communicationAddressFallback.pinCode) },
-  ];
 
   const permanentAddressItems: GridItem[] = [
     { label: "Address Line 1", value: toDisplayValue(profile?.permanentAddressDetails?.addressLine1 ?? permanentAddressFallback.addressLine1) },
@@ -318,6 +301,13 @@ const FormalMemberProfile = ({ profile, onEdit }: FormalMemberProfileProps) => {
           appointeeRelationship: toDisplayValue(item.relationWithNominee),
         }));
 
+  const visibleMemberSectionTabs = memberSectionTabs.filter(
+    (tab) => tab.key !== "nominee" || nominees.length > 0 || appointees.length > 0,
+  );
+  const effectiveActiveSectionTab = visibleMemberSectionTabs.some((tab) => tab.key === activeSectionTab)
+    ? activeSectionTab
+    : "personalKyc";
+
   let content: React.ReactNode = (
     <>
       {nominees.length > 0 ? (
@@ -347,7 +337,7 @@ const FormalMemberProfile = ({ profile, onEdit }: FormalMemberProfileProps) => {
       </Box>
     </>
   );
-  if (activeSectionTab === "personalKyc") {
+  if (effectiveActiveSectionTab === "personalKyc") {
     content = (
       <Box sx={{ p: 2, borderRadius: 2, backgroundColor: "#F6F6F6" }}>
         <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700, mb: 1 }}>
@@ -356,22 +346,13 @@ const FormalMemberProfile = ({ profile, onEdit }: FormalMemberProfileProps) => {
         <GridSection columns={6} items={personalItems} backgroundColor="transparent" />
       </Box>
     );
-  } else if (activeSectionTab === "contactAddress") {
+  } else if (effectiveActiveSectionTab === "contactAddress") {
     content = (
-      <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" }, gap: 2 }}>
-        <Box sx={{ p: 2, borderRadius: 2, backgroundColor: "#F6F6F6" }}>
-          <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700, mb: 1 }}>
-            Communication Address
-          </Typography>
-          <GridSection columns={3} items={communicationAddressItems} backgroundColor="transparent" />
-        </Box>
-
-        <Box sx={{ p: 2, borderRadius: 2, backgroundColor: "#F6F6F6" }}>
-          <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700, mb: 1 }}>
-            Permanent Address
-          </Typography>
-          <GridSection columns={3} items={permanentAddressItems} backgroundColor="transparent" />
-        </Box>
+      <Box sx={{ p: 2, borderRadius: 2, backgroundColor: "#F6F6F6" }}>
+        <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700, mb: 1 }}>
+          Permanent Address
+        </Typography>
+        <GridSection columns={3} items={permanentAddressItems} backgroundColor="transparent" />
       </Box>
     );
   }
@@ -391,8 +372,8 @@ const FormalMemberProfile = ({ profile, onEdit }: FormalMemberProfileProps) => {
       )}
       <Box sx={{ display: "flex", justifyContent: "center", my: 1, width: "100%" }}>
         <CustomTabs
-          tabs={memberSectionTabs}
-          value={activeSectionTab}
+          tabs={visibleMemberSectionTabs}
+          value={effectiveActiveSectionTab}
           onChange={setActiveSectionTab}
         />
       </Box>

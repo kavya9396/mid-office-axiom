@@ -7,7 +7,6 @@ import { cvtDecisionOptions } from "../../../utils/constant";
 import CustomButton from "../../../components/ui/Button/Button";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useNavigate } from "react-router-dom";
-import RequirementManagementTable from "./RequirementManagementTable";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
@@ -416,13 +415,7 @@ const CVTDecision = () => {
                             />
                         </Box>
 
-                        {
-                            (decision === "Raise Requirements" || decision === "Reraise PIVV") && (
-                                <Box sx={{mt:2}}>
-                                    <RequirementManagementTable />
-                                </Box>
-                            )
-                        }
+                       
 
                     </Box>
                     <Box

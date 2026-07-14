@@ -416,7 +416,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             : [];
     });
 
-    const isVisible = roleType !== "Ready For Issuance Pool";
+    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK";
     const teamOptions = useMemo(() => {
         const masterOptions = getTeamOptionsFromMaster(roleType);
         const fallbackOptions = getFallbackTeamOptions(roleType);

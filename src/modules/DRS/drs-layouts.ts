@@ -260,7 +260,6 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "applicationOverview",
     "summary",
     "requirementManagement",
-    "dvtDecision",
     "quickLinks"
   ]
 };

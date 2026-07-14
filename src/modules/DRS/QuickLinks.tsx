@@ -77,10 +77,12 @@ const QuickLinks = () => {
     ).trim();
 
     const quickLinks = [
+        ...(roleType !== 'DVT_FORMAL_TASK' ? [
         { label: "Proposal Form & Documents", path: proposerFormLink },
         { label: "Previous Policies", path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "" },
         { label: "Open Tasks", path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "" },
-        ...(roleType !== 'DVT Pool' ? [
+        ] : []),
+        ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' ? [
             { label: "Risk Details", path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "" },
         ] : []),
         { label: "Audit Trail", path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "" },
