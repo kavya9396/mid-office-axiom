@@ -29,7 +29,6 @@ const SearchApplication = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
-  const roleType = localStorage.getItem("roleType") ?? "";
   const [loading, setLoading] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -70,8 +69,7 @@ const SearchApplication = () => {
 
       const response = await dispatch(
         searchThunk({
-          applicationNo: searchValue,
-          roleType,
+          applicationNo: searchValue
         })
       ).unwrap();
 

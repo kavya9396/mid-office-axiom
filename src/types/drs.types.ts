@@ -482,7 +482,7 @@ export type PreIssuanceRequestChangeSubmitResponse = {
   message: string;
 };
 
-export type CompleteTaskRequest = {
+export type CompleteTaskReq = {
   taskId: string;
   userId: string;
   appNo: string;
@@ -490,10 +490,24 @@ export type CompleteTaskRequest = {
   remarks: string;
   decision: string;
 };
-
+export type CompleteTaskRequest = {
+  requestContext: CompleteTaskReq;
+};
 export type CompleteTaskResponse = {
-  success: boolean;
-  message: string;
+  success?: boolean;
+  message?: string;
+  response?: {
+    responseHeader?: {
+      responseTime?: string;
+      source?: string;
+      transactionId?: string;
+    };
+    responseContext?: {
+      code?: string;
+      message?: string;
+      status?: string;
+    };
+  };
 };
 
 export type BreRetriggerRequest = {

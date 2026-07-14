@@ -29,7 +29,7 @@ const apiUrls = {
     mock: "/mock/inbox/poolData.json",
   },
   searchApplication: {
-    real: "/api/inbox/search",
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/search-application",
     mock: "/mock/inbox/search-application.json",
   },
  
@@ -71,7 +71,7 @@ const apiUrls = {
     mock: "/mock/drs/preIssuanceRequestChangeSubmit.mock.json",
   },
   completeTask: {
-    real: "/api/drs/complete-task",
+    real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/complete-task/retail",
     mock: "/mock/drs/completeTask.mock.json",
   },
   referralUsers: {
@@ -156,5 +156,6 @@ export type ApiKey = keyof typeof apiUrls;
 /** Returns the resolved URL based on the USE_MOCK flag. */
 export const url = (key: ApiKey): string =>
   USE_MOCK ? apiUrls[key].mock : apiUrls[key].real;
+ 
  
  

@@ -2,7 +2,6 @@ import type { AdditionalRequirementRow, ApplicationDetails, ApplicationOverview,
 
 export type SearchRequest = {
   applicationNo: string;
-  roleType?:string;
 };
 
 export type SearchResponse = {

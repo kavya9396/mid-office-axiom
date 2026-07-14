@@ -9,7 +9,9 @@ import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
-import { pivvDecisionSubmitThunk } from "../../../store/thunks/pivvDecisionSubmitThunk";
+import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
+import { getCompleteTaskResult } from "./completeTaskResponse";
+import { getDecisionTaskContext } from "./decisionTaskContext";
 
 type PivvDecisionOption = {
   label: string;
@@ -36,11 +38,6 @@ const pivvDecisionMapping: PivvDecisionOption[] = [
   { label: "PIVV Done", value: "PIVV Done", workflowPool: "COPS Pool" },
 ];
 
-const toRecord = (value: unknown): Record<string, unknown> =>
-  value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-
 const PIVVDecision = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -59,18 +56,10 @@ const PIVVDecision = () => {
     normalizeBusinessType(localStorage.getItem("businessType")) ??
     "retail";
 
-  const taskId = useMemo(() => {
-    const root = toRecord(drsData);
-    const appInfo = toRecord(root.applicationInfo);
-
-    const fromRoot = String(root.taskId ?? root.taskID ?? "").trim();
-    if (fromRoot) return fromRoot;
-
-    const fromApplicationInfo = String(appInfo.taskId ?? appInfo.taskID ?? "").trim();
-    if (fromApplicationInfo) return fromApplicationInfo;
-
-    return String(localStorage.getItem("taskId") ?? "").trim();
-  }, [drsData]);
+  const taskContext = useMemo(
+    () => getDecisionTaskContext(drsData, applicationNumber),
+    [applicationNumber, drsData],
+  );
 
   const workflowPool = useMemo(() => {
     const matched = pivvDecisionMapping.find((item) => item.value === decision);
@@ -85,7 +74,7 @@ const PIVVDecision = () => {
   const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;
 
   const handleSubmit = async () => {
-    if (!applicationNumber || !roleType || !taskId || !workflowPool) {
+    if (!taskContext.appNo || !roleType || !taskContext.taskId || !taskContext.instanceId || !taskContext.userId || !workflowPool) {
       setSubmitMessage("Missing required case information. Please open the case from inbox again.");
       return;
     }
@@ -95,20 +84,27 @@ const PIVVDecision = () => {
       setSubmitMessage(null);
 
       const response = await dispatch(
-        pivvDecisionSubmitThunk({
-          applicationId: applicationNumber,
-          roleType,
-          taskId,
-          decision,
-          remarks: remarks.trim(),
-          workflowPool,
+        completeTaskThunk({
+          requestContext: {
+            appNo: taskContext.appNo,
+            userId: taskContext.userId,
+            taskId: taskContext.taskId,
+            instanceId: taskContext.instanceId,
+            decision,
+            remarks: remarks.trim(),
+          },
         }),
       ).unwrap();
 
-      setSubmitMessage(response.message || "PIVV decision submitted successfully.");
+      const { success, message } = getCompleteTaskResult(response);
+      setSubmitMessage(message);
+      if (!success) {
+        return;
+      }
+
       navigate(getInboxPath(safeBusinessType), {
         state: {
-          snackbarMessage: response.message || "PIVV decision submitted successfully.",
+          snackbarMessage: message,
         },
       });
     } catch (error) {
@@ -172,7 +168,7 @@ const PIVVDecision = () => {
               {remarks.length}/10000
             </Typography>
 
-            {!taskId && (
+            {!taskContext.taskId && (
               <Typography sx={{ mt: 1, fontSize: 13, color: "#DE2C3B" }}>
                 Task ID is missing. Please open the case from inbox again.
               </Typography>
@@ -194,7 +190,7 @@ const PIVVDecision = () => {
           <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
             <CustomButton
               variant="contained"
-              disabled={!isSubmitEnabled || !taskId || submitLoading}
+              disabled={!isSubmitEnabled || !taskContext.taskId || submitLoading}
               onClick={() => setConfirmationDialogOpen(true)}
               sx={{
                 minWidth: 200,

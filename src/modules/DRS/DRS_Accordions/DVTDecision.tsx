@@ -1,4 +1,4 @@
-import { Alert, Box, Container, Typography } from "@mui/material"
+import { Alert, Box, Container, Snackbar, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useEffect, useState } from "react";
@@ -14,16 +14,22 @@ import type { AppDispatch, RootState } from "../../../store/store";
 import type { AdditionalRequirementRow } from "../../../types/drs.types";
 import { decisionCodeThunk } from "../../../store/thunks/decisionCodeThunk";
 import { openRequirementManagement } from "./requirementManagementEvents";
+import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
+import { getDecisionTaskContext } from "./decisionTaskContext";
+import { getCompleteTaskResult } from "./completeTaskResponse";
 
 const DVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
     const [decision, setDecision] = useState<string>("");
-    const [decisionCode, setDecisionCode] = useState("");
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+    const [submitLoading, setSubmitLoading] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+    const [submitStatus, setSubmitStatus] = useState<"success" | "failure" | null>(null);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { businessType } = useAppContext();
+    const { businessType, applicationNumber } = useAppContext();
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes);
+    const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
     
 
     const savedRequirements = useSelector((state: RootState) => {
@@ -40,8 +46,8 @@ const DVTDecision = () => {
     const hasRequirements = savedRequirements.length > 0;
     const isAcceptDecision = decision === "Accept";
     const resolvedDecisionCode = isAcceptDecision
-        ? (decisionCode || decisionCodes[0]?.value || "")
-        : decisionCode;
+        ? (decisionCodes[0]?.value || "")
+        : "";
 
         const isRaiseRequirementsSelected = decision === "Raise Requirements";
         const submitBlocked =
@@ -51,12 +57,54 @@ const DVTDecision = () => {
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
         "retail";
+    const taskContext = getDecisionTaskContext(drsData, applicationNumber);
 
-    useEffect(() => {
-        if (!isAcceptDecision) {
-            setDecisionCode("");
+    const handleSubmit = async () => {
+        if (!taskContext.taskId || !taskContext.userId || !taskContext.appNo || !taskContext.instanceId) {
+            setSubmitMessage("Missing required case information. Please open the case from inbox again.");
+            setSubmitStatus("failure");
             return;
         }
+
+        try {
+            setSubmitLoading(true);
+            setSubmitMessage(null);
+            setSubmitStatus(null);
+
+            const response = await dispatch(
+                completeTaskThunk({
+                    requestContext: {
+                        taskId: taskContext.taskId,
+                        userId: taskContext.userId,
+                        appNo: taskContext.appNo,
+                        instanceId: taskContext.instanceId,
+                        remarks: uwDecisionRemarks.trim(),
+                        decision: decision.trim(),
+                    },
+                }),
+            ).unwrap();
+
+            const { success, message } = getCompleteTaskResult(response);
+            setSubmitMessage(message);
+            setSubmitStatus(success ? "success" : "failure");
+
+            if (success) {
+                navigate(getInboxPath(safeBusinessType), {
+                    state: {
+                        snackbarMessage: message,
+                    },
+                });
+            }
+        } catch (error) {
+            setSubmitMessage(error instanceof Error ? error.message : "Failed to complete task.");
+            setSubmitStatus("failure");
+        } finally {
+            setSubmitLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        if (!isAcceptDecision) return;
 
         dispatch(
             decisionCodeThunk({
@@ -64,11 +112,6 @@ const DVTDecision = () => {
             })
         );
     }, [isAcceptDecision, dispatch]);
-
-    useEffect(() => {
-        if (!isAcceptDecision || decisionCodes.length === 0) return;
-        setDecisionCode((prev) => prev || decisionCodes[0].value);
-    }, [isAcceptDecision, decisionCodes]);
 
     return (
         <Container disableGutters>
@@ -186,7 +229,7 @@ const DVTDecision = () => {
                     >
                         <CustomButton
                             variant="contained"
-                            disabled={!decision || submitBlocked}
+                            disabled={!decision || submitBlocked || submitLoading}
                             onClick={() => {
                                   setConfirmationDialogOpen(true);
                             }}
@@ -199,7 +242,7 @@ const DVTDecision = () => {
                                 whiteSpace: "nowrap",
                             }}
                         >
-                            Submit
+                            {submitLoading ? "Submitting..." : "Submit"}
                         </CustomButton>
                     </Box>
                 </CustomAccordion>
@@ -207,8 +250,32 @@ const DVTDecision = () => {
                     open={confirmationDialogOpen}
                     message="Do you want to submit the case?"
                     onClose={() => setConfirmationDialogOpen(false)}
-                    onConfirm={() => navigate(getInboxPath(safeBusinessType))}
+                    onConfirm={() => {
+                        setConfirmationDialogOpen(false);
+                        void handleSubmit();
+                    }}
                 />
+                <Snackbar
+                    open={Boolean(submitMessage) && submitStatus === "failure"}
+                    autoHideDuration={3000}
+                    onClose={() => {
+                        setSubmitMessage(null);
+                        setSubmitStatus(null);
+                    }}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                >
+                    <Alert
+                        onClose={() => {
+                            setSubmitMessage(null);
+                            setSubmitStatus(null);
+                        }}
+                        severity="error"
+                        variant="filled"
+                        sx={{ width: "100%" }}
+                    >
+                        {submitMessage}
+                    </Alert>
+                </Snackbar>
             </Box>
         </Container>
     )

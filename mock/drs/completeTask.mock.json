@@ -1,4 +1,14 @@
 {
-  "success": true,
-  "message": "Task completed successfully."
+    "response": {
+        "responseHeader": {
+            "responseTime": "2026-07-14T17:37:53",
+            "source": "MS",
+            "transactionId": "27120"
+        },
+        "responseContext": {
+            "code": "200",
+            "message": "Task completed successfully.",
+            "status": "SUCCESS"
+        }
+    }
 }

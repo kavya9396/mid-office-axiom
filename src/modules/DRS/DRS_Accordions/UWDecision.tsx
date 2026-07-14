@@ -1,4 +1,4 @@
-import { Box, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import { Alert, Box, Container, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -16,6 +16,9 @@ import { decisionCodeThunk } from "../../../store/thunks/decisionCodeThunk";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { openRequirementManagement } from "./requirementManagementEvents";
+import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
+import { getDecisionTaskContext } from "./decisionTaskContext";
+import { getCompleteTaskResult } from "./completeTaskResponse";
 
 const referralRoleMap: Record<string, string> = {
     "Refer to HoD": "HoD",
@@ -60,7 +63,8 @@ const UWDecision = () => {
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes)
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
-    const { businessType } = useAppContext();
+    const { businessType, applicationNumber } = useAppContext();
+    const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
@@ -83,6 +87,9 @@ const UWDecision = () => {
     const [referralValue, setReferralValue] = useState("");
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
     const [thresholdDialogOpen, setThresholdDialogOpen] = useState(false);
+    const [submitLoading, setSubmitLoading] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+    const [submitStatus, setSubmitStatus] = useState<"success" | "failure" | null>(null);
 
     const [excludedUserIds, setExcludedUserIds] = useState<string[]>([]);
     const [selectedThresholdUserId, setSelectedThresholdUserId] = useState("");
@@ -184,6 +191,51 @@ const UWDecision = () => {
     const thresholdMessage = `Threshold is achieved for this user, kindly refer the case to another ${caseUWDecision}`;
 
     const riskMessage = "Kindly reconfirm if you want to initiate a risk investigation process for the applicant?";
+    const taskContext = getDecisionTaskContext(drsData, applicationNumber);
+
+    const handleSubmit = async () => {
+        if (!taskContext.taskId || !taskContext.userId || !taskContext.appNo || !taskContext.instanceId) {
+            setSubmitMessage("Missing required case information. Please open the case from inbox again.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        try {
+            setSubmitLoading(true);
+            setSubmitMessage(null);
+            setSubmitStatus(null);
+
+            const response = await dispatch(
+                completeTaskThunk({
+                    requestContext: {
+                        taskId: taskContext.taskId,
+                        userId: taskContext.userId,
+                        appNo: taskContext.appNo,
+                        instanceId: taskContext.instanceId,
+                        remarks: uwDecisionRemarks.trim(),
+                        decision: caseUWDecision.trim(),
+                    },
+                }),
+            ).unwrap();
+
+            const { success, message } = getCompleteTaskResult(response);
+            setSubmitMessage(message);
+            setSubmitStatus(success ? "success" : "failure");
+
+            if (success) {
+                navigate(getInboxPath(safeBusinessType), {
+                    state: {
+                        snackbarMessage: message,
+                    },
+                });
+            }
+        } catch (error) {
+            setSubmitMessage(error instanceof Error ? error.message : "Failed to complete task.");
+            setSubmitStatus("failure");
+        } finally {
+            setSubmitLoading(false);
+        }
+    };
 
     const userOptions = useMemo(() => {
         return users
@@ -245,11 +297,6 @@ const UWDecision = () => {
         lastRoleRef.current = role;
         dispatch(referralUsersThunk({ role }));
     }, [caseUWDecision, dispatch]);
-
-    useEffect(() => {
-        if ((!isRejectDecision && !isDeclineDecision && !isPostponeDecision) || decisionCodes.length === 0) return;
-        setDecisionCode((prev) => prev || decisionCodes[0].value);
-    }, [isRejectDecision, isDeclineDecision, isPostponeDecision, decisionCodes]);
 
     return (
         <Container disableGutters>
@@ -314,6 +361,8 @@ const UWDecision = () => {
                                     setPostponeReason("");
                                     setPostponementPeriod("");
                                     setCounterOfferTable(createCounterOfferTableState());
+                                    setSubmitMessage(null);
+                                    setSubmitStatus(null);
 
                                     if (!fetchDecisionCodes.has(value)) {
                                         setDecisionCode("");
@@ -693,7 +742,7 @@ const UWDecision = () => {
                         >
                             <CustomButton
                                 variant="contained"
-                                //   disabled={!isFormValid}
+                                disabled={submitLoading}
                                 onClick={() => setConfirmationDialogOpen(true)}
                                 sx={{
                                     minWidth: 200,
@@ -704,7 +753,7 @@ const UWDecision = () => {
                                     whiteSpace: "nowrap",
                                 }}
                             >
-                                Submit
+                                {submitLoading ? "Submitting..." : "Submit"}
                             </CustomButton>
                         </Box>
                     )}
@@ -723,8 +772,33 @@ const UWDecision = () => {
                             : dialogMessage
                     }
                     onClose={() => setConfirmationDialogOpen(false)}
-                    onConfirm={() => navigate(getInboxPath(safeBusinessType))}
+                    onConfirm={() => {
+                        setConfirmationDialogOpen(false);
+                        void handleSubmit();
+                    }}
                 />
+
+                <Snackbar
+                    open={Boolean(submitMessage) && submitStatus === "failure"}
+                    autoHideDuration={3000}
+                    onClose={() => {
+                        setSubmitMessage(null);
+                        setSubmitStatus(null);
+                    }}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                >
+                    <Alert
+                        onClose={() => {
+                            setSubmitMessage(null);
+                            setSubmitStatus(null);
+                        }}
+                        severity="error"
+                        variant="filled"
+                        sx={{ width: "100%" }}
+                    >
+                        {submitMessage}
+                    </Alert>
+                </Snackbar>
 
                 {/* Threshold Dialog */}
                 <ConfirmationDialog

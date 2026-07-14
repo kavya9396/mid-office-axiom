@@ -14,6 +14,7 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { openRequirementManagement } from "./requirementManagementEvents";
+import { getCompleteTaskResult } from "./completeTaskResponse";
 
 const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
 const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
@@ -285,7 +286,6 @@ const CVTDecision = () => {
             window.removeEventListener(DRS_TAB_VISIT_EVENT, onVisitEvent);
         };
     }, []);
-
     const handleSubmit = async () => {
         if (!taskId || !userId || !applicationNumber || !instanceId) {
             setSubmitMessage("Missing required case information. Please open the case from inbox again.");
@@ -300,17 +300,18 @@ const CVTDecision = () => {
 
             const response = await dispatch(
                 completeTaskThunk({
-                    taskId,
-                    userId,
-                    appNo: applicationNumber,
-                    instanceId,
-                    remarks: uwDecisionRemarks.trim(),
-                    decision: decision.trim(),
+                    requestContext: {
+                        taskId,
+                        userId,
+                        appNo: applicationNumber,
+                        instanceId,
+                        remarks: uwDecisionRemarks.trim(),
+                        decision: decision.trim(),
+                    },
                 }),
             ).unwrap();
 
-            const success = response.success;
-            const message = response.message || (success ? "Task completed successfully." : "Task completion failed.");
+            const { success, message } = getCompleteTaskResult(response);
             setSubmitMessage(message);
             setSubmitStatus(success ? "success" : "failure");
 

@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
@@ -7,12 +7,18 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { reconsiderationDecisionOptions } from "../../../utils/constant";
+import { getCompleteTaskResult } from "./completeTaskResponse";
+import { getDecisionTaskContext } from "./decisionTaskContext";
 
 const ReconsiderationPoolDecision = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const { businessType } = useAppContext();
+  const { businessType, applicationNumber } = useAppContext();
+  const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
 
   const safeBusinessType =
     normalizeBusinessType(businessType) ??
@@ -22,9 +28,57 @@ const ReconsiderationPoolDecision = () => {
   const [remark, setRemark] = useState("");
   const [decision, setDecision] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [submitStatus, setSubmitStatus] = useState<"success" | "failure" | null>(null);
 
   const isSubmitDisabled = !decision || remark.trim() === "";
   const dialogMessage = `Kindly reconfirm if you want to proceed with the reconsideration pool decision as "${decision}"`;
+  const taskContext = getDecisionTaskContext(drsData, applicationNumber);
+
+  const handleSubmit = async () => {
+    if (!taskContext.taskId || !taskContext.userId || !taskContext.appNo || !taskContext.instanceId) {
+      setSubmitMessage("Missing required case information. Please open the case from inbox again.");
+      setSubmitStatus("failure");
+      return;
+    }
+
+    try {
+      setSubmitLoading(true);
+      setSubmitMessage(null);
+      setSubmitStatus(null);
+
+      const response = await dispatch(
+        completeTaskThunk({
+          requestContext: {
+            taskId: taskContext.taskId,
+            userId: taskContext.userId,
+            appNo: taskContext.appNo,
+            instanceId: taskContext.instanceId,
+            remarks: remark.trim(),
+            decision: decision.trim(),
+          },
+        }),
+      ).unwrap();
+
+      const { success, message } = getCompleteTaskResult(response);
+      setSubmitMessage(message);
+      setSubmitStatus(success ? "success" : "failure");
+
+      if (success) {
+        navigate(getInboxPath(safeBusinessType), {
+          state: {
+            snackbarMessage: message,
+          },
+        });
+      }
+    } catch (error) {
+      setSubmitMessage(error instanceof Error ? error.message : "Failed to complete task.");
+      setSubmitStatus("failure");
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
 
   return (
     <Container disableGutters>
@@ -91,7 +145,11 @@ const ReconsiderationPoolDecision = () => {
               <CustomSelect
                 label="Reconsideration Pool Decision"
                 value={decision}
-                onChange={setDecision}
+                onChange={(value) => {
+                  setDecision(value);
+                  setSubmitMessage(null);
+                  setSubmitStatus(null);
+                }}
                 options={reconsiderationDecisionOptions}
               />
             </Box>
@@ -106,7 +164,7 @@ const ReconsiderationPoolDecision = () => {
           >
             <CustomButton
               variant="contained"
-              disabled={isSubmitDisabled}
+              disabled={isSubmitDisabled || submitLoading}
               onClick={() => setIsConfirmOpen(true)}
               sx={{
                 minWidth: 200,
@@ -117,7 +175,7 @@ const ReconsiderationPoolDecision = () => {
                 whiteSpace: "nowrap",
               }}
             >
-              Submit
+              {submitLoading ? "Submitting..." : "Submit"}
             </CustomButton>
           </Box>
         </CustomAccordion>
@@ -126,8 +184,32 @@ const ReconsiderationPoolDecision = () => {
           open={isConfirmOpen}
           message={dialogMessage}
           onClose={() => setIsConfirmOpen(false)}
-          onConfirm={() => navigate(getInboxPath(safeBusinessType))}
+          onConfirm={() => {
+            setIsConfirmOpen(false);
+            void handleSubmit();
+          }}
         />
+        <Snackbar
+          open={Boolean(submitMessage) && submitStatus === "failure"}
+          autoHideDuration={3000}
+          onClose={() => {
+            setSubmitMessage(null);
+            setSubmitStatus(null);
+          }}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => {
+              setSubmitMessage(null);
+              setSubmitStatus(null);
+            }}
+            severity="error"
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {submitMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </Container>
   );
