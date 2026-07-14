@@ -5,7 +5,6 @@ import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import Badge from "../../../components/ui/Badge/Badge";
 import {
   centerFlex,
-  columnFlex,
   modalTitleStyles,
 } from "../../../utils/styles";
 import { RefreshIcon } from "../../../icons/Icons";
@@ -24,11 +23,6 @@ import { referToItThunk } from "../../../store/thunks/referToItThunk";
 import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 
-type SelectedItem = {
-  label: string;
-  value: string;
-};
-
 type BreDecisionExtraField = {
   label: string;
   value?: string | null;
@@ -39,12 +33,6 @@ interface BreDecisionProps {
   extraFields?: BreDecisionExtraField[];
   breDecisionOverride?: BreDecisionResponse | null;
 }
-
-const truncateText = (text: string, limit: number) => {
-  if (text.length <= limit) return text;
-  const truncated = text.slice(0, limit);
-  return truncated.slice(0, truncated.lastIndexOf(" "));
-};
 
 const mapBreOutputToDecision = (
   breOutput: DRSBreOutput,
@@ -138,10 +126,8 @@ const BreDecision = ({
   const roleType = localStorage.getItem("roleType") ?? "";
   const applicationId = applicationNumber ?? "";
 
-  const [dialogOpen, setDialogOpen] = useState(false);
   const [bredialogOpen, setBreDialogOpen] = useState(false);
   const retriggerCount = 0;
-  const [selectedItem, setSelectedItem] = useState<SelectedItem | null>(null);
   const [retriggeredBreDecision, setRetriggeredBreDecision] =
     useState<BreDecisionResponse | null>(null);
   const [breRetriggerLoading, setBreRetriggerLoading] = useState(false);
@@ -279,61 +265,44 @@ const BreDecision = ({
   const shouldShowInitialBreSection =
     Boolean(initialBreSource) && (isBreRetriggerFailure || hasDecisionChanged);
 
-  const coreBreDetails = [
-    {
-      label: "BRE Status",
-      value: resolvedInitialBreStatus,
-    },
-    {
-      label: "BRE Decision",
-      value: initialBreDecisionValue,
-      highlight: false,
-    },
-    {
-      label: "BRE Remarks",
-      value: initialBreRemarksValue,
-      highlight: shouldShowInitialBreSection && hasRemarksChanged,
-    },
-    {
-      label: "BRE Discrepancy",
-      value: initialBreDiscrepancyValue,
-      highlight: shouldShowInitialBreSection && hasDiscrepancyChanged,
-    },
-    {
-      label: "BRE Timestamp",
-      value: initialBreTimestampValue,
-    },
-  ];
-
-  const coreFinalBreDetails = [
-    {
-      label: "BRE Status",
-      value: resolvedFinalBreStatus,
-    },
-    {
-      label: "BRE Decision",
-      value: finalBreDecisionValue,
-      highlight: false,
-    },
-    {
-      label: "BRE Remarks",
-      value: finalBreRemarksValue,
-      highlight: shouldShowInitialBreSection && hasRemarksChanged,
-    },
-    {
-      label: "BRE Discrepancy",
-      value: finalBreDiscrepancyValue,
-      highlight: shouldShowInitialBreSection && hasDiscrepancyChanged,
-    },
-    {
-      label: "BRE Timestamp",
-      value: finalBreTimestampValue,
-    },
-  ];
-
   const additionalBreDetails = [
     ...conditionalBreDecisionParams,
     ...conditionalFields,
+  ];
+
+  const breTableRows = [
+    {
+      label: "BRE Status",
+      initialValue: shouldShowInitialBreSection ? resolvedInitialBreStatus : "-",
+      finalValue: resolvedFinalBreStatus,
+    },
+    {
+      label: "BRE Decision",
+      initialValue: shouldShowInitialBreSection ? initialBreDecisionValue : "-",
+      finalValue: finalBreDecisionValue,
+    },
+    {
+      label: "BRE Remarks",
+      initialValue: shouldShowInitialBreSection ? initialBreRemarksValue : "-",
+      finalValue: finalBreRemarksValue,
+      highlight: shouldShowInitialBreSection && hasRemarksChanged,
+    },
+    {
+      label: "BRE Discrepancy",
+      initialValue: shouldShowInitialBreSection ? initialBreDiscrepancyValue : "-",
+      finalValue: finalBreDiscrepancyValue,
+      highlight: shouldShowInitialBreSection && hasDiscrepancyChanged,
+    },
+    {
+      label: "BRE Timestamp",
+      initialValue: shouldShowInitialBreSection ? initialBreTimestampValue : "-",
+      finalValue: finalBreTimestampValue,
+    },
+    ...additionalBreDetails.map((item) => ({
+      label: item.label,
+      initialValue: "-",
+      finalValue: item.value,
+    })),
   ];
 
   const handleRetrigger = async () => {
@@ -431,42 +400,36 @@ const BreDecision = ({
     }
   };
 
-  // const getDisplayText = (text: string) => {
-  //   return truncateText(text, 80);
-  // };
-
- const renderBreDetail = (
-  item: { label: string; value: string; highlight?: boolean },
+ const renderBreTableCell = (
+  value: string,
   key: string,
-) => {
-  const limit = item.label === "BRE Discrepancy" ? 30 : 80;
-  const isLongText = item.value.length > limit;
-
-  return (
-    <Box key={key} sx={{ ...columnFlex }}>
-      <Typography
-        sx={{
-          color: "#444444",
-          fontSize: "12px",
-        }}
-      >
-        {item.label}
-      </Typography>
-
+  highlight = false,
+  ) => (
+    <Box
+      key={key}
+      sx={{
+        px: 2,
+        py: 1.5,
+        minHeight: 52,
+        display: "flex",
+        alignItems: "center",
+        borderTop: "1px solid #E3E3E3",
+      }}
+    >
       <Typography
         sx={{
           color: "#161616",
           fontWeight: 600,
           fontSize: "14px",
           lineHeight: "20px",
-          maxHeight: "40px",
-          overflow: "hidden",
+          overflowWrap: "anywhere",
+          whiteSpace: "pre-wrap",
         }}
       >
         <Box
           component="span"
           sx={
-            item.highlight
+            highlight
               ? {
                   backgroundColor: "#FFF59D",
                   px: 0.5,
@@ -475,35 +438,12 @@ const BreDecision = ({
               : undefined
           }
         >
-          {truncateText(item.value, limit)}
-          {isLongText && "... "}
+          {value}
         </Box>
-
-        {isLongText && (
-          <Box
-            component="span"
-            onClick={() => {
-              setSelectedItem({
-                label: item.label,
-                value: item.value,
-              });
-              setDialogOpen(true);
-            }}
-            sx={{
-              color: "#063E6F",
-              cursor: "pointer",
-              fontWeight: 500,
-              textDecoration: "underline",
-            }}
-          >
-            show more
-          </Box>
-        )}
       </Typography>
     </Box>
   );
-};
-const breTitle = roleType == 'GUW_FORMAL_TASK' || roleType =='DVT_FORMAL_TASK' ? "WegaPlus BRE Decision" : "BRE Decision";
+const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK' ? "WegaPlus BRE Decision" : "BRE Decision";
   return (
     <Container disableGutters>
       <CustomAccordion
@@ -522,65 +462,56 @@ const breTitle = roleType == 'GUW_FORMAL_TASK' || roleType =='DVT_FORMAL_TASK' ?
             borderRadius: "8px",
           }}
         >
-          {shouldShowInitialBreSection && (
-            <Box sx={{ fontWeight: 700 }}>
-              Initial BRE
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: "0.5fr 0.8fr 2.5fr 2.5fr 0.8fr 0.5fr",
-                  gap: "16px",
-                }}
-              >
-                {coreBreDetails.map((item, index) =>
-                  renderBreDetail(item, `core-${item.label}-${index}`),
-                )}
-
-                {/* <Box
-                  sx={{
-                    ...centerFlex,
-                  }}
-                >
-                  <Box
-                    component="span"
-                    onClick={() => {
-                      void handleRetrigger();
-                    }}
-                    sx={{
-                      color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
-                      border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
-                      padding: 1,
-                      borderRadius: "8px",
-                      display: "flex",
-                      cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
-                      opacity: isRetriggerDisabled ? 0.5 : 1,
-                    }}
-                  >
-                    <RefreshIcon />
-                  </Box>
-                </Box> */}
-              </Box>
-            </Box>
-          )}
-
-          <Box sx={{ fontWeight: 700 }}>
-            Final BRE
+          <Box
+            sx={{
+              border: "1px solid #D8D8D8",
+              borderRadius: "8px",
+              overflow: "hidden",
+              backgroundColor: "#fff",
+            }}
+          >
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: "0.5fr 0.8fr 2.5fr 2.5fr 0.8fr 0.5fr",
-                gap: "16px",
+                gridTemplateColumns: "0.8fr 1fr 1fr",
+                bgcolor: "#F5F5F5",
               }}
             >
-              {coreFinalBreDetails.map((item, index) =>
-                renderBreDetail(item, `core-${item.label}-${index}`),
-              )}
+              {["BRE", "Initial BRE"].map((header) => (
+                <Typography
+                  key={header}
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    color: "#161616",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                    borderRight: "1px solid #D8D8D8",
+                  }}
+                >
+                  {header}
+                </Typography>
+              ))}
 
               <Box
                 sx={{
-                  ...centerFlex,
+                  px: 2,
+                  py: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 1,
                 }}
               >
+                <Typography
+                  sx={{
+                    color: "#161616",
+                    fontSize: "14px",
+                    fontWeight: 700,
+                  }}
+                >
+                  Final BRE
+                </Typography>
                 <Box
                   component="span"
                   onClick={() => {
@@ -589,17 +520,65 @@ const breTitle = roleType == 'GUW_FORMAL_TASK' || roleType =='DVT_FORMAL_TASK' ?
                   sx={{
                     color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
                     border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
-                    padding: 1,
+                    width: 32,
+                    height: 32,
                     borderRadius: "8px",
-                    display: "flex",
                     cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
                     opacity: isRetriggerDisabled ? 0.5 : 1,
-                  }}
-                >
+                    flexShrink: 0,
+                  ...centerFlex,
+                }}
+              >
                   <RefreshIcon />
                 </Box>
               </Box>
             </Box>
+
+            {breTableRows.map((row, index) => (
+              <Box
+                key={`${row.label}-${index}`}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "0.8fr 1fr 1fr",
+                }}
+              >
+                <Box
+                  sx={{
+                    px: 2,
+                    py: 1.5,
+                    minHeight: 52,
+                    display: "flex",
+                    alignItems: "center",
+                    borderTop: "1px solid #E3E3E3",
+                    borderRight: "1px solid #E3E3E3",
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      color: "#444444",
+                      fontSize: "13px",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {row.label}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ borderRight: "1px solid #E3E3E3" }}>
+                  {renderBreTableCell(
+                    row.initialValue,
+                    `initial-${row.label}-${index}`,
+                    row.highlight,
+                  )}
+                </Box>
+
+                {renderBreTableCell(
+                  row.finalValue,
+                  `final-${row.label}-${index}`,
+                  row.highlight,
+                )}
+              </Box>
+            ))}
           </Box>
 
           {breRetriggerError && (
@@ -613,55 +592,7 @@ const breTitle = roleType == 'GUW_FORMAL_TASK' || roleType =='DVT_FORMAL_TASK' ?
               {breRetriggerError}
             </Typography>
           )}
-
-          {additionalBreDetails.length > 0 && (
-            <Box
-              sx={{
-                mt: 2,
-                pt: 2,
-                borderTop: "1px solid #E3E3E3",
-                display: "grid",
-                gridTemplateColumns: "repeat(4, minmax(0, 1fr))",
-                gap: "16px",
-              }}
-            >
-              {additionalBreDetails.map((item, index) =>
-                renderBreDetail(item, `extra-${item.label}-${index}`),
-              )}
-            </Box>
-          )}
         </Box>
-
-        <CustomDialog
-          open={dialogOpen}
-          onClose={() => setDialogOpen(false)}
-          title={
-            <Typography
-              sx={{
-                ...modalTitleStyles,
-              }}
-            >
-              {selectedItem?.label?.replace("BRE ", "")}
-            </Typography>
-          }
-          contentSx={{
-            whiteSpace: "pre-wrap",
-            overflowWrap: "anywhere",
-            wordBreak: "break-word",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: "14px",
-              color: "#161616",
-              whiteSpace: "pre-wrap",
-              overflowWrap: "anywhere",
-              wordBreak: "break-word",
-            }}
-          >
-            {selectedItem?.value}
-          </Typography>
-        </CustomDialog>
 
         <CustomDialog
           open={bredialogOpen}

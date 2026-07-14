@@ -21,6 +21,10 @@ jest.mock("react-router-dom", () => ({
 
 jest.mock("../../routes/routes", () => ({
   getDRSPath: jest.fn(),
+  normalizeBusinessType: jest.fn((businessType?: string | null) => {
+    const normalized = String(businessType ?? "").trim().toLowerCase();
+    return ["retail", "group"].includes(normalized) ? normalized : undefined;
+  }),
 }));
 
 jest.mock("../../components/ui/TextField/TextField", () => {
@@ -56,46 +60,15 @@ jest.mock("../../components/ui/Button/Button", () => {
     children: React.ReactNode;
     onClick?: () => void;
     disabled?: boolean;
+    type?: "button" | "submit" | "reset";
   };
 
-  return function MockButton({ children, onClick, disabled }: ButtonProps) {
+  return function MockButton({ children, onClick, disabled, type }: ButtonProps) {
     return (
-      <button onClick={onClick} disabled={disabled}>
+      <button type={type} onClick={onClick} disabled={disabled}>
         {children}
       </button>
     );
-  };
-});
-
-jest.mock("../../components/ui/Accordion/Accordion", () => {
-  type AccordionProps = {
-    title: string;
-    children: React.ReactNode;
-  };
-
-  return function MockAccordion({ title, children }: AccordionProps) {
-    return (
-      <section>
-        <h3>{title}</h3>
-        {children}
-      </section>
-    );
-  };
-});
-
-jest.mock("../../components/layout/GridSection", () => ({
-  GridSection: () => <div>GridSection</div>,
-}));
-
-jest.mock("../DRS/DRS_Accordions/RequirementManagement", () => {
-  return function MockRequirementManagement() {
-    return <div>RequirementManagement</div>;
-  };
-});
-
-jest.mock("../DRS/DRS_Accordions/AuditTrail", () => {
-  return function MockAuditTrail() {
-    return <div>AuditTrail</div>;
   };
 });
 
@@ -117,7 +90,10 @@ describe("SearchApplication", () => {
       type: "searchThunk",
       payload,
     }));
-    mockGetDRSPath.mockReturnValue("/drs/retail/APP1234567");
+    mockGetDRSPath.mockReturnValue("/retail/app/APP1234567/drs");
+    localStorage.clear();
+    localStorage.setItem("businessType", "retail");
+    localStorage.setItem("roleType", "CPT Pool");
   });
 
   it("sanitizes input and enables search only for 10 alphanumeric chars", async () => {
@@ -134,22 +110,15 @@ describe("SearchApplication", () => {
     expect(searchBtn).toBeEnabled();
   });
 
-  it("searches and renders result actions", async () => {
+  it("searches and redirects to the DRS page", async () => {
     const navigate = jest.fn();
-    const openSpy = jest
-      .spyOn(window, "open")
-      .mockImplementation(() => null as any);
 
     const response = {
-      applicationDetails: {
-        applicationId: "APP1234567",
+      data: {
+        basicDetails: {
+          applicationNumber: "APP1234567",
+        },
       },
-      applicationOverview: {},
-      summary: [],
-      riderDetails: [],
-      requirements: [],
-      auditTrail: {},
-      udsLink: "https://example.com/uds",
     };
 
     mockUseNavigate.mockReturnValue(navigate);
@@ -164,23 +133,16 @@ describe("SearchApplication", () => {
 
     await waitFor(() => {
       expect(mockSearchThunk).toHaveBeenCalledWith({
-        applicationId: "APP1234567",
+        applicationNo: "APP1234567",
+        roleType: "CPT Pool",
       });
     });
 
     await waitFor(() => {
-      expect(
-        screen.getByText("Application Details - APP1234567"),
-      ).toBeInTheDocument();
+      expect(mockGetDRSPath).toHaveBeenCalledWith("retail", "APP1234567");
+      expect(navigate).toHaveBeenCalledWith("/retail/app/APP1234567/drs");
     });
 
-    await userEvent.click(screen.getByRole("button", { name: "View UDS Document" }));
-    expect(openSpy).toHaveBeenCalledWith("https://example.com/uds", "_blank");
-
-    await userEvent.click(screen.getByRole("button", { name: "View DRS Sheet" }));
-    expect(mockGetDRSPath).toHaveBeenCalledWith("retail", "APP1234567");
-    expect(navigate).toHaveBeenCalledWith("/drs/retail/APP1234567");
-
-    openSpy.mockRestore();
+    expect(localStorage.getItem("applicationNumber")).toBe("APP1234567");
   });
 });

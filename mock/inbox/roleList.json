@@ -1219,7 +1219,13 @@
         "state": "DRAFT",
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
         "displayName": "ARYAYAN Khan",
-        "status": "DRAFT"
+        "status": "DRAFT",
+        "sumAssured":121212,
+        "clientType":"client",
+        "caseType":"Individual",
+        "lastPool":"HOD",
+        "product":"ICICI",
+        "premium":12121
       },
       {
         "id": 2,
@@ -1242,7 +1248,13 @@
         "state": "DRAFT",
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
         "displayName": "ARYAYAN Khan",
-        "status": "DRAFT"
+        "status": "DRAFT",
+        "sumAssured":121212,
+        "clientType":"client",
+        "caseType":"Individual",
+        "lastPool":"HOD",
+        "product":"ICICI",
+        "premium":12121
       }
     ],
     "REJECT_TASK": [

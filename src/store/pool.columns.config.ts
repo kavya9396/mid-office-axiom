@@ -83,7 +83,7 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "requirementRaisedDate",
     "userId",
   ],
-  "Reconsideration Pool": [
+  RECONSIDERATION_TASK: [
     ...baseColumnsCops,
     "lastPool",
     "userId",

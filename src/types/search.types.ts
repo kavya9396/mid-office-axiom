@@ -1,7 +1,8 @@
 import type { AdditionalRequirementRow, ApplicationDetails, ApplicationOverview, AuditTrail, RiderDetail, SummaryResponse } from "./drs.types";
 
 export type SearchRequest = {
-  applicationId: string;
+  applicationNo: string;
+  roleType?:string;
 };
 
 export type SearchResponse = {

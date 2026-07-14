@@ -8,6 +8,8 @@ import {
 } from "../../icons/Icons";
 import { columnFlex, hoverSx, selectedSx } from "../../utils/styles";
 import LastLogin from "./LastLogin";
+import { useNavigate } from "react-router-dom";
+import { getSearchApplicationPath } from "../../routes/routes";
 
 type LeftPanelProps = PoolProps & {
   poolData: Record<string, tableData[]>;
@@ -69,13 +71,14 @@ const LeftPanel = ({
   onSelectPool,
   poolData,
 }: LeftPanelProps) => {
+  const navigate = useNavigate();
   const poolNames = Object.keys(poolData);
   const searchItem = (
     <PoolItem
       label="Search Applications"
       value="Search Applications"
       selectedPool={selectedPool}
-      onClick={onSelectPool}
+      onClick={() => navigate(getSearchApplicationPath())}
       showCount={false}
     />
   );

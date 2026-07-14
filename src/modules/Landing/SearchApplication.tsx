@@ -3,17 +3,11 @@ import { fieldStylesEdit } from "../../utils/styles";
 import CustomTextField from "../../components/ui/TextField/TextField";
 import CustomButton from "../../components/ui/Button/Button";
 import { useState } from "react";
-import type { SearchResponse } from "../../types/search.types";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import { searchThunk } from "../../store/thunks/searchAppThunk";
-import CustomAccordion from "../../components/ui/Accordion/Accordion";
-import { applicationDetailsFields } from "../../utils/constant";
-import { GridSection } from "../../components/layout/GridSection";
-import RequirementManagement from "../DRS/DRS_Accordions/RequirementManagement";
-import AuditTrailAccordion from "../DRS/DRS_Accordions/AuditTrail";
-import { getDRSPath } from "../../routes/routes";
-import { useNavigate, useParams } from "react-router-dom";
+import { getDRSPath, normalizeBusinessType } from "../../routes/routes";
+import { useNavigate } from "react-router-dom";
 
 const pageShellSx = {
   minHeight: "90vh",
@@ -31,94 +25,11 @@ const surfaceCardSx = {
   boxShadow: "0 16px 40px rgba(15,23,42,0.08)",
 };
 
-interface SearchApplicationPageProps {
-  data: SearchResponse;
-}
-
-const SearchApplicationPage = ({
-  data,
-}: SearchApplicationPageProps) => {
-  const navigate = useNavigate();
-  const { businessType } = useParams();
-  const safeBusinessType = String(businessType ?? "retail").toLowerCase();
-  const applicationId = data.applicationDetails?.applicationId ?? "";
-  const applicationDetailsItems = data.applicationDetails
-    ? applicationDetailsFields.map(({ label, key }) => ({
-      label,
-      value: String(data.applicationDetails[key] ?? ""),
-    }))
-    : [];
-
-  const handleUDSDocument = () => {
-    if (data.udsLink) {
-      window.open(data.udsLink, "_blank");
-    }
-  };
-
-  return (
-
-    <>
-      <Container disableGutters>
-        <CustomAccordion
-          title={`Application Details - ${applicationId || "Unknown"}`}
-          defaultExpanded
-        >
-          <Box sx={{ p: 2, backgroundColor: "#f8fafc", mt: 1, borderRadius: 2 }}>
-            {applicationDetailsItems.length > 0 ? (
-              <GridSection columns={5} items={applicationDetailsItems} />
-            ) : (
-              <Typography sx={{ color: "text.secondary" }}>No record found!</Typography>
-            )}
-          </Box>
-        </CustomAccordion>
-        <RequirementManagement requirements={data.requirements} />
-        <AuditTrailAccordion auditTrail={data.auditTrail} />
-        <Box
-          sx={{
-            display: "flex",
-            flexWrap: "wrap",
-            gap: 2,
-            justifyContent: "center",
-            my: 2
-          }}
-        >
-          <CustomButton
-            variant="outlined"
-            sx={{
-              borderRadius: "50px",
-              px: 6,
-              py: 1,
-              minWidth: { xs: "100%", sm: "280px" },
-            }}
-            onClick={handleUDSDocument}
-            disabled={!data.udsLink}
-          >
-            View UDS Document
-          </CustomButton>
-          <CustomButton
-            variant="contained"
-            onClick={() => navigate(getDRSPath(safeBusinessType, applicationId))}
-            sx={{
-              borderRadius: "50px",
-              px: 6,
-              py: 1,
-              minWidth: { xs: "100%", sm: "280px" },
-            }}
-            disabled={!applicationId}
-          >
-            View DRS Sheet
-          </CustomButton>
-        </Box>
-      </Container>
-    </>
-  );
-};
 const SearchApplication = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
-
-  const [applicationData, setApplicationData] =
-    useState<SearchResponse | null>(null);
+  const roleType = localStorage.getItem("roleType") ?? "";
   const [loading, setLoading] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -130,17 +41,54 @@ const SearchApplication = () => {
   };
 
   const isValidSearch = searchValue.length === 10;
+
+  const resolveApplicationNumber = (response: unknown) => {
+    const responseRecord = response && typeof response === "object" && !Array.isArray(response)
+      ? (response as Record<string, unknown>)
+      : {};
+    const dataRecord = responseRecord.data && typeof responseRecord.data === "object" && !Array.isArray(responseRecord.data)
+      ? (responseRecord.data as Record<string, unknown>)
+      : {};
+    const applicationDetails = responseRecord.applicationDetails && typeof responseRecord.applicationDetails === "object" && !Array.isArray(responseRecord.applicationDetails)
+      ? (responseRecord.applicationDetails as Record<string, unknown>)
+      : {};
+    const basicDetails = dataRecord.basicDetails && typeof dataRecord.basicDetails === "object" && !Array.isArray(dataRecord.basicDetails)
+      ? (dataRecord.basicDetails as Record<string, unknown>)
+      : {};
+
+    return String(
+      applicationDetails.applicationId ??
+      dataRecord.applicationNumber ??
+      basicDetails.applicationNumber ??
+      searchValue,
+    ).trim();
+  };
+
   const handleSearch = async () => {
     try {
       setLoading(true);
 
       const response = await dispatch(
         searchThunk({
-          applicationId: searchValue,
+          applicationNo: searchValue,
+          roleType,
         })
       ).unwrap();
 
-      setApplicationData(response);
+      const applicationNumber = resolveApplicationNumber(response);
+      const safeBusinessType =
+        normalizeBusinessType(localStorage.getItem("businessType")) ?? "retail";
+
+      localStorage.setItem("businessType", safeBusinessType);
+      localStorage.setItem("applicationNumber", applicationNumber);
+      localStorage.setItem(
+        "selectedCaseContext",
+        JSON.stringify({
+          applicationNo: applicationNumber,
+        }),
+      );
+
+      navigate(getDRSPath(safeBusinessType, applicationNumber));
     } catch (error) {
       console.error("Search failed:", error);
     } finally {
@@ -159,15 +107,8 @@ const SearchApplication = () => {
               <Typography variant="h4" sx={{ fontWeight: 700, color: "#1f2937" }}>
                 Search an application
               </Typography>
-              <Typography variant="body1" sx={{ color: "text.secondary", maxWidth: 760 }}>
-                Enter a 10-character alphanumeric application ID to retrieve the application summary,
-                requirements, and audit trail.
-              </Typography>
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  Use only letters and numbers. Special characters are removed automatically.
-                </Typography>
-              </Box>
+             
+              
 
               <Box
                 sx={{
@@ -208,8 +149,6 @@ const SearchApplication = () => {
               </Box>
             </Stack>
           </Paper>
-
-          {applicationData && <SearchApplicationPage data={applicationData} />}
         </Stack>
       </Container>
     </Box>

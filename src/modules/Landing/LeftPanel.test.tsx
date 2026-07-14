@@ -3,6 +3,12 @@ import userEvent from "@testing-library/user-event";
 import LeftPanel from "./LeftPanel";
 import type { tableData } from "../../types/inbox";
 
+const mockNavigate = jest.fn();
+
+jest.mock("react-router-dom", () => ({
+  useNavigate: () => mockNavigate,
+}));
+
 jest.mock("./LastLogin", () => {
   return function MockLastLogin() {
     return <div>LastLogin</div>;
@@ -21,6 +27,7 @@ describe("LeftPanel", () => {
 
   beforeEach(() => {
     window.scrollTo = jest.fn();
+    mockNavigate.mockClear();
   });
 
   it("shows empty pool message when no roles are available", () => {
@@ -57,5 +64,24 @@ describe("LeftPanel", () => {
 
     expect(onSelectPool).toHaveBeenCalledWith("Pool B");
     expect(window.scrollTo).toHaveBeenCalled();
+  });
+
+  it("navigates to the standalone search application page", async () => {
+    const onSelectPool = jest.fn();
+
+    render(
+      <LeftPanel
+        selectedPool="Pool A"
+        toggle={false}
+        setToggle={jest.fn()}
+        onSelectPool={onSelectPool}
+        poolData={{ "Pool A": [poolRow] }}
+      />,
+    );
+
+    await userEvent.click(screen.getByText("Search Applications"));
+
+    expect(mockNavigate).toHaveBeenCalledWith("/search/application");
+    expect(onSelectPool).not.toHaveBeenCalled();
   });
 });

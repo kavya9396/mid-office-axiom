@@ -113,6 +113,10 @@ export const dvtDecisionOptions = [
   { label: "Raise Requirements", value: "Raise Requirements" },
   { label: "Refer to GUW", value: "Refer to GUW" },
 ];
+export const reconsiderationDecisionOptions = [
+  { label: "Release the case", value: "Release the case" },
+  { label: "Send back to UW", value: "Send back to UW" },
+];
 export const dvtFormalDecisionOptions = [
   { label: "Accept", value: "Accept" },
   { label: "Raise Requirements", value: "Raise Requirements" },

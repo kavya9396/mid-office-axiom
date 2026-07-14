@@ -17,6 +17,7 @@ import HoDDecision from "./DRS_Accordions/HoDDecision";
 import SrUWDecision from "./DRS_Accordions/SrUWDecision";
 import HoCMODecision from "./DRS_Accordions/HoCMODecision";
 import ReinsureDecision from "./DRS_Accordions/ReinsureDecision";
+import ReconsiderationPoolDecision from "./DRS_Accordions/ReconsiderationPoolDecision";
 import DecisionHistory from "./DRS_Accordions/DecisionHistory";
 import ClaimSection from "./DRS_Accordions/ClaimSection";
 import AccuityDecision from "./DRS_Accordions/AccuityDecision";
@@ -46,6 +47,7 @@ export const accordionRegistry = {
   sruwDecision: SrUWDecision,
   hoCMODecision: HoCMODecision,
   reinsurerDecision: ReinsureDecision,
+  reconsiderationPoolDecision: ReconsiderationPoolDecision,
   claimSection: ClaimSection,
   accuityDecision: AccuityDecision,
   greivance: GrievanceApplication,
@@ -165,8 +167,6 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_RECONSIDERATION_POOL: [
     "breDecision",
     "applicationOverview",
-    "summary",
-    "requirementManagement",
     "reconsiderationPoolDecision"
   ],
   RETAIL_CUW_CLAIM_AUDIT: [
