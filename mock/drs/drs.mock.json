@@ -704,7 +704,7 @@
         "agentName": ""
       },
       "groupDetails": {
-        "coverageOption": "Reducing Cover",
+        "coverageOption": "Reducing Cover12",
         "coverageStatus": "JOINT",
         "moratorium": "No",
         "loanType": "L1",
@@ -843,7 +843,7 @@
           "serviceID": "SRV987654321",
           "ct": "",
           "st": "",
-          "breDate": "2026-05-10 10:15 PM",
+          "breDate": "2026-05-11 10:15 PM",
           "breDiscrepancy": "Pending financial documents",
           "breRemarks": "Awaiting bank statements for verification",
           "userPool": "Financial Review Team",
@@ -852,7 +852,7 @@
       ],
       "riskDetails": [
         {
-          "riskReferralDate": "2026-05-12",
+          "riskReferralDate": "2026-05-11",
           "riskRevertDate": "2026-05-14",
           "riskDecision": "Refer",
           "riskReportValues": "Risk Score: 75, Financial Risk: High, Medical Risk: Medium"
@@ -860,7 +860,7 @@
       ],
       "auditTrail": [
         {
-          "dateTime": "2026-05-16T10:30:00",
+          "dateTime": "2026-05-17T10:30:00",
           "fromPool": "HOD",
           "fromPoolUser": "rahul.sharma",
           "toPool": "Risk Queue",

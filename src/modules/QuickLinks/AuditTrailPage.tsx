@@ -6,9 +6,11 @@ import CustomTable from "../../components/ui/Table/Table";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getDRSPath } from "../../routes/routes";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../store/hooks";
-import { auditTrailThunk } from "../../store/thunks/auditTrailThunk";
-import type { AuditTrail, AuditTrailResponse, AuditTrailRow } from "../../types/drs.types";
+import { drsThunk } from "../../store/thunks/drsThunk";
+import type { RootState } from "../../store/store";
+import type { AuditTrail, AuditTrailRow } from "../../types/drs.types";
 
 const auditTrailColumns: Column<AuditTrailRow>[] = [
   { key: "dateTime", header: "Date/Time", width: "13%" },
@@ -53,51 +55,67 @@ const normalizeAuditTrailRows = (rows: unknown): AuditTrail => {
   });
 };
 
-const extractAuditRows = (response: AuditTrailResponse): AuditTrail => {
-  return normalizeAuditTrailRows(
-    response.auditTrail ?? response.auditTrailData ?? response.data?.auditTrail,
-  );
-};
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 
 const AuditTrailPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { businessType, applicationNumber } = useAppContext();
-  const [rows, setRows] = useState<AuditTrail>([]);
+  const drsData = useSelector((state: RootState) => state.drs.data);
+  const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationNumber = applicationNumber ?? "";
+  const reduxQuickLinks = useMemo(
+    () => toRecord((drsData as unknown as Record<string, unknown> | null)?.quickLinks),
+    [drsData],
+  );
+  const hasReduxAuditTrail = Array.isArray(reduxQuickLinks.auditTrail);
+  const effectiveQuickLinksData = !safeApplicationNumber
+    ? null
+    : hasReduxAuditTrail
+      ? reduxQuickLinks
+      : quickLinksData;
+  const rows = useMemo<AuditTrail>(
+    () => normalizeAuditTrailRows(effectiveQuickLinksData?.auditTrail),
+    [effectiveQuickLinksData],
+  );
 
   useEffect(() => {
     const loadAuditTrail = async () => {
-      if (!safeApplicationNumber) {
-        setRows([]);
+      if (!safeApplicationNumber || hasReduxAuditTrail) {
         return;
       }
 
       try {
         setLoading(true);
         const roleType = localStorage.getItem("roleType") ?? "";
+        const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "System").trim() || "System";
 
         const response = await dispatch(
-          auditTrailThunk({
-            applicationId: safeApplicationNumber,
+          drsThunk({
+            applicationNo: safeApplicationNumber,
+            userId,
             roleType,
+            sections: ["quickLinks"],
           }),
         ).unwrap();
 
-        setRows(extractAuditRows(response));
+        setQuickLinksData(toRecord((response.data as unknown as Record<string, unknown>)?.quickLinks));
       } catch (error) {
         console.error("Failed to load audit trail:", error);
-        setRows([]);
+        setQuickLinksData(null);
       } finally {
         setLoading(false);
       }
     };
 
     void loadAuditTrail();
-  }, [dispatch, safeApplicationNumber]);
+  }, [dispatch, hasReduxAuditTrail, safeApplicationNumber]);
 
   const title = useMemo(
     () => `Audit Trail${loading ? " (Loading...)" : ""}`,

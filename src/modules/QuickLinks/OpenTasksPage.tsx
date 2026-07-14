@@ -1,14 +1,16 @@
 import { Box, Container, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import BackButton from "../../components/layout/BackButton";
 import type { Column } from "../../components/ui/Table/Table";
 import CustomTable from "../../components/ui/Table/Table";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getDRSPath } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
-import { openOtherTasksThunk } from "../../store/thunks/openOtherTasksThunk";
-import type { OpenOtherTaskRow, OpenOtherTasks, OpenOtherTasksResponse } from "../../types/drs.types";
+import { drsThunk } from "../../store/thunks/drsThunk";
+import type { RootState } from "../../store/store";
+import type { OpenOtherTaskRow, OpenOtherTasks } from "../../types/drs.types";
 
 const openTaskColumns: Column<OpenOtherTaskRow>[] = [
   {
@@ -59,54 +61,67 @@ const normalizeOpenTaskRows = (rows: unknown): OpenOtherTasks => {
   });
 };
 
-const extractOpenTaskRows = (response: OpenOtherTasksResponse): OpenOtherTasks => {
-  return normalizeOpenTaskRows(
-    response.openOtherTasks ??
-      response.quickLinks?.openOtherTasks ??
-      response.data?.openOtherTasks ??
-      response.data?.quickLinks?.openOtherTasks,
-  );
-};
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 
 const OpenTasksPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { businessType, applicationNumber } = useAppContext();
-  const [rows, setRows] = useState<OpenOtherTasks>([]);
+  const drsData = useSelector((state: RootState) => state.drs.data);
+  const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationNumber = applicationNumber ?? "";
+  const reduxQuickLinks = useMemo(
+    () => toRecord((drsData as unknown as Record<string, unknown> | null)?.quickLinks),
+    [drsData],
+  );
+  const hasReduxOpenTasks = Array.isArray(reduxQuickLinks.openOtherTasks);
+  const effectiveQuickLinksData = !safeApplicationNumber
+    ? null
+    : hasReduxOpenTasks
+      ? reduxQuickLinks
+      : quickLinksData;
+  const rows = useMemo<OpenOtherTasks>(
+    () => normalizeOpenTaskRows(effectiveQuickLinksData?.openOtherTasks),
+    [effectiveQuickLinksData],
+  );
 
   useEffect(() => {
     const loadOpenTasks = async () => {
-      if (!safeApplicationNumber) {
-        setRows([]);
+      if (!safeApplicationNumber || hasReduxOpenTasks) {
         return;
       }
 
       try {
         setLoading(true);
         const roleType = localStorage.getItem("roleType") ?? "";
+        const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "System").trim() || "System";
 
         const response = await dispatch(
-          openOtherTasksThunk({
-            applicationId: safeApplicationNumber,
+          drsThunk({
+            applicationNo: safeApplicationNumber,
+            userId,
             roleType,
+            sections: ["quickLinks"],
           }),
         ).unwrap();
 
-        setRows(extractOpenTaskRows(response));
+        setQuickLinksData(toRecord((response.data as unknown as Record<string, unknown>)?.quickLinks));
       } catch (error) {
         console.error("Failed to load open tasks:", error);
-        setRows([]);
+        setQuickLinksData(null);
       } finally {
         setLoading(false);
       }
     };
 
     void loadOpenTasks();
-  }, [dispatch, safeApplicationNumber]);
+  }, [dispatch, hasReduxOpenTasks, safeApplicationNumber]);
 
   const title = useMemo(
     () => `Pre Issuance Servicing${loading ? " (Loading...)" : ""}`,

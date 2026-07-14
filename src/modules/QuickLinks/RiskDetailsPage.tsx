@@ -6,9 +6,11 @@ import CustomTable from "../../components/ui/Table/Table";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getDRSPath } from "../../routes/routes";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useAppDispatch } from "../../store/hooks";
-import { riskDetailsThunk } from "../../store/thunks/riskDetailsThunk";
-import type { RiskDetails, RiskDetailsResponse, RiskDetailsRow } from "../../types/drs.types";
+import { drsThunk } from "../../store/thunks/drsThunk";
+import type { RootState } from "../../store/store";
+import type { RiskDetails, RiskDetailsRow } from "../../types/drs.types";
 
 const riskDetailsColumns: Column<RiskDetailsRow>[] = [
   { key: "riskReferralDate", header: "Risk Referral date", width: "18%" },
@@ -39,54 +41,67 @@ const normalizeRiskRows = (rows: unknown): RiskDetails => {
   });
 };
 
-const extractRiskRows = (response: RiskDetailsResponse): RiskDetails => {
-  return normalizeRiskRows(
-    response.riskDetails ??
-      response.quickLinks?.riskDetails ??
-      response.data?.riskDetails ??
-      response.data?.quickLinks?.riskDetails,
-  );
-};
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 
 const RiskDetailsPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { businessType, applicationNumber } = useAppContext();
-  const [rows, setRows] = useState<RiskDetails>([]);
+  const drsData = useSelector((state: RootState) => state.drs.data);
+  const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationNumber = applicationNumber ?? "";
+  const reduxQuickLinks = useMemo(
+    () => toRecord((drsData as unknown as Record<string, unknown> | null)?.quickLinks),
+    [drsData],
+  );
+  const hasReduxRiskDetails = Array.isArray(reduxQuickLinks.riskDetails);
+  const effectiveQuickLinksData = !safeApplicationNumber
+    ? null
+    : hasReduxRiskDetails
+      ? reduxQuickLinks
+      : quickLinksData;
+  const rows = useMemo<RiskDetails>(
+    () => normalizeRiskRows(effectiveQuickLinksData?.riskDetails),
+    [effectiveQuickLinksData],
+  );
 
   useEffect(() => {
     const loadRiskDetails = async () => {
-      if (!safeApplicationNumber) {
-        setRows([]);
+      if (!safeApplicationNumber || hasReduxRiskDetails) {
         return;
       }
 
       try {
         setLoading(true);
         const roleType = localStorage.getItem("roleType") ?? "";
+        const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "System").trim() || "System";
 
         const response = await dispatch(
-          riskDetailsThunk({
-            applicationId: safeApplicationNumber,
+          drsThunk({
+            applicationNo: safeApplicationNumber,
+            userId,
             roleType,
+            sections: ["quickLinks"],
           }),
         ).unwrap();
 
-        setRows(extractRiskRows(response));
+        setQuickLinksData(toRecord((response.data as unknown as Record<string, unknown>)?.quickLinks));
       } catch (error) {
         console.error("Failed to load risk details:", error);
-        setRows([]);
+        setQuickLinksData(null);
       } finally {
         setLoading(false);
       }
     };
 
     void loadRiskDetails();
-  }, [dispatch, safeApplicationNumber]);
+  }, [dispatch, hasReduxRiskDetails, safeApplicationNumber]);
 
   const title = useMemo(
     () => `Risk Details${loading ? " (Loading...)" : ""}`,
