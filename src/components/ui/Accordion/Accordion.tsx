@@ -62,8 +62,21 @@ export default function CustomAccordion({
         }}
       >
         <Typography component="span" sx={{ fontSize: titleFontSize, fontWeight: 700, flex: 1, color:titleColor}}>
-          {title} {chip}
+          {title}
         </Typography>
+
+        {chip && (
+          <Box
+            onClick={(event) => event.stopPropagation()}
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              mr: 1.5,
+            }}
+          >
+            {chip}
+          </Box>
+        )}
 
         <Box
           sx={{

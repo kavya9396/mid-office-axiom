@@ -145,5 +145,7 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "nameOfProposer",
     "nameOfLifeAssured",
     "grievanceRaisedDate",
-  ]
+  ],
+  //RISK_TASK:["applicationNo","nameOfProposer","nameOfLifeAssured","product","premium","channel","referredDate","riskStatus"]
+  RISK_TASK:[...baseColumns]
 };

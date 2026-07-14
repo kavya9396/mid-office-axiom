@@ -21,6 +21,7 @@ import ReconsiderationPoolDecision from "./DRS_Accordions/ReconsiderationPoolDec
 import DecisionHistory from "./DRS_Accordions/DecisionHistory";
 import ClaimSection from "./DRS_Accordions/ClaimSection";
 import AccuityDecision from "./DRS_Accordions/AccuityDecision";
+import RiskDecision from "./DRS_Accordions/RiskDecision";
 import QuickLinks from "./QuickLinks";
 import UWToolkit from "./UWToolkit";
 import GrievanceApplication from "../Grievance/GrievanceApplication";
@@ -50,6 +51,7 @@ export const accordionRegistry = {
   reconsiderationPoolDecision: ReconsiderationPoolDecision,
   claimSection: ClaimSection,
   accuityDecision: AccuityDecision,
+  riskDecision: RiskDecision,
   greivance: GrievanceApplication,
   decisionHistory: DecisionHistory,
   groupPolicyDetails:GroupPolicyDetails
@@ -263,6 +265,16 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "applicationOverview",
     "summary",
     "requirementManagement",
+    "quickLinks"
+  ],
+  RISK_TASK:[
+     "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "riskDecision",
+    "riskReports",
+    "decisionHistory",
     "quickLinks"
   ]
 };

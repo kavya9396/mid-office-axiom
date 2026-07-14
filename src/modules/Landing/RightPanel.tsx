@@ -82,6 +82,7 @@ const roleMapper = {
 
   "GUW_FORMAL_TASK": "GUW_FORMAL_TASK",
   "DVT_FORMAL_TASK": "DVT_FORMAL_TASK",
+  "RISK_TASK":"RISK_TASK"
 }
 
 const RightPanel = ({

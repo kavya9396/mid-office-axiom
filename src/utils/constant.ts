@@ -117,6 +117,11 @@ export const reconsiderationDecisionOptions = [
   { label: "Release the case", value: "Release the case" },
   { label: "Send back to UW", value: "Send back to UW" },
 ];
+export const riskDecisionOptions = [
+  { label: "Favourable", value: "Favourable" },
+  { label: "Adverse", value: "Adverse" },
+  { label: "Refer back to UW", value: "Refer back to UW" },
+];
 export const dvtFormalDecisionOptions = [
   { label: "Accept", value: "Accept" },
   { label: "Raise Requirements", value: "Raise Requirements" },
