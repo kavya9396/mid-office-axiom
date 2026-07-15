@@ -8,6 +8,8 @@ import type { AppDispatch } from "../../store/store";
 import { searchThunk } from "../../store/thunks/searchAppThunk";
 import { getDRSPath, normalizeBusinessType } from "../../routes/routes";
 import { useNavigate } from "react-router-dom";
+import { setDrsData } from "../../store/slices/drsSlice";
+import type { DRSData } from "../../types/drs.types";
 
 const pageShellSx = {
   minHeight: "90vh",
@@ -40,6 +42,22 @@ const SearchApplication = () => {
   };
 
   const isValidSearch = searchValue.length === 10;
+
+  const getResponseData = (response: unknown): DRSData | null => {
+    const responseRecord = response && typeof response === "object" && !Array.isArray(response)
+      ? (response as Record<string, unknown>)
+      : {};
+    const data = responseRecord.data;
+
+    return data && typeof data === "object" && !Array.isArray(data)
+      ? (data as DRSData)
+      : null;
+  };
+
+  const resolveRoleType = (responseData: DRSData | null): string => {
+    const dataRecord = responseData as unknown as Record<string, unknown> | null;
+    return String(dataRecord?.roleType ?? localStorage.getItem("roleType") ?? "").trim();
+  };
 
   const resolveApplicationNumber = (response: unknown) => {
     const responseRecord = response && typeof response === "object" && !Array.isArray(response)
@@ -74,15 +92,29 @@ const SearchApplication = () => {
       ).unwrap();
 
       const applicationNumber = resolveApplicationNumber(response);
+      const drsResponseData = getResponseData(response);
+      const responseRoleType = resolveRoleType(drsResponseData);
       const safeBusinessType =
         normalizeBusinessType(localStorage.getItem("businessType")) ?? "retail";
 
+      if (drsResponseData) {
+        dispatch(setDrsData(drsResponseData));
+        localStorage.setItem("searchApplicationDrsData", JSON.stringify(drsResponseData));
+      }
+
       localStorage.setItem("businessType", safeBusinessType);
       localStorage.setItem("applicationNumber", applicationNumber);
+      if (responseRoleType) {
+        localStorage.setItem("roleType", responseRoleType);
+      }
+      localStorage.setItem("drsReadOnlyMode", "true");
       localStorage.setItem(
         "selectedCaseContext",
         JSON.stringify({
           applicationNo: applicationNumber,
+          roleType: responseRoleType,
+          source: "searchApplication",
+          readOnly: true,
         }),
       );
 

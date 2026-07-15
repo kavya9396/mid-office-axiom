@@ -57,6 +57,7 @@ export default function CustomTabs<T extends string>({
             key={tab.key}
             component="button"
             type="button"
+            data-drs-readonly-nav="true"
             onClick={() => onChange(tab.key)}
             sx={getTabStyles(isActive)}
           >

@@ -1,5 +1,6 @@
 {
   "data": {
+    "roleType":"CUW Pool",
     "basicDetails": {
       "applicationNumber": "APP123456789",
       "lastLoginDate": "2026-05-15T10:30:00",
@@ -37,6 +38,13 @@
       "timestamp": "01/04/2026, 1300hrs",
       "action": "Regular Medical required",
       "reTriggerCount": 1
+    },
+    "pivvSection": {
+      "pivvPoolDecision": "Pending Review",
+      "pivvPoolRemarks": "PIVV verification details are available for review.",
+      "reason": "Customer verification pending",
+      "userId": "PIVV001",
+      "remarkDate": "2026-04-01T13:00:00.000Z"
     },
     "summary": [
       {

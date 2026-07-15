@@ -30,6 +30,11 @@ const drsSlice = createSlice({
   name: "drs",
   initialState,
   reducers: {
+    setDrsData: (state, action: { payload: DRSData }) => {
+      state.data = action.payload;
+      state.loading = "idle";
+      state.error = null;
+    },
     setBreOutput: (state, action: { payload: DRSBreOutput }) => {
       if (!state.data) return;
 
@@ -122,5 +127,5 @@ const drsSlice = createSlice({
   },
 });
 
-export const { setBreOutput, setBreExternalApiOutputs, setProductFaceValue } = drsSlice.actions;
+export const { setDrsData, setBreOutput, setBreExternalApiOutputs, setProductFaceValue } = drsSlice.actions;
 export default drsSlice.reducer;

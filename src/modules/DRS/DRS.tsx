@@ -1,6 +1,6 @@
 import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "./drs-layouts";
 import BackButton from "../../components/layout/BackButton";
-import { Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { Fragment, useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -9,11 +9,10 @@ import type { RootState } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import { mastersThunk } from "../../store/thunks/mastersThunk";
 import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
-import { setBreExternalApiOutputs } from "../../store/slices/drsSlice";
+import { setBreExternalApiOutputs, setDrsData } from "../../store/slices/drsSlice";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
-import GroupPolicyDetails from "./DRS_Accordions/GroupPolicyDetails";
-import type { DRSBreOutput } from "../../types/drs.types";
+import type { DRSBreOutput, DRSData } from "../../types/drs.types";
 
 const toText = (value: unknown) => String(value ?? "").trim();
 
@@ -88,6 +87,57 @@ const mapper = {
     "PRE_LOGIN_TASK":"PRE_LOGIN_TASK"
 }
 
+const getSelectedCaseContext = (): Record<string, unknown> => {
+    try {
+        const raw = localStorage.getItem("selectedCaseContext");
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+            ? (parsed as Record<string, unknown>)
+            : {};
+    } catch {
+        return {};
+    }
+};
+
+const getStoredSearchDrsData = (): DRSData | null => {
+    try {
+        const raw = localStorage.getItem("searchApplicationDrsData");
+        const parsed = raw ? JSON.parse(raw) : null;
+        return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+            ? (parsed as DRSData)
+            : null;
+    } catch {
+        return null;
+    }
+};
+
+const readOnlyContentSx = {
+    "& input, & textarea, & .MuiSelect-select": {
+        pointerEvents: "none",
+    },
+    "& button:not(.MuiAccordionSummary-root):not([data-drs-readonly-nav='true'])": {
+        display: "none",
+    },
+};
+
+const searchHiddenAccordionIds = new Set([
+    "cvtDecision",
+    "dvtDecision",
+    "uwDecision",
+    "pivvDecision",
+    "exceptionDecision",
+    "hodDecision",
+    "sruwDecision",
+    "hoCMODecision",
+    "reinsurerDecision",
+    "reconsiderationPoolDecision",
+    "accuityDecision",
+    "riskDecision",
+    "decisionHistory",
+    "uwChecklist",
+    "uacChecklist",
+]);
+
 const DRS = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
@@ -101,7 +151,6 @@ const DRS = () => {
         () => getPoolWiseAvailableAccordions(layout, drsData),
         [layout, drsData],
     );
-    const showGroupPolicyDetails = layout === "GROUP_DVT_POOL";
     const navigate = useNavigate();
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
@@ -110,9 +159,41 @@ const DRS = () => {
 
     const dispatch = useDispatch<AppDispatch>();
     const safeApplicationNumber = applicationNumber ?? "";
+    const selectedCaseContext = getSelectedCaseContext();
+    const isSearchReadOnlyMode =
+        localStorage.getItem("drsReadOnlyMode") === "true" &&
+        selectedCaseContext.source === "searchApplication" &&
+        selectedCaseContext.readOnly === true &&
+        String(selectedCaseContext.applicationNo ?? "") === safeApplicationNumber;
+    const displayAccordions = useMemo(
+        () => isSearchReadOnlyMode
+            ? visibleAccordions.filter((accordionId) => !searchHiddenAccordionIds.has(String(accordionId)))
+            : visibleAccordions,
+        [isSearchReadOnlyMode, visibleAccordions],
+    );
 
     useEffect(() => {
-        if (!safeApplicationNumber || !userId || !roleType) {
+        if (!safeApplicationNumber || !roleType) {
+            return;
+        }
+
+        if (isSearchReadOnlyMode) {
+            if (!drsData) {
+                const storedDrsData = getStoredSearchDrsData();
+                if (storedDrsData) {
+                    dispatch(setDrsData(storedDrsData));
+                }
+            }
+
+            dispatch(
+                mastersThunk({
+                    masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country", "exceptionDecision"],
+                }),
+            );
+            return;
+        }
+
+        if (!userId) {
             return;
         }
 
@@ -182,7 +263,7 @@ const DRS = () => {
         };
 
         void loadDRSAndBRE();
-    }, [dispatch, roleType, safeApplicationNumber, sections, userId]);
+    }, [dispatch, drsData, isSearchReadOnlyMode, roleType, safeApplicationNumber, sections, userId]);
 
 
     return (
@@ -223,18 +304,19 @@ const DRS = () => {
                     </div>:''
                 }
             />
-            {visibleAccordions.map((accordionId) => {
-                const AccordionComponent = accordionRegistry[accordionId as keyof typeof accordionRegistry];
-                if (!AccordionComponent) {
-                    return null;
-                }
-                return (
-                    <Fragment key={accordionId}>
-                        <AccordionComponent />
-                        {/* {showGroupPolicyDetails && accordionId === "applicationOverview" && <GroupPolicyDetails />} */}
-                    </Fragment>
-                );
-            })}
+            <Box sx={isSearchReadOnlyMode ? readOnlyContentSx : undefined}>
+                {displayAccordions.map((accordionId) => {
+                    const AccordionComponent = accordionRegistry[accordionId as keyof typeof accordionRegistry];
+                    if (!AccordionComponent) {
+                        return null;
+                    }
+                    return (
+                        <Fragment key={accordionId}>
+                            <AccordionComponent />
+                        </Fragment>
+                    );
+                })}
+            </Box>
         </>
     )
 }
