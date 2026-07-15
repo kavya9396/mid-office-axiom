@@ -2,7 +2,7 @@ import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "
 import BackButton from "../../components/layout/BackButton";
 import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Fragment, useEffect, useMemo, useRef } from "react";
+import { Fragment, useCallback, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import type { RootState } from "../../store/store";
@@ -176,37 +176,36 @@ const DRS = () => {
         [isSearchReadOnlyMode, visibleAccordions],
     );
 
+    const dispatchMastersOnce = useCallback(() => {
+        if (mastersRequestedRef.current) {
+            return;
+        }
+
+        mastersRequestedRef.current = true;
+        dispatch(
+            mastersThunk({
+                masters: DRS_MASTER_KEYS,
+            }),
+        );
+    }, [dispatch]);
+
     useEffect(() => {
-        if (!safeApplicationNumber || !roleType) {
+        if (!safeApplicationNumber || !roleType || !isSearchReadOnlyMode) {
             return;
         }
 
-        const dispatchMastersOnce = () => {
-            if (mastersRequestedRef.current) {
-                return;
+        if (!drsData) {
+            const storedDrsData = getStoredSearchDrsData();
+            if (storedDrsData) {
+                dispatch(setDrsData(storedDrsData));
             }
-
-            mastersRequestedRef.current = true;
-            dispatch(
-                mastersThunk({
-                    masters: DRS_MASTER_KEYS,
-                }),
-            );
-        };
-
-        if (isSearchReadOnlyMode) {
-            if (!drsData) {
-                const storedDrsData = getStoredSearchDrsData();
-                if (storedDrsData) {
-                    dispatch(setDrsData(storedDrsData));
-                }
-            }
-
-            dispatchMastersOnce();
-            return;
         }
 
-        if (!userId) {
+        dispatchMastersOnce();
+    }, [dispatch, dispatchMastersOnce, drsData, isSearchReadOnlyMode, roleType, safeApplicationNumber]);
+
+    useEffect(() => {
+        if (!safeApplicationNumber || !roleType || isSearchReadOnlyMode || !userId) {
             return;
         }
 
@@ -272,7 +271,7 @@ const DRS = () => {
         };
 
         void loadDRSAndBRE();
-    }, [dispatch, drsData, isSearchReadOnlyMode, roleType, safeApplicationNumber, sections, userId]);
+    }, [dispatch, dispatchMastersOnce, isSearchReadOnlyMode, roleType, safeApplicationNumber, sections, userId]);
 
 
     return (
