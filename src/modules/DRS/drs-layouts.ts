@@ -26,6 +26,10 @@ import QuickLinks from "./QuickLinks";
 import UWToolkit from "./UWToolkit";
 import GrievanceApplication from "../Grievance/GrievanceApplication";
 import GroupPolicyDetails from "./DRS_Accordions/GroupPolicyDetails";
+import CustomerProfile from "./DRS_Accordions/CustomerProfile";
+import MedicalInsuranceDetails from "./DRS_Accordions/MedicalInsuranceDetails";
+import DocumentRequired from "./DRS_Accordions/DocumentRequired";
+import PreLogin from "./DRS_Accordions/PreLogin";
 
 export const accordionRegistry = {
   breDecision: BreDecision,
@@ -54,7 +58,11 @@ export const accordionRegistry = {
   riskDecision: RiskDecision,
   greivance: GrievanceApplication,
   decisionHistory: DecisionHistory,
-  groupPolicyDetails:GroupPolicyDetails
+  groupPolicyDetails:GroupPolicyDetails,
+  customerProfile: CustomerProfile,
+  medicalInsuranceDetails: MedicalInsuranceDetails,
+  documentRequired: DocumentRequired,
+  preLogin: PreLogin,
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
@@ -80,6 +88,17 @@ const sectionAvailabilityCheck: Partial<Record<AccordionKey, (data: DrsDataRecor
   requirementManagement: (data) => hasNonEmptyArray(data.requirementManagement),
   breDecision: (data) => hasObjectContent(data.breDecision) || hasObjectContent(toRecord(data.externalAPIs).breOutput),
   quickLinks: (data) => hasObjectContent(data.quickLinks),
+  customerProfile: (data) => hasNonEmptyArray(data.summary) || hasNonEmptyArray(data.customerDetails),
+  medicalInsuranceDetails: (data) =>
+    hasObjectContent(data.medicalInsuranceDetails) || hasNonEmptyArray(toRecord(data.quickLinks).previousPolicies),
+  documentRequired: (data) => hasObjectContent(data.documentRequired),
+  preLogin: (data) =>
+    hasObjectContent(data.preLogin) ||
+    hasNonEmptyArray(data.summary) ||
+    hasNonEmptyArray(data.customerDetails) ||
+    hasObjectContent(data.medicalInsuranceDetails) ||
+    hasObjectContent(data.documentRequired) ||
+    hasNonEmptyArray(toRecord(data.quickLinks).previousPolicies),
 };
 
 export const getPoolWiseAvailableAccordions = (
@@ -216,6 +235,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_ECG_POOL: ["quickLinks"],
   RETAIL_TMT_POOL: ["quickLinks"],
   RETAIL_GRIEVANCE_POOL: ["greivance"],
+  PRE_LOGIN_TASK:["breDecision","preLogin","requirementManagement","uwDecision"],
   
 
   GROUP_DVT_POOL: [

@@ -1,182 +1,7 @@
 {
   "userId":"ipru74685",
   "poolData": {
-    "CMO_TASK": [
-      {
-        "id": 1,
-
-        "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
-        "appliedSa": 1000000,
-
-        "annualPremium": 876863872,
-
-        "productType": "I19",
-
-        "isMedical": false,
-
-        "channel": "0TTB",
-
-        "roleType": "CMO_TASK",
-
-        "role": "GROUP_CMO_USER",
-
-        "businessType": "GROUP",
-
-        "state": "DRAFT",
-
-        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
-        "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }
-    ],
-    "CPT_TASK":[{
-        "id": 1,
-
-        "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
-        "appliedSa": 1000000,
-
-        "annualPremium": 876863872,
-
-        "productType": "I19",
-
-        "isMedical": false,
-
-        "channel": "0TTB",
-
-        "roleType": "CPT_TASK",
-
-        "role": "GROUP_CPT_USER",
-
-        "businessType": "GROUP",
-
-        "state": "DRAFT",
-
-        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
-        "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }],
-    "GUW_TASK":[{
-        "id": 1,
-
-        "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
-        "appliedSa": 1000000,
-
-        "annualPremium": 876863872,
-
-        "productType": "I19",
-
-        "isMedical": false,
-
-        "channel": "0TTB",
-
-        "roleType": "GUW_TASK",
-
-        "role": "GROUP_GUW_USER",
-
-        "businessType": "GROUP",
-
-        "state": "DRAFT",
-
-        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
-        "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }],
+    
     "DVT_TASK":[{
         "id": 1,
 
@@ -235,353 +60,363 @@
         "typeOfGroupBusiness":"Term",
         "caseReceivedDate":"01-07-2026"
       }],
-    "HOD_TASK":[{
-        "id": 1,
-
-        "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
-        "appliedSa": 1000000,
-
-        "annualPremium": 876863872,
-
-        "productType": "I19",
-
+      "PRE_ISSUANCE_SERVICING_TASK": [
+      {
+        "taskId": "2078.18771",
+        "applicationNo": "NB0000027",
         "isMedical": false,
-
-        "channel": "0TTB",
-
-        "roleType": "HOD_TASK",
-
-        "role": "GROUP_HOD_USER",
-
-        "businessType": "GROUP",
-
-        "state": "DRAFT",
-
-        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
-        "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }],
-    "MMT_TASK":[{
+        "roleType": "PRE_ISSUANCE_SERVICING_TASK",
+        "role": "GROUP_PRE_ISSUANCE_SERVICING_USER",
+        "businessType": "GROUP"
+      }
+    ],
+    "SYSTEM_WAIT_POOL_AMR_MEDICAL": [
+      {
         "id": 1,
-
         "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
         "appliedSa": 1000000,
-
         "annualPremium": 876863872,
-
         "productType": "I19",
-
         "isMedical": false,
-
+        "drc": "Low",
+        "hniFlag": "Yes",
         "channel": "0TTB",
-
-        "roleType": "MMT_TASK",
-
-        "role": "GROUP_MMT_USER",
-
-        "businessType": "GROUP",
-
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "SYSTEM_WAIT_POOL_AMR_MEDICAL",
+        "role": "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL_USER",
+        "businessType": "RETAIL",
         "state": "DRAFT",
-
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
         "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }],
-    "SR_UW_TASK":[{
+        "status": "DRAFT"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "SYSTEM_WAIT_POOL_AMR_MEDICAL",
+        "role": "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL_USER",
+        "businessType": "RETAIL",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      }
+    ],
+    "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL": [
+      {
         "id": 1,
-
         "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
         "appliedSa": 1000000,
-
         "annualPremium": 876863872,
-
         "productType": "I19",
-
         "isMedical": false,
-
+        "drc": "Low",
+        "hniFlag": "Yes",
         "channel": "0TTB",
-
-        "roleType": "SR_UW_TASK",
-
-        "role": "GROUP_SR_UW_USER",
-
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL",
+        "role": "GROUP_SYSTEM_WAIT_POOL_AMR_NON_MEDICAL_USER",
         "businessType": "GROUP",
-
         "state": "DRAFT",
-
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
         "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }],
-    "SUW_TASK":[{
+        "status": "DRAFT"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL",
+        "role": "GROUP_SYSTEM_WAIT_POOL_AMR_NON_MEDICAL_USER",
+        "businessType": "GROUP",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      }
+    ],
+    "RECONSIDERATION_TASK": [
+      {
         "id": 1,
-
         "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
         "appliedSa": 1000000,
-
         "annualPremium": 876863872,
-
         "productType": "I19",
-
         "isMedical": false,
-
+        "drc": "Low",
+        "hniFlag": "Yes",
         "channel": "0TTB",
-
-        "roleType": "SUW_TASK",
-
-        "role": "GROUP_SUW_USER",
-
-        "businessType": "GROUP",
-
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "RECONSIDERATION_TASK",
+        "role": "RETAIL_RECONSIDERATION_USER",
+        "businessType": "RETAIL",
         "state": "DRAFT",
-
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
         "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
         "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }],
-    "VENDOR_CMO_TASK":[{
+        "sumAssured":121212,
+        "clientType":"client",
+        "caseType":"Individual",
+        "lastPool":"HOD",
+        "product":"ICICI",
+        "premium":12121
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "RECONSIDERATION_TASK",
+        "role": "RETAIL_RECONSIDERATION_USER",
+        "businessType": "RETAIL",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT",
+        "sumAssured":121212,
+        "clientType":"client",
+        "caseType":"Individual",
+        "lastPool":"HOD",
+        "product":"ICICI",
+        "premium":12121
+      }
+    ],
+    "REJECT_TASK": [
+      {
         "id": 1,
-
         "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
         "appliedSa": 1000000,
-
         "annualPremium": 876863872,
-
         "productType": "I19",
-
         "isMedical": false,
-
+        "drc": "Low",
+        "hniFlag": "Yes",
         "channel": "0TTB",
-
-        "roleType": "VENDOR_CMO_TASK",
-
-        "role": "GROUP_VENDOR_CMO_USER",
-
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "REJECT_TASK",
+        "role": "GROUP_REJECT_USER",
         "businessType": "GROUP",
-
         "state": "DRAFT",
-
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
         "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }],
-    "IT_TASK":[{
+        "status": "DRAFT"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "REJECT_TASK",
+        "role": "GROUP_REJECT_USER",
+        "businessType": "GROUP",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      }
+    ],
+    "READY_FOR_ISSUANCE_TASK": [
+      {
         "id": 1,
-
         "taskId": "18763",
-
-        "applicationNo": "NB0000026",
-
-        "productCode": "I19",
-
-        "sumAssured": 100000,
-
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
         "appliedSa": 1000000,
-
         "annualPremium": 876863872,
-
         "productType": "I19",
-
         "isMedical": false,
-
+        "drc": "Low",
+        "hniFlag": "Yes",
         "channel": "0TTB",
-
-        "roleType": "IT_TASK",
-
-        "role": "GROUP_IT_USER",
-
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "READY_FOR_ISSUANCE_TASK",
+        "role": "GROUP_READY_FOR_ISSUANCE_USER",
         "businessType": "GROUP",
-
         "state": "DRAFT",
-
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
-
         "displayName": "ARYAYAN Khan",
-
-        "clientType": "Individual",
-
-        "caseType": "PROP",
-
-        "uwName": "case-intiation-orchestrator",
-
-        "userId": "case-intiation-orchestrator",
-
-        "endDate": "2026-06-19",
-
-        "status": "DRAFT",
-
-        "premium": "876863872",
-
-        "nameOfProposer": "ARYAYAN Khan",
-
-        "nameOfLifeAssured": "ARYAYAN Khan",
-
-        "caseStatus": "DRAFT",
-        "breDecision":"STD",
-        "masterPlanNo":"MPH123",
-        "poolTAT":">2",
-        "typeOfGroupBusiness":"Term",
-        "caseReceivedDate":"01-07-2026"
-      }]
+        "status": "DRAFT"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "READY_FOR_ISSUANCE_TASK",
+        "role": "GROUP_READY_FOR_ISSUANCE_USER",
+        "businessType": "GROUP",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      }
+    ],
+     "ISSUANCE_TASK": [
+      {
+        "id": 1,
+        "taskId": "18763",
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "ISSUANCE_TASK",
+        "role": "GROUP_ISSUANCE_USER",
+        "businessType": "GROUP",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "REJECT_TASK",
+        "role": "GROUP_ISSUANCE_USER",
+        "businessType": "GROUP",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      }
+    ],
+     "REASSIGN_TRANSFER_TASK": [
+      {
+        "id": 1,
+        "taskId": "18763",
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "REASSIGN_TRANSFER_TASK",
+        "role": "GROUP_REASSIGN_TRANSFER_USER",
+        "businessType": "GROUP",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "REASSIGN_TRANSFER_TASK",
+        "role": "GROUP_REASSIGN_TRANSFER_USER",
+        "businessType": "GROUP",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      }
+    ]
   }
 }

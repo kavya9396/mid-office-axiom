@@ -786,6 +786,430 @@
         }
       ]
     },
+    "medicalInsuranceDetails": {
+      "medicalProfile": {
+        "pastMedicalHistory": "No significant past medical history declared.",
+        "currentMedicalCondition": "No current medical condition declared.",
+        "remarks": "Medical profile verified with no adverse findings."
+      },
+      "existingInsuranceDetails": [
+        {
+          "policyNumber": "OB25175112",
+          "plan": "Term",
+          "type": "Medical",
+          "companyName": "ICICI Pru",
+          "sumAssured": 5000000,
+          "dateOfCommencement": "2026-03-27"
+        }
+      ],
+      "simultaneousAppliedPolicies": [
+        {
+          "companyName": "ICICI Pru",
+          "sumAssured": 5000000,
+          "type": "Medical",
+          "plan": "Term",
+          "policyStatus": "Active"
+        },
+        {
+          "companyName": "ICICI Pru",
+          "sumAssured": 5000000,
+          "type": "Medical",
+          "plan": "Term",
+          "policyStatus": "Active"
+        }
+      ],
+      "approvalRequired": {
+        "financial": true,
+        "medical": false,
+        "both": true
+      }
+    },
+    "documentRequired": {
+      "form16": {
+        "title": "FORM 16 (Latest Assessment Year)",
+        "yearHeaders": ["Year 1", "Year 2", "Year 3"],
+        "rows": [
+          {
+            "label": "Assessment",
+            "year1": "AY 25-26",
+            "year2": "NA",
+            "year3": "NA"
+          },
+          {
+            "label": "Gross Salary PA",
+            "year1": "₹ 500000",
+            "year2": "NA",
+            "year3": "NA"
+          },
+          {
+            "label": "Average Annual Income",
+            "year1": "₹ 500000",
+            "year2": "NA",
+            "year3": "NA"
+          },
+          {
+            "label": "Life Assured Pan No",
+            "year1": "AXXXXDXXX2L",
+            "year2": "NA",
+            "year3": "NA"
+          },
+          {
+            "label": "Life Assured Name",
+            "year1": "Rudra Sangha",
+            "year2": "NA",
+            "year3": "NA"
+          }
+        ]
+      },
+      "isLifeAssuredNameSameWithDocName": "Yes",
+      "companyName": "ICICI Bank"
+    },
+    "preLogin": {
+      "individualCase": {
+        "summary": [
+          {
+            "personalDetails": {
+              "title": "Mr",
+              "firstName": "Rudra",
+              "middleName": "Prakash",
+              "lastName": "Sangha",
+              "gender": "M",
+              "maritalStatus": "Married",
+              "dob": "1995-01-02T00:00:00.0",
+              "age": 45,
+              "highestQualification": "Graduate",
+              "designation": "Manager",
+              "orgName": "ICICI Bank",
+              "isPEP": false,
+              "criminalProceeding": "No"
+            },
+            "applicantFinancialDetails": {
+              "occupation": "Salaried",
+              "organisationName": "ICICI Bank",
+              "annualIncome": 5000000
+            },
+            "financialDetails": {
+              "annualIncome": 5000000,
+              "appliedSumAssured": 5000000
+            },
+            "policyDetails": {
+              "productName": "ICICI Pru iProtect Care (Term Plan)",
+              "modalPremium": 11243
+            },
+            "kycDetails": {
+              "pep": "No",
+              "criminalProceedings": "No"
+            },
+            "address": [
+              {
+                "type": "communication",
+                "city": "Mumbai",
+                "residingCountry": "India"
+              }
+            ]
+          }
+        ],
+        "medicalInsuranceDetails": {
+          "existingInsuranceDetails": [
+            {
+              "policyNumber": "OB25175112",
+              "plan": "Term",
+              "type": "Medical",
+              "companyName": "ICICI Pru",
+              "sumAssured": 5000000,
+              "dateOfCommencement": "2026-03-27"
+            }
+          ],
+          "simultaneousAppliedPolicies": [
+            {
+              "companyName": "ICICI Pru",
+              "sumAssured": 5000000,
+              "type": "Medical",
+              "plan": "Term",
+              "policyStatus": "Active"
+            }
+          ],
+          "approvalRequired": {
+            "financial": true,
+            "medical": false,
+            "both": true
+          }
+        },
+        "documentRequired": {
+          "form16": {
+            "title": "FORM 16 (Latest Assessment Year)",
+            "yearHeaders": ["Year 1", "Year 2", "Year 3"],
+            "rows": [
+              { "label": "Assessment", "year1": "AY 25-26", "year2": "NA", "year3": "NA" },
+              { "label": "Gross Salary PA", "year1": "₹ 500000", "year2": "NA", "year3": "NA" },
+              { "label": "Average Annual Income", "year1": "₹ 500000", "year2": "NA", "year3": "NA" },
+              { "label": "Life Assured Pan No", "year1": "AXXXXDXXX2L", "year2": "NA", "year3": "NA" },
+              { "label": "Life Assured Name", "year1": "Rudra Sangha", "year2": "NA", "year3": "NA" }
+            ]
+          },
+          "isLifeAssuredNameSameWithDocName": "Yes",
+          "companyName": "ICICI Bank"
+        }
+      },
+      "keymanInsurance": {
+        "summary": [
+          {
+            "personalDetails": {
+              "title": "Mr",
+              "firstName": "Arvind",
+              "middleName": "Kumar",
+              "lastName": "Mehta",
+              "gender": "M",
+              "maritalStatus": "Married",
+              "dob": "1982-04-11T00:00:00.0",
+              "age": 44,
+              "highestQualification": "MBA",
+              "designation": "Chief Technology Officer",
+              "orgName": "Axiom Finserve Pvt Ltd",
+              "isPEP": false,
+              "criminalProceeding": "No"
+            },
+            "applicantFinancialDetails": {
+              "occupation": "Keyman - Executive",
+              "organisationName": "Axiom Finserve Pvt Ltd",
+              "annualIncome": 8500000
+            },
+            "financialDetails": {
+              "annualIncome": 8500000,
+              "appliedSumAssured": 12000000
+            },
+            "policyDetails": {
+              "productName": "ICICI Pru Keyman Protect",
+              "modalPremium": 48200
+            },
+            "kycDetails": {
+              "pep": "No",
+              "criminalProceedings": "No"
+            },
+            "address": [
+              {
+                "type": "communication",
+                "city": "Pune",
+                "residingCountry": "India"
+              }
+            ]
+          }
+        ],
+        "medicalInsuranceDetails": {
+          "existingInsuranceDetails": [
+            {
+              "policyNumber": "KM88451220",
+              "plan": "Term",
+              "type": "Keyman",
+              "companyName": "ICICI Pru",
+              "sumAssured": 7500000,
+              "dateOfCommencement": "2025-08-18"
+            }
+          ],
+          "simultaneousAppliedPolicies": [
+            {
+              "companyName": "ICICI Pru",
+              "sumAssured": 12000000,
+              "type": "Keyman",
+              "plan": "Term",
+              "policyStatus": "Under Review"
+            }
+          ],
+          "approvalRequired": {
+            "financial": true,
+            "medical": true,
+            "both": true
+          }
+        },
+        "documentRequired": {
+          "form16": {
+            "title": "FORM 16 (Latest Assessment Year)",
+            "yearHeaders": ["Year 1", "Year 2", "Year 3"],
+            "rows": [
+              { "label": "Assessment", "year1": "AY 25-26", "year2": "AY 24-25", "year3": "NA" },
+              { "label": "Gross Salary PA", "year1": "₹ 8500000", "year2": "₹ 7800000", "year3": "NA" },
+              { "label": "Average Annual Income", "year1": "₹ 8150000", "year2": "NA", "year3": "NA" },
+              { "label": "Life Assured Pan No", "year1": "ARVPM4521K", "year2": "NA", "year3": "NA" },
+              { "label": "Life Assured Name", "year1": "Arvind Mehta", "year2": "NA", "year3": "NA" }
+            ]
+          },
+          "isLifeAssuredNameSameWithDocName": "Yes",
+          "companyName": "Axiom Finserve Pvt Ltd"
+        }
+      },
+      "partnershipInsurance": {
+        "summary": [
+          {
+            "personalDetails": {
+              "title": "Ms",
+              "firstName": "Naina",
+              "middleName": "R",
+              "lastName": "Shah",
+              "gender": "F",
+              "maritalStatus": "Single",
+              "dob": "1989-09-19T00:00:00.0",
+              "age": 36,
+              "highestQualification": "CA",
+              "designation": "Managing Partner",
+              "orgName": "Shah & Rao Associates",
+              "isPEP": false,
+              "criminalProceeding": "No"
+            },
+            "applicantFinancialDetails": {
+              "occupation": "Partner",
+              "organisationName": "Shah & Rao Associates",
+              "annualIncome": 6400000
+            },
+            "financialDetails": {
+              "annualIncome": 6400000,
+              "appliedSumAssured": 9000000
+            },
+            "policyDetails": {
+              "productName": "ICICI Pru Partnership Protect",
+              "modalPremium": 35400
+            },
+            "kycDetails": {
+              "pep": "No",
+              "criminalProceedings": "No"
+            },
+            "address": [
+              {
+                "type": "communication",
+                "city": "Ahmedabad",
+                "residingCountry": "India"
+              }
+            ]
+          }
+        ],
+        "medicalInsuranceDetails": {
+          "existingInsuranceDetails": [
+            {
+              "policyNumber": "PT66510233",
+              "plan": "Term",
+              "type": "Partnership",
+              "companyName": "ICICI Pru",
+              "sumAssured": 4500000,
+              "dateOfCommencement": "2024-12-05"
+            }
+          ],
+          "simultaneousAppliedPolicies": [
+            {
+              "companyName": "ICICI Pru",
+              "sumAssured": 9000000,
+              "type": "Partnership",
+              "plan": "Term",
+              "policyStatus": "Active"
+            }
+          ],
+          "approvalRequired": {
+            "financial": true,
+            "medical": false,
+            "both": false
+          }
+        },
+        "documentRequired": {
+          "form16": {
+            "title": "FORM 16 (Latest Assessment Year)",
+            "yearHeaders": ["Year 1", "Year 2", "Year 3"],
+            "rows": [
+              { "label": "Assessment", "year1": "AY 25-26", "year2": "AY 24-25", "year3": "AY 23-24" },
+              { "label": "Gross Salary PA", "year1": "₹ 6400000", "year2": "₹ 5900000", "year3": "₹ 5200000" },
+              { "label": "Average Annual Income", "year1": "₹ 5833333", "year2": "NA", "year3": "NA" },
+              { "label": "Life Assured Pan No", "year1": "NAIPS9087Q", "year2": "NA", "year3": "NA" },
+              { "label": "Life Assured Name", "year1": "Naina Shah", "year2": "NA", "year3": "NA" }
+            ]
+          },
+          "isLifeAssuredNameSameWithDocName": "Yes",
+          "companyName": "Shah & Rao Associates"
+        }
+      },
+      "employeeEmployerInsurance": {
+        "summary": [
+          {
+            "personalDetails": {
+              "title": "Mr",
+              "firstName": "Devendra",
+              "middleName": "S",
+              "lastName": "Iyer",
+              "gender": "M",
+              "maritalStatus": "Married",
+              "dob": "1978-12-02T00:00:00.0",
+              "age": 47,
+              "highestQualification": "Engineer",
+              "designation": "Plant Head",
+              "orgName": "Nova Manufacturing Ltd",
+              "isPEP": false,
+              "criminalProceeding": "No"
+            },
+            "applicantFinancialDetails": {
+              "occupation": "Employee - Senior Management",
+              "organisationName": "Nova Manufacturing Ltd",
+              "annualIncome": 7200000
+            },
+            "financialDetails": {
+              "annualIncome": 7200000,
+              "appliedSumAssured": 10000000
+            },
+            "policyDetails": {
+              "productName": "ICICI Pru Employer Employee Protect",
+              "modalPremium": 42150
+            },
+            "kycDetails": {
+              "pep": "No",
+              "criminalProceedings": "No"
+            },
+            "address": [
+              {
+                "type": "communication",
+                "city": "Chennai",
+                "residingCountry": "India"
+              }
+            ]
+          }
+        ],
+        "medicalInsuranceDetails": {
+          "existingInsuranceDetails": [
+            {
+              "policyNumber": "EE77004218",
+              "plan": "Term",
+              "type": "Employer Employee",
+              "companyName": "ICICI Pru",
+              "sumAssured": 6000000,
+              "dateOfCommencement": "2025-02-14"
+            }
+          ],
+          "simultaneousAppliedPolicies": [
+            {
+              "companyName": "ICICI Pru",
+              "sumAssured": 10000000,
+              "type": "Employer Employee",
+              "plan": "Term",
+              "policyStatus": "Active"
+            }
+          ],
+          "approvalRequired": {
+            "financial": true,
+            "medical": true,
+            "both": false
+          }
+        },
+        "documentRequired": {
+          "form16": {
+            "title": "FORM 16 (Latest Assessment Year)",
+            "yearHeaders": ["Year 1", "Year 2", "Year 3"],
+            "rows": [
+              { "label": "Assessment", "year1": "AY 25-26", "year2": "AY 24-25", "year3": "NA" },
+              { "label": "Gross Salary PA", "year1": "₹ 7200000", "year2": "₹ 6900000", "year3": "NA" },
+              { "label": "Average Annual Income", "year1": "₹ 7050000", "year2": "NA", "year3": "NA" },
+              { "label": "Life Assured Pan No", "year1": "DEVPY2310L", "year2": "NA", "year3": "NA" },
+              { "label": "Life Assured Name", "year1": "Devendra Iyer", "year2": "NA", "year3": "NA" }
+            ]
+          },
+          "isLifeAssuredNameSameWithDocName": "Yes",
+          "companyName": "Nova Manufacturing Ltd"
+        }
+      }
+    },
     "requirementManagement": [
      {
       "team": "Gops",

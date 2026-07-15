@@ -44,9 +44,13 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "poolTAT",
   ],
   CUW_TASK: [...baseColumns],
+   PRE_LOGIN_TASK: [
+    ...baseColumns
+  ],
   HOD_TASK: [
     ...baseColumns
   ],
+  RI_TASK:[...baseColumns],
   MMT_TASK: [
     "applicationNo",
     "nameOfProposer",
@@ -64,20 +68,18 @@ export const poolAllowedColumns: Record<string, string[]> = {
   VENDOR_CMO_TASK: [...baseColumns],
   COPS_TASK: [...baseColumnsCops, "breDecision"],
   IT_TASK: [...baseColumns],
-
-  //group
   PIVV_TASK: [...baseColumnsCops],
 
   PRE_ISSUANCE_SERVICING_TASK: [...baseColumnsCops],
 
   EXCEPTIONAL_TASK: [...baseColumnsCops, "lastPool"],
-  "System Wait Pool - Non medical": [
+  "SYSTEM_WAIT_POOL_AMR_MEDICAL": [
     ...baseColumnsCops,
     "lastPool",
     "requirementRaisedDate",
     "userId",
   ],
-  "AMR - Non medical": [
+  "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL": [
     ...baseColumnsCops,
     "lastPool",
     "requirementRaisedDate",
@@ -91,17 +93,17 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "poolTAT",
     "dueDate",
   ],
-  "Reject Pool": [
+  "REJECT_TASK": [
     ...baseColumnsCops,
     "lastPool",
     "userId",
     "uwDecisionDate",
     "laDecisionDate",
   ],
-  "Ready For Issuance Pool": [...baseColumnsCops, "lastPool"],
-  "Issuance Pool": [...baseColumnsCops, "uwDecisionDate", "laDecisionDate"],
-  "Allocation Details": [...baseColumns],
-  "Leave Management": [
+  "READY_FOR_ISSUANCE_TASK": [...baseColumnsCops, "lastPool"],
+  "ISSUANCE_TASK": [...baseColumnsCops, "uwDecisionDate", "laDecisionDate"],
+  "ALLOCATION_TASK": [...baseColumns],
+  "LEAVE_MANAGEMENT_TASK": [
     "uwName",
     "userId",
     "leaveDateFrom",
@@ -110,7 +112,7 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "caseToReassignToUw",
     "reassignedUserId",
   ],
-  "Reassign/Transfer Cases": [
+  "REASSIGN_TRANSFER_TASK": [
     "applicationNo",
     "nameOfProposer",
     "nameOfLifeAssured",
@@ -136,7 +138,9 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "requirementRaisedDate",
     "userId",
   ],
-  DVT_TASK: [...baseColumnsGops],
+
+
+ 
   "1st UW Pool": [...baseColumns],
   GUW_TASK: [...baseColumnsGops],
   DVT_FORMAL_TASK:["policyNo","applicationNo","productCode","memberName","poolTAT","appliedCover"],
@@ -147,5 +151,51 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "grievanceRaisedDate",
   ],
   //RISK_TASK:["applicationNo","nameOfProposer","nameOfLifeAssured","product","premium","channel","referredDate","riskStatus"]
-  RISK_TASK:[...baseColumns]
+  RISK_TASK:[...baseColumns],
+  //group
+   DVT_TASK: [...baseColumnsGops],
+   PRE_ISSUANCE_SERVICING_TASK: [...baseColumnsCops],
+"SYSTEM_WAIT_POOL_AMR_MEDICAL": [
+    ...baseColumnsCops,
+    "lastPool",
+    "requirementRaisedDate",
+    "userId",
+  ],
+  "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL": [
+    ...baseColumnsCops,
+    "lastPool",
+    "requirementRaisedDate",
+    "userId",
+  ],
+   RECONSIDERATION_TASK: [
+    ...baseColumnsCops,
+    "lastPool",
+    "userId",
+    "uwDecisionDate",
+    "poolTAT",
+    "dueDate",
+  ],
+  "REJECT_TASK": [
+    ...baseColumnsCops,
+    "lastPool",
+    "userId",
+    "uwDecisionDate",
+    "laDecisionDate",
+  ],
+  "READY_FOR_ISSUANCE_TASK": [...baseColumnsCops, "lastPool"],
+  "ISSUANCE_TASK": [...baseColumnsCops, "uwDecisionDate", "laDecisionDate"],
+  "REASSIGN_TRANSFER_TASK": [
+    "applicationNo",
+    "nameOfProposer",
+    "nameOfLifeAssured",
+    "product",
+    "plan",
+    "appliedSa",
+    "caseStatus",
+    "caseInWhichPool",
+    "userId",
+    "reassignedUserId",
+    "remarks",
+  ],
+
 };

@@ -997,6 +997,40 @@ export interface ApplicantProfileSubmitResponse {
   updatedDetails?: Partial<ApplicantEditForm>;
 }
 
+export interface CustomerProfileForm {
+  productApplied: string;
+  appliedSumAssured: string;
+  lifeAssuredName: string;
+  dob: string;
+  gender: string;
+  maritalStatus: string;
+  education: string;
+  occupation: string;
+  designation: string;
+  companyName: string;
+  earnedIncome: string;
+  website: string;
+  personalLinkedInProfile: string;
+  pep: string;
+  criminalHistory: string;
+  location: string;
+  annualIncome: string;
+  modalPremium: string;
+}
+
+export interface CustomerProfileSubmitRequest {
+  applicationId: string;
+  roleType: string;
+  userId: string;
+  updatedDetails: CustomerProfileForm;
+}
+
+export interface CustomerProfileSubmitResponse {
+  success: boolean;
+  message: string;
+  updatedDetails?: Partial<CustomerProfileForm>;
+}
+
 export type AuditTrailRow = {
   dateTime: string;
   fromPool: string;

@@ -54,6 +54,10 @@ const apiUrls = {
     real: "/api/drs/applicant-profile/submit",
     mock: "/mock/drs/applicantProfileSubmit.mock.json",
   },
+  customerProfileSubmit: {
+    real: "/api/drs/customer-profile/submit",
+    mock: "/mock/drs/customerProfileSubmit.mock.json",
+  },
   referToIt: {
     real: "/api/drs/refer-to-it",
     mock: "/mock/drs/referToIt.mock.json",
