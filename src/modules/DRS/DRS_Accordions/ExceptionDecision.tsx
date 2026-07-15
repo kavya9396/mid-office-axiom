@@ -9,6 +9,7 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { referToItThunk } from "../../../store/thunks/referToItThunk";
+import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const ExceptionDecision = () => {
   const dispatch = useAppDispatch();
@@ -28,7 +29,7 @@ const ExceptionDecision = () => {
     "retail";
 
   const decisionOptions = useMemo(
-    () => masters.exceptionDecision ?? [],
+    () => normalizeMasterOptions(masters.exceptionDecision),
     [masters.exceptionDecision],
   );
 
@@ -40,7 +41,9 @@ const ExceptionDecision = () => {
       return;
     }
 
-    if (decision === "Refer to IT") {
+    const selectedDecision = toMasterLabel(decision, decisionOptions);
+
+    if (selectedDecision === "Refer to IT") {
       try {
         setSubmitLoading(true);
         setSubmitMessage(null);
@@ -49,7 +52,7 @@ const ExceptionDecision = () => {
           referToItThunk({
             applicationId: applicationNumber,
             roleType,
-            decision: "Refer to IT",
+            decision,
           }),
         ).unwrap();
 

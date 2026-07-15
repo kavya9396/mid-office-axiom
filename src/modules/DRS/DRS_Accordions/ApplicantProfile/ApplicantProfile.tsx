@@ -7,7 +7,6 @@ import type {
     ApplicantEditForm,
     ApplicantTab,
     ApplicantInfoTab,
-    MasterOption,
     ApplicantProfileSubmitRequest,
     DRSData,
     SummaryResponse,
@@ -35,6 +34,7 @@ import type { RootState } from "../../../../store/store"
 import FundDetails from "./FundDetails"
 import PaymentPayoutDetails from "./PaymentPayoutDetails"
 import FormalMemberProfile from "./FormalMemberProfile";
+import { normalizeMasterOptions, toMasterKey, toMasterLabel, type SelectOption } from "../../../../utils/masterOptions";
 
 export interface ApplicantProfileProps {
     profile?: Partial<SummaryResponse>;
@@ -46,18 +46,18 @@ type FormField = {
     name: keyof ApplicantEditForm;
     label: string;
     type?: "text" | "date" | "select";
-    options?: { label: string; value: string }[];
+    options?: SelectOption[];
 };
 
 type FormErrors = Partial<Record<keyof ApplicantEditForm, string>>;
 
-const emptyOptions: MasterOption[] = [];
+const emptyOptions: SelectOption[] = [];
 
 const getPersonalKycFields = (options: {
-    titleOptions: MasterOption[];
-    genderOptions: MasterOption[];
-    nationalityOptions: MasterOption[];
-    idProofOptions: MasterOption[];
+    titleOptions: SelectOption[];
+    genderOptions: SelectOption[];
+    nationalityOptions: SelectOption[];
+    idProofOptions: SelectOption[];
 }): FormField[] => [
     {
         name: "title",
@@ -95,9 +95,9 @@ const getPersonalKycFields = (options: {
 ];
 
 const getAddressFields = (options: {
-    addressProofOptions: MasterOption[];
-    stateOptions: MasterOption[];
-    countryOptions: MasterOption[];
+    addressProofOptions: SelectOption[];
+    stateOptions: SelectOption[];
+    countryOptions: SelectOption[];
     communicationIsIndia: boolean;
     permanentIsIndia: boolean;
 }): FormField[] => [
@@ -198,6 +198,33 @@ const getGenderByTitle = (title: string): ApplicantEditForm["gender"] | undefine
 
     return undefined;
 };
+
+const toMasterFormData = (
+    formData: ApplicantEditForm,
+    optionMap: Partial<Record<keyof ApplicantEditForm, SelectOption[]>>
+): ApplicantEditForm => ({
+    ...formData,
+    ...Object.entries(optionMap).reduce<Partial<ApplicantEditForm>>((accumulator, [fieldName, options]) => {
+        const formKey = fieldName as keyof ApplicantEditForm;
+        accumulator[formKey] = toMasterKey(formData[formKey], options ?? []);
+        return accumulator;
+    }, {}),
+});
+
+const toDisplayFormDetails = (
+    details: Partial<ApplicantEditForm>,
+    optionMap: Partial<Record<keyof ApplicantEditForm, SelectOption[]>>
+): Partial<ApplicantEditForm> => ({
+    ...details,
+    ...Object.entries(optionMap).reduce<Partial<ApplicantEditForm>>((accumulator, [fieldName, options]) => {
+        const formKey = fieldName as keyof ApplicantEditForm;
+        const value = details[formKey];
+        if (typeof value === "string") {
+            accumulator[formKey] = toMasterLabel(value, options ?? []);
+        }
+        return accumulator;
+    }, {}),
+});
 
 const getStoredApplicantTab = (): ApplicantTab => {
     const storedApplicantTab = localStorage.getItem("drsSelectedApplicantTab");
@@ -603,30 +630,54 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             ? savedProfile
             : baseProfile;
 
+    const titleOptions = normalizeMasterOptions(masters.title) ?? emptyOptions;
+    const genderOptions = normalizeMasterOptions(masters.gender) ?? emptyOptions;
+    const nationalityOptions = normalizeMasterOptions(masters.nationality) ?? emptyOptions;
+    const idProofOptions = normalizeMasterOptions(masters.idProof) ?? emptyOptions;
+    const addressProofOptions = normalizeMasterOptions(masters.addressProof) ?? emptyOptions;
+    const stateOptions = normalizeMasterOptions(masters.state) ?? emptyOptions;
+    const countryOptions = normalizeMasterOptions(masters.country) ?? emptyOptions;
+    const applicantProfileMasterOptions = useMemo<Partial<Record<keyof ApplicantEditForm, SelectOption[]>>>(
+        () => ({
+            title: titleOptions,
+            gender: genderOptions,
+            nationality: nationalityOptions,
+            identityProofType: idProofOptions,
+            addressProof: addressProofOptions,
+            communicationState: stateOptions,
+            permanentState: stateOptions,
+            communicationCountry: countryOptions,
+            permanentCountry: countryOptions,
+        }),
+        [
+            titleOptions,
+            genderOptions,
+            nationalityOptions,
+            idProofOptions,
+            addressProofOptions,
+            stateOptions,
+            countryOptions,
+        ]
+    );
+
     const initialFormData = useMemo(
         () => {
             const appOverview = (drsData as unknown as Record<string, unknown> | null)?.applicationOverview as Record<string, unknown> | undefined;
             const productList = Array.isArray(appOverview?.productDetail)
                 ? (appOverview!.productDetail as Array<Record<string, unknown>>)
                 : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
-            return {
+            const nextFormData = {
                 ...buildFormData(displayProfile),
                 faceValue: String(productList[0]?.faceValue ?? ""),
             };
+
+            return toMasterFormData(nextFormData, applicantProfileMasterOptions);
         },
-        [displayProfile, drsData]
+        [displayProfile, drsData, applicantProfileMasterOptions]
     );
 
     const [formData, setFormData] = useState<ApplicantEditForm>(initialFormData);
     const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
-
-    const titleOptions = masters.title ?? emptyOptions;
-    const genderOptions = masters.gender ?? emptyOptions;
-    const nationalityOptions = masters.nationality ?? emptyOptions;
-    const idProofOptions = masters.idProof ?? emptyOptions;
-    const addressProofOptions = masters.addressProof ?? emptyOptions;
-    const stateOptions = masters.state ?? emptyOptions;
-    const countryOptions = masters.country ?? emptyOptions;
     const normalizedRoleType = roleType.trim().toUpperCase().replace(/\s+/g, " ");
     const isFormalRole = normalizedRoleType === "GUW_FORMAL_TASK" || normalizedRoleType === "DVT_FORMAL_TASK";
     const isDvtFormalTask = normalizedRoleType === "DVT_FORMAL_TASK";
@@ -651,8 +702,8 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         [isDvtFormalTask, personalKycFields]
     );
 
-    const communicationIsIndia = formData.communicationCountry.trim().toLowerCase() === "india";
-    const permanentIsIndia = formData.permanentCountry.trim().toLowerCase() === "india";
+    const communicationIsIndia = toMasterLabel(formData.communicationCountry, countryOptions).trim().toLowerCase() === "india";
+    const permanentIsIndia = toMasterLabel(formData.permanentCountry, countryOptions).trim().toLowerCase() === "india";
 
     const addressFields = useMemo(
         () => getAddressFields({
@@ -849,7 +900,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             }
         }
 
-        const selectedProofValidation = idProofNumberValidationMap[formData.identityProofType];
+        const selectedProofValidation = idProofNumberValidationMap[toMasterLabel(formData.identityProofType, idProofOptions)];
         if (selectedProofValidation && formData.identityProofNumber.trim()) {
             if (!selectedProofValidation.regex.test(formData.identityProofNumber.trim())) {
                 errors.identityProofNumber = selectedProofValidation.message;
@@ -868,10 +919,11 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         const currentFaceValue = String(productList[0]?.faceValue ?? "");
         setFieldErrors({});
         setSubmitError(null);
-        setFormData({
+        const nextFormData = {
             ...buildFormData(displayProfile),
             faceValue: currentFaceValue,
-        });
+        };
+        setFormData(toMasterFormData(nextFormData, applicantProfileMasterOptions));
         setOpenEditDialog(true);
     };
 
@@ -898,9 +950,9 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             }
 
             if (field === "title") {
-                const mappedGender = getGenderByTitle(value);
+                const mappedGender = getGenderByTitle(toMasterLabel(value, titleOptions));
                 if (mappedGender) {
-                    nextFormData.gender = mappedGender;
+                    nextFormData.gender = toMasterKey(mappedGender, genderOptions);
                 }
             }
 
@@ -966,10 +1018,10 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         const productList = Array.isArray(appOverview?.productDetail)
             ? (appOverview!.productDetail as Array<Record<string, unknown>>)
             : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
-        const baselineData = {
+        const baselineData = toMasterFormData({
             ...buildFormData(displayProfile),
             faceValue: String(productList[0]?.faceValue ?? ""),
-        };
+        }, applicantProfileMasterOptions);
         const updatedDetails = Object.entries(formData).reduce<Partial<ApplicantEditForm>>(
             (acc, [key, value]) => {
                 const formKey = key as keyof ApplicantEditForm;
@@ -1014,7 +1066,10 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             if (!displayProfile) {
                 return;
             }
-            const updatedProfile = applyUpdatedDetailsToProfile(displayProfile, finalUpdatedDetails);
+            const updatedProfile = applyUpdatedDetailsToProfile(
+                displayProfile,
+                toDisplayFormDetails(finalUpdatedDetails, applicantProfileMasterOptions),
+            );
 
             // Update local state
             setSavedProfile(updatedProfile);

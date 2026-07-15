@@ -1,5 +1,5 @@
 import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -10,15 +10,21 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
-import { reconsiderationDecisionOptions } from "../../../utils/constant";
+import { reconsiderationDecisionOptions as fallbackReconsiderationDecisionOptions } from "../../../utils/constant";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
+import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const ReconsiderationPoolDecision = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
+  const masters = useAppSelector((state) => state.drs.masters);
+  const reconsiderationDecisionOptions = useMemo(() => {
+    const masterOptions = normalizeMasterOptions(masters.reconsiderationDecision);
+    return masterOptions.length > 0 ? masterOptions : fallbackReconsiderationDecisionOptions;
+  }, [masters.reconsiderationDecision]);
 
   const safeBusinessType =
     normalizeBusinessType(businessType) ??
@@ -33,7 +39,7 @@ const ReconsiderationPoolDecision = () => {
   const [submitStatus, setSubmitStatus] = useState<"success" | "failure" | null>(null);
 
   const isSubmitDisabled = !decision || remark.trim() === "";
-  const dialogMessage = `Kindly reconfirm if you want to proceed with the reconsideration pool decision as "${decision}"`;
+  const dialogMessage = `Kindly reconfirm if you want to proceed with the reconsideration pool decision as "${toMasterLabel(decision, reconsiderationDecisionOptions)}"`;
   const taskContext = getDecisionTaskContext(drsData, applicationNumber);
 
   const handleSubmit = async () => {

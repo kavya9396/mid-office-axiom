@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DRS from "./DRS";
+import { DRS_MASTER_KEYS } from "./drsMasters";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { drsThunk } from "../../store/thunks/drsThunk";
@@ -185,7 +186,7 @@ describe("DRS", () => {
         financialBreOutput: undefined,
       });
       expect(mockMastersThunk).toHaveBeenCalledWith({
-        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country", "exceptionDecision"],
+        masters: DRS_MASTER_KEYS,
       });
       expect(dispatch).toHaveBeenCalledTimes(4);
     });
@@ -242,7 +243,7 @@ describe("DRS", () => {
         breRetriggerStatus: "failure",
       });
       expect(mockMastersThunk).toHaveBeenCalledWith({
-        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country", "exceptionDecision"],
+        masters: DRS_MASTER_KEYS,
       });
     });
 

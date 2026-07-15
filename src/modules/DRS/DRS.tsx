@@ -2,7 +2,7 @@ import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "
 import BackButton from "../../components/layout/BackButton";
 import { Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Fragment, useEffect, useMemo } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import type { RootState } from "../../store/store";
@@ -13,6 +13,7 @@ import { setBreExternalApiOutputs, setDrsData } from "../../store/slices/drsSlic
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import type { DRSBreOutput, DRSData } from "../../types/drs.types";
+import { DRS_MASTER_KEYS } from "./drsMasters";
 
 const toText = (value: unknown) => String(value ?? "").trim();
 
@@ -125,6 +126,8 @@ const searchHiddenAccordionIds = new Set([
     "dvtDecision",
     "uwDecision",
     "pivvDecision",
+    "maritalStatus",
+    "pep",
     "exceptionDecision",
     "hodDecision",
     "sruwDecision",
@@ -158,6 +161,7 @@ const DRS = () => {
         "retail";
 
     const dispatch = useDispatch<AppDispatch>();
+    const mastersRequestedRef = useRef(false);
     const safeApplicationNumber = applicationNumber ?? "";
     const selectedCaseContext = getSelectedCaseContext();
     const isSearchReadOnlyMode =
@@ -177,6 +181,19 @@ const DRS = () => {
             return;
         }
 
+        const dispatchMastersOnce = () => {
+            if (mastersRequestedRef.current) {
+                return;
+            }
+
+            mastersRequestedRef.current = true;
+            dispatch(
+                mastersThunk({
+                    masters: DRS_MASTER_KEYS,
+                }),
+            );
+        };
+
         if (isSearchReadOnlyMode) {
             if (!drsData) {
                 const storedDrsData = getStoredSearchDrsData();
@@ -185,11 +202,7 @@ const DRS = () => {
                 }
             }
 
-            dispatch(
-                mastersThunk({
-                    masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country", "exceptionDecision"],
-                }),
-            );
+            dispatchMastersOnce();
             return;
         }
 
@@ -254,11 +267,7 @@ const DRS = () => {
             } catch (error) {
                 console.error("Failed to load DRS:", error);
             } finally {
-                dispatch(
-                    mastersThunk({
-                        masters: ["title", "gender", "nationality", "idProof", "addressProof", "state", "country", "exceptionDecision"],
-                    }),
-                );
+                dispatchMastersOnce();
             }
         };
 

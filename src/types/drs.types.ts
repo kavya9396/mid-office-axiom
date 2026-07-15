@@ -420,7 +420,7 @@ export type MerSubmitResponse = {
 export type ReferToITRequest = {
   applicationId: string;
   roleType: string;
-  decision: "Refer to IT";
+  decision: string;
 };
 
 export type ReferToITResponse = {
@@ -620,8 +620,22 @@ export interface DecisionCode {
 }
 
 export type MasterOption = {
-  label: string;
+  key?: string;
+  label?: string;
   value: string;
+  disabled?: boolean;
+};
+
+export type RequirementMasterOption = {
+  team: "Gops" | "UW";
+  specialTest?: string;
+  profile: string;
+  category: string;
+  subCategory: string;
+  document: string;
+  reason: string;
+  fupCode: string;
+  description: string;
 };
 
 export type MasterKey =
@@ -632,9 +646,36 @@ export type MasterKey =
   | "addressProof"
   | "state"
   | "country"
-  | "exceptionDecision";
+  | "maritalStatus"
+  | "pep"
+  | "exceptionDecision"
+  | "requirementManagement"
+  | "cvtDecision"
+  | "dvtDecision"
+  | "caseUWDecision"
+  | "firstUWDecision"
+  | "parallelUWDecision"
+  | "reconsiderationDecision"
+  | "requirementTeam"
+  | "requirementProfile"
+  | "requirementCategory"
+  | "requirementSubCategory"
+  | "requirementDocument"
+  | "requirementReason"
+  | "requirementStatus"
+  | "rejectReason"
+  | "declineReason"
+  | "postponeReason"
+  | "postponementPeriod"
+  | "riskReferralReason"
+  | "accuityReferralReason"
+  | "reinsurerReferralReason"
+  | "holdReason"
+  | "cuwReferralReason";
 
-export type MastersData = Partial<Record<MasterKey, MasterOption[]>>;
+export type MastersData = Partial<Record<Exclude<MasterKey, "requirementManagement">, MasterOption[]>> & {
+  requirementManagement?: RequirementMasterOption[];
+};
 
 export type MastersRequest = {
   masters: MasterKey[];

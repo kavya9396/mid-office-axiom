@@ -2,7 +2,16 @@ import { Alert, Box, Container, Snackbar, Table, TableBody, TableCell, TableCont
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
-import { AccuityReferralReasons, caseUWDecisionOptions, CUWReferralReasons, firstUWDecisionOptions, HoldReasons, parallelUWDecisionOptions, ReferralRisk, ReinsurerReferralReasons } from "../../../utils/constant";
+import {
+    AccuityReferralReasons as fallbackAccuityReferralReasons,
+    caseUWDecisionOptions as fallbackCaseUWDecisionOptions,
+    CUWReferralReasons as fallbackCUWReferralReasons,
+    firstUWDecisionOptions as fallbackFirstUWDecisionOptions,
+    HoldReasons as fallbackHoldReasons,
+    parallelUWDecisionOptions as fallbackParallelUWDecisionOptions,
+    ReferralRisk as fallbackReferralRisk,
+    ReinsurerReferralReasons as fallbackReinsurerReferralReasons,
+} from "../../../utils/constant";
 import CustomRadioGroup from "../../../components/ui/Radio/Radio";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
@@ -19,6 +28,7 @@ import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
+import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const referralRoleMap: Record<string, string> = {
     "Refer to HoD": "HoD",
@@ -61,6 +71,7 @@ const createCounterOfferTableState = () => ({
 const UWDecision = () => {
     const users = useSelector((state: RootState) => state.referralUsers.users);
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes)
+    const masters = useSelector((state: RootState) => state.drs.masters);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
     const { businessType, applicationNumber } = useAppContext();
@@ -96,26 +107,92 @@ const UWDecision = () => {
 
     const lastRoleRef = useRef<string | null>(null);
 
+    const caseUWDecisionOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.caseUWDecision);
+        return masterOptions.length > 0 ? masterOptions : fallbackCaseUWDecisionOptions;
+    }, [masters.caseUWDecision]);
+    const firstUWDecisionOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.firstUWDecision);
+        return masterOptions.length > 0 ? masterOptions : fallbackFirstUWDecisionOptions;
+    }, [masters.firstUWDecision]);
+    const parallelUWDecisionOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.parallelUWDecision);
+        return masterOptions.length > 0 ? masterOptions : fallbackParallelUWDecisionOptions;
+    }, [masters.parallelUWDecision]);
+    const rejectReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.rejectReason);
+        return masterOptions.length > 0 ? masterOptions : [
+            { label: "Reason 1", value: "Reason 1" },
+            { label: "Reason 2", value: "Reason 2" },
+            { label: "Reason 3", value: "Reason 3" },
+        ];
+    }, [masters.rejectReason]);
+    const declineReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.declineReason);
+        return masterOptions.length > 0 ? masterOptions : [
+            { label: "Reason 1", value: "Reason 1" },
+            { label: "Reason 2", value: "Reason 2" },
+            { label: "Reason 3", value: "Reason 3" },
+        ];
+    }, [masters.declineReason]);
+    const postponeReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.postponeReason);
+        return masterOptions.length > 0 ? masterOptions : [
+            { label: "Reason 1", value: "Reason 1" },
+            { label: "Reason 2", value: "Reason 2" },
+            { label: "Reason 3", value: "Reason 3" },
+        ];
+    }, [masters.postponeReason]);
+    const postponementPeriodOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.postponementPeriod);
+        return masterOptions.length > 0 ? masterOptions : [
+            { label: "3 Months", value: "3 Months" },
+            { label: "6 Months", value: "6 Months" },
+            { label: "12 Months", value: "12 Months" },
+        ];
+    }, [masters.postponementPeriod]);
+    const riskReferralReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.riskReferralReason);
+        return masterOptions.length > 0 ? masterOptions : fallbackReferralRisk;
+    }, [masters.riskReferralReason]);
+    const accuityReferralReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.accuityReferralReason);
+        return masterOptions.length > 0 ? masterOptions : fallbackAccuityReferralReasons;
+    }, [masters.accuityReferralReason]);
+    const reinsurerReferralReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.reinsurerReferralReason);
+        return masterOptions.length > 0 ? masterOptions : fallbackReinsurerReferralReasons;
+    }, [masters.reinsurerReferralReason]);
+    const holdReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.holdReason);
+        return masterOptions.length > 0 ? masterOptions : fallbackHoldReasons;
+    }, [masters.holdReason]);
+    const cuwReferralReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.cuwReferralReason);
+        return masterOptions.length > 0 ? masterOptions : fallbackCUWReferralReasons;
+    }, [masters.cuwReferralReason]);
+    const caseUWDecisionLabel = toMasterLabel(caseUWDecision, caseUWDecisionOptions);
+
     const showDecisionCode = [
         "Accept",
         "Reject",
         "Decline",
         "Postpone",
-    ].includes(caseUWDecision);
+    ].includes(caseUWDecisionLabel);
 
     const showParallelDecision = [
         "Refer to HO CMO",
         "Refer to Risk",
         "Refer to Accuity",
         "Raise Requirement",
-    ].includes(caseUWDecision);
+    ].includes(caseUWDecisionLabel);
 
     const showFirstUWDecision = [
         "Refer to HoD",
         "Refer to Sr.UW",
         "Refer to Reinsurer",
         "Refer to HO CMO",
-    ].includes(caseUWDecision);
+    ].includes(caseUWDecisionLabel);
 
     const fetchDecisionCodes = new Set([
         "Accept",
@@ -124,42 +201,18 @@ const UWDecision = () => {
         "Postpone",
     ]);
 
-    const showDecisionType = caseUWDecision === "Refer to Sr.UW" || caseUWDecision === "Refer to HoD";
-    const isAcceptDecision = caseUWDecision === "Accept";
-    const isRejectDecision = caseUWDecision === "Reject";
-    const isDeclineDecision = caseUWDecision === "Decline";
-    const isPostponeDecision = caseUWDecision === "Postpone";
-    const isCounterOfferDecision = caseUWDecision === "Counter Offer";
+    const showDecisionType = caseUWDecisionLabel === "Refer to Sr.UW" || caseUWDecisionLabel === "Refer to HoD";
+    const isAcceptDecision = caseUWDecisionLabel === "Accept";
+    const isRejectDecision = caseUWDecisionLabel === "Reject";
+    const isDeclineDecision = caseUWDecisionLabel === "Decline";
+    const isPostponeDecision = caseUWDecisionLabel === "Postpone";
+    const isCounterOfferDecision = caseUWDecisionLabel === "Counter Offer";
     const resolvedDecisionCode = (isAcceptDecision || isRejectDecision || isDeclineDecision || isPostponeDecision)
         ? (decisionCode || decisionCodes[0]?.value || "")
         : decisionCode;
     const resolvedSmokerStatus = isAcceptDecision
         ? (smokerStatus || "Non Smoker")
         : smokerStatus;
-
-    const rejectReasonOptions = [
-        { label: "Reason 1", value: "Reason 1" },
-        { label: "Reason 2", value: "Reason 2" },
-        { label: "Reason 3", value: "Reason 3" },
-    ];
-
-    const declineReasonOptions = [
-        { label: "Reason 1", value: "Reason 1" },
-        { label: "Reason 2", value: "Reason 2" },
-        { label: "Reason 3", value: "Reason 3" },
-    ];
-
-    const postponeReasonOptions = [
-        { label: "Reason 1", value: "Reason 1" },
-        { label: "Reason 2", value: "Reason 2" },
-        { label: "Reason 3", value: "Reason 3" },
-    ];
-
-    const postponementPeriodOptions = [
-        { label: "3 Months", value: "3 Months" },
-        { label: "6 Months", value: "6 Months" },
-        { label: "12 Months", value: "12 Months" },
-    ];
 
     const getDeclineReasonOptions = (index: number) => {
         const selectedInOtherDropdowns = new Set(
@@ -187,8 +240,8 @@ const UWDecision = () => {
         }));
     };
 
-    const dialogMessage = `Kindly reconfirm if you want to proceed with the case as "${caseUWDecision}"`;
-    const thresholdMessage = `Threshold is achieved for this user, kindly refer the case to another ${caseUWDecision}`;
+    const dialogMessage = `Kindly reconfirm if you want to proceed with the case as "${caseUWDecisionLabel}"`;
+    const thresholdMessage = `Threshold is achieved for this user, kindly refer the case to another ${caseUWDecisionLabel}`;
 
     const riskMessage = "Kindly reconfirm if you want to initiate a risk investigation process for the applicant?";
     const taskContext = getDecisionTaskContext(drsData, applicationNumber);
@@ -265,30 +318,30 @@ const UWDecision = () => {
 
         "Refer to Risk": {
             label: "Risk Referral Reasons",
-            options: ReferralRisk,
+            options: riskReferralReasonOptions,
         },
 
         "Refer to Accuity": {
             label: "Accuity Referral Reasons",
-            options: AccuityReferralReasons,
+            options: accuityReferralReasonOptions,
         },
 
         "Refer to Reinsurer": {
             label: "Reinsurer Referral reasons",
-            options: ReinsurerReferralReasons,
+            options: reinsurerReferralReasonOptions,
         },
     }
 
-    const selectedReferralConfig = referralConfig[caseUWDecision as keyof typeof referralConfig];
+    const selectedReferralConfig = referralConfig[caseUWDecisionLabel as keyof typeof referralConfig];
 
     const filteredParallelOptions = useMemo(() => {
         return parallelUWDecisionOptions.filter(
-            (option) => option.value !== caseUWDecision
+            (option) => option.label !== caseUWDecisionLabel
         );
-    }, [caseUWDecision]);
+    }, [caseUWDecisionLabel, parallelUWDecisionOptions]);
 
     useEffect(() => {
-        const role = referralRoleMap[caseUWDecision];
+        const role = referralRoleMap[caseUWDecisionLabel];
 
         if (!role) return;
 
@@ -296,7 +349,7 @@ const UWDecision = () => {
 
         lastRoleRef.current = role;
         dispatch(referralUsersThunk({ role }));
-    }, [caseUWDecision, dispatch]);
+    }, [caseUWDecisionLabel, dispatch]);
 
     return (
         <Container disableGutters>
@@ -354,6 +407,7 @@ const UWDecision = () => {
                                 label="Case UW Decision"
                                 value={caseUWDecision}
                                 onChange={(value: string) => {
+                                    const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
                                     setCaseUWDecision(value);
                                     setReferralValue("");
                                     setRejectReason("");
@@ -364,20 +418,20 @@ const UWDecision = () => {
                                     setSubmitMessage(null);
                                     setSubmitStatus(null);
 
-                                    if (!fetchDecisionCodes.has(value)) {
+                                    if (!fetchDecisionCodes.has(selectedLabel)) {
                                         setDecisionCode("");
                                         setSmokerStatus("");
                                     }
 
-                                    if (fetchDecisionCodes.has(value)) {
+                                    if (fetchDecisionCodes.has(selectedLabel)) {
                                         dispatch(
                                             decisionCodeThunk({
-                                                decision: value,
+                                                decision: selectedLabel,
                                             })
                                         );
                                     }
 
-                                    if (value === "Raise Requirement") {
+                                    if (selectedLabel === "Raise Requirement") {
                                         openRequirementManagement(true);
                                     }
                                 }}
@@ -546,23 +600,23 @@ const UWDecision = () => {
                             )}
 
                             {
-                                caseUWDecision === "Hold" && (
+                                caseUWDecisionLabel === "Hold" && (
                                     <CustomSelect
                                         label="Hold Reasons"
                                         value={holdReasons}
                                         onChange={setHoldReasons}
-                                        options={HoldReasons}
+                                        options={holdReasonOptions}
                                     />
                                 )
                             }
 
                             {
-                                caseUWDecision === "Refer to CUW Claim Pool" && (
+                                caseUWDecisionLabel === "Refer to CUW Claim Pool" && (
                                     <CustomSelect
                                         label="CUW Claim Pool Reasons"
                                         value={cuwReasons}
                                         onChange={setCuwReasons}
-                                        options={CUWReferralReasons}
+                                        options={cuwReferralReasonOptions}
                                     />
                                 )
                             }
@@ -577,7 +631,7 @@ const UWDecision = () => {
                             )}
                         </Box>
 
-                        {selectedReferralConfig && caseUWDecision === "Refer to Reinsurer" && (
+                        {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
                             <>
                                 <UWReinsurerFields />
                             </>
@@ -732,7 +786,7 @@ const UWDecision = () => {
 
                     </Box>
                     {/* Submit Button */}
-                    {caseUWDecision && caseUWDecision !== "Refer to Reinsurer" && (
+                    {caseUWDecision && caseUWDecisionLabel !== "Refer to Reinsurer" && (
                         <Box
                             sx={{
                                 display: "flex",
@@ -758,7 +812,7 @@ const UWDecision = () => {
                         </Box>
                     )}
 
-                    {selectedReferralConfig && caseUWDecision === "Refer to Reinsurer" && (
+                    {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
                         <UWReinsurer setConfirmationDialogOpen={setConfirmationDialogOpen} />
                     )}
                 </CustomAccordion>
@@ -767,7 +821,7 @@ const UWDecision = () => {
                 <ConfirmationDialog
                     open={confirmationDialogOpen}
                     message={
-                        caseUWDecision === "Refer to Risk"
+                        caseUWDecisionLabel === "Refer to Risk"
                             ? riskMessage
                             : dialogMessage
                     }

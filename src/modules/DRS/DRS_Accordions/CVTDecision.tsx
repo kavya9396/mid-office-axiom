@@ -3,7 +3,7 @@ import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
-import { cvtDecisionOptions } from "../../../utils/constant";
+import { cvtDecisionOptions as fallbackCvtDecisionOptions } from "../../../utils/constant";
 import CustomButton from "../../../components/ui/Button/Button";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useNavigate } from "react-router-dom";
@@ -15,6 +15,7 @@ import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { openRequirementManagement } from "./requirementManagementEvents";
 import { getCompleteTaskResult } from "./completeTaskResponse";
+import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
 const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
@@ -195,6 +196,12 @@ const CVTDecision = () => {
         !tabValidationDismissed;
     const { businessType, applicationNumber } = useAppContext();
     const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
+    const masters = useAppSelector((state) => state.drs.masters);
+    const cvtDecisionOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.cvtDecision);
+        return masterOptions.length > 0 ? masterOptions : fallbackCvtDecisionOptions;
+    }, [masters.cvtDecision]);
+    const decisionLabel = toMasterLabel(decision, cvtDecisionOptions);
     const breMandatoryGuidance = useMemo(() => getBreMandatoryGuidance(drsData), [drsData]);
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
@@ -336,7 +343,7 @@ const CVTDecision = () => {
             return;
         }
 
-        const isAcceptDecision = decision.trim().toLowerCase() === "accept";
+        const isAcceptDecision = decisionLabel.trim().toLowerCase() === "accept";
         if (isAcceptDecision && breMandatoryGuidance) {
             setBreActionDialogOpen(true);
             return;
@@ -408,7 +415,7 @@ const CVTDecision = () => {
                                     setSubmitStatus(null);
                                     setTabValidationDismissed(false);
 
-                                    if (value === "Raise Requirements") {
+                                    if (toMasterLabel(value, cvtDecisionOptions) === "Raise Requirements") {
                                         openRequirementManagement(true);
                                     }
                                 }}

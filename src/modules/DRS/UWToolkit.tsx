@@ -15,12 +15,12 @@ const uwToolkitLinks = [
   {
     label: "UW ChatBot",
     path: "/chatbot",
-    roles: ["UW", "Admin"],
+    roles: ["CUW Pool", "GUW Pool"],
   },
   {
     label: "Calculator",
     path: "/calculator",
-    roles: ["UW", "Admin"],
+    roles: ["CUW Pool", "GUW Pool"],
   },
   {
     label: "Raise a Grievance",
@@ -30,6 +30,7 @@ const uwToolkitLinks = [
     roles: ["CPT Pool"],
   },
 ].filter((link) => link.roles.includes(roleType));
+console.log('toolkit links',uwToolkitLinks,roleType)
   
   return (
     <Box

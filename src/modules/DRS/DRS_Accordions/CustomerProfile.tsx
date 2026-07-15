@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { customerProfileSubmitThunk } from "../../../store/thunks/customerProfileSubmitThunk";
 import type { CustomerProfileForm } from "../../../types/drs.types";
 import { formatDOB } from "../../../utils/helpers";
+import { normalizeMasterOptions, toMasterKey, toMasterLabel, type SelectOption } from "../../../utils/masterOptions";
 import { labelStyles, modalTitleStyles } from "../../../utils/styles";
 
 type DetailItem = {
@@ -22,34 +23,20 @@ type FormField = {
   name: keyof CustomerProfileForm;
   label: string;
   type?: "text" | "date" | "select";
-  options?: Array<{ label: string; value: string }>;
+  options?: SelectOption[];
 };
 
-const genderOptions = [
-  { label: "Male", value: "Male" },
-  { label: "Female", value: "Female" },
-  { label: "Other", value: "Other" },
-];
-
-const maritalStatusOptions = [
-  { label: "Single", value: "Single" },
-  { label: "Married", value: "Married" },
-  { label: "Divorced", value: "Divorced" },
-  { label: "Widowed", value: "Widowed" },
-];
-
-const yesNoOptions = [
-  { label: "Yes", value: "Yes" },
-  { label: "No", value: "No" },
-];
-
-const formFields: FormField[] = [
+const getFormFields = (options: {
+  genderOptions: SelectOption[];
+  maritalStatusOptions: SelectOption[];
+  pepOptions: SelectOption[];
+}): FormField[] => [
   { name: "productApplied", label: "Product Applied" },
   { name: "appliedSumAssured", label: "Applied Sum Assured" },
   { name: "lifeAssuredName", label: "Life Assured Name" },
   { name: "dob", label: "DOB", type: "date" },
-  { name: "gender", label: "Gender", type: "select", options: genderOptions },
-  { name: "maritalStatus", label: "Marital Status", type: "select", options: maritalStatusOptions },
+  { name: "gender", label: "Gender", type: "select", options: options.genderOptions },
+  { name: "maritalStatus", label: "Marital Status", type: "select", options: options.maritalStatusOptions },
   { name: "education", label: "Education" },
   { name: "occupation", label: "Occupation" },
   { name: "designation", label: "Designation" },
@@ -57,7 +44,7 @@ const formFields: FormField[] = [
   { name: "earnedIncome", label: "Earned Income" },
   { name: "website", label: "Website" },
   { name: "personalLinkedInProfile", label: "Personal LinkedIn Profile" },
-  { name: "pep", label: "PEP", type: "select", options: yesNoOptions },
+  { name: "pep", label: "PEP", type: "select", options: options.pepOptions },
   { name: "criminalHistory", label: "Criminal History" },
 ];
 
@@ -180,6 +167,33 @@ const buildProfileForm = (profile: Record<string, unknown>): CustomerProfileForm
 const getProfileImage = (profile: Record<string, unknown>): string =>
   toText(toRecord(profile.personalDetails).profileImage);
 
+const toMasterCustomerForm = (
+  formData: CustomerProfileForm,
+  optionMap: Partial<Record<keyof CustomerProfileForm, SelectOption[]>>,
+): CustomerProfileForm => ({
+  ...formData,
+  ...Object.entries(optionMap).reduce<Partial<CustomerProfileForm>>((accumulator, [fieldName, options]) => {
+    const formKey = fieldName as keyof CustomerProfileForm;
+    accumulator[formKey] = toMasterKey(formData[formKey], options ?? []);
+    return accumulator;
+  }, {}),
+});
+
+const toDisplayCustomerDetails = (
+  details: Partial<CustomerProfileForm>,
+  optionMap: Partial<Record<keyof CustomerProfileForm, SelectOption[]>>,
+): Partial<CustomerProfileForm> => ({
+  ...details,
+  ...Object.entries(optionMap).reduce<Partial<CustomerProfileForm>>((accumulator, [fieldName, options]) => {
+    const formKey = fieldName as keyof CustomerProfileForm;
+    const value = details[formKey];
+    if (typeof value === "string") {
+      accumulator[formKey] = toMasterLabel(value, options ?? []);
+    }
+    return accumulator;
+  }, {}),
+});
+
 type CustomerProfileProps = {
   data?: unknown;
 };
@@ -188,6 +202,7 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   const dispatch = useAppDispatch();
   const { applicationNumber } = useAppContext();
   const storeData = useAppSelector((state) => state.drs.data);
+  const masters = useAppSelector((state) => state.drs.masters);
   const data = dataOverride ?? storeData;
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [formValues, setFormValues] = useState<CustomerProfileForm | null>(null);
@@ -200,6 +215,21 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   const displayProfile = useMemo(
     () => ({ ...sourceForm, ...(savedValues ?? {}) }),
     [savedValues, sourceForm],
+  );
+  const genderOptions = normalizeMasterOptions(masters.gender);
+  const maritalStatusOptions = normalizeMasterOptions(masters.maritalStatus);
+  const pepOptions = normalizeMasterOptions(masters.pep);
+  const customerProfileMasterOptions = useMemo<Partial<Record<keyof CustomerProfileForm, SelectOption[]>>>(
+    () => ({
+      gender: genderOptions,
+      maritalStatus: maritalStatusOptions,
+      pep: pepOptions,
+    }),
+    [genderOptions, maritalStatusOptions, pepOptions],
+  );
+  const formFields = useMemo(
+    () => getFormFields({ genderOptions, maritalStatusOptions, pepOptions }),
+    [genderOptions, maritalStatusOptions, pepOptions],
   );
   const profileImage = getProfileImage(profile);
   const detailItems: DetailItem[] = [
@@ -220,7 +250,7 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   ];
 
   const handleEditOpen = () => {
-    setFormValues(displayProfile);
+    setFormValues(toMasterCustomerForm(displayProfile, customerProfileMasterOptions));
     setSubmitStatus(null);
     setIsEditOpen(true);
   };
@@ -236,7 +266,7 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   };
 
   const handleSave = async () => {
-    const nextValues = formValues ?? displayProfile;
+    const nextValues = formValues ?? toMasterCustomerForm(displayProfile, customerProfileMasterOptions);
     const roleType = localStorage.getItem("roleType") ?? "";
     const userId = localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "";
 
@@ -253,7 +283,7 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
         }),
       ).unwrap();
 
-      setSavedValues(response.updatedDetails ?? nextValues);
+      setSavedValues(toDisplayCustomerDetails(response.updatedDetails ?? nextValues, customerProfileMasterOptions));
       setSubmitStatus({ type: "success", message: response.message || "Customer profile updated successfully" });
       setIsEditOpen(false);
     } catch (error) {

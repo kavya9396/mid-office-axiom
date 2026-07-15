@@ -1,9 +1,9 @@
 import { Alert, Box, Container, Snackbar, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
-import {  dvtDecisionOptions } from "../../../utils/constant";
+import { dvtDecisionOptions as fallbackDvtDecisionOptions } from "../../../utils/constant";
 import CustomButton from "../../../components/ui/Button/Button";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
+import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const DVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
@@ -30,6 +31,12 @@ const DVTDecision = () => {
     const { businessType, applicationNumber } = useAppContext();
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes);
     const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
+    const masters = useSelector((state: RootState) => state.drs.masters);
+    const dvtDecisionOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.dvtDecision);
+        return masterOptions.length > 0 ? masterOptions : fallbackDvtDecisionOptions;
+    }, [masters.dvtDecision]);
+    const decisionLabel = toMasterLabel(decision, dvtDecisionOptions);
     
 
     const savedRequirements = useSelector((state: RootState) => {
@@ -44,12 +51,12 @@ const DVTDecision = () => {
             : [];
     });
     const hasRequirements = savedRequirements.length > 0;
-    const isAcceptDecision = decision === "Accept";
+    const isAcceptDecision = decisionLabel === "Accept";
     const resolvedDecisionCode = isAcceptDecision
         ? (decisionCodes[0]?.value || "")
         : "";
 
-        const isRaiseRequirementsSelected = decision === "Raise Requirements";
+        const isRaiseRequirementsSelected = decisionLabel === "Raise Requirements";
         const submitBlocked =
             (isRaiseRequirementsSelected && !hasRequirements) ||
             (hasRequirements && decision !== "" && !isRaiseRequirementsSelected);
@@ -170,7 +177,7 @@ const DVTDecision = () => {
                                 onChange={(value) => {
                                     setDecision(value);
 
-                                    if (value === "Raise Requirements") {
+                                    if (toMasterLabel(value, dvtDecisionOptions) === "Raise Requirements") {
                                         openRequirementManagement(true);
                                     }
                                 }}
@@ -207,7 +214,7 @@ const DVTDecision = () => {
                         </Box>
 
                        
-                        {decision === "Raise Requirements" && !hasRequirements && (
+                        {decisionLabel === "Raise Requirements" && !hasRequirements && (
                             <Alert severity="warning" sx={{ mt: 2, borderRadius: 2 }}>
                                 Please add at least one requirement in the <strong>Requirement Management</strong> section above before selecting "Raise Requirements".
                             </Alert>

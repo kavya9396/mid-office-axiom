@@ -5,7 +5,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTable from "../../../components/ui/Table/Table";
 import type { Column } from "../../../components/ui/Table/Table";
-import type { AdditionalRequirementRow } from "../../../types/drs.types";
+import type { AdditionalRequirementRow, RequirementMasterOption } from "../../../types/drs.types";
 import {
     rm_category,
     rm_document,
@@ -15,10 +15,10 @@ import {
     rm_team,
 } from "../../../utils/constant";
 import { toDisplayValue } from "../../../utils/helpers";
+import { normalizeMasterOptions } from "../../../utils/masterOptions";
 import type { RootState } from "../../../store/store";
 import {
-    requirementMasterRows,
-    type RequirementMasterRow,
+    requirementMasterRows as fallbackRequirementMasterRows,
 } from "./requirementMasterData";
 import { CloseIcon, EditIcon } from "../../../icons/Icons";
 import {
@@ -60,7 +60,7 @@ type Option = {
     value: string;
 };
 
-const getTeamOptionsFromMaster = (roleType: string): Option[] => {
+const getTeamOptionsFromMaster = (roleType: string, requirementMasterRows: RequirementMasterOption[]): Option[] => {
     const normalizedRoleType = roleType.trim().toLowerCase();
     const hasUW = requirementMasterRows.some((row) => row.team === "UW");
     const hasGops = requirementMasterRows.some((row) => row.team === "Gops");
@@ -78,7 +78,7 @@ const getTeamOptionsFromMaster = (roleType: string): Option[] => {
     return options;
 };
 
-const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterRow["team"]> = {
+const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterOption["team"]> = {
     "CVT Team": "UW",
     "DVT Team": "Gops",
     UW: "UW",
@@ -256,6 +256,7 @@ const getMasterTeamForUiValue = (team: string) => MASTER_TEAM_BY_UI[team as Look
 
 const getScopedMasterRows = (
     row: Pick<AdditionalRequirementRow, "team" | "profile" | "category" | "subCategory" | "document" | "reason">,
+    requirementMasterRows: RequirementMasterOption[],
 ) => {
     const masterTeam = getMasterTeamForUiValue(row.team);
     if (!masterTeam) {
@@ -273,7 +274,11 @@ const getScopedMasterRows = (
     );
 };
 
-const applyLookupToRow = (row: EditableRequirementRow, requiresProfile: boolean): EditableRequirementRow => {
+const applyLookupToRow = (
+    row: EditableRequirementRow,
+    requiresProfile: boolean,
+    requirementMasterRows: RequirementMasterOption[],
+): EditableRequirementRow => {
     if (!row.__isDraft) {
         return row;
     }
@@ -295,7 +300,7 @@ const applyLookupToRow = (row: EditableRequirementRow, requiresProfile: boolean)
         };
     }
 
-    const matches = getScopedMasterRows(row);
+    const matches = getScopedMasterRows(row, requirementMasterRows);
 
     if (matches.length === 1) {
         return {
@@ -415,16 +420,56 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             ? (requirementManagement as AdditionalRequirementRow[])
             : [];
     });
+    const masters = useSelector((state: RootState) => state.drs.masters);
+    const masterRequirementRows = useMemo(
+        () => masters.requirementManagement ?? [],
+        [masters.requirementManagement],
+    );
+    const effectiveRequirementMasterRows = useMemo(
+        () => masterRequirementRows.length > 0 ? masterRequirementRows : fallbackRequirementMasterRows,
+        [masterRequirementRows],
+    );
+    const requirementTeamOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.requirementTeam)
+            .map((option) => mapTeamValueToUi(option.label || option.value, roleType))
+            .filter(Boolean)
+            .map(toOption);
+        return masterOptions.length > 0 ? masterOptions : getFallbackTeamOptions(roleType);
+    }, [masters.requirementTeam, roleType]);
+    const requirementProfileOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.requirementProfile);
+        return masterOptions.length > 0 ? masterOptions : FALLBACK_PROFILE_OPTIONS;
+    }, [masters.requirementProfile]);
+    const requirementCategoryOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.requirementCategory);
+        return masterOptions.length > 0 ? masterOptions : FALLBACK_CATEGORY_OPTIONS;
+    }, [masters.requirementCategory]);
+    const requirementSubCategoryOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.requirementSubCategory);
+        return masterOptions.length > 0 ? masterOptions : FALLBACK_SUB_CATEGORY_OPTIONS;
+    }, [masters.requirementSubCategory]);
+    const requirementDocumentOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.requirementDocument);
+        return masterOptions.length > 0 ? masterOptions : FALLBACK_DOCUMENT_OPTIONS;
+    }, [masters.requirementDocument]);
+    const requirementReasonOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.requirementReason);
+        return masterOptions.length > 0 ? masterOptions : FALLBACK_REASON_OPTIONS;
+    }, [masters.requirementReason]);
+    const requirementStatusOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.requirementStatus);
+        return masterOptions.length > 0 ? masterOptions : STATUS_OPTIONS;
+    }, [masters.requirementStatus]);
 
     const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK";
     const teamOptions = useMemo(() => {
-        const masterOptions = getTeamOptionsFromMaster(roleType);
-        const fallbackOptions = getFallbackTeamOptions(roleType);
+        const masterOptions = masterRequirementRows.length > 0
+            ? getTeamOptionsFromMaster(roleType, masterRequirementRows)
+            : requirementTeamOptions;
         return uniqueNonEmpty([
             ...masterOptions.map((item) => item.value),
-            ...fallbackOptions.map((item) => item.value),
         ]).map(toOption);
-    }, [roleType]);
+    }, [masterRequirementRows, requirementTeamOptions, roleType]);
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
         () => finalRequirements.map((row, index) => normalizeExistingRow(row, index)),
@@ -474,48 +519,48 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getCategoryOptions = (row: EditableRequirementRow) => {
         const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, profile: shouldShowProfileAndSpecialTest ? row.profile : "", category: "", subCategory: "", document: "", reason: "" }).map(
+            getScopedMasterRows({ ...row, profile: shouldShowProfileAndSpecialTest ? row.profile : "", category: "", subCategory: "", document: "", reason: "" }, masterRequirementRows).map(
                 (entry) => entry.category,
             ),
         ).map(toOption);
 
-        return options.length > 0 ? options : FALLBACK_CATEGORY_OPTIONS;
+        return options.length > 0 ? options : requirementCategoryOptions;
     };
 
     const getProfileOptions = (row: EditableRequirementRow) => {
         const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, profile: "", category: "", subCategory: "", document: "", reason: "" }).map(
+            getScopedMasterRows({ ...row, profile: "", category: "", subCategory: "", document: "", reason: "" }, masterRequirementRows).map(
                 (entry) => entry.profile,
             ),
         ).map(toOption);
 
-        return options.length > 0 ? options : FALLBACK_PROFILE_OPTIONS;
+        return options.length > 0 ? options : requirementProfileOptions;
     };
 
     const getSubCategoryOptions = (row: EditableRequirementRow) => {
         const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, subCategory: "", document: "", reason: "" }).map(
+            getScopedMasterRows({ ...row, subCategory: "", document: "", reason: "" }, masterRequirementRows).map(
                 (entry) => entry.subCategory,
             ),
         ).map(toOption);
 
-        return options.length > 0 ? options : FALLBACK_SUB_CATEGORY_OPTIONS;
+        return options.length > 0 ? options : requirementSubCategoryOptions;
     };
 
     const getDocumentOptions = (row: EditableRequirementRow) => {
         const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, document: "", reason: "" }).map((entry) => entry.document),
+            getScopedMasterRows({ ...row, document: "", reason: "" }, masterRequirementRows).map((entry) => entry.document),
         ).map(toOption);
 
-        return options.length > 0 ? options : FALLBACK_DOCUMENT_OPTIONS;
+        return options.length > 0 ? options : requirementDocumentOptions;
     };
 
     const getReasonOptions = (row: EditableRequirementRow) => {
         const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, reason: "" }).map((entry) => entry.reason),
+            getScopedMasterRows({ ...row, reason: "" }, masterRequirementRows).map((entry) => entry.reason),
         ).map(toOption);
 
-        return options.length > 0 ? options : FALLBACK_REASON_OPTIONS;
+        return options.length > 0 ? options : requirementReasonOptions;
     };
 
     const updateRow = (rowId: string, updater: (row: EditableRequirementRow) => EditableRequirementRow) => {
@@ -649,13 +694,13 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     break;
             }
 
-            return applyLookupToRow(nextRow, shouldShowProfileAndSpecialTest);
+            return applyLookupToRow(nextRow, shouldShowProfileAndSpecialTest, effectiveRequirementMasterRows);
         });
     };
 
     const handleSave = (rowId: string) => {
         updateRow(rowId, (row) => {
-            const preparedRow = applyLookupToRow(row, shouldShowProfileAndSpecialTest);
+            const preparedRow = applyLookupToRow(row, shouldShowProfileAndSpecialTest, effectiveRequirementMasterRows);
             const errors = validateDraftRow(preparedRow, shouldShowProfileAndSpecialTest);
 
             if (Object.keys(errors).length > 0) {
@@ -779,7 +824,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     );
                 }
 
-                return renderEditableSelect(row, "status", STATUS_OPTIONS, false);
+                return renderEditableSelect(row, "status", requirementStatusOptions, false);
             },
         },
         { key: "raisedDate", header: "Raised Date", width: "6%" },
@@ -1110,7 +1155,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             {renderField(
                                                 "Status",
                                                 canEditStatus
-                                                    ? renderEditableSelect(row, "status", STATUS_OPTIONS, false)
+                                                    ? renderEditableSelect(row, "status", requirementStatusOptions, false)
                                                     : renderReadOnlyField(row.status),
                                             )}
                                             {renderField("Raised Date", renderReadOnlyField(row.raisedDate))}

@@ -439,6 +439,16 @@
       { "label": "Zambia", "value": "Zambia" },
       { "label": "Zimbabwe", "value": "Zimbabwe" }
     ],
+    "maritalStatus": [
+      { "key": "S", "value": "Single" },
+      { "key": "M", "value": "Married" },
+      { "key": "D", "value": "Divorced" },
+      { "key": "W", "value": "Widowed" }
+    ],
+    "pep": [
+      { "key": "Y", "value": "Yes" },
+      { "key": "N", "value": "No" }
+    ],
     "exceptionDecision": [
       {
         "label": "Sent back to last UW",
@@ -448,6 +458,177 @@
         "label": "Refer to IT",
         "value": "Refer to IT"
       }
+    ],
+    "requirementManagement": [],
+    "requirementTeam": [
+      { "label": "Gops", "value": "Gops" },
+      { "label": "System Requirement", "value": "System Requirement" },
+      { "label": "UW", "value": "UW" }
+    ],
+    "requirementProfile": [
+      { "label": "Life Assured", "value": "Life Assured" },
+      { "label": "Proposer", "value": "Proposer" },
+      { "label": "Payer", "value": "Payer" }
+    ],
+    "requirementCategory": [
+      { "label": "Declaration", "value": "Declaration" },
+      { "label": "Internal", "value": "Internal" },
+      { "label": "Document", "value": "Document" },
+      { "label": "Customer Declaration Form", "value": "Customer Declaration Form" },
+      { "label": "Financial", "value": "Financial" },
+      { "label": "OID", "value": "OID" },
+      { "label": "Application", "value": "Application" },
+      { "label": "Questionnaire", "value": "Questionnaire" },
+      { "label": "Medicals", "value": "Medicals" },
+      { "label": "Medical", "value": "Medical" },
+      { "label": "KYC", "value": "KYC" },
+      { "label": "NRI-OCI", "value": "NRI-OCI" },
+      { "label": "Business", "value": "Business" },
+      { "label": "Business Insurance", "value": "Business Insurance" },
+      { "label": "Consent", "value": "Consent" },
+      { "label": "PSO OID", "value": "PSO OID" },
+      { "label": "Covid", "value": "Covid" }
+    ],
+    "requirementSubCategory": [
+      { "label": "Customer declaration form", "value": "Customer declaration form" },
+      { "label": "Joint life", "value": "Joint life" },
+      { "label": "Vernacular DCR", "value": "Vernacular DCR" },
+      { "label": "Salary", "value": "Salary" },
+      { "label": "Business/ salaried", "value": "Business/ salaried" },
+      { "label": "Surrogates", "value": "Surrogates" },
+      { "label": "Non medical", "value": "Non medical" },
+      { "label": "Non Medical", "value": "Non Medical" },
+      { "label": "Medical Findings", "value": "Medical Findings" },
+      { "label": "Grid Medicals", "value": "Grid Medicals" },
+      { "label": "NRI", "value": "NRI" },
+      { "label": "OCI", "value": "OCI" }
+    ],
+    "requirementDocument": [
+      { "label": "CDF", "value": "CDF" },
+      { "label": "Customer Declaration Form", "value": "Customer Declaration Form" },
+      { "label": "Bank statement/ surrogate", "value": "Bank statement/ surrogate" },
+      { "label": "ITR/ COI", "value": "ITR/ COI" },
+      { "label": "Medical Questionnaire", "value": "Medical Questionnaire" },
+      { "label": "Passport", "value": "Passport" },
+      { "label": "Photo", "value": "Photo" },
+      { "label": "Blood test", "value": "Blood test" },
+      { "label": "Loan", "value": "Loan" },
+      { "label": "Consent", "value": "Consent" }
+    ],
+    "requirementReason": [
+      { "label": "Documents submitted not clear", "value": "Documents submitted not clear" },
+      { "label": "Documents not submitted", "value": "Documents not submitted" },
+      { "label": "Incomplete/Invalid document submitted", "value": "Incomplete/Invalid document submitted" },
+      { "label": "Joint Life Identification", "value": "Joint Life Identification" },
+      { "label": "Vernacular DCR Not Given", "value": "Vernacular DCR Not Given" },
+      { "label": "Latest income proof required", "value": "Latest income proof required" },
+      { "label": "Income proof not clear", "value": "Income proof not clear" },
+      { "label": "Clear copy of Latest income proof required", "value": "Clear copy of Latest income proof required" },
+      { "label": "CAM sheet Required", "value": "CAM sheet Required" },
+      { "label": "Document not uploaded", "value": "Document not uploaded" },
+      { "label": "Medical Questionnaire Required", "value": "Medical Questionnaire Required" },
+      { "label": "Non medical Questionnaire not submitted", "value": "Non medical Questionnaire not submitted" },
+      { "label": "Additional medical test required", "value": "Additional medical test required" }
+    ],
+    "requirementStatus": [
+      { "label": "Pending", "value": "Pending" },
+      { "label": "Waived", "value": "Waived" },
+      { "label": "Rejected", "value": "Rejected" },
+      { "label": "Accept", "value": "Accept" }
+    ],
+    "cvtDecision": [
+      { "key": "ACCEPT", "value": "Accept" },
+      { "key": "RAISE_REQUIREMENTS", "value": "Raise Requirements" },
+      { "key": "REFER_TO_RISK", "value": "Refer to Risk" },
+      { "key": "RERAISE_PIVV", "value": "Reraise PIVV" },
+      { "key": "REFER_TO_CUW", "value": "Refer to CUW" }
+    ],
+    "dvtDecision": [
+      { "key": "ACCEPT", "value": "Accept" },
+      { "key": "RAISE_REQUIREMENTS", "value": "Raise Requirements" },
+      { "key": "REFER_TO_GUW", "value": "Refer to GUW" }
+    ],
+    "caseUWDecision": [
+      { "key": "ACCEPT", "value": "Accept" },
+      { "key": "REJECT", "value": "Reject" },
+      { "key": "DECLINE", "value": "Decline" },
+      { "key": "POSTPONE", "value": "Postpone" },
+      { "key": "COUNTER_OFFER", "value": "Counter Offer" },
+      { "key": "REFER_TO_HOD", "value": "Refer to HoD" },
+      { "key": "REFER_TO_SR_UW", "value": "Refer to Sr.UW" },
+      { "key": "REFER_TO_REINSURER", "value": "Refer to Reinsurer" },
+      { "key": "REFER_TO_HO_CMO", "value": "Refer to HO CMO" },
+      { "key": "REFER_TO_RISK", "value": "Refer to Risk" },
+      { "key": "REFER_TO_ACCUITY", "value": "Refer to Accuity" },
+      { "key": "RAISE_REQUIREMENT", "value": "Raise Requirement" },
+      { "key": "REFER_TO_CUW_CLAIM_POOL", "value": "Refer to CUW Claim Pool" },
+      { "key": "HOLD", "value": "Hold" }
+    ],
+    "firstUWDecision": [
+      { "key": "ACCEPT", "value": "Accept" },
+      { "key": "COUNTER_OFFER", "value": "Counter Offer" },
+      { "key": "REJECT", "value": "Reject" },
+      { "key": "DECLINE", "value": "Decline" },
+      { "key": "POSTPONE", "value": "Postpone" },
+      { "key": "RAISE_REQUIREMENT", "value": "Raise Requirement" }
+    ],
+    "parallelUWDecision": [
+      { "key": "RAISE_REQUIREMENT", "value": "Raise Requirement" },
+      { "key": "REFER_TO_HO_CMO", "value": "Refer to HO CMO" },
+      { "key": "REFER_TO_RISK", "value": "Refer to Risk" },
+      { "key": "REFER_TO_ACCUITY", "value": "Refer to Accuity" },
+      { "key": "TELE_MER_VIDEO_MER", "value": "Tele MER/ Video MER" },
+      { "key": "NONE", "value": "None" }
+    ],
+    "reconsiderationDecision": [
+      { "key": "RELEASE_CASE", "value": "Release the case" },
+      { "key": "SEND_BACK_TO_UW", "value": "Send back to UW" }
+    ],
+    "rejectReason": [
+      { "key": "REJECT_REASON_1", "value": "Reason 1" },
+      { "key": "REJECT_REASON_2", "value": "Reason 2" },
+      { "key": "REJECT_REASON_3", "value": "Reason 3" }
+    ],
+    "declineReason": [
+      { "key": "DECLINE_REASON_1", "value": "Reason 1" },
+      { "key": "DECLINE_REASON_2", "value": "Reason 2" },
+      { "key": "DECLINE_REASON_3", "value": "Reason 3" }
+    ],
+    "postponeReason": [
+      { "key": "POSTPONE_REASON_1", "value": "Reason 1" },
+      { "key": "POSTPONE_REASON_2", "value": "Reason 2" },
+      { "key": "POSTPONE_REASON_3", "value": "Reason 3" }
+    ],
+    "postponementPeriod": [
+      { "key": "3M", "value": "3 Months" },
+      { "key": "6M", "value": "6 Months" },
+      { "key": "12M", "value": "12 Months" }
+    ],
+    "riskReferralReason": [
+      { "key": "ADVERSE_PROFILE", "value": "Adverse Profile" },
+      { "key": "DRC_ADVERSE", "value": "DRC Adverse" },
+      { "key": "IIB_ADVERSE", "value": "IIB Adverse" },
+      { "key": "PTRL_ADVERSE", "value": "PTRL Adverse" }
+    ],
+    "accuityReferralReason": [
+      { "key": "ACCUITY_REASON_1", "value": "Reason 1" },
+      { "key": "ACCUITY_REASON_2", "value": "Reason 2" },
+      { "key": "ACCUITY_REASON_3", "value": "Reason 3" }
+    ],
+    "reinsurerReferralReason": [
+      { "key": "REINSURER_REASON_1", "value": "Reason 1" },
+      { "key": "REINSURER_REASON_2", "value": "Reason 2" },
+      { "key": "REINSURER_REASON_3", "value": "Reason 3" }
+    ],
+    "holdReason": [
+      { "key": "HOLD_REASON_1", "value": "Reason 1" },
+      { "key": "HOLD_REASON_2", "value": "Reason 2" },
+      { "key": "HOLD_REASON_3", "value": "Reason 3" }
+    ],
+    "cuwReferralReason": [
+      { "key": "CUW_REASON_1", "value": "Reason 1" },
+      { "key": "CUW_REASON_2", "value": "Reason 2" },
+      { "key": "CUW_REASON_3", "value": "Reason 3" }
     ]
   }
 }
