@@ -11,6 +11,7 @@ import ApplicantProfile from "./ApplicantProfile/ApplicantProfile";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { useNavigate } from "react-router-dom";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
+import { markApplicantTabVisited, syncRequiredApplicantTabs } from "../../../validations/drsApplicantTabValidation";
 
 const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
     const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
@@ -289,7 +290,13 @@ const Summary = () => {
 
     useEffect(() => {
         localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);
+        markApplicantTabVisited(activeApplicantTab);
     }, [activeApplicantTab]);
+
+    useEffect(() => {
+        syncRequiredApplicantTabs(data);
+        markApplicantTabVisited(activeApplicantTab);
+    }, [activeApplicantTab, data]);
 
     const canOpenMedicalFinancialViews = roleType !== "CPT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
 

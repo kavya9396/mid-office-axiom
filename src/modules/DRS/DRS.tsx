@@ -1,8 +1,8 @@
 import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "./drs-layouts";
 import BackButton from "../../components/layout/BackButton";
-import { Box, Typography } from "@mui/material";
+import { Alert, Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { Fragment, useCallback, useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import type { RootState } from "../../store/store";
@@ -14,6 +14,7 @@ import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import type { DRSBreOutput, DRSData } from "../../types/drs.types";
 import { DRS_MASTER_KEYS } from "./drsMasters";
+import { validateDrsFinalBre } from "../../validations/drsBreValidation";
 
 const toText = (value: unknown) => String(value ?? "").trim();
 
@@ -175,6 +176,26 @@ const DRS = () => {
             : visibleAccordions,
         [isSearchReadOnlyMode, visibleAccordions],
     );
+    const breValidation = useMemo(() => validateDrsFinalBre(drsData), [drsData]);
+
+    const handleDrsActionCapture = useCallback((event: SyntheticEvent<HTMLElement>) => {
+        const validation = validateDrsFinalBre(drsData);
+        if (validation.canPerformAction) {
+            return;
+        }
+
+        const target = event.target instanceof HTMLElement ? event.target : null;
+        if (target?.closest("[data-drs-validation-exempt='true']")) {
+            return;
+        }
+
+        if (target?.closest("[data-drs-bre-retrigger='true']")) {
+            return;
+        }
+
+        event.preventDefault();
+        event.stopPropagation();
+    }, [drsData]);
 
     const dispatchMastersOnce = useCallback(() => {
         if (mastersRequestedRef.current) {
@@ -312,16 +333,30 @@ const DRS = () => {
                     </div>:''
                 }
             />
-            <Box sx={isSearchReadOnlyMode ? readOnlyContentSx : undefined}>
+            {!breValidation.canPerformAction && (
+                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
+                    {breValidation.message}
+                </Alert>
+            )}
+            <Box
+                onClickCapture={handleDrsActionCapture}
+                onKeyDownCapture={handleDrsActionCapture}
+                sx={{
+                    ...(isSearchReadOnlyMode ? readOnlyContentSx : {}),
+                }}
+            >
                 {displayAccordions.map((accordionId) => {
                     const AccordionComponent = accordionRegistry[accordionId as keyof typeof accordionRegistry];
                     if (!AccordionComponent) {
                         return null;
                     }
                     return (
-                        <Fragment key={accordionId}>
+                        <Box
+                            key={accordionId}
+                            data-drs-validation-exempt={accordionId === "breDecision" ? "true" : undefined}
+                        >
                             <AccordionComponent />
-                        </Fragment>
+                        </Box>
                     );
                 })}
             </Box>

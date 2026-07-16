@@ -16,6 +16,8 @@ import type { ApplicantTab } from "../../../types/drs.types";
 import { openRequirementManagement } from "./requirementManagementEvents";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
+import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 
 const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
 const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
@@ -184,9 +186,21 @@ const CVTDecision = () => {
         return `Please visit ${formattedTabs} at least once before submitting.`;
     }, [pendingApplicantTabs]);
     const hasVisitedAllApplicantTabs = pendingApplicantTabs.length === 0;
+    const { businessType, applicationNumber } = useAppContext();
+    const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
+    const masters = useAppSelector((state) => state.drs.masters);
+    const cvtDecisionOptions = useMemo(() => {
+        const masterOptions = normalizeMasterOptions(masters.cvtDecision);
+        const options = masterOptions.length > 0 ? masterOptions : fallbackCvtDecisionOptions;
+        return filterAcceptDecisionOptions(options, drsData);
+    }, [drsData, masters.cvtDecision]);
+    const effectiveDecision = cvtDecisionOptions.some((option) => option.value === decision)
+        ? decision
+        : "";
+    const decisionLabel = toMasterLabel(effectiveDecision, cvtDecisionOptions);
     const isDecisionAndRemarksReady =
         uwDecisionRemarks.trim().length > 0 &&
-        decision.trim().length > 0;
+        effectiveDecision.trim().length > 0;
     const isSubmitEnabled =
         isDecisionAndRemarksReady &&
         hasVisitedAllApplicantTabs;
@@ -194,14 +208,6 @@ const CVTDecision = () => {
         isDecisionAndRemarksReady &&
         !hasVisitedAllApplicantTabs &&
         !tabValidationDismissed;
-    const { businessType, applicationNumber } = useAppContext();
-    const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
-    const masters = useAppSelector((state) => state.drs.masters);
-    const cvtDecisionOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.cvtDecision);
-        return masterOptions.length > 0 ? masterOptions : fallbackCvtDecisionOptions;
-    }, [masters.cvtDecision]);
-    const decisionLabel = toMasterLabel(decision, cvtDecisionOptions);
     const breMandatoryGuidance = useMemo(() => getBreMandatoryGuidance(drsData), [drsData]);
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
@@ -293,7 +299,15 @@ const CVTDecision = () => {
             window.removeEventListener(DRS_TAB_VISIT_EVENT, onVisitEvent);
         };
     }, []);
+
     const handleSubmit = async () => {
+        const breValidation = validateDrsFinalBre(drsData);
+        if (!breValidation.canPerformAction) {
+            setSubmitMessage(breValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
         if (!taskId || !userId || !applicationNumber || !instanceId) {
             setSubmitMessage("Missing required case information. Please open the case from inbox again.");
             setSubmitStatus("failure");
@@ -313,7 +327,7 @@ const CVTDecision = () => {
                         appNo: applicationNumber,
                         instanceId,
                         remarks: uwDecisionRemarks.trim(),
-                        decision: decision.trim(),
+                        decision: effectiveDecision.trim(),
                     },
                 }),
             ).unwrap();
@@ -338,6 +352,12 @@ const CVTDecision = () => {
     };
 
     const handleSubmitIntent = () => {
+        const applicantTabsValidation = validateApplicantTabsVisited(drsData);
+        if (!applicantTabsValidation.isValid) {
+            setTabValidationMessage(applicantTabsValidation.message);
+            return;
+        }
+
         if (!hasVisitedAllApplicantTabs) {
             setTabValidationMessage(pendingApplicantTabsMessage || "Please visit all applicant tabs at least once before submitting.");
             return;
@@ -408,7 +428,7 @@ const CVTDecision = () => {
                         >
                             <CustomSelect
                                 label="CVT Decision"
-                                value={decision}
+                                value={effectiveDecision}
                                 onChange={(value: string) => {
                                     setDecision(value);
                                     setSubmitMessage(null);

@@ -18,6 +18,8 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
+import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 
 const DVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
@@ -34,9 +36,13 @@ const DVTDecision = () => {
     const masters = useSelector((state: RootState) => state.drs.masters);
     const dvtDecisionOptions = useMemo(() => {
         const masterOptions = normalizeMasterOptions(masters.dvtDecision);
-        return masterOptions.length > 0 ? masterOptions : fallbackDvtDecisionOptions;
-    }, [masters.dvtDecision]);
-    const decisionLabel = toMasterLabel(decision, dvtDecisionOptions);
+        const options = masterOptions.length > 0 ? masterOptions : fallbackDvtDecisionOptions;
+        return filterAcceptDecisionOptions(options, drsData);
+    }, [drsData, masters.dvtDecision]);
+    const effectiveDecision = dvtDecisionOptions.some((option) => option.value === decision)
+        ? decision
+        : "";
+    const decisionLabel = toMasterLabel(effectiveDecision, dvtDecisionOptions);
     
 
     const savedRequirements = useSelector((state: RootState) => {
@@ -59,7 +65,7 @@ const DVTDecision = () => {
         const isRaiseRequirementsSelected = decisionLabel === "Raise Requirements";
         const submitBlocked =
             (isRaiseRequirementsSelected && !hasRequirements) ||
-            (hasRequirements && decision !== "" && !isRaiseRequirementsSelected);
+            (hasRequirements && effectiveDecision !== "" && !isRaiseRequirementsSelected);
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
@@ -67,6 +73,13 @@ const DVTDecision = () => {
     const taskContext = getDecisionTaskContext(drsData, applicationNumber);
 
     const handleSubmit = async () => {
+        const breValidation = validateDrsFinalBre(drsData);
+        if (!breValidation.canPerformAction) {
+            setSubmitMessage(breValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
         if (!taskContext.taskId || !taskContext.userId || !taskContext.appNo || !taskContext.instanceId) {
             setSubmitMessage("Missing required case information. Please open the case from inbox again.");
             setSubmitStatus("failure");
@@ -86,7 +99,7 @@ const DVTDecision = () => {
                         appNo: taskContext.appNo,
                         instanceId: taskContext.instanceId,
                         remarks: uwDecisionRemarks.trim(),
-                        decision: decision.trim(),
+                        decision: effectiveDecision.trim(),
                     },
                 }),
             ).unwrap();
@@ -108,6 +121,17 @@ const DVTDecision = () => {
         } finally {
             setSubmitLoading(false);
         }
+    };
+
+    const handleSubmitIntent = () => {
+        const applicantTabsValidation = validateApplicantTabsVisited(drsData);
+        if (!applicantTabsValidation.isValid) {
+            setSubmitMessage(applicantTabsValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
+        setConfirmationDialogOpen(true);
     };
 
     useEffect(() => {
@@ -173,7 +197,7 @@ const DVTDecision = () => {
                         >
                             <CustomSelect
                                 label="DVT Decision"
-                                value={decision}
+                                value={effectiveDecision}
                                 onChange={(value) => {
                                     setDecision(value);
 
@@ -236,10 +260,8 @@ const DVTDecision = () => {
                     >
                         <CustomButton
                             variant="contained"
-                            disabled={!decision || submitBlocked || submitLoading}
-                            onClick={() => {
-                                  setConfirmationDialogOpen(true);
-                            }}
+                            disabled={!effectiveDecision || submitBlocked || submitLoading}
+                                onClick={handleSubmitIntent}
                             sx={{
                                 minWidth: 200,
                                 height: 44,

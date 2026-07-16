@@ -29,6 +29,8 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
+import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 
 const referralRoleMap: Record<string, string> = {
     "Refer to HoD": "HoD",
@@ -109,8 +111,12 @@ const UWDecision = () => {
 
     const caseUWDecisionOptions = useMemo(() => {
         const masterOptions = normalizeMasterOptions(masters.caseUWDecision);
-        return masterOptions.length > 0 ? masterOptions : fallbackCaseUWDecisionOptions;
-    }, [masters.caseUWDecision]);
+        const options = masterOptions.length > 0 ? masterOptions : fallbackCaseUWDecisionOptions;
+        return filterAcceptDecisionOptions(options, drsData);
+    }, [drsData, masters.caseUWDecision]);
+    const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
+        ? caseUWDecision
+        : "";
     const firstUWDecisionOptions = useMemo(() => {
         const masterOptions = normalizeMasterOptions(masters.firstUWDecision);
         return masterOptions.length > 0 ? masterOptions : fallbackFirstUWDecisionOptions;
@@ -171,7 +177,7 @@ const UWDecision = () => {
         const masterOptions = normalizeMasterOptions(masters.cuwReferralReason);
         return masterOptions.length > 0 ? masterOptions : fallbackCUWReferralReasons;
     }, [masters.cuwReferralReason]);
-    const caseUWDecisionLabel = toMasterLabel(caseUWDecision, caseUWDecisionOptions);
+    const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
 
     const showDecisionCode = [
         "Accept",
@@ -247,6 +253,13 @@ const UWDecision = () => {
     const taskContext = getDecisionTaskContext(drsData, applicationNumber);
 
     const handleSubmit = async () => {
+        const breValidation = validateDrsFinalBre(drsData);
+        if (!breValidation.canPerformAction) {
+            setSubmitMessage(breValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
         if (!taskContext.taskId || !taskContext.userId || !taskContext.appNo || !taskContext.instanceId) {
             setSubmitMessage("Missing required case information. Please open the case from inbox again.");
             setSubmitStatus("failure");
@@ -266,7 +279,7 @@ const UWDecision = () => {
                         appNo: taskContext.appNo,
                         instanceId: taskContext.instanceId,
                         remarks: uwDecisionRemarks.trim(),
-                        decision: caseUWDecision.trim(),
+                        decision: effectiveCaseUWDecision.trim(),
                     },
                 }),
             ).unwrap();
@@ -288,6 +301,17 @@ const UWDecision = () => {
         } finally {
             setSubmitLoading(false);
         }
+    };
+
+    const handleSubmitIntent = () => {
+        const applicantTabsValidation = validateApplicantTabsVisited(drsData);
+        if (!applicantTabsValidation.isValid) {
+            setSubmitMessage(applicantTabsValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
+        setConfirmationDialogOpen(true);
     };
 
     const userOptions = useMemo(() => {
@@ -405,7 +429,7 @@ const UWDecision = () => {
                         >
                             <CustomSelect
                                 label="Case UW Decision"
-                                value={caseUWDecision}
+                                value={effectiveCaseUWDecision}
                                 onChange={(value: string) => {
                                     const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
                                     setCaseUWDecision(value);
@@ -797,7 +821,7 @@ const UWDecision = () => {
                             <CustomButton
                                 variant="contained"
                                 disabled={submitLoading}
-                                onClick={() => setConfirmationDialogOpen(true)}
+                                onClick={handleSubmitIntent}
                                 sx={{
                                     minWidth: 200,
                                     height: 44,

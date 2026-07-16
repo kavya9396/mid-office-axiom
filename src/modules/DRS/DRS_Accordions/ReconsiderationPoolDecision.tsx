@@ -14,6 +14,7 @@ import { reconsiderationDecisionOptions as fallbackReconsiderationDecisionOption
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 
 const ReconsiderationPoolDecision = () => {
   const dispatch = useAppDispatch();
@@ -43,6 +44,13 @@ const ReconsiderationPoolDecision = () => {
   const taskContext = getDecisionTaskContext(drsData, applicationNumber);
 
   const handleSubmit = async () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      setSubmitStatus("failure");
+      return;
+    }
+
     if (!taskContext.taskId || !taskContext.userId || !taskContext.appNo || !taskContext.instanceId) {
       setSubmitMessage("Missing required case information. Please open the case from inbox again.");
       setSubmitStatus("failure");

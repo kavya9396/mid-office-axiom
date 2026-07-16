@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container, Typography, Button } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -306,7 +306,7 @@ const BreDecision = ({
   ];
 
   const handleRetrigger = async () => {
-    if (isBreSuccess || breRetriggerLoading) {
+    if (isRetriggerDisabled) {
       return;
     }
 
@@ -447,6 +447,7 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
   return (
     <Container disableGutters>
       <CustomAccordion
+      defaultExpanded
         title={breTitle}
         chip={
           currentBreDecision?.decision ? (
@@ -512,25 +513,28 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                 >
                   Final BRE
                 </Typography>
-                <Box
-                  component="span"
+                <Button
+                  data-drs-bre-retrigger="true"
+                  disabled={isRetriggerDisabled}
                   onClick={() => {
-                    void handleRetrigger();
+                    handleRetrigger();
                   }}
                   sx={{
                     color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
                     border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
+                    minWidth: 0,
                     width: 32,
                     height: 32,
+                    p: 0,
                     borderRadius: "8px",
                     cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
                     opacity: isRetriggerDisabled ? 0.5 : 1,
                     flexShrink: 0,
-                  ...centerFlex,
-                }}
-              >
+                    ...centerFlex,
+                  }}
+                >
                   <RefreshIcon />
-                </Box>
+                </Button>
               </Box>
             </Box>
 

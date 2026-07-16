@@ -12,6 +12,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
+import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 
 type PivvDecisionOption = {
   label: string;
@@ -74,6 +75,12 @@ const PIVVDecision = () => {
   const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;
 
   const handleSubmit = async () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      return;
+    }
+
     if (!taskContext.appNo || !roleType || !taskContext.taskId || !taskContext.instanceId || !taskContext.userId || !workflowPool) {
       setSubmitMessage("Missing required case information. Please open the case from inbox again.");
       return;
