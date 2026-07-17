@@ -112,7 +112,7 @@ const GroupPolicyDetails = () => {
   return (
     <Container disableGutters>
       <Box sx={{ mt: 2 }}>
-        <CustomAccordion title="Group Policy Details" defaultExpanded={false}>
+        <CustomAccordion title="Group Policy Details" defaultExpanded>
           <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
             <GridSection columns={3} items={details} />
           </Box>

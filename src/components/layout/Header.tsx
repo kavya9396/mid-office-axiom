@@ -46,7 +46,6 @@ return(
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        p: 1,
         backgroundColor: "#fff",
         boxShadow: 1,
       }}

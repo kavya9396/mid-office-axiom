@@ -386,7 +386,7 @@ const UWDecision = () => {
     return (
         <Container disableGutters>
             <Box sx={{ mt: 2 }}>
-                <CustomAccordion title="UW Decision" defaultExpanded={false}>
+                <CustomAccordion title="UW Decision" defaultExpanded>
                     <Box
                         sx={{
                             mt: 1,

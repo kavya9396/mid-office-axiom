@@ -327,7 +327,7 @@ const ApplicationOverview = () => {
     <Container disableGutters>
       <Box sx={{ mt: 2 }}>
         {/* <CustomAccordion title="Application Overview" defaultExpanded={userRole ==='CPT'?true:false}> */}
-        <CustomAccordion title="Application Details" defaultExpanded={false}>
+        <CustomAccordion title="Application Details" defaultExpanded>
           <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
             {/* <Box
               sx={{

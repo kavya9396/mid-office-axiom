@@ -11,7 +11,7 @@ interface RequirementManagementProps {
 
 const RequirementManagement = ({ requirements }: RequirementManagementProps) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
-  const [expanded, setExpanded] = useState(false);
+  const [expanded, setExpanded] = useState(true);
 
   useEffect(() => {
     const handleOpenRequirementManagement = () => {

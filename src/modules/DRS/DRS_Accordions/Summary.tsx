@@ -380,7 +380,7 @@ const Summary = () => {
             <Box sx={{ mt: 1 }}>
                 <CustomAccordion
                     title={isFormalRole ? "Member Details":"Applicant Details"}
-                    defaultExpanded={false}
+                    defaultExpanded
                     expanded={isApplicantDetailsExpanded}
                     onChange={setIsApplicantDetailsExpanded}
                 >

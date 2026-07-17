@@ -142,7 +142,7 @@ const DVTDecision = () => {
     return (
         <Container disableGutters>
             <Box sx={{ mt: 2 }}>
-                <CustomAccordion title="DVT Decision" defaultExpanded={false}>
+                <CustomAccordion title="DVT Decision" defaultExpanded>
                     <Box
                         sx={{
                             backgroundColor: "#F6F6F6",

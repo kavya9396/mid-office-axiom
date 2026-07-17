@@ -538,7 +538,7 @@ const RightPanel = ({
           width: "100%",
           backgroundColor: "transparent",
           ...columnFlex,
-          margin: 4,
+          margin: 1,
         }}
       >
         <Box
