@@ -159,8 +159,8 @@ const BreDecision = ({
   const isBreSuccess = resolvedFinalBreStatus.toLowerCase() === "success";
 
   // This count should come from backend.
-  const isRetriggerDisabled =
-    isBreSuccess || retriggerCount >= 3 || breRetriggerLoading;
+  // const isRetriggerDisabled =
+  //   isBreSuccess || retriggerCount >= 3 || breRetriggerLoading;
 
   const conditionalFields = extraFields
     .filter((item) => {
@@ -306,7 +306,7 @@ const BreDecision = ({
   ];
 
   const handleRetrigger = async () => {
-    if (isRetriggerDisabled) {
+    if (breRetriggerLoading) {
       return;
     }
 
@@ -515,21 +515,21 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                 </Typography>
                 <Button
                   data-drs-bre-retrigger="true"
-                  disabled={isRetriggerDisabled}
+                  // disabled={isRetriggerDisabled}
                   aria-label={breRetriggerLoading ? "Retriggering BRE" : "Retrigger BRE"}
                   onClick={() => {
                     handleRetrigger();
                   }}
                   sx={{
-                    color: isRetriggerDisabled ? "#BDBDBD" : "#9A2529",
-                    border: `1px solid ${isRetriggerDisabled ? "#BDBDBD" : "#9A2529"}`,
+                    color: "#9A2529",
+                    border: "1px solid #9A2529",
                     minWidth: 0,
                     width: 32,
                     height: 32,
                     p: 0,
                     borderRadius: "8px",
-                    cursor: isRetriggerDisabled ? "not-allowed" : "pointer",
-                    opacity: isRetriggerDisabled ? 0.5 : 1,
+                    cursor: "pointer",
+                    opacity: 1,
                     flexShrink: 0,
                     ...centerFlex,
                   }}

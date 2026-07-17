@@ -479,6 +479,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     );
 
     const [localRows, setLocalRows] = useState<EditableRequirementRow[]>([]);
+    const [isTableSaved, setIsTableSaved] = useState(false);
+    const [editableStatusRowIds, setEditableStatusRowIds] = useState<Set<string>>(() => new Set());
     const [sourceRowOverrides, setSourceRowOverrides] = useState<
         Record<string, Pick<EditableRequirementRow, "status" | "receivedDate" | "receivedBy">>
     >({});
@@ -512,7 +514,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 const currentUserHasRaisedRequirement = [...normalizedExistingRows, ...previousRows].some(
                     isRaisedByCurrentUser,
                 );
-                return currentUserHasRaisedRequirement ? previousRows : [...previousRows, createDraftRow()];
+                if (currentUserHasRaisedRequirement) {
+                    return previousRows;
+                }
+
+                setIsTableSaved(false);
+                return [...previousRows, createDraftRow()];
             });
         };
 
@@ -594,6 +601,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     };
 
     const handleInlineChange = (rowId: string, field: EditableField, value: string) => {
+        setIsTableSaved(false);
+        if (field === "status") {
+            setEditableStatusRowIds((previousIds) => new Set(previousIds).add(rowId));
+        }
+
         updateRow(rowId, (row) => {
             const nextErrors = clearErrors(row.__errors, [field, "lookup"]);
 
@@ -705,6 +717,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     };
 
     const handleSave = (rowId: string) => {
+        setIsTableSaved(false);
         updateRow(rowId, (row) => {
             const preparedRow = applyLookupToRow(row, shouldShowProfileAndSpecialTest, effectiveRequirementMasterRows);
             const errors = validateDraftRow(preparedRow, shouldShowProfileAndSpecialTest);
@@ -726,10 +739,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     };
 
     const handleDelete = (rowId: string) => {
+        setIsTableSaved(false);
         setLocalRows((previousRows) => previousRows.filter((row) => row.__rowId !== rowId));
     };
 
     const handleEditLocalSaved = (rowId: string) => {
+        setIsTableSaved(false);
         setLocalRows((previousRows) =>
             previousRows.map((row) =>
                 row.__rowId === rowId
@@ -803,52 +818,46 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         </Box>
     );
 
-    const savedColumns: Column<EditableRequirementRow>[] = [
-        { key: "team", header: "Team", width: "2%" },
-        ...(shouldShowProfileAndSpecialTest
-            ? ([{ key: "profile", header: "Profile", width: "4%" }] as Column<EditableRequirementRow>[])
-            : []),
-        { key: "category", header: "Category", width: "4%" },
-        { key: "subCategory", header: "Sub Category", width: "7%" },
-        { key: "document", header: "Document", width: "5%" },
-        { key: "reason", header: "Reason", width: "5%" },
-        ...(shouldShowProfileAndSpecialTest
-            ? ([{ key: "specialTest", header: "Special Test", width: "6%" }] as Column<EditableRequirementRow>[])
-            : []),
-        { key: "fupCode", header: "FUP Code", width: "5%" },
-        { key: "description", header: "Description", width: "8%" },
-        {
-            key: "status",
-            header: "Status",
-            width: "6%",
-            render: (_value, row) => {
-                if (!isPendingStatus(row.status)) {
-                    return (
-                        <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
-                            {toDisplayValue(row.status)}
-                        </Typography>
-                    );
-                }
+    const renderDisabledActionIcons = () => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, whiteSpace: "nowrap" }}>
+            <Box
+                component="span"
+                sx={{
+                    color: "#CBD5E1",
+                    display: "inline-flex",
+                    opacity: 0.55,
+                    cursor: "not-allowed",
+                }}
+                aria-disabled="true"
+                aria-label="Edit requirement unavailable"
+            >
+                <EditIcon />
+            </Box>
+            <Box
+                component="span"
+                sx={{
+                    color: "#CBD5E1",
+                    display: "inline-flex",
+                    opacity: 0.55,
+                    cursor: "not-allowed",
+                }}
+                aria-disabled="true"
+                aria-label="Delete requirement unavailable"
+            >
+                <CloseIcon />
+            </Box>
+        </Box>
+    );
 
-                return renderEditableSelect(row, "status", requirementStatusOptions, false);
-            },
-        },
-        { key: "raisedDate", header: "Raised Date", width: "6%" },
-        { key: "raisedBy", header: "Raised By", width: "6%" },
-        { key: "receivedDate", header: "Received Date", width: "7%" },
-        { key: "receivedBy", header: "Received By", width: "6%" },
+    const savedColumns: Column<EditableRequirementRow>[] = [
         {
             key: "__rowId",
             header: "Actions",
             width: "2%",
-            sticky: "right",
+            sticky: "left",
             render: (_value, row) => {
-                if (!row.__isLocal) {
-                    return (
-                        <Typography sx={{ fontSize: 12, color: "#94A3B8" }}>
-                            -
-                        </Typography>
-                    );
+                if (!row.__isLocal || isTableSaved) {
+                    return renderDisabledActionIcons();
                 }
 
                 return (
@@ -889,6 +898,41 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 );
             },
         },
+        {
+            key: "status",
+            header: "Status",
+            width: "6%",
+            render: (_value, row) => {
+                const canEditStatus = !isTableSaved && (isPendingStatus(row.status) || editableStatusRowIds.has(row.__rowId));
+
+                if (!canEditStatus) {
+                    return (
+                        <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
+                            {toDisplayValue(row.status)}
+                        </Typography>
+                    );
+                }
+
+                return renderEditableSelect(row, "status", requirementStatusOptions, false);
+            },
+        },
+        { key: "team", header: "Team", width: "2%" },
+        ...(shouldShowProfileAndSpecialTest
+            ? ([{ key: "profile", header: "Profile", width: "4%" }] as Column<EditableRequirementRow>[])
+            : []),
+        { key: "category", header: "Category", width: "4%" },
+        { key: "subCategory", header: "Sub Category", width: "7%" },
+        { key: "document", header: "Document", width: "5%" },
+        { key: "reason", header: "Reason", width: "5%" },
+        ...(shouldShowProfileAndSpecialTest
+            ? ([{ key: "specialTest", header: "Special Test", width: "6%" }] as Column<EditableRequirementRow>[])
+            : []),
+        { key: "fupCode", header: "FUP Code", width: "5%" },
+        { key: "description", header: "Description", width: "8%" },
+        { key: "raisedDate", header: "Raised Date", width: "6%" },
+        { key: "raisedBy", header: "Raised By", width: "6%" },
+        { key: "receivedDate", header: "Received Date", width: "7%" },
+        { key: "receivedBy", header: "Received By", width: "6%" },
     ];
 
     return (
@@ -931,7 +975,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             px: 2,
                             "&:hover": { backgroundColor: "#FFFFFF" },
                         }}
-                        onClick={() => setLocalRows((previousRows) => [...previousRows, createDraftRow()])}
+                        onClick={() => {
+                            setIsTableSaved(false);
+                            setLocalRows((previousRows) => [...previousRows, createDraftRow()]);
+                        }}
                     >
                         + Add Requirement
                     </CustomButton>
@@ -991,7 +1038,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             const subCategoryOptions = getSubCategoryOptions(row);
                             const documentOptions = getDocumentOptions(row);
                             const reasonOptions = getReasonOptions(row);
-                            const canEditStatus = row.__isDraft || isPendingStatus(row.status);
 
                             return (
                                 <Box
@@ -1056,7 +1102,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                     onClick={() => handleDelete(row.__rowId)}
                                                     sx={{ borderRadius: 999, px: 2 }}
                                                 >
-                                                    Delete
+                                                    Close
                                                 </CustomButton>
                                                 <CustomButton
                                                     variant="contained"
@@ -1064,12 +1110,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                     onClick={() => handleSave(row.__rowId)}
                                                     sx={{ borderRadius: 999, px: 2 }}
                                                 >
-                                                    Save
+                                                    Add
                                                 </CustomButton>
                                             </Box>
                                         ) : (
                                             <Typography sx={{ fontSize: 11, color: "#64748B" }}>
-                                                {canEditStatus
+                                                {isPendingStatus(row.status)
                                                     ? "Only status remains editable while it is pending."
                                                     : "This requirement is locked because status is no longer pending."}
                                             </Typography>
@@ -1158,16 +1204,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                 "Description",
                                                 renderReadOnlyField(row.description),
                                             )}
-                                            {renderField(
-                                                "Status",
-                                                canEditStatus
-                                                    ? renderEditableSelect(row, "status", requirementStatusOptions, false)
-                                                    : renderReadOnlyField(row.status),
-                                            )}
-                                            {renderField("Raised Date", renderReadOnlyField(row.raisedDate))}
-                                            {renderField("Raised By", renderReadOnlyField(row.raisedBy))}
-                                            {renderField("Received Date", renderReadOnlyField(row.receivedDate))}
-                                            {renderField("Received By", renderReadOnlyField(row.receivedBy))}
                                         </Box>
                                     </Box>
 
@@ -1186,6 +1222,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 >
                     <CustomButton
                         variant="contained"
+                        disabled={draftRows.length > 0}
+                        onClick={() => {
+                            setIsTableSaved(true);
+                            setEditableStatusRowIds(new Set());
+                        }}
                         sx={{
                             minWidth: 200,
                             height: 44,
@@ -1195,7 +1236,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             whiteSpace: "nowrap",
                         }}
                     >
-                        Submit
+                        Save
                     </CustomButton>
                 </Box>
             </Box>

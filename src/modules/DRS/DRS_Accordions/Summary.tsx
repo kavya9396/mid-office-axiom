@@ -76,6 +76,12 @@ const toRecord = (value: unknown): Record<string, unknown> | null => {
     return value as Record<string, unknown>;
 };
 
+const toBoolean = (value: unknown): boolean => {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "string") return value.trim().toLowerCase() === "true";
+    return false;
+};
+
 const hasObjectValues = (value: Record<string, unknown> | null): boolean => {
     if (!value) return false;
 
@@ -265,9 +271,15 @@ const Summary = () => {
     const isDvtRole = roleType === "DVT Pool";
     const isFormalRole = roleType === "DVT_FORMAL_TASK" || roleType === "GUW_FORMAL_TASK";
     const canShowRiskAnalytics = roleType !== "DVT Pool" && roleType !== "CVT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW Formal Pool";
-    const inferredDvtLifeOption: DvtLifeOption = availableMemberTypes.includes("lifeassured2") ? "joint" : "main";
+    const hasJointLifeFlag = summaryEntries.some((item) => toBoolean(item.jointFlag ?? item.jontFlag));
+    const lockedDvtLifeOption: DvtLifeOption | null = hasJointLifeFlag && summaryEntries.length > 1
+        ? "joint"
+        : !hasJointLifeFlag && summaryEntries.length === 1
+        ? "main"
+        : null;
+    const inferredDvtLifeOption: DvtLifeOption = availableMemberTypes.includes("lifeassured2") || hasJointLifeFlag ? "joint" : "main";
     const [selectedDvtLifeOption, setSelectedDvtLifeOption] = useState<DvtLifeOption | null>(null);
-    const dvtLifeOption = selectedDvtLifeOption ?? inferredDvtLifeOption;
+    const dvtLifeOption = lockedDvtLifeOption ?? selectedDvtLifeOption ?? inferredDvtLifeOption;
 
     const visibleTabs = isFormalRole
         ? []
@@ -298,7 +310,7 @@ const Summary = () => {
         markApplicantTabVisited(activeApplicantTab);
     }, [activeApplicantTab, data]);
 
-    const canOpenMedicalFinancialViews = roleType !== "CPT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
+    const canOpenMedicalFinancialViews = roleType !== "CVT Pool" && roleType !== "DVT Pool" && roleType !== "CPT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
 
     const activeSummaryEntry = summaryWithTabs.find((item) => item.memberType === activeApplicantTab)?.customer;
     const activeRiskAnalytics = useMemo(() => {
@@ -378,12 +390,23 @@ const Summary = () => {
                                 <Select
                                     size="small"
                                     value={dvtLifeOption}
+                                    disabled={Boolean(lockedDvtLifeOption)}
                                     onChange={(event) => {
+                                        if (lockedDvtLifeOption) return;
                                         const selected = event.target.value as DvtLifeOption;
                                         setSelectedDvtLifeOption(selected);
                                         setApplicantTab(selected === "main" ? "lifeassured1" : "lifeassured1");
                                     }}
-                                    sx={{ minWidth: 130, height: 32, fontSize: 13, backgroundColor: "#fff" }}
+                                    sx={{
+                                        minWidth: 130,
+                                        height: 32,
+                                        fontSize: 13,
+                                        backgroundColor: "#fff",
+                                        "&.Mui-disabled": {
+                                            color: "#161616",
+                                            WebkitTextFillColor: "#161616",
+                                        },
+                                    }}
                                 >
                                     <MenuItem value="main">Main Life</MenuItem>
                                     <MenuItem value="joint">Joint Life</MenuItem>
