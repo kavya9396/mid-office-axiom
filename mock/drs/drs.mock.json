@@ -49,7 +49,7 @@
     "summary": [
       {
         "memberType": "propser",
-        "jontFlag": true,
+        "jontFlag": false,
         "lifeNumber": "01",
         "clientId": "CL0001",
         "proposerLaRelation": "joint",
