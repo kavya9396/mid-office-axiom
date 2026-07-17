@@ -31,6 +31,7 @@ import { getCompleteTaskResult } from "./completeTaskResponse";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const referralRoleMap: Record<string, string> = {
     "Refer to HoD": "HoD",
@@ -307,6 +308,13 @@ const UWDecision = () => {
         const applicantTabsValidation = validateApplicantTabsVisited(drsData);
         if (!applicantTabsValidation.isValid) {
             setSubmitMessage(applicantTabsValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
+        const requirementValidation = validateRequirementDecision(drsData, caseUWDecisionLabel);
+        if (!requirementValidation.isValid) {
+            setSubmitMessage(requirementValidation.message);
             setSubmitStatus("failure");
             return;
         }

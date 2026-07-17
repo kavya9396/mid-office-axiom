@@ -18,6 +18,7 @@ import { getCompleteTaskResult } from "./completeTaskResponse";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
 const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
@@ -360,6 +361,12 @@ const CVTDecision = () => {
 
         if (!hasVisitedAllApplicantTabs) {
             setTabValidationMessage(pendingApplicantTabsMessage || "Please visit all applicant tabs at least once before submitting.");
+            return;
+        }
+
+        const requirementValidation = validateRequirementDecision(drsData, decisionLabel);
+        if (!requirementValidation.isValid) {
+            setTabValidationMessage(requirementValidation.message);
             return;
         }
 
