@@ -367,7 +367,7 @@ const getApplicantHeaderData = (summary?: MedicalSummaryMember) => {
 const ViewMedicals = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { applicationNumber } = useAppContext();
+  const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
@@ -385,6 +385,7 @@ const ViewMedicals = () => {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
+  const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? medicalData.applicationId ?? "";
   const isApplicationIdMissing = !safeApplicationId;
   const roleType = getRoleType();
@@ -581,13 +582,13 @@ const ViewMedicals = () => {
     }
 
     if (value === "medical") {
-      navigate(getMedicalPath(safeApplicationId), {
+      navigate(getMedicalPath(safeBusinessType, safeApplicationId), {
         state: { selectedApplicantTab: currentApplicantTab },
       });
       return;
     }
 
-    navigate(getFinancialPath(safeApplicationId), {
+    navigate(getFinancialPath(safeBusinessType, safeApplicationId), {
       state: { selectedApplicantTab: currentApplicantTab },
     });
   };
@@ -639,7 +640,7 @@ const ViewMedicals = () => {
     <Container disableGutters sx={{ pb: 4 }}>
       <BackButton
         label="Back to DRS"
-        onClick={() => navigate(getDRSPath(safeApplicationId))}
+        onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
       />
 
       {isApplicationIdMissing && (
