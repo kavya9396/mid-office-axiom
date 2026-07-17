@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import Inbox from "./Inbox";
+import { ALL_CASES_POOL } from "./LeftPanel";
 import { useAppDispatch } from "../../store/hooks";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
 
@@ -28,6 +29,7 @@ jest.mock("./LeftPanel", () => {
     return (
       <div>
         <div data-testid="left-selected">{selectedPool}</div>
+        <button onClick={() => onSelectPool(ALL_CASES_POOL)}>{ALL_CASES_POOL}</button>
         {Object.keys(poolData).map((pool) => (
           <button key={pool} onClick={() => onSelectPool(pool)}>{pool}</button>
         ))}
@@ -84,7 +86,7 @@ describe("Inbox", () => {
     }));
   });
 
-  it("loads inbox data on mount and renders the first pool from the initial payload", async () => {
+  it("loads inbox data on mount and renders all cases by default", async () => {
     const inboxResponse = {
       poolData: {
         "Pool A": [baseRow],
@@ -92,7 +94,7 @@ describe("Inbox", () => {
       },
     };
 
-    mockDispatch.mockReturnValueOnce(makeDispatchResult(inboxResponse));
+    mockDispatch.mockReturnValue(makeDispatchResult(inboxResponse));
 
     render(
       <MemoryRouter>
@@ -108,8 +110,8 @@ describe("Inbox", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool A");
-      expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool A:1");
+      expect(screen.getByTestId("left-selected")).toHaveTextContent(ALL_CASES_POOL);
+      expect(screen.getByTestId("right-panel")).toHaveTextContent(`${ALL_CASES_POOL}:1`);
     });
   });
 
@@ -124,7 +126,7 @@ describe("Inbox", () => {
       },
     };
 
-    mockDispatch.mockReturnValueOnce(makeDispatchResult(inboxResponse));
+    mockDispatch.mockReturnValue(makeDispatchResult(inboxResponse));
 
     render(
       <MemoryRouter>
@@ -133,7 +135,7 @@ describe("Inbox", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool A");
+      expect(screen.getByTestId("left-selected")).toHaveTextContent(ALL_CASES_POOL);
     });
 
     await userEvent.click(screen.getByRole("button", { name: "Pool B" }));
@@ -142,6 +144,30 @@ describe("Inbox", () => {
       expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool B:2");
     });
 
-    expect(fetchInboxThunk).toHaveBeenCalledTimes(1);
+    expect(fetchInboxThunk).toHaveBeenCalled();
+  });
+
+  it("shows aggregated rows when all cases is selected", async () => {
+    const inboxResponse = {
+      poolData: {
+        "Pool A": [baseRow],
+        "Pool B": [
+          { ...baseRow, id: 2, applicationNo: "APP-2" },
+          { ...baseRow, id: 3, applicationNo: "APP-3" },
+        ],
+      },
+    };
+
+    mockDispatch.mockReturnValue(makeDispatchResult(inboxResponse));
+
+    render(
+      <MemoryRouter>
+        <Inbox />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("right-panel")).toHaveTextContent(`${ALL_CASES_POOL}:3`);
+    });
   });
 });

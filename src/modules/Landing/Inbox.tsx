@@ -8,6 +8,7 @@ import { useAppDispatch } from "../../store/hooks";
 import RightPanel from "./RightPanel";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
+import { ALL_CASES_POOL } from "./LeftPanel";
 
 const Inbox = () => {
   const dispatch = useAppDispatch();
@@ -21,6 +22,7 @@ const Inbox = () => {
   const [poolData, setPoolData] = useState<Record<string, tableData[]>>({});
   const snackbarMessage = (location.state as { snackbarMessage?: string } | null)?.snackbarMessage ?? "";
   const snackbarOpen = Boolean(snackbarMessage);
+  const allRows = Object.values(poolData).flat();
 
   const isRefreshing = useRef(false);
 
@@ -54,14 +56,17 @@ const Inbox = () => {
         navigate(getInboxPath(resolvedBusinessType), { replace: true });
       }
 
-      const firstPool = Object.keys(poolDataFromAPI)[0] ?? "";
+      const hasPools = Object.keys(poolDataFromAPI).length > 0;
 
       setPoolData(poolDataFromAPI);
       setSelectedPool((previousPool) => {
+        if (previousPool === ALL_CASES_POOL && hasPools) {
+          return ALL_CASES_POOL;
+        }
         if (previousPool && poolDataFromAPI[previousPool]) {
           return previousPool;
         }
-        return firstPool;
+        return hasPools ? ALL_CASES_POOL : "";
       });
     } catch (error) {
       console.error("Failed to load data:", error);
@@ -102,7 +107,7 @@ const Inbox = () => {
         <Box sx={{ flex: 1 }}>
           <RightPanel
             selectedPool={selectedPool}
-            rows={poolData[selectedPool] ?? []}
+            rows={selectedPool === ALL_CASES_POOL ? allRows : (poolData[selectedPool] ?? [])}
           />
         </Box>
       </Grid>

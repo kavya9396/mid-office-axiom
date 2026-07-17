@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LeftPanel from "./LeftPanel";
+import { ALL_CASES_POOL } from "./LeftPanel";
 import type { tableData } from "../../types/inbox";
 
 const mockNavigate = jest.fn();
@@ -58,12 +59,28 @@ describe("LeftPanel", () => {
       />,
     );
 
+    expect(screen.getByText("All Cases (2)")).toBeInTheDocument();
     expect(screen.getByText("Pool A (2)")).toBeInTheDocument();
 
     await userEvent.click(screen.getByText("Pool B"));
 
     expect(onSelectPool).toHaveBeenCalledWith("Pool B");
     expect(window.scrollTo).toHaveBeenCalled();
+  });
+
+  it("highlights all cases when selected", () => {
+    render(
+      <LeftPanel
+        selectedPool={ALL_CASES_POOL}
+        toggle={false}
+        setToggle={jest.fn()}
+        onSelectPool={jest.fn()}
+        poolData={{ "Pool A": [poolRow], "Pool B": [poolRow, poolRow] }}
+      />,
+    );
+
+    expect(screen.getByText("All Cases (3)")).toBeInTheDocument();
+    expect(screen.getByText("Arrow")).toBeInTheDocument();
   });
 
   it("navigates to the standalone search application page", async () => {

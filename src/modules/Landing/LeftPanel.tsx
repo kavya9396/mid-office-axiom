@@ -11,6 +11,8 @@ import LastLogin from "./LastLogin";
 import { useNavigate } from "react-router-dom";
 import { getSearchApplicationPath } from "../../routes/routes";
 
+export const ALL_CASES_POOL = "ALL CASES";
+
 type LeftPanelProps = PoolProps & {
   poolData: Record<string, tableData[]>;
 };
@@ -40,7 +42,7 @@ const taskName = str.replace(/_/g, " ");
         px: 2,
         py: 1.5,
         mb: 1,
-        pl: label !== "All Cases" ? 4 : 2,
+        pl: label !== "ALL CASES" ? 4 : 2,
         ...(isSelected ? selectedSx : hoverSx),
         cursor: "pointer",
       }}
@@ -73,6 +75,10 @@ const LeftPanel = ({
 }: LeftPanelProps) => {
   const navigate = useNavigate();
   const poolNames = Object.keys(poolData);
+  const totalCaseCount = Object.values(poolData).reduce(
+    (sum, rows) => sum + rows.length,
+    0,
+  );
   const searchItem = (
     <PoolItem
       label="Search Applications"
@@ -127,6 +133,13 @@ const LeftPanel = ({
                 </Typography>
               ) : (
                 <List disablePadding>
+                  <PoolItem
+                    label={ALL_CASES_POOL}
+                    value={ALL_CASES_POOL}
+                    selectedPool={selectedPool}
+                    onClick={onSelectPool}
+                    count={totalCaseCount}
+                  />
                   {poolNames.map((pool) => (
                     <PoolItem
                       key={pool}
