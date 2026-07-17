@@ -1,33 +1,36 @@
-import { Box, Container, Divider, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
-import Badge from "../../../components/ui/Badge/Badge";
+// import Badge from "../../../components/ui/Badge/Badge";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
-import { BriefcaseIcon, PhoneIcon, SmsIcon, WalletIcon } from "../../../icons/Icons";
+// import { BriefcaseIcon, PhoneIcon, SmsIcon, WalletIcon } from "../../../icons/Icons";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { apiRequest } from "../../../services/api";
 import { url } from "../../../services/apiConfig";
+import type { ApiKey } from "../../../services/apiConfig";
 import { useAppDispatch } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
 import { financialThunk } from "../../../store/thunks/financialThunk";
-import type { ApplicantTab, DRSRequest, FinancialResponse, MedicalSummaryMember } from "../../../types/drs.types";
+import type { ApplicantTab, DRSRequest, FinancialResponse } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
-import { formatCurrencyINR } from "../../../utils/helpers";
+// import { formatCurrencyINR } from "../../../utils/helpers";
 import BreDecision from "../DRS_Accordions/BreDecision";
+// import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
-import { buildFormalMemberProfile, getFormalHeaderData, isFormalTaskRole } from "../formalProfileHelpers";
+import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
 import {
   financialSections,
   type FinancialField,
   type FinancialSectionConfig,
   type FinancialSectionKey,
 } from "./financialAccordionConfig";
+import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
 const getStoredApplicantTab = () =>
@@ -54,44 +57,44 @@ const buildInitialFieldValues = () => {
   );
 };
 
-const getMemberSummary = (member?: MedicalSummaryMember) => {
-  if (!member) {
-    return undefined;
-  }
+// const getMemberSummary = (member?: MedicalSummaryMember) => {
+//   if (!member) {
+//     return undefined;
+//   }
 
-  if (member.memberType === "proposer") {
-    return member.proposerSummary;
-  }
+//   if (member.memberType === "proposer") {
+//     return member.proposerSummary;
+//   }
 
-  if (member.memberType === "lifeassured1") {
-    return member.lifeassured1Summary;
-  }
+//   if (member.memberType === "lifeassured1") {
+//     return member.lifeassured1Summary;
+//   }
 
-  if (member.memberType === "lifeassured2") {
-    return member.lifeassured2Summary;
-  }
+//   if (member.memberType === "lifeassured2") {
+//     return member.lifeassured2Summary;
+//   }
 
-  return undefined;
-};
+//   return undefined;
+// };
 
-const getApplicantHeaderData = (summary?: MedicalSummaryMember) => {
-  const memberSummary = getMemberSummary(summary);
+// const getApplicantHeaderData = (summary?: MedicalSummaryMember) => {
+//   const memberSummary = getMemberSummary(summary);
 
-  return {
-    name:
-      [memberSummary?.firstName, memberSummary?.middleName, memberSummary?.lastName]
-        .filter(Boolean)
-        .join(" ") || "-",
-    dob: memberSummary?.dob ?? "-",
-    age: memberSummary?.age ?? "-",
-    gender: memberSummary?.gender ?? "-",
-    profileImage: memberSummary?.profileImage ?? "",
-    occupation: memberSummary?.occupation ?? "-",
-    annualIncome: memberSummary?.annualIncome,
-    email: memberSummary?.email ?? "-",
-    mobile: memberSummary?.mobile ?? "-",
-  };
-};
+//   return {
+//     name:
+//       [memberSummary?.firstName, memberSummary?.middleName, memberSummary?.lastName]
+//         .filter(Boolean)
+//         .join(" ") || "-",
+//     dob: memberSummary?.dob ?? "-",
+//     age: memberSummary?.age ?? "-",
+//     gender: memberSummary?.gender ?? "-",
+//     profileImage: memberSummary?.profileImage ?? "",
+//     occupation: memberSummary?.occupation ?? "-",
+//     annualIncome: memberSummary?.annualIncome,
+//     email: memberSummary?.email ?? "-",
+//     mobile: memberSummary?.mobile ?? "-",
+//   };
+// };
 
 const readOnlyBoxSx = {
   minHeight: 38,
@@ -273,7 +276,7 @@ const ViewFinancial = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { businessType, applicationNumber } = useAppContext();
+  const { applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
 
   const requestedApplicantTab =
@@ -295,7 +298,6 @@ const ViewFinancial = () => {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
   const isCptPool = roleType === "CPT Pool";
@@ -346,36 +348,36 @@ const ViewFinancial = () => {
     [activeApplicantTab, visibleTabs]
   );
 
-  const selectedApplicantSummary = useMemo(() => {
-    const preferred = financialData?.summary?.find((item) => item.memberType === currentApplicantTab);
-    if (preferred) {
-      return preferred;
-    }
+  // const selectedApplicantSummary = useMemo(() => {
+  //   const preferred = financialData?.summary?.find((item) => item.memberType === currentApplicantTab);
+  //   if (preferred) {
+  //     return preferred;
+  //   }
 
-    if (visibleTabs[0]) {
-      return financialData?.summary?.find((item) => item.memberType === visibleTabs[0].key);
-    }
+  //   if (visibleTabs[0]) {
+  //     return financialData?.summary?.find((item) => item.memberType === visibleTabs[0].key);
+  //   }
 
-    return financialData?.summary?.[0];
-  }, [currentApplicantTab, financialData, visibleTabs]);
+  //   return financialData?.summary?.[0];
+  // }, [currentApplicantTab, financialData, visibleTabs]);
 
-  const applicantData = isFormalRole
-    ? getFormalHeaderData(formalMemberProfile)
-    : getApplicantHeaderData(selectedApplicantSummary);
+  // const applicantData = isFormalRole
+  //   ? getFormalHeaderData(formalMemberProfile)
+  //   : getApplicantHeaderData(selectedApplicantSummary);
 
-  const applicantInfoItems = useMemo(
-    () => [
-      { label: "Occupation", value: applicantData.occupation, icon: <BriefcaseIcon width={16} height={16} /> },
-      {
-        label: "Annual Income",
-        value: formatCurrencyINR(applicantData.annualIncome),
-        icon: <WalletIcon width={16} height={16} />,
-      },
-      { label: "Email", value: applicantData.email, icon: <SmsIcon width={16} height={16} /> },
-      { label: "Mobile", value: applicantData.mobile, icon: <PhoneIcon width={16} height={16} /> },
-    ],
-    [applicantData.annualIncome, applicantData.email, applicantData.mobile, applicantData.occupation]
-  );
+  // const applicantInfoItems = useMemo(
+  //   () => [
+  //     { label: "Occupation", value: applicantData.occupation, icon: <BriefcaseIcon width={16} height={16} /> },
+  //     {
+  //       label: "Annual Income",
+  //       value: formatCurrencyINR(applicantData.annualIncome),
+  //       icon: <WalletIcon width={16} height={16} />,
+  //     },
+  //     { label: "Email", value: applicantData.email, icon: <SmsIcon width={16} height={16} /> },
+  //     { label: "Mobile", value: applicantData.mobile, icon: <PhoneIcon width={16} height={16} /> },
+  //   ],
+  //   [applicantData.annualIncome, applicantData.email, applicantData.mobile, applicantData.occupation]
+  // );
 
   const resolvedActiveSectionId = useMemo(
     () =>
@@ -475,13 +477,13 @@ const ViewFinancial = () => {
     }
 
     if (value === "medical") {
-      navigate(getMedicalPath(safeBusinessType, safeApplicationId), {
+      navigate(getMedicalPath(safeApplicationId), {
         state: { selectedApplicantTab: currentApplicantTab },
       });
       return;
     }
 
-    navigate(getFinancialPath(safeBusinessType, safeApplicationId), {
+    navigate(getFinancialPath(safeApplicationId), {
       state: { selectedApplicantTab: currentApplicantTab },
     });
   };
@@ -509,7 +511,7 @@ const ViewFinancial = () => {
       setSubmitError(null);
 
       const response = await apiRequest<SubmitResponse, unknown>({
-        url: url("financialSubmit"),
+        url: url("financialSubmit" as ApiKey),
         method: "POST",
         body: {
           applicationId: safeApplicationId,
@@ -532,7 +534,7 @@ const ViewFinancial = () => {
   if (isCptPool) {
     return (
       <Container disableGutters>
-        <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
+        <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeApplicationId))} />
         <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
           View Financial Details is not available for CPT Pool.
         </Typography>
@@ -542,7 +544,7 @@ const ViewFinancial = () => {
 
   return (
     <Container disableGutters sx={{ pb: 4 }}>
-      <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
+      <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeApplicationId))} />
 
       <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
         <CustomTabs
@@ -552,10 +554,13 @@ const ViewFinancial = () => {
         />
       </Box>
 
+      {/*
       <BreDecision
         extraFields={financialData?.breAdditionalFields ?? []}
         breDecisionOverride={financialData?.breDecision ?? null}
       />
+      */}
+      <BreDecision />
 
       {!isFormalRole && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
@@ -577,83 +582,86 @@ const ViewFinancial = () => {
               <FormalMemberProfile profile={formalMemberProfile} />
             </Box>
           ) : (
-          <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-              <Box
-                sx={{
-                  width: 76,
-                  height: 76,
-                  borderRadius: "50%",
-                  backgroundColor: "#EBF1F5",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
-              >
-                {applicantData.profileImage && (
-                  <Box
-                    component="img"
-                    src={applicantData.profileImage}
-                    alt={`${applicantData.name}'s photo`}
-                    sx={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
-                  />
-                )}
-              </Box>
+          //   <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
+          //   <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+          //     <Box
+          //       sx={{
+          //         width: 76,
+          //         height: 76,
+          //         borderRadius: "50%",
+          //         backgroundColor: "#EBF1F5",
+          //         display: "flex",
+          //         alignItems: "center",
+          //         justifyContent: "center",
+          //         overflow: "hidden",
+          //         flexShrink: 0,
+          //       }}
+          //     >
+          //       {applicantData.profileImage && (
+          //         <Box
+          //           component="img"
+          //           src={applicantData.profileImage}
+          //           alt={`${applicantData.name}'s photo`}
+          //           sx={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+          //         />
+          //       )}
+          //     </Box>
 
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "flex-start",
-                    gap: 2,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <Box>
-                    <Typography sx={{ fontSize: 28, fontWeight: 700, color: "#1E293B", lineHeight: 1.15 }}>
-                      {applicantData.name}
-                    </Typography>
-                    <Typography sx={{ fontSize: 14, color: "#4B5563", mt: 0.5 }}>DOB: {applicantData.dob}</Typography>
-                  </Box>
+          //     <Box sx={{ flex: 1, minWidth: 0 }}>
+          //       <Box
+          //         sx={{
+          //           display: "flex",
+          //           justifyContent: "space-between",
+          //           alignItems: "flex-start",
+          //           gap: 2,
+          //           flexWrap: "wrap",
+          //         }}
+          //       >
+          //         <Box>
+          //           <Typography sx={{ fontSize: 28, fontWeight: 700, color: "#1E293B", lineHeight: 1.15 }}>
+          //             {applicantData.name}
+          //           </Typography>
+          //           <Typography sx={{ fontSize: 14, color: "#4B5563", mt: 0.5 }}>DOB: {applicantData.dob}</Typography>
+          //         </Box>
 
-                  <Badge label={`${applicantData.gender}, ${applicantData.age} Years`} variant="Neutral" size="medium" />
-                </Box>
+          //         <Badge label={`${applicantData.gender}, ${applicantData.age} Years`} variant="Neutral" size="medium" />
+          //       </Box>
 
-                <Divider sx={{ my: 1.25, borderColor: "#B7C1CB" }} />
+          //       <Divider sx={{ my: 1.25, borderColor: "#B7C1CB" }} />
 
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
-                    gap: { xs: 1.25, md: 2 },
-                  }}
-                >
-                  {applicantInfoItems.map((item) => (
-                    <Box key={item.label} sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, minWidth: 0 }}>
-                      <Box sx={{ color: "#1E5A8B", mt: 0.2, display: "inline-flex" }}>{item.icon}</Box>
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography sx={{ fontSize: 12, color: "#475569", lineHeight: 1.2 }}>{item.label}</Typography>
-                        <Typography
-                          sx={{
-                            fontSize: 18,
-                            fontWeight: 600,
-                            color: "#111827",
-                            lineHeight: 1.3,
-                            wordBreak: "break-word",
-                          }}
-                        >
-                          {item.value || "-"}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
-            </Box>
-          </Box>
+          //       <Box
+          //         sx={{
+          //           display: "grid",
+          //           gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
+          //           gap: { xs: 1.25, md: 2 },
+          //         }}
+          //       >
+          //         {applicantInfoItems.map((item) => (
+          //           <Box key={item.label} sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, minWidth: 0 }}>
+          //             <Box sx={{ color: "#1E5A8B", mt: 0.2, display: "inline-flex" }}>{item.icon}</Box>
+          //             <Box sx={{ minWidth: 0 }}>
+          //               <Typography sx={{ fontSize: 12, color: "#475569", lineHeight: 1.2 }}>{item.label}</Typography>
+          //               <Typography
+          //                 sx={{
+          //                   fontSize: 18,
+          //                   fontWeight: 600,
+          //                   color: "#111827",
+          //                   lineHeight: 1.3,
+          //                   wordBreak: "break-word",
+          //                 }}
+          //               >
+          //                 {item.value || "-"}
+          //               </Typography>
+          //             </Box>
+          //           </Box>
+          //         ))}
+          //       </Box>
+          //     </Box>
+          //   </Box>
+          // </Box>
+          <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+  <ApplicantProfile selectedApplicantTab={currentApplicantTab} isApplicantDetailsExpanded />
+</Box>
           )}
         </CustomAccordion>
       </Box>

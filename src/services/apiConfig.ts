@@ -129,6 +129,10 @@ const apiUrls = {
     real: "/api/financial/view",
     mock: "/mock/drs/financial.mock.json",
   },
+  financialSubmit: {
+    real: "/api/financial/submit",
+    mock: "/mock/drs/financial.mock.json",
+  },
  
   // Previous Policies
   previousPoliciesView: {

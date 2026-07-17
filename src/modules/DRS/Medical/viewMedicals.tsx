@@ -1,16 +1,14 @@
-import { Box, Checkbox, Container, Divider, FormControlLabel, Typography } from "@mui/material";
+import { Box, Checkbox, Container, FormControlLabel, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
-import Badge from "../../../components/ui/Badge/Badge";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
-import { BriefcaseIcon, PhoneIcon, SmsIcon, WalletIcon } from "../../../icons/Icons";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { apiRequest } from "../../../services/api";
 import { url } from "../../../services/apiConfig";
@@ -18,6 +16,7 @@ import type { RootState } from "../../../store/store";
 import type { ApplicantTab, MedicalResponse, MedicalSection, MedicalSummaryMember, MedicalTestRow } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
 import BreDecision from "../DRS_Accordions/BreDecision";
+import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
 import { buildFormalMemberProfile, getFormalHeaderData, isFormalTaskRole } from "../formalProfileHelpers";
 import { merFieldConfig } from "./merFieldConfig";
@@ -315,18 +314,18 @@ const getFallbackFieldValue = (
   return "";
 };
 
-const formatCurrencyINR = (value?: number | string) => {
-  if (value === undefined || value === null || value === "") {
-    return "-";
-  }
+// const formatCurrencyINR = (value?: number | string) => {
+//   if (value === undefined || value === null || value === "") {
+//     return "-";
+//   }
 
-  const numericValue = Number(value);
-  if (Number.isNaN(numericValue)) {
-    return String(value);
-  }
+//   const numericValue = Number(value);
+//   if (Number.isNaN(numericValue)) {
+//     return String(value);
+//   }
 
-  return numericValue.toLocaleString("en-IN");
-};
+//   return numericValue.toLocaleString("en-IN");
+// };
 
 const getMemberSummary = (member?: MedicalSummaryMember) => {
   if (!member) {
@@ -368,7 +367,7 @@ const getApplicantHeaderData = (summary?: MedicalSummaryMember) => {
 const ViewMedicals = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { businessType, applicationNumber } = useAppContext();
+  const { applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
@@ -386,7 +385,6 @@ const ViewMedicals = () => {
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
-  const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? medicalData.applicationId ?? "";
   const isApplicationIdMissing = !safeApplicationId;
   const roleType = getRoleType();
@@ -427,16 +425,6 @@ const ViewMedicals = () => {
   const applicantData = isFormalRole
     ? getFormalHeaderData(formalMemberProfile)
     : getApplicantHeaderData(selectedApplicantSummary);
-
-  const applicantInfoItems = useMemo(
-    () => [
-      { label: "Occupation", value: applicantData.occupation, icon: <BriefcaseIcon width={16} height={16} /> },
-      { label: "Annual Income", value: `₹ ${formatCurrencyINR(applicantData.annualIncome)}`, icon: <WalletIcon width={16} height={16} /> },
-      { label: "Email", value: applicantData.email, icon: <SmsIcon width={16} height={16} /> },
-      { label: "Mobile", value: applicantData.mobile, icon: <PhoneIcon width={16} height={16} /> },
-    ],
-    [applicantData.annualIncome, applicantData.email, applicantData.mobile, applicantData.occupation]
-  );
 
   const medicalMenuItems = useMemo<MedicalMenuItem[]>(
     () => {
@@ -593,13 +581,13 @@ const ViewMedicals = () => {
     }
 
     if (value === "medical") {
-      navigate(getMedicalPath(safeBusinessType, safeApplicationId), {
+      navigate(getMedicalPath(safeApplicationId), {
         state: { selectedApplicantTab: currentApplicantTab },
       });
       return;
     }
 
-    navigate(getFinancialPath(safeBusinessType, safeApplicationId), {
+    navigate(getFinancialPath(safeApplicationId), {
       state: { selectedApplicantTab: currentApplicantTab },
     });
   };
@@ -651,7 +639,7 @@ const ViewMedicals = () => {
     <Container disableGutters sx={{ pb: 4 }}>
       <BackButton
         label="Back to DRS"
-        onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
+        onClick={() => navigate(getDRSPath(safeApplicationId))}
       />
 
       {isApplicationIdMissing && (
@@ -668,10 +656,13 @@ const ViewMedicals = () => {
         />
       </Box>
 
+      {/*
       <BreDecision
         extraFields={medicalData?.breAdditionalFields ?? []}
         breDecisionOverride={medicalData?.breDecision ?? null}
       />
+      */}
+      <BreDecision />
 
       {!isFormalRole && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
@@ -686,76 +677,80 @@ const ViewMedicals = () => {
         </Box>
       )}
 
-      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1 ,mt:2}}>
+      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
         <CustomAccordion title={isFormalRole ? "Member Profile" : "Applicant Profile"} defaultExpanded={false} detailPadding={0}>
           {isFormalRole ? (
             <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
               <FormalMemberProfile profile={formalMemberProfile} />
             </Box>
           ) : (
-          <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
-            <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-              <Box
-                sx={{
-                  width: 76,
-                  height: 76,
-                  borderRadius: "50%",
-                  backgroundColor: "#EBF1F5",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  overflow: "hidden",
-                  flexShrink: 0,
-                }}
-              >
-                {applicantData.profileImage && (
-                  <Box
-                    component="img"
-                    src={applicantData.profileImage}
-                    alt={`${applicantData.name}'s photo`}
-                    sx={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
-                  />
-                )}
-              </Box>
+            //   <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
+            //   <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+            //     <Box
+            //       sx={{
+            //         width: 76,
+            //         height: 76,
+            //         borderRadius: "50%",
+            //         backgroundColor: "#EBF1F5",
+            //         display: "flex",
+            //         alignItems: "center",
+            //         justifyContent: "center",
+            //         overflow: "hidden",
+            //         flexShrink: 0,
+            //       }}
+            //     >
+            //       {applicantData.profileImage && (
+            //         <Box
+            //           component="img"
+            //           src={applicantData.profileImage}
+            //           alt={`${applicantData.name}'s photo`}
+            //           sx={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+            //         />
+            //       )}
+            //     </Box>
 
-              <Box sx={{ flex: 1, minWidth: 0 }}>
-                <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2, flexWrap: "wrap" }}>
-                  <Box>
-                    <Typography sx={{ fontSize: 28, fontWeight: 700, color: "#1E293B", lineHeight: 1.15 }}>
-                      {applicantData.name}
-                    </Typography>
-                    <Typography sx={{ fontSize: 14, color: "#4B5563", mt: 0.5 }}>
-                      DOB: {applicantData.dob}
-                    </Typography>
-                  </Box>
+            //     <Box sx={{ flex: 1, minWidth: 0 }}>
+            //       <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 2, flexWrap: "wrap" }}>
+            //         <Box>
+            //           <Typography sx={{ fontSize: 28, fontWeight: 700, color: "#1E293B", lineHeight: 1.15 }}>
+            //             {applicantData.name}
+            //           </Typography>
+            //           <Typography sx={{ fontSize: 14, color: "#4B5563", mt: 0.5 }}>
+            //             DOB: {applicantData.dob}
+            //           </Typography>
+            //         </Box>
 
-                  <Badge label={`${applicantData.gender}, ${applicantData.age} Years`} variant="Neutral" size="medium" />
-                </Box>
+            //         <Badge label={`${applicantData.gender}, ${applicantData.age} Years`} variant="Neutral" size="medium" />
+            //       </Box>
 
-                <Divider sx={{ my: 1.25, borderColor: "#B7C1CB" }} />
+            //       <Divider sx={{ my: 1.25, borderColor: "#B7C1CB" }} />
 
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
-                    gap: { xs: 1.25, md: 2 },
-                  }}
-                >
-                  {applicantInfoItems.map((item) => (
-                    <Box key={item.label} sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, minWidth: 0 }}>
-                      <Box sx={{ color: "#1E5A8B", mt: 0.2, display: "inline-flex" }}>{item.icon}</Box>
-                      <Box sx={{ minWidth: 0 }}>
-                        <Typography sx={{ fontSize: 12, color: "#475569", lineHeight: 1.2 }}>{item.label}</Typography>
-                        <Typography sx={{ fontSize: 18, fontWeight: 600, color: "#111827", lineHeight: 1.3, wordBreak: "break-word" }}>
-                          {item.value || "-"}
-                        </Typography>
-                      </Box>
-                    </Box>
-                  ))}
-                </Box>
-              </Box>
+            //       <Box
+            //         sx={{
+            //           display: "grid",
+            //           gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
+            //           gap: { xs: 1.25, md: 2 },
+            //         }}
+            //       >
+            //         {applicantInfoItems.map((item) => (
+            //           <Box key={item.label} sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, minWidth: 0 }}>
+            //             <Box sx={{ color: "#1E5A8B", mt: 0.2, display: "inline-flex" }}>{item.icon}</Box>
+            //             <Box sx={{ minWidth: 0 }}>
+            //               <Typography sx={{ fontSize: 12, color: "#475569", lineHeight: 1.2 }}>{item.label}</Typography>
+            //               <Typography sx={{ fontSize: 18, fontWeight: 600, color: "#111827", lineHeight: 1.3, wordBreak: "break-word" }}>
+            //                 {item.value || "-"}
+            //               </Typography>
+            //             </Box>
+            //           </Box>
+            //         ))}
+            //       </Box>
+            //     </Box>
+            //   </Box>
+            // </Box>
+
+            <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+              <ApplicantProfile selectedApplicantTab={currentApplicantTab} isApplicantDetailsExpanded />
             </Box>
-          </Box>
           )}
         </CustomAccordion>
       </Box>
@@ -769,129 +764,129 @@ const ViewMedicals = () => {
           mt: 1,
         }}
       >
-          <Box
-            ref={menuContainerRef}
-            sx={{
-              width: { xs: "100%", md: 208 },
-              position: { xs: "static", md: "sticky" },
-              top: { md: 124 },
-              alignSelf: "flex-start",
-              borderRadius: 1,
-              overflow: "hidden",
-              border: "1px solid #D6D8DC",
-              backgroundColor: "#F8F9FB",
-              maxHeight: { md: "calc(100vh - 180px)" },
-              overflowY: { md: "auto" },
-            }}
-          >
-            {groupedMedicalMenuItems.map((group) => (
-              <Box key={group.key}>
-                <Typography
-                  sx={{
-                    px: 1.5,
-                    py: 1,
-                    fontSize: 12,
-                    fontWeight: 700,
-                    color: "#344054",
-                    backgroundColor: "#EEF2F6",
-                    borderBottom: "1px solid #E4E7EC",
-                    textTransform: "uppercase",
-                    letterSpacing: 0.35,
-                  }}
-                >
-                  {group.label}
-                </Typography>
-
-                {group.items.map((item) => {
-                  const isActive = item.id === resolvedActiveSectionId;
-
-                  return (
-                    <Box
-                      key={item.id}
-                      data-medical-menu-id={item.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => handleMedicalSectionMenuClick(item.id)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          handleMedicalSectionMenuClick(item.id);
-                        }
-                      }}
-                      sx={{
-                        px: 1.5,
-                        py: 1.25,
-                        borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
-                        borderBottom: "1px solid #EAECEF",
-                        backgroundColor: isActive ? "#FFFFFF" : "transparent",
-                        color: isActive ? "#B42318" : "#667085",
-                        fontSize: 13,
-                        fontWeight: isActive ? 600 : 500,
-                        lineHeight: 1.3,
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: 1,
-                      }}
-                    >
-                      <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit" }}>
-                        {item.title}
-                      </Typography>
-                      <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
-                        {"\u203A"}
-                      </Typography>
-                    </Box>
-                  );
-                })}
-              </Box>
-            ))}
-          </Box>
-
-          <Box sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
-            {medicalMenuItems.length === 0 ? (
-              <Typography sx={{ color: "#6B7280" }}>
-                No medical sections found.
+        <Box
+          ref={menuContainerRef}
+          sx={{
+            width: { xs: "100%", md: 208 },
+            position: { xs: "static", md: "sticky" },
+            top: { md: 124 },
+            alignSelf: "flex-start",
+            borderRadius: 1,
+            overflow: "hidden",
+            border: "1px solid #D6D8DC",
+            backgroundColor: "#F8F9FB",
+            maxHeight: { md: "calc(100vh - 180px)" },
+            overflowY: { md: "auto" },
+          }}
+        >
+          {groupedMedicalMenuItems.map((group) => (
+            <Box key={group.key}>
+              <Typography
+                sx={{
+                  px: 1.5,
+                  py: 1,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: "#344054",
+                  backgroundColor: "#EEF2F6",
+                  borderBottom: "1px solid #E4E7EC",
+                  textTransform: "uppercase",
+                  letterSpacing: 0.35,
+                }}
+              >
+                {group.label}
               </Typography>
-            ) : (
-              medicalMenuItems.map((item) => (
-                <Box
-                  key={item.id}
-                  data-medical-section={item.id}
-                  ref={(node) => {
-                    sectionRefs.current[item.id] = node as HTMLDivElement | null;
-                  }}
-                  sx={{
-                    scrollMarginTop: "160px",
-                    border: "1px solid #E4E7EC",
-                    borderRadius: 1.5,
-                    backgroundColor: "#FFFFFF",
-                    boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
-                    overflow: "hidden",
-                  }}
-                >
+
+              {group.items.map((item) => {
+                const isActive = item.id === resolvedActiveSectionId;
+
+                return (
                   <Box
+                    key={item.id}
+                    data-medical-menu-id={item.id}
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => handleMedicalSectionMenuClick(item.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleMedicalSectionMenuClick(item.id);
+                      }
+                    }}
                     sx={{
-                      px: { xs: 1.5, md: 2 },
+                      px: 1.5,
                       py: 1.25,
-                      borderBottom: "1px solid #E4E7EC",
-                      backgroundColor: "#F8FAFC",
+                      borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
+                      borderBottom: "1px solid #EAECEF",
+                      backgroundColor: isActive ? "#FFFFFF" : "transparent",
+                      color: isActive ? "#B42318" : "#667085",
+                      fontSize: 13,
+                      fontWeight: isActive ? 600 : 500,
+                      lineHeight: 1.3,
+                      cursor: "pointer",
+                      transition: "all 0.2s ease",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 1,
                     }}
                   >
-                    <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>
+                    <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit" }}>
                       {item.title}
                     </Typography>
+                    <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
+                      {"\u203A"}
+                    </Typography>
                   </Box>
+                );
+              })}
+            </Box>
+          ))}
+        </Box>
 
-                  <Box sx={{ px: { xs: 1, md: 1.5 }, py: 1.25 }}>
-                    {item.section.rows.length === 0 ? (
-                      item.fallbackFields.length > 0 ? (
-                        item.id !== resolvedActiveSectionId && !isEditable ? (
-                          <Typography sx={{ color: "#667085", fontSize: 13 }}>
-                            Select this section to load details.
-                          </Typography>
-                        ) : (
+        <Box sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
+          {medicalMenuItems.length === 0 ? (
+            <Typography sx={{ color: "#6B7280" }}>
+              No medical sections found.
+            </Typography>
+          ) : (
+            medicalMenuItems.map((item) => (
+              <Box
+                key={item.id}
+                data-medical-section={item.id}
+                ref={(node) => {
+                  sectionRefs.current[item.id] = node as HTMLDivElement | null;
+                }}
+                sx={{
+                  scrollMarginTop: "160px",
+                  border: "1px solid #E4E7EC",
+                  borderRadius: 1.5,
+                  backgroundColor: "#FFFFFF",
+                  boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
+                  overflow: "hidden",
+                }}
+              >
+                <Box
+                  sx={{
+                    px: { xs: 1.5, md: 2 },
+                    py: 1.25,
+                    borderBottom: "1px solid #E4E7EC",
+                    backgroundColor: "#F8FAFC",
+                  }}
+                >
+                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>
+                    {item.title}
+                  </Typography>
+                </Box>
+
+                <Box sx={{ px: { xs: 1, md: 1.5 }, py: 1.25 }}>
+                  {item.section.rows.length === 0 ? (
+                    item.fallbackFields.length > 0 ? (
+                      item.id !== resolvedActiveSectionId && !isEditable ? (
+                        <Typography sx={{ color: "#667085", fontSize: 13 }}>
+                          Select this section to load details.
+                        </Typography>
+                      ) : (
                         <Box
                           sx={{
                             display: "grid",
@@ -943,134 +938,134 @@ const ViewMedicals = () => {
                             );
                           })}
                         </Box>
-                        )
-                      ) : (
-                        <Typography sx={{ color: "#667085", fontSize: 13 }}>
-                          No details available for this test.
-                        </Typography>
                       )
                     ) : (
-                      <Box>
-                        <Box
-                          sx={{
-                            display: "grid",
-                            gridTemplateColumns: { xs: "2fr 1fr 1fr", md: "2fr 1fr 1fr 1.25fr 1fr" },
-                            gap: 1,
-                            px: 1,
-                            pb: 0.75,
-                          }}
-                        >
-                          <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Parameter</Typography>
-                          <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Value</Typography>
-                          <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Unit</Typography>
-                          <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 12, fontWeight: 700, color: "#475467" }}>
-                            Normal Range
-                          </Typography>
-                          <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 12, fontWeight: 700, color: "#475467" }}>
-                            Status
-                          </Typography>
-                        </Box>
-
-                        {item.section.rows.map((row, index) => {
-                          const parameterKey = `${item.id}-row-${index}-parameter`;
-                          const valueKey = `${item.id}-row-${index}-value`;
-                          const unitKey = `${item.id}-row-${index}-unit`;
-                          const normalRangeKey = `${item.id}-row-${index}-normalRange`;
-                          const statusKey = `${item.id}-row-${index}-status`;
-                          const parameterValue = getMedicalFieldValue(parameterKey, row.parameter);
-                          const valueValue = getMedicalFieldValue(valueKey, row.value);
-                          const unitValue = getMedicalFieldValue(unitKey, row.unit);
-                          const normalRangeValue = getMedicalFieldValue(normalRangeKey, row.normalRange);
-                          const statusValue = getMedicalFieldValue(statusKey, row.status);
-                          const statusColor = getStatusColors(statusValue);
-                          const statusDotColor = getStatusDotColor(statusValue);
-
-                          return (
-                            <Box
-                              key={`${item.id}-${row.parameter}-${index}`}
-                              sx={{
-                                display: "grid",
-                                gridTemplateColumns: { xs: "2fr 1fr 1fr", md: "2fr 1fr 1fr 1.25fr 1fr" },
-                                gap: 1,
-                                alignItems: "center",
-                                px: 1,
-                                py: 1,
-                                borderTop: "1px solid #F2F4F7",
-                                backgroundColor: index % 2 === 0 ? "#FCFCFD" : "#FFFFFF",
-                              }}
-                            >
-                              {isEditable ? (
-                                <CustomTextField fullWidth size="small" value={parameterValue} onChange={(event) => handleMedicalFieldChange(parameterKey, event.target.value)} />
-                              ) : (
-                                <Typography sx={{ fontSize: 13, color: "#344054" }}>{parameterValue || "-"}</Typography>
-                              )}
-                              {isEditable ? (
-                                <CustomTextField fullWidth size="small" value={valueValue} onChange={(event) => handleMedicalFieldChange(valueKey, event.target.value)} />
-                              ) : (
-                                <Typography sx={{ fontSize: 13, color: "#101828", fontWeight: 600 }}>{valueValue || "-"}</Typography>
-                              )}
-                              {isEditable ? (
-                                <CustomTextField fullWidth size="small" value={unitValue} onChange={(event) => handleMedicalFieldChange(unitKey, event.target.value)} />
-                              ) : (
-                                <Typography sx={{ fontSize: 13, color: "#344054" }}>{unitValue || "-"}</Typography>
-                              )}
-                              {isEditable ? (
-                                <CustomTextField
-                                  fullWidth
-                                  size="small"
-                                  value={normalRangeValue}
-                                  onChange={(event) => handleMedicalFieldChange(normalRangeKey, event.target.value)}
-                                  sx={{ display: { xs: "none", md: "block" } }}
-                                />
-                              ) : (
-                                <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 13, color: "#344054" }}>
-                                  {normalRangeValue || "-"}
-                                </Typography>
-                              )}
-                              <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                                {isEditable ? (
-                                  <CustomTextField fullWidth size="small" value={statusValue} onChange={(event) => handleMedicalFieldChange(statusKey, event.target.value)} />
-                                ) : (
-                                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
-                                    <Box
-                                      component="span"
-                                      sx={{
-                                        width: 8,
-                                        height: 8,
-                                        borderRadius: "50%",
-                                        bgcolor: statusDotColor,
-                                        flexShrink: 0,
-                                      }}
-                                    />
-                                    <Box
-                                      component="span"
-                                      sx={{
-                                        px: 1,
-                                        py: 0.25,
-                                        borderRadius: "999px",
-                                        fontSize: 12,
-                                        fontWeight: 600,
-                                        color: statusColor.text,
-                                        backgroundColor: statusColor.bg,
-                                        textTransform: "capitalize",
-                                      }}
-                                    >
-                                      {statusValue || "-"}
-                                    </Box>
-                                  </Box>
-                                )}
-                              </Box>
-                            </Box>
-                          );
-                        })}
+                      <Typography sx={{ color: "#667085", fontSize: 13 }}>
+                        No details available for this test.
+                      </Typography>
+                    )
+                  ) : (
+                    <Box>
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: { xs: "2fr 1fr 1fr", md: "2fr 1fr 1fr 1.25fr 1fr" },
+                          gap: 1,
+                          px: 1,
+                          pb: 0.75,
+                        }}
+                      >
+                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Parameter</Typography>
+                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Value</Typography>
+                        <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#475467" }}>Unit</Typography>
+                        <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 12, fontWeight: 700, color: "#475467" }}>
+                          Normal Range
+                        </Typography>
+                        <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 12, fontWeight: 700, color: "#475467" }}>
+                          Status
+                        </Typography>
                       </Box>
-                    )}
-                  </Box>
+
+                      {item.section.rows.map((row, index) => {
+                        const parameterKey = `${item.id}-row-${index}-parameter`;
+                        const valueKey = `${item.id}-row-${index}-value`;
+                        const unitKey = `${item.id}-row-${index}-unit`;
+                        const normalRangeKey = `${item.id}-row-${index}-normalRange`;
+                        const statusKey = `${item.id}-row-${index}-status`;
+                        const parameterValue = getMedicalFieldValue(parameterKey, row.parameter);
+                        const valueValue = getMedicalFieldValue(valueKey, row.value);
+                        const unitValue = getMedicalFieldValue(unitKey, row.unit);
+                        const normalRangeValue = getMedicalFieldValue(normalRangeKey, row.normalRange);
+                        const statusValue = getMedicalFieldValue(statusKey, row.status);
+                        const statusColor = getStatusColors(statusValue);
+                        const statusDotColor = getStatusDotColor(statusValue);
+
+                        return (
+                          <Box
+                            key={`${item.id}-${row.parameter}-${index}`}
+                            sx={{
+                              display: "grid",
+                              gridTemplateColumns: { xs: "2fr 1fr 1fr", md: "2fr 1fr 1fr 1.25fr 1fr" },
+                              gap: 1,
+                              alignItems: "center",
+                              px: 1,
+                              py: 1,
+                              borderTop: "1px solid #F2F4F7",
+                              backgroundColor: index % 2 === 0 ? "#FCFCFD" : "#FFFFFF",
+                            }}
+                          >
+                            {isEditable ? (
+                              <CustomTextField fullWidth size="small" value={parameterValue} onChange={(event) => handleMedicalFieldChange(parameterKey, event.target.value)} />
+                            ) : (
+                              <Typography sx={{ fontSize: 13, color: "#344054" }}>{parameterValue || "-"}</Typography>
+                            )}
+                            {isEditable ? (
+                              <CustomTextField fullWidth size="small" value={valueValue} onChange={(event) => handleMedicalFieldChange(valueKey, event.target.value)} />
+                            ) : (
+                              <Typography sx={{ fontSize: 13, color: "#101828", fontWeight: 600 }}>{valueValue || "-"}</Typography>
+                            )}
+                            {isEditable ? (
+                              <CustomTextField fullWidth size="small" value={unitValue} onChange={(event) => handleMedicalFieldChange(unitKey, event.target.value)} />
+                            ) : (
+                              <Typography sx={{ fontSize: 13, color: "#344054" }}>{unitValue || "-"}</Typography>
+                            )}
+                            {isEditable ? (
+                              <CustomTextField
+                                fullWidth
+                                size="small"
+                                value={normalRangeValue}
+                                onChange={(event) => handleMedicalFieldChange(normalRangeKey, event.target.value)}
+                                sx={{ display: { xs: "none", md: "block" } }}
+                              />
+                            ) : (
+                              <Typography sx={{ display: { xs: "none", md: "block" }, fontSize: 13, color: "#344054" }}>
+                                {normalRangeValue || "-"}
+                              </Typography>
+                            )}
+                            <Box sx={{ display: { xs: "none", md: "flex" } }}>
+                              {isEditable ? (
+                                <CustomTextField fullWidth size="small" value={statusValue} onChange={(event) => handleMedicalFieldChange(statusKey, event.target.value)} />
+                              ) : (
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      width: 8,
+                                      height: 8,
+                                      borderRadius: "50%",
+                                      bgcolor: statusDotColor,
+                                      flexShrink: 0,
+                                    }}
+                                  />
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      px: 1,
+                                      py: 0.25,
+                                      borderRadius: "999px",
+                                      fontSize: 12,
+                                      fontWeight: 600,
+                                      color: statusColor.text,
+                                      backgroundColor: statusColor.bg,
+                                      textTransform: "capitalize",
+                                    }}
+                                  >
+                                    {statusValue || "-"}
+                                  </Box>
+                                </Box>
+                              )}
+                            </Box>
+                          </Box>
+                        );
+                      })}
+                    </Box>
+                  )}
                 </Box>
-              ))
-            )}
-          </Box>
+              </Box>
+            ))
+          )}
         </Box>
+      </Box>
 
       <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
         <FormControlLabel
