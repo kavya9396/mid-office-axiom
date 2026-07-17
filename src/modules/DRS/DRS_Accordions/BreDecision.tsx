@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Button } from "@mui/material";
+import { Box, Container, Typography, Button, CircularProgress } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -516,6 +516,7 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                 <Button
                   data-drs-bre-retrigger="true"
                   disabled={isRetriggerDisabled}
+                  aria-label={breRetriggerLoading ? "Retriggering BRE" : "Retrigger BRE"}
                   onClick={() => {
                     handleRetrigger();
                   }}
@@ -533,7 +534,11 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                     ...centerFlex,
                   }}
                 >
-                  <RefreshIcon />
+                  {breRetriggerLoading ? (
+                    <CircularProgress size={18} thickness={5} sx={{ color: "#9A2529" }} />
+                  ) : (
+                    <RefreshIcon />
+                  )}
                 </Button>
               </Box>
             </Box>
