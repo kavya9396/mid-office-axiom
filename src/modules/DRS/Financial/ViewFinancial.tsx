@@ -276,7 +276,7 @@ const ViewFinancial = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
-  const { applicationNumber } = useAppContext();
+  const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
 
   const requestedApplicantTab =
@@ -297,7 +297,7 @@ const ViewFinancial = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
-
+  const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
   const isCptPool = roleType === "CPT Pool";
@@ -477,13 +477,13 @@ const ViewFinancial = () => {
     }
 
     if (value === "medical") {
-      navigate(getMedicalPath(safeApplicationId), {
+      navigate(getMedicalPath(safeBusinessType, safeApplicationId), {
         state: { selectedApplicantTab: currentApplicantTab },
       });
       return;
     }
 
-    navigate(getFinancialPath(safeApplicationId), {
+    navigate(getFinancialPath(safeBusinessType, safeApplicationId), {
       state: { selectedApplicantTab: currentApplicantTab },
     });
   };
@@ -534,7 +534,7 @@ const ViewFinancial = () => {
   if (isCptPool) {
     return (
       <Container disableGutters>
-        <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeApplicationId))} />
+        <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
         <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
           View Financial Details is not available for CPT Pool.
         </Typography>
@@ -544,7 +544,7 @@ const ViewFinancial = () => {
 
   return (
     <Container disableGutters sx={{ pb: 4 }}>
-      <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeApplicationId))} />
+      <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
 
       <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
         <CustomTabs
@@ -575,93 +575,93 @@ const ViewFinancial = () => {
         </Box>
       )}
 
-      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1,mt:2 }}>
+      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
         <CustomAccordion title={isFormalRole ? "Member Profile" : "Applicant Profile"} defaultExpanded={false} detailPadding={0}>
           {isFormalRole ? (
             <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
               <FormalMemberProfile profile={formalMemberProfile} />
             </Box>
           ) : (
-          //   <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
-          //   <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-          //     <Box
-          //       sx={{
-          //         width: 76,
-          //         height: 76,
-          //         borderRadius: "50%",
-          //         backgroundColor: "#EBF1F5",
-          //         display: "flex",
-          //         alignItems: "center",
-          //         justifyContent: "center",
-          //         overflow: "hidden",
-          //         flexShrink: 0,
-          //       }}
-          //     >
-          //       {applicantData.profileImage && (
-          //         <Box
-          //           component="img"
-          //           src={applicantData.profileImage}
-          //           alt={`${applicantData.name}'s photo`}
-          //           sx={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
-          //         />
-          //       )}
-          //     </Box>
+            //   <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
+            //   <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
+            //     <Box
+            //       sx={{
+            //         width: 76,
+            //         height: 76,
+            //         borderRadius: "50%",
+            //         backgroundColor: "#EBF1F5",
+            //         display: "flex",
+            //         alignItems: "center",
+            //         justifyContent: "center",
+            //         overflow: "hidden",
+            //         flexShrink: 0,
+            //       }}
+            //     >
+            //       {applicantData.profileImage && (
+            //         <Box
+            //           component="img"
+            //           src={applicantData.profileImage}
+            //           alt={`${applicantData.name}'s photo`}
+            //           sx={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
+            //         />
+            //       )}
+            //     </Box>
 
-          //     <Box sx={{ flex: 1, minWidth: 0 }}>
-          //       <Box
-          //         sx={{
-          //           display: "flex",
-          //           justifyContent: "space-between",
-          //           alignItems: "flex-start",
-          //           gap: 2,
-          //           flexWrap: "wrap",
-          //         }}
-          //       >
-          //         <Box>
-          //           <Typography sx={{ fontSize: 28, fontWeight: 700, color: "#1E293B", lineHeight: 1.15 }}>
-          //             {applicantData.name}
-          //           </Typography>
-          //           <Typography sx={{ fontSize: 14, color: "#4B5563", mt: 0.5 }}>DOB: {applicantData.dob}</Typography>
-          //         </Box>
+            //     <Box sx={{ flex: 1, minWidth: 0 }}>
+            //       <Box
+            //         sx={{
+            //           display: "flex",
+            //           justifyContent: "space-between",
+            //           alignItems: "flex-start",
+            //           gap: 2,
+            //           flexWrap: "wrap",
+            //         }}
+            //       >
+            //         <Box>
+            //           <Typography sx={{ fontSize: 28, fontWeight: 700, color: "#1E293B", lineHeight: 1.15 }}>
+            //             {applicantData.name}
+            //           </Typography>
+            //           <Typography sx={{ fontSize: 14, color: "#4B5563", mt: 0.5 }}>DOB: {applicantData.dob}</Typography>
+            //         </Box>
 
-          //         <Badge label={`${applicantData.gender}, ${applicantData.age} Years`} variant="Neutral" size="medium" />
-          //       </Box>
+            //         <Badge label={`${applicantData.gender}, ${applicantData.age} Years`} variant="Neutral" size="medium" />
+            //       </Box>
 
-          //       <Divider sx={{ my: 1.25, borderColor: "#B7C1CB" }} />
+            //       <Divider sx={{ my: 1.25, borderColor: "#B7C1CB" }} />
 
-          //       <Box
-          //         sx={{
-          //           display: "grid",
-          //           gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
-          //           gap: { xs: 1.25, md: 2 },
-          //         }}
-          //       >
-          //         {applicantInfoItems.map((item) => (
-          //           <Box key={item.label} sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, minWidth: 0 }}>
-          //             <Box sx={{ color: "#1E5A8B", mt: 0.2, display: "inline-flex" }}>{item.icon}</Box>
-          //             <Box sx={{ minWidth: 0 }}>
-          //               <Typography sx={{ fontSize: 12, color: "#475569", lineHeight: 1.2 }}>{item.label}</Typography>
-          //               <Typography
-          //                 sx={{
-          //                   fontSize: 18,
-          //                   fontWeight: 600,
-          //                   color: "#111827",
-          //                   lineHeight: 1.3,
-          //                   wordBreak: "break-word",
-          //                 }}
-          //               >
-          //                 {item.value || "-"}
-          //               </Typography>
-          //             </Box>
-          //           </Box>
-          //         ))}
-          //       </Box>
-          //     </Box>
-          //   </Box>
-          // </Box>
-          <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-  <ApplicantProfile selectedApplicantTab={currentApplicantTab} isApplicantDetailsExpanded />
-</Box>
+            //       <Box
+            //         sx={{
+            //           display: "grid",
+            //           gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
+            //           gap: { xs: 1.25, md: 2 },
+            //         }}
+            //       >
+            //         {applicantInfoItems.map((item) => (
+            //           <Box key={item.label} sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, minWidth: 0 }}>
+            //             <Box sx={{ color: "#1E5A8B", mt: 0.2, display: "inline-flex" }}>{item.icon}</Box>
+            //             <Box sx={{ minWidth: 0 }}>
+            //               <Typography sx={{ fontSize: 12, color: "#475569", lineHeight: 1.2 }}>{item.label}</Typography>
+            //               <Typography
+            //                 sx={{
+            //                   fontSize: 18,
+            //                   fontWeight: 600,
+            //                   color: "#111827",
+            //                   lineHeight: 1.3,
+            //                   wordBreak: "break-word",
+            //                 }}
+            //               >
+            //                 {item.value || "-"}
+            //               </Typography>
+            //             </Box>
+            //           </Box>
+            //         ))}
+            //       </Box>
+            //     </Box>
+            //   </Box>
+            // </Box>
+            <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+              <ApplicantProfile selectedApplicantTab={currentApplicantTab} isApplicantDetailsExpanded />
+            </Box>
           )}
         </CustomAccordion>
       </Box>
