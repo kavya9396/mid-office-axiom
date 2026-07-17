@@ -11,7 +11,6 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
-import type { AdditionalRequirementRow } from "../../../types/drs.types";
 import { decisionCodeThunk } from "../../../store/thunks/decisionCodeThunk";
 import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
@@ -20,6 +19,7 @@ import { getCompleteTaskResult } from "./completeTaskResponse";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
+import { getRequirementRows, validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const DVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
@@ -45,18 +45,7 @@ const DVTDecision = () => {
     const decisionLabel = toMasterLabel(effectiveDecision, dvtDecisionOptions);
     
 
-    const savedRequirements = useSelector((state: RootState) => {
-        const drsData = state.drs.data as unknown as Record<string, unknown> | null;
-        const directRequirements = drsData?.requirements;
-        if (Array.isArray(directRequirements)) {
-            return directRequirements as AdditionalRequirementRow[];
-        }
-        const requirementManagement = drsData?.requirementManagement;
-        return Array.isArray(requirementManagement)
-            ? (requirementManagement as AdditionalRequirementRow[])
-            : [];
-    });
-    const hasRequirements = savedRequirements.length > 0;
+    const hasRequirements = getRequirementRows(drsData).length > 0;
     const isAcceptDecision = decisionLabel === "Accept";
     const resolvedDecisionCode = isAcceptDecision
         ? (decisionCodes[0]?.value || "")
@@ -64,8 +53,7 @@ const DVTDecision = () => {
 
         const isRaiseRequirementsSelected = decisionLabel === "Raise Requirements";
         const submitBlocked =
-            (isRaiseRequirementsSelected && !hasRequirements) ||
-            (hasRequirements && effectiveDecision !== "" && !isRaiseRequirementsSelected);
+            isRaiseRequirementsSelected && !hasRequirements;
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
@@ -127,6 +115,13 @@ const DVTDecision = () => {
         const applicantTabsValidation = validateApplicantTabsVisited(drsData);
         if (!applicantTabsValidation.isValid) {
             setSubmitMessage(applicantTabsValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
+        const requirementValidation = validateRequirementDecision(drsData, decisionLabel);
+        if (!requirementValidation.isValid) {
+            setSubmitMessage(requirementValidation.message);
             setSubmitStatus("failure");
             return;
         }

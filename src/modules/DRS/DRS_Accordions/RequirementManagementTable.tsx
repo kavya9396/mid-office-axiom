@@ -25,6 +25,7 @@ import {
     OPEN_REQUIREMENT_MANAGEMENT_EVENT,
     type OpenRequirementManagementEvent,
 } from "./requirementManagementEvents";
+import { saveLocalRequirementRows } from "../../../validations/drsRequirementDecisionValidation";
 
 type BreRequirementRow = {
     requirementType?: string;
@@ -420,6 +421,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             ? (requirementManagement as AdditionalRequirementRow[])
             : [];
     });
+    const drsData = useSelector((state: RootState) => state.drs.data as unknown);
     const masters = useSelector((state: RootState) => state.drs.masters);
     const masterRequirementRows = useMemo(
         () => masters.requirementManagement ?? [],
@@ -491,6 +493,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         ],
         [localRows, normalizedExistingRows, sourceRowOverrides],
     );
+
+    useEffect(() => {
+        saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })));
+    }, [drsData, rows]);
     const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
 
