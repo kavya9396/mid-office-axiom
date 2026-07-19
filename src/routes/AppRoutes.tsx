@@ -18,7 +18,7 @@ import UserManagement from "../modules/DRS/UserManagement";
 import SearchApplication from "../modules/Landing/SearchApplication";
 
 function BusinessTypeRedirect() {
-    return <Navigate to="inbox" replace />;
+    return <Navigate to="/inbox" replace />;
 }
 
 export default function AppRoutes() {
@@ -32,6 +32,9 @@ export default function AppRoutes() {
             <Route element={<ProtectedRoute />}>
 
              {/* Independent Route */}
+                <Route path={PATHS.INBOX} element={<RootLayout />}>
+                    <Route index element={<Inbox />} />
+                </Route>
                 <Route path={PATHS.USER_MANAGEMENT} element={<RootLayout />}>
                     <Route index element={<UserManagement />} />
                 </Route>
@@ -46,7 +49,6 @@ export default function AppRoutes() {
 
                     {/* APP ROUTES WITH LAYOUT */}
                     <Route path=":businessType" element={<RootLayout />}>
-                        <Route path={PATHS.INBOX} element={<Inbox />} />
                         <Route path={PATHS.DRS} element={<DRS />} />
                         <Route path={PATHS.DRS_MEDICAL} element={<ViewMedicals />} />
                         <Route path={PATHS.DRS_FINANCIAL} element={<ViewFinancial />} />

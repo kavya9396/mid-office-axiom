@@ -6,7 +6,7 @@ export default function BusinessTypeRoute() {
 
   if (!normalizeBusinessType(businessType)) {
     return (
-      <Navigate to="/retail/inbox" replace />
+      <Navigate to="/inbox" replace />
     );
   }
 
