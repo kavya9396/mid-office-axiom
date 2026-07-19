@@ -105,7 +105,11 @@ const RightPanel = ({
     normalizeBusinessType(businessType) ??
     normalizeBusinessType(localStorage.getItem("businessType")) ??
     "retail";
-  const { config, updateConfig } = useColumnConfig(username, selectedPool);
+  const {
+    config,
+    updateConfig,
+    maxVisibleColumns,
+  } = useColumnConfig(username, selectedPool, rows);
 
   const [left, setLeft] = useState<string[]>([]);
   const [right, setRight] = useState<string[]>([]);
@@ -199,17 +203,19 @@ const RightPanel = ({
     }
   };
 
-  const visibleColumns = allColumns.filter((col) =>
-    config.visible.includes(col.key),
+  const columnByKey = useMemo(
+    () => new Map(allColumns.map((column) => [String(column.key), column])),
+    [],
   );
+  const visibleColumns = config.visible
+    .map((columnKey) => columnByKey.get(columnKey))
+    .filter((column): column is TableColumn<tableData> => Boolean(column));
   const hasTableData = rows.length > 0;
   // ---------------- OPEN DIALOG ----------------
   const openColumnDialog = () => {
-    const leftColumns = allColumns.filter((col) =>
-      config.hidden.includes(col.key),
-    ).map((col) => String(col.key));
-    setLeft(leftColumns);
+    setLeft(config.hidden);
     setRight(config.visible);
+    setChecked([]);
     setOpenTransferDialog(true);
   };
 
@@ -221,8 +227,22 @@ const RightPanel = ({
   };
 
   const moveRight = () => {
-    setLeft((prev) => prev.filter((i) => !checked.includes(i)));
-    setRight((prev) => [...prev, ...checked]);
+    const checkedFromAvailable = checked.filter((item) => left.includes(item));
+    const availableSlots = maxVisibleColumns - right.length;
+
+    if (availableSlots <= 0) {
+      setClaimError(`Only ${maxVisibleColumns} columns can be visible at a time.`);
+      return;
+    }
+
+    const itemsToMove = checkedFromAvailable.slice(0, availableSlots);
+
+    if (checkedFromAvailable.length > availableSlots) {
+      setClaimError(`Only ${maxVisibleColumns} columns can be visible at a time.`);
+    }
+
+    setLeft((prev) => prev.filter((item) => !itemsToMove.includes(item)));
+    setRight((prev) => [...prev, ...itemsToMove]);
     setChecked([]);
   };
 
@@ -308,13 +328,21 @@ const RightPanel = ({
   };
 
   // ---------------- APPLY ----------------
-  const handleApply = () => {
-    updateConfig({
-      visible: right,
-      hidden: left,
-    });
+  const handleApply = async () => {
+    try {
+      await updateConfig({
+        visible: right,
+        hidden: left,
+      });
 
-    setOpenTransferDialog(false);
+      setOpenTransferDialog(false);
+    } catch (error) {
+      setClaimError(
+        error instanceof Error
+          ? error.message
+          : "Failed to save column sequence.",
+      );
+    }
   };
   // -------------- Header content -----------------
   const headerContent = () => (
@@ -374,7 +402,10 @@ const RightPanel = ({
     </TableRow>
   );
   // ---------------- RENDER LIST ----------------
-  const customList = (title: string, items: string[]) => (
+  const customList = (title: string, items: string[]) => {
+    const isAvailableList = title === "Available";
+
+    return (
     <Paper
       sx={{
         width: 300,
@@ -392,10 +423,14 @@ const RightPanel = ({
             <Box sx={{ px: 2 }}>
               <CustomCheckbox
                 label={
-                  allColumns.find((col) => String(col.key) === item)?.label ??
-                  item
+                  columnByKey.get(item)?.label ?? item
                 }
                 checked={checked.includes(item)}
+                disabled={
+                  isAvailableList &&
+                  right.length >= maxVisibleColumns &&
+                  !checked.includes(item)
+                }
                 onChange={handleToggle(item)}
               />
             </Box>
@@ -403,7 +438,8 @@ const RightPanel = ({
         ))}
       </List>
     </Paper>
-  );
+    );
+  };
   const filteredRows = rows
     .filter((row) => {
       if (poolStatusFilter === "All") return true;
@@ -951,7 +987,8 @@ const RightPanel = ({
                     size="small"
                     onClick={moveRight}
                     disabled={
-                      checked.filter((c) => left.includes(c)).length === 0
+                      checked.filter((c) => left.includes(c)).length === 0 ||
+                      right.length >= maxVisibleColumns
                     }
                   >
                     <Box component="span">›</Box>

@@ -32,6 +32,10 @@ const apiUrls = {
     real: "http://172.30.74.182:8094/api/v1/drs/ui/search-application",
     mock: "/mock/drs/drs.mock.json",
   },
+  columnConfigSave: {
+    real: "/api/inbox/column-config",
+    mock: "/mock/inbox/columnConfigSave.json",
+  },
  
    // DRS
   drs: {
