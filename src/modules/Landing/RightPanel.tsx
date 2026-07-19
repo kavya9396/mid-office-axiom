@@ -28,7 +28,7 @@ import {
   SettingsIcon,
 } from "../../icons/Icons";
 import SearchBar from "../../components/ui/SearchBar/SearchBar";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 import { useColumnConfig } from "../../hooks/useColumnConfig";
@@ -48,6 +48,55 @@ import { useAppContext } from "../../hooks/useAppContext";
 
 type SortDirection = "asc" | "desc";
 type PoolStatusFilter = "All" | "Active" | "Error";
+type TaskTimingStatus = "normal" | "atRisk" | "due";
+
+const TASK_TIMING_ROW_STYLES: Record<
+  TaskTimingStatus,
+  { backgroundColor: string; hoverColor: string; textColor: string }
+> = {
+  normal: {
+    backgroundColor: "inherit",
+    hoverColor: "#f5faff",
+    textColor: "inherit",
+  },
+  atRisk: {
+    backgroundColor: "#FFF4D6",
+    hoverColor: "#FFE9A8",
+    textColor: "#7A4E00",
+  },
+  due: {
+    backgroundColor: "#FDE8E8",
+    hoverColor: "#FBD5D5",
+    textColor: "#9A2529",
+  },
+};
+
+const getTimestamp = (value?: string) => {
+  if (!value) return null;
+
+  const timestamp = Date.parse(value);
+  return Number.isNaN(timestamp) ? null : timestamp;
+};
+
+const getTaskTimingStatus = (row: tableData, now: number): TaskTimingStatus => {
+  const startTime = getTimestamp(row.start_time);
+  const atRiskTime = getTimestamp(row.at_risk_time);
+  const dueDate = getTimestamp(row.due_date);
+
+  if (startTime !== null && now < startTime) {
+    return "normal";
+  }
+
+  if (dueDate !== null && now >= dueDate) {
+    return "due";
+  }
+
+  if (atRiskTime !== null && now >= atRiskTime) {
+    return "atRisk";
+  }
+
+  return "normal";
+};
 
 const roleMapper = {
   "CUW_TASK": "CUW Pool",
@@ -122,6 +171,7 @@ const RightPanel = ({
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [sortKey, setSortKey] = useState<keyof tableData | "">("");
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [currentTimeMs, setCurrentTimeMs] = useState(() => Date.now());
   const [poolStatusFilter] =
     useState<PoolStatusFilter>("All");
   const [claimError, setClaimError] = useState("");
@@ -134,6 +184,14 @@ const RightPanel = ({
   //   const poolStatus = rowData.poolStatus;
   //   return typeof poolStatus === "string" && poolStatus.trim().length > 0;
   // });
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setCurrentTimeMs(Date.now());
+    }, 30000);
+
+    return () => window.clearInterval(intervalId);
+  }, []);
 
   const handleApplicationClick = async (
     e: React.MouseEvent,
@@ -305,28 +363,6 @@ const RightPanel = ({
     });
   };
 
-  const getPoolTatHours = (row: tableData) => {
-    const rowData = row as unknown as Record<string, unknown>;
-    const rawPoolTat = rowData.poolTAT;
-
-    if (rawPoolTat === null || rawPoolTat === undefined) {
-      return null;
-    }
-
-    const tatText = String(rawPoolTat).trim();
-    if (!tatText) {
-      return null;
-    }
-
-    const tatMatch = tatText.match(/-?\d+(\.\d+)?/);
-    if (!tatMatch) {
-      return null;
-    }
-
-    const tatHours = Number(tatMatch[0]);
-    return Number.isFinite(tatHours) ? tatHours : null;
-  };
-
   // ---------------- APPLY ----------------
   const handleApply = async () => {
     try {
@@ -401,45 +437,45 @@ const RightPanel = ({
       ))}
     </TableRow>
   );
+
   // ---------------- RENDER LIST ----------------
   const customList = (title: string, items: string[]) => {
     const isAvailableList = title === "Available";
 
     return (
-    <Paper
-      sx={{
-        width: 300,
-        height: 400, // 👈 same fixed height for both boxes
-        overflow: "hidden", // 👈 prevents outer scroll
-      }}
-    >
-      <Box sx={{ px: 2, py: 1, backgroundColor: "#f5f5f5" }}>
-        <Typography variant="subtitle1">{title}</Typography>
-      </Box>
+      <Paper
+        sx={{
+          width: 300,
+          height: 400,
+          overflow: "hidden",
+        }}
+      >
+        <Box sx={{ px: 2, py: 1, backgroundColor: "#f5f5f5" }}>
+          <Typography variant="subtitle1">{title}</Typography>
+        </Box>
 
-      <List dense>
-        {items.map((item) => (
-          <ListItem key={item} disablePadding>
-            <Box sx={{ px: 2 }}>
-              <CustomCheckbox
-                label={
-                  columnByKey.get(item)?.label ?? item
-                }
-                checked={checked.includes(item)}
-                disabled={
-                  isAvailableList &&
-                  right.length >= maxVisibleColumns &&
-                  !checked.includes(item)
-                }
-                onChange={handleToggle(item)}
-              />
-            </Box>
-          </ListItem>
-        ))}
-      </List>
-    </Paper>
+        <List dense>
+          {items.map((item) => (
+            <ListItem key={item} disablePadding>
+              <Box sx={{ px: 2 }}>
+                <CustomCheckbox
+                  label={columnByKey.get(item)?.label ?? item}
+                  checked={checked.includes(item)}
+                  disabled={
+                    isAvailableList &&
+                    right.length >= maxVisibleColumns &&
+                    !checked.includes(item)
+                  }
+                  onChange={handleToggle(item)}
+                />
+              </Box>
+            </ListItem>
+          ))}
+        </List>
+      </Paper>
     );
   };
+
   const filteredRows = rows
     .filter((row) => {
       if (poolStatusFilter === "All") return true;
@@ -776,9 +812,8 @@ const RightPanel = ({
                   )}
                   <TableBody>
                     {paginatedRows.map((row) => {
-                      const poolTatHours = getPoolTatHours(row);
-                      const isPoolTatCritical =
-                        poolTatHours !== null && poolTatHours <= 1;
+                      const taskTimingStatus = getTaskTimingStatus(row, currentTimeMs);
+                      const taskTimingRowStyle = TASK_TIMING_ROW_STYLES[taskTimingStatus];
 
                       return (
                         <TableRow
@@ -786,12 +821,12 @@ const RightPanel = ({
                           hover
                           sx={{
                             cursor: "pointer",
-                            backgroundColor: isPoolTatCritical ? "#FDE8E8" : "inherit",
+                            backgroundColor: taskTimingRowStyle.backgroundColor,
                             "& td": {
-                              color: isPoolTatCritical ? "#9A2529" : "inherit",
+                              color: taskTimingRowStyle.textColor,
                             },
                             "&:hover": {
-                              backgroundColor: isPoolTatCritical ? "#FDE8E8" : "#f5faff",
+                              backgroundColor: taskTimingRowStyle.hoverColor,
                             },
                           }}
                         >
@@ -819,7 +854,7 @@ const RightPanel = ({
                                       cursor: "pointer",
                                       fontWeight: 600,
                                       fontSize: "13px",
-                                      color: isPoolTatCritical ? "#9A2529" : "#0E3762",
+                                      color: taskTimingStatus === "normal" ? "#0E3762" : taskTimingRowStyle.textColor,
                                       "&:hover": { textDecoration: "underline" },
                                     }}
                                     onClick={(e) => {

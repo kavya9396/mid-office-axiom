@@ -25,6 +25,18 @@ export const allColumns: TableColumn<tableData>[] = [
     label: "Pool TAT (Hrs)",
   },
   {
+    key: "start_time",
+    label: "Start Time",
+  },
+  {
+    key: "at_risk_time",
+    label: "At Risk Time",
+  },
+  {
+    key: "due_date",
+    label: "Due Date",
+  },
+  {
     key: "productType",
     label: "Product Type",
   },
