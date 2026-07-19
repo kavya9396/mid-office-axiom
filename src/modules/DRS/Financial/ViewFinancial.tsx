@@ -8,6 +8,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
+import CustomTable, { type Column } from "../../../components/ui/Table/Table";
 import { useAppContext } from "../../../hooks/useAppContext";
 // import { BriefcaseIcon, PhoneIcon, SmsIcon, WalletIcon } from "../../../icons/Icons";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
@@ -135,9 +136,95 @@ const FORM_16_TABLE_LABELS = [
   "Life Assured Name",
 ];
 
-const FORM_16_BOTTOM_LABELS = [
-  "Is Life Assured Name Same With Doc Name?",
-  "Company Name",
+const FORM_16A_TABLE_LABELS = [
+  "Assessment Year",
+  "Net Receipt pa",
+  "Average Annual Income",
+];
+
+const ITR_NON_INDIVIDUAL_TABLE_LABELS = [
+  "Assessment Year",
+  "ITR Acknowledgement Number",
+  "Income from Salary",
+  "Income from House Property",
+  "Income from Business or Profession",
+  "Short term & Capital Gains",
+  "Income from Other Sources",
+  "Agricultural Income",
+  "Exempt Income",
+  "Gross Total Income",
+  "Total Gross Total Income",
+  "Average Gross Total Income",
+];
+
+const ITR_INDIVIDUAL_TABLE_LABELS = [
+  "Assessment Year",
+  "ITR Acknowledgement Number",
+  "Date of Filling ITR",
+  "Income from Salary(A)",
+  "Income from House Property",
+  "Income from Business or Profession(B)",
+  "Short term & Capital Gains",
+  "Income from Other Sources",
+  "Agricultural Income",
+  "Exempt Income(C)",
+  "Gross Total Income(A+B+C)",
+  "Total Gross Total Income",
+  "Average Gross Total Income",
+  "PF deduction - Salaried customers",
+  "Life Assured Name",
+  "Is Life Assured Name Same?",
+];
+
+const PROFIT_AND_LOSS_TABLE_LABELS = [
+  "As Per Accounts of Proposer Co.",
+  "Assessment Year",
+  "Shareholders Funds / Partners Capital",
+  "Share Capital or Fixed/Fluctuating Capital",
+  "Reserves & Surplus",
+  "Total Shareholders Funds or Partner's Fund",
+  "Profit Calculation",
+  "Profit Before Depreciation & Tax (PBDT)",
+  "Less : Depreciation",
+  "Profit Before Tax (PBT)",
+  "Tax",
+  "Profit After Tax (PAT)",
+  "Profit After Tax of Last Year",
+  "Rise In Profit as compared to Last Year",
+  "% Rise In Profit as compared to Last Year",
+  "Income Calculation",
+  "Sales",
+  "Sales of Last Year",
+  "Rise In Sales as compared to Last Year",
+  "% Rise In Sales as compared to Last Year",
+  "Average Gross Income",
+  "Average Profit Before Tax",
+  "Average Profit After Tax",
+];
+
+const GST_INCOME_TABLE_LABELS = [
+  "Assessment Year",
+  "Gross Sales",
+  "Gross Purchases",
+  "Profit After GST",
+  "Total of Gross Sales",
+  "Average Gross Sales",
+  "Average Annual Income",
+];
+
+const ITR_NON_INDIVIDUAL_TOP_FIELDS = ["Name of Organisation/Firm", "Permanent Account Number"];
+const ITR_INDIVIDUAL_TOP_FIELDS = ["Name of Organisation/Firm", "Permanent Account Number"];
+const PROFIT_AND_LOSS_TOP_FIELDS = ["Name of Organization/Firm"];
+
+const FORM_J_ROW_LABELS = [
+  "Is Form J in the name of LA",
+  "Month1",
+  "Month2",
+  "Month3",
+  "Total Receipts",
+  "Average Monthly Receipts",
+  "Annual Receipts",
+  "Derived Income",
 ];
 
 type SubmitResponse = {
@@ -145,22 +232,292 @@ type SubmitResponse = {
   message?: string;
 };
 
+const isFieldMandatory = (field?: FinancialField) => {
+  if (!field) {
+    return false;
+  }
+
+  if (typeof field.isMandatory === "boolean") {
+    return field.isMandatory;
+  }
+
+  if (typeof field.value === "string") {
+    return /\bmandatory\b/i.test(field.value);
+  }
+
+  return false;
+};
+
 const renderFieldValue = (
   value: string,
   isEditable: boolean,
   onChange: (value: string) => void,
+  isRequired = false,
+  errorText?: string,
 ) => {
   if (isEditable) {
-    return <CustomTextField fullWidth size="small" value={value} onChange={(event) => onChange(event.target.value)} />;
+    return (
+      <CustomTextField
+        fullWidth
+        size="small"
+        required={isRequired}
+        error={Boolean(errorText)}
+        helperText={errorText}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    );
   }
 
   return <Box sx={readOnlyBoxSx}>{value}</Box>;
+};
+
+type MultiYearTableRow = {
+  label: string;
+  year1: string;
+  year2: string;
+  year3: string;
+  year1FieldLabel: string;
+  year2FieldLabel: string;
+  year3FieldLabel: string;
+  required: boolean;
+};
+
+type FourYearTableRow = {
+  label: string;
+  year1: string;
+  year2: string;
+  year3: string;
+  year4: string;
+  year1FieldLabel: string;
+  year2FieldLabel: string;
+  year3FieldLabel: string;
+  year4FieldLabel: string;
+  required: boolean;
+};
+
+type FormJTableRow = {
+  label: string;
+  receipt1: string;
+  receipt2: string;
+  receipt3: string;
+  receipt4: string;
+  receipt5: string;
+  receipt6: string;
+  receipt1FieldLabel: string;
+  receipt2FieldLabel: string;
+  receipt3FieldLabel: string;
+  receipt4FieldLabel: string;
+  receipt5FieldLabel: string;
+  receipt6FieldLabel: string;
+  required: boolean;
+};
+
+const renderMultiYearTableSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  tableLabels: string[],
+  title: string,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) => {
+  const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
+    accumulator[item.label.toLowerCase()] = item;
+    return accumulator;
+  }, {});
+
+  const tableRows: MultiYearTableRow[] = tableLabels.map((label) => {
+    const item = byLabel[label.toLowerCase()];
+    const year1FieldLabel = item?.label ?? label;
+    const year2FieldLabel = `${label} Year 2`;
+    const year3FieldLabel = `${label} Year 3`;
+
+    return {
+      label,
+      year1: getFieldValue(values, section.key, year1FieldLabel, item?.value),
+      year2: getFieldValue(values, section.key, year2FieldLabel, "NA"),
+      year3: getFieldValue(values, section.key, year3FieldLabel, "NA"),
+      year1FieldLabel,
+      year2FieldLabel,
+      year3FieldLabel,
+      required: isFieldMandatory(item),
+    };
+  });
+
+  const tableColumns: Column<MultiYearTableRow>[] = [
+    {
+      key: "label",
+      header: "",
+      width: "28%",
+      render: (_, row) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+          <Typography sx={{ fontSize: 13, color: "#475467" }}>{row.label}</Typography>
+          {row.required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
+        </Box>
+      ),
+    },
+    {
+      key: "year1",
+      header: "Year 1",
+      width: "24%",
+      render: (value, row) =>
+        renderFieldValue(
+          String(value ?? ""),
+          isEditable,
+          (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
+          row.required,
+          sectionErrors[row.year1FieldLabel]
+        ),
+    },
+    {
+      key: "year2",
+      header: "Year 2",
+      width: "24%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue)),
+    },
+    {
+      key: "year3",
+      header: "Year 3",
+      width: "24%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue)),
+    },
+  ];
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <CustomTable title={title} columns={tableColumns} data={tableRows} />
+    </Box>
+  );
 };
 
 const renderForm16Section = (
   section: FinancialSectionConfig,
   values: Record<FinancialSectionKey, Record<string, string>>,
   isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) =>
+  renderMultiYearTableSection(
+    section,
+    values,
+    isEditable,
+    sectionErrors,
+    FORM_16_TABLE_LABELS,
+    "Form 16",
+    onFieldValueChange
+  );
+
+const renderFourYearTableSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  tableLabels: string[],
+  title: string,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) => {
+  const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
+    accumulator[item.label.toLowerCase()] = item;
+    return accumulator;
+  }, {});
+
+  const tableRows: FourYearTableRow[] = tableLabels.map((label) => {
+    const item = byLabel[label.toLowerCase()];
+    const year1FieldLabel = item?.label ?? label;
+    const year2FieldLabel = `${label} Year 2`;
+    const year3FieldLabel = `${label} Year 3`;
+    const year4FieldLabel = `${label} Year 4`;
+
+    return {
+      label,
+      year1: getFieldValue(values, section.key, year1FieldLabel, item?.value),
+      year2: getFieldValue(values, section.key, year2FieldLabel, "NA"),
+      year3: getFieldValue(values, section.key, year3FieldLabel, "NA"),
+      year4: getFieldValue(values, section.key, year4FieldLabel, "NA"),
+      year1FieldLabel,
+      year2FieldLabel,
+      year3FieldLabel,
+      year4FieldLabel,
+      required: isFieldMandatory(item),
+    };
+  });
+
+  const tableColumns: Column<FourYearTableRow>[] = [
+    {
+      key: "label",
+      header: "",
+      width: "20%",
+      render: (_, row) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+          <Typography sx={{ fontSize: 13, color: "#475467" }}>{row.label}</Typography>
+          {row.required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
+        </Box>
+      ),
+    },
+    {
+      key: "year1",
+      header: "Year 1",
+      width: "20%",
+      render: (value, row) =>
+        renderFieldValue(
+          String(value ?? ""),
+          isEditable,
+          (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
+          row.required,
+          sectionErrors[row.year1FieldLabel]
+        ),
+    },
+    {
+      key: "year2",
+      header: "Year 2",
+      width: "20%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue)),
+    },
+    {
+      key: "year3",
+      header: "Year 3",
+      width: "20%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue)),
+    },
+    {
+      key: "year4",
+      header: "Year 4",
+      width: "20%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.year4FieldLabel, nextValue)),
+    },
+  ];
+
+  return <CustomTable title={title} columns={tableColumns} data={tableRows} />;
+};
+
+const renderForm16ASection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) =>
+  renderMultiYearTableSection(
+    section,
+    values,
+    isEditable,
+    sectionErrors,
+    FORM_16A_TABLE_LABELS,
+    section.title,
+    onFieldValueChange
+  );
+
+const renderITRNonIndividualSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
   onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
 ) => {
   const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
@@ -170,81 +527,291 @@ const renderForm16Section = (
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-      <Box sx={{ borderRadius: 1.5, border: "1px solid #D0D5DD", overflow: "hidden" }}>
-        <Box sx={{ px: 2, py: 1, backgroundColor: "#0B4D80", color: "#FFFFFF", fontSize: 16, fontWeight: 700 }}>
-          Form 16
-        </Box>
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: { xs: "1.5fr 1fr 1fr 1fr", md: "1.2fr 1fr 1fr 1fr" },
-            borderTop: "1px solid #D0D5DD",
-            backgroundColor: "#F3F4F6",
-          }}
-        >
-          <Typography sx={{ px: 1.5, py: 0.8, fontSize: 12, color: "#475467" }} />
-          <Typography sx={{ px: 1.5, py: 0.8, fontSize: 12, color: "#475467" }}>Year 1</Typography>
-          <Typography sx={{ px: 1.5, py: 0.8, fontSize: 12, color: "#475467" }}>Year 2</Typography>
-          <Typography sx={{ px: 1.5, py: 0.8, fontSize: 12, color: "#475467" }}>Year 3</Typography>
-        </Box>
-
-        {FORM_16_TABLE_LABELS.map((label, index) => {
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+          gap: 1.25,
+        }}
+      >
+        {ITR_NON_INDIVIDUAL_TOP_FIELDS.map((label) => {
           const item = byLabel[label.toLowerCase()];
+          const required = isFieldMandatory(item);
           const value = getFieldValue(values, section.key, item?.label ?? label, item?.value);
-          const year2Label = `${label} Year 2`;
-          const year3Label = `${label} Year 3`;
-          const year2Value = getFieldValue(values, section.key, year2Label, "NA");
-          const year3Value = getFieldValue(values, section.key, year3Label, "NA");
 
           return (
-            <Box
-              key={label}
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1.5fr 1fr 1fr 1fr", md: "1.2fr 1fr 1fr 1fr" },
-                borderTop: index === 0 ? "1px solid #D0D5DD" : "1px solid #E4E7EC",
-                backgroundColor: "#FFFFFF",
-              }}
-            >
-              <Typography sx={{ px: 1.5, py: 0.8, fontSize: 13, color: "#475467" }}>{label}</Typography>
-              <Box sx={{ px: 1.5, py: 0.8 }}>
-                {renderFieldValue(value, isEditable, (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue))}
+            <Box key={label}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
+                <Typography sx={{ fontSize: 12, color: "#475467" }}>{label}</Typography>
+                {required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
               </Box>
-              <Box sx={{ px: 1.5, py: 0.8 }}>
-                {renderFieldValue(year2Value, isEditable, (nextValue) => onFieldValueChange(section.key, year2Label, nextValue))}
-              </Box>
-              <Box sx={{ px: 1.5, py: 0.8 }}>
-                {renderFieldValue(year3Value, isEditable, (nextValue) => onFieldValueChange(section.key, year3Label, nextValue))}
-              </Box>
+              {renderFieldValue(
+                value,
+                isEditable,
+                (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
+                required,
+                sectionErrors[item?.label ?? label]
+              )}
             </Box>
           );
         })}
       </Box>
 
-      <Box sx={{ p: 1.5, borderRadius: 1.25, backgroundColor: "#F3F4F6", border: "1px solid #EAECF0" }}>
-        <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" }, gap: 1.25 }}>
-          {FORM_16_BOTTOM_LABELS.map((label) => {
-            const item = byLabel[label.toLowerCase()];
-            const value = getFieldValue(values, section.key, item?.label ?? label, item?.value);
-
-            return (
-              <Box key={label}>
-                <Typography sx={{ fontSize: 12, color: "#475467", mb: 0.5 }}>{label}</Typography>
-                {renderFieldValue(value, isEditable, (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue))}
-              </Box>
-            );
-          })}
-        </Box>
-      </Box>
+      {renderMultiYearTableSection(
+        section,
+        values,
+        isEditable,
+        sectionErrors,
+        ITR_NON_INDIVIDUAL_TABLE_LABELS,
+        section.title,
+        onFieldValueChange
+      )}
     </Box>
   );
+};
+
+const renderITRIndividualSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) => {
+  const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
+    accumulator[item.label.toLowerCase()] = item;
+    return accumulator;
+  }, {});
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+          gap: 1.25,
+        }}
+      >
+        {ITR_INDIVIDUAL_TOP_FIELDS.map((label) => {
+          const item = byLabel[label.toLowerCase()];
+          const required = isFieldMandatory(item);
+          const value = getFieldValue(values, section.key, item?.label ?? label, item?.value);
+
+          return (
+            <Box key={label}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
+                <Typography sx={{ fontSize: 12, color: "#475467" }}>{label}</Typography>
+                {required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
+              </Box>
+              {renderFieldValue(
+                value,
+                isEditable,
+                (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
+                required,
+                sectionErrors[item?.label ?? label]
+              )}
+            </Box>
+          );
+        })}
+      </Box>
+
+      {renderMultiYearTableSection(
+        section,
+        values,
+        isEditable,
+        sectionErrors,
+        ITR_INDIVIDUAL_TABLE_LABELS,
+        section.title,
+        onFieldValueChange
+      )}
+    </Box>
+  );
+};
+
+const renderProfitAndLossSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) => {
+  const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
+    accumulator[item.label.toLowerCase()] = item;
+    return accumulator;
+  }, {});
+
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+          gap: 1.25,
+        }}
+      >
+        {PROFIT_AND_LOSS_TOP_FIELDS.map((label) => {
+          const item = byLabel[label.toLowerCase()];
+          const required = isFieldMandatory(item);
+          const value = getFieldValue(values, section.key, item?.label ?? label, item?.value);
+
+          return (
+            <Box key={label}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
+                <Typography sx={{ fontSize: 12, color: "#475467" }}>{label}</Typography>
+                {required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
+              </Box>
+              {renderFieldValue(
+                value,
+                isEditable,
+                (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
+                required,
+                sectionErrors[item?.label ?? label]
+              )}
+            </Box>
+          );
+        })}
+      </Box>
+
+      {renderMultiYearTableSection(
+        section,
+        values,
+        isEditable,
+        sectionErrors,
+        PROFIT_AND_LOSS_TABLE_LABELS,
+        section.title,
+        onFieldValueChange
+      )}
+    </Box>
+  );
+};
+
+const renderGstIncomeSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) =>
+  renderFourYearTableSection(
+    section,
+    values,
+    isEditable,
+    sectionErrors,
+    GST_INCOME_TABLE_LABELS,
+    section.title,
+    onFieldValueChange
+  );
+
+const renderFormJSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) => {
+  const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
+    accumulator[item.label.toLowerCase()] = item;
+    return accumulator;
+  }, {});
+
+  const tableRows: FormJTableRow[] = FORM_J_ROW_LABELS.map((rowLabel) => {
+    const rowName = rowLabel === "Is Form J in the name of LA" ? rowLabel : rowLabel;
+    const receipt1FieldLabel = rowLabel === "Is Form J in the name of LA" ? rowName : `${rowLabel} Receipt1`;
+    const receipt2FieldLabel = rowLabel === "Is Form J in the name of LA" ? `${rowName} Receipt2` : `${rowLabel} Receipt2`;
+    const receipt3FieldLabel = rowLabel === "Is Form J in the name of LA" ? `${rowName} Receipt3` : `${rowLabel} Receipt3`;
+    const receipt4FieldLabel = rowLabel === "Is Form J in the name of LA" ? `${rowName} Receipt4` : `${rowLabel} Receipt4`;
+    const receipt5FieldLabel = rowLabel === "Is Form J in the name of LA" ? `${rowName} Receipt5` : `${rowLabel} Receipt5`;
+    const receipt6FieldLabel = rowLabel === "Is Form J in the name of LA" ? `${rowName} Receipt6` : `${rowLabel} Receipt6`;
+
+    const rowItem = byLabel[rowLabel.toLowerCase()] ?? byLabel[receipt1FieldLabel.toLowerCase()];
+
+    return {
+      label: rowLabel,
+      receipt1: getFieldValue(values, section.key, receipt1FieldLabel, rowItem?.value),
+      receipt2: getFieldValue(values, section.key, receipt2FieldLabel, "NA"),
+      receipt3: getFieldValue(values, section.key, receipt3FieldLabel, "NA"),
+      receipt4: getFieldValue(values, section.key, receipt4FieldLabel, "NA"),
+      receipt5: getFieldValue(values, section.key, receipt5FieldLabel, "NA"),
+      receipt6: getFieldValue(values, section.key, receipt6FieldLabel, "NA"),
+      receipt1FieldLabel,
+      receipt2FieldLabel,
+      receipt3FieldLabel,
+      receipt4FieldLabel,
+      receipt5FieldLabel,
+      receipt6FieldLabel,
+      required: isFieldMandatory(rowItem),
+    };
+  });
+
+  const tableColumns: Column<FormJTableRow>[] = [
+    {
+      key: "label",
+      header: "",
+      width: "22%",
+      render: (_, row) => (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+          <Typography sx={{ fontSize: 13, color: "#475467" }}>{row.label}</Typography>
+          {row.required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
+        </Box>
+      ),
+    },
+    {
+      key: "receipt1",
+      header: "Receipt 1",
+      width: "13%",
+      render: (value, row) =>
+        renderFieldValue(
+          String(value ?? ""),
+          isEditable,
+          (nextValue) => onFieldValueChange(section.key, row.receipt1FieldLabel, nextValue),
+          row.required,
+          sectionErrors[row.receipt1FieldLabel]
+        ),
+    },
+    {
+      key: "receipt2",
+      header: "Receipt 2",
+      width: "13%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.receipt2FieldLabel, nextValue)),
+    },
+    {
+      key: "receipt3",
+      header: "Receipt 3",
+      width: "13%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.receipt3FieldLabel, nextValue)),
+    },
+    {
+      key: "receipt4",
+      header: "Receipt 4",
+      width: "13%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.receipt4FieldLabel, nextValue)),
+    },
+    {
+      key: "receipt5",
+      header: "Receipt 5",
+      width: "13%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.receipt5FieldLabel, nextValue)),
+    },
+    {
+      key: "receipt6",
+      header: "Receipt 6",
+      width: "13%",
+      render: (value, row) =>
+        renderFieldValue(String(value ?? ""), isEditable, (nextValue) => onFieldValueChange(section.key, row.receipt6FieldLabel, nextValue)),
+    },
+  ];
+
+  return <CustomTable title="FORM J" columns={tableColumns} data={tableRows} />;
 };
 
 const renderStandardSection = (
   section: FinancialSectionConfig,
   values: Record<FinancialSectionKey, Record<string, string>>,
   isEditable: boolean,
+  sectionErrors: Record<string, string>,
   onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
 ) => {
   return (
@@ -259,12 +826,22 @@ const renderStandardSection = (
       }}
     >
       {section.items.map((item) => {
+        const required = isFieldMandatory(item);
         const value = getFieldValue(values, section.key, item.label, item.value);
 
         return (
           <Box key={`${section.key}-${item.label}`}>
-            <Typography sx={{ fontSize: 12, color: "#475467", mb: 0.5 }}>{item.label}</Typography>
-            {renderFieldValue(value, isEditable, (nextValue) => onFieldValueChange(section.key, item.label, nextValue))}
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
+              <Typography sx={{ fontSize: 12, color: "#475467" }}>{item.label}</Typography>
+              {required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
+            </Box>
+            {renderFieldValue(
+              value,
+              isEditable,
+              (nextValue) => onFieldValueChange(section.key, item.label, nextValue),
+              required,
+              sectionErrors[item.label]
+            )}
           </Box>
         );
       })}
@@ -292,6 +869,8 @@ const ViewFinancial = () => {
   );
   const [activeSectionId, setActiveSectionId] = useState<string>(financialSections[0]?.key ?? "");
   const [isEditable, setIsEditable] = useState(false);
+  const [sectionErrors, setSectionErrors] = useState<Partial<Record<FinancialSectionKey, Record<string, string>>>>({});
+  const [savedSections, setSavedSections] = useState<Partial<Record<FinancialSectionKey, boolean>>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -496,12 +1075,63 @@ const ViewFinancial = () => {
         [label]: value,
       },
     }));
+
+    setSavedSections((current) => ({ ...current, [sectionKey]: false }));
+    setSectionErrors((current) => {
+      const currentSectionErrors = current[sectionKey];
+      if (!currentSectionErrors || !currentSectionErrors[label]) {
+        return current;
+      }
+
+      const nextSectionErrors = { ...currentSectionErrors };
+      delete nextSectionErrors[label];
+
+      return {
+        ...current,
+        [sectionKey]: nextSectionErrors,
+      };
+    });
+  };
+
+  const handleSectionSave = (section: FinancialSectionConfig) => {
+    if (!isEditable) {
+      return;
+    }
+
+    const missingFieldErrors = section.items.reduce<Record<string, string>>((accumulator, item) => {
+      if (!isFieldMandatory(item)) {
+        return accumulator;
+      }
+
+      const value = financialFieldValues[section.key]?.[item.label] ?? "";
+      if (!String(value).trim()) {
+        accumulator[item.label] = "This field is mandatory.";
+      }
+
+      return accumulator;
+    }, {});
+
+    setSectionErrors((current) => ({
+      ...current,
+      [section.key]: missingFieldErrors,
+    }));
+
+    if (Object.keys(missingFieldErrors).length > 0) {
+      setSubmitMessage(null);
+      setSubmitError(`Please complete all mandatory fields in ${section.title}.`);
+      return;
+    }
+
+    setSavedSections((current) => ({ ...current, [section.key]: true }));
+    setSubmitError(null);
+    setSubmitMessage(`${section.title} saved successfully.`);
   };
 
   const handleDisagree = () => {
     setSubmitMessage(null);
     setSubmitError(null);
     setIsEditable(true);
+    setSavedSections({});
   };
 
   const handleAgree = async () => {
@@ -768,8 +1398,80 @@ const ViewFinancial = () => {
 
               <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
                 {section.key === "form16"
-                  ? renderForm16Section(section, financialFieldValues, isEditable, handleFieldValueChange)
-                  : renderStandardSection(section, financialFieldValues, isEditable, handleFieldValueChange)}
+                  ? renderForm16Section(
+                      section,
+                      financialFieldValues,
+                      isEditable,
+                      sectionErrors[section.key] ?? {},
+                      handleFieldValueChange
+                    )
+                  : section.key === "form16a"
+                    ? renderForm16ASection(
+                        section,
+                        financialFieldValues,
+                        isEditable,
+                        sectionErrors[section.key] ?? {},
+                        handleFieldValueChange
+                      )
+                    : section.key === "incomeTaxReturnNonIndividual"
+                      ? renderITRNonIndividualSection(
+                          section,
+                          financialFieldValues,
+                          isEditable,
+                          sectionErrors[section.key] ?? {},
+                          handleFieldValueChange
+                        )
+                    : section.key === "incomeTaxReturnIndividual"
+                      ? renderITRIndividualSection(
+                          section,
+                          financialFieldValues,
+                          isEditable,
+                          sectionErrors[section.key] ?? {},
+                          handleFieldValueChange
+                        )
+                    : section.key === "profitAndLossAccount"
+                      ? renderProfitAndLossSection(
+                          section,
+                          financialFieldValues,
+                          isEditable,
+                          sectionErrors[section.key] ?? {},
+                          handleFieldValueChange
+                        )
+                    : section.key === "gstIncome"
+                      ? renderGstIncomeSection(
+                          section,
+                          financialFieldValues,
+                          isEditable,
+                          sectionErrors[section.key] ?? {},
+                          handleFieldValueChange
+                        )
+                    : section.key === "formJ"
+                      ? renderFormJSection(
+                          section,
+                          financialFieldValues,
+                          isEditable,
+                          sectionErrors[section.key] ?? {},
+                          handleFieldValueChange
+                        )
+                  : renderStandardSection(
+                      section,
+                      financialFieldValues,
+                      isEditable,
+                      sectionErrors[section.key] ?? {},
+                      handleFieldValueChange
+                    )}
+
+                {isEditable && (
+                  <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1.5 }}>
+                    <CustomButton
+                      variant="outlined"
+                      sx={{ minWidth: 110 }}
+                      onClick={() => handleSectionSave(section)}
+                    >
+                      {savedSections[section.key] ? "Saved" : "Save"}
+                    </CustomButton>
+                  </Box>
+                )}
               </Box>
             </Box>
           ))}
