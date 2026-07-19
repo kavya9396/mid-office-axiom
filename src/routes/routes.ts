@@ -10,8 +10,10 @@ export const normalizeBusinessType = (businessType?: string | null) => {
 };
 
 //Create other paths
-export const getInboxPath = (businessType: string) =>
-  `/${normalizeBusinessType(businessType) ?? "retail"}/${PATHS.INBOX}`;
+export const getInboxPath = (businessType?: string) => {
+  void businessType;
+  return `/${PATHS.INBOX}`;
+};
 
 export const getSearchApplicationPath = () => `/${PATHS.SEARCH_APPLICATION}`;
 

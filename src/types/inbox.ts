@@ -54,6 +54,9 @@ export interface tableData {
   state?: string;
 
   poolTAT?: string;
+  start_time?: string;
+  at_risk_time?: string;
+  due_date?: string;
   dateAndTimeStamp?: string;
   displayName?:string;
 

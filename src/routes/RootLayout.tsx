@@ -4,7 +4,7 @@ import QuickLinks from "../modules/DRS/QuickLinks";
 
 export default function RootLayout() {
     const { pathname } = useLocation();
-    const isInboxPage = /\/[^/]+\/inbox$/.test(pathname);
+    const isInboxPage = pathname === "/inbox";
     const isLoginPage = pathname === "/login";
     const isMainDrsPage = /\/[^/]+\/app\/[^/]+\/drs$/.test(pathname);
     const shouldShowQuickLinks = !isInboxPage && !isLoginPage && !isMainDrsPage;

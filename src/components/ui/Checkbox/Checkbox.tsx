@@ -4,12 +4,14 @@ type CustomCheckboxProps = {
   label: string;
   checked?: boolean;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 };
 
 export default function CustomCheckbox({
   label,
   checked,
   onChange,
+  disabled,
 }: CustomCheckboxProps) {
   return (
     <FormControlLabel
@@ -18,6 +20,7 @@ export default function CustomCheckbox({
           size="small"
           checked={checked}
           onChange={onChange}
+          disabled={disabled}
           sx={{
             "&.Mui-checked": {
               color: "#063E6F",

@@ -16,6 +16,11 @@ export const ALL_CASES_POOL = "ALL CASES";
 type LeftPanelProps = PoolProps & {
   poolData: Record<string, tableData[]>;
 };
+function toTitleCase(str: string): string {
+  return str
+    .toLowerCase()
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
 
 const PoolItem = ({
   label,
@@ -55,7 +60,7 @@ const taskName = str.replace(/_/g, " ");
         }}
       >
 
-        {taskName}{" "}
+        {toTitleCase(taskName)}{" "}
         {selectedPool != "User Management" &&
           showCount &&
           count !== undefined && count > 0 &&

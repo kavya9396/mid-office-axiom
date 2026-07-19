@@ -1161,16 +1161,16 @@ const ViewFinancial = () => {
     }
   };
 
-  if (isCptPool) {
-    return (
-      <Container disableGutters>
-        <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
-        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
-          View Financial Details is not available for CPT Pool.
-        </Typography>
-      </Container>
-    );
-  }
+  // if (isCptPool) {
+  //   return (
+  //     <Container disableGutters>
+  //       <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeApplicationId))} />
+  //       <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
+  //         View Financial Details is not available for CPT Pool.
+  //       </Typography>
+  //     </Container>
+  //   );
+  // }
 
   return (
     <Container disableGutters sx={{ pb: 4 }}>

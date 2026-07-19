@@ -208,7 +208,7 @@ const DecisionHistory = () => {
   return (
     <Container disableGutters>
       <Box sx={{ mt: 2 }}>
-        <CustomAccordion title="Decision History" defaultExpanded={false}>
+        <CustomAccordion title="Decision History" defaultExpanded>
           <Box sx={{ p: 1 }}>
             {sortedRows.length > 0 ? (
               <CustomTable<DecisionHistoryRow>
