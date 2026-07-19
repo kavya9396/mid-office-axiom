@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { KeyDownArrowIcon, KeyRightArrowIcon, KeyUpArrowIcon, LogoutIcon, TimerPauseIcon, UserProfileIcon } from "../../icons/Icons";
 import { useNavigate } from "react-router-dom";
 import BreakTime from "./BreakTime";
+import { auth } from "../../utils/auth";
+import { useSessionTimeout } from "./sessionTimeoutContext.ts";
 
 const formatDateTime = (date: Date) =>
   date.toLocaleString("en-IN", {
@@ -17,8 +19,17 @@ const formatDateTime = (date: Date) =>
     hour12: true,
   });
 
+const formatSessionTime = (remainingMs: number) => {
+  const totalSeconds = Math.ceil(remainingMs / 1000);
+  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
+  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+
+  return `${minutes}:${seconds}`;
+};
+
 const Header = () => {
     const navigate = useNavigate();
+    const { remainingMs } = useSessionTimeout();
     const username = localStorage.getItem("username") ?? "";
     const [dialogOpen, setDialogOpen] = useState<boolean>(false);
     const [currentTime, setCurrentTime] = useState(() => formatDateTime(new Date()));
@@ -61,9 +72,14 @@ return(
 
         {/* RIGHT SECTION USER DETAILS */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 2, mr: 2 }}>
-          <Typography sx={{ fontSize: 12, color: "#4b5563", minWidth: 180, textAlign: "right" }}>
-            {currentTime}
-          </Typography>
+          <Box sx={{ minWidth: 180, textAlign: "right" }}>
+            <Typography sx={{ fontSize: 12, color: "#4b5563" }}>
+              {currentTime}
+            </Typography>
+            <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#9A2529" }}>
+              Session: {formatSessionTime(remainingMs)}
+            </Typography>
+          </Box>
           <Box>
             <Button onClick={handleUserMenuOpen}>
               {/* USER ICON */}
@@ -179,12 +195,9 @@ return(
                 "&:hover": { backgroundColor: "#f3f4f6" },
               }}
               onClick={() => {
-  localStorage.removeItem("token"); // or your key name
-  localStorage.removeItem("username");
-  localStorage.removeItem("column_config_v1");
-  localStorage.removeItem("roleType");
-  navigate("/login");
-}}
+                auth.logout();
+                navigate("/login");
+              }}
             >
               <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
                 <LogoutIcon />

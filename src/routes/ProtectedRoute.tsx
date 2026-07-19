@@ -1,5 +1,6 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { auth } from "../utils/auth";
+import SessionTimeout from "../components/layout/SessionTimeout";
 
 export default function ProtectedRoute() {
   const location = useLocation();
@@ -14,5 +15,9 @@ export default function ProtectedRoute() {
     );
   }
 
-  return <Outlet />;
+  return (
+    <SessionTimeout>
+      <Outlet />
+    </SessionTimeout>
+  );
 }
