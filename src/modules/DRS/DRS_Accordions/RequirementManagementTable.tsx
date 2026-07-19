@@ -390,6 +390,74 @@ const validateDraftRow = (row: EditableRequirementRow, requiresProfile: boolean)
 const getRowFieldValue = (row: EditableRequirementRow, field: EditableField) =>
     String(row[field] ?? "");
 
+const savedRequirementTableSx = {
+    "& .MuiTable-root": {
+        tableLayout: "fixed",
+        width: "100%",
+    },
+    "& .MuiTableCell-root": {
+        px: 0.75,
+        py: 0.75,
+        fontSize: "11px",
+        whiteSpace: "normal",
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
+        verticalAlign: "top",
+    },
+    "& .MuiTableCell-head": {
+        px: 0.75,
+        py: 0.75,
+    },
+    "& .MuiTableCell-root:first-of-type": {
+        width: "68px",
+        minWidth: "68px",
+        maxWidth: "68px",
+        px: 0.5,
+        whiteSpace: "nowrap",
+        overflowWrap: "normal",
+        wordBreak: "normal",
+    },
+    "& .MuiTableCell-root:nth-of-type(2)": {
+        width: "110px",
+        minWidth: "110px",
+        maxWidth: "110px",
+        px: 0.5,
+        whiteSpace: "nowrap",
+        overflowWrap: "normal",
+        wordBreak: "normal",
+    },
+    "& .MuiTableCell-head .MuiTypography-root": {
+        fontSize: "11px",
+        lineHeight: 1.15,
+        whiteSpace: "normal",
+    },
+    "& .MuiTableCell-body .MuiTypography-root": {
+        fontSize: "11px",
+        lineHeight: 1.25,
+        whiteSpace: "normal",
+        overflowWrap: "anywhere",
+        wordBreak: "break-word",
+    },
+    "& .MuiFormControl-root": {
+        minWidth: 0,
+        width: "100%",
+    },
+    "& .MuiInputBase-root": {
+        height: 32,
+        minWidth: 0,
+        width: "100%",
+        fontSize: "11px",
+    },
+    "& .MuiSelect-select": {
+        px: "6px !important",
+        py: "6px !important",
+        minHeight: "unset !important",
+        whiteSpace: "nowrap !important",
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+    },
+} as const;
+
 interface RequirementManagementTableProps {
     requirements?: AdditionalRequirementRow[];
 }
@@ -819,12 +887,17 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     );
 
     const renderDisabledActionIcons = () => (
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, whiteSpace: "nowrap" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, whiteSpace: "nowrap" }}>
             <Box
                 component="span"
                 sx={{
                     color: "#CBD5E1",
                     display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 22,
+                    height: 22,
+                    flexShrink: 0,
                     opacity: 0.55,
                     cursor: "not-allowed",
                 }}
@@ -838,6 +911,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 sx={{
                     color: "#CBD5E1",
                     display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 22,
+                    height: 22,
+                    flexShrink: 0,
                     opacity: 0.55,
                     cursor: "not-allowed",
                 }}
@@ -853,7 +931,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         {
             key: "__rowId",
             header: "Actions",
-            width: "2%",
+            width: "68px",
             sticky: "left",
             render: (_value, row) => {
                 if (!row.__isLocal || isTableSaved) {
@@ -861,7 +939,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 }
 
                 return (
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 1, whiteSpace: "nowrap" }}>
+                    <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, whiteSpace: "nowrap" }}>
                         <Box
                             component="button"
                             type="button"
@@ -872,6 +950,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                 cursor: "pointer",
                                 color: "#0F4C81",
                                 display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: 22,
+                                height: 22,
+                                flexShrink: 0,
                                 p: 0,
                             }}
                             aria-label="Edit requirement"
@@ -888,6 +971,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                 cursor: "pointer",
                                 color: "#9A2529",
                                 display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                width: 22,
+                                height: 22,
+                                flexShrink: 0,
                                 p: 0,
                             }}
                             aria-label="Delete requirement"
@@ -901,7 +989,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         {
             key: "status",
             header: "Status",
-            width: "6%",
+            width: "110px",
             render: (_value, row) => {
                 const canEditStatus = !isTableSaved && (isPendingStatus(row.status) || editableStatusRowIds.has(row.__rowId));
 
@@ -913,26 +1001,30 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     );
                 }
 
-                return renderEditableSelect(row, "status", requirementStatusOptions, false);
+                return (
+                    <Box sx={{ width: 100, minWidth: 100 }}>
+                        {renderEditableSelect(row, "status", requirementStatusOptions, false)}
+                    </Box>
+                );
             },
         },
-        { key: "team", header: "Team", width: "2%" },
+        { key: "team", header: "Team", width: "6%" },
         ...(shouldShowProfileAndSpecialTest
-            ? ([{ key: "profile", header: "Profile", width: "4%" }] as Column<EditableRequirementRow>[])
+            ? ([{ key: "profile", header: "Profile", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
-        { key: "category", header: "Category", width: "4%" },
-        { key: "subCategory", header: "Sub Category", width: "7%" },
-        { key: "document", header: "Document", width: "5%" },
-        { key: "reason", header: "Reason", width: "5%" },
+        { key: "category", header: "Category", width: "8%" },
+        { key: "subCategory", header: "Sub Category", width: "9%" },
+        { key: "document", header: "Document", width: "8%" },
+        { key: "reason", header: "Reason", width: "8%" },
         ...(shouldShowProfileAndSpecialTest
-            ? ([{ key: "specialTest", header: "Special Test", width: "6%" }] as Column<EditableRequirementRow>[])
+            ? ([{ key: "specialTest", header: "Special Test", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
-        { key: "fupCode", header: "FUP Code", width: "5%" },
-        { key: "description", header: "Description", width: "8%" },
-        { key: "raisedDate", header: "Raised Date", width: "6%" },
-        { key: "raisedBy", header: "Raised By", width: "6%" },
+        { key: "fupCode", header: "FUP Code", width: "6%" },
+        { key: "description", header: "Description", width: shouldShowProfileAndSpecialTest ? "9%" : "12%" },
+        { key: "raisedDate", header: "Raised Date", width: "7%" },
+        { key: "raisedBy", header: "Raised By", width: "7%" },
         { key: "receivedDate", header: "Received Date", width: "7%" },
-        { key: "receivedBy", header: "Received By", width: "6%" },
+        { key: "receivedBy", header: "Received By", width: "7%" },
     ];
 
     return (
@@ -972,7 +1064,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             color: "#063E6F",
                             fontWeight: 700,
                             fontSize: 14,
-                            px: 2,
+                            px: 1,
                             "&:hover": { backgroundColor: "#FFFFFF" },
                         }}
                         onClick={() => {
@@ -1005,29 +1097,22 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         </Typography>
                     </Box>
                 ) : (
-                    <Box sx={{ display: "grid", gap: 2, overflowX: "auto" }}>
+                    <Box sx={{ display: "grid", gap: 2, minWidth: 0 }}>
                         {savedRows.length > 0 ? (
                             <Box>
-                                <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#334155", mb: 1.25 }}>
-                                    Saved Requirements
-                                </Typography>
                                 <Box
                                     sx={{
                                         width: "100%",
+                                        minWidth: 0,
                                         overflowX: "auto",
                                         borderRadius: 2,
+                                        ...savedRequirementTableSx,
                                     }}
                                 >
-                                    <Box
-                                        sx={{
-                                            minWidth: shouldShowProfileAndSpecialTest ? 1800 : 1500,
-                                        }}
-                                    >
-                                        <CustomTable<EditableRequirementRow>
-                                            columns={savedColumns}
-                                            data={savedRows}
-                                        />
-                                    </Box>
+                                    <CustomTable<EditableRequirementRow>
+                                        columns={savedColumns}
+                                        data={savedRows}
+                                    />
                                 </Box>
                             </Box>
                         ) : null}
@@ -1048,7 +1133,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                         backgroundColor: "#FFFFFF",
                                         boxShadow: row.__isDraft ? "0 10px 24px rgba(154, 37, 41, 0.08)" : "none",
                                         overflow: "hidden",
-                                        width: "89vw",
+                                        width: "100%",
+                                        maxWidth: "100%",
                                         position: "sticky",
                                         left: 0,
                                         zIndex: 1,
@@ -1216,8 +1302,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 <Box
                     sx={{
                         display: "flex",
-                        gap: 2,
-                        mt: 2,
+                        justifyContent:"center",
+                        gap: 1,
+                        mt: 1,
                     }}
                 >
                     <CustomButton
@@ -1238,6 +1325,42 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     >
                         Save
                     </CustomButton>
+                    {roleType == 'CPT_TASK' && (<><CustomButton
+                        variant="contained"
+                        disabled={draftRows.length > 0}
+                        onClick={() => {
+                            setIsTableSaved(true);
+                            setEditableStatusRowIds(new Set());
+                        }}
+                        sx={{
+                            minWidth: 200,
+                            height: 44,
+                            borderRadius: "50px",
+                            fontWeight: 600,
+                            px: 3,
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        View Documents
+                    </CustomButton>
+                    <CustomButton
+                        variant="contained"
+                        disabled={draftRows.length > 0}
+                        onClick={() => {
+                            setIsTableSaved(true);
+                            setEditableStatusRowIds(new Set());
+                        }}
+                        sx={{
+                            minWidth: 200,
+                            height: 44,
+                            borderRadius: "50px",
+                            fontWeight: 600,
+                            px: 3,
+                            whiteSpace: "nowrap",
+                        }}
+                    >
+                        View Financial
+                    </CustomButton></>)}
                 </Box>
             </Box>
         </Paper>

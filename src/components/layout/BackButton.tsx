@@ -30,7 +30,7 @@ const BackButton = ({
 
   return (
     <Container disableGutters>
-      <Box sx={{ display: "flex", justifyContent: justify, alignItems: "center", mb: 2, pt: 2 }}>
+      <Box sx={{ display: "flex", justifyContent: justify, alignItems: "center", m: 0, pt: 1 }}>
         <CustomButton
           variant="text"
           size="small"
@@ -38,6 +38,8 @@ const BackButton = ({
           sx={{
             textTransform: "none",
             minWidth: 42,
+            m:0,
+            p:0,
             ...(underline && { textDecoration: "underline" }),
           }}
         >

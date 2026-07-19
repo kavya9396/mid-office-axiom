@@ -325,10 +325,10 @@ const ApplicationOverview = () => {
 
   return (
     <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         {/* <CustomAccordion title="Application Overview" defaultExpanded={userRole ==='CPT'?true:false}> */}
         <CustomAccordion title="Application Details" defaultExpanded>
-          <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
+          <Box sx={{ p: 1, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
             {/* <Box
               sx={{
                 display: "grid",

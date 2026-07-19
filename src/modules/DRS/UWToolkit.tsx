@@ -27,7 +27,7 @@ const uwToolkitLinks = [
     path: safeApplicationNumber
       ? getGrievanceRaisePath(safeBusinessType, safeApplicationNumber)
       : "",
-    roles: ["CPT Pool"],
+    roles: ["CPT_TASK"],
   },
 ].filter((link) => link.roles.includes(roleType));
 console.log('toolkit links',uwToolkitLinks,roleType)

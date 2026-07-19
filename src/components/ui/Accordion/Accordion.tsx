@@ -28,7 +28,7 @@ export default function CustomAccordion({
   expanded: controlledExpanded,
   onChange,
   titleFontSize = 14,
-  detailPadding,
+  detailPadding = "5px",
   titleColor
 }: CustomAccordionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -51,7 +51,10 @@ export default function CustomAccordion({
         boxShadow: 2,
         backgroundColor: "#FFFFFF",
         "&:before": { display: "none" },
-        marginTop:"0px !important"
+        marginTop:"0px !important",
+        "&.Mui-expanded": {
+          margin: "5px !important",
+        },
       }}
     >
       <AccordionSummary
@@ -59,9 +62,22 @@ export default function CustomAccordion({
           borderBottom: "1px solid #E6E6E6",
           display: "flex",
           alignItems: "center",
+          minHeight: "unset !important",
+          p: "10px",
+          m:0,
+          "&.Mui-expanded": {
+            minHeight: "unset !important",
+          },
+          "& .MuiAccordionSummary-content": {
+            alignItems: "center",
+            m: "0 !important",
+          },
+          "& .MuiAccordionSummary-content.Mui-expanded": {
+            m: "0 !important",
+          },
         }}
       >
-        <Typography component="span" sx={{ fontSize: titleFontSize, fontWeight: 700, flex: 1, color:titleColor}}>
+        <Typography component="span" sx={{ fontSize: titleFontSize, fontWeight: 700, flex: 1, color:titleColor,m:0}}>
           {title}
         </Typography>
 
@@ -71,7 +87,7 @@ export default function CustomAccordion({
             sx={{
               display: "flex",
               alignItems: "center",
-              mr: 1.5,
+              m:0,
             }}
           >
             {chip}
@@ -86,7 +102,7 @@ export default function CustomAccordion({
             alignItems: "center",
             justifyContent: "center",
             color: "#161616",
-            mt: 0.5,
+            m: 0,
           }}
         >
           {displayExpanded ? (
@@ -97,7 +113,7 @@ export default function CustomAccordion({
         </Box>
       </AccordionSummary>
 
-      <AccordionDetails sx={{padding:detailPadding}}>
+      <AccordionDetails sx={{padding:detailPadding,m:0}}>
         <Box>{children}</Box>
       </AccordionDetails>
     </Accordion>

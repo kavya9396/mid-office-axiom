@@ -310,7 +310,7 @@ const Summary = () => {
         markApplicantTabVisited(activeApplicantTab);
     }, [activeApplicantTab, data]);
 
-    const canOpenMedicalFinancialViews = roleType !== "CVT Pool" && roleType !== "DVT Pool" && roleType !== "CPT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
+    const canOpenMedicalFinancialViews = roleType !== "CVT Pool" && roleType !== "DVT Pool" && roleType !== "CPT_TASK" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
 
     const activeSummaryEntry = summaryWithTabs.find((item) => item.memberType === activeApplicantTab)?.customer;
     const activeRiskAnalytics = useMemo(() => {

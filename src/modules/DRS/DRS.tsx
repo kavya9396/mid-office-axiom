@@ -55,7 +55,7 @@ const mapper = {
     "CMO Pool": "RETAIL_CMO_POOL",
     "CUW Pool": "RETAIL_CUW_POOL",
     "CVT Pool": "RETAIL_CVT_POOL",
-    "CPT Pool":"RETAIL_CPT_POOL",
+    "CPT_TASK":"RETAIL_CPT_POOL",
     "HOD Pool":"RETAIL_HOD_POOL",
     "Sr UW Pool":"RETAIL_SR_UW_POOL",
     "Ready For Issuance Pool":"RETAIL_READY_FOR_ISSUANCE_POOL",

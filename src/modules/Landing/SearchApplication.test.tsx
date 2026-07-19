@@ -93,7 +93,7 @@ describe("SearchApplication", () => {
     mockGetDRSPath.mockReturnValue("/retail/app/APP1234567/drs");
     localStorage.clear();
     localStorage.setItem("businessType", "retail");
-    localStorage.setItem("roleType", "CPT Pool");
+    localStorage.setItem("roleType", "CPT_TASK");
   });
 
   it("sanitizes input and enables search only for 10 alphanumeric chars", async () => {
@@ -134,7 +134,7 @@ describe("SearchApplication", () => {
     await waitFor(() => {
       expect(mockSearchThunk).toHaveBeenCalledWith({
         applicationNo: "APP1234567",
-        roleType: "CPT Pool",
+        roleType: "CPT_TASK",
       });
     });
 

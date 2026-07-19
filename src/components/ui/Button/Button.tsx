@@ -44,6 +44,11 @@ const CustomButton = ({ variant = "contained", sx, ...props }: CustomButtonProps
       disableElevation
       sx={{
         textTransform: "none",
+        minWidth: "auto",
+        minHeight: "auto",
+        px: 1.25,
+        py: 0.5,
+        lineHeight: 1.2,
         ...getButtonStyles(variant),
         ...sx,
       }}

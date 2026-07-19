@@ -102,7 +102,7 @@ const roleMapper = {
   "CUW_TASK": "CUW Pool",
   "CMO_TASK": "CMO Pool",
   "CVT_TASK": "CVT Pool",
-  "CPT_TASK": "CPT Pool",
+  "CPT_TASK": "CPT_TASK",
   "DVT_TASK": "DVT Pool",
   "PIVV_TASK": "PIVV Pool",
   "PRE_ISSUANCE_SERVICING_TASK": "Pre Issuance Servicing Pool",

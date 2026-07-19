@@ -879,7 +879,7 @@ const ViewFinancial = () => {
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
-  const isCptPool = roleType === "CPT Pool";
+  const isCptPool = roleType === "CPT_TASK";
   const isFormalRole = isFormalTaskRole(roleType);
   const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
 

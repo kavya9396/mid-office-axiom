@@ -44,10 +44,9 @@ const taskName = str.replace(/_/g, " ");
         display: "flex",
         alignItems: "center",
         justifyContent: "space-between",
-        px: 2,
-        py: 1.5,
-        mb: 1,
-        pl: label !== "ALL CASES" ? 4 : 2,
+        px: 1,
+        py: 1,
+        pl:2,
         ...(isSelected ? selectedSx : hoverSx),
         cursor: "pointer",
       }}
@@ -112,7 +111,7 @@ const LeftPanel = ({
         }}
       >
         {/* Top Section */}
-        <Box sx={{ pl: 2, pt: 2 }}>
+        <Box sx={{ pl: 1, pt: 1 }}>
           <Box
             onClick={() => setToggle((prev) => !prev)}
             sx={{ cursor: "pointer" }}
@@ -124,7 +123,7 @@ const LeftPanel = ({
         {/* Main Content */}
         <Box sx={{ flex: 1, overflowY: "auto" }}>
           {toggle ? (
-            <Box sx={{ ...columnFlex, gap: 4, p: 2 }}>
+            <Box sx={{ ...columnFlex, gap: 4, p: 1 }}>
               <InboxIcon />
               <TaskIcon />
             </Box>
@@ -133,7 +132,7 @@ const LeftPanel = ({
               {searchItem}
 
               {poolNames.length === 0 ? (
-                <Typography sx={{ p: 2, color: "#999" }}>
+                <Typography sx={{ p: 1, color: "#999" }}>
                   No work pools available.
                 </Typography>
               ) : (

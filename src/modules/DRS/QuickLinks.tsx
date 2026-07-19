@@ -38,7 +38,7 @@ const QuickLinks = () => {
     const safeApplicationNumber = applicationNumber ?? "";
     const roleType = localStorage.getItem("roleType") ?? "";
     const visibleButtons = [
-        'CPT Pool',
+        'CPT_TASK',
         'GUW_FORMAL_TASK',
     ];
 
