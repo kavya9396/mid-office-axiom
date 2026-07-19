@@ -71,6 +71,89 @@ const TASK_TIMING_ROW_STYLES: Record<
   },
 };
 
+const sanitizeFileNamePart = (value: string) =>
+  value.trim().replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "") || "table";
+
+const escapeHtml = (value: unknown) =>
+  String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+
+const getExportValue = (value: unknown) => {
+  if (value === undefined || value === null) return "";
+  if (typeof value === "object") return JSON.stringify(value);
+
+  return String(value);
+};
+
+const getExportColumnKeys = (rows: tableData[]) => {
+  const rowKeys = new Set<string>();
+
+  rows.forEach((row) => {
+    Object.keys(row as unknown as Record<string, unknown>).forEach((key) => {
+      rowKeys.add(key);
+    });
+  });
+
+  const configuredKeys = allColumns
+    .map((column) => String(column.key))
+    .filter((key) => rowKeys.has(key));
+  const extraKeys = Array.from(rowKeys).filter(
+    (key) => !configuredKeys.includes(key),
+  );
+
+  return [...configuredKeys, ...extraKeys];
+};
+
+const downloadRowsAsExcel = ({
+  rows,
+  columnKeys,
+  columnLabels,
+  selectedPool,
+}: {
+  rows: tableData[];
+  columnKeys: string[];
+  columnLabels: Map<string, string>;
+  selectedPool: string;
+}) => {
+  const headerCells = columnKeys
+    .map((key) => `<th>${escapeHtml(columnLabels.get(key) ?? key)}</th>`)
+    .join("");
+  const bodyRows = rows
+    .map((row) => {
+      const rowData = row as unknown as Record<string, unknown>;
+      const cells = columnKeys
+        .map(
+          (key) =>
+            `<td style="mso-number-format:'\\@';">${escapeHtml(getExportValue(rowData[key]))}</td>`,
+        )
+        .join("");
+
+      return `<tr>${cells}</tr>`;
+    })
+    .join("");
+  const worksheetName = escapeHtml(sanitizeFileNamePart(selectedPool).slice(0, 31));
+  const workbook = `<!doctype html>
+<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+<head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet><x:Name>${worksheetName}</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet></x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head>
+<body><table><thead><tr>${headerCells}</tr></thead><tbody>${bodyRows}</tbody></table></body>
+</html>`;
+  const blob = new Blob([workbook], {
+    type: "application/vnd.ms-excel;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = `${sanitizeFileNamePart(selectedPool)}_${new Date().toISOString().slice(0, 10)}.xls`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 const getTimestamp = (value?: string) => {
   if (!value) return null;
 
@@ -268,6 +351,11 @@ const RightPanel = ({
   const visibleColumns = config.visible
     .map((columnKey) => columnByKey.get(columnKey))
     .filter((column): column is TableColumn<tableData> => Boolean(column));
+  const exportColumnKeys = useMemo(() => getExportColumnKeys(rows), [rows]);
+  const exportColumnLabels = useMemo(
+    () => new Map(allColumns.map((column) => [String(column.key), column.label])),
+    [],
+  );
   const hasTableData = rows.length > 0;
   // ---------------- OPEN DIALOG ----------------
   const openColumnDialog = () => {
@@ -544,6 +632,18 @@ const RightPanel = ({
     setRowsPerPage(value);
     setPage(0);
   };
+
+  const handleDownloadExcel = () => {
+    if (!sortedRows.length || !exportColumnKeys.length) return;
+
+    downloadRowsAsExcel({
+      rows: sortedRows,
+      columnKeys: exportColumnKeys,
+      columnLabels: exportColumnLabels,
+      selectedPool,
+    });
+  };
+
   const renderPageButtons = () => {
     const pages: Array<number | string> = [];
 
@@ -710,6 +810,19 @@ const RightPanel = ({
                   justifyContent: "flex-end",
                 }}
               >
+                <CustomButton
+                  size="small"
+                  variant="outlined"
+                  onClick={handleDownloadExcel}
+                  disabled={!sortedRows.length}
+                  sx={{
+                    mr: 1,
+                    whiteSpace: "nowrap",
+                    backgroundColor: "#FFFFFF",
+                  }}
+                >
+                  Download Excel
+                </CustomButton>
                 {/* Search container */}
                 <Box
                   sx={{

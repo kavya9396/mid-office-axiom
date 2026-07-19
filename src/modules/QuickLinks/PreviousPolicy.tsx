@@ -29,8 +29,29 @@ const defaultRowsPerPage = 25;
 
 const tableHeaderCellSx = {
   backgroundColor: "#E9EEF3",
+  borderColor: "#D8E0E8",
+  color: "#173B5F",
+  fontSize: 12,
   fontWeight: 600,
-  whiteSpace: "nowrap",
+  lineHeight: 1.25,
+  px: 1,
+  py: 1,
+  verticalAlign: "top",
+  whiteSpace: "normal",
+  wordBreak: "break-word",
+};
+
+const tableBodyCellSx = {
+  borderColor: "#E7EBEF",
+  color: "#263238",
+  fontSize: 12,
+  lineHeight: 1.35,
+  px: 1,
+  py: 0.85,
+  verticalAlign: "top",
+  whiteSpace: "normal",
+  overflowWrap: "anywhere",
+  wordBreak: "break-word",
 };
 
 type ColumnSpec = {
@@ -91,7 +112,7 @@ const IPRU_COLUMNS: ColumnSpec[] = [
 ];
 
 const IIB_NON_IPRU_COLUMNS: ColumnSpec[] = [
- { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
+  { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
   { header: "Product name", keys: ["productName", "product", "product_name", "companyName"] },
   { header: "Product Type", keys: ["productType", "product_type"] },
   { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
@@ -268,8 +289,7 @@ const PreviousPolicy = () => {
   const renderPolicyTable = (
     columns: ColumnSpec[],
     rows: PreviousPolicyItem[],
-    emptyState: string,
-    fitToPage = false
+    emptyState: string
   ) => {
     const paginatedRows =
       rowsPerPage === -1
@@ -277,74 +297,78 @@ const PreviousPolicy = () => {
         : rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
     return (
-    <TableContainer
-      sx={{
-        border: "1px solid #D8D8D8",
-        borderRadius: "8px",
-        overflowX: fitToPage ? "hidden" : "auto",
-        overflowY: "hidden",
-      }}
-    >
-      <Table
-        size="small"
+      <TableContainer
         sx={{
-          minWidth: fitToPage ? "100%" : Math.max(1900, columns.length * 170),
-          tableLayout: fitToPage ? "fixed" : "auto",
+          border: "1px solid #D8D8D8",
+          borderRadius: "8px",
+          maxHeight: rowsPerPage === -1 ? 520 : 420,
+          overflowX: { xs: "auto", lg: "hidden" },
+          overflowY: "auto",
+          width: "100%",
         }}
       >
-        <TableHead>
-          <TableRow>
-            {columns.map((column) => (
-              <TableCell
-                key={column.header}
-                sx={{
-                  ...tableHeaderCellSx,
-                  whiteSpace: fitToPage ? "normal" : tableHeaderCellSx.whiteSpace,
-                }}
-              >
-                {column.header}
-              </TableCell>
-            ))}
-          </TableRow>
-        </TableHead>
-
-        <TableBody>
-          {loading ? (
+        <Table
+          size="small"
+          stickyHeader
+          sx={{
+            tableLayout: "fixed",
+            width: "100%",
+            minWidth: { xs: columns.length > 8 ? 960 : 680, lg: "100%" },
+            "& tbody tr:nth-of-type(even)": {
+              backgroundColor: "#FAFBFC",
+            },
+          }}
+        >
+          <TableHead>
             <TableRow>
-              <TableCell colSpan={columns.length} sx={{ py: 2.5 }}>
-                <Typography sx={{ color: "#6B7280" }}>Loading previous policies...</Typography>
-              </TableCell>
+              {columns.map((column, columnIndex) => (
+                <TableCell
+                  key={`${column.header}-${columnIndex}`}
+                  sx={tableHeaderCellSx}
+                >
+                  {column.header}
+                </TableCell>
+              ))}
             </TableRow>
-          ) : paginatedRows.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={columns.length} sx={{ py: 2.5 }}>
-                <Typography sx={{ color: "#6B7280" }}>{emptyState}</Typography>
-              </TableCell>
-            </TableRow>
-          ) : (
-            paginatedRows.map((policy, rowIndex) => (
-              <TableRow key={`policy-row-${rowIndex}`}>
-                {columns.map((column) => {
-                  const rawValue = getValueFromKeys(policy, column.keys);
-                  const display = column.formatter ? column.formatter(rawValue) : toDisplayValue(rawValue);
+          </TableHead>
 
-                  return (
-                    <TableCell key={`${column.header}-${rowIndex}`}>
-                      {display}
-                    </TableCell>
-                  );
-                })}
+          <TableBody>
+            {loading ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} sx={{ ...tableBodyCellSx, py: 2.5 }}>
+                  <Typography sx={{ color: "#6B7280" }}>Loading previous policies...</Typography>
+                </TableCell>
               </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer>
+            ) : paginatedRows.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length} sx={{ ...tableBodyCellSx, py: 2.5 }}>
+                  <Typography sx={{ color: "#6B7280" }}>{emptyState}</Typography>
+                </TableCell>
+              </TableRow>
+            ) : (
+              paginatedRows.map((policy, rowIndex) => (
+                <TableRow key={`policy-row-${rowIndex}`}>
+                  {columns.map((column, columnIndex) => {
+                    const rawValue = getValueFromKeys(policy, column.keys);
+                    const display = column.formatter ? column.formatter(rawValue) : toDisplayValue(rawValue);
+
+                    return (
+                      <TableCell key={`${column.header}-${columnIndex}-${rowIndex}`} sx={tableBodyCellSx}>
+                        {display}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </TableContainer>
     );
   };
 
   return (
-    <Container disableGutters sx={{ pb: 4 }}>
+    <Container maxWidth={false} disableGutters sx={{ pb: 4, width: "100%" }}>
       <BackButton
         label="Back to DRS"
         onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
@@ -364,9 +388,10 @@ const PreviousPolicy = () => {
 
       <Paper
         sx={{
-          borderRadius: "20px",
+          borderRadius: "16px",
           overflow: "hidden",
           border: "1px solid #D8D8D8",
+          width: "100%",
         }}
       >
         <Box
@@ -378,6 +403,7 @@ const PreviousPolicy = () => {
             pl: 2,
             backgroundColor: "#004A80",
             color: "#FFFFFF",
+            minHeight: 46,
           }}
         >
           <Typography sx={{ fontSize: "18px", fontWeight: 700 }}>
@@ -385,26 +411,29 @@ const PreviousPolicy = () => {
           </Typography>
         </Box>
 
-        <Box sx={{ p: 2 }}>
-          <Typography sx={{ fontSize: "26px", fontWeight: 700, mb: 1.5, color: "#0E3762" }}>
+        <Box sx={{ p: { xs: 1.25, md: 2 }, overflow: "hidden" }}>
+          <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 1.25, color: "#0E3762" }}>
             IPRU
           </Typography>
           {renderPolicyTable(IPRU_COLUMNS, ipruRows, "No IPRU previous policy data found.")}
 
-          <Typography sx={{ fontSize: "26px", fontWeight: 700, mt: 3, mb: 1.5, color: "#0E3762" }}>
+          <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
             IIB/ Non IPRU
           </Typography>
-          {renderPolicyTable(IIB_NON_IPRU_COLUMNS, iibNonIpruRows, "No IIB/Non IPRU policy data found.", true)}
-{roleType !== 'DVT_FORMAL_TASK' && (<>
-          <Box sx={{ mt: 2 }}>
-            {renderPolicyTable(NEGATIVE_MATCH_COLUMNS, negativeMatchRows, "No negative match data found.")}
-          </Box>
+          {renderPolicyTable(IIB_NON_IPRU_COLUMNS, iibNonIpruRows, "No IIB/Non IPRU policy data found.")}
 
-          <Typography sx={{ fontSize: "24px", fontWeight: 700, mt: 3, mb: 1.5, color: "#0E3762" }}>
-        Application form details
-          </Typography>
-          {renderPolicyTable(APP_FORM_DETAILS_COLUMNS, appFormRows, "No application form policy details found.")}
-        </>)}
+          {roleType !== "DVT_FORMAL_TASK" && (
+            <>
+              <Box sx={{ mt: 2 }}>
+                {renderPolicyTable(NEGATIVE_MATCH_COLUMNS, negativeMatchRows, "No negative match data found.")}
+              </Box>
+
+              <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
+                Application form details
+              </Typography>
+              {renderPolicyTable(APP_FORM_DETAILS_COLUMNS, appFormRows, "No application form policy details found.")}
+            </>
+          )}
         </Box>
 
         <Box sx={{ borderTop: "1px solid #E0E0E0", px: 2, py: 1.5 }}>
