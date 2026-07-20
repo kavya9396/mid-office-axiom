@@ -6,10 +6,151 @@ import { useState } from "react";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import { searchThunk } from "../../store/thunks/searchAppThunk";
-import { getDRSPath, normalizeBusinessType } from "../../routes/routes";
-import { useNavigate } from "react-router-dom";
 import { setDrsData } from "../../store/slices/drsSlice";
 import type { DRSData } from "../../types/drs.types";
+import BreDecision from "../DRS/DRS_Accordions/BreDecision";
+import ApplicationOverview from "../DRS/DRS_Accordions/ApplicationOverview";
+import Summary from "../DRS/DRS_Accordions/Summary";
+import RequirementManagement from "../DRS/DRS_Accordions/RequirementManagement";
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const toText = (value: unknown): string => String(value ?? "").trim();
+
+const normalizeSummary = (dataRecord: Record<string, unknown>) => {
+  const summaryRaw = dataRecord.summary;
+  if (Array.isArray(summaryRaw)) {
+    return summaryRaw;
+  }
+
+  const summaryObject = toRecord(summaryRaw);
+  if (Object.keys(summaryObject).length === 0) {
+    return [];
+  }
+
+  const proposerSummary = toRecord(summaryObject.proposerSummary);
+  const personalDetails = toRecord(summaryObject.personalDetails);
+  const financialDetails = toRecord(summaryObject.financialDetails);
+  const policyDetails = toRecord(summaryObject.policyDetails);
+  const underwriting = toRecord(summaryObject.underwriting);
+  const applicantProfile = toRecord(dataRecord.applicantProfile);
+  const location = toRecord(personalDetails.location);
+  const occupation = toRecord(personalDetails.occupation);
+
+  return [
+    {
+      memberType: "PROPOSER",
+      jontFlag: false,
+      proposerSummary,
+      personalDetails: {
+        firstName: toText(proposerSummary.name),
+        dob: toText(proposerSummary.dob || applicantProfile.dateOfBirth),
+        age: proposerSummary.age,
+        gender: toText(proposerSummary.gender || applicantProfile.gender),
+        maritalStatus: toText(personalDetails.maritalStatus || applicantProfile.maritalStatus),
+        nationality: toText(applicantProfile.nationality),
+        residentStatus: toText(applicantProfile.countryOfResidence),
+        highestQualification: toText(applicantProfile.education),
+        orgName: toText(occupation.organization || applicantProfile.organisationName),
+        designation: toText(occupation.designation),
+        city: toText(location.city),
+        panNo: toText(applicantProfile.panOrForm60),
+        ckycNumber: toText(applicantProfile.existingCkycNumber),
+        criminalProceeding: toText(applicantProfile.criminalProceedings),
+        incomeProof: toText(applicantProfile.incomeProof),
+      },
+      kycDetails: {
+        panNumber: toText(applicantProfile.panOrForm60),
+        identityProofType: toText(applicantProfile.identityProofType),
+        identityProofNumber: toText(applicantProfile.identityProofNumber),
+        addressProof: toText(applicantProfile.addressProof),
+        incomeProof: toText(applicantProfile.incomeProof),
+        existingCkycNumber: toText(applicantProfile.existingCkycNumber),
+        pep: toText(applicantProfile.politicallyExposedPerson),
+        criminalProceedings: toText(applicantProfile.criminalProceedings),
+      },
+      financialDetails,
+      policyDetails,
+      underwriting,
+    },
+  ];
+};
+
+const normalizeApplicationOverview = (dataRecord: Record<string, unknown>) => {
+  const applicationOverviewRaw = toRecord(dataRecord.applicationOverview);
+
+  if (Array.isArray(applicationOverviewRaw.productDetail)) {
+    return applicationOverviewRaw;
+  }
+
+  const product = toRecord(applicationOverviewRaw.product);
+  const distribution = toRecord(applicationOverviewRaw.distribution);
+  const agent = toRecord(applicationOverviewRaw.agent);
+  const customer = toRecord(applicationOverviewRaw.customer);
+  const policyDetails = toRecord(applicationOverviewRaw.policyDetails);
+
+  return {
+    ...applicationOverviewRaw,
+    sourcingDetail: {
+      channelCode: toText(distribution.channel),
+      drcChannelCode: toText(distribution.subChannel),
+      agentCode: toText(agent.agentCode),
+      agentName: toText(agent.agentName),
+    },
+    groupDetails: {
+      coverageStatus: toText(customer.policyType),
+    },
+    productDetail: [
+      {
+        name: toText(product.name),
+        sumAssured: product.sumAssured,
+        paymentAmount: policyDetails.modalPremium,
+        premium: policyDetails.modalPremium,
+        term: policyDetails.policyTerm,
+        premiumPaymentTerm: policyDetails.premiumPaymentTerm,
+        premiumModeFpd: toText(policyDetails.paymentMode),
+      },
+    ],
+  };
+};
+
+const normalizeSearchData = (rawData: Record<string, unknown>): DRSData => {
+  const applicationDetails = toRecord(rawData.applicationDetails);
+  const financialDetails = toRecord(toRecord(rawData.summary).financialDetails);
+  const basicDetails = toRecord(rawData.basicDetails);
+  const applicationOverview = toRecord(rawData.applicationOverview);
+  const applicationOverviewProduct = toRecord(applicationOverview.product);
+  const applicationOverviewCustomer = toRecord(applicationOverview.customer);
+  const requirementManagement = Array.isArray(rawData.requirementManagement)
+    ? rawData.requirementManagement
+    : Array.isArray(rawData.requirements)
+      ? rawData.requirements
+      : [];
+
+  const normalized: Record<string, unknown> = {
+    ...rawData,
+    applicationInfo: {
+      ...toRecord(rawData.applicationInfo),
+      sumAssured:
+        financialDetails.appliedSumAssured ??
+        applicationDetails.appliedSA ??
+        applicationOverviewProduct.sumAssured,
+      proposerType:
+        toText(applicationOverviewCustomer.customerType) ||
+        toText(applicationDetails.clientType),
+      policyNumber: toText(applicationDetails.applicationId || basicDetails.applicationNumber),
+    },
+    summary: normalizeSummary(rawData),
+    applicationOverview: normalizeApplicationOverview(rawData),
+    requirementManagement,
+    requirements: requirementManagement,
+  };
+
+  return normalized as unknown as DRSData;
+};
 
 const pageShellSx = {
   minHeight: "90vh",
@@ -27,11 +168,20 @@ const surfaceCardSx = {
   boxShadow: "0 16px 40px rgba(15,23,42,0.08)",
 };
 
+const readOnlyContentSx = {
+  "& input, & textarea, & .MuiSelect-select": {
+    pointerEvents: "none",
+  },
+  "& button:not(.MuiAccordionSummary-root):not([data-drs-readonly-nav='true'])": {
+    display: "none",
+  },
+};
+
 const SearchApplication = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hasSearchResult, setHasSearchResult] = useState(false);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -50,35 +200,8 @@ const SearchApplication = () => {
     const data = responseRecord.data;
 
     return data && typeof data === "object" && !Array.isArray(data)
-      ? (data as DRSData)
+      ? normalizeSearchData(data as Record<string, unknown>)
       : null;
-  };
-
-  const resolveRoleType = (responseData: DRSData | null): string => {
-    const dataRecord = responseData as unknown as Record<string, unknown> | null;
-    return String(dataRecord?.roleType ?? localStorage.getItem("roleType") ?? "").trim();
-  };
-
-  const resolveApplicationNumber = (response: unknown) => {
-    const responseRecord = response && typeof response === "object" && !Array.isArray(response)
-      ? (response as Record<string, unknown>)
-      : {};
-    const dataRecord = responseRecord.data && typeof responseRecord.data === "object" && !Array.isArray(responseRecord.data)
-      ? (responseRecord.data as Record<string, unknown>)
-      : {};
-    const applicationDetails = responseRecord.applicationDetails && typeof responseRecord.applicationDetails === "object" && !Array.isArray(responseRecord.applicationDetails)
-      ? (responseRecord.applicationDetails as Record<string, unknown>)
-      : {};
-    const basicDetails = dataRecord.basicDetails && typeof dataRecord.basicDetails === "object" && !Array.isArray(dataRecord.basicDetails)
-      ? (dataRecord.basicDetails as Record<string, unknown>)
-      : {};
-
-    return String(
-      applicationDetails.applicationId ??
-      dataRecord.applicationNumber ??
-      basicDetails.applicationNumber ??
-      searchValue,
-    ).trim();
   };
 
   const handleSearch = async () => {
@@ -91,35 +214,16 @@ const SearchApplication = () => {
         })
       ).unwrap();
 
-      const applicationNumber = resolveApplicationNumber(response);
       const drsResponseData = getResponseData(response);
-      const responseRoleType = resolveRoleType(drsResponseData);
-      const safeBusinessType =
-        normalizeBusinessType(localStorage.getItem("businessType")) ?? "retail";
 
       if (drsResponseData) {
         dispatch(setDrsData(drsResponseData));
-        localStorage.setItem("searchApplicationDrsData", JSON.stringify(drsResponseData));
+        setHasSearchResult(true);
+      } else {
+        setHasSearchResult(false);
       }
-
-      localStorage.setItem("businessType", safeBusinessType);
-      localStorage.setItem("applicationNumber", applicationNumber);
-      if (responseRoleType) {
-        localStorage.setItem("roleType", responseRoleType);
-      }
-      localStorage.setItem("drsReadOnlyMode", "true");
-      localStorage.setItem(
-        "selectedCaseContext",
-        JSON.stringify({
-          applicationNo: applicationNumber,
-          roleType: responseRoleType,
-          source: "searchApplication",
-          readOnly: true,
-        }),
-      );
-
-      navigate(getDRSPath(safeBusinessType, applicationNumber));
     } catch (error) {
+      setHasSearchResult(false);
       console.error("Search failed:", error);
     } finally {
       setLoading(false);
@@ -179,6 +283,15 @@ const SearchApplication = () => {
               </Box>
             </Stack>
           </Paper>
+
+          {hasSearchResult && (
+            <Box sx={readOnlyContentSx}>
+              <BreDecision />
+              <ApplicationOverview />
+              <Summary />
+              <RequirementManagement />
+            </Box>
+          )}
         </Stack>
       </Container>
     </Box>

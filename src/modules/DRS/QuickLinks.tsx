@@ -21,6 +21,21 @@ import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomButton from "../../components/ui/Button/Button";
 import { modalTitleStyles } from "../../utils/styles";
 
+const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
+    if (Array.isArray(value)) {
+        return value.filter(
+            (entry): entry is Record<string, unknown> =>
+                !!entry && typeof entry === "object" && !Array.isArray(entry),
+        );
+    }
+
+    if (value && typeof value === "object") {
+        return [value as Record<string, unknown>];
+    }
+
+    return [];
+};
+
 const QuickLinks = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
@@ -45,7 +60,9 @@ const QuickLinks = () => {
     const isPoolRole = visibleButtons.includes(roleType);
     const selectedApplicantTab = localStorage.getItem("drsSelectedApplicantTab") ?? "proposer";
 
-    const summaryEntries = (drsData as unknown as { summary?: Array<Record<string, unknown>> } | null)?.summary ?? [];
+    const summaryEntries = toSummaryEntries(
+        (drsData as unknown as { summary?: unknown } | null)?.summary,
+    );
 
     const selectedSummary = summaryEntries.find((entry, index) => {
         const memberType = String(entry.memberType ?? "").trim().toUpperCase();
