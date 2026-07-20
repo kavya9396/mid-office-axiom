@@ -1,3 +1,5 @@
+import { clearSessionMasters } from "./masterDataSession";
+
 export const auth = {
   isAuthenticated: () =>
     !!localStorage.getItem("token"),
@@ -10,6 +12,7 @@ export const auth = {
   localStorage.removeItem("username");
   localStorage.removeItem("column_config_v1");
   localStorage.removeItem("roleType");
+  clearSessionMasters();
   }
   
 };

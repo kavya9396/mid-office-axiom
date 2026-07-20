@@ -7,6 +7,7 @@ import type {
 } from "../../types/drs.types";
 import { drsThunk } from "../thunks/drsThunk";
 import { mastersThunk } from "../thunks/mastersThunk";
+import { getSessionMasters } from "../../utils/masterDataSession";
 
 interface DrsState {
   data: DRSData | null;
@@ -19,7 +20,7 @@ interface DrsState {
 
 const initialState: DrsState = {
   data: null,
-  masters: {},
+  masters: getSessionMasters() ?? {},
   mastersLoading: "idle",
   mastersError: null,
   loading: "idle",
@@ -92,6 +93,11 @@ const drsSlice = createSlice({
         };
       }
     },
+    setMastersData: (state, action: { payload: MastersData }) => {
+      state.masters = action.payload;
+      state.mastersLoading = "idle";
+      state.mastersError = null;
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -127,5 +133,5 @@ const drsSlice = createSlice({
   },
 });
 
-export const { setDrsData, setBreOutput, setBreExternalApiOutputs, setProductFaceValue } = drsSlice.actions;
+export const { setDrsData, setBreOutput, setBreExternalApiOutputs, setProductFaceValue, setMastersData } = drsSlice.actions;
 export default drsSlice.reducer;

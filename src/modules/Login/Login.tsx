@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { loginThunk } from "../../store/thunks/authThunk";
 import { useAppDispatch } from "../../store/hooks";
 import { getInboxPath } from "../../routes/routes";
+import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 
 type LoginForm = {
   username: string;
@@ -45,6 +46,12 @@ const navigate = useNavigate();
        localStorage.setItem("username", data.username);
        localStorage.setItem("password", data.password);
        localStorage.setItem("businessType", normalizedBusinessType);
+
+      try {
+        await dispatch(fetchMastersForSession());
+      } catch (error) {
+        console.error("Failed to load master data", error);
+      }
 
       navigate(getInboxPath(normalizedBusinessType));
     }

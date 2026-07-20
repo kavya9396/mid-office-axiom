@@ -1,11 +1,10 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import DRS from "./DRS";
-import { DRS_MASTER_KEYS } from "./drsMasters";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { drsThunk } from "../../store/thunks/drsThunk";
-import { mastersThunk } from "../../store/thunks/mastersThunk";
+import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
 import { setBreExternalApiOutputs } from "../../store/slices/drsSlice";
 import { useAppContext } from "../../hooks/useAppContext";
@@ -27,8 +26,8 @@ jest.mock("../../store/thunks/drsThunk", () => ({
   drsThunk: jest.fn(),
 }));
 
-jest.mock("../../store/thunks/mastersThunk", () => ({
-  mastersThunk: jest.fn(),
+jest.mock("../../store/thunks/sessionMastersThunk", () => ({
+  fetchMastersForSession: jest.fn(),
 }));
 
 jest.mock("../../store/thunks/breRetriggerThunk", () => ({
@@ -66,7 +65,7 @@ const mockUseSelector = useSelector as unknown as jest.Mock;
 const mockUseNavigate = useNavigate as unknown as jest.Mock;
 const mockUseAppContext = useAppContext as unknown as jest.Mock;
 const mockDrsThunk = drsThunk as unknown as jest.Mock;
-const mockMastersThunk = mastersThunk as unknown as jest.Mock;
+const mockFetchMastersForSession = fetchMastersForSession as unknown as jest.Mock;
 const mockBreRetriggerThunk = breRetriggerThunk as unknown as jest.Mock;
 const mockSetBreExternalApiOutputs = setBreExternalApiOutputs as unknown as jest.Mock;
 
@@ -88,9 +87,8 @@ describe("DRS", () => {
       type: "breRetriggerThunk",
       payload,
     }));
-    mockMastersThunk.mockImplementation((payload) => ({
-      type: "mastersThunk",
-      payload,
+    mockFetchMastersForSession.mockImplementation(() => ({
+      type: "fetchMastersForSession",
     }));
     mockSetBreExternalApiOutputs.mockImplementation((payload) => ({
       type: "setBreExternalApiOutputs",
@@ -185,9 +183,7 @@ describe("DRS", () => {
         medicalBreOutput: undefined,
         financialBreOutput: undefined,
       });
-      expect(mockMastersThunk).toHaveBeenCalledWith({
-        masters: DRS_MASTER_KEYS,
-      });
+      expect(mockFetchMastersForSession).toHaveBeenCalledTimes(1);
       expect(dispatch).toHaveBeenCalledTimes(4);
     });
 
@@ -242,9 +238,7 @@ describe("DRS", () => {
         initialBreOutput: mockDrsData.externalAPIs.breOutput,
         breRetriggerStatus: "failure",
       });
-      expect(mockMastersThunk).toHaveBeenCalledWith({
-        masters: DRS_MASTER_KEYS,
-      });
+      expect(mockFetchMastersForSession).toHaveBeenCalledTimes(1);
     });
 
     consoleErrorSpy.mockRestore();
@@ -313,6 +307,6 @@ describe("DRS", () => {
 
     await userEvent.click(screen.getByRole("button", { name: "Back to inbox" }));
 
-    expect(navigate).toHaveBeenCalledWith("/retail/inbox");
+    expect(navigate).toHaveBeenCalledWith("/inbox");
   });
 });

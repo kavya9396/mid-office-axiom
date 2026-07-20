@@ -138,7 +138,7 @@ describe("Login", () => {
       expect(localStorage.getItem("token")).toBe("token-123");
       expect(localStorage.getItem("username")).toBe("demouser");
       expect(localStorage.getItem("businessType")).toBe("retail");
-      expect(navigate).toHaveBeenCalledWith("/retail/inbox");
+      expect(navigate).toHaveBeenCalledWith("/inbox");
     });
   });
 });

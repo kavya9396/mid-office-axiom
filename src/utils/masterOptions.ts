@@ -11,14 +11,16 @@ const toText = (value: unknown): string => String(value ?? "").trim();
 export const normalizeMasterOptions = (options?: MasterOption[]): SelectOption[] =>
   (options ?? [])
     .map((option) => {
+      const code = toText(option.code);
       const key = toText(option.key);
       const value = toText(option.value);
-      const label = toText(option.label) || value || key;
+      const description = toText(option.description);
+      const label = description || toText(option.label) || value || code || key;
 
       return {
         label,
-        value: key || value || label,
-        disabled: option.disabled,
+        value: code || key || value || label,
+        disabled: option.disabled ?? toText(option.isActive).toUpperCase() === "N",
       };
     })
     .filter((option) => option.label && option.value);

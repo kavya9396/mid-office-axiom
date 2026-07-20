@@ -7,13 +7,12 @@ import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import type { RootState } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
-import { mastersThunk } from "../../store/thunks/mastersThunk";
 import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
 import { setBreExternalApiOutputs, setDrsData } from "../../store/slices/drsSlice";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import type { DRSBreOutput, DRSData } from "../../types/drs.types";
-import { DRS_MASTER_KEYS } from "./drsMasters";
+import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 import { validateDrsFinalBre } from "../../validations/drsBreValidation";
 
 const toText = (value: unknown) => String(value ?? "").trim();
@@ -203,11 +202,7 @@ const DRS = () => {
         }
 
         mastersRequestedRef.current = true;
-        dispatch(
-            mastersThunk({
-                masters: DRS_MASTER_KEYS,
-            }),
-        );
+        dispatch(fetchMastersForSession());
     }, [dispatch]);
 
     useEffect(() => {

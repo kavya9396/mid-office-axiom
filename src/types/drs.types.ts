@@ -622,8 +622,11 @@ export interface DecisionCode {
 export type MasterOption = {
   key?: string;
   label?: string;
-  value: string;
+  code?: string;
+  description?: string;
+  value?: string | null;
   disabled?: boolean;
+  isActive?: string;
 };
 
 export type RequirementMasterOption = {

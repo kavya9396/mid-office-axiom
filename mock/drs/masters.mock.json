@@ -1,634 +1,191 @@
 {
-  "success": true,
   "data": {
     "title": [
-      {
-        "label": "Mr",
-        "value": "Mr"
-      },
-      {
-        "label": "Mrs",
-        "value": "Mrs"
-      },
-      {
-        "label": "M/s",
-        "value": "M/s"
-      },
-      {
-        "label": "Miss",
-        "value": "Miss"
-      },
-      {
-        "label": "Master",
-        "value": "Master"
-      },
-      {
-        "label": "Dr",
-        "value": "Dr"
-      }
+      { "code": "MR", "description": "Mr", "value": "Mr", "isActive": "Y" },
+      { "code": "MRS", "description": "Mrs", "value": "Mrs", "isActive": "Y" },
+      { "code": "MISS", "description": "Miss", "value": "Miss", "isActive": "Y" },
+      { "code": "MS", "description": "Ms", "value": "Ms", "isActive": "Y" },
+      { "code": "MASTER", "description": "Master", "value": "Master", "isActive": "Y" }
     ],
     "gender": [
       {
-        "label": "Male",
-        "value": "Male"
+        "code": "F",
+        "description": "Female",
+        "value": "Femaleing ",
+        "isActive": "Y"
       },
+      { "code": "M", "description": "Male", "value": "Male", "isActive": "Y" },
       {
-        "label": "Female",
-        "value": "Female"
-      },
-      {
-        "label": "Transgender",
-        "value": "Transgender"
+        "code": "TG",
+        "description": "Transgender",
+        "value": "Transgender",
+        "isActive": "Y"
       }
     ],
     "nationality": [
-      {
-        "label": "Indian",
-        "value": "Indian"
-      },
-      {
-        "label": "Non-Indian",
-        "value": "Non-Indian"
-      },
-      {
-        "label": "Not Answered",
-        "value": "Not Answered"
-      }
+      { "code": "IND", "description": "Indian", "value": "Indian", "isActive": "Y" },
+      { "code": "NRI", "description": "Non Resident Indian", "value": "Non Resident Indian", "isActive": "Y" },
+      { "code": "OTH", "description": "Other", "value": "Other", "isActive": "Y" }
     ],
     "idProof": [
-      {
-        "label": "PAN Card",
-        "value": "PAN Card"
-      },
-      {
-        "label": "Voter ID",
-        "value": "Voter ID"
-      },
-      {
-        "label": "Aadhaar Card",
-        "value": "Aadhaar Card"
-      },
-      {
-        "label": "Passport",
-        "value": "Passport"
-      },
-      {
-        "label": "Driving's License",
-        "value": "Driving's License"
-      }
+      { "code": "PAN", "description": "PAN Card", "value": "PAN Card", "isActive": "Y" },
+      { "code": "AADHAAR", "description": "Aadhaar Card", "value": "Aadhaar Card", "isActive": "Y" },
+      { "code": "PASSPORT", "description": "Passport", "value": "Passport", "isActive": "Y" },
+      { "code": "VOTER_ID", "description": "Voter ID", "value": "Voter ID", "isActive": "Y" },
+      { "code": "DRIVING_LICENSE", "description": "Driving's License", "value": "Driving's License", "isActive": "Y" }
     ],
     "addressProof": [
-      {
-        "label": "PAN Card",
-        "value": "PAN Card"
-      },
-      {
-        "label": "Voter ID",
-        "value": "Voter ID"
-      },
-      {
-        "label": "Aadhaar Card",
-        "value": "Aadhaar Card"
-      },
-      {
-        "label": "Passport",
-        "value": "Passport"
-      },
-      {
-        "label": "Driving's License",
-        "value": "Driving's License"
-      }
+      { "code": "AADHAAR", "description": "Aadhaar Card", "value": "Aadhaar Card", "isActive": "Y" },
+      { "code": "PASSPORT", "description": "Passport", "value": "Passport", "isActive": "Y" },
+      { "code": "VOTER_ID", "description": "Voter ID", "value": "Voter ID", "isActive": "Y" },
+      { "code": "DRIVING_LICENSE", "description": "Driving's License", "value": "Driving's License", "isActive": "Y" },
+      { "code": "UTILITY_BILL", "description": "Utility Bill", "value": "Utility Bill", "isActive": "Y" }
     ],
     "state": [
-      {
-        "label": "Andaman & Nicobar (UT)",
-        "value": "Andaman & Nicobar (UT)"
-      },
-      {
-        "label": "Andhra Pradesh",
-        "value": "Andhra Pradesh"
-      },
-      {
-        "label": "Assam",
-        "value": "Assam"
-      },
-      {
-        "label": "Bihar",
-        "value": "Bihar"
-      },
-      {
-        "label": "Chandigarh (UT)",
-        "value": "Chandigarh (UT)"
-      },
-      {
-        "label": "Chhattisgarh",
-        "value": "Chhattisgarh"
-      },
-      {
-        "label": "Dadra and Nagar Haveli (UT)",
-        "value": "Dadra and Nagar Haveli (UT)"
-      },
-      {
-        "label": "Daman and Diu (UT)",
-        "value": "Daman and Diu (UT)"
-      },
-      {
-        "label": "Delhi (UT)",
-        "value": "Delhi (UT)"
-      },
-      {
-        "label": "Goa",
-        "value": "Goa"
-      },
-      {
-        "label": "Gujarat",
-        "value": "Gujarat"
-      },
-      {
-        "label": "Haryana",
-        "value": "Haryana"
-      },
-      {
-        "label": "Himachal Pradesh",
-        "value": "Himachal Pradesh"
-      },
-      {
-        "label": "Jammu & Kashmir",
-        "value": "Jammu & Kashmir"
-      },
-      {
-        "label": "Jharkhand",
-        "value": "Jharkhand"
-      },
-      {
-        "label": "Karnataka",
-        "value": "Karnataka"
-      },
-      {
-        "label": "Kerala",
-        "value": "Kerala"
-      },
-      {
-        "label": "Lakshadweep (UT)",
-        "value": "Lakshadweep (UT)"
-      },
-      {
-        "label": "Madhya Pradesh",
-        "value": "Madhya Pradesh"
-      },
-      {
-        "label": "Maharashtra",
-        "value": "Maharashtra"
-      },
-      {
-        "label": "Manipur",
-        "value": "Manipur"
-      },
-      {
-        "label": "Meghalaya",
-        "value": "Meghalaya"
-      },
-      {
-        "label": "Mizoram",
-        "value": "Mizoram"
-      },
-      {
-        "label": "Nagaland",
-        "value": "Nagaland"
-      },
-      {
-        "label": "Odisha",
-        "value": "Odisha"
-      },
-      {
-        "label": "Others",
-        "value": "Others"
-      },
-      {
-        "label": "Puducherry (UT)",
-        "value": "Puducherry (UT)"
-      },
-      {
-        "label": "Punjab",
-        "value": "Punjab"
-      },
-      {
-        "label": "Rajasthan",
-        "value": "Rajasthan"
-      },
-      {
-        "label": "Sikkim",
-        "value": "Sikkim"
-      },
-      {
-        "label": "Tamil Nadu",
-        "value": "Tamil Nadu"
-      },
-      {
-        "label": "Telangana",
-        "value": "Telangana"
-      },
-      {
-        "label": "Tripura",
-        "value": "Tripura"
-      },
-      {
-        "label": "Uttar Pradesh",
-        "value": "Uttar Pradesh"
-      },
-      {
-        "label": "Uttarakhand",
-        "value": "Uttarakhand"
-      },
-      {
-        "label": "West Bengal",
-        "value": "West Bengal"
-      }
+      { "code": "MAHS", "description": "Maharashtra", "value": "Maharashtra", "isActive": "Y" },
+      { "code": "GUJ", "description": "Gujarat", "value": "Gujarat", "isActive": "Y" },
+      { "code": "KAR", "description": "Karnataka", "value": "Karnataka", "isActive": "Y" },
+      { "code": "DEL", "description": "Delhi", "value": "Delhi", "isActive": "Y" },
+      { "code": "TN", "description": "Tamil Nadu", "value": "Tamil Nadu", "isActive": "Y" }
     ],
     "country": [
-      { "label": "Abkhazia", "value": "Abkhazia" },
-      { "label": "Afghanistan", "value": "Afghanistan" },
-      { "label": "Aland", "value": "Aland" },
-      { "label": "Albania", "value": "Albania" },
-      { "label": "Algeria", "value": "Algeria" },
-      { "label": "American Samoa", "value": "American Samoa" },
-      { "label": "Andorra", "value": "Andorra" },
-      { "label": "Angola", "value": "Angola" },
-      { "label": "Anguilla", "value": "Anguilla" },
-      { "label": "Antigua and Barbuda", "value": "Antigua and Barbuda" },
-      { "label": "Argentina", "value": "Argentina" },
-      { "label": "Armenia", "value": "Armenia" },
-      { "label": "Aruba", "value": "Aruba" },
-      { "label": "Ascension", "value": "Ascension" },
-      { "label": "Australia", "value": "Australia" },
-      { "label": "Austria", "value": "Austria" },
-      { "label": "Azerbaijan", "value": "Azerbaijan" },
-      { "label": "Bahamas", "value": "Bahamas" },
-      { "label": "Bahrain", "value": "Bahrain" },
-      { "label": "Bangladesh", "value": "Bangladesh" },
-      { "label": "Barbados", "value": "Barbados" },
-      { "label": "Belarus", "value": "Belarus" },
-      { "label": "Belgium", "value": "Belgium" },
-      { "label": "Belize", "value": "Belize" },
-      { "label": "Benin", "value": "Benin" },
-      { "label": "Bermuda", "value": "Bermuda" },
-      { "label": "Bhutan", "value": "Bhutan" },
-      { "label": "Bolivia", "value": "Bolivia" },
-      { "label": "Bosnia and Herzegovina", "value": "Bosnia and Herzegovina" },
-      { "label": "Botswana", "value": "Botswana" },
-      { "label": "Brazil", "value": "Brazil" },
-      { "label": "Brunei Darussalam", "value": "Brunei Darussalam" },
-      { "label": "Bulgaria", "value": "Bulgaria" },
-      { "label": "Burkina Faso", "value": "Burkina Faso" },
-      { "label": "Burundi", "value": "Burundi" },
-      { "label": "Cambodia", "value": "Cambodia" },
-      { "label": "Cameroon", "value": "Cameroon" },
-      { "label": "Canada", "value": "Canada" },
-      { "label": "Cape Verde", "value": "Cape Verde" },
-      { "label": "Cayman Islands", "value": "Cayman Islands" },
-      {
-        "label": "Central African Republic",
-        "value": "Central African Republic"
-      },
-      { "label": "Chad", "value": "Chad" },
-      { "label": "Chile", "value": "Chile" },
-      { "label": "China", "value": "China" },
-      { "label": "Colombia", "value": "Colombia" },
-      { "label": "Comoros", "value": "Comoros" },
-      { "label": "Congo (Brazzaville)", "value": "Congo (Brazzaville)" },
-      { "label": "Congo (Kinshasa)", "value": "Congo (Kinshasa)" },
-      { "label": "Costa Rica", "value": "Costa Rica" },
-      { "label": "Croatia", "value": "Croatia" },
-      { "label": "Cuba", "value": "Cuba" },
-      { "label": "Curacao", "value": "Curacao" },
-      { "label": "Cyprus", "value": "Cyprus" },
-      { "label": "Czech Republic", "value": "Czech Republic" },
-      { "label": "Denmark", "value": "Denmark" },
-      { "label": "Djibouti", "value": "Djibouti" },
-      { "label": "Dominica", "value": "Dominica" },
-      { "label": "Dominican Republic", "value": "Dominican Republic" },
-      { "label": "Ecuador", "value": "Ecuador" },
-      { "label": "Egypt", "value": "Egypt" },
-      { "label": "El Salvador", "value": "El Salvador" },
-      { "label": "Equatorial Guinea", "value": "Equatorial Guinea" },
-      { "label": "Eritrea", "value": "Eritrea" },
-      { "label": "Estonia", "value": "Estonia" },
-      { "label": "Ethiopia", "value": "Ethiopia" },
-      { "label": "Faroe Islands", "value": "Faroe Islands" },
-      { "label": "Fiji", "value": "Fiji" },
-      { "label": "Finland", "value": "Finland" },
-      { "label": "France", "value": "France" },
-      { "label": "French Guiana", "value": "French Guiana" },
-      { "label": "French Polynesia", "value": "French Polynesia" },
-      { "label": "Gabon", "value": "Gabon" },
-      { "label": "Gambia", "value": "Gambia" },
-      { "label": "Georgia", "value": "Georgia" },
-      { "label": "Germany", "value": "Germany" },
-      { "label": "Ghana", "value": "Ghana" },
-      { "label": "Gibraltar", "value": "Gibraltar" },
-      { "label": "Greece", "value": "Greece" },
-      { "label": "Greenland", "value": "Greenland" },
-      { "label": "Grenada", "value": "Grenada" },
-      { "label": "Guadeloupe", "value": "Guadeloupe" },
-      { "label": "Guam", "value": "Guam" },
-      { "label": "Guatemala", "value": "Guatemala" },
-      { "label": "Guinea", "value": "Guinea" },
-      { "label": "Guinea-Bissau", "value": "Guinea-Bissau" },
-      { "label": "Guyana", "value": "Guyana" },
-      { "label": "Haiti", "value": "Haiti" },
-      { "label": "Honduras", "value": "Honduras" },
-      { "label": "Hong Kong", "value": "Hong Kong" },
-      { "label": "Hungary", "value": "Hungary" },
-      { "label": "Iceland", "value": "Iceland" },
-      { "label": "India", "value": "India" },
-      { "label": "Indonesia", "value": "Indonesia" },
-      { "label": "Iran", "value": "Iran" },
-      { "label": "Iraq", "value": "Iraq" },
-      { "label": "Ireland", "value": "Ireland" },
-      { "label": "Israel", "value": "Israel" },
-      { "label": "Italy", "value": "Italy" },
-      { "label": "Ivory Coast", "value": "Ivory Coast" },
-      { "label": "Jamaica", "value": "Jamaica" },
-      { "label": "Japan", "value": "Japan" },
-      { "label": "Jordan", "value": "Jordan" },
-      { "label": "Kazakhstan", "value": "Kazakhstan" },
-      { "label": "Kenya", "value": "Kenya" },
-      { "label": "Kuwait", "value": "Kuwait" },
-      { "label": "Kyrgyzstan", "value": "Kyrgyzstan" },
-      { "label": "Laos", "value": "Laos" },
-      { "label": "Latvia", "value": "Latvia" },
-      { "label": "Lebanon", "value": "Lebanon" },
-      { "label": "Lesotho", "value": "Lesotho" },
-      { "label": "Liberia", "value": "Liberia" },
-      { "label": "Libya", "value": "Libya" },
-      { "label": "Liechtenstein", "value": "Liechtenstein" },
-      { "label": "Lithuania", "value": "Lithuania" },
-      { "label": "Luxembourg", "value": "Luxembourg" },
-      { "label": "Madagascar", "value": "Madagascar" },
-      { "label": "Malawi", "value": "Malawi" },
-      { "label": "Malaysia", "value": "Malaysia" },
-      { "label": "Maldives", "value": "Maldives" },
-      { "label": "Mali", "value": "Mali" },
-      { "label": "Malta", "value": "Malta" },
-      { "label": "Mauritania", "value": "Mauritania" },
-      { "label": "Mauritius", "value": "Mauritius" },
-      { "label": "Mexico", "value": "Mexico" },
-      { "label": "Moldova", "value": "Moldova" },
-      { "label": "Monaco", "value": "Monaco" },
-      { "label": "Mongolia", "value": "Mongolia" },
-      { "label": "Montenegro", "value": "Montenegro" },
-      { "label": "Morocco", "value": "Morocco" },
-      { "label": "Mozambique", "value": "Mozambique" },
-      { "label": "Myanmar", "value": "Myanmar" },
-      { "label": "Namibia", "value": "Namibia" },
-      { "label": "Nepal", "value": "Nepal" },
-      { "label": "Netherlands", "value": "Netherlands" },
-      { "label": "New Zealand", "value": "New Zealand" },
-      { "label": "Nicaragua", "value": "Nicaragua" },
-      { "label": "Niger", "value": "Niger" },
-      { "label": "Nigeria", "value": "Nigeria" },
-      { "label": "North Korea", "value": "North Korea" },
-      { "label": "Norway", "value": "Norway" },
-      { "label": "Oman", "value": "Oman" },
-      { "label": "Pakistan", "value": "Pakistan" },
-      { "label": "Panama", "value": "Panama" },
-      { "label": "Papua New Guinea", "value": "Papua New Guinea" },
-      { "label": "Paraguay", "value": "Paraguay" },
-      { "label": "Peru", "value": "Peru" },
-      { "label": "Philippines", "value": "Philippines" },
-      { "label": "Poland", "value": "Poland" },
-      { "label": "Portugal", "value": "Portugal" },
-      { "label": "Qatar", "value": "Qatar" },
-      { "label": "Romania", "value": "Romania" },
-      { "label": "Russia", "value": "Russia" },
-      { "label": "Rwanda", "value": "Rwanda" },
-      { "label": "Saudi Arabia", "value": "Saudi Arabia" },
-      { "label": "Senegal", "value": "Senegal" },
-      { "label": "Serbia", "value": "Serbia" },
-      { "label": "Singapore", "value": "Singapore" },
-      { "label": "Slovakia", "value": "Slovakia" },
-      { "label": "Slovenia", "value": "Slovenia" },
-      { "label": "Somalia", "value": "Somalia" },
-      { "label": "South Africa", "value": "South Africa" },
-      { "label": "South Korea", "value": "South Korea" },
-      { "label": "Spain", "value": "Spain" },
-      { "label": "Sri Lanka", "value": "Sri Lanka" },
-      { "label": "Sudan", "value": "Sudan" },
-      { "label": "Sweden", "value": "Sweden" },
-      { "label": "Switzerland", "value": "Switzerland" },
-      { "label": "Syria", "value": "Syria" },
-      { "label": "Taiwan", "value": "Taiwan" },
-      { "label": "Tanzania", "value": "Tanzania" },
-      { "label": "Thailand", "value": "Thailand" },
-      { "label": "Togo", "value": "Togo" },
-      { "label": "Trinidad and Tobago", "value": "Trinidad and Tobago" },
-      { "label": "Tunisia", "value": "Tunisia" },
-      { "label": "Turkey", "value": "Turkey" },
-      { "label": "Uganda", "value": "Uganda" },
-      { "label": "Ukraine", "value": "Ukraine" },
-      { "label": "United Arab Emirates", "value": "United Arab Emirates" },
-      { "label": "United Kingdom", "value": "United Kingdom" },
-      { "label": "United States", "value": "United States" },
-      { "label": "Uruguay", "value": "Uruguay" },
-      { "label": "Uzbekistan", "value": "Uzbekistan" },
-      { "label": "Vanuatu", "value": "Vanuatu" },
-      { "label": "Vatican City", "value": "Vatican City" },
-      { "label": "Venezuela", "value": "Venezuela" },
-      { "label": "Vietnam", "value": "Vietnam" },
-      { "label": "Yemen", "value": "Yemen" },
-      { "label": "Zambia", "value": "Zambia" },
-      { "label": "Zimbabwe", "value": "Zimbabwe" }
+      { "code": "IND", "description": "India", "value": "India", "isActive": "Y" },
+      { "code": "USA", "description": "United States", "value": "United States", "isActive": "Y" },
+      { "code": "GBR", "description": "United Kingdom", "value": "United Kingdom", "isActive": "Y" },
+      { "code": "ARE", "description": "United Arab Emirates", "value": "United Arab Emirates", "isActive": "Y" },
+      { "code": "SGP", "description": "Singapore", "value": "Singapore", "isActive": "Y" }
     ],
     "maritalStatus": [
-      { "key": "S", "value": "Single" },
-      { "key": "M", "value": "Married" },
-      { "key": "D", "value": "Divorced" },
-      { "key": "W", "value": "Widowed" }
+      { "code": "S", "description": "Single", "value": "Single", "isActive": "Y" },
+      { "code": "M", "description": "Married", "value": "Married", "isActive": "Y" },
+      { "code": "D", "description": "Divorced", "value": "Divorced", "isActive": "Y" },
+      { "code": "W", "description": "Widowed", "value": "Widowed", "isActive": "Y" }
     ],
     "pep": [
-      { "key": "Y", "value": "Yes" },
-      { "key": "N", "value": "No" }
+      { "code": "Y", "description": "Yes", "value": "Yes", "isActive": "Y" },
+      { "code": "N", "description": "No", "value": "No", "isActive": "Y" }
     ],
-    "exceptionDecision": [
+    "app_status": [
       {
-        "label": "Sent back to last UW",
-        "value": "Sent back to last UW"
+        "code": "APPROVED",
+        "description": "Application has been approved",
+        "value": "Approved",
+        "isActive": "Y",
+        "statusType": "TERMINAL"
       },
       {
-        "label": "Refer to IT",
-        "value": "Refer to IT"
+        "code": "DECLINED",
+        "description": "Application has been declined",
+        "value": "Declined",
+        "isActive": "Y",
+        "statusType": "TERMINAL"
+      },
+      {
+        "code": "DRAFT",
+        "description": "Application is being prepared",
+        "value": "Draft",
+        "isActive": "Y",
+        "statusType": "IN_PROGRESS"
+      },
+      {
+        "code": "SUBMITTED",
+        "description": "Application has been submitted for review",
+        "value": "Submitted",
+        "isActive": "Y",
+        "statusType": "IN_PROGRESS"
+      },
+      {
+        "code": "UNDER_REVIEW",
+        "description": "Application is under review",
+        "value": "Under Review",
+        "isActive": "Y",
+        "statusType": "IN_PROGRESS"
       }
     ],
-    "requirementManagement": [],
-    "requirementTeam": [
-      { "label": "Gops", "value": "Gops" },
-      { "label": "System Requirement", "value": "System Requirement" },
-      { "label": "UW", "value": "UW" }
+    "misc": [
+      {
+        "code": "EMAIL",
+        "description": "Email",
+        "value": "EMAIL",
+        "isActive": "Y",
+        "miscMastId": "COMMUNICATION",
+        "type": "CHANNEL"
+      },
+      {
+        "code": "SMS",
+        "description": "SMS",
+        "value": "SMS",
+        "isActive": "Y",
+        "miscMastId": "COMMUNICATION",
+        "type": "CHANNEL"
+      },
+      {
+        "code": "MOBILE",
+        "description": "Mobile Number",
+        "value": "MOBILE",
+        "isActive": "Y",
+        "miscMastId": "CONTACT",
+        "type": "CONTACT_TYPE"
+      },
+      {
+        "code": "ADDRESS",
+        "description": "Address Proof",
+        "value": "ADDRESS_PROOF",
+        "isActive": "Y",
+        "miscMastId": "DOCUMENT",
+        "type": "DOCUMENT_TYPE"
+      },
+      {
+        "code": "IDENTITY",
+        "description": "Identity Proof",
+        "value": "IDENTITY_PROOF",
+        "isActive": "Y",
+        "miscMastId": "DOCUMENT",
+        "type": "DOCUMENT_TYPE"
+      }
     ],
-    "requirementProfile": [
-      { "label": "Life Assured", "value": "Life Assured" },
-      { "label": "Proposer", "value": "Proposer" },
-      { "label": "Payer", "value": "Payer" }
-    ],
-    "requirementCategory": [
-      { "label": "Declaration", "value": "Declaration" },
-      { "label": "Internal", "value": "Internal" },
-      { "label": "Document", "value": "Document" },
-      { "label": "Customer Declaration Form", "value": "Customer Declaration Form" },
-      { "label": "Financial", "value": "Financial" },
-      { "label": "OID", "value": "OID" },
-      { "label": "Application", "value": "Application" },
-      { "label": "Questionnaire", "value": "Questionnaire" },
-      { "label": "Medicals", "value": "Medicals" },
-      { "label": "Medical", "value": "Medical" },
-      { "label": "KYC", "value": "KYC" },
-      { "label": "NRI-OCI", "value": "NRI-OCI" },
-      { "label": "Business", "value": "Business" },
-      { "label": "Business Insurance", "value": "Business Insurance" },
-      { "label": "Consent", "value": "Consent" },
-      { "label": "PSO OID", "value": "PSO OID" },
-      { "label": "Covid", "value": "Covid" }
-    ],
-    "requirementSubCategory": [
-      { "label": "Customer declaration form", "value": "Customer declaration form" },
-      { "label": "Joint life", "value": "Joint life" },
-      { "label": "Vernacular DCR", "value": "Vernacular DCR" },
-      { "label": "Salary", "value": "Salary" },
-      { "label": "Business/ salaried", "value": "Business/ salaried" },
-      { "label": "Surrogates", "value": "Surrogates" },
-      { "label": "Non medical", "value": "Non medical" },
-      { "label": "Non Medical", "value": "Non Medical" },
-      { "label": "Medical Findings", "value": "Medical Findings" },
-      { "label": "Grid Medicals", "value": "Grid Medicals" },
-      { "label": "NRI", "value": "NRI" },
-      { "label": "OCI", "value": "OCI" }
-    ],
-    "requirementDocument": [
-      { "label": "CDF", "value": "CDF" },
-      { "label": "Customer Declaration Form", "value": "Customer Declaration Form" },
-      { "label": "Bank statement/ surrogate", "value": "Bank statement/ surrogate" },
-      { "label": "ITR/ COI", "value": "ITR/ COI" },
-      { "label": "Medical Questionnaire", "value": "Medical Questionnaire" },
-      { "label": "Passport", "value": "Passport" },
-      { "label": "Photo", "value": "Photo" },
-      { "label": "Blood test", "value": "Blood test" },
-      { "label": "Loan", "value": "Loan" },
-      { "label": "Consent", "value": "Consent" }
-    ],
-    "requirementReason": [
-      { "label": "Documents submitted not clear", "value": "Documents submitted not clear" },
-      { "label": "Documents not submitted", "value": "Documents not submitted" },
-      { "label": "Incomplete/Invalid document submitted", "value": "Incomplete/Invalid document submitted" },
-      { "label": "Joint Life Identification", "value": "Joint Life Identification" },
-      { "label": "Vernacular DCR Not Given", "value": "Vernacular DCR Not Given" },
-      { "label": "Latest income proof required", "value": "Latest income proof required" },
-      { "label": "Income proof not clear", "value": "Income proof not clear" },
-      { "label": "Clear copy of Latest income proof required", "value": "Clear copy of Latest income proof required" },
-      { "label": "CAM sheet Required", "value": "CAM sheet Required" },
-      { "label": "Document not uploaded", "value": "Document not uploaded" },
-      { "label": "Medical Questionnaire Required", "value": "Medical Questionnaire Required" },
-      { "label": "Non medical Questionnaire not submitted", "value": "Non medical Questionnaire not submitted" },
-      { "label": "Additional medical test required", "value": "Additional medical test required" }
-    ],
-    "requirementStatus": [
-      { "label": "Pending", "value": "Pending" },
-      { "label": "Waived", "value": "Waived" },
-      { "label": "Rejected", "value": "Rejected" },
-      { "label": "Accept", "value": "Accept" }
-    ],
-    "cvtDecision": [
-      { "key": "ACCEPT", "value": "Accept" },
-      { "key": "RAISE_REQUIREMENTS", "value": "Raise Requirements" },
-      { "key": "REFER_TO_RISK", "value": "Refer to Risk" },
-      { "key": "RERAISE_PIVV", "value": "Reraise PIVV" },
-      { "key": "REFER_TO_CUW", "value": "Refer to CUW" }
-    ],
-    "dvtDecision": [
-      { "key": "ACCEPT", "value": "Accept" },
-      { "key": "RAISE_REQUIREMENTS", "value": "Raise Requirements" },
-      { "key": "REFER_TO_GUW", "value": "Refer to GUW" }
-    ],
-    "caseUWDecision": [
-      { "key": "ACCEPT", "value": "Accept" },
-      { "key": "REJECT", "value": "Reject" },
-      { "key": "DECLINE", "value": "Decline" },
-      { "key": "POSTPONE", "value": "Postpone" },
-      { "key": "COUNTER_OFFER", "value": "Counter Offer" },
-      { "key": "REFER_TO_HOD", "value": "Refer to HoD" },
-      { "key": "REFER_TO_SR_UW", "value": "Refer to Sr.UW" },
-      { "key": "REFER_TO_REINSURER", "value": "Refer to Reinsurer" },
-      { "key": "REFER_TO_HO_CMO", "value": "Refer to HO CMO" },
-      { "key": "REFER_TO_RISK", "value": "Refer to Risk" },
-      { "key": "REFER_TO_ACCUITY", "value": "Refer to Accuity" },
-      { "key": "RAISE_REQUIREMENT", "value": "Raise Requirement" },
-      { "key": "REFER_TO_CUW_CLAIM_POOL", "value": "Refer to CUW Claim Pool" },
-      { "key": "HOLD", "value": "Hold" }
-    ],
-    "firstUWDecision": [
-      { "key": "ACCEPT", "value": "Accept" },
-      { "key": "COUNTER_OFFER", "value": "Counter Offer" },
-      { "key": "REJECT", "value": "Reject" },
-      { "key": "DECLINE", "value": "Decline" },
-      { "key": "POSTPONE", "value": "Postpone" },
-      { "key": "RAISE_REQUIREMENT", "value": "Raise Requirement" }
-    ],
-    "parallelUWDecision": [
-      { "key": "RAISE_REQUIREMENT", "value": "Raise Requirement" },
-      { "key": "REFER_TO_HO_CMO", "value": "Refer to HO CMO" },
-      { "key": "REFER_TO_RISK", "value": "Refer to Risk" },
-      { "key": "REFER_TO_ACCUITY", "value": "Refer to Accuity" },
-      { "key": "TELE_MER_VIDEO_MER", "value": "Tele MER/ Video MER" },
-      { "key": "NONE", "value": "None" }
-    ],
-    "reconsiderationDecision": [
-      { "key": "RELEASE_CASE", "value": "Release the case" },
-      { "key": "SEND_BACK_TO_UW", "value": "Send back to UW" }
-    ],
-    "rejectReason": [
-      { "key": "REJECT_REASON_1", "value": "Reason 1" },
-      { "key": "REJECT_REASON_2", "value": "Reason 2" },
-      { "key": "REJECT_REASON_3", "value": "Reason 3" }
-    ],
-    "declineReason": [
-      { "key": "DECLINE_REASON_1", "value": "Reason 1" },
-      { "key": "DECLINE_REASON_2", "value": "Reason 2" },
-      { "key": "DECLINE_REASON_3", "value": "Reason 3" }
-    ],
-    "postponeReason": [
-      { "key": "POSTPONE_REASON_1", "value": "Reason 1" },
-      { "key": "POSTPONE_REASON_2", "value": "Reason 2" },
-      { "key": "POSTPONE_REASON_3", "value": "Reason 3" }
-    ],
-    "postponementPeriod": [
-      { "key": "3M", "value": "3 Months" },
-      { "key": "6M", "value": "6 Months" },
-      { "key": "12M", "value": "12 Months" }
-    ],
-    "riskReferralReason": [
-      { "key": "ADVERSE_PROFILE", "value": "Adverse Profile" },
-      { "key": "DRC_ADVERSE", "value": "DRC Adverse" },
-      { "key": "IIB_ADVERSE", "value": "IIB Adverse" },
-      { "key": "PTRL_ADVERSE", "value": "PTRL Adverse" }
-    ],
-    "accuityReferralReason": [
-      { "key": "ACCUITY_REASON_1", "value": "Reason 1" },
-      { "key": "ACCUITY_REASON_2", "value": "Reason 2" },
-      { "key": "ACCUITY_REASON_3", "value": "Reason 3" }
-    ],
-    "reinsurerReferralReason": [
-      { "key": "REINSURER_REASON_1", "value": "Reason 1" },
-      { "key": "REINSURER_REASON_2", "value": "Reason 2" },
-      { "key": "REINSURER_REASON_3", "value": "Reason 3" }
-    ],
-    "holdReason": [
-      { "key": "HOLD_REASON_1", "value": "Reason 1" },
-      { "key": "HOLD_REASON_2", "value": "Reason 2" },
-      { "key": "HOLD_REASON_3", "value": "Reason 3" }
-    ],
-    "cuwReferralReason": [
-      { "key": "CUW_REASON_1", "value": "Reason 1" },
-      { "key": "CUW_REASON_2", "value": "Reason 2" },
-      { "key": "CUW_REASON_3", "value": "Reason 3" }
+    "uw_decision": [
+      {
+        "code": "UW_ACCEPT",
+        "value": null,
+        "isActive": "Y",
+        "decisionType": "STANDARD",
+        "dataEntry": "AUTO",
+        "decisionCode": "ACC",
+        "decision": "ACCEPT",
+        "descriptionCode": "ACCEPT_STANDARD"
+      },
+      {
+        "code": "UW_DECLINE",
+        "value": null,
+        "isActive": "Y",
+        "decisionType": "STANDARD",
+        "dataEntry": "MANUAL",
+        "decisionCode": "DEC",
+        "decision": "DECLINE",
+        "descriptionCode": "DECLINE_RISK"
+      },
+      {
+        "code": "UW_EXTRA",
+        "value": null,
+        "isActive": "Y",
+        "decisionType": "RATED",
+        "dataEntry": "MANUAL",
+        "decisionCode": "EXTRA",
+        "decision": "ACCEPT",
+        "descriptionCode": "ACCEPT_EXTRA_PREMIUM"
+      },
+      {
+        "code": "UW_POSTPONE",
+        "value": null,
+        "isActive": "Y",
+        "decisionType": "STANDARD",
+        "dataEntry": "MANUAL",
+        "decisionCode": "POST",
+        "decision": "POSTPONE",
+        "descriptionCode": "POSTPONE_REVIEW"
+      }
     ]
-  }
+  },
+  "unknownTypes": []
 }
