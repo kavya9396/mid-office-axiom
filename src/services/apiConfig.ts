@@ -43,7 +43,7 @@ const apiUrls = {
     mock: "/mock/drs/drs.mock.json",
   },
   masters: {
-    real: "/mock/drs/masters.mock.json",
+    real: "http://172.30.74.182:8154/icic-master-data-service/v1/masters",
     mock: "/mock/drs/masters.mock.json",
   },
   decisionCodes: {
