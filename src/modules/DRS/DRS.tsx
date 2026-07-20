@@ -338,6 +338,9 @@ const DRS = () => {
                 onKeyDownCapture={handleDrsActionCapture}
                 sx={{
                     ...(isSearchReadOnlyMode ? readOnlyContentSx : {}),
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 1,
                 }}
             >
                 {displayAccordions.map((accordionId) => {
@@ -349,6 +352,7 @@ const DRS = () => {
                         <Box
                             key={accordionId}
                             data-drs-validation-exempt={accordionId === "breDecision" ? "true" : undefined}
+                            sx={{ "& > .MuiContainer-root > .MuiBox-root": { mt: "0 !important" } }}
                         >
                             <AccordionComponent />
                         </Box>

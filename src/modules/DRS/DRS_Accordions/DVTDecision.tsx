@@ -141,29 +141,29 @@ const DVTDecision = () => {
 
     return (
         <Container disableGutters>
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 1 }}>
                 <CustomAccordion title="DVT Decision" defaultExpanded>
                     <Box
                         sx={{
                             backgroundColor: "#F6F6F6",
-                            p: 2,
-                            mt: 1,
-                            borderRadius: "8px",
+                            p: 1.25,
+                            mt: 0.75,
+                            borderRadius: "6px",
                         }}
                     >
 
                         <Typography
                             sx={{
-                                fontSize: "14px",
+                                fontSize: "12px",
                                 fontWeight: 400,
                                 color: "#444",
-                                mb: 1,
+                                mb: 0.5,
                             }}>DVT Remarks</Typography>
 
                         <CustomTextField
                             fullWidth
                             multiline
-                            minRows={3}
+                            minRows={2}
                             placeholder="Enter remarks..."
                             value={uwDecisionRemarks}
                             onChange={(e) => {
@@ -175,11 +175,11 @@ const DVTDecision = () => {
                             size="small"
                             sx={{
                                 backgroundColor: "#fff",
-                                borderRadius: "10px",
+                                borderRadius: "6px",
                             }}
                         />
 
-                        <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "12px", color: "#888", mt: 0.5 }}>
+                        <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
                             {uwDecisionRemarks.length}/10000
                         </Typography>
 
@@ -187,7 +187,7 @@ const DVTDecision = () => {
                             sx={{
                                 display: "grid",
                                 gridTemplateColumns: "repeat(2, 1fr)",
-                                gap: 2,
+                                gap: 1,
                             }}
                         >
                             <CustomSelect
@@ -207,10 +207,10 @@ const DVTDecision = () => {
                                 <Box>
                                     <Typography
                                         sx={{
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             fontWeight: 400,
                                             color: "#444",
-                                            mb: 1,
+                                            mb: 0.5,
                                         }}
                                     >
                                         Decision Code
@@ -222,8 +222,8 @@ const DVTDecision = () => {
                                         disabled
                                         sx={{
                                             "& .MuiInputBase-root": {
-                                                height: 40,
-                                                borderRadius: "8px",
+                                                height: 36,
+                                                borderRadius: "6px",
                                                 backgroundColor: "#fff",
                                             },
                                         }}
@@ -234,7 +234,7 @@ const DVTDecision = () => {
 
                        
                         {decisionLabel === "Raise Requirements" && !hasRequirements && (
-                            <Alert severity="warning" sx={{ mt: 2, borderRadius: 2 }}>
+                            <Alert severity="warning" sx={{ mt: 1, py: 0.25, borderRadius: 1 }}>
                                 Please add at least one requirement in the <strong>Requirement Management</strong> section above before selecting "Raise Requirements".
                             </Alert>
                         )}
@@ -249,8 +249,8 @@ const DVTDecision = () => {
                     <Box
                         sx={{
                             display: "flex",
-                            gap: 2,
-                            mt: 2,
+                            gap: 1,
+                            mt: 1,
                         }}
                     >
                         <CustomButton
@@ -258,11 +258,11 @@ const DVTDecision = () => {
                             disabled={!effectiveDecision || submitBlocked || submitLoading}
                                 onClick={handleSubmitIntent}
                             sx={{
-                                minWidth: 200,
-                                height: 44,
+                                minWidth: 150,
+                                height: 36,
                                 borderRadius: "50px",
                                 fontWeight: 600,
-                                px: 3,
+                                px: 2.5,
                                 whiteSpace: "nowrap",
                             }}
                         >

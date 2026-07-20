@@ -119,8 +119,8 @@ const reportRows: Array<[RiskReportField, RiskReportField]> = [
 
 const cellSx = {
   border: "1px solid #8c8c8c",
-  p: 0.75,
-  minHeight: 44,
+  p: 0.5,
+  minHeight: 36,
 };
 
 const headerCellSx = {
@@ -216,39 +216,39 @@ const RiskDecision = () => {
 
   return (
     <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <CustomAccordion title="Risk Decision" chip={riskReportButton} defaultExpanded>
           <Box
             sx={{
-              p: 2,
-              borderRadius: "8px",
+              p: 1.25,
+              borderRadius: "6px",
               backgroundColor: "#f6f6f6",
             }}
           >
             <CustomTextField
               fullWidth
               multiline
-              minRows={3}
+              minRows={2}
               label="Risk Remarks"
               placeholder="Enter remarks..."
               value={remarks}
               onChange={(event) => setRemarks(event.target.value)}
               sx={{
                 backgroundColor: "#fff",
-                borderRadius: "10px",
-                mb: 2,
+                borderRadius: "6px",
+                mb: 1,
               }}
             />
 
-            <Box sx={{ display: "flex", mt: 2 }}>
+            <Box sx={{ display: "flex", mt: 1 }}>
               <CustomButton
                 variant="contained"
                 sx={{
-                  minWidth: 180,
-                  height: 44,
+                  minWidth: 140,
+                  height: 36,
                   borderRadius: "50px",
                   fontWeight: 600,
-                  px: 3,
+                  px: 2.5,
                 }}
               >
                 Submit
@@ -269,13 +269,13 @@ const RiskDecision = () => {
         maxWidth="md"
         fullWidth
         paperSx={{
-          borderRadius: "12px",
+          borderRadius: "8px",
           maxHeight: "92vh",
         }}
         contentSx={{
           pt: 0,
-          px: 4,
-          pb: 3,
+          px: 2,
+          pb: 2,
         }}
         actions={
           <CustomButton
@@ -292,7 +292,7 @@ const RiskDecision = () => {
             position: "relative",
             border: "1px solid #c9c9c9",
             backgroundColor: "#fff",
-            p: 2,
+            p: 1.25,
             minWidth: 640,
           }}
         >
@@ -314,12 +314,12 @@ const RiskDecision = () => {
           </Box>
 
           <Box sx={{ position: "relative", zIndex: 1 }}>
-            <Box sx={{ display: "flex", justifyContent: "center", mb: 1.5 }}>
+            <Box sx={{ display: "flex", justifyContent: "center", mb: 0.75 }}>
               <Box
                 component="img"
                 src={Logo}
                 alt="ICICI Prudential Logo"
-                sx={{ width: 250, maxWidth: "60%" }}
+                sx={{ width: 210, maxWidth: "55%" }}
               />
             </Box>
 
@@ -355,7 +355,7 @@ const RiskDecision = () => {
               </Box>
             </Box>
 
-            <Box sx={{ height: 18 }} />
+            <Box sx={{ height: 10 }} />
 
             <Box
               sx={{

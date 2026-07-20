@@ -438,6 +438,22 @@ const BreDecision = ({
     }
   };
 
+  const breGridTemplate = "minmax(132px, 0.7fr) minmax(0, 1fr) minmax(0, 1fr)";
+  const breHeaderCellStyles = {
+    px: 1.25,
+    py: 0.75,
+    minHeight: 36,
+    display: "flex",
+    alignItems: "center",
+    color: "#161616",
+    fontSize: "12px",
+    lineHeight: "16px",
+    fontWeight: 800,
+    textTransform: "uppercase",
+    letterSpacing: 0,
+    borderRight: "1px solid #D8DDE3",
+  };
+
  const renderBreTableCell = (
   value: string,
   key: string,
@@ -446,20 +462,19 @@ const BreDecision = ({
     <Box
       key={key}
       sx={{
-        px: 2,
-        py: 1.5,
-        minHeight: 52,
+        px: 1.25,
+        py: 0.75,
+        minHeight: 36,
         display: "flex",
         alignItems: "center",
-        borderTop: "1px solid #E3E3E3",
       }}
     >
       <Typography
         sx={{
           color: "#161616",
           fontWeight: 600,
-          fontSize: "14px",
-          lineHeight: "20px",
+          fontSize: "12.5px",
+          lineHeight: "17px",
           overflowWrap: "anywhere",
           whiteSpace: "pre-wrap",
         }}
@@ -470,7 +485,7 @@ const BreDecision = ({
             highlight
               ? {
                   backgroundColor: "#FFF59D",
-                  px: 0.5,
+                  px: 0.4,
                   borderRadius: "2px",
                 }
               : undefined
@@ -495,16 +510,13 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
       >
         <Box
           sx={{
-            backgroundColor: "#f6f6f6",
-            padding: "16px",
-            marginTop: "8px",
-            borderRadius: "8px",
+            mt: 1,
           }}
         >
           <Box
             sx={{
-              border: "1px solid #D8D8D8",
-              borderRadius: "8px",
+              border: "1px solid #D8DDE3",
+              borderRadius: "6px",
               overflow: "hidden",
               backgroundColor: "#fff",
             }}
@@ -512,21 +524,15 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: "0.8fr 1fr 1fr",
-                bgcolor: "#F5F5F5",
+                gridTemplateColumns: breGridTemplate,
+                bgcolor: "#F7F8FA",
+                borderBottom: "1px solid #D8DDE3",
               }}
             >
               {["BRE", "Initial BRE"].map((header) => (
                 <Typography
                   key={header}
-                  sx={{
-                    px: 2,
-                    py: 1.5,
-                    color: "#161616",
-                    fontSize: "14px",
-                    fontWeight: 700,
-                    borderRight: "1px solid #D8D8D8",
-                  }}
+                  sx={breHeaderCellStyles}
                 >
                   {header}
                 </Typography>
@@ -534,8 +540,9 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
 
               <Box
                 sx={{
-                  px: 2,
-                  py: 1.5,
+                  px: 1.25,
+                  py: 0.5,
+                  minHeight: 36,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "space-between",
@@ -545,8 +552,10 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                 <Typography
                   sx={{
                     color: "#161616",
-                    fontSize: "14px",
-                    fontWeight: 700,
+                    fontSize: "12px",
+                    lineHeight: "16px",
+                    fontWeight: 800,
+                    textTransform: "uppercase",
                   }}
                 >
                   Final BRE
@@ -562,10 +571,10 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                     color: "#9A2529",
                     border: "1px solid #9A2529",
                     minWidth: 0,
-                    width: 32,
-                    height: 32,
+                    width: 28,
+                    height: 28,
                     p: 0,
-                    borderRadius: "8px",
+                    borderRadius: "6px",
                     cursor: "pointer",
                     opacity: 1,
                     flexShrink: 0,
@@ -586,24 +595,27 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                 key={`${row.label}-${index}`}
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "0.8fr 1fr 1fr",
+                  gridTemplateColumns: breGridTemplate,
+                  borderTop: index === 0 ? 0 : "1px solid #E6E8EC",
+                  backgroundColor: index % 2 === 0 ? "#fff" : "#FCFCFD",
                 }}
               >
                 <Box
                   sx={{
-                    px: 2,
-                    py: 1.5,
-                    minHeight: 52,
+                    px: 1.25,
+                    py: 0.75,
+                    minHeight: 36,
                     display: "flex",
                     alignItems: "center",
-                    borderTop: "1px solid #E3E3E3",
-                    borderRight: "1px solid #E3E3E3",
+                    borderRight: "1px solid #E6E8EC",
+                    backgroundColor: "rgba(247, 248, 250, 0.7)",
                   }}
                 >
                   <Typography
                     sx={{
                       color: "#444444",
-                      fontSize: "13px",
+                      fontSize: "12px",
+                      lineHeight: "16px",
                       fontWeight: 700,
                     }}
                   >
@@ -611,7 +623,7 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                   </Typography>
                 </Box>
 
-                <Box sx={{ borderRight: "1px solid #E3E3E3" }}>
+                <Box sx={{ borderRight: "1px solid #E6E8EC" }}>
                   {renderBreTableCell(
                     row.initialValue,
                     `initial-${row.label}-${index}`,

@@ -381,29 +381,29 @@ const CVTDecision = () => {
 
     return (
         <Container disableGutters>
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 1 }}>
                 <CustomAccordion title="CVT Decision" defaultExpanded>
                     <Box
                         sx={{
                             backgroundColor: "#F6F6F6",
-                            p: 2,
-                            mt: 1,
-                            borderRadius: "8px",
+                            p: 1.25,
+                            mt: 0.75,
+                            borderRadius: "6px",
                         }}
                     >
 
                         <Typography
                             sx={{
-                                fontSize: "14px",
+                                fontSize: "12px",
                                 fontWeight: 400,
                                 color: "#444",
-                                mb: 1,
+                                mb: 0.5,
                             }}>CVT Remarks</Typography>
 
                         <CustomTextField
                             fullWidth
                             multiline
-                            minRows={3}
+                            minRows={2}
                             placeholder="Enter remarks..."
                             value={uwDecisionRemarks}
                             onChange={(e) => {
@@ -418,11 +418,11 @@ const CVTDecision = () => {
                             size="small"
                             sx={{
                                 backgroundColor: "#fff",
-                                borderRadius: "10px",
+                                borderRadius: "6px",
                             }}
                         />
 
-                        <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "12px", color: "#888", mt: 0.5 }}>
+                        <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
                             {uwDecisionRemarks.length}/10000
                         </Typography>
 
@@ -430,7 +430,7 @@ const CVTDecision = () => {
                             sx={{
                                 display: "grid",
                                 gridTemplateColumns: "repeat(2, 1fr)",
-                                gap: 2,
+                                gap: 1,
                             }}
                         >
                             <CustomSelect
@@ -456,8 +456,8 @@ const CVTDecision = () => {
                     <Box
                         sx={{
                             display: "flex",
-                            gap: 2,
-                            mt: 2,
+                            gap: 1,
+                            mt: 1,
                         }}
                     >
                         <CustomButton
@@ -465,11 +465,11 @@ const CVTDecision = () => {
                             disabled={!isSubmitEnabled || !taskId || submitLoading}
                             onClick={handleSubmitIntent}
                             sx={{
-                                minWidth: 200,
-                                height: 44,
+                                minWidth: 150,
+                                height: 36,
                                 borderRadius: "50px",
                                 fontWeight: 600,
-                                px: 3,
+                                px: 2.5,
                                 whiteSpace: "nowrap",
                             }}
                         >

@@ -41,23 +41,23 @@ const HoCMODecision = () => {
 
   return (
     <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <CustomAccordion title="HO CMO Decision" defaultExpanded>
           <Box
             sx={{
-              mt: 1,
-              p: 2,
-              borderRadius: "12px",
+              mt: 0.75,
+              p: 1.25,
+              borderRadius: "6px",
               backgroundColor: "#f6f6f6",
             }}
           >
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{ mb: 1 }}>
               <Typography
                 sx={{
-                  fontSize: "14px",
+                  fontSize: "12px",
                   fontWeight: 400,
                   color: "#444",
-                  mb: 1,
+                  mb: 0.5,
                 }}
               >
                 HO CMO Remarks
@@ -65,7 +65,7 @@ const HoCMODecision = () => {
               <CustomTextField
                 fullWidth
                 multiline
-                minRows={3}
+                minRows={2}
                 placeholder="Enter remarks..."
                 value={remarks}
                 onChange={(event) => {
@@ -78,16 +78,16 @@ const HoCMODecision = () => {
                 size="small"
                 sx={{
                   backgroundColor: "#fff",
-                  borderRadius: "10px",
+                  borderRadius: "6px",
                 }}
               />
               <Typography
                 sx={{
                   display: "flex",
                   justifyContent: "flex-end",
-                  fontSize: "12px",
+                  fontSize: "11px",
                   color: "#888",
-                  mt: 0.5,
+                  mt: 0.25,
                 }}
               >
                 {remarks.length}/10000
@@ -98,7 +98,7 @@ const HoCMODecision = () => {
               sx={{
                 display: "grid",
                 gridTemplateColumns: "1fr",
-                gap: 2,
+                gap: 1,
               }}
             >
               <CustomSelect
@@ -109,7 +109,7 @@ const HoCMODecision = () => {
               />
             </Box>
 
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 1 }}>
               <FormControlLabel
                 control={
                   <input
@@ -117,8 +117,8 @@ const HoCMODecision = () => {
                     checked={doNotPayToTpa}
                     onChange={(e) => setDoNotPayToTpa(e.target.checked)}
                     style={{
-                      width: 18,
-                      height: 18,
+                      width: 16,
+                      height: 16,
                       cursor: "pointer",
                     }}
                   />
@@ -126,7 +126,7 @@ const HoCMODecision = () => {
                 label="Do Not Pay To TPA"
                 sx={{
                   "& .MuiFormControlLabel-label": {
-                    fontSize: "14px",
+                    fontSize: "12px",
                     fontWeight: 500,
                     color: "#4A4A4A",
                   },
@@ -138,8 +138,8 @@ const HoCMODecision = () => {
           <Box
             sx={{
               display: "flex",
-              gap: 2,
-              mt: 2,
+              gap: 1,
+              mt: 1,
             }}
           >
             <CustomButton
@@ -147,11 +147,11 @@ const HoCMODecision = () => {
               disabled={isSubmitDisabled}
               onClick={() => setIsConfirmOpen(true)}
               sx={{
-                minWidth: 200,
-                height: 44,
+                minWidth: 150,
+                height: 36,
                 borderRadius: "50px",
                 fontWeight: 600,
-                px: 3,
+                px: 2.5,
                 whiteSpace: "nowrap",
               }}
             >

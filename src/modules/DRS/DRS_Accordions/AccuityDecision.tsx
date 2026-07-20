@@ -129,12 +129,12 @@ const AccuityDecision = () => {
 
   return (
     <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <CustomAccordion
           title="UW Decision"
           defaultExpanded
         >
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1.2 }}>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 0.6 }}>
             <CustomButton
               variant="outlined"
               onClick={handleOpenFircoAcs}
@@ -158,30 +158,30 @@ const AccuityDecision = () => {
             </CustomButton>
           </Box>
 
-          <Box sx={{ p: 2, borderRadius: "8px", backgroundColor: "#f6f6f6" }}>
+          <Box sx={{ p: 1.25, borderRadius: "6px", backgroundColor: "#f6f6f6" }}>
             <Box
               sx={{
                 display: "grid",
                 gridTemplateColumns: "repeat(2, minmax(220px, 1fr))",
-                gap: 2,
+                gap: 1,
               }}
             >
               <Box>
-                <Typography sx={{ fontSize: "12px", color: "#6A6A6A", mb: 0.6 }}>
+                <Typography sx={{ fontSize: "11.5px", color: "#6A6A6A", mb: 0.35 }}>
                   Revised Status Code
                 </Typography>
                 <CustomTextField fullWidth value={resolved.revisedStatusCode} disabled size="small" />
               </Box>
 
               <Box>
-                <Typography sx={{ fontSize: "12px", color: "#6A6A6A", mb: 0.6 }}>
+                <Typography sx={{ fontSize: "11.5px", color: "#6A6A6A", mb: 0.35 }}>
                   Status
                 </Typography>
                 <CustomTextField fullWidth value={resolved.status} disabled size="small" />
               </Box>
             </Box>
 
-            <Box sx={{ mt: 1.5, display: "grid", gap: 0.8 }}>
+            <Box sx={{ mt: 1, display: "grid", gap: 0.45 }}>
               <Typography sx={{ fontSize: "12px", color: "#3F3F3F" }}>
                 Description: {resolved.description}
               </Typography>

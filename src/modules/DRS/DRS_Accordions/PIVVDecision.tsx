@@ -123,14 +123,14 @@ const PIVVDecision = () => {
 
   return (
     <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <CustomAccordion title="PIVV Decision" defaultExpanded>
           <Box
             sx={{
               backgroundColor: "#F6F6F6",
-              p: 2,
-              mt: 1,
-              borderRadius: "8px",
+              p: 1.25,
+              mt: 0.75,
+              borderRadius: "6px",
             }}
           >
             <CustomSelect
@@ -145,11 +145,11 @@ const PIVVDecision = () => {
 
             <Typography
               sx={{
-                fontSize: "14px",
+                fontSize: "12px",
                 fontWeight: 400,
                 color: "#444",
-                mt: 2,
-                mb: 1,
+                mt: 1,
+                mb: 0.5,
               }}
             >
               Remarks
@@ -158,7 +158,7 @@ const PIVVDecision = () => {
             <CustomTextField
               fullWidth
               multiline
-              minRows={3}
+              minRows={2}
               placeholder="Enter remarks..."
               value={remarks}
               onChange={(event) => {
@@ -171,12 +171,12 @@ const PIVVDecision = () => {
               sx={{ backgroundColor: "#fff" }}
             />
 
-            <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "12px", color: "#888", mt: 0.5 }}>
+            <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
               {remarks.length}/10000
             </Typography>
 
             {!taskContext.taskId && (
-              <Typography sx={{ mt: 1, fontSize: 13, color: "#DE2C3B" }}>
+              <Typography sx={{ mt: 0.75, fontSize: 12, color: "#DE2C3B" }}>
                 Task ID is missing. Please open the case from inbox again.
               </Typography>
             )}
@@ -184,8 +184,8 @@ const PIVVDecision = () => {
             {submitMessage && (
               <Typography
                 sx={{
-                  mt: 1,
-                  fontSize: 13,
+                  mt: 0.75,
+                  fontSize: 12,
                   color: submitMessage.toLowerCase().includes("success") ? "#0F8A3D" : "#DE2C3B",
                 }}
               >
@@ -194,17 +194,17 @@ const PIVVDecision = () => {
             )}
           </Box>
 
-          <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
+          <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
             <CustomButton
               variant="contained"
               disabled={!isSubmitEnabled || !taskContext.taskId || submitLoading}
               onClick={() => setConfirmationDialogOpen(true)}
               sx={{
-                minWidth: 200,
-                height: 44,
+                minWidth: 150,
+                height: 36,
                 borderRadius: "50px",
                 fontWeight: 600,
-                px: 3,
+                px: 2.5,
                 whiteSpace: "nowrap",
               }}
             >

@@ -219,7 +219,7 @@ const evaluateRiskStatus = (
 
 const riskDetailGridSx = {
     display: "grid",
-    gap: 1.5,
+    gap: 1,
     gridTemplateColumns: {
         xs: "1fr",
         sm: "repeat(2, minmax(0, 1fr))",
@@ -230,16 +230,16 @@ const riskDetailGridSx = {
 const riskDetailItemSx = {
     display: "flex",
     flexDirection: "column" as const,
-    gap: 0.25,
+    gap: 0.15,
     minWidth: 0,
     borderBottom: "1px solid #efefef",
-    pb: 1,
+    pb: 0.6,
 };
 
 const Summary = () => {
     const navigate = useNavigate();
     const { data } = useSelector((state: RootState) => state.drs);
-    const [isApplicantDetailsExpanded, setIsApplicantDetailsExpanded] = useState(false);
+    const [isApplicantDetailsExpanded, setIsApplicantDetailsExpanded] = useState(true);
     const [selectedRiskCard, setSelectedRiskCard] = useState<RiskCardItem | null>(null);
 
     const customerDetails = data?.customerDetails ?? [];
@@ -377,7 +377,7 @@ const Summary = () => {
 
     return (
         <Container disableGutters>
-            <Box sx={{ mt: 1 }}>
+            <Box sx={{ mt: 0.5 }}>
                 <CustomAccordion
                     title={isFormalRole ? "Member Details":"Applicant Details"}
                     defaultExpanded
@@ -385,8 +385,8 @@ const Summary = () => {
                     onChange={setIsApplicantDetailsExpanded}
                 >
                     {isDvtRole && !isFormalRole && (
-                        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 1 }}>
-                            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <Box sx={{ display: "flex", justifyContent: "flex-start", mb: 0.5 }}>
+                            <Box sx={{ display: "flex", alignItems: "center", gap: 0.75 }}>
                                 <Select
                                     size="small"
                                     value={dvtLifeOption}
@@ -398,9 +398,9 @@ const Summary = () => {
                                         setApplicantTab(selected === "main" ? "lifeassured1" : "lifeassured1");
                                     }}
                                     sx={{
-                                        minWidth: 130,
-                                        height: 32,
-                                        fontSize: 13,
+                                        minWidth: 118,
+                                        height: 28,
+                                        fontSize: 12,
                                         backgroundColor: "#fff",
                                         "&.Mui-disabled": {
                                             color: "#161616",
@@ -416,7 +416,7 @@ const Summary = () => {
                     )}
 
                     {!isFormalRole && (
-                        <Box sx={{ display: "flex", justifyContent: "center" }}>
+                        <Box sx={{ display: "flex", justifyContent: "center", mb: 0.5 }}>
                             <CustomTabs
                                 tabs={visibleTabs}
                                 value={activeApplicantTab}
@@ -430,15 +430,15 @@ const Summary = () => {
                     )}
 
                     {canShowRiskAnalytics && riskCards.length > 0 && (
-                        <Box sx={{ mt: 2, mb: 3 }}>
-                            <Typography sx={{ fontSize: "14px", fontWeight: 700, color: "#2b2b2b", mb: 1.5, lineHeight: 1.2 }}>
+                        <Box sx={{ mt: 1, mb: 1.25 }}>
+                            <Typography sx={{ fontSize: "12px", fontWeight: 800, color: "#2b2b2b", mb: 0.75, lineHeight: 1.2, textTransform: "uppercase" }}>
                                 Risk Analytics
                             </Typography>
 
                             <Box
                                 sx={{
                                     display: "grid",
-                                    gap: 2,
+                                    gap: 1,
                                     width: "100%",
                                     gridTemplateColumns: {
                                         xs: "1fr",
@@ -458,29 +458,29 @@ const Summary = () => {
                                                 width: "100%",
                                                 border: "1px solid #dfdfdf",
                                                 borderLeft: `3px solid ${statusColor}`,
-                                                borderRadius: "8px",
+                                                borderRadius: "6px",
                                                 backgroundColor: "#fff",
-                                                px: 2,
-                                                py: 1.5,
+                                                px: 1.25,
+                                                py: 0.9,
                                                 cursor: "pointer",
                                             }}
                                         >
-                                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 1 }}>
+                                            <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 0.6 }}>
                                                 <Typography sx={{ fontSize: "12px", fontWeight: 700, color: "#1f1f1f", lineHeight: 1.2 }}>
                                                     {item.label}
                                                 </Typography>
 
                                                 <Box
                                                     sx={{
-                                                        width: 18,
-                                                        height: 18,
+                                                        width: 16,
+                                                        height: 16,
                                                         borderRadius: "50%",
                                                         border: `1.5px solid ${statusColor}`,
                                                         color: statusColor,
                                                         display: "flex",
                                                         alignItems: "center",
                                                         justifyContent: "center",
-                                                        fontSize: "12px",
+                                                        fontSize: "11px",
                                                         fontWeight: 700,
                                                         lineHeight: 1,
                                                     }}
@@ -495,9 +495,10 @@ const Summary = () => {
                                                     borderRadius: "999px",
                                                     border: "1px solid #dddddd",
                                                     backgroundColor: "#f2f2f2",
-                                                    px: 1.5,
-                                                    py: 0.4,
-                                                    fontSize: "13px",
+                                                    px: 1,
+                                                    py: 0.25,
+                                                    fontSize: "11.5px",
+                                                    lineHeight: "16px",
                                                     color: "#4a4a4a",
                                                 }}
                                             >
@@ -517,15 +518,16 @@ const Summary = () => {
                     />
 
                     {canOpenMedicalFinancialViews && (
-                        <Box sx={{ mt: 2, display: "flex", gap: 2, flexWrap: "wrap" }}>
+                        <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
                             <CustomButton
                                 variant="outlined"
                                 sx={{
                                     borderRadius: "50px",
-                                    px: 8,
-                                    py: 1,
-                                    width: "240px",
-                                    fontSize: "16px",
+                                    px: 3,
+                                    py: 0.5,
+                                    minWidth: "170px",
+                                    fontSize: "12px",
+                                    lineHeight: "16px",
                                     fontWeight: 700,
                                 }}
                                 onClick={() => navigate(getMedicalPath("retail", "OB25175127"))}
@@ -536,10 +538,11 @@ const Summary = () => {
                                 variant="outlined"
                                 sx={{
                                     borderRadius: "50px",
-                                    px: 4,
-                                    py: 1,
-                                    width: "240px",
-                                    fontSize: "16px",
+                                    px: 3,
+                                    py: 0.5,
+                                    minWidth: "190px",
+                                    fontSize: "12px",
+                                    lineHeight: "16px",
                                     fontWeight: 700,
                                 }}
                                 onClick={() => navigate(getFinancialPath("retail", "OB25175127"))}
@@ -556,16 +559,16 @@ const Summary = () => {
                         maxWidth="md"
                     >
                         {selectedRiskCard && (
-                            <Box sx={{ display: "flex", flexDirection: "column", gap: 1.2, minWidth: { xs: 320, md: 760 }, py: 1 }}>
+                            <Box sx={{ display: "flex", flexDirection: "column", gap: 0.8, minWidth: { xs: 320, md: 760 }, py: 0.25 }}>
                               
 
                                 {!selectedRiskCard.isHealthy && (
-                                    <Box sx={{ p: 1, borderRadius: "8px", backgroundColor: "#fff1f0", border: "1px solid #ffcdd2" }}>
-                                        <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#b71c1c", mb: 0.4 }}>
+                                    <Box sx={{ p: 0.75, borderRadius: "6px", backgroundColor: "#fff1f0", border: "1px solid #ffcdd2" }}>
+                                        <Typography sx={{ fontSize: "12px", fontWeight: 700, color: "#b71c1c", mb: 0.25 }}>
                                             Mismatch Details
                                         </Typography>
                                         {selectedRiskCard.mismatches.map((entry, index) => (
-                                            <Typography key={`${selectedRiskCard.key}-mismatch-${index}`} sx={{ fontSize: "12px", color: "#b71c1c" }}>
+                                            <Typography key={`${selectedRiskCard.key}-mismatch-${index}`} sx={{ fontSize: "11.5px", color: "#b71c1c", lineHeight: "16px" }}>
                                                 {entry}
                                             </Typography>
                                         ))}
@@ -582,10 +585,10 @@ const Summary = () => {
                                                     ...riskDetailItemSx,
                                                 }}
                                             >
-                                                <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                                <Typography sx={{ fontSize: "12px", lineHeight: "16px", color: "#616161", fontWeight: 600 }}>
                                                     {label}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f", fontWeight: 700 }}>
+                                                <Typography sx={{ fontSize: "12px", lineHeight: "16px", color: "#1f1f1f", fontWeight: 700 }}>
                                                     {value === "" || value === null || value === undefined ? "-" : String(value)}
                                                 </Typography>
                                             </Box>
@@ -602,10 +605,10 @@ const Summary = () => {
                                                     ...riskDetailItemSx,
                                                 }}
                                             >
-                                                <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                                <Typography sx={{ fontSize: "12px", lineHeight: "16px", color: "#616161", fontWeight: 600 }}>
                                                     {label}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f", fontWeight: 700 }}>
+                                                <Typography sx={{ fontSize: "12px", lineHeight: "16px", color: "#1f1f1f", fontWeight: 700 }}>
                                                     {value === "" || value === null || value === undefined ? "-" : String(value)}
                                                 </Typography>
                                             </Box>
@@ -622,10 +625,10 @@ const Summary = () => {
                                                     ...riskDetailItemSx,
                                                 }}
                                             >
-                                                <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                                <Typography sx={{ fontSize: "12px", lineHeight: "16px", color: "#616161", fontWeight: 600 }}>
                                                     {label}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f", fontWeight: 700 }}>
+                                                <Typography sx={{ fontSize: "12px", lineHeight: "16px", color: "#1f1f1f", fontWeight: 700 }}>
                                                     {value === "" || value === null || value === undefined ? "-" : String(value)}
                                                 </Typography>
                                             </Box>
@@ -642,10 +645,10 @@ const Summary = () => {
                                                     ...riskDetailItemSx,
                                                 }}
                                             >
-                                                <Typography sx={{ fontSize: "13px", color: "#616161", fontWeight: 600 }}>
+                                                <Typography sx={{ fontSize: "12px", lineHeight: "16px", color: "#616161", fontWeight: 600 }}>
                                                     {toTitle(key)}
                                                 </Typography>
-                                                <Typography sx={{ fontSize: "13px", color: "#1f1f1f", fontWeight: 700 }}>
+                                                <Typography sx={{ fontSize: "12px", lineHeight: "16px", color: "#1f1f1f", fontWeight: 700 }}>
                                                     {value === "" || value === null || value === undefined ? "-" : String(value)}
                                                 </Typography>
                                             </Box>

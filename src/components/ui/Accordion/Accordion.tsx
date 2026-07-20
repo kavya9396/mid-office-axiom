@@ -51,9 +51,9 @@ export default function CustomAccordion({
         boxShadow: 2,
         backgroundColor: "#FFFFFF",
         "&:before": { display: "none" },
-        marginTop:"0px !important",
+        margin: "0 !important",
         "&.Mui-expanded": {
-          margin: "5px !important",
+          margin: "0 !important",
         },
       }}
     >

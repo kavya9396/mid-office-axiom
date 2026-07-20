@@ -681,7 +681,7 @@ export type MastersData = Partial<Record<Exclude<MasterKey, "requirementManageme
 };
 
 export type MastersRequest = {
-  masters: MasterKey[];
+  types: MasterKey[];
 };
 
 export type MastersResponse = {

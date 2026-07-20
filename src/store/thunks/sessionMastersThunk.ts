@@ -21,7 +21,7 @@ export const fetchMastersForSession = () => async (
 
   const response = await dispatch(
     mastersThunk({
-      masters: DRS_MASTER_KEYS,
+      types: DRS_MASTER_KEYS,
     }),
   ).unwrap();
   const masters = response.data ?? {};

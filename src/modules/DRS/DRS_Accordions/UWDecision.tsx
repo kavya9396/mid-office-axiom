@@ -385,22 +385,22 @@ const UWDecision = () => {
 
     return (
         <Container disableGutters>
-            <Box sx={{ mt: 2 }}>
+            <Box sx={{ mt: 1 }}>
                 <CustomAccordion title="UW Decision" defaultExpanded>
                     <Box
                         sx={{
-                            mt: 1,
-                            p: 2,
-                            borderRadius: "12px",
+                            mt: 0.75,
+                            p: 1.25,
+                            borderRadius: "6px",
                             backgroundColor: "#f6f6f6",
                         }}
                     >
                         <Typography
                             sx={{
-                                fontSize: "14px",
+                                fontSize: "12px",
                                 fontWeight: 400,
                                 color: "#444",
-                                mb: 1,
+                                mb: 0.5,
                             }}
                         >
                             UW Remarks
@@ -409,7 +409,7 @@ const UWDecision = () => {
                         <CustomTextField
                             fullWidth
                             multiline
-                            minRows={3}
+                            minRows={2}
                             placeholder="Enter remarks..."
                             value={uwDecisionRemarks}
                             onChange={(e) => {
@@ -421,10 +421,10 @@ const UWDecision = () => {
                             size="small"
                             sx={{
                                 backgroundColor: "#fff",
-                                borderRadius: "10px",
+                                borderRadius: "6px",
                             }}
                         />
-                        <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "12px", color: "#888", mt: 0.5 }}>
+                        <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
                             {uwDecisionRemarks.length}/10000
                         </Typography>
 
@@ -432,7 +432,7 @@ const UWDecision = () => {
                             sx={{
                                 display: "grid",
                                 gridTemplateColumns: "repeat(3, 1fr)",
-                                gap: 2,
+                                gap: 1,
                             }}
                         >
                             <CustomSelect
@@ -475,10 +475,10 @@ const UWDecision = () => {
                                     <Box>
                                         <Typography
                                             sx={{
-                                                fontSize: "14px",
+                                                fontSize: "12px",
                                                 fontWeight: 400,
                                                 color: "#444",
-                                                mb: 1,
+                                                mb: 0.5,
                                             }}
                                         >
                                             Decision Code
@@ -490,8 +490,8 @@ const UWDecision = () => {
                                             disabled
                                             sx={{
                                                 "& .MuiInputBase-root": {
-                                                    height: 40,
-                                                    borderRadius: "8px",
+                                                    height: 36,
+                                                    borderRadius: "6px",
                                                     backgroundColor: "#fff",
                                                 },
                                             }}
@@ -578,10 +578,10 @@ const UWDecision = () => {
                                 <Box>
                                     <Typography
                                         sx={{
-                                            fontSize: "14px",
+                                            fontSize: "12px",
                                             fontWeight: 400,
                                             color: "#444",
-                                            mb: 1,
+                                            mb: 0.5,
                                         }}
                                     >
                                         Smoker Status
@@ -593,8 +593,8 @@ const UWDecision = () => {
                                         disabled
                                         sx={{
                                             "& .MuiInputBase-root": {
-                                                height: 40,
-                                                borderRadius: "8px",
+                                                height: 36,
+                                                borderRadius: "6px",
                                                 backgroundColor: "#fff",
                                             },
                                         }}
@@ -670,7 +670,7 @@ const UWDecision = () => {
                         )}
 
                         {showDecisionType && (
-                            <Box sx={{ mt: 2 }}>
+                            <Box sx={{ mt: 1 }}>
                                 <CustomRadioGroup
                                     row
                                     value={decisionType}
@@ -684,13 +684,13 @@ const UWDecision = () => {
                         )}
 
                         {isCounterOfferDecision && (
-                            <Box sx={{ mt: 3 }}>
+                            <Box sx={{ mt: 1.25 }}>
                                 <Typography
                                     sx={{
-                                        fontSize: "15px",
+                                        fontSize: "13px",
                                         fontWeight: 600,
                                         color: "#1f2937",
-                                        mb: 1.5,
+                                        mb: 0.75,
                                     }}
                                 >
                                     Counter Offer Details
@@ -699,7 +699,7 @@ const UWDecision = () => {
                                 <TableContainer
                                     sx={{
                                         border: "1px solid #d7d7d7",
-                                        borderRadius: "10px",
+                                        borderRadius: "6px",
                                         overflowX: "auto",
                                         backgroundColor: "#fff",
                                     }}
@@ -822,8 +822,8 @@ const UWDecision = () => {
                         <Box
                             sx={{
                                 display: "flex",
-                                gap: 2,
-                                mt: 2,
+                                gap: 1,
+                                mt: 1,
                             }}
                         >
                             <CustomButton
@@ -831,11 +831,11 @@ const UWDecision = () => {
                                 disabled={submitLoading}
                                 onClick={handleSubmitIntent}
                                 sx={{
-                                    minWidth: 200,
-                                    height: 44,
+                                    minWidth: 150,
+                                    height: 36,
                                     borderRadius: "50px",
                                     fontWeight: 600,
-                                    px: 3,
+                                    px: 2.5,
                                     whiteSpace: "nowrap",
                                 }}
                             >

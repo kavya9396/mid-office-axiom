@@ -82,13 +82,13 @@ const ExceptionDecision = () => {
 
   return (
     <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+      <Box sx={{ mt: 1 }}>
         <CustomAccordion title="UW Decision" defaultExpanded>
           <Box
             sx={{
-              mt: 1,
-              p: 2,
-              borderRadius: "8px",
+              mt: 0.75,
+              p: 1.25,
+              borderRadius: "6px",
               backgroundColor: "#F6F6F6",
             }}
           >
@@ -108,8 +108,8 @@ const ExceptionDecision = () => {
             {submitMessage && (
               <Typography
                 sx={{
-                  mt: 1,
-                  fontSize: 13,
+                  mt: 0.75,
+                  fontSize: 12,
                   color: submitMessage.toLowerCase().includes("success") ? "#0F8A3D" : "#DE2C3B",
                 }}
               >
@@ -118,12 +118,12 @@ const ExceptionDecision = () => {
             )}
           </Box>
 
-          <Box sx={{ display: "flex", mt: 2 }}>
+          <Box sx={{ display: "flex", mt: 1 }}>
             <CustomButton
               variant="contained"
               disabled={!isSubmitEnabled || submitLoading}
               onClick={() => setOpenConfirmation(true)}
-              sx={{ minWidth: 140, borderRadius: "999px" }}
+              sx={{ minWidth: 130, height: 36, borderRadius: "999px" }}
             >
               {submitLoading ? "Submitting..." : "Submit"}
             </CustomButton>
