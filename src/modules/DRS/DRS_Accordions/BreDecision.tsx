@@ -53,6 +53,17 @@ const mapBreOutputToDecision = (
 
 const toText = (value: unknown) => String(value ?? "").trim();
 
+const getFirstText = (record: Record<string, unknown>, keys: string[]) => {
+  for (const key of keys) {
+    const value = toText(record[key]);
+    if (value) {
+      return value;
+    }
+  }
+
+  return "";
+};
+
 const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
   const record = value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -62,10 +73,18 @@ const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
     return null;
   }
 
-  const decision = toText(record.decision);
-  const initialDecision = toText(record.initialDecision);
-  const remarks = toText(record.remarks);
-  const discrepancy = toText(record.discrepancy);
+  const decision = getFirstText(record, ["decision", "breDecision", "finalDecision"]);
+  const initialDecision = getFirstText(record, [
+    "initialDecision",
+    "initialBreDecision",
+    "breInitialDecision",
+    "initialBREDecision",
+    "initial_decision",
+    "previousDecision",
+    "preDecision",
+  ]);
+  const remarks = getFirstText(record, ["remarks", "breRemarks"]);
+  const discrepancy = getFirstText(record, ["discrepancy", "breRequirement"]);
 
   if (!decision && !initialDecision && !remarks && !discrepancy) {
     return null;
@@ -106,6 +125,18 @@ const BreDecision = ({
   const legacyBreOutput = mapLegacyBreDecisionToOutput(
     (data as unknown as Record<string, unknown> | null)?.breDecision,
   );
+  const legacyBreDecisionRecord = (data as unknown as Record<string, unknown> | null)?.breDecision;
+  const legacyBreDecisionText = legacyBreDecisionRecord && typeof legacyBreDecisionRecord === "object" && !Array.isArray(legacyBreDecisionRecord)
+    ? getFirstText(legacyBreDecisionRecord as Record<string, unknown>, [
+      "initialDecision",
+      "initialBreDecision",
+      "breInitialDecision",
+      "initialBREDecision",
+      "initial_decision",
+      "previousDecision",
+      "preDecision",
+    ])
+    : "";
 
   const drsBreDecision: BreDecisionResponse | null = breOutput
     ? mapBreOutputToDecision(breOutput, initialBreOutput)
@@ -144,6 +175,13 @@ const BreDecision = ({
     isBreRetriggerFailure ? "-" : currentBreDecision?.discrepancy ?? drsBreDecision?.discrepancy ?? "-";
   const initialBreSource = initialBreOutput ?? legacyBreOutput;
   const finalBreSource = isBreRetriggerFailure ? undefined : breOutput;
+  const initialBreDecisionRaw =
+    initialBreSource?.decisionTypes?.initialDecision ??
+    initialBreSource?.decisionTypes?.breInitialDecision ??
+    legacyBreDecisionText ??
+    currentBreDecision?.initialDecision ??
+    initialBreSource?.decisionTypes?.breDecision ??
+    "";
 
   const hasValue = (value: unknown) =>
     value !== null && value !== undefined && String(value).trim() !== "";
@@ -215,8 +253,7 @@ const BreDecision = ({
       value: String(item.value),
     }));
 
-  const initialBreDecisionValue =
-    initialBreSource?.decisionTypes?.breDecision ?? "-";
+  const initialBreDecisionValue = initialBreDecisionRaw || "-";
   const finalBreDecisionValue =
     finalBreSource?.decisionTypes?.breDecision ?? currentBreDecision?.decision ?? "-";
   const initialBreRemarksValue = initialBreSource?.breRemarks ?? "-";
@@ -233,7 +270,7 @@ const BreDecision = ({
     finalBreSource?.systemDecisionDateTime ?? currentBreDecision?.timestamp ?? "-";
 
   const normalizedInitialBreDecision = normalizeValue(
-    initialBreSource?.decisionTypes?.breDecision ?? "",
+    initialBreDecisionRaw,
   );
   const normalizedFinalBreDecision = normalizeValue(
     finalBreSource?.decisionTypes?.breDecision ?? currentBreDecision?.decision ?? "",
@@ -263,7 +300,8 @@ const BreDecision = ({
     normalizedInitialDiscrepancy !== normalizedFinalDiscrepancy;
 
   const shouldShowInitialBreSection =
-    Boolean(initialBreSource) && (isBreRetriggerFailure || hasDecisionChanged);
+    Boolean(initialBreSource) &&
+    (isBreRetriggerFailure || hasDecisionChanged || normalizedInitialBreDecision !== "");
 
   const additionalBreDetails = [
     ...conditionalBreDecisionParams,
