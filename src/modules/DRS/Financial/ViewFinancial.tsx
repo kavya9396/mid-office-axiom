@@ -21,6 +21,7 @@ import { financialThunk } from "../../../store/thunks/financialThunk";
 import type { ApplicantTab, DRSRequest, FinancialResponse } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
+import { getErrorMessage } from "../../../config/errorMessages";
 // import { formatCurrencyINR } from "../../../utils/helpers";
 import BreDecision from "../DRS_Accordions/BreDecision";
 // import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
@@ -362,7 +363,7 @@ const getFinancialFieldValidationError = (sectionKey: FinancialSectionKey, field
   }
 
   if (isFieldMandatory(field) && !value.trim()) {
-    return "This field is mandatory.";
+    return getErrorMessage("financialFieldMandatory");
   }
 
   return "";

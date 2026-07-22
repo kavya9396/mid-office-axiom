@@ -1,11 +1,15 @@
 import { Box, Container, Typography } from "@mui/material";
 import type { ChangeEvent, MouseEvent } from "react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
+import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
+import { useAppSelector } from "../../../store/hooks";
+import { ReferralRisk as fallbackRiskReferralReasons, riskDecisionOptions as fallbackRiskDecisionOptions } from "../../../utils/constant";
+import { normalizeMasterOptions } from "../../../utils/masterOptions";
 import Logo from "../../../assets/ICICI-Logo.svg";
 
 type RiskReportForm = {
@@ -171,7 +175,19 @@ const ReportInput = ({
 
 const RiskDecision = () => {
   const { applicationNumber } = useAppContext();
+  const masters = useAppSelector((state) => state.drs.masters);
+  const riskDecisionOptions = useMemo(() => {
+    const masterOptions = normalizeMasterOptions(masters.riskDecision);
+    return masterOptions.length > 0 ? masterOptions : fallbackRiskDecisionOptions;
+  }, [masters.riskDecision]);
+  const riskReferralReasonOptions = useMemo(() => {
+    const masterOptions = normalizeMasterOptions(masters.riskReferralReason);
+    return masterOptions.length > 0 ? masterOptions : fallbackRiskReferralReasons;
+  }, [masters.riskReferralReason]);
   const [remarks, setRemarks] = useState("");
+  const [riskDecision, setRiskDecision] = useState("");
+  const [riskReferralReason, setRiskReferralReason] = useState("");
+  const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
   const [isRiskReportOpen, setIsRiskReportOpen] = useState(false);
   const [riskReportForm, setRiskReportForm] = useState<RiskReportForm>(() =>
     defaultRiskReportForm(applicationNumber ?? localStorage.getItem("applicationNumber")),
@@ -240,9 +256,32 @@ const RiskDecision = () => {
               }}
             />
 
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+                gap: 1.25,
+                mb: 1,
+              }}
+            >
+              <CustomSelect
+                label="Risk Decision"
+                value={riskDecision}
+                onChange={setRiskDecision}
+                options={riskDecisionOptions}
+              />
+              <CustomSelect
+                label="Risk Referral Reasons"
+                value={riskReferralReason}
+                onChange={setRiskReferralReason}
+                options={riskReferralReasonOptions}
+              />
+            </Box>
+
             <Box sx={{ display: "flex", mt: 1 }}>
               <CustomButton
                 variant="contained"
+                onClick={() => setConfirmationDialogOpen(true)}
                 sx={{
                   minWidth: 140,
                   height: 36,
@@ -257,6 +296,35 @@ const RiskDecision = () => {
           </Box>
         </CustomAccordion>
       </Box>
+
+      <CustomDialog
+        open={confirmationDialogOpen}
+        onClose={() => setConfirmationDialogOpen(false)}
+        title={<Typography sx={{ fontSize: 16, fontWeight: 700 }}>Confirmation</Typography>}
+        actionsSx={{ justifyContent: "center", gap: 1, pb: 2 }}
+        actions={
+          <>
+            <CustomButton
+              variant="contained"
+              onClick={() => setConfirmationDialogOpen(false)}
+              sx={{ minWidth: 170, borderRadius: "50px" }}
+            >
+              Okay (Proceed further)
+            </CustomButton>
+            <CustomButton
+              variant="outlined"
+              onClick={() => setConfirmationDialogOpen(false)}
+              sx={{ minWidth: 190, borderRadius: "50px" }}
+            >
+              Cancel (back to same screen)
+            </CustomButton>
+          </>
+        }
+      >
+        <Typography sx={{ fontSize: "12px", color: "#161616" }}>
+          You are initiating a risk investigation process for the applicant
+        </Typography>
+      </CustomDialog>
 
       <CustomDialog
         open={isRiskReportOpen}

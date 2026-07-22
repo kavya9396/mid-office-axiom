@@ -1523,6 +1523,64 @@
         "displayName": "ARYAYAN Khan",
         "status": "DRAFT"
       }
+    ],
+    "RISK_TASK": [
+      {
+        "id": 1,
+        "taskId": "18763",
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "RISK_TASK",
+        "role": "RETAIL_RISK_USER",
+        "businessType": "RETAIL",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT",
+          "due_date": "2026-07-21T07:08:37Z",
+
+      "start_time": "2026-07-16T06:08:37Z",
+
+      "at_risk_time": "2026-07-20T06:40:16Z"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "RISK_TASK",
+        "role": "RETAIL_RISK_USER",
+        "businessType": "RETAIL",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT",
+          "due_date": "2026-07-23T07:08:37Z",
+
+      "start_time": "2026-07-16T06:08:37Z",
+
+      "at_risk_time": "2026-07-22T06:40:16Z"
+      }
     ]
   }
 }

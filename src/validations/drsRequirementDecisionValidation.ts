@@ -1,4 +1,5 @@
 import type { AdditionalRequirementRow } from "../types/drs.types";
+import { getErrorMessage } from "../config/errorMessages";
 
 const DRS_LOCAL_REQUIREMENTS_KEY_PREFIX = "drsLocalRequirementRows";
 
@@ -97,7 +98,7 @@ export const validateRequirementDecision = (
   if (hasPendingRequirements && !isRaiseRequirementDecision(decisionLabel)) {
     return {
       isValid: false,
-      message: "Pending requirements are available. Please select Raise Requirement before taking another decision.",
+      message: getErrorMessage("drsPendingRequirements"),
     };
   }
 

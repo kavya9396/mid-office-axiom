@@ -674,6 +674,7 @@ export type MasterKey =
   | "firstUWDecision"
   | "parallelUWDecision"
   | "reconsiderationDecision"
+  | "riskDecision"
   | "requirementTeam"
   | "requirementProfile"
   | "requirementCategory"

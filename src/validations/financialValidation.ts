@@ -1,3 +1,5 @@
+import { getErrorMessage } from "../config/errorMessages";
+
 export type FinancialFieldInputType = "freeText" | "numeric" | "dateDDMMYYYY";
 
 export type FinancialFieldRule = {
@@ -37,7 +39,7 @@ export const validateFinancialSectionValues = (
     (label) => values[label]?.trim()
   );
 
-  return hasMonthValue ? {} : { "Month 1": "At least one month data is mandatory." };
+  return hasMonthValue ? {} : { "Month 1": getErrorMessage("financialAtLeastOneMonthMandatory") };
 };
 
 export const validateFinancialFieldValue = (
@@ -47,7 +49,7 @@ export const validateFinancialFieldValue = (
   const trimmedValue = value.trim();
 
   if (rule?.isMandatory && !trimmedValue) {
-    return "This field is mandatory.";
+    return getErrorMessage("financialFieldMandatory");
   }
 
   if (!trimmedValue) {
@@ -55,14 +57,14 @@ export const validateFinancialFieldValue = (
   }
 
   if (rule?.inputType === "numeric" && !/^-?\d+(\.\d+)?$/.test(trimmedValue)) {
-    return "Enter a numeric value.";
+    return getErrorMessage("financialNumericValue");
   }
 
   if (rule?.inputType === "dateDDMMYYYY") {
     const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(trimmedValue);
 
     if (!match) {
-      return "Enter date in DD/MM/YYYY format.";
+      return getErrorMessage("financialDateFormat");
     }
 
     const [, dayText, monthText, yearText] = match;
@@ -76,7 +78,7 @@ export const validateFinancialFieldValue = (
       parsedDate.getMonth() !== month - 1 ||
       parsedDate.getDate() !== day
     ) {
-      return "Enter a valid date.";
+      return getErrorMessage("financialValidDate");
     }
   }
 

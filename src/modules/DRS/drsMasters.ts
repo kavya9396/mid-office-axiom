@@ -25,6 +25,7 @@ export const DRS_MASTER_KEYS: MasterKey[] = [
   "firstUWDecision",
   "parallelUWDecision",
   "reconsiderationDecision",
+  "riskDecision",
   "rejectReason",
   "declineReason",
   "postponeReason",
