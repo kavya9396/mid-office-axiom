@@ -5,6 +5,12 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTable from "../../../components/ui/Table/Table";
 import type { Column } from "../../../components/ui/Table/Table";
+import { useAppContext } from "../../../hooks/useAppContext";
+import {
+    getFinancialPath,
+    getMedicalPath,
+    normalizeBusinessType,
+} from "../../../routes/routes";
 import type { AdditionalRequirementRow, RequirementMasterOption } from "../../../types/drs.types";
 import {
     rm_category,
@@ -128,6 +134,33 @@ const INITIAL_ROW_STATE: AdditionalRequirementRow = {
 
 const uniqueNonEmpty = (values: string[]) =>
     Array.from(new Set(values.map((value) => value.trim()).filter(Boolean)));
+
+const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
+    if (Array.isArray(value)) {
+        return value.filter(
+            (entry): entry is Record<string, unknown> =>
+                !!entry && typeof entry === "object" && !Array.isArray(entry),
+        );
+    }
+
+    if (value && typeof value === "object") {
+        return [value as Record<string, unknown>];
+    }
+
+    return [];
+};
+
+const getSelectedCaseContext = (): Record<string, unknown> => {
+    try {
+        const raw = localStorage.getItem("selectedCaseContext");
+        const parsed = raw ? JSON.parse(raw) : {};
+        return parsed && typeof parsed === "object" && !Array.isArray(parsed)
+            ? (parsed as Record<string, unknown>)
+            : {};
+    } catch {
+        return {};
+    }
+};
 
 const toOption = (value: string): Option => ({ label: value, value });
 
@@ -464,6 +497,7 @@ interface RequirementManagementTableProps {
 
 const RequirementManagementTable = ({ requirements }: RequirementManagementTableProps) => {
     const roleType = String(localStorage.getItem("roleType") ?? "");
+    const { businessType, applicationNumber } = useAppContext();
     const normalizedRoleType = roleType.trim().toLowerCase();
     const isCvtOrDvtRole = normalizedRoleType.includes("cvt") || normalizedRoleType.includes("dvt");
     const shouldShowProfileAndSpecialTest = !isCvtOrDvtRole;
@@ -563,6 +597,83 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         ],
         [localRows, normalizedExistingRows, sourceRowOverrides],
     );
+
+    const safeBusinessType =
+        normalizeBusinessType(businessType) ??
+        normalizeBusinessType(localStorage.getItem("businessType")) ??
+        "retail";
+    const safeApplicationNumber = applicationNumber ?? "";
+    const selectedApplicantTab = localStorage.getItem("drsSelectedApplicantTab") ?? "proposer";
+
+    const summaryEntries = toSummaryEntries(
+        (drsData as { summary?: unknown } | null)?.summary,
+    );
+
+    const selectedSummary = summaryEntries.find((entry, index) => {
+        const memberType = String(entry.memberType ?? "").trim().toUpperCase();
+
+        if (memberType === "PROPOSER" || memberType.includes("PR")) {
+            return selectedApplicantTab === "proposer";
+        }
+
+        if (memberType === "LIFEASSURED1" || memberType === "LIFE ASSURED 1") {
+            return selectedApplicantTab === "lifeassured1";
+        }
+
+        if (memberType === "LIFEASSURED2" || memberType === "LIFE ASSURED 2") {
+            return selectedApplicantTab === "lifeassured2";
+        }
+
+        if (memberType.includes("LA") || memberType.includes("LIFE")) {
+            return (index === 1 && selectedApplicantTab === "lifeassured1") || (index > 1 && selectedApplicantTab === "lifeassured2");
+        }
+
+        return index === 0 && selectedApplicantTab === "proposer";
+    }) ?? summaryEntries[0];
+
+    const summaryPersonal = (selectedSummary?.personalDetails as Record<string, unknown> | undefined) ?? {};
+    const proposalFormAndDocumentsLink = String(
+        (drsData as { quickLinks?: { proposerForm?: string } } | null)?.quickLinks?.proposerForm ??
+        summaryPersonal.UDSLink ??
+        "",
+    ).trim();
+
+    const openLinkInNewTab = (path: string) => {
+        const trimmedPath = path.trim();
+        if (!trimmedPath) {
+            return;
+        }
+
+        if (/^https?:\/\//i.test(trimmedPath)) {
+            window.open(trimmedPath, "_blank");
+            return;
+        }
+
+        const targetUrl = new URL(trimmedPath, window.location.origin).toString();
+        window.open(targetUrl, "_blank");
+    };
+
+    const selectedCaseContext = getSelectedCaseContext();
+    const selectedCaseRoleType = String(selectedCaseContext.roleType ?? "").trim();
+    const selectedCaseIsMedical = Boolean(
+        (selectedCaseContext as { isMedical?: unknown }).isMedical ??
+        (drsData as { isMedical?: unknown } | null)?.isMedical,
+    );
+    const effectiveCptRoleType = roleType === "CPT_TASK"
+        ? (selectedCaseRoleType || (selectedCaseIsMedical ? "CPT_DATA_ENTRY_MR_TASK" : "CPT_DATA_ENTRY_NMR_TASK"))
+        : roleType;
+    const showCptActionButtons = effectiveCptRoleType === "CPT_DATA_ENTRY_NMR_TASK"
+        || effectiveCptRoleType === "CPT_DATA_ENTRY_MR_TASK"
+        || roleType === "CPT_TASK";
+    const cptSecondaryAction = effectiveCptRoleType === "CPT_DATA_ENTRY_NMR_TASK"
+        ? {
+            label: "View Financial",
+            path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "",
+        }
+        : {
+            label: "View Medicals",
+            path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "",
+        };
 
     useEffect(() => {
         saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })));
@@ -1325,12 +1436,13 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     >
                         Save
                     </CustomButton>
-                    {roleType == 'CPT_TASK' && (<><CustomButton
+                    {showCptActionButtons && (<><CustomButton
                         variant="contained"
                         disabled={draftRows.length > 0}
                         onClick={() => {
                             setIsTableSaved(true);
                             setEditableStatusRowIds(new Set());
+                            openLinkInNewTab(proposalFormAndDocumentsLink);
                         }}
                         sx={{
                             minWidth: 200,
@@ -1349,6 +1461,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         onClick={() => {
                             setIsTableSaved(true);
                             setEditableStatusRowIds(new Set());
+                            openLinkInNewTab(cptSecondaryAction.path);
                         }}
                         sx={{
                             minWidth: 200,
@@ -1359,7 +1472,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             whiteSpace: "nowrap",
                         }}
                     >
-                        View Financial
+                        {cptSecondaryAction.label}
                     </CustomButton></>)}
                 </Box>
             </Box>

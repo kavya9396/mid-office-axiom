@@ -214,6 +214,7 @@ const roleMapper = {
   "CVT_TASK": "CVT Pool",
   "CPT_TASK": "CPT_TASK",
   "CPT_DATA_ENTRY_NMR_TASK": "CPT_TASK",
+  "CPT_DATA_ENTRY_MR_TASK": "CPT_TASK",
   "DVT_TASK": "DVT Pool",
   "PIVV_TASK": "PIVV Pool",
   "PRE_ISSUANCE_SERVICING_TASK": "Pre Issuance Servicing Pool",
@@ -354,6 +355,7 @@ const RightPanel = ({
         "selectedCaseContext",
         JSON.stringify({
           applicationNo: String(row.applicationNo ?? "").trim(),
+          roleType: String(row.roleType ?? "").trim(),
           taskId: claimTaskId,
           instanceId,
           taskCompositeId: rawTaskId,
