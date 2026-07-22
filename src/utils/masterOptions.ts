@@ -8,8 +8,34 @@ export type SelectOption = {
 
 const toText = (value: unknown): string => String(value ?? "").trim();
 
-export const normalizeMasterOptions = (options?: MasterOption[]): SelectOption[] =>
-  (options ?? [])
+const toMasterOptionList = (options?: unknown): MasterOption[] => {
+  if (Array.isArray(options)) {
+    return options as MasterOption[];
+  }
+
+  if (!options || typeof options !== "object") {
+    return [];
+  }
+
+  const optionRecord = options as Record<string, unknown>;
+
+  if (Array.isArray(optionRecord.data)) {
+    return optionRecord.data as MasterOption[];
+  }
+
+  if (Array.isArray(optionRecord.options)) {
+    return optionRecord.options as MasterOption[];
+  }
+
+  if (Array.isArray(optionRecord.values)) {
+    return optionRecord.values as MasterOption[];
+  }
+
+  return Object.values(optionRecord).flatMap((value) => (Array.isArray(value) ? value as MasterOption[] : []));
+};
+
+export const normalizeMasterOptions = (options?: unknown): SelectOption[] =>
+  toMasterOptionList(options)
     .map((option) => {
       const code = toText(option.code);
       const key = toText(option.key);

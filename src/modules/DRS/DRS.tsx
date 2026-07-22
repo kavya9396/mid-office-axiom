@@ -14,27 +14,27 @@ import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import type { DRSBreOutput, DRSData } from "../../types/drs.types";
 import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 import { validateDrsFinalBre } from "../../validations/drsBreValidation";
-
+ 
 const toText = (value: unknown) => String(value ?? "").trim();
-
+ 
 const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
     const record = value && typeof value === "object" && !Array.isArray(value)
         ? (value as Record<string, unknown>)
         : null;
-
+ 
     if (!record) {
         return null;
     }
-
+ 
     const decision = toText(record.decision);
     const initialDecision = toText(record.initialDecision);
     const remarks = toText(record.remarks);
     const discrepancy = toText(record.discrepancy);
-
+ 
     if (!decision && !initialDecision && !remarks && !discrepancy) {
         return null;
     }
-
+ 
     return {
         systemDecision: decision,
         decisionTypes: {
@@ -49,7 +49,7 @@ const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
         breRemarks: remarks,
     };
 };
-
+ 
 const mapper = {
     "CMO Pool": "RETAIL_CMO_POOL",
     "CUW Pool": "RETAIL_CUW_POOL",
@@ -85,9 +85,12 @@ const mapper = {
     "GUW_FORMAL_TASK":"GUW_FORMAL_TASK",
     "DVT_FORMAL_TASK": "DVT_FORMAL_TASK",
     "RISK_TASK":"RISK_TASK",
-    "PRE_LOGIN_TASK":"PRE_LOGIN_TASK"
+    "PRE_LOGIN_TASK":"PRE_LOGIN_TASK",
+    "AMR_MEDICAL_TASK":"AMR_MEDICAL_TASK",
+    "AMR_NON_MEDICAL_TASK":"AMR_NON_MEDICAL_TASK",
+    "ACUITY_TASK":"ACUITY_TASK"
 }
-
+ 
 const getSelectedCaseContext = (): Record<string, unknown> => {
     try {
         const raw = localStorage.getItem("selectedCaseContext");
@@ -99,7 +102,7 @@ const getSelectedCaseContext = (): Record<string, unknown> => {
         return {};
     }
 };
-
+ 
 const getStoredSearchDrsData = (): DRSData | null => {
     try {
         const raw = localStorage.getItem("searchApplicationDrsData");
@@ -111,7 +114,7 @@ const getStoredSearchDrsData = (): DRSData | null => {
         return null;
     }
 };
-
+ 
 const readOnlyContentSx = {
     "& input, & textarea, & .MuiSelect-select": {
         pointerEvents: "none",
@@ -120,7 +123,7 @@ const readOnlyContentSx = {
         display: "none",
     },
 };
-
+ 
 const searchHiddenAccordionIds = new Set([
     "cvtDecision",
     "dvtDecision",
@@ -140,13 +143,13 @@ const searchHiddenAccordionIds = new Set([
     "uwChecklist",
     "uacChecklist",
 ]);
-
+ 
 const DRS = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
     const { applicationNumber, businessType } = useAppContext();
     const drsData = useSelector((state: RootState) => state.drs.data);
-
+ 
     const layout = mapper[roleType as keyof typeof mapper];
     const layoutAccordions = useMemo(() => (layout ? (DRS_LAYOUTS[layout] ?? []) : []), [layout]);
     const sections = useMemo(() => layoutAccordions.map((accordion) => String(accordion)), [layoutAccordions]);
@@ -159,7 +162,7 @@ const DRS = () => {
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
         "retail";
-
+ 
     const dispatch = useDispatch<AppDispatch>();
     const mastersRequestedRef = useRef(false);
     const safeApplicationNumber = applicationNumber ?? "";
@@ -176,55 +179,55 @@ const DRS = () => {
         [isSearchReadOnlyMode, visibleAccordions],
     );
     const breValidation = useMemo(() => validateDrsFinalBre(drsData), [drsData]);
-
+ 
     const handleDrsActionCapture = useCallback((event: SyntheticEvent<HTMLElement>) => {
         const validation = validateDrsFinalBre(drsData);
         if (validation.canPerformAction) {
             return;
         }
-
+ 
         const target = event.target instanceof HTMLElement ? event.target : null;
         if (target?.closest("[data-drs-validation-exempt='true']")) {
             return;
         }
-
+ 
         if (target?.closest("[data-drs-bre-retrigger='true']")) {
             return;
         }
-
+ 
         event.preventDefault();
         event.stopPropagation();
     }, [drsData]);
-
+ 
     const dispatchMastersOnce = useCallback(() => {
         if (mastersRequestedRef.current) {
             return;
         }
-
+ 
         mastersRequestedRef.current = true;
         dispatch(fetchMastersForSession());
     }, [dispatch]);
-
+ 
     useEffect(() => {
         if (!safeApplicationNumber || !roleType || !isSearchReadOnlyMode) {
             return;
         }
-
+ 
         if (!drsData) {
             const storedDrsData = getStoredSearchDrsData();
             if (storedDrsData) {
                 dispatch(setDrsData(storedDrsData));
             }
         }
-
+ 
         dispatchMastersOnce();
     }, [dispatch, dispatchMastersOnce, drsData, isSearchReadOnlyMode, roleType, safeApplicationNumber]);
-
+ 
     useEffect(() => {
         if (!safeApplicationNumber || !roleType || isSearchReadOnlyMode || !userId) {
             return;
         }
-
+ 
         const loadDRSAndBRE = async () => {
             try {
                 const drsResponse = await dispatch(
@@ -235,14 +238,14 @@ const DRS = () => {
                         sections,
                     }),
                 ).unwrap();
-
+ 
                 try {
                     const breResponse = await dispatch(
                         breRetriggerThunk({
                             data: drsResponse.data,
                         }),
                     ).unwrap();
-
+ 
                     const updatedBrePayload = breResponse.data;
                     const dataRecord = drsResponse.data as unknown as Record<string, unknown>;
                     const originalBreOutput =
@@ -270,7 +273,7 @@ const DRS = () => {
                         drsResponse.data.externalAPIs?.initialBreOutput ??
                         drsResponse.data.externalAPIs?.breOutput ??
                         mapLegacyBreDecisionToOutput(dataRecord.breDecision);
-
+ 
                     dispatch(
                         setBreExternalApiOutputs({
                             initialBreOutput: originalBreOutput ?? undefined,
@@ -285,18 +288,18 @@ const DRS = () => {
                 dispatchMastersOnce();
             }
         };
-
+ 
         void loadDRSAndBRE();
     }, [dispatch, dispatchMastersOnce, isSearchReadOnlyMode, roleType, safeApplicationNumber, sections, userId]);
-
-
+ 
+ 
     return (
         <>
             <BackButton
                 label="Back to inbox"
                 justify="flex-start"
                 onClick={() => navigate(getInboxPath(safeBusinessType))}
-                rightSlot={roleType != 'MMT Pool' ? 
+                rightSlot={roleType != 'MMT Pool' ?
                     <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
                         <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
                             <Typography
@@ -362,5 +365,6 @@ const DRS = () => {
         </>
     )
 }
-
+ 
 export default DRS
+ 

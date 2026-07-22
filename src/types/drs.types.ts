@@ -360,6 +360,21 @@ export type FinancialResponse = {
   };
   breAdditionalFields?: BreDecisionExtraField[];
   summary: MedicalSummaryMember[];
+  sections?: FinancialResponseSection[];
+};
+
+export type FinancialResponseField = {
+  label: string;
+  value?: string | number | boolean | null;
+  isMandatory?: boolean;
+  mandatoryCondition?: string;
+};
+
+export type FinancialResponseSection = {
+  key: string;
+  title?: string;
+  columns?: number;
+  items: FinancialResponseField[];
 };
 
 export type PreviousPolicyItem = {

@@ -30,7 +30,7 @@ import CustomerProfile from "./DRS_Accordions/CustomerProfile";
 import MedicalInsuranceDetails from "./DRS_Accordions/MedicalInsuranceDetails";
 import DocumentRequired from "./DRS_Accordions/DocumentRequired";
 import PreLogin from "./DRS_Accordions/PreLogin";
-
+ 
 export const accordionRegistry = {
   breDecision: BreDecision,
   applicationOverview: ApplicationOverview,
@@ -64,23 +64,23 @@ export const accordionRegistry = {
   documentRequired: DocumentRequired,
   preLogin: PreLogin,
 } as const;
-
+ 
 type AccordionKey = keyof typeof accordionRegistry;
-
+ 
 type DrsDataRecord = Record<string, unknown>;
-
+ 
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
-
+ 
 const hasNonEmptyArray = (value: unknown): boolean => Array.isArray(value) && value.length > 0;
-
+ 
 const hasObjectContent = (value: unknown): boolean => {
   const record = toRecord(value);
   return Object.keys(record).length > 0;
 };
-
+ 
 const sectionAvailabilityCheck: Partial<Record<AccordionKey, (data: DrsDataRecord) => boolean>> = {
   applicationOverview: (data) => hasObjectContent(data.applicationOverview),
   summary: (data) => hasNonEmptyArray(data.summary) || hasNonEmptyArray(data.customerDetails),
@@ -100,31 +100,31 @@ const sectionAvailabilityCheck: Partial<Record<AccordionKey, (data: DrsDataRecor
     hasObjectContent(data.documentRequired) ||
     hasNonEmptyArray(toRecord(data.quickLinks).previousPolicies),
 };
-
+ 
 export const getPoolWiseAvailableAccordions = (
   layoutKey: string | undefined,
   data?: unknown,
 ): AccordionKey[] => {
   const baseAccordions = layoutKey ? DRS_LAYOUTS[layoutKey] ?? [] : [];
-
+ 
   const accordionsWithQuickLinks = baseAccordions.includes("quickLinks")
     ? baseAccordions
     : [...baseAccordions, "quickLinks"];
-
+ 
   return accordionsWithQuickLinks.filter((accordion): accordion is AccordionKey => {
     if (!(accordion in accordionRegistry)) {
       return false;
     }
-
+ 
     const checker = sectionAvailabilityCheck[accordion as AccordionKey];
     if (!checker || !data) {
       return true;
     }
-
+ 
     return checker((data as DrsDataRecord) ?? {});
   });
 };
-
+ 
 export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_COPS_POOL: [
     "breDecision",
@@ -182,8 +182,8 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "requirementManagement",
   ],
   RETAIL_SYSTEM_WAIT_POOL_AMR_NON_MEDICAL: [
-    "applicationOverview", 
-    "requirementManagement", 
+    "applicationOverview",
+    "requirementManagement",
   ],
   RETAIL_RECONSIDERATION_POOL: [
     "breDecision",
@@ -191,7 +191,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "reconsiderationPoolDecision"
   ],
   RETAIL_CUW_CLAIM_AUDIT: [
-    "applicationOverview", 
+    "applicationOverview",
     "claimSection",
     "quickLinks"
   ],
@@ -212,6 +212,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks",
   ],
   RETAIL_ACCUITY_USER:["applicationOverview","summary","accuityDecision"],
+  ACUITY_TASK:["applicationOverview","summary","accuityDecision"],
   RETAIL_REQUIREMENT_REVIEW_POOL: ["applicationOverview","requirementManagement","quickLinks"],
   RETAIL_TELE_VIDEO_POOL: ["applicationOverview","requirementManagement","quickLinks"],
   RETAIL_ISSUANCE_POOL: ["breDecision","applicationOverview","requirementManagement","uwDecision","quickLinks"],
@@ -231,13 +232,15 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_REINSURER_POOL: ["breDecision","applicationOverview","summary","requirementManagement","reinsurerDecision","decisionHistory","quickLinks"],
   RETAIL_IT_POOL:["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
   RETAIL_VENDOR_CMO_POOL:["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
-  
+ 
   RETAIL_ECG_POOL: ["quickLinks"],
   RETAIL_TMT_POOL: ["quickLinks"],
   RETAIL_GRIEVANCE_POOL: ["greivance"],
   PRE_LOGIN_TASK:["breDecision","preLogin","requirementManagement","uwDecision"],
-  
-
+  AMR_MEDICAL_TASK:["applicationOverview","requirementManagement","quickLinks"],
+  AMR_NON_MEDICAL_TASK:["applicationOverview","requirementManagement","quickLinks"],
+ 
+ 
   GROUP_DVT_POOL: [
     "breDecision",
     "applicationOverview",
@@ -270,7 +273,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "summary",
     "requirementManagement",
     "quickLinks"
-  ], 
+  ],
   GUW_FORMAL_TASK: [
     "breDecision",
     "applicationOverview",
@@ -298,3 +301,5 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks"
   ]
 };
+ 
+ 

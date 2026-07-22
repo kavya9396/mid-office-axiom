@@ -96,7 +96,8 @@ const getPersonalKycFields = (options: {
 
 const getAddressFields = (options: {
     addressProofOptions: SelectOption[];
-    stateOptions: SelectOption[];
+    communicationStateOptions: SelectOption[];
+    permanentStateOptions: SelectOption[];
     countryOptions: SelectOption[];
     communicationIsIndia: boolean;
     permanentIsIndia: boolean;
@@ -121,8 +122,8 @@ const getAddressFields = (options: {
     {
         name: "communicationState",
         label: "Comm. State",
-        type: options.communicationIsIndia ? "select" : "text",
-        options: options.communicationIsIndia ? options.stateOptions : undefined,
+        type: options.communicationStateOptions.length > 0 ? "select" : "text",
+        options: options.communicationStateOptions.length > 0 ? options.communicationStateOptions : undefined,
     },
     { name: "communicationCity", label: "Comm. City" },
     { name: "communicationPincode", label: "Comm. Pincode" },
@@ -139,8 +140,8 @@ const getAddressFields = (options: {
     {
         name: "permanentState",
         label: "Perm. State",
-        type: options.permanentIsIndia ? "select" : "text",
-        options: options.permanentIsIndia ? options.stateOptions : undefined,
+        type: options.permanentStateOptions.length > 0 ? "select" : "text",
+        options: options.permanentStateOptions.length > 0 ? options.permanentStateOptions : undefined,
     },
     { name: "permanentCity", label: "Perm. City" },
     { name: "permanentPincode", label: "Perm. Pincode" },
@@ -225,6 +226,28 @@ const toDisplayFormDetails = (
         return accumulator;
     }, {}),
 });
+
+const getStateOptionsForCountry = (
+    stateMaster: unknown,
+    countryValue: string,
+    countryOptions: SelectOption[],
+): SelectOption[] => {
+    const countryCode = toMasterKey(countryValue, countryOptions);
+
+    if (!countryCode) {
+        return [];
+    }
+
+    if (stateMaster && typeof stateMaster === "object" && !Array.isArray(stateMaster)) {
+        const groupedStates = (stateMaster as Record<string, unknown>)[countryCode];
+        return normalizeMasterOptions(groupedStates);
+    }
+
+    return normalizeMasterOptions(stateMaster).filter((option) => {
+        const optionRecord = option as SelectOption & { countryCode?: string };
+        return !optionRecord.countryCode || optionRecord.countryCode === countryCode;
+    });
+};
 
 const getStoredApplicantTab = (): ApplicantTab => {
     const storedApplicantTab = localStorage.getItem("drsSelectedApplicantTab");
@@ -704,18 +727,28 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
 
     const communicationIsIndia = toMasterLabel(formData.communicationCountry, countryOptions).trim().toLowerCase() === "india";
     const permanentIsIndia = toMasterLabel(formData.permanentCountry, countryOptions).trim().toLowerCase() === "india";
+    const communicationStateOptions = useMemo(
+        () => getStateOptionsForCountry(masters.state, formData.communicationCountry, countryOptions),
+        [masters.state, formData.communicationCountry, countryOptions]
+    );
+    const permanentStateOptions = useMemo(
+        () => getStateOptionsForCountry(masters.state, formData.permanentCountry, countryOptions),
+        [masters.state, formData.permanentCountry, countryOptions]
+    );
 
     const addressFields = useMemo(
         () => getAddressFields({
             addressProofOptions,
-            stateOptions,
+            communicationStateOptions,
+            permanentStateOptions,
             countryOptions,
             communicationIsIndia,
             permanentIsIndia,
         }),
         [
             addressProofOptions,
-            stateOptions,
+            communicationStateOptions,
+            permanentStateOptions,
             countryOptions,
             communicationIsIndia,
             permanentIsIndia,
@@ -817,9 +850,14 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         [addressProofOptions]
     );
 
-    const allowedStateValues = useMemo(
-        () => new Set(stateOptions.map((option) => option.value)),
-        [stateOptions]
+    const allowedCommunicationStateValues = useMemo(
+        () => new Set(communicationStateOptions.map((option) => option.value)),
+        [communicationStateOptions]
+    );
+
+    const allowedPermanentStateValues = useMemo(
+        () => new Set(permanentStateOptions.map((option) => option.value)),
+        [permanentStateOptions]
     );
 
     const validateForm = () => {
@@ -865,7 +903,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         }
 
         if (communicationIsIndia) {
-            if (stateOptions.length > 0 && formData.communicationState && !allowedStateValues.has(formData.communicationState)) {
+            if (communicationStateOptions.length > 0 && formData.communicationState && !allowedCommunicationStateValues.has(formData.communicationState)) {
                 errors.communicationState = "Select a valid Comm. State";
             }
 
@@ -883,7 +921,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         }
 
         if (permanentIsIndia) {
-            if (stateOptions.length > 0 && formData.permanentState && !allowedStateValues.has(formData.permanentState)) {
+            if (permanentStateOptions.length > 0 && formData.permanentState && !allowedPermanentStateValues.has(formData.permanentState)) {
                 errors.permanentState = "Select a valid Perm. State";
             }
 

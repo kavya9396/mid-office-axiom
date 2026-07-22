@@ -1,20 +1,18 @@
 {
   "data": {
-    "title": [
-      { "code": "MR", "description": "Mr", "value": "Mr", "isActive": "Y" },
-      { "code": "MRS", "description": "Mrs", "value": "Mrs", "isActive": "Y" },
-      { "code": "MISS", "description": "Miss", "value": "Miss", "isActive": "Y" },
-      { "code": "MS", "description": "Ms", "value": "Ms", "isActive": "Y" },
-      { "code": "MASTER", "description": "Master", "value": "Master", "isActive": "Y" }
-    ],
     "gender": [
       {
         "code": "F",
         "description": "Female",
-        "value": "Femaleing ",
+        "value": "Female",
         "isActive": "Y"
       },
-      { "code": "M", "description": "Male", "value": "Male", "isActive": "Y" },
+      {
+        "code": "M",
+        "description": "Male",
+        "value": "Male",
+        "isActive": "Y"
+      },
       {
         "code": "TG",
         "description": "Transgender",
@@ -22,48 +20,1249 @@
         "isActive": "Y"
       }
     ],
+    "resident_status": [
+      {
+        "code": "FN",
+        "description": "Foreign National",
+        "value": "Foreign National",
+        "isActive": "Y"
+      },
+      {
+        "code": "IR",
+        "description": "Indian Resident",
+        "value": "Indian Resident",
+        "isActive": "Y"
+      },
+      {
+        "code": "NRI",
+        "description": "Non-Resident Indian",
+        "value": "Non-Resident Indian",
+        "isActive": "Y"
+      },
+      {
+        "code": "PIO",
+        "description": "Person of Indian Origin",
+        "value": "Person of Indian Origin",
+        "isActive": "Y"
+      }
+    ],
     "nationality": [
-      { "code": "IND", "description": "Indian", "value": "Indian", "isActive": "Y" },
-      { "code": "NRI", "description": "Non Resident Indian", "value": "Non Resident Indian", "isActive": "Y" },
-      { "code": "OTH", "description": "Other", "value": "Other", "isActive": "Y" }
+      {
+        "code": "IND",
+        "description": "Indian",
+        "value": "Indian",
+        "isActive": "Y"
+      },
+      {
+        "code": "NON",
+        "description": "Non-Indian",
+        "value": "Non-Indian",
+        "isActive": "Y"
+      }
     ],
-    "idProof": [
-      { "code": "PAN", "description": "PAN Card", "value": "PAN Card", "isActive": "Y" },
-      { "code": "AADHAAR", "description": "Aadhaar Card", "value": "Aadhaar Card", "isActive": "Y" },
-      { "code": "PASSPORT", "description": "Passport", "value": "Passport", "isActive": "Y" },
-      { "code": "VOTER_ID", "description": "Voter ID", "value": "Voter ID", "isActive": "Y" },
-      { "code": "DRIVING_LICENSE", "description": "Driving's License", "value": "Driving's License", "isActive": "Y" }
+    "marital_status": [
+      {
+        "code": "DV",
+        "description": "Divorced",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "MA",
+        "description": "Married",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "UN",
+        "description": "Unmarried",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "WD",
+        "description": "Widow(er)",
+        "value": null,
+        "isActive": "Y"
+      }
     ],
-    "addressProof": [
-      { "code": "AADHAAR", "description": "Aadhaar Card", "value": "Aadhaar Card", "isActive": "Y" },
-      { "code": "PASSPORT", "description": "Passport", "value": "Passport", "isActive": "Y" },
-      { "code": "VOTER_ID", "description": "Voter ID", "value": "Voter ID", "isActive": "Y" },
-      { "code": "DRIVING_LICENSE", "description": "Driving's License", "value": "Driving's License", "isActive": "Y" },
-      { "code": "UTILITY_BILL", "description": "Utility Bill", "value": "Utility Bill", "isActive": "Y" }
+    "education": [
+      {
+        "code": "ILL",
+        "description": "Illiterate",
+        "value": null,
+        "isActive": "Y",
+        "sortOrder": 1
+      },
+      {
+        "code": "BH10",
+        "description": "Below 10th",
+        "value": null,
+        "isActive": "Y",
+        "sortOrder": 2
+      },
+      {
+        "code": "H10",
+        "description": "10th Pass",
+        "value": null,
+        "isActive": "Y",
+        "sortOrder": 3
+      },
+      {
+        "code": "H12",
+        "description": "12th Pass",
+        "value": null,
+        "isActive": "Y",
+        "sortOrder": 4
+      },
+      {
+        "code": "DIP",
+        "description": "Diploma",
+        "value": null,
+        "isActive": "Y",
+        "sortOrder": 5
+      },
+      {
+        "code": "GR",
+        "description": "Graduate",
+        "value": null,
+        "isActive": "Y",
+        "sortOrder": 6
+      },
+      {
+        "code": "PG",
+        "description": "Post Graduate",
+        "value": null,
+        "isActive": "Y",
+        "sortOrder": 7
+      }
     ],
-    "state": [
-      { "code": "MAHS", "description": "Maharashtra", "value": "Maharashtra", "isActive": "Y" },
-      { "code": "GUJ", "description": "Gujarat", "value": "Gujarat", "isActive": "Y" },
-      { "code": "KAR", "description": "Karnataka", "value": "Karnataka", "isActive": "Y" },
-      { "code": "DEL", "description": "Delhi", "value": "Delhi", "isActive": "Y" },
-      { "code": "TN", "description": "Tamil Nadu", "value": "Tamil Nadu", "isActive": "Y" }
+    "occupation": [
+      {
+        "code": "AGR",
+        "description": "Agriculturist",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "HW",
+        "description": "Housewife",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "OTH",
+        "description": "Others",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "PRO",
+        "description": "Professional",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "RET",
+        "description": "Retired",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SAL",
+        "description": "Salaried",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SE",
+        "description": "Self Employed",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "STU",
+        "description": "Student",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "industry_type": [
+      {
+        "code": "AGR",
+        "description": "Agriculture",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "IMP",
+        "description": "Import/Export",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "JEW",
+        "description": "Jewellery",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "MIN",
+        "description": "Mining",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "OTH",
+        "description": "Others",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "RE",
+        "description": "Real Estate",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SB",
+        "description": "Stock Broking",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SCR",
+        "description": "Scrap Dealing",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SHP",
+        "description": "Shipping",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "organization_type": [
+      {
+        "code": "GOVT",
+        "description": "Govt",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "HUF",
+        "description": "HUF",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "OTH",
+        "description": "Others",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "PART",
+        "description": "Partner/Proprietor",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "PUB",
+        "description": "Public Ltd",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "PVT",
+        "description": "Pvt Ltd",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "S25",
+        "description": "Section 8/25 Company",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SOC",
+        "description": "Society",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "TRUST",
+        "description": "Trust",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "id_proof_type": [
+      {
+        "code": "AADH",
+        "description": "Aadhaar",
+        "value": null,
+        "isActive": "Y",
+        "hasExpiry": "N"
+      },
+      {
+        "code": "DL",
+        "description": "Driving Licence",
+        "value": null,
+        "isActive": "Y",
+        "hasExpiry": "Y"
+      },
+      {
+        "code": "OTH",
+        "description": "Others",
+        "value": null,
+        "isActive": "Y",
+        "hasExpiry": "N"
+      },
+      {
+        "code": "PASS",
+        "description": "Passport",
+        "value": null,
+        "isActive": "Y",
+        "hasExpiry": "Y"
+      },
+      {
+        "code": "SCH",
+        "description": "School/College Certificate",
+        "value": null,
+        "isActive": "Y",
+        "hasExpiry": "N"
+      }
+    ],
+    "impairement_type": [
+      {
+        "code": "1",
+        "description": "Blindness",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "2",
+        "description": "Low Vision",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "3",
+        "description": "Hearing Impairment",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "4",
+        "description": "Locomotor Disability",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "5",
+        "description": "Leprosy Cured",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "6",
+        "description": "Cerebral Palsy",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "7",
+        "description": "Intellectual Disability",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "8",
+        "description": "Mental Illness",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "9",
+        "description": "Muscular Dystrophy",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "10",
+        "description": "Parkinson Disease",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "11",
+        "description": "Acid Attack Victim",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "12",
+        "description": "Sickle Cell Disease",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "13",
+        "description": "Hemophilia",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "14",
+        "description": "Thalassemia",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "15",
+        "description": "Speech and Language Disability",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "16",
+        "description": "Multiple Sclerosis",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "17",
+        "description": "Specific Learning Disabilities",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "18",
+        "description": "Chronic Neurological Conditions",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "19",
+        "description": "Autism Spectrum Disorder",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "20",
+        "description": "Dwarfism",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "insurance_repository": [
+      {
+        "code": "CAMS",
+        "description": "CAMS Repository Services Limited",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "CDSL",
+        "description": "CDSL Insurance Repository Limited",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "KARVY",
+        "description": "Karvy Insurance Repository Limited",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "NSDL",
+        "description": "NSDL Insurance Repository",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "product": [
+      {
+        "code": "ICICI_PRU_GIFT_PRO",
+        "description": "ICICI PRU GIFT PRO",
+        "value": null,
+        "isActive": "Y",
+        "productType": "SAVINGS",
+        "formType": "SINGLE_LIFE",
+        "effectiveFrom": "2024-03-01"
+      },
+      {
+        "code": "ICICI_PRU_GOLD",
+        "description": "ICICI PRU GOLD",
+        "value": null,
+        "isActive": "Y",
+        "productType": "SAVINGS",
+        "formType": "SINGLE_LIFE",
+        "effectiveFrom": "2024-04-01"
+      },
+      {
+        "code": "ICICI_PRU_IPROTECT_CARE",
+        "description": "ICICI PRU IPROTECT CARE",
+        "value": null,
+        "isActive": "Y",
+        "productType": "TERM",
+        "formType": "SINGLE_LIFE",
+        "effectiveFrom": "2024-02-01"
+      },
+      {
+        "code": "ICICI_PRU_LOAN_PROTECT",
+        "description": "ICICI PRU LOAN PROTECT",
+        "value": null,
+        "isActive": "Y",
+        "productType": "LOAN_PROTECT",
+        "formType": "LOAN_PROTECT",
+        "effectiveFrom": "2024-05-01"
+      },
+      {
+        "code": "ICICI_PRU_SIGNATURE",
+        "description": "ICICI PRU SIGNATURE",
+        "value": null,
+        "isActive": "Y",
+        "productType": "ULIP",
+        "formType": "SINGLE_LIFE",
+        "effectiveFrom": "2024-01-01"
+      }
+    ],
+    "rider": [
+      {
+        "code": "ICICI_PRU_LINKED_ACCIDENTAL_DEATH_AND_DISABILITY_RIDER",
+        "description": "ICICI Pru Linked Accidental Death and Disability Rider",
+        "value": null,
+        "isActive": "Y",
+        "riderType": "LINKED"
+      },
+      {
+        "code": "ICICI_PRU_NON_LINKED_HEALTH_PROTECT_RIDER",
+        "description": "ICICI Pru Non-Linked Health Protect Rider",
+        "value": null,
+        "isActive": "Y",
+        "riderType": "NON_LINKED"
+      }
+    ],
+    "annuity_option": [
+      {
+        "code": "DEF_JL",
+        "description": "Deferred Joint Life Annuity",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "DEF_SL",
+        "description": "Deferred Single Life Annuity",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "JL",
+        "description": "Joint Life Annuity",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "JL_ROP",
+        "description": "Joint Life with Return of Purchase Price",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SL",
+        "description": "Single Life Annuity",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SL_ROP",
+        "description": "Single Life with Return of Purchase Price",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "fund": [
+      {
+        "code": "BLU002",
+        "description": "Bluechip",
+        "value": null,
+        "isActive": "Y",
+        "sfin": "ULIF00201/07/26BLUECHIP",
+        "fundType": "EQUITY"
+      },
+      {
+        "code": "MCG001",
+        "description": "Multi Cap Growth",
+        "value": null,
+        "isActive": "Y",
+        "sfin": "ULIF00101/07/26MCGROWTH",
+        "fundType": "EQUITY"
+      },
+      {
+        "code": "MIM004",
+        "description": "Mid Cap 150 Momentum 50 Index",
+        "value": null,
+        "isActive": "Y",
+        "fundType": "INDEX"
+      },
+      {
+        "code": "MMF003",
+        "description": "Money Market",
+        "value": null,
+        "isActive": "Y",
+        "sfin": "ULIF00301/07/26MONEYMARKET",
+        "fundType": "MONEY_MARKET"
+      }
+    ],
+    "portfolio_strategy": [
+      {
+        "code": "FIXED",
+        "description": "Fixed Portfolio Strategy",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "LIFECYCLE",
+        "description": "LifeCycle based Portfolio Strategy",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "LIFECYCLE2",
+        "description": "LifeCycle based Portfolio Strategy 2",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "TARGET",
+        "description": "Target Asset Allocation Strategy",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "TRIGGER2",
+        "description": "Trigger Portfolio Strategy 2",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "payment_mode": [
+      {
+        "code": "CASH",
+        "description": "Cash",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "CC",
+        "description": "Credit Card",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "CHQ",
+        "description": "Cheque/DD",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "DC",
+        "description": "Direct Credit",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "DD",
+        "description": "Demand Draft",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "ECS",
+        "description": "ECS",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "MPOS",
+        "description": "MPOS",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "NEFT",
+        "description": "NEFT",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "source_of_fund": [
+      {
+        "code": "BIZ",
+        "description": "Business Income",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "INH",
+        "description": "Inheritance",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "OTH",
+        "description": "Others",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SAL",
+        "description": "Salary",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "SOA",
+        "description": "Sale of Assets",
+        "value": null,
+        "isActive": "Y"
+      }
+    ],
+    "proposal_status": [
+      {
+        "code": "APPROVED",
+        "description": "Proposal approved successfully",
+        "value": null,
+        "isActive": "Y",
+        "isTerminal": "Y"
+      },
+      {
+        "code": "CANCELLED",
+        "description": "Proposal cancelled before completion",
+        "value": null,
+        "isActive": "Y",
+        "isTerminal": "Y"
+      },
+      {
+        "code": "DECLINED",
+        "description": "Proposal declined after review",
+        "value": null,
+        "isActive": "Y",
+        "isTerminal": "Y"
+      },
+      {
+        "code": "DRAFT",
+        "description": "Proposal saved as a draft",
+        "value": null,
+        "isActive": "Y",
+        "isTerminal": "N"
+      },
+      {
+        "code": "SUBMITTED",
+        "description": "Proposal submitted for processing",
+        "value": null,
+        "isActive": "Y",
+        "isTerminal": "N"
+      },
+      {
+        "code": "UNDER_REVIEW",
+        "description": "Proposal is under review",
+        "value": null,
+        "isActive": "Y",
+        "isTerminal": "N"
+      },
+      {
+        "code": "WITHDRAWN",
+        "description": "Proposal withdrawn by the applicant",
+        "value": null,
+        "isActive": "Y",
+        "isTerminal": "Y"
+      }
     ],
     "country": [
-      { "code": "IND", "description": "India", "value": "India", "isActive": "Y" },
-      { "code": "USA", "description": "United States", "value": "United States", "isActive": "Y" },
-      { "code": "GBR", "description": "United Kingdom", "value": "United Kingdom", "isActive": "Y" },
-      { "code": "ARE", "description": "United Arab Emirates", "value": "United Arab Emirates", "isActive": "Y" },
-      { "code": "SGP", "description": "Singapore", "value": "Singapore", "isActive": "Y" }
+      {
+        "code": "ARE",
+        "description": "United Arab Emirates",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+971"
+      },
+      {
+        "code": "GBR",
+        "description": "United Kingdom",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+44"
+      },
+      {
+        "code": "IND",
+        "description": "India",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+91"
+      },
+      {
+        "code": "SGP",
+        "description": "Singapore",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+65"
+      },
+      {
+        "code": "USA",
+        "description": "United States of America",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+1"
+      }
     ],
-    "maritalStatus": [
-      { "code": "S", "description": "Single", "value": "Single", "isActive": "Y" },
-      { "code": "M", "description": "Married", "value": "Married", "isActive": "Y" },
-      { "code": "D", "description": "Divorced", "value": "Divorced", "isActive": "Y" },
-      { "code": "W", "description": "Widowed", "value": "Widowed", "isActive": "Y" }
+    "state": {
+      "IND": [
+        {
+          "code": "DL",
+          "description": "Delhi",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        },
+        {
+          "code": "KA",
+          "description": "Karnataka",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        },
+        {
+          "code": "MH",
+          "description": "Maharashtra",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        },
+        {
+          "code": "MP",
+          "description": "Madhya Pradesh",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        },
+        {
+          "code": "UP",
+          "description": "Uttar Pradesh",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        }
+      ],
+      "USA": [
+        {
+          "code": "CA",
+          "description": "California",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "USA"
+        },
+        {
+          "code": "NY",
+          "description": "New York",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "USA"
+        },
+        {
+          "code": "TX",
+          "description": "Texas",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "USA"
+        }
+      ]
+    },
+    "policy_decision": [
+      {
+        "code": "ACC",
+        "description": "Accepted",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "DEC",
+        "description": "Declined",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "EXTRA",
+        "description": "Accepted with Extra Premium",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "MOD",
+        "description": "Modified Terms",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "POST",
+        "description": "Postponed",
+        "value": null,
+        "isActive": "Y"
+      },
+      {
+        "code": "WD",
+        "description": "Withdrawn",
+        "value": null,
+        "isActive": "Y"
+      }
     ],
-    "pep": [
-      { "code": "Y", "description": "Yes", "value": "Yes", "isActive": "Y" },
-      { "code": "N", "description": "No", "value": "No", "isActive": "Y" }
+    "agent_mst": [
+      {
+        "code": "LOB1001",
+        "description": "Amit Verma",
+        "value": null,
+        "isActive": "Y",
+        "agentId": 1,
+        "afsmCode": "AFSM501",
+        "spPosCode": "SP2001",
+        "channelCode": "AG"
+      },
+      {
+        "code": "LOB1002",
+        "description": "Priya Nair",
+        "value": null,
+        "isActive": "Y",
+        "agentId": 2,
+        "spPosCode": "SP2002",
+        "channelCode": "BANK",
+        "bankBranch": "ICICI Bank - Andheri West, Mumbai"
+      },
+      {
+        "code": "LOB1003",
+        "description": "Rakesh Sharma",
+        "value": null,
+        "isActive": "Y",
+        "agentId": 3,
+        "afsmCode": "AFSM503",
+        "channelCode": "AG"
+      },
+      {
+        "code": "LOB1004",
+        "description": "Sunita Rao",
+        "value": null,
+        "isActive": "Y",
+        "agentId": 4,
+        "spPosCode": "SP2004",
+        "channelCode": "BANK",
+        "bankBranch": "ICICI Bank - MG Road, Bengaluru"
+      }
+    ],
+    "health_question": [
+      {
+        "code": "001",
+        "description": "Do you currently use tobacco or nicotine products?",
+        "value": null,
+        "isActive": "Y",
+        "questionType": "YESNO",
+        "section": "LIFESTYLE",
+        "displayOrder": 1,
+        "applicableForm": "SINGLE_LIFE"
+      },
+      {
+        "code": "002",
+        "description": "Select your usual exercise frequency.",
+        "value": null,
+        "isActive": "Y",
+        "questionType": "DROPDOWN",
+        "answerOptions": "Never,Occasionally,Weekly,Daily",
+        "section": "LIFESTYLE",
+        "displayOrder": 2,
+        "applicableForm": "SINGLE_LIFE"
+      },
+      {
+        "code": "003",
+        "description": "Enter your current weight in kilograms.",
+        "value": null,
+        "isActive": "Y",
+        "questionType": "NUMBER",
+        "section": "PHYSICAL",
+        "displayOrder": 3,
+        "applicableForm": "SINGLE_LIFE,ANNUITY"
+      },
+      {
+        "code": "004",
+        "description": "Provide details of any ongoing medical treatment.",
+        "value": null,
+        "isActive": "Y",
+        "questionType": "TEXT",
+        "section": "MEDICAL_HISTORY",
+        "displayOrder": 4,
+        "applicableForm": "SINGLE_LIFE"
+      },
+      {
+        "code": "005",
+        "description": "Provide the month and year of your last medical examination.",
+        "value": null,
+        "isActive": "Y",
+        "questionType": "DATE_MM",
+        "section": "MEDICAL_HISTORY",
+        "displayOrder": 5,
+        "applicableForm": "SINGLE_LIFE,ANNUITY"
+      },
+      {
+        "code": "006",
+        "description": "Select any conditions present in your immediate family.",
+        "value": null,
+        "isActive": "Y",
+        "questionType": "MULTISELECT",
+        "answerOptions": "Diabetes,Heart disease,Hypertension,Cancer,None",
+        "section": "FAMILY_HISTORY",
+        "displayOrder": 6,
+        "applicableForm": "SINGLE_LIFE"
+      },
+      {
+        "code": "009",
+        "description": "Have you ever consumed alcohol?",
+        "value": null,
+        "isActive": "Y",
+        "questionType": "YESNO",
+        "section": "SUBSTANCE",
+        "displayOrder": 9,
+        "applicableForm": "SINGLE_LIFE"
+      },
+      {
+        "code": "009.1",
+        "description": "Select your usual alcohol consumption frequency.",
+        "value": null,
+        "isActive": "Y",
+        "parentQuestionId": "009",
+        "questionType": "DROPDOWN",
+        "answerOptions": "Occasionally,Weekly,Daily",
+        "section": "SUBSTANCE",
+        "displayOrder": 10,
+        "applicableForm": "SINGLE_LIFE"
+      }
+    ],
+    "requirement_mst": [
+      {
+        "code": "FIN001",
+        "description": "Synthetic income proof requirement",
+        "value": null,
+        "isActive": "Y",
+        "custCommunicationPrintingAttribute": "Y",
+        "requirementType": "External",
+        "coreNonCore": "CORE",
+        "requirementCategory": "Non-Medical",
+        "requirementSubCategory": "Financial",
+        "system": "No",
+        "special": "N",
+        "raisingAuthority": "UW",
+        "resolvingAuthority": "OPS",
+        "mandatoryReq": "Y"
+      },
+      {
+        "code": "KYC001",
+        "description": "Synthetic identity verification requirement",
+        "value": null,
+        "isActive": "Y",
+        "custCommunicationPrintingAttribute": "Y",
+        "requirementType": "External",
+        "coreNonCore": "CORE",
+        "requirementCategory": "Non-Medical",
+        "requirementSubCategory": "KYC",
+        "system": "Yes",
+        "special": "N",
+        "raisingAuthority": "KYC",
+        "resolvingAuthority": "OPS",
+        "mandatoryReq": "Y"
+      },
+      {
+        "code": "MED001",
+        "description": "Synthetic medical examination requirement",
+        "value": null,
+        "isActive": "Y",
+        "custCommunicationPrintingAttribute": "N",
+        "requirementType": "Internal",
+        "coreNonCore": "CORE",
+        "requirementCategory": "Medical",
+        "requirementSubCategory": "Clarification",
+        "system": "Yes",
+        "special": "Y",
+        "raisingAuthority": "UW",
+        "resolvingAuthority": "MED",
+        "mandatoryReq": "Y"
+      },
+      {
+        "code": "NMC001",
+        "description": "Synthetic non-medical clarification requirement",
+        "value": null,
+        "isActive": "Y",
+        "requirementType": "Internal",
+        "coreNonCore": "NON_CORE",
+        "requirementCategory": "Non-Medical",
+        "requirementSubCategory": "Clarification",
+        "system": "No",
+        "special": "N",
+        "raisingAuthority": "OPS",
+        "resolvingAuthority": "UW",
+        "mandatoryReq": "N"
+      }
+    ],
+    "bre": [
+      {
+        "code": "AGE_CHECK",
+        "description": "Synthetic age eligibility rule",
+        "value": null,
+        "isActive": "Y",
+        "breFlag": "Y",
+        "breCodeValueDesc": "Y",
+        "severity": "H"
+      },
+      {
+        "code": "BMI_LIMIT",
+        "description": "Synthetic BMI threshold rule",
+        "value": null,
+        "isActive": "Y",
+        "breFlag": "Y",
+        "breCodeValueDesc": "N",
+        "severity": "M"
+      },
+      {
+        "code": "INCOME_VAL",
+        "description": "Synthetic income validation rule",
+        "value": null,
+        "isActive": "Y",
+        "breFlag": "N",
+        "breCodeValueDesc": "Y",
+        "severity": "L"
+      },
+      {
+        "code": "OCC_RISK",
+        "description": "Synthetic occupation risk rule",
+        "value": null,
+        "isActive": "Y",
+        "severity": "M"
+      }
+    ],
+    "ntu_retail": [
+      {
+        "code": "NTU_FIN",
+        "value": null,
+        "isActive": "Y",
+        "businessType": "NEW_BUSINESS",
+        "productType": "ICICI_PRU_GIFT_PRO",
+        "requirementCode": "FIN001",
+        "tat": 48,
+        "priority": "MEDIUM"
+      },
+      {
+        "code": "NTU_KYC",
+        "value": null,
+        "isActive": "Y",
+        "businessType": "NEW_BUSINESS",
+        "productType": "ICICI_PRU_SIGNATURE",
+        "requirementCode": "KYC001",
+        "tat": 24,
+        "priority": "HIGH"
+      },
+      {
+        "code": "NTU_MED",
+        "value": null,
+        "isActive": "Y",
+        "businessType": "UNDERWRITING",
+        "productType": "ICICI_PRU_IPROTECT_CARE",
+        "requirementCode": "MED001",
+        "tat": 72,
+        "priority": "HIGH"
+      }
+    ],
+    "pre_post_insurance": [
+      {
+        "code": "PPI_ADDR",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "POLICY_SERVICING",
+        "requestType": "ADDRESS_CHANGE",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PPI_BENE",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "NOMINATION",
+        "requestType": "BENEFICIARY_CHANGE",
+        "updateLa": "N",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PPI_NAME",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "PROPOSAL_UPDATE",
+        "requestType": "NAME_CORRECTION",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PPI_UW",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "UNDERWRITING",
+        "requestType": "RISK_REASSESSMENT",
+        "updateLa": "N",
+        "uwRequired": "Y"
+      }
+    ],
+    "uw_decision": [
+      {
+        "code": "UW_ACCEPT",
+        "value": null,
+        "isActive": "Y",
+        "decisionType": "STANDARD",
+        "dataEntry": "AUTO",
+        "decisionCode": "ACC",
+        "decision": "ACCEPT",
+        "descriptionCode": "ACCEPT_STANDARD"
+      },
+      {
+        "code": "UW_DECLINE",
+        "value": null,
+        "isActive": "Y",
+        "decisionType": "STANDARD",
+        "dataEntry": "MANUAL",
+        "decisionCode": "DEC",
+        "decision": "DECLINE",
+        "descriptionCode": "DECLINE_RISK"
+      },
+      {
+        "code": "UW_EXTRA",
+        "value": null,
+        "isActive": "Y",
+        "decisionType": "RATED",
+        "dataEntry": "MANUAL",
+        "decisionCode": "EXTRA",
+        "decision": "ACCEPT",
+        "descriptionCode": "ACCEPT_EXTRA_PREMIUM"
+      },
+      {
+        "code": "UW_POSTPONE",
+        "value": null,
+        "isActive": "Y",
+        "decisionType": "STANDARD",
+        "dataEntry": "MANUAL",
+        "decisionCode": "POST",
+        "decision": "POSTPONE",
+        "descriptionCode": "POSTPONE_REVIEW"
+      }
     ],
     "app_status": [
       {
@@ -143,49 +1342,8 @@
         "miscMastId": "DOCUMENT",
         "type": "DOCUMENT_TYPE"
       }
-    ],
-    "uw_decision": [
-      {
-        "code": "UW_ACCEPT",
-        "value": null,
-        "isActive": "Y",
-        "decisionType": "STANDARD",
-        "dataEntry": "AUTO",
-        "decisionCode": "ACC",
-        "decision": "ACCEPT",
-        "descriptionCode": "ACCEPT_STANDARD"
-      },
-      {
-        "code": "UW_DECLINE",
-        "value": null,
-        "isActive": "Y",
-        "decisionType": "STANDARD",
-        "dataEntry": "MANUAL",
-        "decisionCode": "DEC",
-        "decision": "DECLINE",
-        "descriptionCode": "DECLINE_RISK"
-      },
-      {
-        "code": "UW_EXTRA",
-        "value": null,
-        "isActive": "Y",
-        "decisionType": "RATED",
-        "dataEntry": "MANUAL",
-        "decisionCode": "EXTRA",
-        "decision": "ACCEPT",
-        "descriptionCode": "ACCEPT_EXTRA_PREMIUM"
-      },
-      {
-        "code": "UW_POSTPONE",
-        "value": null,
-        "isActive": "Y",
-        "decisionType": "STANDARD",
-        "dataEntry": "MANUAL",
-        "decisionCode": "POST",
-        "decision": "POSTPONE",
-        "descriptionCode": "POSTPONE_REVIEW"
-      }
     ]
   },
   "unknownTypes": []
 }
+ 

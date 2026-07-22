@@ -7,7 +7,7 @@ import type {
 } from "../../types/drs.types";
 import { drsThunk } from "../thunks/drsThunk";
 import { mastersThunk } from "../thunks/mastersThunk";
-import { getSessionMasters } from "../../utils/masterDataSession";
+import { getSessionMasters, normalizeMastersData } from "../../utils/masterDataSession";
 
 interface DrsState {
   data: DRSData | null;
@@ -94,7 +94,7 @@ const drsSlice = createSlice({
       }
     },
     setMastersData: (state, action: { payload: MastersData }) => {
-      state.masters = action.payload;
+      state.masters = normalizeMastersData(action.payload);
       state.mastersLoading = "idle";
       state.mastersError = null;
     },
@@ -123,7 +123,7 @@ const drsSlice = createSlice({
       .addCase(mastersThunk.fulfilled, (state, action) => {
         state.mastersLoading = "idle";
         state.mastersError = null;
-        state.masters = action.payload.data ?? {};
+        state.masters = normalizeMastersData(action.payload.data ?? {});
       })
       .addCase(mastersThunk.rejected, (state, action) => {
         state.mastersLoading = "failed";

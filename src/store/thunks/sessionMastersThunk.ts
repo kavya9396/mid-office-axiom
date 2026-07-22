@@ -1,6 +1,6 @@
 import type { AppDispatch, RootState } from "../store";
 import { DRS_MASTER_KEYS } from "../../modules/DRS/drsMasters";
-import { getSessionMasters, saveSessionMasters } from "../../utils/masterDataSession";
+import { getSessionMasters, normalizeMastersData, saveSessionMasters } from "../../utils/masterDataSession";
 import { setMastersData } from "../slices/drsSlice";
 import { mastersThunk } from "./mastersThunk";
 
@@ -24,7 +24,7 @@ export const fetchMastersForSession = () => async (
       types: DRS_MASTER_KEYS,
     }),
   ).unwrap();
-  const masters = response.data ?? {};
+  const masters = normalizeMastersData(response.data ?? {});
   saveSessionMasters(masters);
 
   return masters;

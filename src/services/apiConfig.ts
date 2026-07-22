@@ -137,6 +137,10 @@ const apiUrls = {
     real: "/api/financial/submit",
     mock: "/mock/drs/financial.mock.json",
   },
+  financialCommissionCalculate: {
+    real: "/api/financial/commission/calculate",
+    mock: "/mock/drs/financialCommissionCalculate.mock.json",
+  },
  
   // Previous Policies
   previousPoliciesView: {

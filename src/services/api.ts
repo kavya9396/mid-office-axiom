@@ -11,12 +11,15 @@ export const apiRequest = async <TResponse = unknown, TRequest = unknown>({
   method,
   body,
 }: ApiRequest<TRequest>): Promise<TResponse> => {
+  const isMockJsonRequest = url.endsWith(".json");
+  const resolvedMethod = isMockJsonRequest ? "GET" : method;
+
   const response = await fetch(url, {
-    method,
+    method: resolvedMethod,
     headers: {
       "Content-Type": "application/json",
     },
-    body: body ? JSON.stringify(body) : undefined,
+    body: resolvedMethod !== "GET" && body ? JSON.stringify(body) : undefined,
   });
 
   if (!response.ok) {

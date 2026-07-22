@@ -20,7 +20,7 @@
         "middleName": "Kumar",
         "lastName": "Sangha",
         "dob": "22-02-1992",
-        "age": 34.0,
+        "age": 34,
         "gender": "Male",
         "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
         "caseStatus": "Green Case",
@@ -37,7 +37,7 @@
         "middleName": "Rudra",
         "lastName": "Sangha",
         "dob": "22-02-1992",
-        "age": 34.0,
+        "age": 34,
         "gender": "Male",
         "profileImage": "https://plus.unsplash.com/premium_photo-1739786995646-480d5cfd83dc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OXx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww",
         "caseStatus": "Green Case",
@@ -46,6 +46,2015 @@
         "email": "test@ipru.com",
         "mobile": "9876543210"
       }
+    }
+  ],
+  "sections": [
+    {
+      "key": "appointmentLetter",
+      "title": "Appointment Letter / Contract of Employer",
+      "items": [
+        {
+          "label": "Name of the company",
+          "value": "ABCD Company",
+          "isMandatory": false
+        },
+        {
+          "label": "Name of the employee",
+          "value": "Rudra Sangha",
+          "isMandatory": false
+        },
+        {
+          "label": "Joining Date",
+          "value": "22/06/2024",
+          "isMandatory": true
+        },
+        {
+          "label": "CTC",
+          "value": "500000",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "caCertifiedBalanceSheet",
+      "title": "CA Certified Balance Sheet",
+      "items": [
+        {
+          "label": "Is Balance Sheet in the name of LA",
+          "value": "No"
+        },
+        {
+          "label": "Fixed Assets",
+          "value": "No"
+        },
+        {
+          "label": "Other Investments",
+          "value": "No"
+        },
+        {
+          "label": "Cash",
+          "value": "No"
+        },
+        {
+          "label": "Banks",
+          "value": "No"
+        },
+        {
+          "label": "Secured Loans",
+          "value": "No"
+        },
+        {
+          "label": "Net Worth",
+          "value": "No"
+        },
+        {
+          "label": "Derived Income",
+          "value": "Yes"
+        },
+        {
+          "label": "Average Income",
+          "value": "Auto calculate"
+        }
+      ]
+    },
+    {
+      "key": "caCertifiedNetWorthStatement",
+      "title": "CA Certified Net Worth Statement",
+      "items": [
+        {
+          "label": "Is Net Worth Statement in the name of LA",
+          "value": "No"
+        },
+        {
+          "label": "Is Certified by CA",
+          "value": "No"
+        },
+        {
+          "label": "Net Worth as per Statement",
+          "value": "No"
+        },
+        {
+          "label": "Income Earned",
+          "value": "No"
+        },
+        {
+          "label": "Derived Income",
+          "value": "Yes"
+        },
+        {
+          "label": "Average Income",
+          "value": "Auto calculate"
+        }
+      ]
+    },
+    {
+      "key": "commissionStatement",
+      "title": "Commission Statement",
+      "columns": 4,
+      "items": [
+        {
+          "label": "Month 1",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Month 2",
+          "value": "20000"
+        },
+        {
+          "label": "Month 3",
+          "value": ""
+        },
+        {
+          "label": "Month 4",
+          "value": ""
+        },
+        {
+          "label": "Month 5",
+          "value": ""
+        },
+        {
+          "label": "Month 6",
+          "value": ""
+        },
+        {
+          "label": "Average commission pm",
+          "value": "Auto calculate"
+        },
+        {
+          "label": "Average Annual Income",
+          "value": "Auto calculate"
+        }
+      ]
+    },
+    {
+      "key": "creditCards",
+      "title": "Credit Cards",
+      "items": [
+        {
+          "label": "Is Credit card statement in the name of LA",
+          "value": ""
+        },
+        {
+          "label": "Is LA Defaulter in the Payment",
+          "value": ""
+        },
+        {
+          "label": "Type of Card",
+          "value": ""
+        },
+        {
+          "label": "Credit Limit",
+          "value": "50000",
+          "isMandatory": true
+        },
+        {
+          "label": "Points Earned",
+          "value": ""
+        },
+        {
+          "label": "Income Earned",
+          "value": ""
+        },
+        {
+          "label": "Derived Income",
+          "value": "100000"
+        },
+        {
+          "label": "Average Income",
+          "value": "100000"
+        }
+      ]
+    },
+    {
+      "key": "fixedDepositReceipt",
+      "title": "Fixed Deposit Receipt",
+      "items": [
+        {
+          "label": "Is Fixed Deposit Receipt in the name of LA",
+          "value": ""
+        },
+        {
+          "label": "Is Fixed Deposit Receipts matured",
+          "value": ""
+        },
+        {
+          "label": "Amount Invested",
+          "value": "100000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income Earned",
+          "value": ""
+        },
+        {
+          "label": "Derived Income",
+          "value": "50000"
+        },
+        {
+          "label": "Average Income",
+          "value": "50000"
+        }
+      ]
+    },
+    {
+      "key": "form16",
+      "title": "FORM16/FORM 130",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Entity",
+          "value": "Year 1 | Year 2 | Year 3"
+        },
+        {
+          "label": "ASSESSMENT",
+          "value": "AY 25-26",
+          "isMandatory": true
+        },
+        {
+          "label": "ASSESSMENT Year 2",
+          "value": "AY 24-25",
+          "isMandatory": true
+        },
+        {
+          "label": "ASSESSMENT Year 3",
+          "value": "AY 23-24",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Salary PA",
+          "value": "500000"
+        },
+        {
+          "label": "Gross Salary PA Year 2",
+          "value": "460000"
+        },
+        {
+          "label": "Gross Salary PA Year 3",
+          "value": "420000"
+        },
+        {
+          "label": "Average Annual Income",
+          "value": "460000"
+        },
+        {
+          "label": "Average Annual Income Year 2",
+          "value": "430000"
+        },
+        {
+          "label": "Average Annual Income Year 3",
+          "value": "400000"
+        },
+        {
+          "label": "Life Assured Pan No",
+          "value": "AXXXDXXX2L"
+        },
+        {
+          "label": "Life Assured Pan No Year 2",
+          "value": "AXXXDXXX2L"
+        },
+        {
+          "label": "Life Assured Pan No Year 3",
+          "value": "AXXXDXXX2L"
+        },
+        {
+          "label": "Life Assured Name",
+          "value": "Rudra Sangha"
+        },
+        {
+          "label": "Life Assured Name Year 2",
+          "value": "Rudra Sangha"
+        },
+        {
+          "label": "Life Assured Name Year 3",
+          "value": "Rudra Sangha"
+        },
+        {
+          "label": "Is Life Assured Name Same With Doc Name?",
+          "value": "No"
+        },
+        {
+          "label": "Company Name",
+          "value": "ICICI Bank"
+        }
+      ]
+    },
+    {
+      "key": "form16a",
+      "title": "FORM 16A/FORM 131",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Assessment Year",
+          "value": "AY 25-26",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 2",
+          "value": "Latest 1 Year data Mandatory",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 3",
+          "value": "AY 23-24",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Receipt pa",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Receipt pa Year 2",
+          "value": "No"
+        },
+        {
+          "label": "Net Receipt pa Year 3",
+          "value": "No"
+        },
+        {
+          "label": "Average Annual Income",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Annual Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Average Annual Income Year 3",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "key": "formJ",
+      "title": "FORM J",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Is Form J in the name of LA",
+          "value": "No",
+          "isMandatory": true
+        },
+        {
+          "label": "Month1 Receipt1",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Month1 Receipt2",
+          "value": ""
+        },
+        {
+          "label": "Month1 Receipt3",
+          "value": ""
+        },
+        {
+          "label": "Month1 Receipt4",
+          "value": ""
+        },
+        {
+          "label": "Month1 Receipt5",
+          "value": ""
+        },
+        {
+          "label": "Month1 Receipt6",
+          "value": ""
+        },
+        {
+          "label": "Month2 Receipt1",
+          "value": "12000"
+        },
+        {
+          "label": "Month2 Receipt2",
+          "value": ""
+        },
+        {
+          "label": "Month2 Receipt3",
+          "value": ""
+        },
+        {
+          "label": "Month2 Receipt4",
+          "value": ""
+        },
+        {
+          "label": "Month2 Receipt5",
+          "value": ""
+        },
+        {
+          "label": "Month2 Receipt6",
+          "value": ""
+        },
+        {
+          "label": "Month3 Receipt1",
+          "value": "14000"
+        },
+        {
+          "label": "Month3 Receipt2",
+          "value": ""
+        },
+        {
+          "label": "Month3 Receipt3",
+          "value": ""
+        },
+        {
+          "label": "Month3 Receipt4",
+          "value": ""
+        },
+        {
+          "label": "Month3 Receipt5",
+          "value": ""
+        },
+        {
+          "label": "Month3 Receipt6",
+          "value": ""
+        },
+        {
+          "label": "Total Receipts Receipt1",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Total Receipts Receipt2",
+          "value": ""
+        },
+        {
+          "label": "Total Receipts Receipt3",
+          "value": ""
+        },
+        {
+          "label": "Total Receipts Receipt4",
+          "value": ""
+        },
+        {
+          "label": "Total Receipts Receipt5",
+          "value": ""
+        },
+        {
+          "label": "Total Receipts Receipt6",
+          "value": ""
+        },
+        {
+          "label": "Average Monthly Receipts Receipt1",
+          "value": "12000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Monthly Receipts Receipt2",
+          "value": ""
+        },
+        {
+          "label": "Average Monthly Receipts Receipt3",
+          "value": ""
+        },
+        {
+          "label": "Average Monthly Receipts Receipt4",
+          "value": ""
+        },
+        {
+          "label": "Average Monthly Receipts Receipt5",
+          "value": ""
+        },
+        {
+          "label": "Average Monthly Receipts Receipt6",
+          "value": ""
+        },
+        {
+          "label": "Annual Receipts Receipt1",
+          "value": "144000",
+          "isMandatory": true
+        },
+        {
+          "label": "Annual Receipts Receipt2",
+          "value": ""
+        },
+        {
+          "label": "Annual Receipts Receipt3",
+          "value": ""
+        },
+        {
+          "label": "Annual Receipts Receipt4",
+          "value": ""
+        },
+        {
+          "label": "Annual Receipts Receipt5",
+          "value": ""
+        },
+        {
+          "label": "Annual Receipts Receipt6",
+          "value": ""
+        },
+        {
+          "label": "Derived Income Receipt1",
+          "value": "144000",
+          "isMandatory": true
+        },
+        {
+          "label": "Derived Income Receipt2",
+          "value": ""
+        },
+        {
+          "label": "Derived Income Receipt3",
+          "value": ""
+        },
+        {
+          "label": "Derived Income Receipt4",
+          "value": ""
+        },
+        {
+          "label": "Derived Income Receipt5",
+          "value": ""
+        },
+        {
+          "label": "Derived Income Receipt6",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "key": "governmentOfIndiaBonds",
+      "title": "Govt. Of India Bonds",
+      "items": [
+        {
+          "label": "Is Bond Certification in the name of LA",
+          "value": ""
+        },
+        {
+          "label": "Is Bond Certificate matured",
+          "value": ""
+        },
+        {
+          "label": "Amount Invested or Maturity Value, whichever higher",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income Earned",
+          "value": ""
+        },
+        {
+          "label": "Derived Income",
+          "value": "5000"
+        },
+        {
+          "label": "Average Income",
+          "value": "5000"
+        }
+      ]
+    },
+    {
+      "key": "incomeTaxReturnNonIndividual",
+      "title": "Income Tax Return (Non-Individual)",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Name of Organisation/Firm",
+          "value": "No",
+          "isMandatory": true
+        },
+        {
+          "label": "Permanent Account Number",
+          "value": "No",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year",
+          "value": "AY 25-26",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 2",
+          "value": "Latest 2 Years field data Mandatory",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 3",
+          "value": "AY 23-24",
+          "isMandatory": true
+        },
+        {
+          "label": "ITR Acknowledgement Number",
+          "value": "No",
+          "isMandatory": true
+        },
+        {
+          "label": "Income from Salary",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income from Salary Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income from Salary Year 3",
+          "value": ""
+        },
+        {
+          "label": "Income from House Property",
+          "value": "No"
+        },
+        {
+          "label": "Income from House Property Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income from House Property Year 3",
+          "value": ""
+        },
+        {
+          "label": "Income from Business or Profession",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income from Business or Profession Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income from Business or Profession Year 3",
+          "value": ""
+        },
+        {
+          "label": "Short term & Capital Gains",
+          "value": "No"
+        },
+        {
+          "label": "Short term & Capital Gains Year 2",
+          "value": ""
+        },
+        {
+          "label": "Short term & Capital Gains Year 3",
+          "value": ""
+        },
+        {
+          "label": "Income from Other Sources",
+          "value": "No"
+        },
+        {
+          "label": "Income from Other Sources Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income from Other Sources Year 3",
+          "value": ""
+        },
+        {
+          "label": "Agricultural Income",
+          "value": "No"
+        },
+        {
+          "label": "Agricultural Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Agricultural Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "Exempt Income",
+          "value": "5000",
+          "isMandatory": true
+        },
+        {
+          "label": "Exempt Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Exempt Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "Gross Total Income",
+          "value": "250000",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Total Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Gross Total Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "Total Gross Total Income",
+          "value": "250000",
+          "isMandatory": true
+        },
+        {
+          "label": "Total Gross Total Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Total Gross Total Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Total Income",
+          "value": "120000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Gross Total Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Total Income Year 3",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "key": "incomeTaxReturnIndividual",
+      "title": "Income Tax Return (Individual)",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Name of Organisation/Firm",
+          "value": "No",
+          "isMandatory": true
+        },
+        {
+          "label": "Permanent Account Number",
+          "value": "No",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year",
+          "value": "AY 25-26",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 2",
+          "value": "Latest 2 Years field data Mandatory",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 3",
+          "value": "AY 23-24",
+          "isMandatory": true
+        },
+        {
+          "label": "ITR Acknowledgement Number",
+          "value": "No",
+          "isMandatory": true
+        },
+        {
+          "label": "Date of Filling ITR",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Date of Filling ITR Year 2",
+          "value": ""
+        },
+        {
+          "label": "Date of Filling ITR Year 3",
+          "value": ""
+        },
+        {
+          "label": "Income from Salary(A)",
+          "value": "100000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income from Salary(A) Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income from Salary(A) Year 3",
+          "value": ""
+        },
+        {
+          "label": "Income from House Property",
+          "value": "No"
+        },
+        {
+          "label": "Income from House Property Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income from House Property Year 3",
+          "value": ""
+        },
+        {
+          "label": "Income from Business or Profession(B)",
+          "value": "100000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income from Business or Profession(B) Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income from Business or Profession(B) Year 3",
+          "value": ""
+        },
+        {
+          "label": "Short term & Capital Gains",
+          "value": "No"
+        },
+        {
+          "label": "Short term & Capital Gains Year 2",
+          "value": ""
+        },
+        {
+          "label": "Short term & Capital Gains Year 3",
+          "value": ""
+        },
+        {
+          "label": "Income from Other Sources",
+          "value": "No"
+        },
+        {
+          "label": "Income from Other Sources Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income from Other Sources Year 3",
+          "value": ""
+        },
+        {
+          "label": "Agricultural Income",
+          "value": "No"
+        },
+        {
+          "label": "Agricultural Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Agricultural Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "Exempt Income(C)",
+          "value": "0",
+          "isMandatory": true
+        },
+        {
+          "label": "Exempt Income(C) Year 2",
+          "value": ""
+        },
+        {
+          "label": "Exempt Income(C) Year 3",
+          "value": ""
+        },
+        {
+          "label": "Gross Total Income(A+B+C)",
+          "value": "200000",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Total Income(A+B+C) Year 2",
+          "value": ""
+        },
+        {
+          "label": "Gross Total Income(A+B+C) Year 3",
+          "value": ""
+        },
+        {
+          "label": "Total Gross Total Income",
+          "value": "1200000",
+          "isMandatory": true
+        },
+        {
+          "label": "Total Gross Total Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Total Gross Total Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Total Income",
+          "value": "1200000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Gross Total Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Total Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "PF deduction - Salaried customers",
+          "value": "No"
+        },
+        {
+          "label": "PF deduction - Salaried customers Year 2",
+          "value": ""
+        },
+        {
+          "label": "PF deduction - Salaried customers Year 3",
+          "value": ""
+        },
+        {
+          "label": "Life Assured Name",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Life Assured Name Year 2",
+          "value": ""
+        },
+        {
+          "label": "Life Assured Name Year 3",
+          "value": ""
+        },
+        {
+          "label": "Is Life Assured Name Same?",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Is Life Assured Name Same? Year 2",
+          "value": ""
+        },
+        {
+          "label": "Is Life Assured Name Same? Year 3",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "key": "loanStatements",
+      "title": "Loan Statements",
+      "items": [
+        {
+          "label": "Is Loan Statements in the name of LA",
+          "value": ""
+        },
+        {
+          "label": "Is LA Defaulter in the Payment",
+          "value": ""
+        },
+        {
+          "label": "Monthly EMI as per Schedule",
+          "value": "1000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income Earned",
+          "value": ""
+        },
+        {
+          "label": "Derived Income",
+          "value": "24000"
+        },
+        {
+          "label": "Average Income",
+          "value": "24000"
+        }
+      ]
+    },
+    {
+      "key": "mutualFundAccountStatement",
+      "title": "Mutual Fund A/C Statement",
+      "items": [
+        {
+          "label": "Is Mutual Fund Statement in the name of LA",
+          "value": ""
+        },
+        {
+          "label": "Latest Market Value (as per NAV) in Statement",
+          "value": "100000"
+        },
+        {
+          "label": "Income Earned",
+          "value": ""
+        },
+        {
+          "label": "Derived Income",
+          "value": "50000"
+        },
+        {
+          "label": "Average Income",
+          "value": "50000"
+        }
+      ]
+    },
+    {
+      "key": "pensionStatement",
+      "title": "PENSION STATEMENT",
+      "items": [
+        {
+          "label": "Total Monthly Pension",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Pension Received pa",
+          "value": "120000"
+        }
+      ]
+    },
+    {
+      "key": "profitAndLossAccount",
+      "title": "Profit & Loss A/C",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Name of Organization/Firm",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "As Per Accounts of Proposer Co.",
+          "value": "Year1",
+          "isMandatory": true
+        },
+        {
+          "label": "As Per Accounts of Proposer Co. Year 2",
+          "value": "Year2",
+          "isMandatory": true
+        },
+        {
+          "label": "As Per Accounts of Proposer Co. Year 3",
+          "value": "Year3",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year",
+          "value": "AY 25-26",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 2",
+          "value": "Latest 3 Year Year data Mandatory",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 3",
+          "value": "AY 23-24",
+          "isMandatory": true
+        },
+        {
+          "label": "Shareholders Funds / Partners Capital",
+          "value": ""
+        },
+        {
+          "label": "Shareholders Funds / Partners Capital Year 2",
+          "value": ""
+        },
+        {
+          "label": "Shareholders Funds / Partners Capital Year 3",
+          "value": ""
+        },
+        {
+          "label": "Share Capital or Fixed/Fluctuating Capital",
+          "value": "No"
+        },
+        {
+          "label": "Share Capital or Fixed/Fluctuating Capital Year 2",
+          "value": ""
+        },
+        {
+          "label": "Share Capital or Fixed/Fluctuating Capital Year 3",
+          "value": ""
+        },
+        {
+          "label": "Reserves & Surplus",
+          "value": "No"
+        },
+        {
+          "label": "Reserves & Surplus Year 2",
+          "value": ""
+        },
+        {
+          "label": "Reserves & Surplus Year 3",
+          "value": ""
+        },
+        {
+          "label": "Total Shareholders Funds or Partner's Fund",
+          "value": "No"
+        },
+        {
+          "label": "Total Shareholders Funds or Partner's Fund Year 2",
+          "value": ""
+        },
+        {
+          "label": "Total Shareholders Funds or Partner's Fund Year 3",
+          "value": ""
+        },
+        {
+          "label": "Profit Calculation",
+          "value": ""
+        },
+        {
+          "label": "Profit Calculation Year 2",
+          "value": ""
+        },
+        {
+          "label": "Profit Calculation Year 3",
+          "value": ""
+        },
+        {
+          "label": "Profit Before Depreciation & Tax (PBDT)",
+          "value": "No"
+        },
+        {
+          "label": "Profit Before Depreciation & Tax (PBDT) Year 2",
+          "value": ""
+        },
+        {
+          "label": "Profit Before Depreciation & Tax (PBDT) Year 3",
+          "value": ""
+        },
+        {
+          "label": "Less : Depreciation",
+          "value": "No"
+        },
+        {
+          "label": "Less : Depreciation Year 2",
+          "value": ""
+        },
+        {
+          "label": "Less : Depreciation Year 3",
+          "value": ""
+        },
+        {
+          "label": "Profit Before Tax (PBT)",
+          "value": "No"
+        },
+        {
+          "label": "Profit Before Tax (PBT) Year 2",
+          "value": ""
+        },
+        {
+          "label": "Profit Before Tax (PBT) Year 3",
+          "value": ""
+        },
+        {
+          "label": "Tax",
+          "value": "No"
+        },
+        {
+          "label": "Tax Year 2",
+          "value": ""
+        },
+        {
+          "label": "Tax Year 3",
+          "value": ""
+        },
+        {
+          "label": "Profit After Tax (PAT)",
+          "value": "Yes"
+        },
+        {
+          "label": "Profit After Tax (PAT) Year 2",
+          "value": ""
+        },
+        {
+          "label": "Profit After Tax (PAT) Year 3",
+          "value": ""
+        },
+        {
+          "label": "Profit After Tax of Last Year",
+          "value": "No"
+        },
+        {
+          "label": "Profit After Tax of Last Year Year 2",
+          "value": ""
+        },
+        {
+          "label": "Profit After Tax of Last Year Year 3",
+          "value": ""
+        },
+        {
+          "label": "Rise In Profit as compared to Last Year",
+          "value": "No"
+        },
+        {
+          "label": "Rise In Profit as compared to Last Year Year 2",
+          "value": ""
+        },
+        {
+          "label": "Rise In Profit as compared to Last Year Year 3",
+          "value": ""
+        },
+        {
+          "label": "% Rise In Profit as compared to Last Year",
+          "value": "No"
+        },
+        {
+          "label": "% Rise In Profit as compared to Last Year Year 2",
+          "value": ""
+        },
+        {
+          "label": "% Rise In Profit as compared to Last Year Year 3",
+          "value": ""
+        },
+        {
+          "label": "Income Calculation",
+          "value": ""
+        },
+        {
+          "label": "Income Calculation Year 2",
+          "value": ""
+        },
+        {
+          "label": "Income Calculation Year 3",
+          "value": ""
+        },
+        {
+          "label": "Sales",
+          "value": "No"
+        },
+        {
+          "label": "Sales Year 2",
+          "value": ""
+        },
+        {
+          "label": "Sales Year 3",
+          "value": ""
+        },
+        {
+          "label": "Sales of Last Year",
+          "value": "No"
+        },
+        {
+          "label": "Sales of Last Year Year 2",
+          "value": ""
+        },
+        {
+          "label": "Sales of Last Year Year 3",
+          "value": ""
+        },
+        {
+          "label": "Rise In Sales as compared to Last Year",
+          "value": "No"
+        },
+        {
+          "label": "Rise In Sales as compared to Last Year Year 2",
+          "value": ""
+        },
+        {
+          "label": "Rise In Sales as compared to Last Year Year 3",
+          "value": ""
+        },
+        {
+          "label": "% Rise In Sales as compared to Last Year",
+          "value": "No"
+        },
+        {
+          "label": "% Rise In Sales as compared to Last Year Year 2",
+          "value": ""
+        },
+        {
+          "label": "% Rise In Sales as compared to Last Year Year 3",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Income",
+          "value": "Auto calculate",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Gross Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "Average Profit Before Tax",
+          "value": "No"
+        },
+        {
+          "label": "Average Profit Before Tax Year 2",
+          "value": ""
+        },
+        {
+          "label": "Average Profit Before Tax Year 3",
+          "value": ""
+        },
+        {
+          "label": "Average Profit After Tax",
+          "value": "No"
+        },
+        {
+          "label": "Average Profit After Tax Year 2",
+          "value": ""
+        },
+        {
+          "label": "Average Profit After Tax Year 3",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "key": "propertyPurchaseDocuments",
+      "title": "Property Purchase Documents",
+      "items": [
+        {
+          "label": "Is Property purchased by LA",
+          "value": ""
+        },
+        {
+          "label": "Purchase Price",
+          "value": "100000",
+          "isMandatory": true
+        },
+        {
+          "label": "Financial Year of Purchase",
+          "value": ""
+        },
+        {
+          "label": "Estimated Market Value of Property",
+          "value": ""
+        },
+        {
+          "label": "Derived Income",
+          "value": "20000"
+        }
+      ]
+    },
+    {
+      "key": "propertyValuationReport",
+      "title": "Property Valuation Report",
+      "items": [
+        {
+          "label": "Is Property Valuation Report in the name of LA",
+          "value": ""
+        },
+        {
+          "label": "Estimated Market Value of Property(as per report)",
+          "value": "100000",
+          "isMandatory": true
+        },
+        {
+          "label": "Derived Income",
+          "value": "20000"
+        }
+      ]
+    },
+    {
+      "key": "salaryCertificate",
+      "title": "Salary Certificate",
+      "items": [
+        {
+          "label": "Gross Salary PA",
+          "value": "100000",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "salaryRevisionLetter",
+      "title": "Salary Revision Letter",
+      "items": [
+        {
+          "label": "Gross Salary PA",
+          "value": "100000",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "salarySlips",
+      "title": "SALARY SLIPS",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Gross Salary Pm1",
+          "value": "50000",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Salary Pm2",
+          "value": "50000",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Salary Pm3",
+          "value": "50000",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Salary Pm4",
+          "value": ""
+        },
+        {
+          "label": "Gross Salary Pm5",
+          "value": ""
+        },
+        {
+          "label": "Gross Salary Pm6",
+          "value": ""
+        },
+        {
+          "label": "Average Salary pm",
+          "value": "50000"
+        },
+        {
+          "label": "Gross Salary pa",
+          "value": "50000"
+        },
+        {
+          "label": "Annual Bonus/Incentive/Reimbursement",
+          "value": ""
+        },
+        {
+          "label": "Average Annual Income",
+          "value": "600000"
+        },
+        {
+          "label": "Company Name",
+          "value": "ABCD Company",
+          "isMandatory": true
+        },
+        {
+          "label": "Life Assured Name",
+          "value": "Rajveer Shikhavat",
+          "isMandatory": true
+        },
+        {
+          "label": "Is Life Assured Name Same?",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "PF / UAN No",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "key": "savingsAccountStatements",
+      "title": "Savings A/C & Current A/C Bank Statements",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Is Bank Statement in the name of LA/his Business",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Latest 6 months statements given",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Any Overdraft(Negative/Debit) Balances",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Monthly Closing Bal 1",
+          "value": "600000",
+          "isMandatory": true
+        },
+        {
+          "label": "Monthly Closing Bal 2",
+          "value": ""
+        },
+        {
+          "label": "Monthly Closing Bal 3",
+          "value": ""
+        },
+        {
+          "label": "Monthly Closing Bal 4",
+          "value": ""
+        },
+        {
+          "label": "Monthly Closing Bal 5",
+          "value": ""
+        },
+        {
+          "label": "Monthly Closing Bal 6",
+          "value": ""
+        },
+        {
+          "label": "Average Bank Balance",
+          "value": "100000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Annual income",
+          "value": "100000",
+          "isMandatory": true
+        },
+        {
+          "label": "Opening Balance",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Statement Period",
+          "value": "Rajveer Shikhavat",
+          "isMandatory": true
+        },
+        {
+          "label": "Life Assured Name",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Is LA Name Match with Doc Name?",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Life Insurance Premium Deduction Entry",
+          "value": ""
+        },
+        {
+          "label": "Wine Beer_Entries",
+          "value": ""
+        },
+        {
+          "label": "Med Entry",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "key": "stockHoldingStatement",
+      "title": "Stock Holding Statement",
+      "items": [
+        {
+          "label": "Is Stock Holding Statement in name of LA/his Business",
+          "value": ""
+        },
+        {
+          "label": "Gross Total Market Value as per the Stmt",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income Earned",
+          "value": "No"
+        },
+        {
+          "label": "Derived Income",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Income",
+          "value": "10000",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "vehicleOwnershipPapers",
+      "title": "Vehicle Ownership Papers",
+      "items": [
+        {
+          "label": "Is Registration Papers in the name of LA",
+          "value": ""
+        },
+        {
+          "label": "Is Purchase invoices in the name of LA",
+          "value": ""
+        },
+        {
+          "label": "Purchase Price",
+          "value": "10000",
+          "isMandatory": true
+        },
+        {
+          "label": "Vehicle RC Number",
+          "value": ""
+        },
+        {
+          "label": "Derived Income",
+          "value": "20000",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "vahan",
+      "title": "Vahan",
+      "items": [
+        {
+          "label": "Is Registration Papers in the Name of LA",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Is Purchase Invoices in the Name of LA",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Car RC Number",
+          "value": ""
+        },
+        {
+          "label": "IDV",
+          "value": "50000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Annual Income",
+          "value": "100000"
+        }
+      ]
+    },
+    {
+      "key": "sipStatement",
+      "title": "SIP Statement",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Latest 6 Months SIP Statements Given",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Is SIP Statements in the Name of LA",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP of Month1",
+          "value": "January 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP Per Month 1",
+          "value": "₹10,000",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP of Month2",
+          "value": "February 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP Per Month2",
+          "value": "₹10,000",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP of Month 3",
+          "value": "March 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP Per Month 3",
+          "value": "₹10,000",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP of Month 4",
+          "value": "April 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP Per Month4",
+          "value": "₹10,000",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP of Month5",
+          "value": "May 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP Per Month 5",
+          "value": "₹10,000",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP of Month 6",
+          "value": "June 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "SIP Per Month 6",
+          "value": "₹10,000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Monthly SIP",
+          "value": "₹10,000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Annual Income",
+          "value": "₹12,00,000",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "gstIncome",
+      "title": "GST Income",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Assessment Year",
+          "value": "FY 25-26",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 2",
+          "value": "",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 3",
+          "value": "",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 4",
+          "value": "",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Sales",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Sales Year 2",
+          "value": ""
+        },
+        {
+          "label": "Gross Sales Year 3",
+          "value": ""
+        },
+        {
+          "label": "Gross Sales Year 4",
+          "value": ""
+        },
+        {
+          "label": "Gross Purchases",
+          "value": "No"
+        },
+        {
+          "label": "Gross Purchases Year 2",
+          "value": ""
+        },
+        {
+          "label": "Gross Purchases Year 3",
+          "value": ""
+        },
+        {
+          "label": "Gross Purchases Year 4",
+          "value": ""
+        },
+        {
+          "label": "Profit After GST",
+          "value": "No"
+        },
+        {
+          "label": "Profit After GST Year 2",
+          "value": ""
+        },
+        {
+          "label": "Profit After GST Year 3",
+          "value": ""
+        },
+        {
+          "label": "Profit After GST Year 4",
+          "value": ""
+        },
+        {
+          "label": "Total of Gross Sales",
+          "value": "100000",
+          "isMandatory": true
+        },
+        {
+          "label": "Total of Gross Sales Year 2",
+          "value": ""
+        },
+        {
+          "label": "Total of Gross Sales Year 3",
+          "value": ""
+        },
+        {
+          "label": "Total of Gross Sales Year 4",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Sales",
+          "value": "200000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Gross Sales Year 2",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Sales Year 3",
+          "value": ""
+        },
+        {
+          "label": "Average Gross Sales Year 4",
+          "value": ""
+        },
+        {
+          "label": "Average Annual Income",
+          "value": "300000",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Annual Income Year 2",
+          "value": ""
+        },
+        {
+          "label": "Average Annual Income Year 3",
+          "value": ""
+        },
+        {
+          "label": "Average Annual Income Year 4",
+          "value": ""
+        }
+      ]
+    },
+    {
+      "key": "bankStatementSalaryCredit",
+      "title": "Bank Statement with Salary Credit Details",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Is Bank Statement in the Name of LA",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Salary Month1",
+          "value": "January 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Salary Credited PM1",
+          "value": "80000",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Salary Month 2",
+          "value": "February 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Salary Credited PM2",
+          "value": "82000",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Salary Month 3",
+          "value": "March 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Salary Credited PM3",
+          "value": "81000",
+          "isMandatory": true
+        },
+        {
+          "label": "Net Salary Month 4",
+          "value": ""
+        },
+        {
+          "label": "Net Salary Credited PM4",
+          "value": ""
+        },
+        {
+          "label": "Net Salary Month 5",
+          "value": ""
+        },
+        {
+          "label": "Net Salary Credited PM 5",
+          "value": ""
+        },
+        {
+          "label": "Net Salary Month 6",
+          "value": ""
+        },
+        {
+          "label": "Net Salary Credited PM 6",
+          "value": ""
+        },
+        {
+          "label": "Average Net Salary Credited PM",
+          "value": "81000"
+        },
+        {
+          "label": "Net Salary Credited PA",
+          "value": "1069200"
+        },
+        {
+          "label": "Annual Bonus /Incentive /Reimbursement",
+          "value": "0"
+        },
+        {
+          "label": "Average Annual Income",
+          "value": "1069200"
+        },
+        {
+          "label": "Salary Credited",
+          "value": "No"
+        },
+        {
+          "label": "Opening Balance",
+          "value": "150000",
+          "isMandatory": true
+        },
+        {
+          "label": "Closing Balance",
+          "value": "No"
+        },
+        {
+          "label": "Statement Period",
+          "value": "January 2025 - March 2025",
+          "isMandatory": true
+        },
+        {
+          "label": "Life Assured Name",
+          "value": "Rahul Sharma",
+          "isMandatory": true
+        },
+        {
+          "label": "Is LA Name Match with Doc Name?",
+          "value": "Yes",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "epfBasic",
+      "title": "EMPLOYEE PROVIDENT FUND - BASIC",
+      "items": [
+        {
+          "label": "Latest Organization Name",
+          "value": "ABC Technologies Pvt. Ltd.",
+          "isMandatory": true
+        },
+        {
+          "label": "Is Organization Name Same?",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "Income",
+          "value": "972000",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "epfAdvanced",
+      "title": "EMPLOYEE PROVIDENT FUND - ADVANCED",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Latest Organization Name",
+          "value": "ABC Technologies Pvt. Ltd.",
+          "isMandatory": true
+        },
+        {
+          "label": "Is Organization Name Same?",
+          "value": "Yes",
+          "isMandatory": true
+        },
+        {
+          "label": "PF Contribution M1",
+          "value": "5000",
+          "isMandatory": true
+        },
+        {
+          "label": "PF Contribution M2",
+          "value": "5000",
+          "isMandatory": true
+        },
+        {
+          "label": "PF Contribution M3",
+          "value": "5000",
+          "isMandatory": true
+        },
+        {
+          "label": "PF Contribution M4",
+          "value": "5000",
+          "isMandatory": true
+        },
+        {
+          "label": "PF Contribution M5",
+          "value": "5000",
+          "isMandatory": true
+        },
+        {
+          "label": "PF Contribution M6",
+          "value": "5000",
+          "isMandatory": true
+        },
+        {
+          "label": "Annual Income",
+          "value": "60000",
+          "isMandatory": true
+        }
+      ]
     }
   ]
 }

@@ -45,11 +45,11 @@ import { toFilterComparableValue } from "../../utils/filter";
 import { useAppDispatch } from "../../store/hooks";
 import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
 import { useAppContext } from "../../hooks/useAppContext";
-
+ 
 type SortDirection = "asc" | "desc";
 type PoolStatusFilter = "All" | "Active" | "Error";
 type TaskTimingStatus = "normal" | "atRisk" | "due";
-
+ 
 const TASK_TIMING_ROW_STYLES: Record<
   TaskTimingStatus,
   { backgroundColor: string; hoverColor: string; textColor: string }
@@ -70,43 +70,43 @@ const TASK_TIMING_ROW_STYLES: Record<
     textColor: "#9A2529",
   },
 };
-
+ 
 const sanitizeFileNamePart = (value: string) =>
   value.trim().replace(/[^a-z0-9]+/gi, "_").replace(/^_+|_+$/g, "") || "table";
-
+ 
 const escapeHtml = (value: unknown) =>
   String(value ?? "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
-
+ 
 const getExportValue = (value: unknown) => {
   if (value === undefined || value === null) return "";
   if (typeof value === "object") return JSON.stringify(value);
-
+ 
   return String(value);
 };
-
+ 
 const getExportColumnKeys = (rows: tableData[]) => {
   const rowKeys = new Set<string>();
-
+ 
   rows.forEach((row) => {
     Object.keys(row as unknown as Record<string, unknown>).forEach((key) => {
       rowKeys.add(key);
     });
   });
-
+ 
   const configuredKeys = allColumns
     .map((column) => String(column.key))
     .filter((key) => rowKeys.has(key));
   const extraKeys = Array.from(rowKeys).filter(
     (key) => !configuredKeys.includes(key),
   );
-
+ 
   return [...configuredKeys, ...extraKeys];
 };
-
+ 
 const downloadRowsAsExcel = ({
   rows,
   columnKeys,
@@ -130,7 +130,7 @@ const downloadRowsAsExcel = ({
             `<td style="mso-number-format:'\\@';">${escapeHtml(getExportValue(rowData[key]))}</td>`,
         )
         .join("");
-
+ 
       return `<tr>${cells}</tr>`;
     })
     .join("");
@@ -145,7 +145,7 @@ const downloadRowsAsExcel = ({
   });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
-
+ 
   link.href = url;
   link.download = `${sanitizeFileNamePart(selectedPool)}_${new Date().toISOString().slice(0, 10)}.xls`;
   document.body.appendChild(link);
@@ -153,39 +153,41 @@ const downloadRowsAsExcel = ({
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
 };
-
+ 
 const getTimestamp = (value?: string) => {
   if (!value) return null;
-
+ 
   const timestamp = Date.parse(value);
   return Number.isNaN(timestamp) ? null : timestamp;
 };
-
+ 
 const getTaskTimingStatus = (row: tableData, now: number): TaskTimingStatus => {
   const startTime = getTimestamp(row.start_time);
   const atRiskTime = getTimestamp(row.at_risk_time);
   const dueDate = getTimestamp(row.due_date);
-
+ 
   if (startTime !== null && now < startTime) {
     return "normal";
   }
-
+ 
   if (dueDate !== null && now >= dueDate) {
     return "due";
   }
-
+ 
   if (atRiskTime !== null && now >= atRiskTime) {
     return "atRisk";
   }
-
+ 
   return "normal";
 };
-
+ 
 const roleMapper = {
   "CUW_TASK": "CUW Pool",
+  "UW_TASK": "CUW Pool",
   "CMO_TASK": "CMO Pool",
   "CVT_TASK": "CVT Pool",
   "CPT_TASK": "CPT_TASK",
+  "CPT_DATA_ENTRY_NMR_TASK": "CPT_TASK",
   "DVT_TASK": "DVT Pool",
   "PIVV_TASK": "PIVV Pool",
   "PRE_ISSUANCE_SERVICING_TASK": "Pre Issuance Servicing Pool",
@@ -204,19 +206,23 @@ const roleMapper = {
   "REQUIREMENT_POOL": "Requirement Pool",
   "CUW_CLAIM_AUDIT_TASK": "Claim Audit Pool",
   "ACCUITY_TASK": "Accuity Pool",
-
+  "AMR_MEDICAL_TASK":"AMR_MEDICAL_TASK",
+  "AMR_NON_MEDICAL_TASK":"AMR_NON_MEDICAL_TASK",
+  "NON_MEDICAL_POOL":"AMR_NON_MEDICAL_TASK",
+ 
   "ECG_TASK": "ECG Pool",
   "TMT_TASK": "TMT Pool",
   "GRIEVANCE_TASK": "Grievance Pool",
   "RECONSIDERATION_TASK": "Reconsideration Pool",
   "REJECT_TASK": "Reject Pool",
   "READY_FOR_ISSUANCE_TASK": "Ready For Issuance Pool",
-
+ 
   "GUW_FORMAL_TASK": "GUW_FORMAL_TASK",
   "DVT_FORMAL_TASK": "DVT_FORMAL_TASK",
-  "RISK_TASK":"RISK_TASK"
+  "RISK_TASK":"RISK_TASK",
+  "ACUITY_TASK":"ACUITY_TASK"
 }
-
+ 
 const RightPanel = ({
   selectedPool,
   rows,
@@ -228,9 +234,9 @@ const RightPanel = ({
   const navigate = useNavigate();
   const { businessType } = useAppContext();
   const [openFilterDialog, setOpenFilterDialog] = useState<boolean>(false);
-
+ 
   // ---------------- STATES ----------------
-
+ 
   const username = localStorage.getItem("username") ?? "";
   const password = localStorage.getItem("password") ?? "";
   const safeBusinessType =
@@ -242,11 +248,11 @@ const RightPanel = ({
     updateConfig,
     maxVisibleColumns,
   } = useColumnConfig(username, selectedPool, rows);
-
+ 
   const [left, setLeft] = useState<string[]>([]);
   const [right, setRight] = useState<string[]>([]);
   const [checked, setChecked] = useState<string[]>([]);
-
+ 
   const [openTransferDialog, setOpenTransferDialog] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchText, setSearchText] = useState("");
@@ -261,28 +267,28 @@ const RightPanel = ({
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
     {},
   );
-
+ 
   // const hasPoolStatus = rows.some((row) => {
   //   const rowData = row as unknown as Record<string, unknown>;
   //   const poolStatus = rowData.poolStatus;
   //   return typeof poolStatus === "string" && poolStatus.trim().length > 0;
   // });
-
+ 
   useEffect(() => {
     const intervalId = window.setInterval(() => {
       setCurrentTimeMs(Date.now());
     }, 30000);
-
+ 
     return () => window.clearInterval(intervalId);
   }, []);
-
+ 
   const handleApplicationClick = async (
     e: React.MouseEvent,
     row: tableData,
   ) => {
     e.preventDefault();
     e.stopPropagation();
-
+ 
     const rawTaskId = String(row.taskId ?? "").trim();
     const [instanceFromTaskId = "", taskFromTaskId = ""] = rawTaskId.includes(".")
       ? rawTaskId.split(".")
@@ -294,24 +300,24 @@ const RightPanel = ({
       setClaimError("Task id is missing. Unable to claim this case.");
       return;
     }
-
+ 
     try {
       const claimResponse = await dispatch(
         claimTaskThunk({ username, password, taskId: claimTaskId }),
       ).unwrap();
-
+ 
       const isClaimed =
         claimResponse.success === true ||
         claimResponse.state?.toLowerCase() === "claimed";
-
+ 
       if (!isClaimed) {
         setClaimError(claimResponse.message || "Failed to claim task.");
         return;
       }
-
+ 
       const mappedRoleType =
         roleMapper[row.roleType as keyof typeof roleMapper] ?? row.roleType;
-
+ 
       localStorage.setItem("roleType", mappedRoleType);
       localStorage.setItem("taskCompositeId", rawTaskId);
       localStorage.setItem("taskId", claimTaskId);
@@ -327,15 +333,15 @@ const RightPanel = ({
           taskCompositeId: rawTaskId,
         }),
       );
-
+ 
       const targetBusinessType =
         normalizeBusinessType(row.businessType) ?? safeBusinessType;
-
+ 
       const targetPath =
         row.roleType === "Grievance Pool"
           ? getGrievanceApplicationPath(targetBusinessType, row.applicationNo)
           : getDRSPath(targetBusinessType, row.applicationNo);
-
+ 
       navigate(targetPath);
     } catch (error) {
       setClaimError(
@@ -343,7 +349,7 @@ const RightPanel = ({
       );
     }
   };
-
+ 
   const columnByKey = useMemo(
     () => new Map(allColumns.map((column) => [String(column.key), column])),
     [],
@@ -364,57 +370,57 @@ const RightPanel = ({
     setChecked([]);
     setOpenTransferDialog(true);
   };
-
+ 
   // ---------------- MOVE LOGIC ----------------
   const handleToggle = (item: string) => () => {
     setChecked((prev) =>
       prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
     );
   };
-
+ 
   const moveRight = () => {
     const checkedFromAvailable = checked.filter((item) => left.includes(item));
     const availableSlots = maxVisibleColumns - right.length;
-
+ 
     if (availableSlots <= 0) {
       setClaimError(`Only ${maxVisibleColumns} columns can be visible at a time.`);
       return;
     }
-
+ 
     const itemsToMove = checkedFromAvailable.slice(0, availableSlots);
-
+ 
     if (checkedFromAvailable.length > availableSlots) {
       setClaimError(`Only ${maxVisibleColumns} columns can be visible at a time.`);
     }
-
+ 
     setLeft((prev) => prev.filter((item) => !itemsToMove.includes(item)));
     setRight((prev) => [...prev, ...itemsToMove]);
     setChecked([]);
   };
-
+ 
   const moveLeft = () => {
     setRight((prev) => prev.filter((i) => !checked.includes(i)));
     setLeft((prev) => [...prev, ...checked]);
     setChecked([]);
   };
-
+ 
   const handleSort = (columnKey: keyof tableData) => {
     setPage(0);
-
+ 
     if (sortKey === columnKey) {
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
       return;
     }
-
+ 
     setSortKey(columnKey);
     setSortDirection("asc");
   };
-
+ 
   const getSortIndicator = (columnKey: keyof tableData) => {
     if (sortKey !== columnKey) return "⇅";
     return sortDirection === "asc" ? "▲" : "▼";
   };
-
+ 
   const compareByColumn = (
     a: tableData,
     b: tableData,
@@ -422,35 +428,35 @@ const RightPanel = ({
   ) => {
     const aRaw = a[column.key];
     const bRaw = b[column.key];
-
+ 
     const aText = toFilterComparableValue(aRaw).trim();
     const bText = toFilterComparableValue(bRaw).trim();
-
+ 
     if (!aText && !bText) return 0;
     if (!aText) return 1;
     if (!bText) return -1;
-
+ 
     if (column.numeric) {
       const aNum = Number(aText.toString().replace(/,/g, ""));
       const bNum = Number(bText.toString().replace(/,/g, ""));
-
+ 
       if (Number.isFinite(aNum) && Number.isFinite(bNum)) {
         return aNum - bNum;
       }
     }
-
+ 
     const aDate = Date.parse(aText);
     const bDate = Date.parse(bText);
     if (!Number.isNaN(aDate) && !Number.isNaN(bDate)) {
       return aDate - bDate;
     }
-
+ 
     return aText.localeCompare(bText, undefined, {
       numeric: true,
       sensitivity: "base",
     });
   };
-
+ 
   // ---------------- APPLY ----------------
   const handleApply = async () => {
     try {
@@ -458,7 +464,7 @@ const RightPanel = ({
         visible: right,
         hidden: left,
       });
-
+ 
       setOpenTransferDialog(false);
     } catch (error) {
       setClaimError(
@@ -525,11 +531,11 @@ const RightPanel = ({
       ))}
     </TableRow>
   );
-
+ 
   // ---------------- RENDER LIST ----------------
   const customList = (title: string, items: string[]) => {
     const isAvailableList = title === "Available";
-
+ 
     return (
       <Paper
         sx={{
@@ -541,7 +547,7 @@ const RightPanel = ({
         <Box sx={{ px: 2, py: 1, backgroundColor: "#f5f5f5" }}>
           <Typography variant="subtitle1">{title}</Typography>
         </Box>
-
+ 
         <List dense>
           {items.map((item) => (
             <ListItem key={item} disablePadding>
@@ -563,37 +569,37 @@ const RightPanel = ({
       </Paper>
     );
   };
-
+ 
   const filteredRows = rows
     .filter((row) => {
       if (poolStatusFilter === "All") return true;
-
+ 
       const rowData = row as unknown as Record<string, unknown>;
       const poolStatus = String(rowData.poolStatus ?? "").trim().toLowerCase();
-
+ 
       return poolStatus === poolStatusFilter.toLowerCase();
     })
     .filter((row) => {
       const activeFilters = Object.entries(filterValues);
-
+ 
       if (!activeFilters.length) return true;
-
+ 
       return activeFilters.every(([key, values]) => {
         if (!values.length) return true;
-
+ 
         const rowValue = toFilterComparableValue(row[key as keyof typeof row]);
-
+ 
         return values.includes(rowValue);
       });
     })
     .filter((row) => {
       if (!searchText.trim()) return true;
-
+ 
       const search = searchText.toLowerCase();
-
+ 
       return visibleColumns.some((col) => {
         const value = row[col.key];
-
+ 
         return String(value ?? "")
           .toLowerCase()
           .includes(search);
@@ -601,28 +607,28 @@ const RightPanel = ({
     });
   const sortedRows = useMemo(() => {
     if (!sortKey) return filteredRows;
-
+ 
     const sortColumn = visibleColumns.find((column) => column.key === sortKey);
     if (!sortColumn) return filteredRows;
-
+ 
     const sorted = [...filteredRows].sort((a, b) =>
       compareByColumn(a, b, sortColumn),
     );
-
+ 
     return sortDirection === "asc" ? sorted : sorted.reverse();
   }, [filteredRows, sortDirection, sortKey, visibleColumns]);
-
+ 
   const paginatedRows =
     rowsPerPage === -1
       ? sortedRows
       : sortedRows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
   const totalCount = sortedRows.length;
-
+ 
   const totalPages =
     rowsPerPage === -1 ? 1 : Math.ceil(totalCount / rowsPerPage);
-
+ 
   const startRecord = rowsPerPage === -1 ? 1 : page * rowsPerPage + 1;
-
+ 
   const endRecord =
     rowsPerPage === -1
       ? totalCount
@@ -632,10 +638,10 @@ const RightPanel = ({
     setRowsPerPage(value);
     setPage(0);
   };
-
+ 
   const handleDownloadExcel = () => {
     if (!sortedRows.length || !exportColumnKeys.length) return;
-
+ 
     downloadRowsAsExcel({
       rows: sortedRows,
       columnKeys: exportColumnKeys,
@@ -643,10 +649,10 @@ const RightPanel = ({
       selectedPool,
     });
   };
-
+ 
   const renderPageButtons = () => {
     const pages: Array<number | string> = [];
-
+ 
     if (totalPages <= 7) {
       for (let i = 1; i <= totalPages; i += 1) pages.push(i);
     } else if (page <= 3) {
@@ -664,7 +670,7 @@ const RightPanel = ({
     } else {
       pages.push(1, 2, "...", page + 1, "...", totalPages - 1, totalPages);
     }
-
+ 
     return pages.map((item, index) =>
       typeof item === "number" ? (
         <CustomButton
@@ -695,7 +701,7 @@ const RightPanel = ({
       ),
     );
   };
-
+ 
   return (
     <Box
       sx={{
@@ -848,7 +854,7 @@ const RightPanel = ({
                   >
                     <SearchBar onSearch={setSearchText} />
                   </Box>
-
+ 
                   {/* Search icon */}
                   <Box
                     sx={{
@@ -901,7 +907,7 @@ const RightPanel = ({
                 </Box>
               </Box>
             </Box>
-
+ 
             <Paper
               sx={{
                 height: "100%",
@@ -927,7 +933,7 @@ const RightPanel = ({
                     {paginatedRows.map((row) => {
                       const taskTimingStatus = getTaskTimingStatus(row, currentTimeMs);
                       const taskTimingRowStyle = TASK_TIMING_ROW_STYLES[taskTimingStatus];
-
+ 
                       return (
                         <TableRow
                           key={row.id}
@@ -1041,7 +1047,7 @@ const RightPanel = ({
                       <MenuItem value={-1}>All</MenuItem>
                     </Select>
                   </Box>
-
+ 
                   <Box
                     sx={{
                       display: "flex",
@@ -1057,9 +1063,9 @@ const RightPanel = ({
                       <KeyLeftArrowIcon />
                       Previous
                     </CustomButton>
-
+ 
                     {renderPageButtons()}
-
+ 
                     <CustomButton
                       onClick={() =>
                         setPage(Math.min(totalPages - 1, page + 1))
@@ -1070,16 +1076,16 @@ const RightPanel = ({
                       <KeyRightArrowIcon />
                     </CustomButton>
                   </Box>
-
+ 
                   <Typography sx={{ fontSize: 14, color: "#444444" }}>
                     Showing {startRecord}-{endRecord} of {totalCount}
                   </Typography>
                 </Box>
               </Box>)}
-
+ 
             </Paper>
             {/*  ------- Filter table ------------ */}
-
+ 
             <FilterTable
               openFilterDialog={openFilterDialog}
               setOpenFilterDialog={setOpenFilterDialog}
@@ -1119,7 +1125,7 @@ const RightPanel = ({
                 }}
               >
                 {customList("Available", left)}
-
+ 
                 <Box
                   sx={{
                     display: "flex",
@@ -1154,7 +1160,7 @@ const RightPanel = ({
                     <Box component="span">‹</Box>
                   </CustomButton>
                 </Box>
-
+ 
                 {customList("Visible", right)}
               </Box>
             </CustomDialog>
@@ -1185,3 +1191,5 @@ const RightPanel = ({
   );
 };
 export default RightPanel;
+ 
+ 

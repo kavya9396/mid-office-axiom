@@ -20,6 +20,7 @@ import type { RootState } from "../../../store/store";
 import { financialThunk } from "../../../store/thunks/financialThunk";
 import type { ApplicantTab, DRSRequest, FinancialResponse } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
+import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
 // import { formatCurrencyINR } from "../../../utils/helpers";
 import BreDecision from "../DRS_Accordions/BreDecision";
 // import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
@@ -44,8 +45,8 @@ const drsViewTabs: { key: DRSViewTab; label: string }[] = [
   { key: "financial", label: "View Financial" },
 ];
 
-const buildInitialFieldValues = () => {
-  return financialSections.reduce<Record<FinancialSectionKey, Record<string, string>>>(
+const buildInitialFieldValues = (sections: FinancialSectionConfig[] = financialSections) => {
+  return sections.reduce<Record<FinancialSectionKey, Record<string, string>>>(
     (accumulator, section) => {
       accumulator[section.key] = section.items.reduce<Record<string, string>>((itemAccumulator, item) => {
         itemAccumulator[item.label] = item.value == null ? "" : String(item.value);
@@ -56,6 +57,35 @@ const buildInitialFieldValues = () => {
     },
     {} as Record<FinancialSectionKey, Record<string, string>>
   );
+};
+
+const buildFinancialSectionsFromResponse = (responseSections: FinancialResponse["sections"] = []) => {
+  const responseSectionsByKey = new Map(responseSections.map((section) => [section.key, section]));
+
+  return financialSections.map((section) => {
+    const responseSection = responseSectionsByKey.get(section.key);
+
+    if (!responseSection) {
+      return section;
+    }
+
+    const responseItemsByLabel = new Map(responseSection.items.map((item) => [item.label, item]));
+
+    return {
+      ...section,
+      columns: responseSection.columns ?? section.columns,
+      items: section.items.map((item) => {
+        const responseItem = responseItemsByLabel.get(item.label);
+
+        return {
+          ...item,
+          value: responseItem?.value ?? "",
+          isMandatory: responseItem?.isMandatory ?? item.isMandatory,
+          mandatoryCondition: responseItem?.mandatoryCondition ?? item.mandatoryCondition,
+        };
+      }),
+    };
+  });
 };
 
 // const getMemberSummary = (member?: MedicalSummaryMember) => {
@@ -122,7 +152,7 @@ const getFieldValue = (
   }
 
   if (fallback == null || fallback === "") {
-    return "NA";
+    return "";
   }
 
   return String(fallback);
@@ -227,6 +257,25 @@ const FORM_J_ROW_LABELS = [
   "Derived Income",
 ];
 
+const COMMISSION_MONTH_LABELS = ["Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6"] as const;
+const COMMISSION_AVERAGE_PM_LABEL = "Average commission pm";
+const COMMISSION_AVERAGE_ANNUAL_LABEL = "Average Annual Income";
+
+type CommissionStatementCalculationRequest = {
+  applicationId: string;
+  roleType: string;
+  months: Record<string, string>;
+};
+
+type CommissionStatementCalculationResponse = {
+  averageCommissionPm?: string | number;
+  averageAnnualIncome?: string | number;
+  data?: {
+    averageCommissionPm?: string | number;
+    averageAnnualIncome?: string | number;
+  };
+};
+
 type SubmitResponse = {
   success?: boolean;
   message?: string;
@@ -246,6 +295,77 @@ const isFieldMandatory = (field?: FinancialField) => {
   }
 
   return false;
+};
+
+const isCommissionCalculatedField = (sectionKey: FinancialSectionKey, label: string) =>
+  sectionKey === "commissionStatement" &&
+  (label === COMMISSION_AVERAGE_PM_LABEL || label === COMMISSION_AVERAGE_ANNUAL_LABEL);
+
+const parseCommissionAmount = (value: string) => {
+  const normalizedValue = value.replace(/,/g, "").trim();
+
+  if (!normalizedValue) {
+    return null;
+  }
+
+  const amount = Number(normalizedValue);
+  return Number.isFinite(amount) ? amount : null;
+};
+
+const formatCalculatedAmount = (value: number) => {
+  if (Number.isInteger(value)) {
+    return String(value);
+  }
+
+  return value.toFixed(2);
+};
+
+const calculateCommissionStatementValues = (months: Record<string, string>) => {
+  const enteredAmounts = COMMISSION_MONTH_LABELS
+    .map((label) => parseCommissionAmount(months[label] ?? ""))
+    .filter((amount): amount is number => amount != null);
+
+  if (enteredAmounts.length === 0) {
+    return {
+      averageCommissionPm: "",
+      averageAnnualIncome: "",
+    };
+  }
+
+  const totalCommission = enteredAmounts.reduce((total, amount) => total + amount, 0);
+  const averageCommissionPm = totalCommission / enteredAmounts.length;
+
+  return {
+    averageCommissionPm: formatCalculatedAmount(averageCommissionPm),
+    averageAnnualIncome: formatCalculatedAmount(averageCommissionPm * 12),
+  };
+};
+
+const getCommissionCalculationResponseValues = (
+  response: CommissionStatementCalculationResponse,
+  fallback: ReturnType<typeof calculateCommissionStatementValues>,
+) => ({
+  averageCommissionPm: String(response.data?.averageCommissionPm ?? response.averageCommissionPm ?? fallback.averageCommissionPm),
+  averageAnnualIncome: String(response.data?.averageAnnualIncome ?? response.averageAnnualIncome ?? fallback.averageAnnualIncome),
+});
+
+const getFinancialFieldValidationError = (sectionKey: FinancialSectionKey, field: FinancialField, value: string) => {
+  const rule = getFinancialFieldRule(sectionKey, field.label);
+  const validationError = validateFinancialFieldValue(value, rule);
+
+  if (validationError) {
+    return validationError;
+  }
+
+  if (rule) {
+    return "";
+  }
+
+  if (isFieldMandatory(field) && !value.trim()) {
+    return "This field is mandatory.";
+  }
+
+  return "";
 };
 
 const renderFieldValue = (
@@ -336,8 +456,8 @@ const renderMultiYearTableSection = (
     return {
       label,
       year1: getFieldValue(values, section.key, year1FieldLabel, item?.value),
-      year2: getFieldValue(values, section.key, year2FieldLabel, "NA"),
-      year3: getFieldValue(values, section.key, year3FieldLabel, "NA"),
+      year2: getFieldValue(values, section.key, year2FieldLabel, " "),
+      year3: getFieldValue(values, section.key, year3FieldLabel, " "),
       year1FieldLabel,
       year2FieldLabel,
       year3FieldLabel,
@@ -434,9 +554,9 @@ const renderFourYearTableSection = (
     return {
       label,
       year1: getFieldValue(values, section.key, year1FieldLabel, item?.value),
-      year2: getFieldValue(values, section.key, year2FieldLabel, "NA"),
-      year3: getFieldValue(values, section.key, year3FieldLabel, "NA"),
-      year4: getFieldValue(values, section.key, year4FieldLabel, "NA"),
+      year2: getFieldValue(values, section.key, year2FieldLabel, " "),
+      year3: getFieldValue(values, section.key, year3FieldLabel, " "),
+      year4: getFieldValue(values, section.key, year4FieldLabel, " "),
       year1FieldLabel,
       year2FieldLabel,
       year3FieldLabel,
@@ -727,11 +847,11 @@ const renderFormJSection = (
     return {
       label: rowLabel,
       receipt1: getFieldValue(values, section.key, receipt1FieldLabel, rowItem?.value),
-      receipt2: getFieldValue(values, section.key, receipt2FieldLabel, "NA"),
-      receipt3: getFieldValue(values, section.key, receipt3FieldLabel, "NA"),
-      receipt4: getFieldValue(values, section.key, receipt4FieldLabel, "NA"),
-      receipt5: getFieldValue(values, section.key, receipt5FieldLabel, "NA"),
-      receipt6: getFieldValue(values, section.key, receipt6FieldLabel, "NA"),
+      receipt2: getFieldValue(values, section.key, receipt2FieldLabel, " "),
+      receipt3: getFieldValue(values, section.key, receipt3FieldLabel, " "),
+      receipt4: getFieldValue(values, section.key, receipt4FieldLabel, " "),
+      receipt5: getFieldValue(values, section.key, receipt5FieldLabel, " "),
+      receipt6: getFieldValue(values, section.key, receipt6FieldLabel, " "),
       receipt1FieldLabel,
       receipt2FieldLabel,
       receipt3FieldLabel,
@@ -828,6 +948,7 @@ const renderStandardSection = (
       {section.items.map((item) => {
         const required = isFieldMandatory(item);
         const value = getFieldValue(values, section.key, item.label, item.value);
+        const isFieldEditable = isEditable && !isCommissionCalculatedField(section.key, item.label);
 
         return (
           <Box key={`${section.key}-${item.label}`}>
@@ -837,7 +958,7 @@ const renderStandardSection = (
             </Box>
             {renderFieldValue(
               value,
-              isEditable,
+              isFieldEditable,
               (nextValue) => onFieldValueChange(section.key, item.label, nextValue),
               required,
               sectionErrors[item.label]
@@ -879,15 +1000,14 @@ const ViewFinancial = () => {
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
-  const isCptPool = roleType === "CPT_TASK";
   const isFormalRole = isFormalTaskRole(roleType);
   const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
+  const displayFinancialSections = useMemo(
+    () => buildFinancialSectionsFromResponse(financialData?.sections),
+    [financialData?.sections]
+  );
 
   useEffect(() => {
-    if (isCptPool) {
-      return;
-    }
-
     const payload: DRSRequest = {
       applicationId: safeApplicationId,
       roleType,
@@ -899,6 +1019,7 @@ const ViewFinancial = () => {
         setError(null);
         const response = await dispatch(financialThunk(payload)).unwrap();
         setFinancialData(response);
+        setFinancialFieldValues(buildInitialFieldValues(buildFinancialSectionsFromResponse(response.sections)));
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch financial details.");
       } finally {
@@ -907,7 +1028,74 @@ const ViewFinancial = () => {
     };
 
     void fetchFinancial();
-  }, [dispatch, isCptPool, roleType, safeApplicationId]);
+  }, [dispatch, roleType, safeApplicationId]);
+
+  const commissionMonthValueKey = useMemo(
+    () => COMMISSION_MONTH_LABELS.map((label) => financialFieldValues.commissionStatement?.[label] ?? "").join("|"),
+    [financialFieldValues]
+  );
+
+  useEffect(() => {
+    if (!isEditable) {
+      return;
+    }
+
+    const enteredMonthValues = commissionMonthValueKey.split("|");
+    const months = COMMISSION_MONTH_LABELS.reduce<Record<string, string>>((accumulator, label, index) => {
+      accumulator[label] = enteredMonthValues[index] ?? "";
+      return accumulator;
+    }, {});
+
+    const fallbackValues = calculateCommissionStatementValues(months);
+    const hasEnteredMonth = COMMISSION_MONTH_LABELS.some((label) => months[label].trim());
+    const hasInvalidMonth = COMMISSION_MONTH_LABELS.some((label) => {
+      const value = months[label].trim();
+      return Boolean(value) && parseCommissionAmount(value) == null;
+    });
+
+    if (!hasEnteredMonth) {
+      return;
+    }
+
+    if (hasInvalidMonth) {
+      return;
+    }
+
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const response = await apiRequest<CommissionStatementCalculationResponse, CommissionStatementCalculationRequest>({
+          url: url("financialCommissionCalculate" as ApiKey),
+          method: "POST",
+          body: {
+            applicationId: safeApplicationId,
+            roleType,
+            months,
+          },
+        });
+        const calculatedValues = getCommissionCalculationResponseValues(response, fallbackValues);
+
+        setFinancialFieldValues((currentValues) => ({
+          ...currentValues,
+          commissionStatement: {
+            ...currentValues.commissionStatement,
+            [COMMISSION_AVERAGE_PM_LABEL]: calculatedValues.averageCommissionPm,
+            [COMMISSION_AVERAGE_ANNUAL_LABEL]: calculatedValues.averageAnnualIncome,
+          },
+        }));
+      } catch {
+        setFinancialFieldValues((currentValues) => ({
+          ...currentValues,
+          commissionStatement: {
+            ...currentValues.commissionStatement,
+            [COMMISSION_AVERAGE_PM_LABEL]: fallbackValues.averageCommissionPm,
+            [COMMISSION_AVERAGE_ANNUAL_LABEL]: fallbackValues.averageAnnualIncome,
+          },
+        }));
+      }
+    }, 400);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [commissionMonthValueKey, isEditable, roleType, safeApplicationId]);
 
   const availableMemberTypes = useMemo(
     () => financialData?.summary?.map((item) => item.memberType) ?? [],
@@ -960,10 +1148,10 @@ const ViewFinancial = () => {
 
   const resolvedActiveSectionId = useMemo(
     () =>
-      financialSections.some((section) => section.key === activeSectionId)
+      displayFinancialSections.some((section) => section.key === activeSectionId)
         ? activeSectionId
-        : (financialSections[0]?.key ?? ""),
-    [activeSectionId]
+        : (displayFinancialSections[0]?.key ?? ""),
+    [activeSectionId, displayFinancialSections]
   );
 
   useEffect(() => {
@@ -1007,7 +1195,7 @@ const ViewFinancial = () => {
   }, [resolvedActiveSectionId]);
 
   useEffect(() => {
-    if (loading || financialSections.length === 0) {
+    if (loading || displayFinancialSections.length === 0) {
       return;
     }
 
@@ -1033,7 +1221,7 @@ const ViewFinancial = () => {
       }
     );
 
-    financialSections.forEach((section) => {
+    displayFinancialSections.forEach((section) => {
       const sectionNode = sectionRefs.current[section.key];
       if (sectionNode) {
         observer.observe(sectionNode);
@@ -1043,7 +1231,7 @@ const ViewFinancial = () => {
     return () => {
       observer.disconnect();
     };
-  }, [loading, currentApplicantTab]);
+  }, [loading, currentApplicantTab, displayFinancialSections]);
 
   const handleSectionMenuClick = (sectionId: string) => {
     setActiveSectionId(sectionId);
@@ -1068,13 +1256,26 @@ const ViewFinancial = () => {
   };
 
   const handleFieldValueChange = (sectionKey: FinancialSectionKey, label: string, value: string) => {
-    setFinancialFieldValues((currentValues) => ({
-      ...currentValues,
-      [sectionKey]: {
+    setFinancialFieldValues((currentValues) => {
+      const nextSectionValues = {
         ...currentValues[sectionKey],
         [label]: value,
-      },
-    }));
+      };
+
+      if (sectionKey === "commissionStatement" && COMMISSION_MONTH_LABELS.includes(label as typeof COMMISSION_MONTH_LABELS[number])) {
+        const hasEnteredMonth = COMMISSION_MONTH_LABELS.some((monthLabel) => nextSectionValues[monthLabel]?.trim());
+
+        if (!hasEnteredMonth) {
+          nextSectionValues[COMMISSION_AVERAGE_PM_LABEL] = "";
+          nextSectionValues[COMMISSION_AVERAGE_ANNUAL_LABEL] = "";
+        }
+      }
+
+      return {
+        ...currentValues,
+        [sectionKey]: nextSectionValues,
+      };
+    });
 
     setSavedSections((current) => ({ ...current, [sectionKey]: false }));
     setSectionErrors((current) => {
@@ -1098,27 +1299,32 @@ const ViewFinancial = () => {
       return;
     }
 
-    const missingFieldErrors = section.items.reduce<Record<string, string>>((accumulator, item) => {
-      if (!isFieldMandatory(item)) {
+    const itemErrors = section.items.reduce<Record<string, string>>((accumulator, item) => {
+      const value = financialFieldValues[section.key]?.[item.label] ?? "";
+      const validationError = getFinancialFieldValidationError(section.key, item, String(value));
+
+      if (!validationError) {
         return accumulator;
       }
 
-      const value = financialFieldValues[section.key]?.[item.label] ?? "";
-      if (!String(value).trim()) {
-        accumulator[item.label] = "This field is mandatory.";
-      }
+      accumulator[item.label] = validationError;
 
       return accumulator;
     }, {});
 
+    const fieldErrors = {
+      ...itemErrors,
+      ...validateFinancialSectionValues(section.key, financialFieldValues[section.key] ?? {}),
+    };
+
     setSectionErrors((current) => ({
       ...current,
-      [section.key]: missingFieldErrors,
+      [section.key]: fieldErrors,
     }));
 
-    if (Object.keys(missingFieldErrors).length > 0) {
+    if (Object.keys(fieldErrors).length > 0) {
       setSubmitMessage(null);
-      setSubmitError(`Please complete all mandatory fields in ${section.title}.`);
+      setSubmitError(`Please correct highlighted fields in ${section.title}.`);
       return;
     }
 
@@ -1323,7 +1529,7 @@ const ViewFinancial = () => {
             overflowY: { md: "auto" },
           }}
         >
-          {financialSections.map((section) => {
+          {displayFinancialSections.map((section) => {
             const isActive = section.key === resolvedActiveSectionId;
 
             return (
@@ -1369,7 +1575,7 @@ const ViewFinancial = () => {
         </Box>
 
         <Box sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
-          {financialSections.map((section) => (
+          {displayFinancialSections.map((section) => (
             <Box
               key={section.key}
               data-financial-section={section.key}
