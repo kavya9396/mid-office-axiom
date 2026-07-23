@@ -15,13 +15,15 @@ jest.mock("../../store/thunks/inboxThunk", () => ({
 }));
 
 jest.mock("./LeftPanel", () => {
+  const ALL_CASES_POOL = "ALL CASES";
+
   type LeftPanelProps = {
     selectedPool: string;
     onSelectPool: (pool: string) => void;
     poolData: Record<string, Array<unknown>>;
   };
 
-  return function LeftPanelMock({
+  function LeftPanelMock({
     selectedPool,
     onSelectPool,
     poolData,
@@ -35,6 +37,12 @@ jest.mock("./LeftPanel", () => {
         ))}
       </div>
     );
+  }
+
+  return {
+    __esModule: true,
+    ALL_CASES_POOL,
+    default: LeftPanelMock,
   };
 });
 
@@ -168,6 +176,37 @@ describe("Inbox", () => {
 
     await waitFor(() => {
       expect(screen.getByTestId("right-panel")).toHaveTextContent(`${ALL_CASES_POOL}:3`);
+    });
+  });
+
+  it("renders every row from the role list response in both panels", async () => {
+    const sharedApplicationRow = { ...baseRow, id: 2, applicationNo: "APP-SHARED" };
+    const inboxResponse = {
+      poolData: {
+        "Pool A": [sharedApplicationRow],
+        "Pool B": [{ ...sharedApplicationRow, taskId: "TASK-2", roleType: "Pool B" }],
+      },
+    };
+
+    mockDispatch.mockReturnValue(makeDispatchResult(inboxResponse));
+
+    render(
+      <MemoryRouter>
+        <Inbox />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByRole("button", { name: "Pool A" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "Pool B" })).toBeInTheDocument();
+      expect(screen.getByTestId("right-panel")).toHaveTextContent(`${ALL_CASES_POOL}:2`);
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "Pool B" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool B");
+      expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool B:1");
     });
   });
 });

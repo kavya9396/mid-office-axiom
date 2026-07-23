@@ -10,33 +10,10 @@ import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import { ALL_CASES_POOL } from "./LeftPanel";
 
-const getInboxRowIdentity = (row: tableData) => {
-  const applicationNo = String(row.applicationNo ?? "").trim();
-  if (applicationNo) return `application:${applicationNo}`;
-
-  const taskId = String(row.taskId ?? "").trim();
-  if (taskId) return `task:${taskId}`;
-
-  return `row:${String(row.id ?? "")}`;
-};
-
 const normalizePoolData = (poolData: Record<string, tableData[]> = {}) => {
-  const latestPoolByRow = new Map<string, string>();
-
-  Object.entries(poolData).forEach(([poolName, rows]) => {
-    rows.forEach((row) => {
-      const rowIdentity = getInboxRowIdentity(row);
-      if (!latestPoolByRow.has(rowIdentity)) {
-        latestPoolByRow.set(rowIdentity, poolName);
-      }
-    });
-  });
-
   return Object.entries(poolData).reduce<Record<string, tableData[]>>(
     (normalizedPoolData, [poolName, rows]) => {
-      normalizedPoolData[poolName] = rows.filter(
-        (row) => latestPoolByRow.get(getInboxRowIdentity(row)) === poolName,
-      );
+      normalizedPoolData[poolName] = Array.isArray(rows) ? rows : [];
 
       return normalizedPoolData;
     },
