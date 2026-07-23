@@ -172,6 +172,20 @@ const FORM_16A_TABLE_LABELS = [
   "Average Annual Income",
 ];
 
+const COMPUTATION_OF_INCOME_TABLE_LABELS = [
+  "Assessment Year",
+  "Income from Salary(A)",
+  "Income from House Property",
+  "Income from Business or Profession (B)",
+  "Short term & Capital Gains",
+  "Income from Other Sources",
+  "Agricultural Income",
+  "Exempt Income(C)",
+  "Gross Total Income",
+  "Total Gross Total Income",
+  "Average Gross Total Income",
+];
+
 const ITR_NON_INDIVIDUAL_TABLE_LABELS = [
   "Assessment Year",
   "ITR Acknowledgement Number",
@@ -629,6 +643,23 @@ const renderForm16ASection = (
     isEditable,
     sectionErrors,
     FORM_16A_TABLE_LABELS,
+    section.title,
+    onFieldValueChange
+  );
+
+const renderComputationOfIncomeSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) =>
+  renderMultiYearTableSection(
+    section,
+    values,
+    isEditable,
+    sectionErrors,
+    COMPUTATION_OF_INCOME_TABLE_LABELS,
     section.title,
     onFieldValueChange
   );
@@ -1619,6 +1650,14 @@ const ViewFinancial = () => {
                         sectionErrors[section.key] ?? {},
                         handleFieldValueChange
                       )
+                    : section.key === "computationOfIncome"
+                      ? renderComputationOfIncomeSection(
+                          section,
+                          financialFieldValues,
+                          isEditable,
+                          sectionErrors[section.key] ?? {},
+                          handleFieldValueChange
+                        )
                     : section.key === "incomeTaxReturnNonIndividual"
                       ? renderITRNonIndividualSection(
                           section,

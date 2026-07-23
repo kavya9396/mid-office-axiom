@@ -188,6 +188,154 @@
       ]
     },
     {
+      "key": "computationOfIncome",
+      "title": "Computation Of Income",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Assessment Year",
+          "value": "AY 25-26",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 2",
+          "value": "AY 24-25",
+          "isMandatory": true
+        },
+        {
+          "label": "Assessment Year Year 3",
+          "value": "AY 23-24",
+          "isMandatory": true
+        },
+        {
+          "label": "Income from Salary(A)",
+          "value": "1250000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income from Salary(A) Year 2",
+          "value": "1180000"
+        },
+        {
+          "label": "Income from Salary(A) Year 3",
+          "value": "1110000"
+        },
+        {
+          "label": "Income from House Property",
+          "value": "120000"
+        },
+        {
+          "label": "Income from House Property Year 2",
+          "value": "100000"
+        },
+        {
+          "label": "Income from House Property Year 3",
+          "value": "90000"
+        },
+        {
+          "label": "Income from Business or Profession (B)",
+          "value": "300000",
+          "isMandatory": true
+        },
+        {
+          "label": "Income from Business or Profession (B) Year 2",
+          "value": "250000"
+        },
+        {
+          "label": "Income from Business or Profession (B) Year 3",
+          "value": "200000"
+        },
+        {
+          "label": "Short term & Capital Gains",
+          "value": "75000"
+        },
+        {
+          "label": "Short term & Capital Gains Year 2",
+          "value": "50000"
+        },
+        {
+          "label": "Short term & Capital Gains Year 3",
+          "value": "45000"
+        },
+        {
+          "label": "Income from Other Sources",
+          "value": "60000"
+        },
+        {
+          "label": "Income from Other Sources Year 2",
+          "value": "55000"
+        },
+        {
+          "label": "Income from Other Sources Year 3",
+          "value": "50000"
+        },
+        {
+          "label": "Agricultural Income",
+          "value": "30000"
+        },
+        {
+          "label": "Agricultural Income Year 2",
+          "value": "28000"
+        },
+        {
+          "label": "Agricultural Income Year 3",
+          "value": "26000"
+        },
+        {
+          "label": "Exempt Income(C)",
+          "value": "50000",
+          "isMandatory": true
+        },
+        {
+          "label": "Exempt Income(C) Year 2",
+          "value": "45000"
+        },
+        {
+          "label": "Exempt Income(C) Year 3",
+          "value": "40000"
+        },
+        {
+          "label": "Gross Total Income",
+          "value": "1885000",
+          "isMandatory": true
+        },
+        {
+          "label": "Gross Total Income Year 2",
+          "value": "1683000"
+        },
+        {
+          "label": "Gross Total Income Year 3",
+          "value": "1561000"
+        },
+        {
+          "label": "Total Gross Total Income",
+          "value": "5129000",
+          "isMandatory": true
+        },
+        {
+          "label": "Total Gross Total Income Year 2",
+          "value": "5129000"
+        },
+        {
+          "label": "Total Gross Total Income Year 3",
+          "value": "5129000"
+        },
+        {
+          "label": "Average Gross Total Income",
+          "value": "1709667",
+          "isMandatory": true
+        },
+        {
+          "label": "Average Gross Total Income Year 2",
+          "value": "1709667"
+        },
+        {
+          "label": "Average Gross Total Income Year 3",
+          "value": "1709667"
+        }
+      ]
+    },
+    {
       "key": "creditCards",
       "title": "Credit Cards",
       "items": [
@@ -2052,6 +2200,33 @@
         {
           "label": "Annual Income",
           "value": "60000",
+          "isMandatory": true
+        }
+      ]
+    },
+    {
+      "key": "employeeIDCard",
+      "title": "Employee ID Card",
+      "columns": 3,
+      "items": [
+        {
+          "label": "Name of the company",
+          "value": "ABC Technologies Pvt. Ltd.",
+          "isMandatory": true
+        },
+        {
+          "label": "Name of the employee",
+          "value": "Suresh Kumar",
+          "isMandatory": true
+        },
+        {
+          "label": "Employee number",
+          "value": "123456",
+          "isMandatory": true
+        },
+        {
+          "label": "Photo available",
+          "value": "Yes",
           "isMandatory": true
         }
       ]
