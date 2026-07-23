@@ -28,6 +28,38 @@ const getMasterSource = (masters: unknown): Record<string, unknown> => {
 const firstAvailable = (source: Record<string, unknown>, keys: string[]) =>
   keys.map((key) => source[key]).find((value) => value != null);
 
+const toText = (value: unknown): string => String(value ?? "").trim();
+
+const toRequirementManagementRows = (value: unknown) => {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object" || Array.isArray(item)) {
+        return null;
+      }
+
+      const row = item as Record<string, unknown>;
+      const team = toText(row.team) || toText(row.raisingAuthority) || "UW";
+      const normalizedTeam = team.toLowerCase().includes("ops") ? "Gops" : "UW";
+
+      return {
+        team: normalizedTeam,
+        specialTest: toText(row.specialTest ?? row.special),
+        profile: toText(row.profile),
+        category: toText(row.category ?? row.requirementCategory),
+        subCategory: toText(row.subCategory ?? row.requirementSubCategory),
+        document: toText(row.document ?? row.description),
+        reason: toText(row.reason ?? row.requirementType),
+        fupCode: toText(row.fupCode ?? row.code),
+        description: toText(row.description),
+      };
+    })
+    .filter((row): row is NonNullable<typeof row> => Boolean(row?.category || row?.subCategory || row?.document));
+};
+
 export const normalizeMastersData = (masters: unknown): MastersData => {
   const source = getMasterSource(masters);
   const normalized: Record<string, unknown> = { ...source };
@@ -40,6 +72,15 @@ export const normalizeMastersData = (masters: unknown): MastersData => {
     firstUWDecision: ["firstUWDecision", "policy_decision", "uw_decision"],
     parallelUWDecision: ["parallelUWDecision", "policy_decision", "uw_decision"],
     reconsiderationDecision: ["reconsiderationDecision", "policy_decision", "uw_decision"],
+    cvtDecision: ["cvtDecision", "policy_decision", "uw_decision"],
+    dvtDecision: ["dvtDecision", "policy_decision", "uw_decision"],
+    riskDecision: ["riskDecision", "policy_decision", "uw_decision"],
+    exceptionDecision: ["exceptionDecision", "policy_decision", "uw_decision"],
+    srUwDecision: ["srUwDecision", "policy_decision", "uw_decision"],
+    hodDecision: ["hodDecision", "policy_decision", "uw_decision"],
+    hoCmoDecision: ["hoCmoDecision", "policy_decision", "uw_decision"],
+    reinsurerDecision: ["reinsurerDecision", "policy_decision", "uw_decision"],
+    pivvDecision: ["pivvDecision", "policy_decision", "uw_decision"],
   };
 
   Object.entries(aliases).forEach(([targetKey, sourceKeys]) => {
@@ -50,6 +91,13 @@ export const normalizeMastersData = (masters: unknown): MastersData => {
       }
     }
   });
+
+  if (normalized.requirementManagement == null) {
+    const requirementManagement = toRequirementManagementRows(source.requirement_mst);
+    if (requirementManagement.length > 0) {
+      normalized.requirementManagement = requirementManagement;
+    }
+  }
 
   return normalized as MastersData;
 };

@@ -582,6 +582,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const [localRows, setLocalRows] = useState<EditableRequirementRow[]>([]);
     const [isTableSaved, setIsTableSaved] = useState(false);
+    const [hasRequirementChanges, setHasRequirementChanges] = useState(false);
     const [editableStatusRowIds, setEditableStatusRowIds] = useState<Set<string>>(() => new Set());
     const [sourceRowOverrides, setSourceRowOverrides] = useState<
         Record<string, Pick<EditableRequirementRow, "status" | "receivedDate" | "receivedBy">>
@@ -676,8 +677,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         };
 
     useEffect(() => {
-        saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })));
-    }, [drsData, rows]);
+        saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), hasRequirementChanges);
+    }, [drsData, hasRequirementChanges, rows]);
     const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
 
@@ -698,6 +699,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 }
 
                 setIsTableSaved(false);
+                setHasRequirementChanges(true);
                 return [...previousRows, createDraftRow()];
             });
         };
@@ -781,6 +783,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const handleInlineChange = (rowId: string, field: EditableField, value: string) => {
         setIsTableSaved(false);
+        setHasRequirementChanges(true);
         if (field === "status") {
             setEditableStatusRowIds((previousIds) => new Set(previousIds).add(rowId));
         }
@@ -897,6 +900,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const handleSave = (rowId: string) => {
         setIsTableSaved(false);
+        setHasRequirementChanges(true);
         updateRow(rowId, (row) => {
             const preparedRow = applyLookupToRow(row, shouldShowProfileAndSpecialTest, effectiveRequirementMasterRows);
             const errors = validateDraftRow(preparedRow, shouldShowProfileAndSpecialTest);
@@ -919,11 +923,13 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const handleDelete = (rowId: string) => {
         setIsTableSaved(false);
+        setHasRequirementChanges(true);
         setLocalRows((previousRows) => previousRows.filter((row) => row.__rowId !== rowId));
     };
 
     const handleEditLocalSaved = (rowId: string) => {
         setIsTableSaved(false);
+        setHasRequirementChanges(true);
         setLocalRows((previousRows) =>
             previousRows.map((row) =>
                 row.__rowId === rowId
@@ -1180,6 +1186,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         }}
                         onClick={() => {
                             setIsTableSaved(false);
+                            setHasRequirementChanges(true);
                             setLocalRows((previousRows) => [...previousRows, createDraftRow()]);
                         }}
                     >
@@ -1422,7 +1429,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         variant="contained"
                         disabled={draftRows.length > 0}
                         onClick={() => {
+                            saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
                             setIsTableSaved(true);
+                            setHasRequirementChanges(false);
                             setEditableStatusRowIds(new Set());
                         }}
                         sx={{
@@ -1440,7 +1449,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         variant="contained"
                         disabled={draftRows.length > 0}
                         onClick={() => {
+                            saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
                             setIsTableSaved(true);
+                            setHasRequirementChanges(false);
                             setEditableStatusRowIds(new Set());
                             openLinkInNewTab(proposalFormAndDocumentsLink);
                         }}
@@ -1459,7 +1470,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         variant="contained"
                         disabled={draftRows.length > 0}
                         onClick={() => {
+                            saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
                             setIsTableSaved(true);
+                            setHasRequirementChanges(false);
                             setEditableStatusRowIds(new Set());
                             openLinkInNewTab(cptSecondaryAction.path);
                         }}

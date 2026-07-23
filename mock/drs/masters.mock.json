@@ -1301,6 +1301,164 @@
         "statusType": "IN_PROGRESS"
       }
     ],
+    "caseUWDecision": [
+      { "code": "Accept", "description": "Accept", "value": "Accept", "isActive": "Y" },
+      { "code": "Reject", "description": "Reject", "value": "Reject", "isActive": "Y" },
+      { "code": "Decline", "description": "Decline", "value": "Decline", "isActive": "Y" },
+      { "code": "Postpone", "description": "Postpone", "value": "Postpone", "isActive": "Y" },
+      { "code": "Counter Offer", "description": "Counter Offer", "value": "Counter Offer", "isActive": "Y" },
+      { "code": "Refer to HoD", "description": "Refer to HoD", "value": "Refer to HoD", "isActive": "Y" },
+      { "code": "Refer to Sr.UW", "description": "Refer to Sr.UW", "value": "Refer to Sr.UW", "isActive": "Y" },
+      { "code": "Refer to Reinsurer", "description": "Refer to Reinsurer", "value": "Refer to Reinsurer", "isActive": "Y" },
+      { "code": "Refer to HO CMO", "description": "Refer to HO CMO", "value": "Refer to HO CMO", "isActive": "Y" },
+      { "code": "Refer to Risk", "description": "Refer to Risk", "value": "Refer to Risk", "isActive": "Y" },
+      { "code": "Refer to Accuity", "description": "Refer to Accuity", "value": "Refer to Accuity", "isActive": "Y" },
+      { "code": "Raise Requirement", "description": "Raise Requirement", "value": "Raise Requirement", "isActive": "Y" },
+      { "code": "Refer to CUW Claim Pool", "description": "Refer to CUW Claim Pool", "value": "Refer to CUW Claim Pool", "isActive": "Y" },
+      { "code": "Hold", "description": "Hold", "value": "Hold", "isActive": "Y" }
+    ],
+    "firstUWDecision": [
+      { "code": "Accept", "description": "Accept", "value": "Accept", "isActive": "Y" },
+      { "code": "Counter Offer", "description": "Counter Offer", "value": "Counter Offer", "isActive": "Y" },
+      { "code": "Reject", "description": "Reject", "value": "Reject", "isActive": "Y" },
+      { "code": "Decline", "description": "Decline", "value": "Decline", "isActive": "Y" },
+      { "code": "Postpone", "description": "Postpone", "value": "Postpone", "isActive": "Y" },
+      { "code": "Raise Requirement", "description": "Raise Requirement", "value": "Raise Requirement", "isActive": "Y" }
+    ],
+    "parallelUWDecision": [
+      { "code": "Raise Requirement", "description": "Raise Requirement", "value": "Raise Requirement", "isActive": "Y" },
+      { "code": "Refer to HO CMO", "description": "Refer to HO CMO", "value": "Refer to HO CMO", "isActive": "Y" },
+      { "code": "Refer to Risk", "description": "Refer to Risk", "value": "Refer to Risk", "isActive": "Y" },
+      { "code": "Refer to Accuity", "description": "Refer to Accuity", "value": "Refer to Accuity", "isActive": "Y" },
+      { "code": "Tele MER/ Video MER", "description": "Tele MER/ Video MER", "value": "Tele MER/ Video MER", "isActive": "Y" },
+      { "code": "None", "description": "None", "value": "None", "isActive": "Y" }
+    ],
+    "cvtDecision": [
+      { "code": "Accept", "description": "Accept", "value": "Accept", "isActive": "Y" },
+      { "code": "Raise Requirements", "description": "Raise Requirements", "value": "Raise Requirements", "isActive": "Y" },
+      { "code": "Refer to Risk", "description": "Refer to Risk", "value": "Refer to Risk", "isActive": "Y" },
+      { "code": "Reraise PIVV", "description": "Reraise PIVV", "value": "Reraise PIVV", "isActive": "Y" },
+      { "code": "Refer to CUW", "description": "Refer to CUW", "value": "Refer to CUW", "isActive": "Y" }
+    ],
+    "dvtDecision": [
+      { "code": "Accept", "description": "Accept", "value": "Accept", "isActive": "Y" },
+      { "code": "Raise Requirements", "description": "Raise Requirements", "value": "Raise Requirements", "isActive": "Y" },
+      { "code": "Refer to GUW", "description": "Refer to GUW", "value": "Refer to GUW", "isActive": "Y" }
+    ],
+    "reconsiderationDecision": [
+      { "code": "Release the case", "description": "Release the case", "value": "Release the case", "isActive": "Y" },
+      { "code": "Send back to UW", "description": "Send back to UW", "value": "Send back to UW", "isActive": "Y" }
+    ],
+    "riskDecision": [
+      { "code": "Favourable", "description": "Favourable", "value": "Favourable", "isActive": "Y" },
+      { "code": "Adverse", "description": "Adverse", "value": "Adverse", "isActive": "Y" },
+      { "code": "Refer back to UW", "description": "Refer back to UW", "value": "Refer back to UW", "isActive": "Y" }
+    ],
+    "srUwDecision": [
+      { "code": "Agree", "description": "Agree", "value": "Agree", "isActive": "Y" },
+      { "code": "Disagree", "description": "Disagree", "value": "Disagree", "isActive": "Y" },
+      { "code": "Refer to CMO", "description": "Refer to CMO", "value": "Refer to CMO", "isActive": "Y" },
+      { "code": "Refer back to last UW", "description": "Refer back to last UW", "value": "Refer back to last UW", "isActive": "Y" },
+      { "code": "Refer to HoD", "description": "Refer to HoD", "value": "Refer to HoD", "isActive": "Y" }
+    ],
+    "hodDecision": [
+      { "code": "Agree", "description": "Agree", "value": "Agree", "isActive": "Y" },
+      { "code": "Disagree", "description": "Disagree", "value": "Disagree", "isActive": "Y" },
+      { "code": "Refer to CMO", "description": "Refer to CMO", "value": "Refer to CMO", "isActive": "Y" },
+      { "code": "Refer back to last UW", "description": "Refer back to last UW", "value": "Refer back to last UW", "isActive": "Y" }
+    ],
+    "hoCmoDecision": [
+      { "code": "Approve", "description": "Approve", "value": "Approve", "isActive": "Y" },
+      { "code": "Reject", "description": "Reject", "value": "Reject", "isActive": "Y" },
+      { "code": "Refer Back", "description": "Refer Back", "value": "Refer Back", "isActive": "Y" },
+      { "code": "Refer to Risk", "description": "Refer to Risk", "value": "Refer to Risk", "isActive": "Y" }
+    ],
+    "reinsurerDecision": [
+      { "code": "Accept", "description": "Accept", "value": "Accept", "isActive": "Y" },
+      { "code": "Reject", "description": "Reject", "value": "Reject", "isActive": "Y" },
+      { "code": "Counter Offer", "description": "Counter Offer", "value": "Counter Offer", "isActive": "Y" },
+      { "code": "Refer Back", "description": "Refer Back", "value": "Refer Back", "isActive": "Y" }
+    ],
+    "reinsurerDecisionId": [
+      { "code": "RES001", "description": "RES001", "value": "RES001", "isActive": "Y" },
+      { "code": "RES002", "description": "RES002", "value": "RES002", "isActive": "Y" },
+      { "code": "RES003", "description": "RES003", "value": "RES003", "isActive": "Y" },
+      { "code": "RES004", "description": "RES004", "value": "RES004", "isActive": "Y" },
+      { "code": "RES005", "description": "RES005", "value": "RES005", "isActive": "Y" }
+    ],
+    "pivvDecision": [
+      { "code": "Customer not speaking", "description": "Customer not speaking", "value": "Customer not speaking", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Another person spoken", "description": "Another person spoken", "value": "Another person spoken", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Pre-recorded video", "description": "Pre-recorded video", "value": "Pre-recorded video", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Customer didn't complete full script - a. Application", "description": "Customer didn't complete full script - a. Application", "value": "Customer didn't complete full script - a. Application", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Customer didn't complete full script - b. Premium", "description": "Customer didn't complete full script - b. Premium", "value": "Customer didn't complete full script - b. Premium", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Customer didn't complete full script - c. Policy term", "description": "Customer didn't complete full script - c. Policy term", "value": "Customer didn't complete full script - c. Policy term", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Customer didn't complete full script - d. Premium paying term", "description": "Customer didn't complete full script - d. Premium paying term", "value": "Customer didn't complete full script - d. Premium paying term", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Customer didn't complete full script - e. Sum assured", "description": "Customer didn't complete full script - e. Sum assured", "value": "Customer didn't complete full script - e. Sum assured", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Problematic case - Customer physical condition not good", "description": "Problematic case - Customer physical condition not good", "value": "Problematic case - Customer physical condition not good", "isActive": "Y", "workflowPool": "CUW Pool" },
+      { "code": "Customer weight different with application form", "description": "Customer weight different with application form", "value": "Customer weight different with application form", "isActive": "Y", "workflowPool": "CUW Pool" },
+      { "code": "Customer profile is not ok", "description": "Customer profile is not ok", "value": "Customer profile is not ok", "isActive": "Y", "workflowPool": "CUW Pool" },
+      { "code": "Customer face not clear in video", "description": "Customer face not clear in video", "value": "Customer face not clear in video", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "Voice is not audible", "description": "Voice is not audible", "value": "Voice is not audible", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "PDF not generated to check script", "description": "PDF not generated to check script", "value": "PDF not generated to check script", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "New PDF not generated as per latest PIVV", "description": "New PDF not generated as per latest PIVV", "value": "New PDF not generated as per latest PIVV", "isActive": "Y", "workflowPool": "COPS Pool" },
+      { "code": "PIVV Done", "description": "PIVV Done", "value": "PIVV Done", "isActive": "Y", "workflowPool": "COPS Pool" }
+    ],
+    "exceptionDecision": [
+      { "code": "Refer to IT", "description": "Refer to IT", "value": "Refer to IT", "isActive": "Y" },
+      { "code": "Send back to last UW", "description": "Send back to last UW", "value": "Send back to last UW", "isActive": "Y" }
+    ],
+    "riskReferralReason": [
+      { "code": "Adverse Profile", "description": "Adverse Profile", "value": "Adverse Profile", "isActive": "Y" },
+      { "code": "DRC Adverse", "description": "DRC Adverse", "value": "DRC Adverse", "isActive": "Y" },
+      { "code": "IIB Adverse", "description": "IIB Adverse", "value": "IIB Adverse", "isActive": "Y" },
+      { "code": "PTRL Adverse", "description": "PTRL Adverse", "value": "PTRL Adverse", "isActive": "Y" }
+    ],
+    "requirementManagement": [
+      { "team": "UW", "profile": "Life Assured", "category": "Financial", "subCategory": "Salary", "document": "Bank statement/ surrogate", "reason": "Latest income proof required", "fupCode": "SRG", "description": "Kindly share income proof of the person insured by the policy.", "specialTest": "N" },
+      { "team": "UW", "profile": "Proposer", "category": "Medical", "subCategory": "Medical Findings", "document": "Blood test", "reason": "Additional medical test required", "fupCode": "MUR", "description": "Micro urinalysis is required.", "specialTest": "Y" },
+      { "team": "Gops", "profile": "Life Assured", "category": "Declaration", "subCategory": "Customer declaration form", "document": "CDF", "reason": "Documents not submitted", "fupCode": "GCD", "description": "Customer declaration form not uploaded.", "specialTest": "N" },
+      { "team": "Gops", "profile": "Proposer", "category": "Document", "subCategory": "Joint life", "document": "CDF Of Joint Life", "reason": "Incomplete/Invalid document submitted", "fupCode": "CD2", "description": "CDF of joint life required.", "specialTest": "N" }
+    ],
+    "requirementTeam": [
+      { "code": "UW", "description": "UW", "value": "UW", "isActive": "Y" },
+      { "code": "Gops", "description": "Gops", "value": "Gops", "isActive": "Y" }
+    ],
+    "requirementProfile": [
+      { "code": "Life Assured", "description": "Life Assured", "value": "Life Assured", "isActive": "Y" },
+      { "code": "Proposer", "description": "Proposer", "value": "Proposer", "isActive": "Y" },
+      { "code": "Payer", "description": "Payer", "value": "Payer", "isActive": "Y" }
+    ],
+    "requirementCategory": [
+      { "code": "Financial", "description": "Financial", "value": "Financial", "isActive": "Y" },
+      { "code": "Medical", "description": "Medical", "value": "Medical", "isActive": "Y" },
+      { "code": "Declaration", "description": "Declaration", "value": "Declaration", "isActive": "Y" },
+      { "code": "Document", "description": "Document", "value": "Document", "isActive": "Y" }
+    ],
+    "requirementSubCategory": [
+      { "code": "Salary", "description": "Salary", "value": "Salary", "isActive": "Y" },
+      { "code": "Medical Findings", "description": "Medical Findings", "value": "Medical Findings", "isActive": "Y" },
+      { "code": "Customer declaration form", "description": "Customer declaration form", "value": "Customer declaration form", "isActive": "Y" },
+      { "code": "Joint life", "description": "Joint life", "value": "Joint life", "isActive": "Y" }
+    ],
+    "requirementDocument": [
+      { "code": "Bank statement/ surrogate", "description": "Bank statement/ surrogate", "value": "Bank statement/ surrogate", "isActive": "Y" },
+      { "code": "Blood test", "description": "Blood test", "value": "Blood test", "isActive": "Y" },
+      { "code": "CDF", "description": "CDF", "value": "CDF", "isActive": "Y" },
+      { "code": "CDF Of Joint Life", "description": "CDF Of Joint Life", "value": "CDF Of Joint Life", "isActive": "Y" }
+    ],
+    "requirementReason": [
+      { "code": "Latest income proof required", "description": "Latest income proof required", "value": "Latest income proof required", "isActive": "Y" },
+      { "code": "Additional medical test required", "description": "Additional medical test required", "value": "Additional medical test required", "isActive": "Y" },
+      { "code": "Documents not submitted", "description": "Documents not submitted", "value": "Documents not submitted", "isActive": "Y" },
+      { "code": "Incomplete/Invalid document submitted", "description": "Incomplete/Invalid document submitted", "value": "Incomplete/Invalid document submitted", "isActive": "Y" }
+    ],
+    "requirementStatus": [
+      { "code": "Pending", "description": "Pending", "value": "Pending", "isActive": "Y" },
+      { "code": "Waived", "description": "Waived", "value": "Waived", "isActive": "Y" },
+      { "code": "Rejected", "description": "Rejected", "value": "Rejected", "isActive": "Y" },
+      { "code": "Accept", "description": "Accept", "value": "Accept", "isActive": "Y" }
+    ],
     "misc": [
       {
         "code": "EMAIL",

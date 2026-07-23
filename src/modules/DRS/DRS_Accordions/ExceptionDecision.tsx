@@ -10,12 +10,14 @@ import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { referToItThunk } from "../../../store/thunks/referToItThunk";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const ExceptionDecision = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { applicationNumber, businessType } = useAppContext();
   const masters = useAppSelector((state) => state.drs.masters);
+  const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
 
   const [decision, setDecision] = useState("");
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -34,6 +36,18 @@ const ExceptionDecision = () => {
   );
 
   const isSubmitEnabled = decision.trim().length > 0;
+
+  const handleSubmitIntent = () => {
+    const selectedDecision = toMasterLabel(decision, decisionOptions);
+    const requirementValidation = validateRequirementDecision(drsData, selectedDecision);
+    if (!requirementValidation.isValid) {
+      setSubmitMessage(requirementValidation.message);
+      return;
+    }
+
+    setSubmitMessage(null);
+    setOpenConfirmation(true);
+  };
 
   const handleSubmit = async () => {
     if (!applicationNumber || !roleType || !decision) {
@@ -122,7 +136,7 @@ const ExceptionDecision = () => {
             <CustomButton
               variant="contained"
               disabled={!isSubmitEnabled || submitLoading}
-              onClick={() => setOpenConfirmation(true)}
+              onClick={handleSubmitIntent}
               sx={{ minWidth: 130, height: 36, borderRadius: "999px" }}
             >
               {submitLoading ? "Submitting..." : "Submit"}

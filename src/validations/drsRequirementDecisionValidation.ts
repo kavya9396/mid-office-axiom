@@ -38,8 +38,16 @@ export const getRequirementStorageKey = (drsData: unknown): string => {
     : DRS_LOCAL_REQUIREMENTS_KEY_PREFIX;
 };
 
-export const saveLocalRequirementRows = (drsData: unknown, rows: RequirementStatusRow[]): void => {
+const getRequirementUnsavedStorageKey = (drsData: unknown): string =>
+  `${getRequirementStorageKey(drsData)}:unsaved`;
+
+export const saveLocalRequirementRows = (
+  drsData: unknown,
+  rows: RequirementStatusRow[],
+  hasUnsavedChanges = false,
+): void => {
   localStorage.setItem(getRequirementStorageKey(drsData), JSON.stringify(rows));
+  localStorage.setItem(getRequirementUnsavedStorageKey(drsData), JSON.stringify(hasUnsavedChanges));
 };
 
 const getStoredRequirementRows = (drsData: unknown): RequirementStatusRow[] | null => {
@@ -76,9 +84,12 @@ export const getRequirementRows = (drsData: unknown): RequirementStatusRow[] => 
   ].map((row) => ({ status: toText(toRecord(row).status) }));
 };
 
-const isRaiseRequirementDecision = (decisionLabel: string): boolean => {
-  const normalized = decisionLabel.trim().toLowerCase();
-  return normalized === "raise requirement" || normalized === "raise requirements";
+export const hasUnsavedRequirementRows = (drsData: unknown): boolean => {
+  try {
+    return JSON.parse(localStorage.getItem(getRequirementUnsavedStorageKey(drsData)) ?? "false") === true;
+  } catch {
+    return false;
+  }
 };
 
 const isPendingRequirement = (status: string): boolean => {
@@ -93,12 +104,12 @@ export const validateRequirementDecision = (
   drsData: unknown,
   decisionLabel: string,
 ): { isValid: boolean; message: string } => {
-  const hasPendingRequirements = hasPendingRequirementRows(drsData);
+  void decisionLabel;
 
-  if (hasPendingRequirements && !isRaiseRequirementDecision(decisionLabel)) {
+  if (hasUnsavedRequirementRows(drsData)) {
     return {
       isValid: false,
-      message: getErrorMessage("drsPendingRequirements"),
+      message: getErrorMessage("drsUnsavedRequirementChanges"),
     };
   }
 

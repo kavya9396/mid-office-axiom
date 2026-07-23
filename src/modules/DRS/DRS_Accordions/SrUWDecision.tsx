@@ -11,13 +11,15 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import type { AppDispatch, RootState } from "../../../store/store";
 import { referralUsersThunk } from "../../../store/thunks/referralUsersThunk";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { normalizeMasterOptions } from "../../../utils/masterOptions";
 
 type DecisionOption = {
   label: string;
   value: string;
 };
 
-const srUwDecisionOptions: DecisionOption[] = [
+const fallbackSrUwDecisionOptions: DecisionOption[] = [
   { label: "Agree", value: "Agree" },
   { label: "Disagree", value: "Disagree" },
   { label: "Refer to CMO", value: "Refer to CMO" },
@@ -94,8 +96,16 @@ const SrUWDecision = () => {
   const [remarks, setRemarks] = useState("");
   const [selectedHoD, setSelectedHoD] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
   const users = useSelector((state: RootState) => state.referralUsers.users);
+  const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
+  const masters = useSelector((state: RootState) => state.drs.masters);
+
+  const srUwDecisionOptions = useMemo(() => {
+    const masterOptions = normalizeMasterOptions(masters.srUwDecision);
+    return masterOptions.length > 0 ? masterOptions : fallbackSrUwDecisionOptions;
+  }, [masters.srUwDecision]);
 
   const hoDOptions = useMemo(
     () =>
@@ -195,6 +205,17 @@ const SrUWDecision = () => {
     !decision ||
     remarks.trim() === "" ||
     (decision === "Refer to HoD" && !selectedHoD);
+
+  const handleSubmitIntent = () => {
+    const requirementValidation = validateRequirementDecision(drsData, decision);
+    if (!requirementValidation.isValid) {
+      setSubmitMessage(requirementValidation.message);
+      return;
+    }
+
+    setSubmitMessage(null);
+    setIsConfirmOpen(true);
+  };
 
   return (
     <Container disableGutters>
@@ -344,7 +365,7 @@ const SrUWDecision = () => {
             <CustomButton
               variant="contained"
               disabled={isSubmitDisabled}
-              onClick={() => setIsConfirmOpen(true)}
+              onClick={handleSubmitIntent}
               sx={{
                 minWidth: 200,
                 height: 44,
@@ -357,6 +378,11 @@ const SrUWDecision = () => {
               Submit
             </CustomButton>
           </Box>
+          {submitMessage && (
+            <Typography sx={{ mt: 1, fontSize: 12, color: "#DE2C3B" }}>
+              {submitMessage}
+            </Typography>
+          )}
         </CustomAccordion>
 
         <ConfirmationDialog

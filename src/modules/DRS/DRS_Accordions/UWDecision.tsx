@@ -845,7 +845,7 @@ const UWDecision = () => {
                     )}
 
                     {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
-                        <UWReinsurer setConfirmationDialogOpen={setConfirmationDialogOpen} />
+                        <UWReinsurer onOpenConfirmation={handleSubmitIntent} />
                     )}
                 </CustomAccordion>
 

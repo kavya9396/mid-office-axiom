@@ -8,20 +8,24 @@ import CustomTextField from "../../../components/ui/TextField/TextField";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../store/store";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { normalizeMasterOptions } from "../../../utils/masterOptions";
 
 type DecisionOption = {
   label: string;
   value: string;
 };
 
-const reinsurerDecisionOptions: DecisionOption[] = [
+const fallbackReinsurerDecisionOptions: DecisionOption[] = [
   { label: "Accept", value: "Accept" },
   { label: "Reject", value: "Reject" },
   { label: "Counter Offer", value: "Counter Offer" },
   { label: "Refer Back", value: "Refer Back" },
 ];
 
-const reinsurerDecisionIdOptions: DecisionOption[] = [
+const fallbackReinsurerDecisionIdOptions: DecisionOption[] = [
   { label: "RES001", value: "RES001" },
   { label: "RES002", value: "RES002" },
   { label: "RES003", value: "RES003" },
@@ -42,10 +46,35 @@ const ReinsureDecision = () => {
   const [decisionId, setDecisionId] = useState("");
   const [remarks, setRemarks] = useState("");
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+
+  const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
+  const masters = useSelector((state: RootState) => state.drs.masters);
+
+  const reinsurerDecisionOptions = useMemo(() => {
+    const masterOptions = normalizeMasterOptions(masters.reinsurerDecision);
+    return masterOptions.length > 0 ? masterOptions : fallbackReinsurerDecisionOptions;
+  }, [masters.reinsurerDecision]);
+
+  const reinsurerDecisionIdOptions = useMemo(() => {
+    const masterOptions = normalizeMasterOptions(masters.reinsurerDecisionId);
+    return masterOptions.length > 0 ? masterOptions : fallbackReinsurerDecisionIdOptions;
+  }, [masters.reinsurerDecisionId]);
 
   const dialogMessage = `Kindly reconfirm if you want to proceed with the reinsurer decision as "${decision}"`;
 
   const isSubmitDisabled = !decision || !decisionId || remarks.trim() === "";
+
+  const handleSubmitIntent = () => {
+    const requirementValidation = validateRequirementDecision(drsData, decision);
+    if (!requirementValidation.isValid) {
+      setSubmitMessage(requirementValidation.message);
+      return;
+    }
+
+    setSubmitMessage(null);
+    setIsConfirmOpen(true);
+  };
 
   return (
     <Container disableGutters>
@@ -135,7 +164,7 @@ const ReinsureDecision = () => {
             <CustomButton
               variant="contained"
               disabled={isSubmitDisabled}
-              onClick={() => setIsConfirmOpen(true)}
+              onClick={handleSubmitIntent}
               sx={{
                 minWidth: 200,
                 height: 44,
@@ -148,6 +177,11 @@ const ReinsureDecision = () => {
               Submit
             </CustomButton>
           </Box>
+          {submitMessage && (
+            <Typography sx={{ mt: 1, fontSize: 12, color: "#DE2C3B" }}>
+              {submitMessage}
+            </Typography>
+          )}
         </CustomAccordion>
 
         <ConfirmationDialog

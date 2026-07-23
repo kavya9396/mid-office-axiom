@@ -8,13 +8,17 @@ import CustomTextField from "../../../components/ui/TextField/TextField";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
+import { useSelector } from "react-redux";
+import type { RootState } from "../../../store/store";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { normalizeMasterOptions } from "../../../utils/masterOptions";
 
 type DecisionOption = {
   label: string;
   value: string;
 };
 
-const hoCmoDecisionOptions: DecisionOption[] = [
+const fallbackHoCmoDecisionOptions: DecisionOption[] = [
   { label: "Approve", value: "Approve" },
   { label: "Reject", value: "Reject" },
   { label: "Refer Back", value: "Refer Back" },
@@ -34,10 +38,30 @@ const HoCMODecision = () => {
   const [remarks, setRemarks] = useState("");
   const [doNotPayToTpa, setDoNotPayToTpa] = useState(false);
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+
+  const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
+  const masters = useSelector((state: RootState) => state.drs.masters);
+
+  const hoCmoDecisionOptions = useMemo(() => {
+    const masterOptions = normalizeMasterOptions(masters.hoCmoDecision);
+    return masterOptions.length > 0 ? masterOptions : fallbackHoCmoDecisionOptions;
+  }, [masters.hoCmoDecision]);
 
   const dialogMessage = `Kindly reconfirm if you want to proceed with the HO CMO decision as "${decision}"`;
 
   const isSubmitDisabled = !decision || remarks.trim() === "";
+
+  const handleSubmitIntent = () => {
+    const requirementValidation = validateRequirementDecision(drsData, decision);
+    if (!requirementValidation.isValid) {
+      setSubmitMessage(requirementValidation.message);
+      return;
+    }
+
+    setSubmitMessage(null);
+    setIsConfirmOpen(true);
+  };
 
   return (
     <Container disableGutters>
@@ -145,7 +169,7 @@ const HoCMODecision = () => {
             <CustomButton
               variant="contained"
               disabled={isSubmitDisabled}
-              onClick={() => setIsConfirmOpen(true)}
+              onClick={handleSubmitIntent}
               sx={{
                 minWidth: 150,
                 height: 36,
@@ -158,6 +182,11 @@ const HoCMODecision = () => {
               Submit
             </CustomButton>
           </Box>
+          {submitMessage && (
+            <Typography sx={{ mt: 1, fontSize: 12, color: "#DE2C3B" }}>
+              {submitMessage}
+            </Typography>
+          )}
         </CustomAccordion>
 
         <ConfirmationDialog

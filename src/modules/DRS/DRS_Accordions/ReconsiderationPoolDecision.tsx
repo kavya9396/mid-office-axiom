@@ -15,6 +15,7 @@ import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const ReconsiderationPoolDecision = () => {
   const dispatch = useAppDispatch();
@@ -92,6 +93,20 @@ const ReconsiderationPoolDecision = () => {
     } finally {
       setSubmitLoading(false);
     }
+  };
+
+  const handleSubmitIntent = () => {
+    const decisionLabel = toMasterLabel(decision, reconsiderationDecisionOptions);
+    const requirementValidation = validateRequirementDecision(drsData, decisionLabel);
+    if (!requirementValidation.isValid) {
+      setSubmitMessage(requirementValidation.message);
+      setSubmitStatus("failure");
+      return;
+    }
+
+    setSubmitMessage(null);
+    setSubmitStatus(null);
+    setIsConfirmOpen(true);
   };
 
   return (
@@ -179,7 +194,7 @@ const ReconsiderationPoolDecision = () => {
             <CustomButton
               variant="contained"
               disabled={isSubmitDisabled || submitLoading}
-              onClick={() => setIsConfirmOpen(true)}
+              onClick={handleSubmitIntent}
               sx={{
                 minWidth: 150,
                 height: 36,

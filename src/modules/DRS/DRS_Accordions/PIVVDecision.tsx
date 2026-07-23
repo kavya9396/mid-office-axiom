@@ -13,6 +13,8 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { normalizeMasterOptions } from "../../../utils/masterOptions";
 
 type PivvDecisionOption = {
   label: string;
@@ -20,7 +22,7 @@ type PivvDecisionOption = {
   workflowPool: "COPS Pool" | "CUW Pool";
 };
 
-const pivvDecisionMapping: PivvDecisionOption[] = [
+const fallbackPivvDecisionMapping: PivvDecisionOption[] = [
   { label: "Customer not speaking", value: "Customer not speaking", workflowPool: "COPS Pool" },
   { label: "Another person spoken", value: "Another person spoken", workflowPool: "COPS Pool" },
   { label: "Pre-recorded video", value: "Pre-recorded video", workflowPool: "COPS Pool" },
@@ -44,6 +46,7 @@ const PIVVDecision = () => {
   const navigate = useNavigate();
   const { applicationNumber, businessType } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
+  const masters = useAppSelector((state) => state.drs.masters);
 
   const [decision, setDecision] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -63,14 +66,17 @@ const PIVVDecision = () => {
   );
 
   const workflowPool = useMemo(() => {
-    const matched = pivvDecisionMapping.find((item) => item.value === decision);
+    const sourceRows = Array.isArray(masters.pivvDecision) ? masters.pivvDecision : fallbackPivvDecisionMapping;
+    const matched = sourceRows.find((item) => item.value === decision || item.description === decision || item.code === decision) as PivvDecisionOption | undefined;
     return matched?.workflowPool ?? "";
-  }, [decision]);
+  }, [decision, masters.pivvDecision]);
 
-  const decisionOptions = pivvDecisionMapping.map((item) => ({
-    label: item.label,
-    value: item.value,
-  }));
+  const decisionOptions = useMemo(() => {
+    const masterOptions = normalizeMasterOptions(masters.pivvDecision);
+    return masterOptions.length > 0
+      ? masterOptions
+      : fallbackPivvDecisionMapping.map((item) => ({ label: item.label, value: item.value }));
+  }, [masters.pivvDecision]);
 
   const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;
 
@@ -119,6 +125,17 @@ const PIVVDecision = () => {
     } finally {
       setSubmitLoading(false);
     }
+  };
+
+  const handleSubmitIntent = () => {
+    const requirementValidation = validateRequirementDecision(drsData, decision);
+    if (!requirementValidation.isValid) {
+      setSubmitMessage(requirementValidation.message);
+      return;
+    }
+
+    setSubmitMessage(null);
+    setConfirmationDialogOpen(true);
   };
 
   return (
@@ -198,7 +215,7 @@ const PIVVDecision = () => {
             <CustomButton
               variant="contained"
               disabled={!isSubmitEnabled || !taskContext.taskId || submitLoading}
-              onClick={() => setConfirmationDialogOpen(true)}
+              onClick={handleSubmitIntent}
               sx={{
                 minWidth: 150,
                 height: 36,

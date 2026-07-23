@@ -55,7 +55,7 @@ const taskName = str.replace(/_/g, " ");
         sx={{
           fontWeight: 600,
           color: isSelected ? "#9A2529" : "#999999",
-          fontSize: "14px",
+          fontSize: "12px",
         }}
       >
 

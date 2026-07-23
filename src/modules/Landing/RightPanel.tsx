@@ -520,11 +520,10 @@ const RightPanel = ({
           onClick={() => handleSort(column.key)}
           sx={{
             backgroundColor: "#E9EEF3",
-            px: 1,
             fontWeight: "bold",
-            fontSize: "13px",
+            fontSize: "12px",
             width: column.width,
-            padding: 0.5,
+            padding: "7px",
             userSelect: "none",
             whiteSpace: "nowrap",
           }}
@@ -986,7 +985,7 @@ const RightPanel = ({
                             return (
                               <TableCell
                                 key={String(col.key)}
-                                sx={{ p: 1.5, pl: 2, fontSize: "13px" }}
+                                sx={{  padding:"7px", fontSize: "11px" }}
                               >
                                 {col.key === "drc" ? (
                                   <Badge
@@ -1004,7 +1003,7 @@ const RightPanel = ({
                                     sx={{
                                       cursor: "pointer",
                                       fontWeight: 600,
-                                      fontSize: "13px",
+                                      fontSize: "11px",
                                       color: taskTimingStatus === "normal" ? "#0E3762" : taskTimingRowStyle.textColor,
                                       "&:hover": { textDecoration: "underline" },
                                     }}

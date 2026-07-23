@@ -11,6 +11,7 @@ import { useAppSelector } from "../../../store/hooks";
 import { ReferralRisk as fallbackRiskReferralReasons, riskDecisionOptions as fallbackRiskDecisionOptions } from "../../../utils/constant";
 import { normalizeMasterOptions } from "../../../utils/masterOptions";
 import Logo from "../../../assets/ICICI-Logo.svg";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 type RiskReportForm = {
   krnNo: string;
@@ -175,6 +176,7 @@ const ReportInput = ({
 
 const RiskDecision = () => {
   const { applicationNumber } = useAppContext();
+  const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
   const riskDecisionOptions = useMemo(() => {
     const masterOptions = normalizeMasterOptions(masters.riskDecision);
@@ -188,6 +190,7 @@ const RiskDecision = () => {
   const [riskDecision, setRiskDecision] = useState("");
   const [riskReferralReason, setRiskReferralReason] = useState("");
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
+  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [isRiskReportOpen, setIsRiskReportOpen] = useState(false);
   const [riskReportForm, setRiskReportForm] = useState<RiskReportForm>(() =>
     defaultRiskReportForm(applicationNumber ?? localStorage.getItem("applicationNumber")),
@@ -203,6 +206,17 @@ const RiskDecision = () => {
       ...current,
       [key]: value,
     }));
+  };
+
+  const handleSubmitIntent = () => {
+    const requirementValidation = validateRequirementDecision(drsData, riskDecision);
+    if (!requirementValidation.isValid) {
+      setSubmitMessage(requirementValidation.message);
+      return;
+    }
+
+    setSubmitMessage(null);
+    setConfirmationDialogOpen(true);
   };
 
   const riskReportButton = (
@@ -281,7 +295,7 @@ const RiskDecision = () => {
             <Box sx={{ display: "flex", mt: 1 }}>
               <CustomButton
                 variant="contained"
-                onClick={() => setConfirmationDialogOpen(true)}
+                onClick={handleSubmitIntent}
                 sx={{
                   minWidth: 140,
                   height: 36,
@@ -293,6 +307,11 @@ const RiskDecision = () => {
                 Submit
               </CustomButton>
             </Box>
+            {submitMessage && (
+              <Typography sx={{ mt: 1, fontSize: 12, color: "#DE2C3B" }}>
+                {submitMessage}
+              </Typography>
+            )}
           </Box>
         </CustomAccordion>
       </Box>

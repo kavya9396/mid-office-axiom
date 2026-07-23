@@ -110,10 +110,10 @@ export const UWReinsurerFields = () => {
 }
 
 type Props = {
-  setConfirmationDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  onOpenConfirmation: () => void;
 };
 
-const UWReinsurer = ({ setConfirmationDialogOpen }: Props) => {
+const UWReinsurer = ({ onOpenConfirmation }: Props) => {
   const [openEmail, setOpenEmail] = useState(false);
 
   return (
@@ -167,7 +167,7 @@ const UWReinsurer = ({ setConfirmationDialogOpen }: Props) => {
         <>
           <CustomButton
             variant="outlined"
-            onClick={() => setConfirmationDialogOpen(true)}
+            onClick={onOpenConfirmation}
             sx={{
               borderRadius: "50px",
               px: 8,

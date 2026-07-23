@@ -5,6 +5,8 @@ export const defaultErrorMessages = {
   drsApplicantTabsNotVisited: "Please visit all applicant tabs at least once before submitting.",
   drsPendingRequirements:
     "Pending requirements are available. Please select Raise Requirement before taking another decision.",
+  drsUnsavedRequirementChanges:
+    "Please save Requirement Management changes before taking decision.",
   financialAtLeastOneMonthMandatory: "At least one month data is mandatory.",
   financialFieldMandatory: "This field is mandatory.",
   financialNumericValue: "Enter a numeric value.",
