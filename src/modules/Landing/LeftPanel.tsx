@@ -78,7 +78,11 @@ const LeftPanel = ({
   poolData,
 }: LeftPanelProps) => {
   const navigate = useNavigate();
-  const poolNames = Object.keys(poolData);
+  const poolNames = Object.keys(poolData).sort((firstPool, secondPool) =>
+    firstPool.replace(/_/g, " ").localeCompare(secondPool.replace(/_/g, " "), undefined, {
+      sensitivity: "base",
+    }),
+  );
   const totalCaseCount = Object.values(poolData).reduce(
     (sum, rows) => sum + rows.length,
     0,

@@ -964,7 +964,7 @@ const RightPanel = ({
  
                       return (
                         <TableRow
-                          key={row.id}
+                          key={`${selectedPool}-${row.applicationNo ?? ""}-${row.taskId ?? ""}-${row.id ?? ""}`}
                           hover
                           sx={{
                             cursor: "pointer",

@@ -10,6 +10,40 @@ import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import { ALL_CASES_POOL } from "./LeftPanel";
 
+const getInboxRowIdentity = (row: tableData) => {
+  const applicationNo = String(row.applicationNo ?? "").trim();
+  if (applicationNo) return `application:${applicationNo}`;
+
+  const taskId = String(row.taskId ?? "").trim();
+  if (taskId) return `task:${taskId}`;
+
+  return `row:${String(row.id ?? "")}`;
+};
+
+const normalizePoolData = (poolData: Record<string, tableData[]> = {}) => {
+  const latestPoolByRow = new Map<string, string>();
+
+  Object.entries(poolData).forEach(([poolName, rows]) => {
+    rows.forEach((row) => {
+      const rowIdentity = getInboxRowIdentity(row);
+      if (!latestPoolByRow.has(rowIdentity)) {
+        latestPoolByRow.set(rowIdentity, poolName);
+      }
+    });
+  });
+
+  return Object.entries(poolData).reduce<Record<string, tableData[]>>(
+    (normalizedPoolData, [poolName, rows]) => {
+      normalizedPoolData[poolName] = rows.filter(
+        (row) => latestPoolByRow.get(getInboxRowIdentity(row)) === poolName,
+      );
+
+      return normalizedPoolData;
+    },
+    {},
+  );
+};
+
 const Inbox = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
@@ -34,7 +68,7 @@ const Inbox = () => {
       const username = localStorage.getItem("username") ?? "";
       const password = localStorage.getItem("password") ?? "";
       const roleResponse = await dispatch(fetchInboxThunk({ username, password })).unwrap();
-      const poolDataFromAPI = roleResponse.poolData ?? {};
+      const poolDataFromAPI = normalizePoolData(roleResponse.poolData);
       const businessTypeFromPoolData = normalizeBusinessType(
         Object.values(poolDataFromAPI)
           .find((rows) => rows.length > 0)
@@ -80,15 +114,24 @@ const Inbox = () => {
       loadData();
     }, 0);
 
-    const intervalId = window.setInterval(() => {
+    const reloadVisibleInbox = () => {
       if (document.visibilityState === "visible") {
         loadData();
       }
+    };
+
+    const intervalId = window.setInterval(() => {
+      reloadVisibleInbox();
     }, 30000);
+
+    window.addEventListener("focus", reloadVisibleInbox);
+    document.addEventListener("visibilitychange", reloadVisibleInbox);
 
     return () => {
       window.clearTimeout(initialLoadTimeoutId);
       window.clearInterval(intervalId);
+      window.removeEventListener("focus", reloadVisibleInbox);
+      document.removeEventListener("visibilitychange", reloadVisibleInbox);
     };
   }, [loadData]);
 

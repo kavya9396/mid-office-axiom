@@ -12,10 +12,14 @@ export const apiRequest = async <TResponse = unknown, TRequest = unknown>({
   body,
 }: ApiRequest<TRequest>): Promise<TResponse> => {
   const isMockJsonRequest = url.endsWith(".json");
+  const resolvedUrl = isMockJsonRequest
+    ? `${url}${url.includes("?") ? "&" : "?"}_=${Date.now()}`
+    : url;
   const resolvedMethod = isMockJsonRequest ? "GET" : method;
 
-  const response = await fetch(url, {
+  const response = await fetch(resolvedUrl, {
     method: resolvedMethod,
+    cache: isMockJsonRequest ? "no-store" : "default",
     headers: {
       "Content-Type": "application/json",
     },
