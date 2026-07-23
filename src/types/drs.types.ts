@@ -107,7 +107,7 @@ export interface CVTRequirementRow {
   userId: string;
   remarks: string;
   udsLink: string;
-};
+}
 
 export type DRSViewRequest = {
   applicationNo: string;
@@ -674,6 +674,7 @@ export type MasterKey =
   | "firstUWDecision"
   | "parallelUWDecision"
   | "reconsiderationDecision"
+  | "riskDecision"
   | "requirementTeam"
   | "requirementProfile"
   | "requirementCategory"
@@ -689,9 +690,38 @@ export type MasterKey =
   | "accuityReferralReason"
   | "reinsurerReferralReason"
   | "holdReason"
-  | "cuwReferralReason";
+  | "cuwReferralReason"
+  | "resident_status"
+  | "marital_status"
+  | "education"
+  | "occupation"
+  | "industry_type"
+  | "organization_type"
+  | "id_proof_type"
+  | "impairement_type"
+  | "insurance_repository"
+  | "product"
+  | "rider"
+  | "annuity_option"
+  | "fund"
+  | "portfolio_strategy"
+  | "payment_mode"
+  | "source_of_fund"
+  | "proposal_status"
+  | "policy_decision"
+  | "agent_mst"
+  | "health_question"
+  | "requirement_mst"
+  | "bre"
+  | "ntu_retail"
+  | "pre_post_insurance"
+  | "uw_decision"
+  | "app_status"
+  | "misc";
 
-export type MastersData = Partial<Record<Exclude<MasterKey, "requirementManagement">, MasterOption[]>> & {
+export type MastersData = Partial<
+  Record<Exclude<MasterKey, "requirementManagement">, MasterOption[]>
+> & {
   requirementManagement?: RequirementMasterOption[];
 };
 
@@ -823,12 +853,12 @@ export interface ApplicantDetails {
   nationality: string;
   countryOfResidence: string;
   education: string;
-  residentStatus:string;
-  designation:string;
-  disabled:string;
-  percentageOfImpairment:string;
-  typeOfImpairment:string;
-  udidNumber:string;
+  residentStatus: string;
+  designation: string;
+  disabled: string;
+  percentageOfImpairment: string;
+  typeOfImpairment: string;
+  udidNumber: string;
   udsLink?: string;
 }
 
@@ -841,12 +871,11 @@ export interface KycDetails {
   existingCkycNumber: string;
   pep: boolean;
   criminalProceedings: string;
-  panFlag:string;
-  panAadharSeedingStatus:string;
-  identityProofExpiryDate:string;
-  pranNo:string;
-  pranNoVerifivation:string;
-
+  panFlag: string;
+  panAadharSeedingStatus: string;
+  identityProofExpiryDate: string;
+  pranNo: string;
+  pranNoVerifivation: string;
 }
 
 export interface AddressDetails {
@@ -867,7 +896,7 @@ export interface ContactDetails {
   landlineNumber: number;
   emailPref: string;
   smsPref: string;
-  std:number;
+  std: number;
 }
 
 export interface ApplicantFinancialDetails {

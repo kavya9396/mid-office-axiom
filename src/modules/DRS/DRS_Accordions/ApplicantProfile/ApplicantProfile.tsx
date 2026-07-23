@@ -35,6 +35,7 @@ import FundDetails from "./FundDetails"
 import PaymentPayoutDetails from "./PaymentPayoutDetails"
 import FormalMemberProfile from "./FormalMemberProfile";
 import { normalizeMasterOptions, toMasterKey, toMasterLabel, type SelectOption } from "../../../../utils/masterOptions";
+import { getErrorMessage, type ErrorMessageKey } from "../../../../config/errorMessages";
 
 export interface ApplicantProfileProps {
     profile?: Partial<SummaryResponse>;
@@ -147,26 +148,26 @@ const getAddressFields = (options: {
     { name: "permanentPincode", label: "Perm. Pincode" },
 ];
 
-const idProofNumberValidationMap: Record<string, { regex: RegExp; message: string }> = {
+const idProofNumberValidationMap: Record<string, { regex: RegExp; messageKey: ErrorMessageKey }> = {
     "PAN Card": {
         regex: /^[A-Z]{5}[0-9]{4}[A-Z]$/,
-        message: "Enter a valid PAN number (e.g. ABCDE1234F)",
+        messageKey: "applicantValidPan",
     },
     "Voter ID": {
         regex: /^[A-Z]{3}[0-9]{7}$/i,
-        message: "Enter a valid Voter ID (e.g. ABC1234567)",
+        messageKey: "applicantValidVoterId",
     },
     "Aadhaar Card": {
         regex: /^\d{12}$/,
-        message: "Enter a valid Aadhaar number (12 digits)",
+        messageKey: "applicantValidAadhaar",
     },
     "Passport": {
         regex: /^[A-PR-WY][1-9]\d{6}$/i,
-        message: "Enter a valid Passport number (e.g. A1234567)",
+        messageKey: "applicantValidPassport",
     },
     "Driving's License": {
         regex: /^[A-Z]{2}[0-9]{2}[0-9A-Z]{9,13}$/i,
-        message: "Enter a valid Driving License number",
+        messageKey: "applicantValidDrivingLicense",
     },
 };
 
@@ -883,7 +884,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         }
 
         if (formData.panNumber.trim() && !panRegex.test(formData.panNumber.trim().toUpperCase())) {
-            errors.panNumber = "Enter a valid PAN number (e.g. ABCDE1234F)";
+            errors.panNumber = getErrorMessage("applicantValidPan");
         }
 
         if (idProofOptions.length > 0 && formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
@@ -941,7 +942,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         const selectedProofValidation = idProofNumberValidationMap[toMasterLabel(formData.identityProofType, idProofOptions)];
         if (selectedProofValidation && formData.identityProofNumber.trim()) {
             if (!selectedProofValidation.regex.test(formData.identityProofNumber.trim())) {
-                errors.identityProofNumber = selectedProofValidation.message;
+                errors.identityProofNumber = getErrorMessage(selectedProofValidation.messageKey);
             }
         }
 

@@ -19,6 +19,7 @@ import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOpti
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { getErrorMessage } from "../../../config/errorMessages";
 
 const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
 const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
@@ -360,7 +361,7 @@ const CVTDecision = () => {
         }
 
         if (!hasVisitedAllApplicantTabs) {
-            setTabValidationMessage(pendingApplicantTabsMessage || "Please visit all applicant tabs at least once before submitting.");
+            setTabValidationMessage(pendingApplicantTabsMessage || getErrorMessage("drsApplicantTabsNotVisited"));
             return;
         }
 
@@ -526,7 +527,7 @@ const CVTDecision = () => {
                         variant="filled"
                         sx={{ width: "100%" }}
                     >
-                        {tabValidationMessage ?? pendingApplicantTabsMessage ?? "Please visit all applicant tabs at least once before submitting."}
+                        {tabValidationMessage ?? pendingApplicantTabsMessage ?? getErrorMessage("drsApplicantTabsNotVisited")}
                     </Alert>
                 </Snackbar>
 

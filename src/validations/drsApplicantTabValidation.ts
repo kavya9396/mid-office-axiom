@@ -1,4 +1,5 @@
 import type { ApplicantTab } from "../types/drs.types";
+import { getErrorMessage } from "../config/errorMessages";
 
 export const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
 export const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
@@ -110,6 +111,8 @@ export const validateApplicantTabsVisited = (drsData: unknown): { isValid: boole
 
   return {
     isValid: false,
-    message: `Please visit ${formatApplicantTabLabels(pendingTabs)} before taking decision.`,
+    message: getErrorMessage("drsApplicantTabsPending", {
+      tabs: formatApplicantTabLabels(pendingTabs),
+    }),
   };
 };

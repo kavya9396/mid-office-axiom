@@ -1,5 +1,4 @@
-export const DRS_FINAL_BRE_FAILURE_MESSAGE =
-  "Final BRE is failed. Please retrigger BRE before performing any action on this case.";
+import { getErrorMessage } from "../config/errorMessages";
 
 export type DrsBreValidationResult = {
   canPerformAction: boolean;
@@ -107,6 +106,6 @@ export const validateDrsFinalBre = (drsData: unknown): DrsBreValidationResult =>
   return {
     canPerformAction: !finalBreFailed,
     finalBreFailed,
-    message: finalBreFailed ? DRS_FINAL_BRE_FAILURE_MESSAGE : "",
+    message: finalBreFailed ? getErrorMessage("drsFinalBreFailure") : "",
   };
 };
