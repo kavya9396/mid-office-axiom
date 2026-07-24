@@ -1,6 +1,7 @@
 import type { MastersData } from "../types/drs.types";
 
-const MASTER_DATA_SESSION_KEY = "drsMasterData";
+const LEGACY_MASTER_DATA_SESSION_KEY = "drsMasterData";
+const MASTER_DATA_SESSION_KEY = "drsMasterData:v2";
 
 const getSessionStorage = (): Storage | null => {
   if (typeof window === "undefined") {
@@ -68,19 +69,6 @@ export const normalizeMastersData = (masters: unknown): MastersData => {
     maritalStatus: ["maritalStatus", "marital_status"],
     idProof: ["idProof", "id_proof_type"],
     addressProof: ["addressProof", "address_proof_type", "id_proof_type"],
-    caseUWDecision: ["caseUWDecision", "policy_decision", "uw_decision"],
-    firstUWDecision: ["firstUWDecision", "policy_decision", "uw_decision"],
-    parallelUWDecision: ["parallelUWDecision", "policy_decision", "uw_decision"],
-    reconsiderationDecision: ["reconsiderationDecision", "policy_decision", "uw_decision"],
-    cvtDecision: ["cvtDecision", "policy_decision", "uw_decision"],
-    dvtDecision: ["dvtDecision", "policy_decision", "uw_decision"],
-    riskDecision: ["riskDecision", "policy_decision", "uw_decision"],
-    exceptionDecision: ["exceptionDecision", "policy_decision", "uw_decision"],
-    srUwDecision: ["srUwDecision", "policy_decision", "uw_decision"],
-    hodDecision: ["hodDecision", "policy_decision", "uw_decision"],
-    hoCmoDecision: ["hoCmoDecision", "policy_decision", "uw_decision"],
-    reinsurerDecision: ["reinsurerDecision", "policy_decision", "uw_decision"],
-    pivvDecision: ["pivvDecision", "policy_decision", "uw_decision"],
   };
 
   Object.entries(aliases).forEach(([targetKey, sourceKeys]) => {
@@ -104,6 +92,7 @@ export const normalizeMastersData = (masters: unknown): MastersData => {
 
 export const getSessionMasters = (): MastersData | null => {
   const storage = getSessionStorage();
+  storage?.removeItem(LEGACY_MASTER_DATA_SESSION_KEY);
   const rawMasters = storage?.getItem(MASTER_DATA_SESSION_KEY);
 
   if (!rawMasters) {
@@ -123,7 +112,9 @@ export const saveSessionMasters = (masters: MastersData) => {
 };
 
 export const clearSessionMasters = () => {
-  getSessionStorage()?.removeItem(MASTER_DATA_SESSION_KEY);
+  const storage = getSessionStorage();
+  storage?.removeItem(LEGACY_MASTER_DATA_SESSION_KEY);
+  storage?.removeItem(MASTER_DATA_SESSION_KEY);
 };
 
 export const hasSessionMasters = (): boolean => {

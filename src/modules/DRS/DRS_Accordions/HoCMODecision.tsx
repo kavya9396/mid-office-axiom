@@ -1,5 +1,5 @@
 import { Box, Container, FormControlLabel, Typography } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -12,18 +12,6 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { normalizeMasterOptions } from "../../../utils/masterOptions";
-
-type DecisionOption = {
-  label: string;
-  value: string;
-};
-
-const fallbackHoCmoDecisionOptions: DecisionOption[] = [
-  { label: "Approve", value: "Approve" },
-  { label: "Reject", value: "Reject" },
-  { label: "Refer Back", value: "Refer Back" },
-  { label: "Refer to Risk", value: "Refer to Risk" },
-];
 
 const HoCMODecision = () => {
   const navigate = useNavigate();
@@ -44,8 +32,7 @@ const HoCMODecision = () => {
   const masters = useSelector((state: RootState) => state.drs.masters);
 
   const hoCmoDecisionOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.hoCmoDecision);
-    return masterOptions.length > 0 ? masterOptions : fallbackHoCmoDecisionOptions;
+    return normalizeMasterOptions(masters.hoCmoDecision);
   }, [masters.hoCmoDecision]);
 
   const dialogMessage = `Kindly reconfirm if you want to proceed with the HO CMO decision as "${decision}"`;

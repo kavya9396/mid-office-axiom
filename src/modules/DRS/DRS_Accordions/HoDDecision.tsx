@@ -13,18 +13,6 @@ import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { normalizeMasterOptions } from "../../../utils/masterOptions";
 
-type DecisionOption = {
-  label: string;
-  value: string;
-};
-
-const fallbackHodDecisionOptions: DecisionOption[] = [
-  { label: "Agree", value: "Agree" },
-  { label: "Disagree", value: "Disagree" },
-  { label: "Refer to CMO", value: "Refer to CMO" },
-  { label: "Refer back to last UW", value: "Refer back to last UW" },
-];
-
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
@@ -73,8 +61,7 @@ const HoDDecision = () => {
   const masters = useSelector((state: RootState) => state.drs.masters);
 
   const hodDecisionOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.hodDecision);
-    return masterOptions.length > 0 ? masterOptions : fallbackHodDecisionOptions;
+    return normalizeMasterOptions(masters.hodDecision);
   }, [masters.hodDecision]);
 
   const lastUwUser = useSelector((state: RootState) => {

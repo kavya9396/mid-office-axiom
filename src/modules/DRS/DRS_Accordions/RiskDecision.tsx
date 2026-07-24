@@ -8,7 +8,6 @@ import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppSelector } from "../../../store/hooks";
-import { ReferralRisk as fallbackRiskReferralReasons, riskDecisionOptions as fallbackRiskDecisionOptions } from "../../../utils/constant";
 import { normalizeMasterOptions } from "../../../utils/masterOptions";
 import Logo from "../../../assets/ICICI-Logo.svg";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
@@ -179,12 +178,10 @@ const RiskDecision = () => {
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
   const riskDecisionOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.riskDecision);
-    return masterOptions.length > 0 ? masterOptions : fallbackRiskDecisionOptions;
+    return normalizeMasterOptions(masters.riskDecision);
   }, [masters.riskDecision]);
   const riskReferralReasonOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.riskReferralReason);
-    return masterOptions.length > 0 ? masterOptions : fallbackRiskReferralReasons;
+    return normalizeMasterOptions(masters.riskReferralReason);
   }, [masters.riskReferralReason]);
   const [remarks, setRemarks] = useState("");
   const [riskDecision, setRiskDecision] = useState("");

@@ -2,16 +2,6 @@ import { Alert, Box, Container, Snackbar, Table, TableBody, TableCell, TableCont
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
-import {
-    AccuityReferralReasons as fallbackAccuityReferralReasons,
-    caseUWDecisionOptions as fallbackCaseUWDecisionOptions,
-    CUWReferralReasons as fallbackCUWReferralReasons,
-    firstUWDecisionOptions as fallbackFirstUWDecisionOptions,
-    HoldReasons as fallbackHoldReasons,
-    parallelUWDecisionOptions as fallbackParallelUWDecisionOptions,
-    ReferralRisk as fallbackReferralRisk,
-    ReinsurerReferralReasons as fallbackReinsurerReferralReasons,
-} from "../../../utils/constant";
 import CustomRadioGroup from "../../../components/ui/Radio/Radio";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
@@ -112,71 +102,43 @@ const UWDecision = () => {
 
     const caseUWDecisionOptions = useMemo(() => {
         const masterOptions = normalizeMasterOptions(masters.caseUWDecision);
-        const options = masterOptions.length > 0 ? masterOptions : fallbackCaseUWDecisionOptions;
-        return filterAcceptDecisionOptions(options, drsData);
+        return filterAcceptDecisionOptions(masterOptions, drsData);
     }, [drsData, masters.caseUWDecision]);
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
     const firstUWDecisionOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.firstUWDecision);
-        return masterOptions.length > 0 ? masterOptions : fallbackFirstUWDecisionOptions;
+        return normalizeMasterOptions(masters.firstUWDecision);
     }, [masters.firstUWDecision]);
     const parallelUWDecisionOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.parallelUWDecision);
-        return masterOptions.length > 0 ? masterOptions : fallbackParallelUWDecisionOptions;
+        return normalizeMasterOptions(masters.parallelUWDecision);
     }, [masters.parallelUWDecision]);
     const rejectReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.rejectReason);
-        return masterOptions.length > 0 ? masterOptions : [
-            { label: "Reason 1", value: "Reason 1" },
-            { label: "Reason 2", value: "Reason 2" },
-            { label: "Reason 3", value: "Reason 3" },
-        ];
+        return normalizeMasterOptions(masters.rejectReason);
     }, [masters.rejectReason]);
     const declineReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.declineReason);
-        return masterOptions.length > 0 ? masterOptions : [
-            { label: "Reason 1", value: "Reason 1" },
-            { label: "Reason 2", value: "Reason 2" },
-            { label: "Reason 3", value: "Reason 3" },
-        ];
+        return normalizeMasterOptions(masters.declineReason);
     }, [masters.declineReason]);
     const postponeReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.postponeReason);
-        return masterOptions.length > 0 ? masterOptions : [
-            { label: "Reason 1", value: "Reason 1" },
-            { label: "Reason 2", value: "Reason 2" },
-            { label: "Reason 3", value: "Reason 3" },
-        ];
+        return normalizeMasterOptions(masters.postponeReason);
     }, [masters.postponeReason]);
     const postponementPeriodOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.postponementPeriod);
-        return masterOptions.length > 0 ? masterOptions : [
-            { label: "3 Months", value: "3 Months" },
-            { label: "6 Months", value: "6 Months" },
-            { label: "12 Months", value: "12 Months" },
-        ];
+        return normalizeMasterOptions(masters.postponementPeriod);
     }, [masters.postponementPeriod]);
     const riskReferralReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.riskReferralReason);
-        return masterOptions.length > 0 ? masterOptions : fallbackReferralRisk;
+        return normalizeMasterOptions(masters.riskReferralReason);
     }, [masters.riskReferralReason]);
     const accuityReferralReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.accuityReferralReason);
-        return masterOptions.length > 0 ? masterOptions : fallbackAccuityReferralReasons;
+        return normalizeMasterOptions(masters.accuityReferralReason);
     }, [masters.accuityReferralReason]);
     const reinsurerReferralReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.reinsurerReferralReason);
-        return masterOptions.length > 0 ? masterOptions : fallbackReinsurerReferralReasons;
+        return normalizeMasterOptions(masters.reinsurerReferralReason);
     }, [masters.reinsurerReferralReason]);
     const holdReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.holdReason);
-        return masterOptions.length > 0 ? masterOptions : fallbackHoldReasons;
+        return normalizeMasterOptions(masters.holdReason);
     }, [masters.holdReason]);
     const cuwReferralReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.cuwReferralReason);
-        return masterOptions.length > 0 ? masterOptions : fallbackCUWReferralReasons;
+        return normalizeMasterOptions(masters.cuwReferralReason);
     }, [masters.cuwReferralReason]);
     const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
 

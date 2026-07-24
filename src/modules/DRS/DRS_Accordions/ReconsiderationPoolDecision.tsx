@@ -10,7 +10,6 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
-import { reconsiderationDecisionOptions as fallbackReconsiderationDecisionOptions } from "../../../utils/constant";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
@@ -24,8 +23,7 @@ const ReconsiderationPoolDecision = () => {
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
   const reconsiderationDecisionOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.reconsiderationDecision);
-    return masterOptions.length > 0 ? masterOptions : fallbackReconsiderationDecisionOptions;
+    return normalizeMasterOptions(masters.reconsiderationDecision);
   }, [masters.reconsiderationDecision]);
 
   const safeBusinessType =

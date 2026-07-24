@@ -1,5 +1,5 @@
 import { Box, Container, Typography } from "@mui/material";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -12,26 +12,6 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { normalizeMasterOptions } from "../../../utils/masterOptions";
-
-type DecisionOption = {
-  label: string;
-  value: string;
-};
-
-const fallbackReinsurerDecisionOptions: DecisionOption[] = [
-  { label: "Accept", value: "Accept" },
-  { label: "Reject", value: "Reject" },
-  { label: "Counter Offer", value: "Counter Offer" },
-  { label: "Refer Back", value: "Refer Back" },
-];
-
-const fallbackReinsurerDecisionIdOptions: DecisionOption[] = [
-  { label: "RES001", value: "RES001" },
-  { label: "RES002", value: "RES002" },
-  { label: "RES003", value: "RES003" },
-  { label: "RES004", value: "RES004" },
-  { label: "RES005", value: "RES005" },
-];
 
 const ReinsureDecision = () => {
   const navigate = useNavigate();
@@ -52,13 +32,11 @@ const ReinsureDecision = () => {
   const masters = useSelector((state: RootState) => state.drs.masters);
 
   const reinsurerDecisionOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.reinsurerDecision);
-    return masterOptions.length > 0 ? masterOptions : fallbackReinsurerDecisionOptions;
+    return normalizeMasterOptions(masters.reinsurerDecision);
   }, [masters.reinsurerDecision]);
 
   const reinsurerDecisionIdOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.reinsurerDecisionId);
-    return masterOptions.length > 0 ? masterOptions : fallbackReinsurerDecisionIdOptions;
+    return normalizeMasterOptions(masters.reinsurerDecisionId);
   }, [masters.reinsurerDecisionId]);
 
   const dialogMessage = `Kindly reconfirm if you want to proceed with the reinsurer decision as "${decision}"`;

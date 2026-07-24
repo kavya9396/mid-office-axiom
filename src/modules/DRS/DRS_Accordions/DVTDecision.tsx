@@ -3,7 +3,6 @@ import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
-import { dvtDecisionOptions as fallbackDvtDecisionOptions } from "../../../utils/constant";
 import CustomButton from "../../../components/ui/Button/Button";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useNavigate } from "react-router-dom";
@@ -36,8 +35,7 @@ const DVTDecision = () => {
     const masters = useSelector((state: RootState) => state.drs.masters);
     const dvtDecisionOptions = useMemo(() => {
         const masterOptions = normalizeMasterOptions(masters.dvtDecision);
-        const options = masterOptions.length > 0 ? masterOptions : fallbackDvtDecisionOptions;
-        return filterAcceptDecisionOptions(options, drsData);
+        return filterAcceptDecisionOptions(masterOptions, drsData);
     }, [drsData, masters.dvtDecision]);
     const effectiveDecision = dvtDecisionOptions.some((option) => option.value === decision)
         ? decision

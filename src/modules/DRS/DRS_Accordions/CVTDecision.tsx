@@ -3,7 +3,6 @@ import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
-import { cvtDecisionOptions as fallbackCvtDecisionOptions } from "../../../utils/constant";
 import CustomButton from "../../../components/ui/Button/Button";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import { useNavigate } from "react-router-dom";
@@ -193,8 +192,7 @@ const CVTDecision = () => {
     const masters = useAppSelector((state) => state.drs.masters);
     const cvtDecisionOptions = useMemo(() => {
         const masterOptions = normalizeMasterOptions(masters.cvtDecision);
-        const options = masterOptions.length > 0 ? masterOptions : fallbackCvtDecisionOptions;
-        return filterAcceptDecisionOptions(options, drsData);
+        return filterAcceptDecisionOptions(masterOptions, drsData);
     }, [drsData, masters.cvtDecision]);
     const effectiveDecision = cvtDecisionOptions.some((option) => option.value === decision)
         ? decision

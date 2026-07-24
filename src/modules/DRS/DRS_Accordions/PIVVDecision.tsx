@@ -22,25 +22,6 @@ type PivvDecisionOption = {
   workflowPool: "COPS Pool" | "CUW Pool";
 };
 
-const fallbackPivvDecisionMapping: PivvDecisionOption[] = [
-  { label: "Customer not speaking", value: "Customer not speaking", workflowPool: "COPS Pool" },
-  { label: "Another person spoken", value: "Another person spoken", workflowPool: "COPS Pool" },
-  { label: "Pre-recorded video", value: "Pre-recorded video", workflowPool: "COPS Pool" },
-  { label: "Customer didn't complete full script - a. Application", value: "Customer didn't complete full script - a. Application", workflowPool: "COPS Pool" },
-  { label: "Customer didn't complete full script - b. Premium", value: "Customer didn't complete full script - b. Premium", workflowPool: "COPS Pool" },
-  { label: "Customer didn't complete full script - c. Policy term", value: "Customer didn't complete full script - c. Policy term", workflowPool: "COPS Pool" },
-  { label: "Customer didn't complete full script - d. Premium paying term", value: "Customer didn't complete full script - d. Premium paying term", workflowPool: "COPS Pool" },
-  { label: "Customer didn't complete full script - e. Sum assured", value: "Customer didn't complete full script - e. Sum assured", workflowPool: "COPS Pool" },
-  { label: "Problematic case - Customer physical condition not good", value: "Problematic case - Customer physical condition not good", workflowPool: "CUW Pool" },
-  { label: "Customer weight different with application form", value: "Customer weight different with application form", workflowPool: "CUW Pool" },
-  { label: "Customer profile is not ok", value: "Customer profile is not ok", workflowPool: "CUW Pool" },
-  { label: "Customer face not clear in video", value: "Customer face not clear in video", workflowPool: "COPS Pool" },
-  { label: "Voice is not audible", value: "Voice is not audible", workflowPool: "COPS Pool" },
-  { label: "PDF not generated to check script", value: "PDF not generated to check script", workflowPool: "COPS Pool" },
-  { label: "New PDF not generated as per latest PIVV", value: "New PDF not generated as per latest PIVV", workflowPool: "COPS Pool" },
-  { label: "PIVV Done", value: "PIVV Done", workflowPool: "COPS Pool" },
-];
-
 const PIVVDecision = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -66,16 +47,13 @@ const PIVVDecision = () => {
   );
 
   const workflowPool = useMemo(() => {
-    const sourceRows = Array.isArray(masters.pivvDecision) ? masters.pivvDecision : fallbackPivvDecisionMapping;
+    const sourceRows = Array.isArray(masters.pivvDecision) ? masters.pivvDecision : [];
     const matched = sourceRows.find((item) => item.value === decision || item.description === decision || item.code === decision) as PivvDecisionOption | undefined;
     return matched?.workflowPool ?? "";
   }, [decision, masters.pivvDecision]);
 
   const decisionOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.pivvDecision);
-    return masterOptions.length > 0
-      ? masterOptions
-      : fallbackPivvDecisionMapping.map((item) => ({ label: item.label, value: item.value }));
+    return normalizeMasterOptions(masters.pivvDecision);
   }, [masters.pivvDecision]);
 
   const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;

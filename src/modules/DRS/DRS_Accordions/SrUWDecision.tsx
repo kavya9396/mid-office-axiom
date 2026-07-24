@@ -14,19 +14,6 @@ import { referralUsersThunk } from "../../../store/thunks/referralUsersThunk";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { normalizeMasterOptions } from "../../../utils/masterOptions";
 
-type DecisionOption = {
-  label: string;
-  value: string;
-};
-
-const fallbackSrUwDecisionOptions: DecisionOption[] = [
-  { label: "Agree", value: "Agree" },
-  { label: "Disagree", value: "Disagree" },
-  { label: "Refer to CMO", value: "Refer to CMO" },
-  { label: "Refer back to last UW", value: "Refer back to last UW" },
-  { label: "Refer to HoD", value: "Refer to HoD" },
-];
-
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return null;
@@ -103,8 +90,7 @@ const SrUWDecision = () => {
   const masters = useSelector((state: RootState) => state.drs.masters);
 
   const srUwDecisionOptions = useMemo(() => {
-    const masterOptions = normalizeMasterOptions(masters.srUwDecision);
-    return masterOptions.length > 0 ? masterOptions : fallbackSrUwDecisionOptions;
+    return normalizeMasterOptions(masters.srUwDecision);
   }, [masters.srUwDecision]);
 
   const hoDOptions = useMemo(
