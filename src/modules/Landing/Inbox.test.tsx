@@ -94,7 +94,7 @@ describe("Inbox", () => {
     }));
   });
 
-  it("loads inbox data on mount and renders all cases by default", async () => {
+  it("loads inbox data on mount and renders the first available pool by default", async () => {
     const inboxResponse = {
       poolData: {
         "Pool A": [baseRow],
@@ -118,8 +118,8 @@ describe("Inbox", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByTestId("left-selected")).toHaveTextContent(ALL_CASES_POOL);
-      expect(screen.getByTestId("right-panel")).toHaveTextContent(`${ALL_CASES_POOL}:1`);
+      expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool A");
+      expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool A:1");
     });
   });
 
@@ -143,7 +143,7 @@ describe("Inbox", () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByTestId("left-selected")).toHaveTextContent(ALL_CASES_POOL);
+      expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool A");
     });
 
     await userEvent.click(screen.getByRole("button", { name: "Pool B" }));
@@ -153,6 +153,41 @@ describe("Inbox", () => {
     });
 
     expect(fetchInboxThunk).toHaveBeenCalled();
+  });
+
+  it("shows only CVT task rows when CVT_TASK is selected", async () => {
+    const inboxResponse = {
+      poolData: {
+        CVT_TASK: [
+          { ...baseRow, id: 1, applicationNo: "CVT-1", roleType: "CVT_TASK" },
+          { ...baseRow, id: 2, applicationNo: "CVT-2", roleType: "CVT_TASK" },
+        ],
+        DVT_TASK: [
+          { ...baseRow, id: 3, applicationNo: "DVT-1", roleType: "DVT_TASK" },
+          { ...baseRow, id: 4, applicationNo: "DVT-2", roleType: "DVT_TASK" },
+          { ...baseRow, id: 5, applicationNo: "DVT-3", roleType: "DVT_TASK" },
+        ],
+      },
+    };
+
+    mockDispatch.mockReturnValue(makeDispatchResult(inboxResponse));
+
+    render(
+      <MemoryRouter>
+        <Inbox />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("right-panel")).toHaveTextContent("CVT_TASK:2");
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: "CVT_TASK" }));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("left-selected")).toHaveTextContent("CVT_TASK");
+      expect(screen.getByTestId("right-panel")).toHaveTextContent("CVT_TASK:2");
+    });
   });
 
   it("shows aggregated rows when all cases is selected", async () => {
@@ -173,6 +208,12 @@ describe("Inbox", () => {
         <Inbox />
       </MemoryRouter>
     );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool A:1");
+    });
+
+    await userEvent.click(screen.getByRole("button", { name: ALL_CASES_POOL }));
 
     await waitFor(() => {
       expect(screen.getByTestId("right-panel")).toHaveTextContent(`${ALL_CASES_POOL}:3`);
@@ -199,7 +240,7 @@ describe("Inbox", () => {
     await waitFor(() => {
       expect(screen.getByRole("button", { name: "Pool A" })).toBeInTheDocument();
       expect(screen.getByRole("button", { name: "Pool B" })).toBeInTheDocument();
-      expect(screen.getByTestId("right-panel")).toHaveTextContent(`${ALL_CASES_POOL}:2`);
+      expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool A:1");
     });
 
     await userEvent.click(screen.getByRole("button", { name: "Pool B" }));
@@ -207,6 +248,50 @@ describe("Inbox", () => {
     await waitFor(() => {
       expect(screen.getByTestId("left-selected")).toHaveTextContent("Pool B");
       expect(screen.getByTestId("right-panel")).toHaveTextContent("Pool B:1");
+    });
+  });
+
+  it("replaces the whole inbox when a later role list response changes buckets", async () => {
+    const sharedApplicationRow = { ...baseRow, applicationNo: "APP-SHARED" };
+    const firstResponse = {
+      poolData: {
+        CVT_TASK: [{ ...sharedApplicationRow, id: 1, roleType: "CVT_TASK" }],
+        DVT_TASK: [{ ...sharedApplicationRow, id: 2, roleType: "DVT_TASK" }],
+      },
+    };
+    const secondResponse = {
+      poolData: {
+        DVT_TASK: [
+          { ...sharedApplicationRow, id: 3, taskId: "DVT-1", roleType: "DVT_TASK" },
+          { ...sharedApplicationRow, id: 4, taskId: "DVT-2", roleType: "DVT_TASK" },
+        ],
+        PIVV_TASK: [{ ...sharedApplicationRow, id: 5, roleType: "PIVV_TASK" }],
+      },
+    };
+
+    mockDispatch
+      .mockReturnValueOnce(makeDispatchResult(firstResponse))
+      .mockReturnValueOnce(makeDispatchResult(secondResponse));
+
+    render(
+      <MemoryRouter>
+        <Inbox />
+      </MemoryRouter>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId("right-panel")).toHaveTextContent("CVT_TASK:1");
+    });
+
+    window.dispatchEvent(new Event("focus"));
+
+    await waitFor(() => {
+      expect(mockDispatch).toHaveBeenCalledTimes(2);
+      expect(screen.queryByRole("button", { name: "CVT_TASK" })).not.toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "DVT_TASK" })).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: "PIVV_TASK" })).toBeInTheDocument();
+      expect(screen.getByTestId("left-selected")).toHaveTextContent("DVT_TASK");
+      expect(screen.getByTestId("right-panel")).toHaveTextContent("DVT_TASK:2");
     });
   });
 });

@@ -21,6 +21,24 @@ const normalizePoolData = (poolData: Record<string, tableData[]> = {}) => {
   );
 };
 
+const getNextSelectedPool = (
+  previousPool: string,
+  nextPoolData: Record<string, tableData[]>,
+) => {
+  const nextPoolNames = Object.keys(nextPoolData);
+  const hasPools = nextPoolNames.length > 0;
+
+  if (previousPool === ALL_CASES_POOL && hasPools) {
+    return ALL_CASES_POOL;
+  }
+
+  if (previousPool && nextPoolData[previousPool]) {
+    return previousPool;
+  }
+
+  return hasPools ? nextPoolNames[0] : "";
+};
+
 const Inbox = () => {
   const dispatch = useAppDispatch();
   const location = useLocation();
@@ -67,18 +85,8 @@ const Inbox = () => {
         navigate(getInboxPath(resolvedBusinessType), { replace: true });
       }
 
-      const hasPools = Object.keys(poolDataFromAPI).length > 0;
-
       setPoolData(poolDataFromAPI);
-      setSelectedPool((previousPool) => {
-        if (previousPool === ALL_CASES_POOL && hasPools) {
-          return ALL_CASES_POOL;
-        }
-        if (previousPool && poolDataFromAPI[previousPool]) {
-          return previousPool;
-        }
-        return hasPools ? ALL_CASES_POOL : "";
-      });
+      setSelectedPool((previousPool) => getNextSelectedPool(previousPool, poolDataFromAPI));
     } catch (error) {
       console.error("Failed to load data:", error);
     } finally {
