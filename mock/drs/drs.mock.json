@@ -726,7 +726,9 @@
         "shareOfLoanJl": 0,
         "applicantStatusJl": "Co-Borrower",
         "masterPolicyHolder": "MPH",
-        "masterPolicyHolderCode": "MPH1"
+        "masterPolicyHolderCode": "MPH1",
+        "fundSource":"Balanced Fund",
+        "propserType":"Individual"
       },
       "productDetail": [
         {

@@ -58,7 +58,9 @@ type ApplicationDetailKey =
   | "faceValue"
   | "trsa"
   | "tfsa"
-  | "policyType";
+  | "policyType"
+  | "mphName"
+  |"mphCode" | "proposerType" | "sumAssured" |"deathBenefitOption" | "benefitOption" |"annualPremium"|"fundSource";
 
 const ApplicationOverview = () => {
   const { data } = useSelector((state: RootState) => state.drs);
@@ -199,11 +201,11 @@ const ApplicationOverview = () => {
       ),
     },
     pt: {
-      label: "PT",
+      label: "Policy Term",
       value: toDisplayValue(firstProduct?.term),
     },
     ppt: {
-      label: "PPT",
+      label: "Premium Paying Term",
       value: toDisplayValue(firstProduct?.premiumCessationTerm ?? firstProduct?.premiumPaymentTerm),
     },
     paymentMode: {
@@ -231,6 +233,28 @@ const ApplicationOverview = () => {
       label: "Policy Type",
       value: String(groupDetails?.coverageStatus ?? "-"),
     },
+    mphName:{
+      label: "MPH Name",
+      value: String(groupDetails?.masterPolicyHolder ?? "-"),
+    },mphCode:{
+      label: "MPH Code",
+      value: String(groupDetails?.masterPolicyHolderCode ?? "-"),
+    },proposerType:{
+      label: "Proposer Type",
+      value: String(groupDetails?.propserType ?? "-"),
+    },deathBenefitOption:{
+      label: "Death Benefit Option",
+      value: String(firstProduct?.deathBenefitPayoutOption ?? "-"),
+    },benefitOption:{
+      label: "Benefit Option",
+      value:String(firstProduct?.benefitOption ?? "-"),
+    },annualPremium:{
+      label: "Annual Premium",
+      value: String(firstProduct?.annualPremium ?? "-"),
+    },fundSource:{
+      label: "Fund Source",
+      value: String(groupDetails?.fundSource ?? "-"),
+    }
   };
 
   const formalPoolDisplayKeys: ApplicationDetailKey[] = [
@@ -293,6 +317,7 @@ const ApplicationOverview = () => {
       ...(isRetailBusiness ? (["productCode", "faceValue", "trsa", "tfsa"] as ApplicationDetailKey[]) : []),
       ...(isGroupBusiness ? (["policyType"] as ApplicationDetailKey[]) : []),
     ];
+    const guwPoolDisplayKeys: ApplicationDetailKey[]=["mphName","productName","productCode","pt","ppt","proposerType","sumAssured","deathBenefitOption","benefitOption","annualPremium","fundSource"]
 
   let selectedApplicationDetailKeys: ApplicationDetailKey[] = defaultDisplayKeys;
 
@@ -302,12 +327,11 @@ const ApplicationOverview = () => {
     selectedApplicationDetailKeys = cvtPoolDisplayKeys;
   } else if (
     roleType === "DVT_POOL" ||
-    roleType === "DVT Pool" ||
-    roleType === "GUW_POOL" ||
-    roleType === "GUW Pool"
+    roleType === "DVT Pool" 
+   
   ) {
     selectedApplicationDetailKeys = dvtPoolDisplayKeys;
-  }
+  }else if(roleType === "GUW_TASK" || roleType === "GUW Pool"){selectedApplicationDetailKeys = guwPoolDisplayKeys;}
 
   const applicationDetails = selectedApplicationDetailKeys
     .map((key) => applicationDetailsByKey[key])

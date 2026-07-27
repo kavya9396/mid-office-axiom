@@ -1,5 +1,7 @@
 import { Alert, Box, Chip, Paper, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
+import { apiRequest } from "../../../services/api";
+import { url as apiUrl } from "../../../services/apiConfig";
 import { useSelector } from "react-redux";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -457,17 +459,19 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             : [];
     });
     const drsData = useSelector((state: RootState) => state.drs.data as unknown);
-    const masterRequirementRows = EMPTY_REQUIREMENT_MASTER_ROWS;
     const effectiveRequirementMasterRows = EMPTY_REQUIREMENT_MASTER_ROWS;
     const requirementProfileOptions = EMPTY_OPTIONS;
     const requirementCategoryOptions = EMPTY_OPTIONS;
     const requirementSubCategoryOptions = EMPTY_OPTIONS;
     const requirementDocumentOptions = EMPTY_OPTIONS;
     const requirementReasonOptions = EMPTY_OPTIONS;
+
+    const [teamOptionsState, setTeamOptionsState] = useState<Option[]>(EMPTY_OPTIONS);
+    const [requirementOptionsCache, setRequirementOptionsCache] = useState<Record<string, Option[]>>({});
     const requirementStatusOptions = EMPTY_OPTIONS;
 
     const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK";
-    const teamOptions = EMPTY_OPTIONS;
+    const teamOptions = teamOptionsState;
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
         () => finalRequirements.map((row, index) => normalizeExistingRow(row, index)),
@@ -606,50 +610,98 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     }, [isVisible, normalizedExistingRows]);
 
     const getCategoryOptions = (row: EditableRequirementRow) => {
-        const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, profile: shouldShowProfileAndSpecialTest ? row.profile : "", category: "", subCategory: "", document: "", reason: "" }, masterRequirementRows).map(
-                (entry) => entry.category,
-            ),
-        ).map(toOption);
-
-        return options.length > 0 ? options : requirementCategoryOptions;
+        const payload: Record<string, string> = { team: row.team };
+        if (shouldShowProfileAndSpecialTest && String(row.profile ?? "").trim()) payload.profile = row.profile;
+        const cacheKey = JSON.stringify(payload);
+        return requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
     };
 
     const getProfileOptions = (row: EditableRequirementRow) => {
-        const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, profile: "", category: "", subCategory: "", document: "", reason: "" }, masterRequirementRows).map(
-                (entry) => entry.profile,
-            ),
-        ).map(toOption);
-
-        return options.length > 0 ? options : requirementProfileOptions;
+        const cacheKey = JSON.stringify({ team: row.team });
+        return requirementOptionsCache[cacheKey] ?? requirementProfileOptions;
     };
 
     const getSubCategoryOptions = (row: EditableRequirementRow) => {
-        const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, subCategory: "", document: "", reason: "" }, masterRequirementRows).map(
-                (entry) => entry.subCategory,
-            ),
-        ).map(toOption);
-
-        return options.length > 0 ? options : requirementSubCategoryOptions;
+        const payload: Record<string, string> = { team: row.team };
+        if (shouldShowProfileAndSpecialTest && String(row.profile ?? "").trim()) payload.profile = row.profile;
+        if (String(row.category ?? "").trim()) payload.category = row.category;
+        const cacheKey = JSON.stringify(payload);
+        return requirementOptionsCache[cacheKey] ?? requirementSubCategoryOptions;
     };
 
     const getDocumentOptions = (row: EditableRequirementRow) => {
-        const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, document: "", reason: "" }, masterRequirementRows).map((entry) => entry.document),
-        ).map(toOption);
-
-        return options.length > 0 ? options : requirementDocumentOptions;
+        const payload: Record<string, string> = { team: row.team };
+        if (shouldShowProfileAndSpecialTest && String(row.profile ?? "").trim()) payload.profile = row.profile;
+        if (String(row.category ?? "").trim()) payload.category = row.category;
+        if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
+        const cacheKey = JSON.stringify(payload);
+        return requirementOptionsCache[cacheKey] ?? requirementDocumentOptions;
     };
 
     const getReasonOptions = (row: EditableRequirementRow) => {
-        const options = uniqueNonEmpty(
-            getScopedMasterRows({ ...row, reason: "" }, masterRequirementRows).map((entry) => entry.reason),
-        ).map(toOption);
-
-        return options.length > 0 ? options : requirementReasonOptions;
+        const payload: Record<string, string> = { team: row.team };
+        if (shouldShowProfileAndSpecialTest && String(row.profile ?? "").trim()) payload.profile = row.profile;
+        if (String(row.category ?? "").trim()) payload.category = row.category;
+        if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
+        if (String(row.document ?? "").trim()) payload.document = row.document;
+        const cacheKey = JSON.stringify(payload);
+        return requirementOptionsCache[cacheKey] ?? requirementReasonOptions;
     };
+
+    const parseFirstArrayFromRequirementMst = (mst: unknown): string[] => {
+        if (!mst || typeof mst !== "object") return [];
+        const obj = mst as Record<string, unknown>;
+        // Prefer known keys
+        const preferredKeys = ["teams", "profiles", "categories", "subCategories", "documents", "reasons", "profile", "category", "subCategory", "document", "reason"];
+        for (const key of preferredKeys) {
+            const v = obj[key];
+            if (Array.isArray(v) && v.length > 0) {
+                return v.map(String);
+            }
+        }
+
+        // Fallback: first property that's an array
+        for (const key of Object.keys(obj)) {
+            const v = obj[key];
+            if (Array.isArray(v) && v.length > 0) return v.map(String);
+        }
+
+        return [];
+    };
+
+    const fetchRequirementMst = async (payload: unknown) => {
+        try {
+            console.debug("RequirementManagement: fetching masters with payload:", payload, "url:", apiUrl("masters"));
+            const data = await apiRequest<Record<string, unknown>>({ url: apiUrl("masters"), method: "POST", body: payload });
+            // mock file structure: { data: { requirement_mst: { ... } } }
+            const mst = (data as any)?.data?.requirement_mst ?? (data as any)?.requirement_mst ?? data;
+            return mst;
+        } catch (err) {
+            console.debug("RequirementManagement: fetch masters failed", err);
+            return null;
+        }
+    };
+
+    const cacheOptionsForPayload = (payload: Record<string, unknown>, options: Option[]) => {
+        const key = JSON.stringify(payload);
+        console.debug("RequirementManagement: caching options for", payload, options);
+        setRequirementOptionsCache((prev) => ({ ...prev, [key]: options }));
+    };
+
+    useEffect(() => {
+        // initial load: get teams
+        const loadInitial = async () => {
+            const mst = await fetchRequirementMst(undefined);
+            if (!mst) return;
+            const teams = parseFirstArrayFromRequirementMst(mst);
+            const opts = teams.map(toOption);
+            setTeamOptionsState(opts.length > 0 ? opts : EMPTY_OPTIONS);
+            // cache root
+            cacheOptionsForPayload({}, opts);
+        };
+
+        loadInitial();
+    }, []);
 
     const updateRow = (rowId: string, updater: (row: EditableRequirementRow) => EditableRequirementRow) => {
         const currentRow = rows.find((row) => row.__rowId === rowId);
@@ -681,6 +733,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         if (field === "status") {
             setEditableStatusRowIds((previousIds) => new Set(previousIds).add(rowId));
         }
+        const currentRowBefore = rows.find((r) => r.__rowId === rowId);
 
         updateRow(rowId, (row) => {
             const nextErrors = clearErrors(row.__errors, [field, "lookup"]);
@@ -790,6 +843,78 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
             return applyLookupToRow(nextRow, shouldShowProfileAndSpecialTest, effectiveRequirementMasterRows);
         });
+
+        // fetch next level options based on selection (only for draft rows)
+        (async () => {
+            try {
+                const before = currentRowBefore;
+                if (!before) return;
+
+                if (field === "team") {
+                    const payload = { requirementMst: { team: value } };
+                    const cacheKey = JSON.stringify({ team: value });
+                    if (!requirementOptionsCache[cacheKey]) {
+                        const mst = await fetchRequirementMst(payload);
+                        const entries = parseFirstArrayFromRequirementMst(mst);
+                        const opts = entries.map(toOption);
+                        cacheOptionsForPayload({ team: value }, opts);
+                    }
+                }
+
+                if (field === "profile") {
+                    const teamVal = before.team || "";
+                    const payload = { requirementMst: { team: teamVal, profile: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, profile: value });
+                    if (!requirementOptionsCache[cacheKey]) {
+                        const mst = await fetchRequirementMst(payload);
+                        const entries = parseFirstArrayFromRequirementMst(mst);
+                        const opts = entries.map(toOption);
+                        cacheOptionsForPayload({ team: teamVal, profile: value }, opts);
+                    }
+                }
+
+                if (field === "category") {
+                    const teamVal = before.team || "";
+                    const profileVal = before.profile || "";
+                    const payload = { requirementMst: { team: teamVal, profile: profileVal, category: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: value });
+                    if (!requirementOptionsCache[cacheKey]) {
+                        const mst = await fetchRequirementMst(payload);
+                        const entries = parseFirstArrayFromRequirementMst(mst);
+                        const opts = entries.map(toOption);
+                        cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: value }, opts);
+                    }
+                }
+
+                if (field === "subCategory") {
+                    const teamVal = before.team || "";
+                    const profileVal = before.profile || "";
+                    const payload = { requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: value });
+                    if (!requirementOptionsCache[cacheKey]) {
+                        const mst = await fetchRequirementMst(payload);
+                        const entries = parseFirstArrayFromRequirementMst(mst);
+                        const opts = entries.map(toOption);
+                        cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: value }, opts);
+                    }
+                }
+
+                if (field === "document") {
+                    const teamVal = before.team || "";
+                    const profileVal = before.profile || "";
+                    const payload = { requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value });
+                    if (!requirementOptionsCache[cacheKey]) {
+                        const mst = await fetchRequirementMst(payload);
+                        const entries = parseFirstArrayFromRequirementMst(mst);
+                        const opts = entries.map(toOption);
+                        cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value }, opts);
+                    }
+                }
+            } catch {
+                // ignore fetch errors
+            }
+        })();
     };
 
     const handleSave = (rowId: string) => {
