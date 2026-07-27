@@ -365,7 +365,8 @@ const BreDecision = ({
 
       const response = await dispatch(
         breRetriggerThunk({
-          data,
+           eventName: "BRE-RETAILS",
+                            applicationNumber:safeApplicationNumber
         }),
       ).unwrap();
 

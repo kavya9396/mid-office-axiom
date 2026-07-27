@@ -51,7 +51,7 @@ const apiUrls = {
     mock: "/mock/drs/decisionCodes.json",
   },
   breRetrigger: {
-    real: "/mock/drs/breRetrigger.mock.json",
+    real: "/api/drs/breRetrigger",
     mock: "/mock/drs/breRetrigger.mock.json",
   },
   applicantProfileSubmit: {

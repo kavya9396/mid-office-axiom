@@ -526,7 +526,8 @@ export type CompleteTaskResponse = {
 };
 
 export type BreRetriggerRequest = {
-  data: DRSData;
+  eventName:string;
+  applicationNumber:string;
 };
 
 export type BreRetriggerResponse = {
