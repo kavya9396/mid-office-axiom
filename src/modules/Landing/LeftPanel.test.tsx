@@ -68,6 +68,26 @@ describe("LeftPanel", () => {
     expect(window.scrollTo).toHaveBeenCalled();
   });
 
+  it("keeps task abbreviations uppercase in pool labels", () => {
+    render(
+      <LeftPanel
+        selectedPool="CVT_TASK"
+        toggle={false}
+        setToggle={jest.fn()}
+        onSelectPool={jest.fn()}
+        poolData={{
+          CVT_TASK: [poolRow, poolRow],
+          SR_UW_TASK: [poolRow],
+          PIVV_TASK: [poolRow],
+        }}
+      />,
+    );
+
+    expect(screen.getByText("CVT Task (2)")).toBeInTheDocument();
+    expect(screen.getByText("PIVV Task (1)")).toBeInTheDocument();
+    expect(screen.getByText("SR UW Task (1)")).toBeInTheDocument();
+  });
+
   it("highlights all cases when selected", () => {
     render(
       <LeftPanel

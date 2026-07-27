@@ -85,8 +85,20 @@ export const allColumns: TableColumn<tableData>[] = [
     label: "Role Type",
   },
   {
+    key: "role",
+    label: "Role",
+  },
+  {
+    key: "businessType",
+    label: "Business Type",
+  },
+  {
     key: "isMedical",
     label: "Medical/Non Medical",
+  },
+  {
+    key: "displayName",
+    label: "Display Name",
   },
   {
     key: "clientType",

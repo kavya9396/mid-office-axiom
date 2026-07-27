@@ -24,6 +24,8 @@ export type PoolProps = {
 };
 
 export interface tableData {
+  [key: string]: unknown;
+
   id: number;
 
   taskId?: string;
@@ -50,6 +52,7 @@ export interface tableData {
   hniFlag: boolean;
 
   roleType: string;
+  role?: string;
   businessType?: string;
   state?: string;
 

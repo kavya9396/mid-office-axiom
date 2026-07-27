@@ -1,7 +1,7 @@
 import type { MastersData } from "../types/drs.types";
 
-const LEGACY_MASTER_DATA_SESSION_KEY = "drsMasterData";
-const MASTER_DATA_SESSION_KEY = "drsMasterData:v2";
+const LEGACY_MASTER_DATA_SESSION_KEYS = ["drsMasterData", "drsMasterData:v2"];
+const MASTER_DATA_SESSION_KEY = "drsMasterData:v3";
 
 const getSessionStorage = (): Storage | null => {
   if (typeof window === "undefined") {
@@ -29,38 +29,6 @@ const getMasterSource = (masters: unknown): Record<string, unknown> => {
 const firstAvailable = (source: Record<string, unknown>, keys: string[]) =>
   keys.map((key) => source[key]).find((value) => value != null);
 
-const toText = (value: unknown): string => String(value ?? "").trim();
-
-const toRequirementManagementRows = (value: unknown) => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
-
-  return value
-    .map((item) => {
-      if (!item || typeof item !== "object" || Array.isArray(item)) {
-        return null;
-      }
-
-      const row = item as Record<string, unknown>;
-      const team = toText(row.team) || toText(row.raisingAuthority) || "UW";
-      const normalizedTeam = team.toLowerCase().includes("ops") ? "Gops" : "UW";
-
-      return {
-        team: normalizedTeam,
-        specialTest: toText(row.specialTest ?? row.special),
-        profile: toText(row.profile),
-        category: toText(row.category ?? row.requirementCategory),
-        subCategory: toText(row.subCategory ?? row.requirementSubCategory),
-        document: toText(row.document ?? row.description),
-        reason: toText(row.reason ?? row.requirementType),
-        fupCode: toText(row.fupCode ?? row.code),
-        description: toText(row.description),
-      };
-    })
-    .filter((row): row is NonNullable<typeof row> => Boolean(row?.category || row?.subCategory || row?.document));
-};
-
 export const normalizeMastersData = (masters: unknown): MastersData => {
   const source = getMasterSource(masters);
   const normalized: Record<string, unknown> = { ...source };
@@ -80,19 +48,12 @@ export const normalizeMastersData = (masters: unknown): MastersData => {
     }
   });
 
-  if (normalized.requirementManagement == null) {
-    const requirementManagement = toRequirementManagementRows(source.requirement_mst);
-    if (requirementManagement.length > 0) {
-      normalized.requirementManagement = requirementManagement;
-    }
-  }
-
   return normalized as MastersData;
 };
 
 export const getSessionMasters = (): MastersData | null => {
   const storage = getSessionStorage();
-  storage?.removeItem(LEGACY_MASTER_DATA_SESSION_KEY);
+  LEGACY_MASTER_DATA_SESSION_KEYS.forEach((key) => storage?.removeItem(key));
   const rawMasters = storage?.getItem(MASTER_DATA_SESSION_KEY);
 
   if (!rawMasters) {
@@ -113,7 +74,7 @@ export const saveSessionMasters = (masters: MastersData) => {
 
 export const clearSessionMasters = () => {
   const storage = getSessionStorage();
-  storage?.removeItem(LEGACY_MASTER_DATA_SESSION_KEY);
+  LEGACY_MASTER_DATA_SESSION_KEYS.forEach((key) => storage?.removeItem(key));
   storage?.removeItem(MASTER_DATA_SESSION_KEY);
 };
 

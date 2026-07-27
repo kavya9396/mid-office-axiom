@@ -11,14 +11,6 @@ export const DRS_MASTER_KEYS: MasterKey[] = [
   "maritalStatus",
   "pep",
   "exceptionDecision",
-  "requirementManagement",
-  "requirementTeam",
-  "requirementProfile",
-  "requirementCategory",
-  "requirementSubCategory",
-  "requirementDocument",
-  "requirementReason",
-  "requirementStatus",
   "cvtDecision",
   "dvtDecision",
   "caseUWDecision",
@@ -41,5 +33,5 @@ export const DRS_MASTER_KEYS: MasterKey[] = [
   "reinsurerReferralReason",
   "holdReason",
   "cuwReferralReason",
-  "resident_status", "marital_status", "education", "occupation", "industry_type", "organization_type", "id_proof_type", "impairement_type", "insurance_repository", "product", "rider", "annuity_option", "fund", "portfolio_strategy", "payment_mode", "source_of_fund", "proposal_status", "country", "state", "policy_decision", "agent_mst", "health_question", "requirement_mst", "bre", "ntu_retail", "pre_post_insurance", "uw_decision", "app_status", "misc"
+  "resident_status", "marital_status", "education", "occupation", "industry_type", "organization_type", "id_proof_type", "impairement_type", "insurance_repository", "product", "rider", "annuity_option", "fund", "portfolio_strategy", "payment_mode", "source_of_fund", "proposal_status", "country", "state", "policy_decision", "agent_mst", "health_question", "bre", "ntu_retail", "pre_post_insurance", "uw_decision", "app_status", "misc"
 ];

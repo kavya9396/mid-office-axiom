@@ -1405,7 +1405,6 @@
       { "code": "PIVV Done", "description": "PIVV Done", "value": "PIVV Done", "isActive": "Y", "workflowPool": "COPS Pool" }
     ],
     "exceptionDecision": [
-      { "code": "Refer to IT", "description": "Refer to IT", "value": "Refer to IT", "isActive": "Y" },
       { "code": "Send back to last UW", "description": "Send back to last UW", "value": "Send back to last UW", "isActive": "Y" }
     ],
     "riskReferralReason": [

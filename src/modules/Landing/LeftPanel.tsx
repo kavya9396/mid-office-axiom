@@ -16,11 +16,47 @@ export const ALL_CASES_POOL = "ALL CASES";
 type LeftPanelProps = PoolProps & {
   poolData: Record<string, tableData[]>;
 };
-function toTitleCase(str: string): string {
-  return str
-    .toLowerCase()
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
+
+const UPPERCASE_LABEL_PARTS = new Set([
+  "ACCUITY",
+  "AMR",
+  "CMO",
+  "COPS",
+  "CPT",
+  "CUW",
+  "CVT",
+  "DVT",
+  "ECG",
+  "GOPS",
+  "GUW",
+  "HOD",
+  "IT",
+  "MMT",
+  "MR",
+  "NMR",
+  "PIVV",
+  "RI",
+  "SR",
+  "SUW",
+  "TMT",
+  "UW",
+]);
+
+const toDisplayLabel = (value: string): string =>
+  value
+    .replace(/_/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .map((part) => {
+      const upperPart = part.toUpperCase();
+
+      if (UPPERCASE_LABEL_PARTS.has(upperPart)) {
+        return upperPart;
+      }
+
+      return part.charAt(0).toUpperCase() + part.slice(1).toLowerCase();
+    })
+    .join(" ");
 
 const PoolItem = ({
   label,
@@ -35,8 +71,6 @@ const PoolItem = ({
     window.scrollTo({ top: 0, behavior: "smooth" });
     onClick(value);
   };
-const str = label;
-const taskName = str.replace(/_/g, " ");
   return (
     <Box
       onClick={handlePoolClick}
@@ -59,7 +93,7 @@ const taskName = str.replace(/_/g, " ");
         }}
       >
 
-        {toTitleCase(taskName)}{" "}
+        {toDisplayLabel(label)}{" "}
         {selectedPool != "User Management" &&
           showCount &&
           count !== undefined && count > 0 &&

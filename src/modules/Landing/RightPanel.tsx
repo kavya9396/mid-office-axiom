@@ -18,6 +18,8 @@ import {
 } from "@mui/material";
 import { columnFlex, modalTitleStyles } from "../../utils/styles";
 import CustomButton from "../../components/ui/Button/Button";
+import CustomSelect from "../../components/ui/Select/Select";
+import CustomTextField from "../../components/ui/TextField/TextField";
 import type { TableColumn, tableData } from "../../types/inbox";
 import { allColumns } from "../../store/inbox.columns";
 import {
@@ -51,9 +53,11 @@ type PoolStatusFilter = "All" | "Active" | "Error";
 type TaskTimingStatus = "normal" | "atRisk" | "due";
 type TaskTimingColumnKey = "start_time" | "at_risk_time" | "due_date";
 
+
 const IST_TIME_ZONE = "Asia/Kolkata";
 const ISO_TIME_ZONE_PATTERN = /(Z|[+-]\d{2}:?\d{2})$/i;
 const TASK_TIMING_COLUMN_KEYS = new Set<TaskTimingColumnKey>(["start_time", "at_risk_time", "due_date"]);
+const EXCLUDED_ROW_COLUMN_KEYS = new Set(["id", "taskid", "instanceid", "state"]);
 const taskTimingFormatter = new Intl.DateTimeFormat("en-IN", {
   timeZone: IST_TIME_ZONE,
   year: "numeric",
@@ -95,6 +99,14 @@ const escapeHtml = (value: unknown) =>
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
+
+const isAllowedRowColumnKey = (key: string) => !EXCLUDED_ROW_COLUMN_KEYS.has(key.toLowerCase());
+
+const toColumnLabel = (key: string) =>
+  key
+    .replace(/_/g, " ")
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
  
 const getExportValue = (value: unknown) => {
   if (value === undefined || value === null) return "";
@@ -108,7 +120,9 @@ const getExportColumnKeys = (rows: tableData[]) => {
  
   rows.forEach((row) => {
     Object.keys(row as unknown as Record<string, unknown>).forEach((key) => {
-      rowKeys.add(key);
+      if (isAllowedRowColumnKey(key)) {
+        rowKeys.add(key);
+      }
     });
   });
  
@@ -243,6 +257,7 @@ const roleMapper = {
   "RECONSIDERATION_TASK": "Reconsideration Pool",
   "REJECT_TASK": "Reject Pool",
   "READY_FOR_ISSUANCE_TASK": "Ready For Issuance Pool",
+  "ISSUANCE_TASK":"ISSUANCE_TASK",
  
   "GUW_FORMAL_TASK": "GUW_FORMAL_TASK",
   "DVT_FORMAL_TASK": "DVT_FORMAL_TASK",
@@ -273,6 +288,7 @@ const RightPanel = ({
   const {
     config,
     updateConfig,
+    allowedColumns,
     maxVisibleColumns,
   } = useColumnConfig(username, selectedPool, rows);
  
@@ -291,9 +307,13 @@ const RightPanel = ({
   const [poolStatusFilter] =
     useState<PoolStatusFilter>("All");
   const [claimError, setClaimError] = useState("");
+  const [addLeavesFormPool, setAddLeavesFormPool] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
     {},
   );
+  const isLeaveManagementPool = selectedPool === "LEAVE_MANAGEMENT_POOL";
+  const showAddLeavesForm = isLeaveManagementPool && addLeavesFormPool === selectedPool;
+  console.log(showAddLeavesForm)
  
   // const hasPoolStatus = rows.some((row) => {
   //   const rowData = row as unknown as Record<string, unknown>;
@@ -308,6 +328,114 @@ const RightPanel = ({
  
     return () => window.clearInterval(intervalId);
   }, []);
+
+  const renderLeaveField = ({ label, disabled = false }: { label: string; disabled?: boolean }) => (
+    <Box>
+      <Typography sx={{ fontSize: "11px", color: "#555", mb: 0.7 }}>{label}</Typography>
+      <CustomTextField
+        placeholder="Select"
+        disabled={disabled}
+        fullWidth
+        sx={{
+          backgroundColor: disabled ? "#E9E9E9" : "#FFFFFF",
+          borderRadius: "6px",
+          "& .MuiOutlinedInput-root": {
+            height: 31,
+            borderRadius: "6px",
+            fontSize: "12px",
+          },
+        }}
+      />
+    </Box>
+  );
+
+  const renderAddLeavesForm = () => (
+    <Paper
+      sx={{
+        flexGrow: 1,
+        p: 3,
+        borderRadius: "0 0 6px 6px",
+        backgroundColor: "#FFFFFF",
+      }}
+    >
+      <Typography sx={{ fontSize: "16px", fontWeight: 700, color: "#222", mb: 3 }}>
+        Add Leaves
+      </Typography>
+      <Box
+        sx={{
+          backgroundColor: "#F5F5F5",
+          borderRadius: "6px",
+          p: 1.5,
+          maxWidth: 960,
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, minmax(180px, 1fr))",
+            columnGap: 3,
+            rowGap: 2,
+            "@media (max-width: 900px)": {
+              gridTemplateColumns: "repeat(2, minmax(180px, 1fr))",
+            },
+            "@media (max-width: 640px)": {
+              gridTemplateColumns: "1fr",
+            },
+          }}
+        >
+          {renderLeaveField({ label: "UW Name" })}
+          {renderLeaveField({ label: "User ID", disabled: true })}
+          <Box />
+          {renderLeaveField({ label: "Leave Date From" })}
+          {renderLeaveField({ label: "Leave Date Till" })}
+          <Box>
+            <Typography sx={{ fontSize: "11px", color: "#555", mb: 0.7 }}>Leave Reason</Typography>
+            <CustomSelect value="" options={[]} placeholder="Select" />
+          </Box>
+          {renderLeaveField({ label: "Case To Reassign To UW" })}
+          {renderLeaveField({ label: "User ID", disabled: true })}
+        </Box>
+      </Box>
+      <CustomButton
+        variant="contained"
+        sx={{
+          mt: 4,
+          minWidth: 164,
+          height: 38,
+          borderRadius: "22px",
+          backgroundColor: "#A72A2F",
+          color: "#FFFFFF",
+          fontWeight: 700,
+          textTransform: "none",
+          "&:hover": {
+            backgroundColor: "#8F2428",
+          },
+        }}
+      >
+        Submit
+      </CustomButton>
+      <CustomButton
+        variant="contained"
+        sx={{
+          mt: 4,
+          ml:1,
+          minWidth: 164,
+          height: 38,
+          borderRadius: "22px",
+          backgroundColor: "#A72A2F",
+          color: "#FFFFFF",
+          fontWeight: 700,
+          textTransform: "none",
+          "&:hover": {
+            backgroundColor: "#8F2428",
+          },
+        }}
+        onClick={() => setAddLeavesFormPool("")}
+      >
+        Close
+      </CustomButton>
+    </Paper>
+  );
  
   const handleApplicationClick = async (
     e: React.MouseEvent,
@@ -378,18 +506,34 @@ const RightPanel = ({
     }
   };
  
-  const columnByKey = useMemo(
-    () => new Map(allColumns.map((column) => [String(column.key), column])),
-    [],
-  );
+  const columnByKey = useMemo(() => {
+    const configuredColumns = new Map(allColumns.map((column) => [String(column.key), column]));
+
+    allowedColumns.forEach((columnKey) => {
+      if (!configuredColumns.has(columnKey)) {
+        configuredColumns.set(columnKey, {
+          key: columnKey as keyof tableData,
+          label: toColumnLabel(columnKey),
+        });
+      }
+    });
+
+    return configuredColumns;
+  }, [allowedColumns]);
   const visibleColumns = config.visible
     .map((columnKey) => columnByKey.get(columnKey))
     .filter((column): column is TableColumn<tableData> => Boolean(column));
   const exportColumnKeys = useMemo(() => getExportColumnKeys(rows), [rows]);
-  const exportColumnLabels = useMemo(
-    () => new Map(allColumns.map((column) => [String(column.key), column.label])),
-    [],
-  );
+  const exportColumnLabels = useMemo(() => {
+    const labels = new Map(allColumns.map((column) => [String(column.key), column.label]));
+    exportColumnKeys.forEach((columnKey) => {
+      if (!labels.has(columnKey)) {
+        labels.set(columnKey, toColumnLabel(columnKey));
+      }
+    });
+
+    return labels;
+  }, [exportColumnKeys]);
   const hasTableData = rows.length > 0;
   // ---------------- OPEN DIALOG ----------------
   const openColumnDialog = () => {
@@ -761,11 +905,15 @@ const RightPanel = ({
           <Typography component="span" className="gap-1">
             {selectedPool ? selectedPool.replace(/_/g, " ") : ""}
           </Typography>
-          {(selectedPool == "Leave Management" ||
-            selectedPool == "UW Details") && (
+          {(isLeaveManagementPool || selectedPool == "UW Details") && (
               <CustomButton
                 variant="contained"
                 size="small"
+                onClick={() => {
+                  if (isLeaveManagementPool) {
+                    setAddLeavesFormPool(selectedPool);
+                  }
+                }}
                 sx={{
                   backgroundColor: "white",
                   color: "#063E6F",
@@ -777,12 +925,16 @@ const RightPanel = ({
                   mr: 2,
                 }}
               >
-                + Add
+                {isLeaveManagementPool ? "Add Leaves" : "+ Add"}
               </CustomButton>
             )}
         </Box>
         {selectedPool != "Search Applications" && (
           <>
+            {isLeaveManagementPool && showAddLeavesForm ? (
+              renderAddLeavesForm()
+            ) : (
+              <>
             <Box
               sx={{
                 display: "flex",
@@ -896,6 +1048,7 @@ const RightPanel = ({
                       if (!hasTableData) return;
                       setIsSearchOpen((prev) => !prev);
                     }}
+                    aria-disabled={!hasTableData}
                     data-testid="search-toggle"
                   >
                     <SearchIcon />
@@ -1195,6 +1348,8 @@ const RightPanel = ({
                 {customList("Visible", right)}
               </Box>
             </CustomDialog>
+              </>
+            )}
           </>
         )}
         {selectedPool == "Search Applications" && (

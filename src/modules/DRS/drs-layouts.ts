@@ -150,17 +150,13 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "uwToolkit",
   ],
   RETAIL_PRE_ISSUANCE_SERVICING_POOL: [
-    "breDecision",
-    "summary",
-    "applicationOverview",
-    "pivvSection",
     "openOtherTasks",
+    "applicationOverview",
     "preIssuanceRequestChange",
     "quickLinks",
   ],
   RETAIL_EXCEPTIONAL_POOL: [
     "breDecision",
-    "summary",
     "applicationOverview",
     "requirementManagement",
     "exceptionDecision"
@@ -188,6 +184,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_RECONSIDERATION_POOL: [
     "breDecision",
     "applicationOverview",
+    "requirementManagement",
     "reconsiderationPoolDecision"
   ],
   RETAIL_CUW_CLAIM_AUDIT: [
@@ -215,7 +212,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   ACUITY_TASK:["applicationOverview","summary","accuityDecision"],
   RETAIL_REQUIREMENT_REVIEW_POOL: ["applicationOverview","requirementManagement","quickLinks"],
   RETAIL_TELE_VIDEO_POOL: ["applicationOverview","requirementManagement","quickLinks"],
-  RETAIL_ISSUANCE_POOL: ["breDecision","applicationOverview","requirementManagement","uwDecision","quickLinks"],
+  ISSUANCE_TASK: ["breDecision","applicationOverview","requirementManagement","quickLinks"],
   RETAIL_REJECT_POOL: ["applicationOverview","requirementManagement","reconsiderationDecision","quickLinks"],
   RETAIL_SUW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
   RETAIL_CUW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","decisionHistory","uwToolkit","quickLinks"],

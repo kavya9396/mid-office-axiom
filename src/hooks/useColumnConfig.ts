@@ -11,8 +11,10 @@ import { apiRequest } from "../services/api";
 import { url } from "../services/apiConfig";
 
 const MAX_VISIBLE_COLUMNS = 8;
+const EXCLUDED_ROW_COLUMN_KEYS = new Set(["id", "taskid", "instanceid", "state"]);
 const allColumnKeys = allColumns.map((column) => String(column.key));
-const allColumnKeySet = new Set(allColumnKeys);
+
+const isAllowedRowColumnKey = (key: string) => !EXCLUDED_ROW_COLUMN_KEYS.has(key.toLowerCase());
 
 type RoleColumnSource = object[];
 
@@ -41,35 +43,39 @@ const getDefaultConfig = (allowed: string[]): ColumnConfig => {
   };
 };
 
+const getMaxVisibleColumns = () => MAX_VISIBLE_COLUMNS;
+
 const getRoleRowsSignature = (roleRows: RoleColumnSource) => {
   return roleRows
-    .map((row) => Object.keys(row).filter((key) => allColumnKeySet.has(key)).join(","))
+    .map((row) => Object.keys(row).filter(isAllowedRowColumnKey).join(","))
     .join("|");
 };
 
 const getRoleAllowedColumns = (roleRowsSignature: string) => {
   const keysFromRoleList = Array.from(
     new Set(roleRowsSignature.split(/[|,]/).filter(Boolean)),
-  ).filter((key) => allColumnKeySet.has(key));
+  ).filter(isAllowedRowColumnKey);
 
   if (keysFromRoleList.length > 0) {
     return keysFromRoleList;
   }
 
-  return allColumnKeys;
+  return allColumnKeys.filter(isAllowedRowColumnKey);
 };
 
 const normalizeConfig = (
   config: ColumnConfig | undefined,
   allowedColumns: string[],
 ) => {
+  const maxVisibleColumns = getMaxVisibleColumns();
+
   if (!config) {
     return getDefaultConfig(allowedColumns);
   }
 
   const visible = config.visible
     .filter((key) => allowedColumns.includes(key))
-    .slice(0, MAX_VISIBLE_COLUMNS);
+    .slice(0, maxVisibleColumns);
 
   if (visible.length === 0) {
     return getDefaultConfig(allowedColumns);
@@ -215,6 +221,6 @@ export const useColumnConfig = (
     config,
     updateConfig,
     allowedColumns,
-    maxVisibleColumns: MAX_VISIBLE_COLUMNS,
+    maxVisibleColumns: getMaxVisibleColumns(),
   };
 };

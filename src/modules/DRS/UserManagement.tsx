@@ -431,13 +431,13 @@ const UserManagement = () => {
                             <Typography variant="overline" sx={{ color: "#9A2529", letterSpacing: 1.5 }}>
                                 User Management
                             </Typography>
-                            <Typography variant="h4" sx={{ fontWeight: 700, color: "#1f2937" }}>
+                            {/* <Typography variant="h4" sx={{ fontWeight: 700, color: "#1f2937" }}>
                                 Search and create users
                             </Typography>
                             <Typography variant="body1" sx={{ color: "text.secondary", maxWidth: 760 }}>
                                 Use the search form to locate an existing user in NL or IPRU. If no user is found,
                                 you can create a new one directly from the alert prompt.
-                            </Typography>
+                            </Typography> */}
                         </Stack>
                     </Paper>
 

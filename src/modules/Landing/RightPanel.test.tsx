@@ -172,6 +172,8 @@ describe("RightPanel", () => {
         hidden: [],
       },
       updateConfig: jest.fn(),
+      allowedColumns: ["applicationNo", "drc", "roleType"],
+      maxVisibleColumns: 3,
     });
     mockUseParams.mockReturnValue({ businessType: "retail" });
   });
@@ -219,5 +221,55 @@ describe("RightPanel", () => {
     expect(localStorage.getItem("roleType")).toBe("underwriter");
     expect(mockGetDRSPath).toHaveBeenCalledWith("retail", "APP-1");
     expect(navigate).toHaveBeenCalledWith("/drs/retail/APP-1");
+  });
+
+  it("renders dynamic row-key columns that are not in the static column registry", () => {
+    mockUseColumnConfig.mockReturnValue({
+      config: {
+        visible: ["applicationNo", "customDecisionField"],
+        hidden: [],
+      },
+      updateConfig: jest.fn(),
+      allowedColumns: ["applicationNo", "customDecisionField"],
+      maxVisibleColumns: 2,
+    });
+
+    render(
+      <RightPanel
+        selectedPool="ANY_TASK"
+        rows={[{ ...rows[0], customDecisionField: "Custom value" }]}
+      />,
+    );
+
+    expect(screen.getByRole("columnheader", { name: /Application No\./ })).toBeInTheDocument();
+    expect(screen.getByRole("columnheader", { name: /Custom Decision Field/ })).toBeInTheDocument();
+    expect(screen.getByText("Custom value")).toBeInTheDocument();
+  });
+
+  it("replaces the Leave Management table with the Add Leaves form", async () => {
+    mockUseColumnConfig.mockReturnValue({
+      config: {
+        visible: ["applicationNo", "leaveDateFrom", "leaveReason"],
+        hidden: [],
+      },
+      updateConfig: jest.fn(),
+      allowedColumns: ["applicationNo", "leaveDateFrom", "leaveReason"],
+      maxVisibleColumns: 3,
+    });
+
+    render(<RightPanel selectedPool="Leave Management" rows={rows} />);
+
+    expect(screen.getByRole("columnheader", { name: /Application No\./ })).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole("button", { name: "Add Leaves" }));
+
+    expect(screen.getAllByText("Add Leaves")).toHaveLength(2);
+    expect(screen.getByText("UW Name")).toBeInTheDocument();
+    expect(screen.getByText("Leave Date From")).toBeInTheDocument();
+    expect(screen.getByText("Leave Date Till")).toBeInTheDocument();
+    expect(screen.getByText("Leave Reason")).toBeInTheDocument();
+    expect(screen.getByText("Case To Reassign To UW")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Submit" })).toBeInTheDocument();
+    expect(screen.queryByRole("columnheader", { name: /Application No\./ })).not.toBeInTheDocument();
   });
 });

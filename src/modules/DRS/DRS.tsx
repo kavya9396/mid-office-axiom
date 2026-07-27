@@ -88,7 +88,8 @@ const mapper = {
     "PRE_LOGIN_TASK":"PRE_LOGIN_TASK",
     "AMR_MEDICAL_TASK":"AMR_MEDICAL_TASK",
     "AMR_NON_MEDICAL_TASK":"AMR_NON_MEDICAL_TASK",
-    "ACUITY_TASK":"ACUITY_TASK"
+    "ACUITY_TASK":"ACUITY_TASK",
+    "ISSUANCE_TASK":"ISSUANCE_TASK"
 }
  
 const getSelectedCaseContext = (): Record<string, unknown> => {

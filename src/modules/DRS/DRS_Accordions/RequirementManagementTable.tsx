@@ -12,20 +12,8 @@ import {
     normalizeBusinessType,
 } from "../../../routes/routes";
 import type { AdditionalRequirementRow, RequirementMasterOption } from "../../../types/drs.types";
-import {
-    rm_category,
-    rm_document,
-    rm_profile,
-    rm_reason,
-    rm_sub_category,
-    rm_team,
-} from "../../../utils/constant";
 import { toDisplayValue } from "../../../utils/helpers";
-import { normalizeMasterOptions } from "../../../utils/masterOptions";
 import type { RootState } from "../../../store/store";
-import {
-    requirementMasterRows as fallbackRequirementMasterRows,
-} from "./requirementMasterData";
 import { CloseIcon, EditIcon } from "../../../icons/Icons";
 import {
     OPEN_REQUIREMENT_MANAGEMENT_EVENT,
@@ -67,36 +55,14 @@ type Option = {
     value: string;
 };
 
-const getTeamOptionsFromMaster = (roleType: string, requirementMasterRows: RequirementMasterOption[]): Option[] => {
-    const normalizedRoleType = roleType.trim().toLowerCase();
-    const hasUW = requirementMasterRows.some((row) => row.team === "UW");
-    const hasGops = requirementMasterRows.some((row) => row.team === "Gops");
-    const options: Option[] = [];
-
-    if (hasUW) {
-        const uwLabel = normalizedRoleType.includes("cvt") ? "CVT Team" : "UW";
-        options.push({ label: uwLabel, value: uwLabel });
-    }
-
-    if (hasGops) {
-        options.push({ label: "DVT Team", value: "DVT Team" });
-    }
-
-    return options;
-};
-
 const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterOption["team"]> = {
     "CVT Team": "UW",
     "DVT Team": "Gops",
     UW: "UW",
 };
 
-const STATUS_OPTIONS: Option[] = [
-    { label: "Pending", value: "Pending" },
-    { label: "Waived", value: "Waived" },
-    { label: "Rejected", value: "Rejected" },
-    { label: "Accept", value: "Accept" },
-];
+const EMPTY_OPTIONS: Option[] = [];
+const EMPTY_REQUIREMENT_MASTER_ROWS: RequirementMasterOption[] = [];
 
 const REQUIRED_SELECTION_FIELDS: Array<Exclude<EditableField, "status" | "profile">> = [
     "team",
@@ -163,39 +129,6 @@ const getSelectedCaseContext = (): Record<string, unknown> => {
 };
 
 const toOption = (value: string): Option => ({ label: value, value });
-
-const mapTeamValueToUi = (team: string, roleType: string): string => {
-    const normalizedTeam = team.trim().toLowerCase();
-    const normalizedRoleType = roleType.trim().toLowerCase();
-
-    if (!normalizedTeam) {
-        return "";
-    }
-
-    if (normalizedTeam === "gops" || normalizedTeam.includes("dvt")) {
-        return "DVT Team";
-    }
-
-    if (normalizedTeam === "uw") {
-        return normalizedRoleType.includes("cvt") ? "CVT Team" : "UW";
-    }
-
-    return team;
-};
-
-const toOptionsFromList = (items: Array<{ label: string; value: string }>): Option[] =>
-    uniqueNonEmpty(items.map((item) => String(item.value ?? item.label ?? ""))).map(toOption);
-
-const FALLBACK_PROFILE_OPTIONS = toOptionsFromList(rm_profile);
-const FALLBACK_CATEGORY_OPTIONS = toOptionsFromList(rm_category);
-const FALLBACK_SUB_CATEGORY_OPTIONS = toOptionsFromList(rm_sub_category);
-const FALLBACK_DOCUMENT_OPTIONS = toOptionsFromList(rm_document);
-const FALLBACK_REASON_OPTIONS = toOptionsFromList(rm_reason);
-
-const getFallbackTeamOptions = (roleType: string): Option[] =>
-    uniqueNonEmpty(rm_team.map((item) => mapTeamValueToUi(String(item.value ?? item.label ?? ""), roleType))).map(
-        toOption,
-    );
 
 const getTodayDate = () => new Date().toISOString().slice(0, 10);
 
@@ -300,7 +233,7 @@ const getScopedMasterRows = (
     return requirementMasterRows.filter(
         (entry) =>
             entry.team === masterTeam &&
-            (!row.profile || entry.profile === row.profile) &&
+            (!row.profile || !entry.profile || entry.profile === row.profile) &&
             (!row.category || entry.category === row.category) &&
             (!row.subCategory || entry.subCategory === row.subCategory) &&
             (!row.document || entry.document === row.document) &&
@@ -524,56 +457,17 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             : [];
     });
     const drsData = useSelector((state: RootState) => state.drs.data as unknown);
-    const masters = useSelector((state: RootState) => state.drs.masters);
-    const masterRequirementRows = useMemo(
-        () => masters.requirementManagement ?? [],
-        [masters.requirementManagement],
-    );
-    const effectiveRequirementMasterRows = useMemo(
-        () => masterRequirementRows.length > 0 ? masterRequirementRows : fallbackRequirementMasterRows,
-        [masterRequirementRows],
-    );
-    const requirementTeamOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.requirementTeam)
-            .map((option) => mapTeamValueToUi(option.label || option.value, roleType))
-            .filter(Boolean)
-            .map(toOption);
-        return masterOptions.length > 0 ? masterOptions : getFallbackTeamOptions(roleType);
-    }, [masters.requirementTeam, roleType]);
-    const requirementProfileOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.requirementProfile);
-        return masterOptions.length > 0 ? masterOptions : FALLBACK_PROFILE_OPTIONS;
-    }, [masters.requirementProfile]);
-    const requirementCategoryOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.requirementCategory);
-        return masterOptions.length > 0 ? masterOptions : FALLBACK_CATEGORY_OPTIONS;
-    }, [masters.requirementCategory]);
-    const requirementSubCategoryOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.requirementSubCategory);
-        return masterOptions.length > 0 ? masterOptions : FALLBACK_SUB_CATEGORY_OPTIONS;
-    }, [masters.requirementSubCategory]);
-    const requirementDocumentOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.requirementDocument);
-        return masterOptions.length > 0 ? masterOptions : FALLBACK_DOCUMENT_OPTIONS;
-    }, [masters.requirementDocument]);
-    const requirementReasonOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.requirementReason);
-        return masterOptions.length > 0 ? masterOptions : FALLBACK_REASON_OPTIONS;
-    }, [masters.requirementReason]);
-    const requirementStatusOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.requirementStatus);
-        return masterOptions.length > 0 ? masterOptions : STATUS_OPTIONS;
-    }, [masters.requirementStatus]);
+    const masterRequirementRows = EMPTY_REQUIREMENT_MASTER_ROWS;
+    const effectiveRequirementMasterRows = EMPTY_REQUIREMENT_MASTER_ROWS;
+    const requirementProfileOptions = EMPTY_OPTIONS;
+    const requirementCategoryOptions = EMPTY_OPTIONS;
+    const requirementSubCategoryOptions = EMPTY_OPTIONS;
+    const requirementDocumentOptions = EMPTY_OPTIONS;
+    const requirementReasonOptions = EMPTY_OPTIONS;
+    const requirementStatusOptions = EMPTY_OPTIONS;
 
     const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK";
-    const teamOptions = useMemo(() => {
-        const masterOptions = masterRequirementRows.length > 0
-            ? getTeamOptionsFromMaster(roleType, masterRequirementRows)
-            : requirementTeamOptions;
-        return uniqueNonEmpty([
-            ...masterOptions.map((item) => item.value),
-        ]).map(toOption);
-    }, [masterRequirementRows, requirementTeamOptions, roleType]);
+    const teamOptions = EMPTY_OPTIONS;
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
         () => finalRequirements.map((row, index) => normalizeExistingRow(row, index)),
