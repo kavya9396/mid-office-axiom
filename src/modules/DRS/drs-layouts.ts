@@ -136,8 +136,8 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks"
   ],RETAIL_CVT_POOL: [
     "breDecision",
-    "applicationOverview",
     "summary",
+    "applicationOverview",
     "pivvSection",
     "requirementManagement",
     "cvtDecision",

@@ -57,18 +57,9 @@ const emptyOptions: SelectOption[] = [];
 const getPersonalKycFields = (options: {
     titleOptions: SelectOption[];
     genderOptions: SelectOption[];
-    nationalityOptions: SelectOption[];
+    residentStatusOptions: SelectOption[];
     idProofOptions: SelectOption[];
 }): FormField[] => [
-    {
-        name: "title",
-        label: "Title",
-        type: "select",
-        options: options.titleOptions,
-    },
-    { name: "firstName", label: "First Name" },
-    { name: "middleName", label: "Middle Name" },
-    { name: "lastName", label: "Last Name" },
     { name: "dob", label: "DOB", type: "date" },
     {
         name: "gender",
@@ -77,12 +68,13 @@ const getPersonalKycFields = (options: {
         options: options.genderOptions,
     },
     {
-        name: "nationality",
-        label: "Nationality",
+        name: "residentStatus",
+        label: "Residential Status",
         type: "select",
-        options: options.nationalityOptions,
+        options: options.residentStatusOptions,
     },
     { name: "panNumber", label: "PAN Number" },
+    { name: "pranNo", label: "PRAN Number" },
     {
         name: "identityProofType",
         label: "Identity Proof",
@@ -92,6 +84,12 @@ const getPersonalKycFields = (options: {
     {
         name: "identityProofNumber",
         label: "Identity Proof Number",
+    },
+    {
+        name: "ageProof",
+        label: "Age Proof",
+        type: "select",
+        options: options.idProofOptions,
     },
 ];
 
@@ -172,6 +170,7 @@ const idProofNumberValidationMap: Record<string, { regex: RegExp; messageKey: Er
 };
 
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
+const pranRegex = /^\d{12}$/;
 const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
 const indiaPincodeRegex = /^\d{6}$/;
 const numericRegex = /^\d+$/;
@@ -436,13 +435,22 @@ const buildProfileFromReduxData = (
             nationality: String(personalDetails?.nationality ?? ""),
             countryOfResidence: String(personalDetails?.residentStatus ?? ""),
             education: String(personalDetails?.highestQualification ?? ""),
+            residentStatus: String(personalDetails?.residentStatus ?? ""),
             udsLink: String(personalDetails?.UDSLink ?? ""),
         },
         kycDetails: {
+            pranNo: String(resolvedKyc?.pranNo ?? personalDetails?.pranNo ?? ""),
             panNumber: String(resolvedKyc?.panNumber ?? personalDetails?.panNo ?? ""),
             identityProofType: String(resolvedKyc?.identityProofType ?? resolvedDocument?.documentType ?? ""),
             identityProofNumber: String(resolvedKyc?.identityProofNumber ?? resolvedDocument?.documentId ?? ""),
             addressProof: String(resolvedKyc?.addressProof ?? resolvedDocument?.documentName ?? ""),
+            ageProof: String(
+                resolvedKyc?.ageProof ??
+                toRecord(resolvedDocument).ageProof ??
+                resolvedKyc?.identityProofType ??
+                resolvedDocument?.documentType ??
+                ""
+            ),
             incomeProof: String(resolvedKyc?.incomeProof ?? personalDetails?.incomeProof ?? ""),
             existingCkycNumber: String(resolvedKyc?.existingCkycNumber ?? personalDetails?.ckycNumber ?? ""),
             pep: String(resolvedKyc?.pep ?? personalDetails?.isPEP ?? "").toLowerCase() === "yes" || Boolean(personalDetails?.isPEP),
@@ -543,10 +551,13 @@ const buildFormData = (
     dob: formatDOB(profile?.proposerSummary?.dob ?? "") ?? "",
     gender: profile?.proposerSummary?.gender ?? "",
     nationality: profile?.applicantDetails?.nationality ?? "",
+    residentStatus: profile?.applicantDetails?.residentStatus ?? "",
+    pranNo: profile?.kycDetails?.pranNo ?? "",
     panNumber: profile?.kycDetails?.panNumber ?? "",
     identityProofType: profile?.kycDetails?.identityProofType ?? "",
     identityProofNumber: profile?.kycDetails?.identityProofNumber ?? "",
     addressProof: profile?.kycDetails?.addressProof ?? "",
+    ageProof: profile?.kycDetails?.ageProof ?? profile?.kycDetails?.identityProofType ?? "",
     faceValue: "",
     communicationAddressLine1: profile?.communicationAddressDetails?.addressLine1 ?? "",
     communicationAddressLine2: profile?.communicationAddressDetails?.addressLine2 ?? "",
@@ -582,13 +593,16 @@ const applyUpdatedDetailsToProfile = (
         dateOfBirth: updatedDetails.dob ?? profile.applicantDetails?.dateOfBirth ?? "",
         gender: updatedDetails.gender ?? profile.applicantDetails?.gender ?? "",
         nationality: updatedDetails.nationality ?? profile.applicantDetails?.nationality ?? "",
+        residentStatus: updatedDetails.residentStatus ?? profile.applicantDetails?.residentStatus ?? "",
     },
     kycDetails: {
         ...profile.kycDetails,
+        pranNo: updatedDetails.pranNo ?? profile.kycDetails?.pranNo ?? "",
         panNumber: updatedDetails.panNumber ?? profile.kycDetails?.panNumber ?? "",
         identityProofType: updatedDetails.identityProofType ?? profile.kycDetails?.identityProofType ?? "",
         identityProofNumber: updatedDetails.identityProofNumber ?? profile.kycDetails?.identityProofNumber ?? "",
         addressProof: updatedDetails.addressProof ?? profile.kycDetails?.addressProof ?? "",
+        ageProof: updatedDetails.ageProof ?? profile.kycDetails?.ageProof ?? "",
     },
     communicationAddressDetails: {
         ...profile.communicationAddressDetails,
@@ -657,6 +671,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     const titleOptions = normalizeMasterOptions(masters.title) ?? emptyOptions;
     const genderOptions = normalizeMasterOptions(masters.gender) ?? emptyOptions;
     const nationalityOptions = normalizeMasterOptions(masters.nationality) ?? emptyOptions;
+    const residentStatusOptions = normalizeMasterOptions(masters.resident_status) ?? emptyOptions;
     const idProofOptions = normalizeMasterOptions(masters.idProof) ?? emptyOptions;
     const addressProofOptions = normalizeMasterOptions(masters.addressProof) ?? emptyOptions;
     const stateOptions = normalizeMasterOptions(masters.state) ?? emptyOptions;
@@ -666,7 +681,9 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             title: titleOptions,
             gender: genderOptions,
             nationality: nationalityOptions,
+            residentStatus: residentStatusOptions,
             identityProofType: idProofOptions,
+            ageProof: idProofOptions,
             addressProof: addressProofOptions,
             communicationState: stateOptions,
             permanentState: stateOptions,
@@ -677,6 +694,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             titleOptions,
             genderOptions,
             nationalityOptions,
+            residentStatusOptions,
             idProofOptions,
             addressProofOptions,
             stateOptions,
@@ -708,17 +726,13 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     const isCVTTask = normalizedRoleType === "CVT Pool";
 
     const personalKycFields = useMemo(
-        () => getPersonalKycFields({ titleOptions, genderOptions, nationalityOptions, idProofOptions }),
-        [titleOptions, genderOptions, nationalityOptions, idProofOptions]
+        () => getPersonalKycFields({ titleOptions, genderOptions, residentStatusOptions, idProofOptions }),
+        [titleOptions, genderOptions, residentStatusOptions, idProofOptions]
     );
 
     const editablePersonalKycFields = useMemo(
         () => isDvtFormalTask
             ? personalKycFields.filter((field) => (
-                field.name === "title" ||
-                field.name === "firstName" ||
-                field.name === "middleName" ||
-                field.name === "lastName" ||
                 field.name === "dob" ||
                 field.name === "gender"
             ))
@@ -851,6 +865,11 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         [addressProofOptions]
     );
 
+    const allowedResidentStatusValues = useMemo(
+        () => new Set(residentStatusOptions.map((option) => option.value)),
+        [residentStatusOptions]
+    );
+
     const allowedCommunicationStateValues = useMemo(
         () => new Set(communicationStateOptions.map((option) => option.value)),
         [communicationStateOptions]
@@ -889,6 +908,18 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
 
         if (idProofOptions.length > 0 && formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
             errors.identityProofType = "Select a valid Identity Proof";
+        }
+
+        if (residentStatusOptions.length > 0 && formData.residentStatus && !allowedResidentStatusValues.has(formData.residentStatus)) {
+            errors.residentStatus = "Select a valid Residential Status";
+        }
+
+        if (formData.pranNo.trim() && !pranRegex.test(formData.pranNo.trim())) {
+            errors.pranNo = "PRAN Number must be exactly 12 digits";
+        }
+
+        if (idProofOptions.length > 0 && formData.ageProof && !allowedIdProofValues.has(formData.ageProof)) {
+            errors.ageProof = "Select a valid Age Proof";
         }
 
         if (addressProofOptions.length > 0 && formData.addressProof && !allowedAddressProofValues.has(formData.addressProof)) {
