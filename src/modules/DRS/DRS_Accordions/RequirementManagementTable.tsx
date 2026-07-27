@@ -470,7 +470,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [requirementOptionsCache, setRequirementOptionsCache] = useState<Record<string, Option[]>>({});
     const requirementStatusOptions = EMPTY_OPTIONS;
 
-    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK";
+    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "Exceptional Pool";
     const teamOptions = teamOptionsState;
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
@@ -1439,31 +1439,35 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 <Box
                     sx={{
                         display: "flex",
-                        justifyContent:"center",
+                        justifyContent: "center",
                         gap: 1,
                         mt: 1,
                     }}
                 >
-                    <CustomButton
-                        variant="contained"
-                        disabled={draftRows.length > 0}
-                        onClick={() => {
-                            saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
-                            setIsTableSaved(true);
-                            setHasRequirementChanges(false);
-                            setEditableStatusRowIds(new Set());
-                        }}
-                        sx={{
-                            minWidth: 200,
-                            height: 44,
-                            borderRadius: "50px",
-                            fontWeight: 600,
-                            px: 3,
-                            whiteSpace: "nowrap",
-                        }}
-                    >
-                        Save
-                    </CustomButton>
+                    {
+                        isVisible && (
+                            <CustomButton
+                                variant="contained"
+                                disabled={draftRows.length > 0}
+                                onClick={() => {
+                                    saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
+                                    setIsTableSaved(true);
+                                    setHasRequirementChanges(false);
+                                    setEditableStatusRowIds(new Set());
+                                }}
+                                sx={{
+                                    minWidth: 200,
+                                    height: 44,
+                                    borderRadius: "50px",
+                                    fontWeight: 600,
+                                    px: 3,
+                                    whiteSpace: "nowrap",
+                                }}
+                            >
+                                Save
+                            </CustomButton>
+                        )
+                    }
                     {showCptActionButtons && (<><CustomButton
                         variant="contained"
                         disabled={draftRows.length > 0}
@@ -1485,27 +1489,27 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     >
                         View Documents
                     </CustomButton>
-                    <CustomButton
-                        variant="contained"
-                        disabled={draftRows.length > 0}
-                        onClick={() => {
-                            saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
-                            setIsTableSaved(true);
-                            setHasRequirementChanges(false);
-                            setEditableStatusRowIds(new Set());
-                            openLinkInNewTab(cptSecondaryAction.path);
-                        }}
-                        sx={{
-                            minWidth: 200,
-                            height: 44,
-                            borderRadius: "50px",
-                            fontWeight: 600,
-                            px: 3,
-                            whiteSpace: "nowrap",
-                        }}
-                    >
-                        {cptSecondaryAction.label}
-                    </CustomButton></>)}
+                        <CustomButton
+                            variant="contained"
+                            disabled={draftRows.length > 0}
+                            onClick={() => {
+                                saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
+                                setIsTableSaved(true);
+                                setHasRequirementChanges(false);
+                                setEditableStatusRowIds(new Set());
+                                openLinkInNewTab(cptSecondaryAction.path);
+                            }}
+                            sx={{
+                                minWidth: 200,
+                                height: 44,
+                                borderRadius: "50px",
+                                fontWeight: 600,
+                                px: 3,
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {cptSecondaryAction.label}
+                        </CustomButton></>)}
                 </Box>
             </Box>
         </Paper>

@@ -876,6 +876,7 @@ export interface KycDetails {
   identityProofType: string;
   identityProofNumber: string;
   addressProof: string;
+  ageProof: string;
   incomeProof: string;
   existingCkycNumber: string;
   pep: boolean;
@@ -1056,11 +1057,14 @@ export interface ApplicantEditForm {
   dob: string;
   gender: string;
   nationality: string;
+  residentStatus: string;
 
   panNumber: string;
+  pranNo: string;
   identityProofType: string;
   identityProofNumber: string;
   addressProof: string;
+  ageProof: string;
 
   faceValue: string;
 
