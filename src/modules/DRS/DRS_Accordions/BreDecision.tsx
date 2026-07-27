@@ -48,7 +48,12 @@ const mapBreOutputToDecision = (
     breOutput.decisionTypes?.initialDecision ??
     breOutput.decisionTypes?.breInitialDecision ??
     null,
-  retrigger: null,
+  retrigger:
+    // Some BRE retrigger responses include a reTriggerCount or retriggerCount
+    // when they come from the retrigger API. Treat any positive count as true.
+    ((breOutput.reTriggerCount ?? (breOutput as any).retriggerCount) as number) > 0
+      ? true
+      : null,
 });
 
 const toText = (value: unknown) => String(value ?? "").trim();
@@ -366,7 +371,7 @@ const BreDecision = ({
       const response = await dispatch(
         breRetriggerThunk({
            eventName: "BRE-RETAILS",
-                            applicationNumber:safeApplicationNumber
+                            applicationNumber:applicationId
         }),
       ).unwrap();
 
@@ -590,7 +595,6 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                 </Button>
               </Box>
             </Box>
-
             {breTableRows.map((row, index) => (
               <Box
                 key={`${row.label}-${index}`}
