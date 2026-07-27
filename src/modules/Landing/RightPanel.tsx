@@ -16,6 +16,7 @@ import {
   Typography,
   type SelectChangeEvent,
 } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { columnFlex, modalTitleStyles } from "../../utils/styles";
 import CustomButton from "../../components/ui/Button/Button";
 import CustomSelect from "../../components/ui/Select/Select";
@@ -310,6 +311,7 @@ const RightPanel = ({
   const [poolStatusFilter] =
     useState<PoolStatusFilter>("All");
   const [claimError, setClaimError] = useState("");
+  const [openingCaseLoading, setOpeningCaseLoading] = useState(false);
   const [addLeavesFormPool, setAddLeavesFormPool] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
     {},
@@ -460,6 +462,7 @@ const RightPanel = ({
     }
  
     try {
+      setOpeningCaseLoading(true);
       const claimResponse = await dispatch(
         claimTaskThunk({ username, password, taskId: claimTaskId }),
       ).unwrap();
@@ -562,6 +565,8 @@ const RightPanel = ({
       setClaimError(
         error instanceof Error ? error.message : "Failed to claim task.",
       );
+    } finally {
+      setOpeningCaseLoading(false);
     }
   };
  
@@ -940,6 +945,21 @@ const RightPanel = ({
         height: "90vh",
       }}
     >
+      {openingCaseLoading && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.25)",
+          }}
+        >
+          <CircularProgress size={64} sx={{ color: "#fff" }} />
+        </Box>
+      )}
       <Box
         sx={{
           // height:"100%",
