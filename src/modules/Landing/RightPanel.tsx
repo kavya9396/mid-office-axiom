@@ -16,6 +16,7 @@ import {
   Typography,
   type SelectChangeEvent,
 } from "@mui/material";
+import { CircularProgress } from "@mui/material";
 import { columnFlex, modalTitleStyles } from "../../utils/styles";
 import CustomButton from "../../components/ui/Button/Button";
 import CustomSelect from "../../components/ui/Select/Select";
@@ -46,6 +47,9 @@ import SearchApplication from "./SearchApplication";
 import { toFilterComparableValue } from "../../utils/filter";
 import { useAppDispatch } from "../../store/hooks";
 import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
+import { drsThunk } from "../../store/thunks/drsThunk";
+import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
+import { setDrsData, setBreExternalApiOutputs } from "../../store/slices/drsSlice";
 import { useAppContext } from "../../hooks/useAppContext";
  
 type SortDirection = "asc" | "desc";
@@ -57,7 +61,7 @@ type TaskTimingColumnKey = "start_time" | "at_risk_time" | "due_date";
 const IST_TIME_ZONE = "Asia/Kolkata";
 const ISO_TIME_ZONE_PATTERN = /(Z|[+-]\d{2}:?\d{2})$/i;
 const TASK_TIMING_COLUMN_KEYS = new Set<TaskTimingColumnKey>(["start_time", "at_risk_time", "due_date"]);
-const EXCLUDED_ROW_COLUMN_KEYS = new Set(["id", "taskid", "instanceid", "state"]);
+const EXCLUDED_ROW_COLUMN_KEYS = new Set(["id", "taskid", "instanceid", "state", "roleType"].map((k) => k.toLowerCase()));
 const taskTimingFormatter = new Intl.DateTimeFormat("en-IN", {
   timeZone: IST_TIME_ZONE,
   year: "numeric",
@@ -307,6 +311,7 @@ const RightPanel = ({
   const [poolStatusFilter] =
     useState<PoolStatusFilter>("All");
   const [claimError, setClaimError] = useState("");
+  const [openingCaseLoading, setOpeningCaseLoading] = useState(false);
   const [addLeavesFormPool, setAddLeavesFormPool] = useState("");
   const [filterValues, setFilterValues] = useState<Record<string, string[]>>(
     {},
@@ -457,6 +462,7 @@ const RightPanel = ({
     }
  
     try {
+      setOpeningCaseLoading(true);
       const claimResponse = await dispatch(
         claimTaskThunk({ username, password, taskId: claimTaskId }),
       ).unwrap();
@@ -472,7 +478,7 @@ const RightPanel = ({
  
       const mappedRoleType =
         roleMapper[row.roleType as keyof typeof roleMapper] ?? row.roleType;
- 
+
       localStorage.setItem("roleType", mappedRoleType);
       localStorage.setItem("taskCompositeId", rawTaskId);
       localStorage.setItem("taskId", claimTaskId);
@@ -489,20 +495,78 @@ const RightPanel = ({
           taskCompositeId: rawTaskId,
         }),
       );
- 
+
       const targetBusinessType =
         normalizeBusinessType(row.businessType) ?? safeBusinessType;
- 
+
       const targetPath =
         row.roleType === "Grievance Pool"
           ? getGrievanceApplicationPath(targetBusinessType, row.applicationNo)
           : getDRSPath(targetBusinessType, row.applicationNo);
- 
-      navigate(targetPath);
+
+      // After claim success: attempt to load DRS and retrigger BRE.
+      // Navigate to DRS if either DRS or BRE succeeds; only return to inbox when both fail.
+      const appNo = String(row.applicationNo ?? "").trim();
+
+      const drsPromise = (async () => {
+        try {
+          const drsResp = await dispatch(
+            drsThunk({ applicationNo: appNo, userId: username, roleType: mappedRoleType, sections: [] }),
+          ).unwrap();
+          // store DRS data so DRS page can render immediately
+          dispatch(setDrsData(drsResp.data));
+          return { ok: true };
+        } catch (err) {
+          return { ok: false, error: err };
+        }
+      })();
+
+      const brePromise = (async () => {
+        try {
+          const breResp = await dispatch(
+            breRetriggerThunk({ eventName: "BRE-RETAILS", applicationNumber: appNo }),
+          ).unwrap();
+
+          dispatch(
+            setBreExternalApiOutputs({
+              breOutput: breResp.data?.breOutput,
+              initialBreOutput: breResp.data?.initialBreOutput,
+              breRetriggerStatus: "success",
+              medicalBreOutput: breResp.data?.medicalBreOutput,
+              financialBreOutput: breResp.data?.financialBreOutput,
+            }),
+          );
+
+          return { ok: true };
+        } catch (err) {
+          // mark bre as failed in store so UI can reflect final BRE failure
+          dispatch(
+            setBreExternalApiOutputs({
+              initialBreOutput: undefined,
+              breRetriggerStatus: "failure",
+            }),
+          );
+          return { ok: false, error: err };
+        }
+      })();
+
+      const [drsResult, breResult] = await Promise.all([drsPromise, brePromise]);
+
+      if (drsResult.ok || breResult.ok) {
+        navigate(targetPath);
+        return;
+      }
+
+      // If both failed, fallback to inbox with message
+      navigate(getInboxPath(targetBusinessType), {
+        state: { snackbarMessage: "Failed to open case. Please try again." },
+      });
     } catch (error) {
       setClaimError(
         error instanceof Error ? error.message : "Failed to claim task.",
       );
+    } finally {
+      setOpeningCaseLoading(false);
     }
   };
  
@@ -881,6 +945,21 @@ const RightPanel = ({
         height: "90vh",
       }}
     >
+      {openingCaseLoading && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.25)",
+          }}
+        >
+          <CircularProgress size={64} sx={{ color: "#fff" }} />
+        </Box>
+      )}
       <Box
         sx={{
           // height:"100%",

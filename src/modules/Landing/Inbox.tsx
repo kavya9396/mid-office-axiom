@@ -1,4 +1,4 @@
-import { Alert, Box, Grid, Snackbar } from "@mui/material";
+import { Alert, Box, Grid, Snackbar, CircularProgress } from "@mui/material";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import LeftPanel from "./LeftPanel";
@@ -49,6 +49,7 @@ const Inbox = () => {
   const [selectedPool, setSelectedPool] = useState("");
 
   const [poolData, setPoolData] = useState<Record<string, tableData[]>>({});
+  const [loading, setLoading] = useState(false);
   const snackbarMessage = (location.state as { snackbarMessage?: string } | null)?.snackbarMessage ?? "";
   const snackbarOpen = Boolean(snackbarMessage);
   const allRows = Object.values(poolData).flat();
@@ -60,6 +61,7 @@ const Inbox = () => {
     isRefreshing.current = true;
 
     try {
+      setLoading(true);
       const username = localStorage.getItem("username") ?? "";
       const password = localStorage.getItem("password") ?? "";
       const roleResponse = await dispatch(fetchInboxThunk({ username, password })).unwrap();
@@ -91,6 +93,7 @@ const Inbox = () => {
       console.error("Failed to load data:", error);
     } finally {
       isRefreshing.current = false;
+      setLoading(false);
     }
   }, [businessType, dispatch, navigate]);
 
@@ -123,6 +126,21 @@ const Inbox = () => {
   // ---------------- UI ----------------
   return (
     <Box>
+      {loading && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.25)",
+          }}
+        >
+          <CircularProgress size={64} sx={{ color: "#fff" }} />
+        </Box>
+      )}
       <Grid container sx={{ flexWrap: "nowrap" }} className="bg-grey-200">
         <LeftPanel
           selectedPool={selectedPool}

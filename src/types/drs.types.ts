@@ -283,6 +283,8 @@ export interface DRSBreOutput {
   systemDecisionDateTime: string;
   errorResp: string;
   breRemarks: string;
+  reTriggerCount?: number;
+  retriggerCount?: number;
 }
 
 export interface DRSRequirement {
