@@ -8,4 +8,4 @@ import type {
 export const applicantProfileSubmitThunk = createApiThunk<
   ApplicantProfileSubmitResponse,
   ApplicantProfileSubmitRequest
->("drs/applicantProfileSubmit", { url: url("applicantProfileSubmit"), method: "POST" });
+>("drs/applicantProfileSubmit", { url: url("applicantProfileSubmit"), method: "PUT" });

@@ -1112,13 +1112,24 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             setSubmitLoading(true);
             setSubmitError(null);
 
+            // Merge baseline + updatedDetails to build full master form, convert to display values
+            const mergedMasterForm: ApplicantEditForm = {
+                ...(baselineData as ApplicantEditForm),
+                ...(updatedDetails as Partial<ApplicantEditForm>),
+            };
+            const fullDisplayDetails = toDisplayFormDetails(mergedMasterForm, applicantProfileMasterOptions);
+            const fullUpdatedProfile = applyUpdatedDetailsToProfile(displayProfile as Partial<SummaryResponse>, fullDisplayDetails);
+
             const payload: ApplicantProfileSubmitRequest = {
-                applicationId: applicationNumber,
+                applicationNo: applicationNumber,
                 roleType,
                 memberType: resolvedApplicantTab,
                 updatedDetails,
+                sections: ["summary"],
+                data: { summary: [fullUpdatedProfile] },
             };
 
+            console.log('payload', payload);
             const response = await dispatch(applicantProfileSubmitThunk(payload)).unwrap();
 
             const serverUpdatedDetails = response.updatedDetails;

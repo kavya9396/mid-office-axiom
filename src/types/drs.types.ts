@@ -1086,10 +1086,16 @@ export interface ApplicantEditForm {
 }
 
 export interface ApplicantProfileSubmitRequest {
-  applicationId: string;
+  applicationNo: string;
   roleType: string;
   memberType: ApplicantTab;
   updatedDetails: Partial<ApplicantEditForm>;
+  sections:string[];
+  // Optional data object allowing sections like summary to be sent in the request body
+  data?: {
+    summary?: Partial<SummaryResponse>[];
+    [key: string]: unknown;
+  };
 }
 
 export interface ApplicantProfileSubmitResponse {
