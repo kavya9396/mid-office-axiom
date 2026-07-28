@@ -154,48 +154,5 @@ export const poolAllowedColumns: Record<string, string[]> = {
   RISK_TASK:[...baseColumns],
   //group
    DVT_TASK: [...baseColumnsGops],
-   PRE_ISSUANCE_SERVICING_TASK: [...baseColumnsCops],
-"SYSTEM_WAIT_POOL_AMR_MEDICAL": [
-    ...baseColumnsCops,
-    "lastPool",
-    "requirementRaisedDate",
-    "userId",
-  ],
-  "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL": [
-    ...baseColumnsCops,
-    "lastPool",
-    "requirementRaisedDate",
-    "userId",
-  ],
-   RECONSIDERATION_TASK: [
-    ...baseColumnsCops,
-    "lastPool",
-    "userId",
-    "uwDecisionDate",
-    "poolTAT",
-    "dueDate",
-  ],
-  "REJECT_TASK": [
-    ...baseColumnsCops,
-    "lastPool",
-    "userId",
-    "uwDecisionDate",
-    "laDecisionDate",
-  ],
-  "READY_FOR_ISSUANCE_TASK": [...baseColumnsCops, "lastPool"],
-  "ISSUANCE_TASK": [...baseColumnsCops, "uwDecisionDate", "laDecisionDate"],
-  "REASSIGN_TRANSFER_TASK": [
-    "applicationNo",
-    "nameOfProposer",
-    "nameOfLifeAssured",
-    "product",
-    "plan",
-    "appliedSa",
-    "caseStatus",
-    "caseInWhichPool",
-    "userId",
-    "reassignedUserId",
-    "remarks",
-  ],
 
 };

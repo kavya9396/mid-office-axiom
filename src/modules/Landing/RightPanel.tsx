@@ -43,6 +43,7 @@ import {
   getGrievanceApplicationPath,
   normalizeBusinessType,
 } from "../../routes/routes";
+import { getInboxPath } from "../../routes/routes";
 import SearchApplication from "./SearchApplication";
 import { toFilterComparableValue } from "../../utils/filter";
 import { useAppDispatch } from "../../store/hooks";
@@ -523,9 +524,10 @@ const RightPanel = ({
       })();
 
       const brePromise = (async () => {
+        const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
         try {
           const breResp = await dispatch(
-            breRetriggerThunk({ eventName: "BRE-RETAIL", applicationNumber: appNo }),
+            breRetriggerThunk({ eventName: eventName, applicationNumber: appNo }),
           ).unwrap();
 
           dispatch(

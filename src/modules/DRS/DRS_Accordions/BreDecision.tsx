@@ -144,8 +144,7 @@ const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
 const normalizeValue = (value: string | null | undefined) =>
   String(value ?? "").trim().toLowerCase();
 
-const normalizeDiscrepancy = (value: string | null | undefined) =>
-  normalizeValue(value).replace(/#/g, " ").replace(/\s+/g, " ").trim();
+// `normalizeDiscrepancy` removed because it's unused — keep logic minimal
 
 const BreDecision = ({
   extraFields = [],
@@ -314,10 +313,7 @@ const BreDecision = ({
   const normalizedFinalBreDecision = normalizeValue(
     finalBreSource?.decisionTypes?.breDecision ?? currentBreDecision?.decision ?? "",
   );
-  const normalizedInitialRemarks = normalizeValue(
-    initialBreSource?.breRemarks ?? "",
-  );
-  const normalizedFinalRemarks = normalizeValue(finalBreRemarksValue);
+  // normalized remarks variables are not used; omitted to avoid unused-variable errors
 
   // Extract all alphanumeric discrepancy codes (tokens) from a requirement string.
   const extractDiscrepancyCodes = (value: string | null | undefined): string[] => {
@@ -409,14 +405,14 @@ const BreDecision = ({
       setBreRetriggerError("Missing DRS response. Unable to retrigger BRE.");
       return;
     }
-
+const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
     try {
       setBreRetriggerLoading(true);
       setBreRetriggerError(null);
 
       const response = await dispatch(
         breRetriggerThunk({
-           eventName: "BRE-RETAIL",
+           eventName: eventName,
                             applicationNumber:applicationId
         }),
       ).unwrap();
@@ -495,11 +491,12 @@ const BreDecision = ({
     }
   };
 
-  const breGridTemplate = "minmax(132px, 0.7fr) minmax(0, 1fr) minmax(0, 1fr)";
+  // tightened grid: smaller label column and reduced paddings for denser layout
+  const breGridTemplate = "minmax(80px, 0.35fr) minmax(0, 1fr) minmax(0, 1fr)";
   const breHeaderCellStyles = {
-    px: 1.25,
-    py: 0.75,
-    minHeight: 36,
+    px: 0.75,
+    py: 0.5,
+    minHeight: 32,
     display: "flex",
     alignItems: "center",
     color: "#161616",
@@ -519,9 +516,9 @@ const BreDecision = ({
     <Box
       key={key}
       sx={{
-        px: 1.25,
-        py: 0.75,
-        minHeight: 36,
+        px: 0.75,
+        py: 0.5,
+        minHeight: 32,
         display: "flex",
         alignItems: "center",
       }}

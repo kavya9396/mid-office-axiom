@@ -377,10 +377,10 @@ const savedRequirementTableSx = {
         py: 0.75,
     },
     "& .MuiTableCell-root:first-of-type": {
-        width: "68px",
-        minWidth: "68px",
-        maxWidth: "68px",
-        px: 0.5,
+        width: "auto",
+        minWidth: 0,
+        maxWidth: "unset",
+        pr: "5px",
         whiteSpace: "nowrap",
         overflowWrap: "normal",
         wordBreak: "normal",
@@ -485,6 +485,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     );
 
     const [localRows, setLocalRows] = useState<EditableRequirementRow[]>([]);
+    const [lastAddedDraftRowId, setLastAddedDraftRowId] = useState<string | null>(null);
     const [isTableSaved, setIsTableSaved] = useState(false);
     const [hasRequirementChanges, setHasRequirementChanges] = useState(false);
     const [editableStatusRowIds, setEditableStatusRowIds] = useState<Set<string>>(() => new Set());
@@ -615,6 +616,21 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             window.removeEventListener(OPEN_REQUIREMENT_MANAGEMENT_EVENT, handleOpenRequirementManagement);
         };
     }, [isVisible, normalizedExistingRows]);
+
+    useEffect(() => {
+        if (!lastAddedDraftRowId) return;
+        const id = lastAddedDraftRowId;
+        // allow DOM to update before querying
+        requestAnimationFrame(() => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                const control = el.querySelector('input, select, textarea, button, [tabindex]') as HTMLElement | null;
+                if (control) control.focus();
+            }
+            setLastAddedDraftRowId(null);
+        });
+    }, [lastAddedDraftRowId]);
 
     const getCategoryOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
@@ -1160,7 +1176,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         {
             key: "__rowId",
             header: "Actions",
-            width: "68px",
+            width: "auto",
             sticky: "left",
             render: (_value, row) => {
                 if (!row.__isLocal || isTableSaved) {
@@ -1299,7 +1315,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         onClick={() => {
                             setIsTableSaved(false);
                             setHasRequirementChanges(true);
-                            setLocalRows((previousRows) => [...previousRows, createDraftRow()]);
+                            const draft = createDraftRow();
+                            setLocalRows((previousRows) => [...previousRows, draft]);
+                            setLastAddedDraftRowId(draft.__rowId);
                         }}
                     >
                         + Add Requirement
@@ -1356,6 +1374,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                             return (
                                 <Box
+                                    id={row.__rowId}
                                     key={row.__rowId}
                                     sx={{
                                         borderRadius: 3,
