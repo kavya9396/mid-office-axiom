@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Button, CircularProgress } from "@mui/material";
+import { Box, Container, Typography, Button, CircularProgress, Snackbar, Alert } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -201,6 +201,9 @@ const BreDecision = ({
   const [breRetriggerError, setBreRetriggerError] = useState<string | null>(
     null,
   );
+  const [breToastOpen, setBreToastOpen] = useState(false);
+  const [breToastMessage, setBreToastMessage] = useState<string>("");
+  const [breToastSeverity, setBreToastSeverity] = useState<"error" | "success">("error");
   const [referToItLoading, setReferToItLoading] = useState(false);
   const [referToItError, setReferToItError] = useState<string | null>(null);
 
@@ -315,12 +318,6 @@ const BreDecision = ({
     initialBreSource?.breRemarks ?? "",
   );
   const normalizedFinalRemarks = normalizeValue(finalBreRemarksValue);
-  const normalizedInitialDiscrepancy = normalizeDiscrepancy(
-    initialBreSource?.decisionTypes?.breRequirement ?? "",
-  );
-  const normalizedFinalDiscrepancy = normalizeDiscrepancy(
-    finalBreSource?.decisionTypes?.breRequirement ?? resolvedDiscrepancy,
-  );
 
   // Extract all alphanumeric discrepancy codes (tokens) from a requirement string.
   const extractDiscrepancyCodes = (value: string | null | undefined): string[] => {
@@ -338,10 +335,7 @@ const BreDecision = ({
     normalizedInitialBreDecision !== "" &&
     normalizedFinalBreDecision !== "" &&
     normalizedInitialBreDecision !== normalizedFinalBreDecision;
-  const hasRemarksChanged =
-    normalizedInitialRemarks !== "" &&
-    normalizedFinalRemarks !== "" &&
-    normalizedInitialRemarks !== normalizedFinalRemarks;
+  // remarks comparison available in `hasRemarksChanged` is not used here
 
   // Compare sets of codes: highlight when sets differ or when one side has codes and the other doesn't.
   const hasDiscrepancyChanged = (() => {
@@ -455,9 +449,11 @@ const BreDecision = ({
           breRetriggerStatus: "failure",
         }),
       );
-      setBreRetriggerError(
-        error instanceof Error ? error.message : "Failed to retrigger BRE.",
-      );
+        const message = error instanceof Error ? error.message : "Failed to retrigger BRE.";
+        setBreRetriggerError(message);
+        setBreToastMessage(message);
+        setBreToastSeverity("error");
+        setBreToastOpen(true);
     } finally {
       setBreRetriggerLoading(false);
     }
@@ -487,6 +483,9 @@ const BreDecision = ({
           snackbarMessage: "Case has been referred to IT successfully",
         },
       });
+        setBreToastMessage("Case has been referred to IT successfully");
+        setBreToastSeverity("success");
+        setBreToastOpen(true);
     } catch (error) {
       setReferToItError(
         error instanceof Error ? error.message : "Failed to refer to IT.",
@@ -712,8 +711,8 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
 
         <CustomDialog
           open={bredialogOpen}
-          showCloseIcon={false}
-          onClose={() => setBreDialogOpen(true)}
+          showCloseIcon={true}
+          onClose={() => setBreDialogOpen(false)}
           title={
             <Typography
               sx={{
@@ -760,6 +759,21 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
             </Typography>
           )}
         </CustomDialog>
+        <Snackbar
+          open={breToastOpen}
+          autoHideDuration={5000}
+          onClose={() => setBreToastOpen(false)}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <Alert
+            onClose={() => setBreToastOpen(false)}
+            severity={breToastSeverity}
+            variant="filled"
+            sx={{ width: "100%" }}
+          >
+            {breToastMessage}
+          </Alert>
+        </Snackbar>
       </CustomAccordion>
     </Container>
   );

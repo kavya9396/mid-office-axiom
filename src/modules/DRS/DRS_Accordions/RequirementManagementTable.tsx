@@ -438,6 +438,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const shouldShowProfileAndSpecialTest = !isCvtOrDvtRole;
     const reduxRequirements = useSelector((state: RootState) => {
         const drsData = state.drs.data as unknown as Record<string, unknown> | null;
+
+        // support both flat and nested `data` structures from DRS API
+        const requirementManagement = (drsData?.requirementManagement ?? (drsData?.data as any)?.requirementManagement) as
+            | unknown
+            | undefined;
+        if (Array.isArray(requirementManagement) && requirementManagement.length > 0) {
+            return requirementManagement as AdditionalRequirementRow[];
+        }
+
         const directRequirements = drsData?.requirements;
         if (Array.isArray(directRequirements)) {
             return directRequirements as AdditionalRequirementRow[];
@@ -453,10 +462,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             );
         }
 
-        const requirementManagement = drsData?.requirementManagement;
-        return Array.isArray(requirementManagement)
-            ? (requirementManagement as AdditionalRequirementRow[])
-            : [];
+        return [];
     });
     const drsData = useSelector((state: RootState) => state.drs.data as unknown);
     const effectiveRequirementMasterRows = EMPTY_REQUIREMENT_MASTER_ROWS;
@@ -558,6 +564,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         (selectedCaseContext as { isMedical?: unknown }).isMedical ??
         (drsData as { isMedical?: unknown } | null)?.isMedical,
     );
+    // prefer using requirementManagement from DRS if present (handled in selector)
     const effectiveCptRoleType = roleType === "CPT_TASK"
         ? (selectedCaseRoleType || (selectedCaseIsMedical ? "CPT_DATA_ENTRY_MR_TASK" : "CPT_DATA_ENTRY_NMR_TASK"))
         : roleType;
@@ -1277,7 +1284,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     </Typography>
                 </Box>
 
-                {isVisible ? (
+                {isVisible && (
                     <CustomButton
                         variant="contained"
                         size="small"
@@ -1297,7 +1304,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     >
                         + Add Requirement
                     </CustomButton>
-                ) : null}
+                ) }
             </Box>
 
             <Box sx={{ p: 2, backgroundColor: "#F5F7FA" }}>
@@ -1321,7 +1328,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     </Box>
                 ) : (
                     <Box sx={{ display: "grid", gap: 2, minWidth: 0 }}>
-                        {savedRows.length > 0 ? (
+                        {savedRows.length > 0 && (
                             <Box>
                                 <Box
                                     sx={{
@@ -1338,7 +1345,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     />
                                 </Box>
                             </Box>
-                        ) : null}
+                        ) }
 
                         {draftRows.map((row, rowIndex) => {
                             const profileOptions = getProfileOptions(row);
@@ -1457,15 +1464,13 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                     : renderReadOnlyField(row.team),
                                                 true,
                                             )}
-                                            {shouldShowProfileAndSpecialTest
-                                                ? renderField(
-                                                    "Profile",
-                                                    row.__isDraft
-                                                        ? renderEditableSelect(row, "profile", profileOptions, !row.team)
-                                                        : renderReadOnlyField(row.profile),
-                                                    true,
-                                                )
-                                                : null}
+                                            {shouldShowProfileAndSpecialTest && renderField(
+                                                "Profile",
+                                                row.__isDraft
+                                                    ? renderEditableSelect(row, "profile", profileOptions, !row.team)
+                                                    : renderReadOnlyField(row.profile),
+                                                true,
+                                            )}
                                             {renderField(
                                                 "Category",
                                                 row.__isDraft
@@ -1499,12 +1504,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                     : renderReadOnlyField(row.reason),
                                                 true,
                                             )}
-                                            {shouldShowProfileAndSpecialTest
-                                                ? renderField(
-                                                    "Special Test",
-                                                    renderReadOnlyField(row.specialTest),
-                                                )
-                                                : null}
+                                            {shouldShowProfileAndSpecialTest && renderField(
+                                                "Special Test",
+                                                renderReadOnlyField(row.specialTest),
+                                            )}
                                             {renderField(
                                                 "FUP Code",
                                                 renderReadOnlyField(row.fupCode, row.__isDraft ? row.__lookupMessage : undefined),
@@ -1521,7 +1524,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             );
                         })}
                     </Box>
-                )}
+                ) }
+
+                {/* requirementManagement raw debug view removed to show entries in main table */}
                 <Box
                     sx={{
                         display: "flex",
