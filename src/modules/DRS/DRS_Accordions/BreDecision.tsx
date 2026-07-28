@@ -16,6 +16,7 @@ import type {
   BreDecisionResponse,
   DRSBreOutput,
 } from "../../../types/drs.types";
+import { formatDateForUI } from "../../../utils/helpers";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppDispatch } from "../../../store/hooks";
 import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
@@ -57,6 +58,36 @@ const mapBreOutputToDecision = (
 });
 
 const toText = (value: unknown) => String(value ?? "").trim();
+
+const formatMaybeDate = (value: unknown): string => {
+  const text = String(value ?? "").trim();
+  if (!text) return "-";
+
+  // Try native parse first (ISO and common formats)
+  const parsed = Date.parse(text);
+  if (!Number.isNaN(parsed)) {
+    return `${formatDateForUI(new Date(parsed))}`;
+  }
+
+  // Handle legacy formats like '01/04/2026, 1300hrs' or '01/04/2026 1300hrs'
+  const legacyMatch = text.match(/^\s*(\d{2})\/(\d{2})\/(\d{4})(?:[,\s]+(\d{3,4})hrs)?\s*$/i);
+  if (legacyMatch) {
+    const day = Number(legacyMatch[1]);
+    const month = Number(legacyMatch[2]);
+    const year = Number(legacyMatch[3]);
+    const hm = legacyMatch[4] ? legacyMatch[4].padStart(4, "0") : "0000";
+    const hour = Number(hm.slice(0, hm.length - 2));
+    const minute = Number(hm.slice(-2));
+
+    // Construct a UTC timestamp that corresponds to the given IST local time.
+    // IST = UTC+5:30, so subtract the offset to get UTC milliseconds.
+    const istOffsetMs = 5.5 * 60 * 60 * 1000;
+    const utcMillis = Date.UTC(year, month - 1, day, hour, minute) - istOffsetMs;
+    return `${formatDateForUI(new Date(utcMillis))} IST`;
+  }
+
+  return text;
+};
 
 const getFirstText = (record: Record<string, unknown>, keys: string[]) => {
   for (const key of keys) {
@@ -255,7 +286,7 @@ const BreDecision = ({
     .filter((item) => hasValue(item.value))
     .map((item) => ({
       label: item.label,
-      value: String(item.value),
+      value: item.label.toLowerCase().includes("date") ? formatMaybeDate(item.value) : String(item.value),
     }));
 
   const initialBreDecisionValue = initialBreDecisionRaw || "-";
@@ -338,8 +369,8 @@ const BreDecision = ({
     },
     {
       label: "BRE Timestamp",
-      initialValue: shouldShowInitialBreSection ? initialBreTimestampValue : "-",
-      finalValue: finalBreTimestampValue,
+      initialValue: shouldShowInitialBreSection ? formatMaybeDate(initialBreTimestampValue) : "-",
+      finalValue: shouldShowInitialBreSection ? formatMaybeDate(finalBreTimestampValue) : "-",
     },
     ...additionalBreDetails.map((item) => ({
       label: item.label,
@@ -349,10 +380,6 @@ const BreDecision = ({
   ];
 
   const handleRetrigger = async () => {
-    if (breRetriggerLoading) {
-      return;
-    }
-
     if (retriggerCount >= 3) {
       setReferToItError(null);
       setBreDialogOpen(true);
@@ -370,7 +397,7 @@ const BreDecision = ({
 
       const response = await dispatch(
         breRetriggerThunk({
-           eventName: "BRE-RETAILS",
+           eventName: "BRE-RETAIL",
                             applicationNumber:applicationId
         }),
       ).unwrap();

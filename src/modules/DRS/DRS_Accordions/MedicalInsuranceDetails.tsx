@@ -5,6 +5,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppSelector } from "../../../store/hooks";
+import { formatDateForUI } from "../../../utils/helpers";
 
 type ExistingInsuranceRow = {
   policyNumber: string;
@@ -80,16 +81,9 @@ const formatCurrency = (value: unknown): string => {
 
 const formatDate = (value: unknown): string => {
   const textValue = toText(value);
-  if (!textValue || textValue === "-") {
-    return "-";
-  }
-
-  const date = new Date(textValue);
-  if (Number.isNaN(date.getTime())) {
-    return textValue;
-  }
-
-  return date.toLocaleDateString("en-GB");
+  if (!textValue || textValue === "-") return "-";
+  // Delegate to shared formatter which enforces IST and consistent format.
+  return formatDateForUI(textValue);
 };
 
 const toExistingInsuranceRow = (item: unknown): ExistingInsuranceRow => {

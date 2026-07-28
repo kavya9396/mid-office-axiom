@@ -168,17 +168,56 @@ export const formatDateWithOrdinalTime = (value: unknown) => {
 
     const date = new Date(raw);
     if (Number.isNaN(date.getTime())) return "";
-
-    const day = date.getDate();
-    const month = date.toLocaleString("en-GB", { month: "long" });
-    const year = date.getFullYear();
-    const time = date.toLocaleString("en-GB", {
+    const dtf = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kolkata",
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
-    }).toUpperCase();
+    });
+    const parts = Object.fromEntries(dtf.formatToParts(date).map((p) => [p.type, p.value]));
+    const day = Number(parts.day || date.getDate());
+    const month = parts.month || date.toLocaleString("en-GB", { month: "long", timeZone: "Asia/Kolkata" });
+    const year = parts.year || date.getFullYear();
+    const hour = parts.hour || "";
+    const minute = parts.minute || "";
+    const dayPeriod = (parts.dayPeriod || "").toUpperCase();
 
-    return `${day}${getOrdinalSuffix(day)} ${month} ${year}, ${time}`;
+    return `${day}${getOrdinalSuffix(day)} ${month} ${year}, ${hour}:${minute} ${dayPeriod}`;
+};
+
+/**
+ * Format date for UI as: "28 Jul 2026, 8:40:35 am"
+ */
+export const formatDateForUI = (value: unknown): string => {
+    const raw = String(value ?? "").trim();
+    if (!raw) return "";
+
+    const date = new Date(raw);
+    if (Number.isNaN(date.getTime())) return "";
+    const dtf = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Kolkata",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: true,
+    });
+    const parts = Object.fromEntries(dtf.formatToParts(date).map((p) => [p.type, p.value]));
+
+    const day = parts.day || String(date.getDate()).padStart(2, "0");
+    const monthShort = parts.month || date.toLocaleString("en-GB", { month: "short", timeZone: "Asia/Kolkata" });
+    const year = parts.year || date.getFullYear();
+    const hour = parts.hour || "";
+    const minute = parts.minute || "00";
+    const second = parts.second || "00";
+    const dayPeriod = (parts.dayPeriod || "").toLowerCase();
+
+    return `${Number(day)} ${monthShort} ${year}, ${hour}:${minute}:${second} ${dayPeriod}`;
 };
 
 type TripleFieldConfig<T> = {

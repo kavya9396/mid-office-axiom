@@ -13,6 +13,7 @@ import type { AppDispatch, RootState } from "../../../store/store";
 import { referralUsersThunk } from "../../../store/thunks/referralUsersThunk";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { normalizeMasterOptions } from "../../../utils/masterOptions";
+import { formatDateForUI } from "../../../utils/helpers";
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -44,17 +45,7 @@ const isUwLike = (value: unknown): boolean => {
   return text.includes("UW") || text.includes("CUW") || text.includes("UNDERWRITER");
 };
 
-const formatDateTime = (value: Date): string => {
-  return new Intl.DateTimeFormat("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  }).format(value);
-};
+const formatDateTime = (value: Date): string => formatDateForUI(value);
 
 const SrUWDecision = () => {
   const dispatch = useDispatch<AppDispatch>();

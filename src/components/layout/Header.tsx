@@ -5,19 +5,11 @@ import { useEffect, useState } from "react";
 import { KeyDownArrowIcon, KeyRightArrowIcon, KeyUpArrowIcon, LogoutIcon, TimerPauseIcon, UserProfileIcon } from "../../icons/Icons";
 import { useNavigate } from "react-router-dom";
 import BreakTime from "./BreakTime";
+import { formatDateForUI } from "../../utils/helpers";
 import { auth } from "../../utils/auth";
 import { useSessionTimeout } from "./sessionTimeoutContext.ts";
 
-const formatDateTime = (date: Date) =>
-  date.toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hour12: true,
-  });
+const formatDateTime = (date: Date) => formatDateForUI(date);
 
 const formatSessionTime = (remainingMs: number) => {
   const totalSeconds = Math.ceil(remainingMs / 1000);

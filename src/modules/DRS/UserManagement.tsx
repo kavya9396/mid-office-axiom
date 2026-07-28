@@ -850,17 +850,9 @@ const formatRoles = (roles: string[]) => {
     return roles.join(", ");
 };
 
-const formatCreatedAt = (date: Date) => {
-    return date.toLocaleString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "numeric",
-        minute: "2-digit",
-        second: "2-digit",
-        hour12: true,
-    });
-};
+import { formatDateForUI } from "../../utils/helpers";
+
+const formatCreatedAt = (date: Date) => formatDateForUI(date);
 
 type RoleGroupProps = {
     title: string;

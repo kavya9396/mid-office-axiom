@@ -243,7 +243,7 @@ const DRS = () => {
                 try {
                     const breResponse = await dispatch(
                         breRetriggerThunk({
-                            eventName: "BRE-RETAILS",
+                            eventName: "BRE-RETAIL",
                             applicationNumber:safeApplicationNumber
                         }),
                     ).unwrap();

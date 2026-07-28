@@ -611,19 +611,31 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getCategoryOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest && String(row.profile ?? "").trim()) payload.profile = row.profile;
+        if (shouldShowProfileAndSpecialTest) {
+            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
+        } else {
+            // profile dropdown hidden — use explicit empty profile to match cached payloads
+            payload.profile = "";
+        }
         const cacheKey = JSON.stringify(payload);
         return requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
     };
 
     const getProfileOptions = (row: EditableRequirementRow) => {
-        const cacheKey = JSON.stringify({ team: row.team });
+        // When profile is hidden there won't be a profile dropdown, but keep lookup consistent
+        const payload: Record<string, string> = { team: row.team };
+        if (!shouldShowProfileAndSpecialTest) payload.profile = "";
+        const cacheKey = JSON.stringify(payload);
         return requirementOptionsCache[cacheKey] ?? requirementProfileOptions;
     };
 
     const getSubCategoryOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest && String(row.profile ?? "").trim()) payload.profile = row.profile;
+        if (shouldShowProfileAndSpecialTest) {
+            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
+        } else {
+            payload.profile = "";
+        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         const cacheKey = JSON.stringify(payload);
         return requirementOptionsCache[cacheKey] ?? requirementSubCategoryOptions;
@@ -631,7 +643,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getDocumentOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest && String(row.profile ?? "").trim()) payload.profile = row.profile;
+        if (shouldShowProfileAndSpecialTest) {
+            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
+        } else {
+            payload.profile = "";
+        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
         const cacheKey = JSON.stringify(payload);
@@ -640,7 +656,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getReasonOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest && String(row.profile ?? "").trim()) payload.profile = row.profile;
+        if (shouldShowProfileAndSpecialTest) {
+            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
+        } else {
+            payload.profile = "";
+        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
         if (String(row.document ?? "").trim()) payload.document = row.document;
@@ -689,15 +709,16 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     };
 
     useEffect(() => {
-        // initial load: get teams
+        // initial load: request only the requirement_mst types so teams populate
         const loadInitial = async () => {
-            const mst = await fetchRequirementMst(undefined);
+            const payload = { types: ["requirement_mst"] };
+            const mst = await fetchRequirementMst(payload);
             if (!mst) return;
             const teams = parseFirstArrayFromRequirementMst(mst);
             const opts = teams.map(toOption);
             setTeamOptionsState(opts.length > 0 ? opts : EMPTY_OPTIONS);
-            // cache root
-            cacheOptionsForPayload({}, opts);
+            // cache the response keyed by types
+            cacheOptionsForPayload(payload, opts);
         };
 
         loadInitial();
@@ -851,19 +872,24 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 if (!before) return;
 
                 if (field === "team") {
-                    const payload = { requirementMst: { team: value } };
-                    const cacheKey = JSON.stringify({ team: value });
+                    const includeBlankProfile = !shouldShowProfileAndSpecialTest;
+                    const payloadBody: Record<string, string> = includeBlankProfile
+                        ? { team: value, profile: "" }
+                        : { team: value };
+                    const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
+                    const cacheKeyObj = includeBlankProfile ? { team: value, profile: "" } : { team: value };
+                    const cacheKey = JSON.stringify(cacheKeyObj);
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
                         const entries = parseFirstArrayFromRequirementMst(mst);
                         const opts = entries.map(toOption);
-                        cacheOptionsForPayload({ team: value }, opts);
+                        cacheOptionsForPayload(cacheKeyObj, opts);
                     }
                 }
 
                 if (field === "profile") {
                     const teamVal = before.team || "";
-                    const payload = { requirementMst: { team: teamVal, profile: value } };
+                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: value } };
                     const cacheKey = JSON.stringify({ team: teamVal, profile: value });
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
@@ -876,7 +902,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 if (field === "category") {
                     const teamVal = before.team || "";
                     const profileVal = before.profile || "";
-                    const payload = { requirementMst: { team: teamVal, profile: profileVal, category: value } };
+                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: value } };
                     const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: value });
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
@@ -889,7 +915,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 if (field === "subCategory") {
                     const teamVal = before.team || "";
                     const profileVal = before.profile || "";
-                    const payload = { requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: value } };
+                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: value } };
                     const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: value });
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
@@ -902,13 +928,73 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 if (field === "document") {
                     const teamVal = before.team || "";
                     const profileVal = before.profile || "";
-                    const payload = { requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value } };
+                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value } };
                     const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value });
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
                         const entries = parseFirstArrayFromRequirementMst(mst);
                         const opts = entries.map(toOption);
                         cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value }, opts);
+                    }
+                }
+                
+                if (field === "reason") {
+                    const teamVal = before.team || "";
+                    const profileVal = shouldShowProfileAndSpecialTest ? (before.profile || "") : "";
+                    const payloadBody: Record<string, string> = {
+                        team: teamVal,
+                        profile: profileVal,
+                        category: before.category || "",
+                        subCategory: before.subCategory || "",
+                        document: before.document || "",
+                        reason: value,
+                    };
+                    const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
+                    const cacheKeyObj = payloadBody;
+                    const cacheKey = JSON.stringify(cacheKeyObj);
+                    let mstResponse: unknown = null;
+                    if (!requirementOptionsCache[cacheKey]) {
+                        mstResponse = await fetchRequirementMst(payload);
+                        const entries = parseFirstArrayFromRequirementMst(mstResponse);
+                        const opts = entries.map(toOption);
+                        cacheOptionsForPayload(cacheKeyObj, opts);
+                    } else {
+                        // still try to fetch to obtain details in case cached options only exist
+                        mstResponse = await fetchRequirementMst(payload);
+                    }
+
+                    try {
+                        const mst = mstResponse as any;
+                        let detail: any = null;
+
+                        if (Array.isArray(mst) && mst.length > 0 && typeof mst[0] === "object") {
+                            detail = mst[0];
+                        } else if (mst && typeof mst === "object") {
+                            // prefer known nested structures
+                            detail = mst;
+                            if (mst.data && mst.data.requirement_mst && typeof mst.data.requirement_mst === "object") {
+                                detail = mst.data.requirement_mst;
+                            }
+                        }
+
+                        if (detail) {
+                            const fup = String(detail.fupCode ?? detail.fup_code ?? detail.fup ?? "").trim();
+                            const desc = String(detail.description ?? detail.desc ?? detail.ruleName ?? detail.ruleName ?? "").trim();
+                            const specialTest = String(detail.specialTest ?? detail.special_test ?? detail.specialTest ?? "").trim();
+
+                            if (fup || desc || specialTest) {
+                                updateRow(currentRowBefore?.__rowId ?? rowId, (r) => ({
+                                    ...r,
+                                    fupCode: fup || r.fupCode,
+                                    description: desc || r.description,
+                                    specialTest: specialTest || r.specialTest,
+                                    __lookupMessage: "",
+                                    __errors: clearErrors(r.__errors, ["lookup"]),
+                                }));
+                            }
+                        }
+                    } catch (e) {
+                        // ignore extraction errors
                     }
                 }
             } catch {

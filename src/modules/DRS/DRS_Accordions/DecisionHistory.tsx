@@ -5,6 +5,7 @@ import type { Column } from "../../../components/ui/Table/Table";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTable from "../../../components/ui/Table/Table";
 import type { RootState } from "../../../store/store";
+import { formatDateForUI } from "../../../utils/helpers";
 
 type DecisionStage = "hoCmo" | "hod" | "srUw" | "uw";
 
@@ -106,13 +107,7 @@ const formatDateTime = (value: unknown): string => {
     return text;
   }
 
-  return new Date(parsed).toLocaleString("en-IN", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateForUI(new Date(parsed));
 };
 
 const mapHistoryRecord = (

@@ -51,6 +51,7 @@ import { drsThunk } from "../../store/thunks/drsThunk";
 import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
 import { setDrsData, setBreExternalApiOutputs } from "../../store/slices/drsSlice";
 import { useAppContext } from "../../hooks/useAppContext";
+import { formatDateForUI } from "../../utils/helpers";
  
 type SortDirection = "asc" | "desc";
 type PoolStatusFilter = "All" | "Active" | "Error";
@@ -524,7 +525,7 @@ const RightPanel = ({
       const brePromise = (async () => {
         try {
           const breResp = await dispatch(
-            breRetriggerThunk({ eventName: "BRE-RETAILS", applicationNumber: appNo }),
+            breRetriggerThunk({ eventName: "BRE-RETAIL", applicationNumber: appNo }),
           ).unwrap();
 
           dispatch(
@@ -1210,9 +1211,15 @@ const RightPanel = ({
                         >
                           {visibleColumns.map((col) => {
                             const cellValue = row[col.key];
-                            const displayValue = TASK_TIMING_COLUMN_KEYS.has(col.key as TaskTimingColumnKey)
-                              ? formatTaskTimingValue(cellValue)
-                              : String(cellValue ?? "");
+                            let displayValue: string;
+                            if (TASK_TIMING_COLUMN_KEYS.has(col.key as TaskTimingColumnKey)) {
+                              displayValue = formatTaskTimingValue(cellValue);
+                            } else if (typeof cellValue === "string" && /date|time|timestamp/i.test(String(col.key))) {
+                              const formatted = formatDateForUI(cellValue);
+                              displayValue = formatted || String(cellValue ?? "");
+                            } else {
+                              displayValue = String(cellValue ?? "");
+                            }
 
                             return (
                               <TableCell
