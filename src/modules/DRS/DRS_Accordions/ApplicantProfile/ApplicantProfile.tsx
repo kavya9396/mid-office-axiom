@@ -53,7 +53,7 @@ type FormField = {
 type FormErrors = Partial<Record<keyof ApplicantEditForm, string>>;
 
 const emptyOptions: SelectOption[] = [];
-
+const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
 const getPersonalKycFields = (options: {
     titleOptions: SelectOption[];
     genderOptions: SelectOption[];
@@ -1123,8 +1123,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             const payload: ApplicantProfileSubmitRequest = {
                 applicationNo: applicationNumber,
                 roleType,
-                memberType: resolvedApplicantTab,
-                updatedDetails,
+                userId: userId,
                 sections: ["summary"],
                 data: { summary: [fullUpdatedProfile] },
             };
@@ -1323,6 +1322,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         );
     }
 console.log('roleType',roleType);
+
     return (
         <>
             <Box sx={{ mt: 1 }}>

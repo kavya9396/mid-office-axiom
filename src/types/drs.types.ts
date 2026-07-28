@@ -1087,9 +1087,10 @@ export interface ApplicantEditForm {
 
 export interface ApplicantProfileSubmitRequest {
   applicationNo: string;
-  roleType: string;
-  memberType: ApplicantTab;
-  updatedDetails: Partial<ApplicantEditForm>;
+  roleType?: string;
+  userId?:string;
+  memberType?: ApplicantTab;
+  updatedDetails?: Partial<ApplicantEditForm>;
   sections:string[];
   // Optional data object allowing sections like summary to be sent in the request body
   data?: {

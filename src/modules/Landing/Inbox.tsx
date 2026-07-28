@@ -46,7 +46,9 @@ const Inbox = () => {
   const { businessType } = useAppContext();
 
   const [toggle, setToggle] = useState(false);
-  const [selectedPool, setSelectedPool] = useState("");
+  const [selectedPool, setSelectedPool] = useState<string>(() => {
+    return sessionStorage.getItem("selectedPool") ?? ALL_CASES_POOL;
+  });
 
   const [poolData, setPoolData] = useState<Record<string, tableData[]>>({});
   const [loading, setLoading] = useState(false);
@@ -88,7 +90,11 @@ const Inbox = () => {
       }
 
       setPoolData(poolDataFromAPI);
-      setSelectedPool((previousPool) => getNextSelectedPool(previousPool, poolDataFromAPI));
+
+      const storedPool = sessionStorage.getItem("selectedPool") ?? selectedPool;
+      const nextPool = getNextSelectedPool(storedPool, poolDataFromAPI);
+      setSelectedPool(nextPool);
+      sessionStorage.setItem("selectedPool", nextPool);
     } catch (error) {
       console.error("Failed to load data:", error);
     } finally {
@@ -146,7 +152,10 @@ const Inbox = () => {
           selectedPool={selectedPool}
           toggle={toggle}
           setToggle={setToggle}
-          onSelectPool={setSelectedPool}
+          onSelectPool={(pool: string) => {
+            setSelectedPool(pool);
+            sessionStorage.setItem("selectedPool", pool);
+          }}
           poolData={poolData}
         />
 
