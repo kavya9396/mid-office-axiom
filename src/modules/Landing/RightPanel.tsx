@@ -203,7 +203,7 @@ const formatTaskTimingValue = (value: unknown) => {
   }
 
   const timestamp = getTimestamp(value);
-  return timestamp === null ? value : `${taskTimingFormatter.format(new Date(timestamp))} IST`;
+  return timestamp === null ? value : `${taskTimingFormatter.format(new Date(timestamp))}`;
 };
  
 const getTaskTimingStatus = (row: tableData, now: number): TaskTimingStatus => {

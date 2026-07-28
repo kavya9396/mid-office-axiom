@@ -34,7 +34,7 @@
       "decision": "ST",
       "initialDecision": "ST",
       "remarks": "# TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML## TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML## TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML## TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML#",
-      "discrepancy": "-",
+      "discrepancy": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EIS",
       "timestamp": "01/04/2026, 1300hrs",
       "action": "Regular Medical required",
       "reTriggerCount": 1
@@ -203,7 +203,7 @@
             "addressLine3": "malad west",
             "landmark": "Malad Station",
             "city": "NASHIK",
-            "state": "MAHS",
+            "state": "MH",
             "pinCode": "422002",
             "residingCountry": "India",
             "topCity": "Y/N",

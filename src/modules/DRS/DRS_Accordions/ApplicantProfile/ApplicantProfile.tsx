@@ -2,7 +2,7 @@ import { Box, Divider, Typography } from "@mui/material"
 import CustomButton from "../../../../components/ui/Button/Button"
 import CustomTabs from "../../../../components/ui/Tabs/Tabs"
 import { applicantInfoTabs } from "../../../../utils/constant"
-import { useMemo, useState } from "react"
+import { useMemo, useState, useEffect } from "react"
 import type {
     ApplicantEditForm,
     ApplicantTab,
@@ -708,14 +708,25 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             const productList = Array.isArray(appOverview?.productDetail)
                 ? (appOverview!.productDetail as Array<Record<string, unknown>>)
                 : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
+
             const nextFormData = {
                 ...buildFormData(displayProfile),
                 faceValue: String(productList[0]?.faceValue ?? ""),
             };
 
-            return toMasterFormData(nextFormData, applicantProfileMasterOptions);
+            // Compute country-specific state options so state values from DRS map to the correct master keys
+            const commStateOptions = getStateOptionsForCountry(masters.state, nextFormData.communicationCountry, countryOptions);
+            const permStateOptions = getStateOptionsForCountry(masters.state, nextFormData.permanentCountry, countryOptions);
+
+            const optionMap = {
+                ...applicantProfileMasterOptions,
+                communicationState: commStateOptions,
+                permanentState: permStateOptions,
+            } as Partial<Record<keyof ApplicantEditForm, SelectOption[]>>;
+
+            return toMasterFormData(nextFormData, optionMap);
         },
-        [displayProfile, drsData, applicantProfileMasterOptions]
+        [displayProfile, drsData, applicantProfileMasterOptions, masters.state, countryOptions]
     );
 
     const [formData, setFormData] = useState<ApplicantEditForm>(initialFormData);
@@ -993,9 +1004,28 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             ...buildFormData(displayProfile),
             faceValue: currentFaceValue,
         };
-        setFormData(toMasterFormData(nextFormData, applicantProfileMasterOptions));
+
+        const commStateOptions = getStateOptionsForCountry(masters.state, nextFormData.communicationCountry, countryOptions);
+        const permStateOptions = getStateOptionsForCountry(masters.state, nextFormData.permanentCountry, countryOptions);
+
+        const optionMap = {
+            ...applicantProfileMasterOptions,
+            communicationState: commStateOptions,
+            permanentState: permStateOptions,
+        } as Partial<Record<keyof ApplicantEditForm, SelectOption[]>>;
+
+        setFormData(toMasterFormData(nextFormData, optionMap));
         setOpenEditDialog(true);
     };
+
+    // Keep formData in sync with masters / drs-data when not editing.
+    // This ensures values derived from `drsData` are mapped to master dropdown keys
+    // once the masters API response arrives. Do not overwrite while the dialog is open.
+    useEffect(() => {
+        if (!openEditDialog) {
+            setFormData(initialFormData);
+        }
+    }, [initialFormData, openEditDialog]);
 
     const handleInputChange = (
         field: keyof ApplicantEditForm,

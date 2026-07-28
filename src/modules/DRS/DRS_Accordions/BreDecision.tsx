@@ -83,7 +83,7 @@ const formatMaybeDate = (value: unknown): string => {
     // IST = UTC+5:30, so subtract the offset to get UTC milliseconds.
     const istOffsetMs = 5.5 * 60 * 60 * 1000;
     const utcMillis = Date.UTC(year, month - 1, day, hour, minute) - istOffsetMs;
-    return `${formatDateForUI(new Date(utcMillis))} IST`;
+    return `${formatDateForUI(new Date(utcMillis))}`;
   }
 
   return text;
@@ -322,6 +322,18 @@ const BreDecision = ({
     finalBreSource?.decisionTypes?.breRequirement ?? resolvedDiscrepancy,
   );
 
+  // Extract all alphanumeric discrepancy codes (tokens) from a requirement string.
+  const extractDiscrepancyCodes = (value: string | null | undefined): string[] => {
+    const text = String(value ?? "").toUpperCase();
+    if (!text.trim()) return [];
+    const cleaned = text.replace(/[^A-Z0-9]+/gi, " ").trim();
+    if (!cleaned) return [];
+    return Array.from(new Set(cleaned.split(/\s+/).filter(Boolean)));
+  };
+
+  const initialDiscrepancyCodes = extractDiscrepancyCodes(initialBreSource?.decisionTypes?.breRequirement ?? "");
+  const finalDiscrepancyCodes = extractDiscrepancyCodes(finalBreSource?.decisionTypes?.breRequirement ?? resolvedDiscrepancy);
+
   const hasDecisionChanged =
     normalizedInitialBreDecision !== "" &&
     normalizedFinalBreDecision !== "" &&
@@ -330,10 +342,23 @@ const BreDecision = ({
     normalizedInitialRemarks !== "" &&
     normalizedFinalRemarks !== "" &&
     normalizedInitialRemarks !== normalizedFinalRemarks;
-  const hasDiscrepancyChanged =
-    normalizedInitialDiscrepancy !== "" &&
-    normalizedFinalDiscrepancy !== "" &&
-    normalizedInitialDiscrepancy !== normalizedFinalDiscrepancy;
+
+  // Compare sets of codes: highlight when sets differ or when one side has codes and the other doesn't.
+  const hasDiscrepancyChanged = (() => {
+    if (initialDiscrepancyCodes.length === 0 && finalDiscrepancyCodes.length === 0) return false;
+    if (initialDiscrepancyCodes.length === 0 || finalDiscrepancyCodes.length === 0) return true;
+
+    const a = new Set(initialDiscrepancyCodes);
+    const b = new Set(finalDiscrepancyCodes);
+
+    if (a.size !== b.size) return true;
+
+    for (const code of a) {
+      if (!b.has(code)) return true;
+    }
+
+    return false;
+  })();
 
   const shouldShowInitialBreSection =
     Boolean(initialBreSource) &&
@@ -359,7 +384,7 @@ const BreDecision = ({
       label: "BRE Remarks",
       initialValue: shouldShowInitialBreSection ? initialBreRemarksValue : "-",
       finalValue: finalBreRemarksValue,
-      highlight: shouldShowInitialBreSection && hasRemarksChanged,
+      highlight: false,
     },
     {
       label: "BRE Discrepancy",

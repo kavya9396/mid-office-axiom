@@ -5,7 +5,7 @@
       "decisionTypes": {
         "breDecision": "RM",
         "breAction": "Regular Medical required",
-        "breRequirement": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EID"
+        "breRequirement": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EIS"
       },
       "requirements": [
         {
