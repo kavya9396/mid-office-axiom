@@ -560,6 +560,16 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         window.open(targetUrl, "_blank");
     };
 
+    const mapDisplayTeamToStored = (display: string) => {
+        const normalized = String(display ?? "").trim().toLowerCase();
+        if (!normalized) return "";
+        if (normalized.includes("cvt")) return "COPS";
+        if (normalized.includes("dvt") || normalized === "dvt team" || normalized === "dvt") return "GOPS";
+        if (normalized === "uw") return "UW";
+        if (normalized === "system requirement") return "System Requirement";
+        return display;
+    };
+
     const persistNewTabContext = () => {
         const drsRecord = drsData as Record<string, unknown> | null;
         const externalApis = (drsRecord?.externalAPIs as Record<string, unknown> | undefined) ?? {};
@@ -1660,30 +1670,78 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         mt: 1,
                     }}
                 >
-                    {
-                        isVisible && (
-                            <CustomButton
-                                variant="contained"
-                                disabled={draftRows.length > 0}
-                                onClick={() => {
+                    {isVisible && (
+                        <CustomButton
+                            variant="contained"
+                            disabled={draftRows.length > 0}
+                            onClick={async () => {
+                                // Build a full DRS payload by cloning current drsData and replacing requirementManagement
+                                try {
+                                    const source = (drsData && typeof drsData === "object") ? (drsData as Record<string, unknown>) : {};
+                                    const cloned: Record<string, unknown> = JSON.parse(JSON.stringify(source || {}));
+
+                                    const payloadRequirements = rows.map((r) => ({
+                                        team: mapDisplayTeamToStored(r.team ?? ""),
+                                        profile: r.profile ?? "",
+                                        category: r.category ?? "",
+                                        subCategory: r.subCategory ?? "",
+                                        document: r.document ?? "",
+                                        reason: r.reason ?? "",
+                                        fupCode: r.fupCode ?? "",
+                                        description: r.description ?? "",
+                                        status: String(r.status ?? "").trim() || "Pending",
+                                        raisedDate: r.raisedDate ?? "",
+                                        raisedBy: r.raisedBy ?? "",
+                                        receivedDate: r.receivedDate ?? "",
+                                        receivedBy: r.receivedBy ?? "",
+                                        validity: r.validity ?? "",
+                                        userId: r.userId ?? "",
+                                        remarks: r.remarks ?? "",
+                                        udsLink: r.udsLink ?? "",
+                                    }));
+
+                                    // Replace requirementManagement in cloned object. Support both top-level and data.requirementManagement
+                                    if (Array.isArray(cloned.requirementManagement) || cloned.requirementManagement == null) {
+                                        cloned.requirementManagement = payloadRequirements;
+                                    } else if (cloned.data && typeof cloned.data === "object") {
+                                        (cloned.data as Record<string, unknown>).requirementManagement = payloadRequirements;
+                                    } else {
+                                        cloned.requirementManagement = payloadRequirements;
+                                    }
+
+                                    const requestBody = cloned;
+
+                                    await apiRequest<{ success?: boolean; message?: string }, unknown>({
+                                        url: apiUrl("requirementManagementSave"),
+                                        method: "POST",
+                                        body: requestBody,
+                                    });
+
+                                    // persist local snapshot and update state
                                     saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
                                     setIsTableSaved(true);
                                     setHasRequirementChanges(false);
                                     setEditableStatusRowIds(new Set());
-                                }}
-                                sx={{
-                                    minWidth: 200,
-                                    height: 44,
-                                    borderRadius: "50px",
-                                    fontWeight: 600,
-                                    px: 3,
-                                    whiteSpace: "nowrap",
-                                }}
-                            >
-                                Save
-                            </CustomButton>
-                        )
-                    }
+                                } catch (err) {
+                                    console.warn("Requirement save failed", err);
+                                    // persist unsaved flag so user doesn't lose changes
+                                    saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), true);
+                                    setIsTableSaved(false);
+                                    setHasRequirementChanges(true);
+                                }
+                            }}
+                            sx={{
+                                minWidth: 200,
+                                height: 44,
+                                borderRadius: "50px",
+                                fontWeight: 600,
+                                px: 3,
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            Save
+                        </CustomButton>
+                    )}
                     {showCptActionButtons && (<><CustomButton
                         variant="contained"
                         disabled={draftRows.length > 0}

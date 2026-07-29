@@ -82,6 +82,10 @@ const apiUrls = {
     real: "/api/drs/pre-issuance-request-change/submit",
     mock: "/mock/drs/preIssuanceRequestChangeSubmit.mock.json",
   },
+  requirementManagementSave: {
+    real: "/api/drs/requirement-management/submit",
+    mock: "/mock/drs/requirementManagementSubmit.mock.json",
+  },
   completeTask: {
     real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/complete-task/retail",
     mock: "/mock/drs/completeTask.mock.json",
