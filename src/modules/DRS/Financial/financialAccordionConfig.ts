@@ -6,39 +6,41 @@ export type FinancialField = {
 };
 
 export type FinancialSectionKey =
-  // | "advanceTaxChallan"
-  | "appointmentLetter"
-  | "caCertifiedBalanceSheet"
-  | "caCertifiedNetWorthStatement"
-  | "commissionStatement"
-  | "computationOfIncome"
-  | "creditCards"
-  | "fixedDepositReceipt"
+  | "appointment_letter"
+  // | "ca_balance_sheet"
+  // | "ca_networth"
+  | "commission_statement"
+  | "computation_of_income"
+  | "credit_card"
+  | "fixed_deposit_receipt"
   | "form16"
   | "form16a"
-  | "formJ"
-  | "governmentOfIndiaBonds"
-  | "incomeTaxReturnNonIndividual"
-  | "incomeTaxReturnIndividual"
-  | "loanStatements"
-  | "mutualFundAccountStatement"
-  | "pensionStatement"
-  | "profitAndLossAccount"
-  | "propertyPurchaseDocuments"
-  | "propertyValuationReport"
-  | "salaryCertificate"
-  | "salaryRevisionLetter"
-  | "salarySlips"
-  | "savingsAccountStatements"
-  | "stockHoldingStatement"
-  | "vehicleOwnershipPapers"
+  | "form_j"
+  | "govt_bonds"
+  | "itr_non_individual"
+  | "itr_individual"
+  | "loan_statement"
+  | "mutual_fund"
+  | "pension_statement"
+  | "profit_and_loss"
+  | "property_purchase"
+  | "property_valuation"
+  | "salary_certificate"
+  | "salary_revision_letter"
+  | "salary_slips"
+  | "bank_statement"
+  | "stock_holding"
+  | "vehicle_ownership"
   | "vahan"
-  | "sipStatement"
-  | "gstIncome"
-  | "bankStatementSalaryCredit"
-  | "epfBasic"
-  | "epfAdvanced"
-  | "employeeIDCard";
+  | "sip_statement"
+  | "gst_income"
+  | "bank_statement_salary_credit"
+  | "epf_basic"
+  | "epf_advanced"
+  | "employee_id_card"
+  | "advance_tax"
+  | "ca_networth"
+  | "ca_balance_sheet";
 
 export type FinancialSectionConfig = {
   key: FinancialSectionKey;
@@ -60,62 +62,42 @@ const section = (
 });
 
 export const financialSections: FinancialSectionConfig[] = [
-  // section("advanceTaxChallan", "ADVANCE TAX CHALLAN", [
-  //   { label: "Assesse", value: "No" },
-  //   { label: "Period", value: "No" },
-  //   { label: "Advance Tax", value: "No" },
-  //   { label: "Total Tax Liability", value: "No" },
-  //   { label: "Derived Income", value: "Yes" },
-  // ]),
-  section("appointmentLetter", "Appointment Letter / Contract of Employer", [
+  section("appointment_letter", "Appointment Letter / Contract of Employer", [
     { label: "Name of the company", isMandatory: false },
     { label: "Name of the employee", isMandatory: false },
     { label: "Joining Date", isMandatory: true },
     { label: "CTC", isMandatory: true },
   ]),
-  section("caCertifiedBalanceSheet", "CA Certified Balance Sheet", [
-    { label: "Is Balance Sheet in the name of LA"},
-    { label: "Fixed Assets"},
-    { label: "Other Investments"},
-    { label: "Cash"},
-    { label: "Banks"},
-    { label: "Secured Loans"},
-    { label: "Net Worth"},
-    { label: "Derived Income"},
-    { label: "Average Income"},
-  ]),
-  section("caCertifiedNetWorthStatement", "CA Certified Net Worth Statement", [
-    { label: "Is Net Worth Statement in the name of LA"},
-    { label: "Is Certified by CA"},
-    { label: "Net Worth as per Statement"},
-    { label: "Income Earned"},
-    { label: "Derived Income"},
-    { label: "Average Income"},
-  ]),
-  section("commissionStatement", "Commission Statement", [
+  // section("caCertifiedBalanceSheet", "CA Certified Balance Sheet", [
+  //   { label: "Is Balance Sheet in the name of LA"},
+  //   { label: "Fixed Assets"},
+  //   { label: "Other Investments"},
+  //   { label: "Cash"},
+  //   { label: "Banks"},
+  //   { label: "Secured Loans"},
+  //   { label: "Net Worth"},
+  //   { label: "Derived Income"},
+  //   { label: "Average Income"},
+  // ]),
+  // section("caCertifiedNetWorthStatement", "CA Certified Net Worth Statement", [
+  //   { label: "Is Net Worth Statement in the name of LA"},
+  //   { label: "Is Certified by CA"},
+  //   { label: "Net Worth as per Statement"},
+  //   { label: "Income Earned"},
+  //   { label: "Derived Income"},
+  //   { label: "Average Income"},
+  // ]),
+  section("commission_statement", "Commission Statement", [
     { label: "Month 1", isMandatory: true },
     { label: "Month 2"},
     { label: "Month 3"},
     { label: "Month 4"},
     { label: "Month 5"},
     { label: "Month 6"},
-    { label: "Average commission pm", isMandatory: true},
-    { label: "Average Annual Income", isMandatory: true},
+    { label: "Average commission pm"},
+    { label: "Average Annual Income"},
   ], 4),
-  // section("computationOfIncome", "Computation Of Income", [
-  //   { label: "Assessment Year", value: "at least One Year data Mandatory" },
-  //   { label: "Income from Salary(A)", value: "atleast Income from salary or Income from Business or Exempt Income mandatory" },
-  //   { label: "Income from House Property", value: "No" },
-  //   { label: "Income from Business or Profession (B)", value: "atleast Income from salary or Income from Business or Exempt Income mandatory" },
-  //   { label: "Short term & Capital Gains", value: "No" },
-  //   { label: "Income from Other Sources", value: "No" },
-  //   { label: "Agricultural Income", value: "No" },
-  //   { label: "Exempt Income(C)", value: "atleast Income from salary or Income from Business or Exempt Income mandatory" },
-  //   { label: "Gross Total Income", value: "Auto calculate" },
-  //   { label: "Total Gross Total Income", value: "Auto calculate" },
-  //   { label: "Average Gross Total Income", value: "Auto calculate" },
-  // ], 3),
-  section("computationOfIncome", "Computation Of Income", [
+  section("computation_of_income", "Computation Of Income", [
     { label: "Assessment Year", isMandatory: true },
     { label: "Assessment Year Year 2", isMandatory: true },
     { label: "Assessment Year Year 3", isMandatory: true },
@@ -140,53 +122,53 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Exempt Income(C)", isMandatory: true },
     { label: "Exempt Income(C) Year 2" },
     { label: "Exempt Income(C) Year 3" },
-    { label: "Gross Total Income", isMandatory: true },
+    { label: "Gross Total Income"},
     { label: "Gross Total Income Year 2" },
     { label: "Gross Total Income Year 3" },
-    { label: "Total Gross Total Income", isMandatory: true },
+    { label: "Total Gross Total Income"},
     { label: "Total Gross Total Income Year 2" },
     { label: "Total Gross Total Income Year 3" },
-    { label: "Average Gross Total Income", isMandatory: true },
+    { label: "Average Gross Total Income"},
     { label: "Average Gross Total Income Year 2" },
     { label: "Average Gross Total Income Year 3" },
   ], 3),
-  section("creditCards", "Credit Cards", [
+  section("credit_card", "Credit Cards", [
     { label: "Is Credit card statement in the name of LA"},
     { label: "Is LA Defaulter in the Payment"},
     { label: "Type of Card"},
     { label: "Credit Limit", isMandatory: true },
     { label: "Points Earned"},
     { label: "Income Earned"},
-    { label: "Derived Income", isMandatory: true },
-    { label: "Average Income", isMandatory: true },
+    { label: "Derived Income" },
+    { label: "Average Income" },
   ]),
-  section("fixedDepositReceipt", "Fixed Deposit Receipt", [
+  section("fixed_deposit_receipt", "Fixed Deposit Receipt", [
     { label: "Is Fixed Deposit Receipt in the name of LA"},
     { label: "Is Fixed Deposit Receipts matured"},
     { label: "Amount Invested", isMandatory: true },
     { label: "Income Earned"},
-    { label: "Derived Income", isMandatory: true},
-    { label: "Average Income", isMandatory: true},
+    { label: "Derived Income" },
+    { label: "Average Income" },
   ]),
   section("form16", "FORM16/FORM 130", [
     { label: "Entity"},
     { label: "ASSESSMENT", isMandatory: true },
-    { label: "ASSESSMENT Year 2", isMandatory: true },
-    { label: "ASSESSMENT Year 3", isMandatory: true },
-    { label: "Gross Salary PA"},
+    { label: "ASSESSMENT Year 2" },
+    { label: "ASSESSMENT Year 3" },
+    { label: "Gross Salary PA", isMandatory: true},
     { label: "Gross Salary PA Year 2"},
     { label: "Gross Salary PA Year 3"},
     { label: "Average Annual Income"},
     { label: "Average Annual Income Year 2"},
     { label: "Average Annual Income Year 3"},
-    { label: "Life Assured Pan No"},
+    { label: "Life Assured Pan No", isMandatory: true},
     { label: "Life Assured Pan No Year 2"},
     { label: "Life Assured Pan No Year 3"},
-    { label: "Life Assured Name"},
+    { label: "Life Assured Name", isMandatory: true},
     { label: "Life Assured Name Year 2"},
     { label: "Life Assured Name Year 3"},
     { label: "Is Life Assured Name Same With Doc Name?"},
-    { label: "Company Name"},
+    { label: "Company Name", isMandatory: true},
   ], 3),
   section("form16a", "FORM 16A/FORM 131", [
     { label: "Assessment Year", isMandatory: true },
@@ -195,21 +177,11 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Net Receipt pa", isMandatory: true },
     { label: "Net Receipt pa Year 2"},
     { label: "Net Receipt pa Year 3"},
-    { label: "Average Annual Income", isMandatory: true },
+    { label: "Average Annual Income" },
     { label: "Average Annual Income Year 2"},
     { label: "Average Annual Income Year 3"},
   ], 3),
-  // section("formJ", "FORM J", [
-  //   { label: "Is Form J in the name of LA", value: "" },
-  //   { label: "Month 1", value: "at least One month and one receipt data Mandatory" },
-  //   { label: "Month 2", value: "" },
-  //   { label: "Month 3", value: "" },
-  //   { label: "Total Receipts", value: "Auto calculate" },
-  //   { label: "Average Monthly Receipts", value: "Auto calculate" },
-  //   { label: "Annual Receipts", value: "Auto calculate" },
-  //   { label: "Derived Income", value: "Auto calculate" },
-  // ]),
-  section("formJ", "FORM J", [
+  section("form_j", "FORM J", [
     { label: "Is Form J in the name of LA", isMandatory: true },
     { label: "Month1 Receipt1", isMandatory: true },
     { label: "Month1 Receipt2"},
@@ -229,56 +201,40 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Month3 Receipt4"},
     { label: "Month3 Receipt5"},
     { label: "Month3 Receipt6"},
-    { label: "Total Receipts Receipt1", isMandatory: true },
+    { label: "Total Receipts Receipt1" },
     { label: "Total Receipts Receipt2"},
     { label: "Total Receipts Receipt3"},
     { label: "Total Receipts Receipt4"},
     { label: "Total Receipts Receipt5"},
     { label: "Total Receipts Receipt6"},
-    { label: "Average Monthly Receipts Receipt1", isMandatory: true },
+    { label: "Average Monthly Receipts Receipt1" },
     { label: "Average Monthly Receipts Receipt2"},
     { label: "Average Monthly Receipts Receipt3"},
     { label: "Average Monthly Receipts Receipt4"},
     { label: "Average Monthly Receipts Receipt5"},
     { label: "Average Monthly Receipts Receipt6"},
-    { label: "Annual Receipts Receipt1", isMandatory: true },
+    { label: "Annual Receipts Receipt1" },
     { label: "Annual Receipts Receipt2"},
     { label: "Annual Receipts Receipt3"},
     { label: "Annual Receipts Receipt4"},
     { label: "Annual Receipts Receipt5"},
     { label: "Annual Receipts Receipt6"},
-    { label: "Derived Income Receipt1", isMandatory: true },
+    { label: "Derived Income Receipt1" },
     { label: "Derived Income Receipt2"},
     { label: "Derived Income Receipt3"},
     { label: "Derived Income Receipt4"},
     { label: "Derived Income Receipt5"},
     { label: "Derived Income Receipt6"},
   ], 3),
-  section("governmentOfIndiaBonds", "Govt. Of India Bonds", [
+  section("govt_bonds", "Govt. Of India Bonds", [
     { label: "Is Bond Certification in the name of LA"},
     { label: "Is Bond Certificate matured"},
     { label: "Amount Invested or Maturity Value, whichever higher", isMandatory: true },
     { label: "Income Earned"},
-    { label: "Derived Income", isMandatory: true},
-    { label: "Average Income", isMandatory: true},
+    { label: "Derived Income"},
+    { label: "Average Income"},
   ]),
-  // section("incomeTaxReturnNonIndividual", "Income Tax Return (Non-Individual)", [
-  //   { label: "Name of Organisation/Firm", value: "No" },
-  //   { label: "Permanent Account Number", value: "No" },
-  //   { label: "ITR Acknowledgement Number", value: "No" },
-  //   { label: "Assessment Year", value: "at least One Year data Mandatory" },
-  //   { label: "Income from Salary", value: "atleast one field data Mandatory" },
-  //   { label: "Income from House Property", value: "" },
-  //   { label: "Income from Business or Profession", value: "" },
-  //   { label: "Short term & Capital Gains", value: "" },
-  //   { label: "Income from Other Sources", value: "" },
-  //   { label: "Agricultural Income", value: "" },
-  //   { label: "Exempt Income", value: "" },
-  //   { label: "Gross Total Income", value: "Auto calculate" },
-  //   { label: "Total Gross Total Income", value: "Auto calculate" },
-  //   { label: "Average Gross Total Income", value: "Auto calculate" },
-  // ], 3),
-  section("incomeTaxReturnNonIndividual", "Income Tax Return (Non-Individual)", [
+  section("itr_non_individual", "Income Tax Return (Non-Individual)", [
     { label: "Name of Organisation/Firm", isMandatory: true },
     { label: "Permanent Account Number", isMandatory: true },
     { label: "Assessment Year", isMandatory: true },
@@ -306,37 +262,17 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Exempt Income", isMandatory: true },
     { label: "Exempt Income Year 2"},
     { label: "Exempt Income Year 3"},
-    { label: "Gross Total Income", isMandatory: true },
+    { label: "Gross Total Income"},
     { label: "Gross Total Income Year 2"},
     { label: "Gross Total Income Year 3"},
-    { label: "Total Gross Total Income", isMandatory: true },
+    { label: "Total Gross Total Income"},
     { label: "Total Gross Total Income Year 2"},
     { label: "Total Gross Total Income Year 3"},
-    { label: "Average Gross Total Income", isMandatory: true },
+    { label: "Average Gross Total Income"},
     { label: "Average Gross Total Income Year 2"},
     { label: "Average Gross Total Income Year 3"},
   ], 3),
-  // section("incomeTaxReturnIndividual", "Income Tax Return (Individual)", [
-  //   { label: "Name of Organisation/Firm", value: "No" },
-  //   { label: "Permanent Account Number", value: "No" },
-  //   { label: "ITR Acknowledgement Number", value: "No" },
-  //   { label: "Assessment Year", value: "at least One Year data Mandatory" },
-  //   { label: "Date of Filling ITR", value: "No" },
-  //   { label: "Income from Salary(A)", value: "atleast Income from salary or Income from Business or Exempt Income" },
-  //   { label: "Income from House Property", value: "No" },
-  //   { label: "Income from Business or Profession(B)", value: "atleast Income from salary or Income from Business or Exempt Income" },
-  //   { label: "Short term & Capital Gains", value: "No" },
-  //   { label: "Income from Other Sources", value: "No" },
-  //   { label: "Agricultural Income", value: "No" },
-  //   { label: "Exempt Income(C)", value: "atleast Income from salary or Income from Business or Exempt Income" },
-  //   { label: "Gross Total Income(A+B+C)", value: "Auto calculate" },
-  //   { label: "Total Gross Total Income", value: "Auto calculate" },
-  //   { label: "Average Gross Total Income", value: "Auto calculate" },
-  //   { label: "PF deduction - Salaried customers", value: "No" },
-  //   { label: "Life Assured Name", value: "Yes" },
-  //   { label: "Is Life Assured Name Same?", value: "Yes" },
-  // ], 3),
-  section("incomeTaxReturnIndividual", "Income Tax Return (Individual)", [
+  section("itr_individual", "Income Tax Return (Individual)", [
     { label: "Name of Organisation/Firm", isMandatory: true },
     { label: "Permanent Account Number", isMandatory: true },
     { label: "Assessment Year", isMandatory: true },
@@ -367,13 +303,13 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Exempt Income(C)", isMandatory: true },
     { label: "Exempt Income(C) Year 2"},
     { label: "Exempt Income(C) Year 3"},
-    { label: "Gross Total Income(A+B+C)", isMandatory: true },
+    { label: "Gross Total Income(A+B+C)"},
     { label: "Gross Total Income(A+B+C) Year 2"},
     { label: "Gross Total Income(A+B+C) Year 3"},
-    { label: "Total Gross Total Income", isMandatory: true },
+    { label: "Total Gross Total Income"},
     { label: "Total Gross Total Income Year 2"},
     { label: "Total Gross Total Income Year 3"},
-    { label: "Average Gross Total Income", isMandatory: true },
+    { label: "Average Gross Total Income"},
     { label: "Average Gross Total Income Year 2"},
     { label: "Average Gross Total Income Year 3"},
     { label: "PF deduction - Salaried customers"},
@@ -386,50 +322,26 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Is Life Assured Name Same? Year 2"},
     { label: "Is Life Assured Name Same? Year 3"},
   ], 3),
-  section("loanStatements", "Loan Statements", [
+  section("loan_statement", "Loan Statements", [
     { label: "Is Loan Statements in the name of LA"},
     { label: "Is LA Defaulter in the Payment"},
     { label: "Monthly EMI as per Schedule", isMandatory: true },
     { label: "Income Earned"},
-    { label: "Derived Income", isMandatory: true},
-    { label: "Average Income", isMandatory: true},
+    { label: "Derived Income"},
+    { label: "Average Income"},
   ]),
-  section("mutualFundAccountStatement", "Mutual Fund A/C Statement", [
+  section("mutual_fund", "Mutual Fund A/C Statement", [
     { label: "Is Mutual Fund Statement in the name of LA"},
-    { label: "Latest Market Value (as per NAV) in Statement"},
+    { label: "Latest Market Value (as per NAV) in Statement", isMandatory: true},
     { label: "Income Earned"},
-    { label: "Derived Income", isMandatory: true},
-    { label: "Average Income", isMandatory: true},
+    { label: "Derived Income"},
+    { label: "Average Income"},
   ]),
-  section("pensionStatement", "PENSION STATEMENT", [
+  section("pension_statement", "PENSION STATEMENT", [
     { label: "Total Monthly Pension", isMandatory: true },
-    { label: "Pension Received pa", isMandatory: true},
+    { label: "Pension Received pa"},
   ]),
-  // section("profitAndLossAccount", "Profit & Loss A/C", [
-  //   { label: "Name of Organization/Firm", value: "Yes" },
-  //   { label: "As Per Accounts of Proposer Co.", value: "Year 1 | Year 2 | Year 3" },
-  //   { label: "Assessment Year", value: "at least One Year data Mandatory" },
-  //   { label: "Shareholders Funds / Partners Capital", value: "" },
-  //   { label: "Share Capital or Fixed/Fluctuating Capital", value: "No" },
-  //   { label: "Reserves & Surplus", value: "No" },
-  //   { label: "Total Shareholders Funds or Partner's Fund", value: "No" },
-  //   { label: "Profit Before Depreciation & Tax (PBDT)", value: "No" },
-  //   { label: "Less : Depreciation", value: "No" },
-  //   { label: "Profit Before Tax (PBT)", value: "No" },
-  //   { label: "Tax", value: "No" },
-  //   { label: "Profit After Tax (PAT)", value: "Yes" },
-  //   { label: "Profit After Tax of Last Year", value: "No" },
-  //   { label: "Rise In Profit as compared to Last Year", value: "No" },
-  //   { label: "% Rise In Profit as compared to Last Year", value: "No" },
-  //   { label: "Sales", value: "No" },
-  //   { label: "Sales of Last Year", value: "No" },
-  //   { label: "Rise In Sales as compared to Last Year", value: "No" },
-  //   { label: "% Rise In Sales as compared to Last Year", value: "No" },
-  //   { label: "Average Gross Income", value: "Auto calculate" },
-  //   { label: "Average Profit Before Tax", value: "No" },
-  //   { label: "Average Profit After Tax", value: "No" },
-  // ], 3),
-  section("profitAndLossAccount", "Profit & Loss A/C", [
+  section("profit_and_loss", "Profit & Loss A/C", [
     { label: "Name of Organization/Firm", isMandatory: true },
     { label: "As Per Accounts of Proposer Co.", isMandatory: true },
     { label: "As Per Accounts of Proposer Co. Year 2", isMandatory: true },
@@ -464,9 +376,9 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Tax"},
     { label: "Tax Year 2"},
     { label: "Tax Year 3"},
-    { label: "Profit After Tax (PAT)"},
-    { label: "Profit After Tax (PAT) Year 2"},
-    { label: "Profit After Tax (PAT) Year 3"},
+    { label: "Profit After Tax (PAT)", isMandatory: true},
+    { label: "Profit After Tax (PAT) Year 2", isMandatory: true},
+    { label: "Profit After Tax (PAT) Year 3", isMandatory: true},
     { label: "Profit After Tax of Last Year"},
     { label: "Profit After Tax of Last Year Year 2"},
     { label: "Profit After Tax of Last Year Year 3"},
@@ -491,7 +403,7 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "% Rise In Sales as compared to Last Year"},
     { label: "% Rise In Sales as compared to Last Year Year 2"},
     { label: "% Rise In Sales as compared to Last Year Year 3"},
-    { label: "Average Gross Income", isMandatory: true },
+    { label: "Average Gross Income" },
     { label: "Average Gross Income Year 2"},
     { label: "Average Gross Income Year 3"},
     { label: "Average Profit Before Tax"},
@@ -501,41 +413,41 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Average Profit After Tax Year 2"},
     { label: "Average Profit After Tax Year 3"},
   ], 3),
-  section("propertyPurchaseDocuments", "Property Purchase Documents", [
+  section("property_purchase", "Property Purchase Documents", [
     { label: "Is Property purchased by LA"},
     { label: "Purchase Price", isMandatory: true },
     { label: "Financial Year of Purchase"},
     { label: "Estimated Market Value of Property"},
-    { label: "Derived Income", isMandatory: true},
+    { label: "Derived Income"},
   ]),
-  section("propertyValuationReport", "Property Valuation Report", [
+  section("property_valuation", "Property Valuation Report", [
     { label: "Is Property Valuation Report in the name of LA"},
     { label: "Estimated Market Value of Property(as per report)", isMandatory: true },
-    { label: "Derived Income", isMandatory: true},
+    { label: "Derived Income"},
   ]),
-  section("salaryCertificate", "Salary Certificate", [
+  section("salary_certificate", "Salary Certificate", [
     { label: "Gross Salary PA", isMandatory: true },
   ]),
-  section("salaryRevisionLetter", "Salary Revision Letter", [
+  section("salary_revision_letter", "Salary Revision Letter", [
     { label: "Gross Salary PA", isMandatory: true },
   ]),
-  section("salarySlips", "SALARY SLIPS", [
+  section("salary_slips", "SALARY SLIPS", [
     { label: "Gross Salary Pm1", isMandatory: true },
     { label: "Gross Salary Pm2", isMandatory: true },
     { label: "Gross Salary Pm3", isMandatory: true },
     { label: "Gross Salary Pm4"},
     { label: "Gross Salary Pm5"},
     { label: "Gross Salary Pm6"},
-    { label: "Average Salary pm", isMandatory: true},
-    { label: "Gross Salary pa", isMandatory: true},
+    { label: "Average Salary pm"},
+    { label: "Gross Salary pa"},
     { label: "Annual Bonus/Incentive/Reimbursement"},
-    { label: "Average Annual Income", isMandatory: true},
+    { label: "Average Annual Income"},
     { label: "Company Name", isMandatory: true },
     { label: "Life Assured Name", isMandatory: true },
     { label: "Is Life Assured Name Same?", isMandatory: true },
     { label: "PF / UAN No"},
   ], 3),
-  section("savingsAccountStatements", "Savings A/C & Current A/C Bank Statements", [
+  section("bank_statement", "Savings A/C & Current A/C Bank Statements", [
     { label: "Is Bank Statement in the name of LA/his Business", isMandatory: true },
     { label: "Latest 6 months statements given", isMandatory: true },
     { label: "Any Overdraft(Negative/Debit) Balances", isMandatory: true },
@@ -545,8 +457,8 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Monthly Closing Bal 4", isMandatory: true},
     { label: "Monthly Closing Bal 5", isMandatory: true},
     { label: "Monthly Closing Bal 6", isMandatory: true},
-    { label: "Average Bank Balance", isMandatory: true },
-    { label: "Average Annual income", isMandatory: true },
+    { label: "Average Bank Balance" },
+    { label: "Average Annual income" },
     { label: "Opening Balance", isMandatory: true },
     { label: "Statement Period", isMandatory: true },
     { label: "Life Assured Name", isMandatory: true },
@@ -555,19 +467,19 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Wine Beer_Entries"},
     { label: "Med Entry"},
   ], 3),
-  section("stockHoldingStatement", "Stock Holding Statement", [
+  section("stock_holding", "Stock Holding Statement", [
     { label: "Is Stock Holding Statement in name of LA/his Business"},
     { label: "Gross Total Market Value as per the Stmt", isMandatory: true },
     { label: "Income Earned"},
-    { label: "Derived Income", isMandatory: true },
-    { label: "Average Income", isMandatory: true },
+    { label: "Derived Income"},
+    { label: "Average Income"},
   ]),
-  section("vehicleOwnershipPapers", "Vehicle Ownership Papers", [
+  section("vehicle_ownership", "Vehicle Ownership Papers", [
     { label: "Is Registration Papers in the name of LA"},
     { label: "Is Purchase invoices in the name of LA"},
     { label: "Purchase Price", isMandatory: true },
     { label: "Vehicle RC Number"},
-    { label: "Derived Income", isMandatory: true },
+    { label: "Derived Income" },
   ]),
   section("vahan", "Vahan", [
     { label: "Is Registration Papers in the Name of LA", isMandatory: true },
@@ -576,7 +488,7 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "IDV", isMandatory: true },
     { label: "Average Annual Income"},
   ]),
-  section("sipStatement", "SIP Statement", [
+  section("sip_statement", "SIP Statement", [
     { label: "Latest 6 Months SIP Statements Given", isMandatory: true },
     { label: "Is SIP Statements in the Name of LA", isMandatory: true },
     { label: "SIP of Month1", isMandatory: true },
@@ -591,19 +503,10 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "SIP Per Month 5", isMandatory: true },
     { label: "SIP of Month 6", isMandatory: true },
     { label: "SIP Per Month 6", isMandatory: true },
-    { label: "Average Monthly SIP", isMandatory: true },
-    { label: "Average Annual Income", isMandatory: true },
+    { label: "Average Monthly SIP" },
+    { label: "Average Annual Income" },
   ], 3),
-  // section("gstIncome", "GST Income", [
-  //   { label: "Assessment Year", value: "at least one year details in GST Income!" },
-  //   { label: "Gross Sales", value: "Yes" },
-  //   { label: "Gross Purchases", value: "No" },
-  //   { label: "Profit After GST", value: "No" },
-  //   { label: "Total of Gross Sales", value: "Auto calculate" },
-  //   { label: "Average Gross Sales", value: "Auto calculate" },
-  //   { label: "Average Annual Income", value: "Auto calculate" },
-  // ]),
-  section("gstIncome", "GST Income", [
+  section("gst_income", "GST Income", [
     { label: "Assessment Year", isMandatory: true },
     { label: "Assessment Year Year 2", isMandatory: true },
     { label: "Assessment Year Year 3", isMandatory: true },
@@ -620,20 +523,20 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Profit After GST Year 2"},
     { label: "Profit After GST Year 3"},
     { label: "Profit After GST Year 4"},
-    { label: "Total of Gross Sales", isMandatory: true },
+    { label: "Total of Gross Sales" },
     { label: "Total of Gross Sales Year 2"},
     { label: "Total of Gross Sales Year 3"},
     { label: "Total of Gross Sales Year 4"},
-    { label: "Average Gross Sales", isMandatory: true },
+    { label: "Average Gross Sales" },
     { label: "Average Gross Sales Year 2"},
     { label: "Average Gross Sales Year 3"},
     { label: "Average Gross Sales Year 4"},
-    { label: "Average Annual Income", isMandatory: true },
+    { label: "Average Annual Income" },
     { label: "Average Annual Income Year 2"},
     { label: "Average Annual Income Year 3"},
     { label: "Average Annual Income Year 4"},
   ], 3),
-  section("bankStatementSalaryCredit", "Bank Statement with Salary Credit Details", [
+  section("bank_statement_salary_credit", "Bank Statement with Salary Credit Details", [
     { label: "Is Bank Statement in the Name of LA", isMandatory: true },
     { label: "Net Salary Month1", isMandatory: true },
     { label: "Net Salary Credited PM1", isMandatory: true },
@@ -658,12 +561,12 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Life Assured Name", isMandatory: true },
     { label: "Is LA Name Match with Doc Name?", isMandatory: true },
   ], 3),
-  section("epfBasic", "EMPLOYEE PROVIDENT FUND - BASIC", [
+  section("epf_basic", "EMPLOYEE PROVIDENT FUND - BASIC", [
     { label: "Latest Organization Name", isMandatory: true },
     { label: "Is Organization Name Same?", isMandatory: true },
     { label: "Income", isMandatory: true },
   ]),
-  section("epfAdvanced", "EMPLOYEE PROVIDENT FUND - ADVANCED", [
+  section("epf_advanced", "EMPLOYEE PROVIDENT FUND - ADVANCED", [
     { label: "Latest Organization Name", isMandatory: true },
     { label: "Is Organization Name Same?", isMandatory: true },
     { label: "PF Contribution M1", isMandatory: true },
@@ -672,9 +575,9 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "PF Contribution M4", isMandatory: true },
     { label: "PF Contribution M5", isMandatory: true },
     { label: "PF Contribution M6", isMandatory: true },
-    { label: "Annual Income", isMandatory: true },
+    { label: "Annual Income" },
   ], 3),
-  section("employeeIDCard", "Employee ID Card", [
+  section("employee_id_card", "Employee ID Card", [
     { label: "Name of the company", isMandatory: true },
     { label: "Name of the employee", isMandatory: true },
     { label: "Employee number", isMandatory: true },

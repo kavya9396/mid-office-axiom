@@ -526,9 +526,23 @@ const ViewMedicals = () => {
 
     const containerRect = menuContainer.getBoundingClientRect();
     const itemRect = activeMenuItem.getBoundingClientRect();
+    const padding = 8;
 
-    if (itemRect.top < containerRect.top || itemRect.bottom > containerRect.bottom) {
-      activeMenuItem.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (itemRect.top < containerRect.top + padding) {
+      const delta = itemRect.top - containerRect.top - padding;
+      menuContainer.scrollTo({
+        top: menuContainer.scrollTop + delta,
+        behavior: "smooth",
+      });
+      return;
+    }
+
+    if (itemRect.bottom > containerRect.bottom - padding) {
+      const delta = itemRect.bottom - containerRect.bottom + padding;
+      menuContainer.scrollTo({
+        top: menuContainer.scrollTop + delta,
+        behavior: "smooth",
+      });
     }
   }, [resolvedActiveSectionId]);
 
@@ -883,63 +897,57 @@ const ViewMedicals = () => {
                 <Box sx={{ px: { xs: 1, md: 1.5 }, py: 1.25 }}>
                   {item.section.rows.length === 0 ? (
                     item.fallbackFields.length > 0 ? (
-                      item.id !== resolvedActiveSectionId && !isEditable ? (
-                        <Typography sx={{ color: "#667085", fontSize: 13 }}>
-                          Select this section to load details.
-                        </Typography>
-                      ) : (
-                        <Box
-                          sx={{
-                            display: "grid",
-                            gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
-                            gap: 1.25,
-                            px: 1,
-                          }}
-                        >
-                          {item.fallbackFields.map((field) => {
-                            const isDropdown = isDropdownConfigField(field);
-                            const isDate = isDateConfigField(field);
-                            const isNumeric = isNumericConfigField(field);
-                            const required = isMandatoryConfigField(field);
-                            const label = `${field.field}${required ? " *" : ""}`;
-                            const fieldValue = getFallbackFieldValue(field, item.section.rows, safeApplicationId, applicantData);
-                            const fieldKey = `${item.id}-field-${field.id}`;
-                            const editableValue = getMedicalFieldValue(fieldKey, fieldValue);
-                            const baseOptions = parseConfigDropdownOptions(field);
-                            const options = isDropdown && editableValue && !baseOptions.some((option) => option.value === editableValue)
-                              ? [...baseOptions, { label: editableValue, value: editableValue }]
-                              : baseOptions;
+                      <Box
+                        sx={{
+                          display: "grid",
+                          gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+                          gap: 1.25,
+                          px: 1,
+                        }}
+                      >
+                        {item.fallbackFields.map((field) => {
+                          const isDropdown = isDropdownConfigField(field);
+                          const isDate = isDateConfigField(field);
+                          const isNumeric = isNumericConfigField(field);
+                          const required = isMandatoryConfigField(field);
+                          const label = `${field.field}${required ? " *" : ""}`;
+                          const fieldValue = getFallbackFieldValue(field, item.section.rows, safeApplicationId, applicantData);
+                          const fieldKey = `${item.id}-field-${field.id}`;
+                          const editableValue = getMedicalFieldValue(fieldKey, fieldValue);
+                          const baseOptions = parseConfigDropdownOptions(field);
+                          const options = isDropdown && editableValue && !baseOptions.some((option) => option.value === editableValue)
+                            ? [...baseOptions, { label: editableValue, value: editableValue }]
+                            : baseOptions;
 
-                            return (
-                              <Box key={`${item.id}-${field.id}`}>
-                                {isDropdown ? (
-                                  <CustomSelect
-                                    label={label}
+                          return (
+                            <Box key={`${item.id}-${field.id}`}>
+                              {isDropdown ? (
+                                <CustomSelect
+                                  label={label}
+                                  value={editableValue}
+                                  onChange={(value) => handleMedicalFieldChange(fieldKey, value)}
+                                  options={options}
+                                  placeholder="Select"
+                                  disabled={!isEditable}
+                                />
+                              ) : (
+                                <Box>
+                                  <Typography sx={{ fontSize: "14px", fontWeight: 400, color: "#444", mb: 1 }}>{label}</Typography>
+                                  <CustomTextField
+                                    fullWidth
+                                    size="small"
+                                    type={isDate ? "date" : (isNumeric ? "number" : "text")}
                                     value={editableValue}
-                                    onChange={(value) => handleMedicalFieldChange(fieldKey, value)}
-                                    options={options}
-                                    placeholder="Select"
+                                    onChange={(event) => handleMedicalFieldChange(fieldKey, event.target.value)}
                                     disabled={!isEditable}
+                                    placeholder={isDate ? "YYYY-MM-DD" : ""}
                                   />
-                                ) : (
-                                  <Box>
-                                    <Typography sx={{ fontSize: "14px", fontWeight: 400, color: "#444", mb: 1 }}>{label}</Typography>
-                                    <CustomTextField
-                                      fullWidth
-                                      size="small"
-                                      type={isDate ? "date" : (isNumeric ? "number" : "text")}
-                                      value={editableValue}
-                                      onChange={(event) => handleMedicalFieldChange(fieldKey, event.target.value)}
-                                      disabled={!isEditable}
-                                      placeholder={isDate ? "YYYY-MM-DD" : ""}
-                                    />
-                                  </Box>
-                                )}
-                              </Box>
-                            );
-                          })}
-                        </Box>
-                      )
+                                </Box>
+                              )}
+                            </Box>
+                          );
+                        })}
+                      </Box>
                     ) : (
                       <Typography sx={{ color: "#667085", fontSize: 13 }}>
                         No details available for this test.

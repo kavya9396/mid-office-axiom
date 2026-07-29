@@ -1,0 +1,249 @@
+{
+  "response_code": 200,
+  "error": false,
+  "message": "32 document(s) saved successfully (0 row(s) inserted, 90 row(s) updated)",
+  "data": {
+    "documents": {
+      "salary_slips": {
+        "finDocId": 102,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 3,
+        "avgSalaryPmCalculated": 50000,
+        "grossSalaryPaCalculated": 600000,
+        "avgAnnualIncomeCalculated": 650000
+      },
+      "bank_statement": {
+        "finDocId": 103,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 6,
+        "avgBankBalanceCalculated": 546666.67,
+        "avgAnnualIncomeCalculated": 3280000.02
+      },
+      "bank_statement_salary_credit": {
+        "finDocId": 104,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 6,
+        "avgNetSalaryCreditedPmCalculated": 81000,
+        "netSalaryCreditedPaCalculated": 1069200,
+        "avgAnnualIncomeCalculated": 1166400
+      },
+      "commission_statement": {
+        "finDocId": 105,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 3,
+        "avgCommissionPmCalculated": 11000,
+        "avgAnnualIncomeCalculated": 132000
+      },
+      "form_j": {
+        "finDocId": 106,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 3,
+        "totalReceiptsCalculated": 30000,
+        "avgMonthlyReceiptsCalculated": 10000,
+        "annualReceiptsCalculated": 120000,
+        "derivedIncomeCalculated": 120000
+      },
+      "sip_statement": {
+        "finDocId": 107,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 6,
+        "avgMonthlySipCalculated": 10000,
+        "avgAnnualIncomeCalculated": 600000
+      },
+      "epf_advanced": {
+        "finDocId": 108,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 6,
+        "annualIncomeCalculated": 60000
+      },
+      "epf_basic": {
+        "finDocId": 109,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1
+      },
+      "form16": {
+        "finDocId": 110,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 3,
+        "avgAnnualIncomeCalculated": 500000
+      },
+      "form16a": {
+        "finDocId": 111,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 2,
+        "avgAnnualIncomeCalculated": 320000
+      },
+      "gst_income": {
+        "finDocId": 112,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 4,
+        "totalGrossSalesCalculated": 3800000,
+        "avgGrossSalesCalculated": 1000000,
+        "avgAnnualIncomeCalculated": 200000
+      },
+      "itr_individual": {
+        "finDocId": 113,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 10,
+        "totalGrossTotalIncomeCalculated": 1150000,
+        "avgGrossTotalIncomeCalculated": 575000
+      },
+      "itr_non_individual": {
+        "finDocId": 114,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 4,
+        "totalGrossTotalIncomeCalculated": 1750000,
+        "avgGrossTotalIncomeCalculated": 875000
+      },
+      "computation_of_income": {
+        "finDocId": 115,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 3,
+        "totalGrossTotalIncomeCalculated": 1200000,
+        "avgGrossTotalIncomeCalculated": 600000
+      },
+      "profit_and_loss": {
+        "finDocId": 116,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 13,
+        "avgGrossIncomeCalculated": 400000
+      },
+      "credit_card": {
+        "finDocId": 117,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 100000,
+        "avgIncomeCalculated": 100000
+      },
+      "fixed_deposit_receipt": {
+        "finDocId": 118,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 50000,
+        "avgIncomeCalculated": 50000
+      },
+      "govt_bonds": {
+        "finDocId": 119,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 100000,
+        "avgIncomeCalculated": 100000
+      },
+      "loan_statement": {
+        "finDocId": 120,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 360000,
+        "avgIncomeCalculated": 360000
+      },
+      "mutual_fund": {
+        "finDocId": 121,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 200000,
+        "avgIncomeCalculated": 200000
+      },
+      "pension_statement": {
+        "finDocId": 122,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "pensionReceivedPaCalculated": 120000
+      },
+      "property_purchase": {
+        "finDocId": 123,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 500000
+      },
+      "property_valuation": {
+        "finDocId": 124,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 600000
+      },
+      "salary_certificate": {
+        "finDocId": 125,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 800000
+      },
+      "salary_revision_letter": {
+        "finDocId": 126,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 900000
+      },
+      "stock_holding": {
+        "finDocId": 127,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 250000,
+        "avgIncomeCalculated": 250000
+      },
+      "vehicle_ownership": {
+        "finDocId": 128,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "derivedIncomeCalculated": 1700000
+      },
+      "vahan": {
+        "finDocId": 129,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "avgAnnualIncomeCalculated": 900000
+      },
+      "appointment_letter": {
+        "finDocId": 130,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1
+      },
+      "advance_tax": {
+        "finDocId": 131,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1
+      },
+      "ca_networth": {
+        "finDocId": 132,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1
+      },
+      "ca_balance_sheet": {
+        "finDocId": 133,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1
+      }
+    }
+  }
+}

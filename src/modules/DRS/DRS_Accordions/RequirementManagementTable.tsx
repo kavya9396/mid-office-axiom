@@ -65,6 +65,7 @@ const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterOption["team"]> = {
 
 const EMPTY_OPTIONS: Option[] = [];
 const EMPTY_REQUIREMENT_MASTER_ROWS: RequirementMasterOption[] = [];
+const DRS_NEW_TAB_CONTEXT_KEY = "drsNewTabContext";
 
 const REQUIRED_SELECTION_FIELDS: Array<Exclude<EditableField, "status" | "profile">> = [
     "team",
@@ -557,6 +558,23 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
         const targetUrl = new URL(trimmedPath, window.location.origin).toString();
         window.open(targetUrl, "_blank");
+    };
+
+    const persistNewTabContext = () => {
+        const drsRecord = drsData as Record<string, unknown> | null;
+        const externalApis = (drsRecord?.externalAPIs as Record<string, unknown> | undefined) ?? {};
+        const partyId = String(selectedSummary?.partyId ?? "").trim();
+
+        const payload = {
+            applicationNumber: safeApplicationNumber,
+            partyId,
+            selectedApplicantTab,
+            breDecision: drsRecord?.breDecision ?? externalApis.breOutput ?? null,
+            applicantProfile: selectedSummary ?? null,
+            savedAt: Date.now(),
+        };
+
+        localStorage.setItem(DRS_NEW_TAB_CONTEXT_KEY, JSON.stringify(payload));
     };
 
     const selectedCaseContext = getSelectedCaseContext();
@@ -1643,6 +1661,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                 setIsTableSaved(true);
                                 setHasRequirementChanges(false);
                                 setEditableStatusRowIds(new Set());
+                                persistNewTabContext();
                                 openLinkInNewTab(cptSecondaryAction.path);
                             }}
                             sx={{

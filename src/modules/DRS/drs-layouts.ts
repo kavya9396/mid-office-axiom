@@ -148,6 +148,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_CPT_POOL: [
     "applicationOverview",
     "requirementManagement",
+    "summary",
     "quickLinks",
     "uwToolkit",
   ],

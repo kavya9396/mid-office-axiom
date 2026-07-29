@@ -8,13 +8,13 @@ export type FinancialFieldRule = {
 };
 
 const financialFieldRules: Record<string, Record<string, FinancialFieldRule>> = {
-  appointmentLetter: {
+  appointment_letter: {
     "Name of the company": { inputType: "freeText", isMandatory: false },
     "Name of the employee": { inputType: "freeText", isMandatory: false },
     "Joining Date": { inputType: "dateDDMMYYYY", isMandatory: true },
     CTC: { inputType: "numeric", isMandatory: true },
   },
-  commissionStatement: {
+  commission_statement: {
     "Month 1": { inputType: "numeric" },
     "Month 2": { inputType: "numeric" },
     "Month 3": { inputType: "numeric" },
@@ -31,7 +31,7 @@ export const validateFinancialSectionValues = (
   sectionKey: string,
   values: Record<string, string>,
 ) => {
-  if (sectionKey !== "commissionStatement") {
+  if (sectionKey !== "commission_statement") {
     return {};
   }
 
