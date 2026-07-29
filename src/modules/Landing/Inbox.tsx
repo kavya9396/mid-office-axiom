@@ -91,8 +91,22 @@ const Inbox = () => {
 
       setPoolData(poolDataFromAPI);
 
-      const storedPool = sessionStorage.getItem("selectedPool") ?? selectedPool;
-      const nextPool = getNextSelectedPool(storedPool, poolDataFromAPI);
+      const storedPool = sessionStorage.getItem("selectedPool");
+
+      // Prefer the current in-memory selection when it still exists in the
+      // freshly loaded pool data to avoid overwriting user selection on refresh.
+      let nextPool = selectedPool;
+
+      if (!nextPool) {
+        nextPool = storedPool ?? "";
+      }
+
+      if (!nextPool || !poolDataFromAPI[nextPool]) {
+        // Fallback to computed next pool only when current selection is invalid.
+        const computedPool = getNextSelectedPool(storedPool ?? nextPool, poolDataFromAPI);
+        nextPool = computedPool;
+      }
+
       setSelectedPool(nextPool);
       sessionStorage.setItem("selectedPool", nextPool);
     } catch (error) {
@@ -101,7 +115,7 @@ const Inbox = () => {
       isRefreshing.current = false;
       setLoading(false);
     }
-  }, [businessType, dispatch, navigate]);
+  }, [businessType, dispatch, navigate, selectedPool]);
 
   useEffect(() => {
     const initialLoadTimeoutId = window.setTimeout(() => {
@@ -161,6 +175,7 @@ const Inbox = () => {
 
         <Box sx={{ flex: 1 }}>
           <RightPanel
+            key={selectedPool}
             selectedPool={selectedPool}
             rows={selectedPool === ALL_CASES_POOL ? allRows : (poolData[selectedPool] ?? [])}
           />

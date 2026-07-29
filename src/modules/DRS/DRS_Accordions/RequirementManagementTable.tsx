@@ -614,6 +614,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 return;
             }
 
+            let didAdd = false;
             setLocalRows((previousRows) => {
                 const currentUserHasRaisedRequirement = [...normalizedExistingRows, ...previousRows].some(
                     isRaisedByCurrentUser,
@@ -624,8 +625,36 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                 setIsTableSaved(false);
                 setHasRequirementChanges(true);
+                didAdd = true;
                 return [...previousRows, createDraftRow()];
             });
+
+            // If a draft row was added, prefetch master data for the default team
+            // using the same payload/key shape as team selection so dropdowns are primed.
+            if (didAdd) {
+                (async () => {
+                    try {
+                        const defaultTeam = getDefaultTeam();
+                        const includeBlankProfile = !shouldShowProfileAndSpecialTest;
+                        const payloadBody: Record<string, string> = includeBlankProfile
+                            ? { team: defaultTeam, profile: "" }
+                            : { team: defaultTeam };
+                        const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
+                        console.log('payload',payload)
+                        const cacheKeyObj = includeBlankProfile ? { team: defaultTeam, profile: "" } : { team: defaultTeam };
+                        const cacheKey = JSON.stringify(cacheKeyObj);
+
+                        if (!requirementOptionsCache[cacheKey]) {
+                            const mst = await fetchRequirementMst(payload);
+                            const entries = parseFirstArrayFromRequirementMst(mst);
+                            const opts = entries.map(toOption);
+                            cacheOptionsForPayload(cacheKeyObj, opts);
+                        }
+                    } catch (e) {
+                        // ignore
+                    }
+                })();
+            }
         };
 
         window.addEventListener(OPEN_REQUIREMENT_MANAGEMENT_EVENT, handleOpenRequirementManagement);
@@ -633,7 +662,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         return () => {
             window.removeEventListener(OPEN_REQUIREMENT_MANAGEMENT_EVENT, handleOpenRequirementManagement);
         };
-    }, [isVisible, normalizedExistingRows]);
+    }, [isVisible, normalizedExistingRows, requirementOptionsCache, shouldShowProfileAndSpecialTest]);
 
     useEffect(() => {
         if (!lastAddedDraftRowId) return;
@@ -1367,12 +1396,35 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             "&:hover": { backgroundColor: "#FFFFFF" },
                         }}
                         onClick={() => {
-                            setIsTableSaved(false);
-                            setHasRequirementChanges(true);
-                            const draft = createDraftRow();
-                            setLocalRows((previousRows) => [...previousRows, draft]);
-                            setLastAddedDraftRowId(draft.__rowId);
-                        }}
+                                    setIsTableSaved(false);
+                                    setHasRequirementChanges(true);
+                                    const draft = createDraftRow();
+                                    setLocalRows((previousRows) => [...previousRows, draft]);
+                                    setLastAddedDraftRowId(draft.__rowId);
+
+                                    // Prefetch masters for the default team so dropdowns are primed
+                                    (async () => {
+                                        try {
+                                            const defaultTeam = getDefaultTeam();
+                                            const includeBlankProfile = !shouldShowProfileAndSpecialTest;
+                                            const payloadBody: Record<string, string> = includeBlankProfile
+                                                ? { team: defaultTeam, profile: "" }
+                                                : { team: defaultTeam };
+                                            const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
+                                            const cacheKeyObj = includeBlankProfile ? { team: defaultTeam, profile: "" } : { team: defaultTeam };
+                                            const cacheKey = JSON.stringify(cacheKeyObj);
+
+                                            if (!requirementOptionsCache[cacheKey]) {
+                                                const mst = await fetchRequirementMst(payload);
+                                                const entries = parseFirstArrayFromRequirementMst(mst);
+                                                const opts = entries.map(toOption);
+                                                cacheOptionsForPayload(cacheKeyObj, opts);
+                                            }
+                                        } catch (e) {
+                                            // ignore
+                                        }
+                                    })();
+                                }}
                     >
                         + Add Requirement
                     </CustomButton>
