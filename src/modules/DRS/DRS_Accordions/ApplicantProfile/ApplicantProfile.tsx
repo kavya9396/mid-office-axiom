@@ -2,7 +2,7 @@ import { Box, Divider, Typography } from "@mui/material"
 import CustomButton from "../../../../components/ui/Button/Button"
 import CustomTabs from "../../../../components/ui/Tabs/Tabs"
 import { applicantInfoTabs } from "../../../../utils/constant"
-import { useMemo, useState, useEffect } from "react"
+import { useMemo, useState } from "react"
 import type {
     ApplicantEditForm,
     ApplicantTab,
@@ -1018,15 +1018,6 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         setOpenEditDialog(true);
     };
 
-    // Keep formData in sync with masters / drs-data when not editing.
-    // This ensures values derived from `drsData` are mapped to master dropdown keys
-    // once the masters API response arrives. Do not overwrite while the dialog is open.
-    useEffect(() => {
-        if (!openEditDialog) {
-            setFormData(initialFormData);
-        }
-    }, [initialFormData, openEditDialog]);
-
     const handleInputChange = (
         field: keyof ApplicantEditForm,
         value: string
@@ -1351,7 +1342,6 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             </>
         );
     }
-console.log('roleType',roleType);
 
     return (
         <>

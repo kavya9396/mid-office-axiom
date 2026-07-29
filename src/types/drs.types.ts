@@ -121,6 +121,11 @@ export type DRSRequest = {
   roleType: string;
 };
 
+export type FinancialViewRequest = {
+  applicationNumber: string;
+  partyId: string;
+};
+
 export type DRSResponse = {
   data: DRSData;
 };

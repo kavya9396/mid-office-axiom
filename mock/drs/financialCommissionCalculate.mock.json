@@ -1,1 +1,32 @@
-{}
+{
+	"response_code": 200,
+	"error": false,
+	"message": "Calculated values computed for 1 document(s); nothing persisted",
+	"data": {
+		"documents": {
+			"salary_slips": {
+				"annualBonus": 50000,
+				"months": [
+					{
+						"periodYear": 2026,
+						"periodMonth": 1,
+						"monthlyGrossSalary": 50000
+					},
+					{
+						"periodYear": 2026,
+						"periodMonth": 2,
+						"monthlyGrossSalary": 50000
+					},
+					{
+						"periodYear": 2026,
+						"periodMonth": 3,
+						"monthlyGrossSalary": 50000
+					}
+				],
+				"avgSalaryPmCalculated": 50000,
+				"grossSalaryPaCalculated": 600000,
+				"avgAnnualIncomeCalculated": 650000
+			}
+		}
+	}
+}

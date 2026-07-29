@@ -130,12 +130,16 @@ const apiUrls = {
  
   // Financial
   financialView: {
-    real: "/api/financial/view",
+    real: "http://172.30.74.182:8156/icic-finance-service/v1/fetch",
     mock: "/mock/drs/financial.mock.json",
   },
   financialSubmit: {
     real: "/api/financial/submit",
     mock: "/mock/drs/financial.mock.json",
+  },
+  financialSaveAndCalculate: {
+    real: "/api/financial/save-and-calculate",
+    mock: "/mock/drs/financialSaveAndCalculate.mock.json",
   },
   financialCommissionCalculate: {
     real: "/api/financial/commission/calculate",
