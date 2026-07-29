@@ -1816,7 +1816,8 @@
         "type": "DOCUMENT_TYPE"
       }
     ],
-    "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] }
+    "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] },
+    "decision_master":[]
   },
   "unknownTypes": []
 }

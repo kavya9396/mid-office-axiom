@@ -37,6 +37,7 @@ export const normalizeMastersData = (masters: unknown): MastersData => {
     maritalStatus: ["maritalStatus", "marital_status"],
     idProof: ["idProof", "id_proof_type"],
     addressProof: ["addressProof", "address_proof_type", "id_proof_type"],
+    cvtDecision: ["cvtDecision", "decision_master"],
   };
 
   Object.entries(aliases).forEach(([targetKey, sourceKeys]) => {

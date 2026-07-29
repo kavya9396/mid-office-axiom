@@ -31,7 +31,7 @@ type BreRequirementRow = {
     metaphorName?: string;
 };
 
-type LookupTeam = "CVT Team" | "DVT Team" | "UW";
+type LookupTeam = "COPS" | "GOPS" | "UW";
 
 type EditableField =
     | "team"
@@ -58,8 +58,8 @@ type Option = {
 };
 
 const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterOption["team"]> = {
-    "CVT Team": "UW",
-    "DVT Team": "Gops",
+    COPS: "Cops",
+    GOPS: "Gops",
     UW: "UW",
 };
 
@@ -179,11 +179,11 @@ const getDefaultTeam = (): LookupTeam => {
     const roleType = String(localStorage.getItem("roleType") ?? "").toLowerCase();
 
     if (roleType.includes("cvt")) {
-        return "CVT Team";
+        return "COPS";
     }
 
     if (roleType.includes("dvt") || roleType.includes("gops")) {
-        return "DVT Team";
+        return "GOPS";
     }
 
     return "UW";
