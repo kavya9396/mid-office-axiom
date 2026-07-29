@@ -954,10 +954,26 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value } };
                     const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value });
                     if (!requirementOptionsCache[cacheKey]) {
-                        const mst = await fetchRequirementMst(payload);
-                        const entries = parseFirstArrayFromRequirementMst(mst);
-                        const opts = entries.map(toOption);
-                        cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value }, opts);
+                            const mst = await fetchRequirementMst(payload);
+                            // Prefer explicit `reasons` array when API returns both documents and reasons
+                            let entries: string[] = [];
+                            try {
+                                const candidate = (mst as any)?.data?.requirement_mst ?? mst;
+                                if (candidate && typeof candidate === "object") {
+                                    if (Array.isArray(candidate.reasons) && candidate.reasons.length > 0) {
+                                        entries = candidate.reasons.map(String);
+                                    } else {
+                                        entries = parseFirstArrayFromRequirementMst(candidate);
+                                    }
+                                } else {
+                                    entries = parseFirstArrayFromRequirementMst(mst);
+                                }
+                            } catch (e) {
+                                entries = parseFirstArrayFromRequirementMst(mst);
+                            }
+
+                            const opts = entries.map(toOption);
+                            cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value }, opts);
                     }
                 }
                 
@@ -1001,20 +1017,40 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         }
 
                         if (detail) {
-                            const fup = String(detail.fupCode ?? detail.fup_code ?? detail.fup ?? "").trim();
-                            const desc = String(detail.description ?? detail.desc ?? detail.ruleName ?? detail.ruleName ?? "").trim();
-                            const specialTest = String(detail.specialTest ?? detail.special_test ?? detail.specialTest ?? "").trim();
+                                // Support explicit `requirements` array shape: map `code` -> fupCode, `description` -> description, `special` -> specialTest
+                                const candidate = detail;
+                                if (Array.isArray(candidate.requirements) && candidate.requirements.length > 0 && typeof candidate.requirements[0] === "object") {
+                                    const req = candidate.requirements[0] as Record<string, unknown>;
+                                    const fup = String(req.code ?? req.fupCode ?? req.fup_code ?? req.fup ?? "").trim();
+                                    const desc = String(req.description ?? req.desc ?? req.ruleName ?? "").trim();
+                                    const specialTest = String(req.special ?? req.specialTest ?? req.special_test ?? "").trim();
 
-                            if (fup || desc || specialTest) {
-                                updateRow(currentRowBefore?.__rowId ?? rowId, (r) => ({
-                                    ...r,
-                                    fupCode: fup || r.fupCode,
-                                    description: desc || r.description,
-                                    specialTest: specialTest || r.specialTest,
-                                    __lookupMessage: "",
-                                    __errors: clearErrors(r.__errors, ["lookup"]),
-                                }));
-                            }
+                                    if (fup || desc || specialTest) {
+                                        updateRow(currentRowBefore?.__rowId ?? rowId, (r) => ({
+                                            ...r,
+                                            fupCode: fup || r.fupCode,
+                                            description: desc || r.description,
+                                            specialTest: specialTest || r.specialTest,
+                                            __lookupMessage: "",
+                                            __errors: clearErrors(r.__errors, ["lookup"]),
+                                        }));
+                                    }
+                                } else {
+                                    const fup = String(detail.fupCode ?? detail.fup_code ?? detail.fup ?? "").trim();
+                                    const desc = String(detail.description ?? detail.desc ?? detail.ruleName ?? "").trim();
+                                    const specialTest = String(detail.specialTest ?? detail.special_test ?? detail.specialTest ?? "").trim();
+
+                                    if (fup || desc || specialTest) {
+                                        updateRow(currentRowBefore?.__rowId ?? rowId, (r) => ({
+                                            ...r,
+                                            fupCode: fup || r.fupCode,
+                                            description: desc || r.description,
+                                            specialTest: specialTest || r.specialTest,
+                                            __lookupMessage: "",
+                                            __errors: clearErrors(r.__errors, ["lookup"]),
+                                        }));
+                                    }
+                                }
                         }
                     } catch (e) {
                         // ignore extraction errors

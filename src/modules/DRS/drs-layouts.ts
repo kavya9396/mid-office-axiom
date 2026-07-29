@@ -30,8 +30,10 @@ import CustomerProfile from "./DRS_Accordions/CustomerProfile";
 import MedicalInsuranceDetails from "./DRS_Accordions/MedicalInsuranceDetails";
 import DocumentRequired from "./DRS_Accordions/DocumentRequired";
 import PreLogin from "./DRS_Accordions/PreLogin";
+import BreDecision1 from "./DRS_Accordions/BreDecision1";
  
 export const accordionRegistry = {
+  breDecision1:BreDecision1,
   breDecision: BreDecision,
   applicationOverview: ApplicationOverview,
   requirementManagement: RequirementManagement,

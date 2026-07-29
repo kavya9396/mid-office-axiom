@@ -28,29 +28,46 @@ const Login = () => {
   const { control, handleSubmit } = useForm<LoginForm>();
 const dispatch = useAppDispatch();
 const navigate = useNavigate();
+  const USE_MOCK_LOGIN = true;
   const [status, setStatus] = React.useState<"idle" | "loading">("idle");
 
   const onSubmit = async (data:LoginForm) => {
   setStatus("loading");
 
   try {
-    const res = await dispatch(loginThunk({
-        username: data.username,
-        password: data.password,
-       })).unwrap();
+     let res;
 
-    // mock response: { ldapsuresponse: "success" }
+    if (USE_MOCK_LOGIN) {
+      // Mock API response
+      res = {
+        ldapAuthentication: "Success",
+        token: "mock-token-123456",
+      };
+    } else {
+      // Real API
+      res = await dispatch(
+        loginThunk({
+          username: data.username,
+          password: data.password,
+        })
+      ).unwrap();
+    }
+
     if (res?.ldapAuthentication === "Success") {
-       const normalizedBusinessType = "retail";
-       localStorage.setItem("token", res?.token);
-       localStorage.setItem("username", data.username);
-       localStorage.setItem("password", data.password);
-       localStorage.setItem("businessType", normalizedBusinessType);
+      const normalizedBusinessType = "retail";
 
-      try {
-        await dispatch(fetchMastersForSession());
-      } catch (error) {
-        console.error("Failed to load master data", error);
+      localStorage.setItem("token", res.token);
+      localStorage.setItem("username", data.username);
+      localStorage.setItem("password", data.password);
+      localStorage.setItem("businessType", normalizedBusinessType);
+
+      // Skip this if your masters API also depends on authentication
+      if (!USE_MOCK_LOGIN) {
+        try {
+          await dispatch(fetchMastersForSession());
+        } catch (error) {
+          console.error("Failed to load master data", error);
+        }
       }
 
       navigate(getInboxPath(normalizedBusinessType));

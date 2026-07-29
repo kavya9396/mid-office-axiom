@@ -1158,7 +1158,6 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
                 data: { summary: [fullUpdatedProfile] },
             };
 
-            console.log('payload', payload);
             const response = await dispatch(applicantProfileSubmitThunk(payload)).unwrap();
 
             const serverUpdatedDetails = response.updatedDetails;
@@ -1351,7 +1350,6 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             </>
         );
     }
-console.log('roleType',roleType);
 
     return (
         <>

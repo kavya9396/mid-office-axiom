@@ -10,18 +10,20 @@ import { KeyDownArrowIcon, KeyUpArrowIcon } from "../../../icons/Icons";
 
 type CustomAccordionProps = {
   title: string;
+  headerActions?: React.ReactNode;
   children: React.ReactNode;
   chip?: React.ReactNode;
   defaultExpanded?: boolean;
   expanded?: boolean;
   onChange?: (expanded: boolean) => void;
-  titleFontSize?:number | string;
-  detailPadding?:number | string;
-  titleColor?:string;
+  titleFontSize?: number | string;
+  detailPadding?: number | string;
+  titleColor?: string;
 };
 
 export default function CustomAccordion({
   title,
+  headerActions,
   children,
   chip,
   defaultExpanded = false,
@@ -29,7 +31,7 @@ export default function CustomAccordion({
   onChange,
   titleFontSize = 14,
   detailPadding = "5px",
-  titleColor
+  titleColor,
 }: CustomAccordionProps) {
   const [expanded, setExpanded] = useState(defaultExpanded);
   const isControlled = controlledExpanded !== undefined;
@@ -64,7 +66,7 @@ export default function CustomAccordion({
           alignItems: "center",
           minHeight: "unset !important",
           p: "10px",
-          m:0,
+          m: 0,
           "&.Mui-expanded": {
             minHeight: "unset !important",
           },
@@ -77,7 +79,16 @@ export default function CustomAccordion({
           },
         }}
       >
-        <Typography component="span" sx={{ fontSize: titleFontSize, fontWeight: 700, flex: 1, color:titleColor,m:0}}>
+        <Typography
+          component="span"
+          sx={{
+            fontSize: titleFontSize,
+            fontWeight: 700,
+            flex: 1,
+            color: titleColor,
+            m: 0,
+          }}
+        >
           {title}
         </Typography>
 
@@ -87,13 +98,20 @@ export default function CustomAccordion({
             sx={{
               display: "flex",
               alignItems: "center",
-              m:0,
+              m: 0,
             }}
           >
             {chip}
           </Box>
         )}
-
+        {headerActions && (
+          <Box
+            onClick={(e) => e.stopPropagation()}
+            sx={{ display: "flex", alignItems: "center", mr: 1 }}
+          >
+            {headerActions}
+          </Box>
+        )}
         <Box
           sx={{
             width: 20,
@@ -113,7 +131,7 @@ export default function CustomAccordion({
         </Box>
       </AccordionSummary>
 
-      <AccordionDetails sx={{padding:detailPadding,m:0}}>
+      <AccordionDetails sx={{ padding: detailPadding, m: 0 }}>
         <Box>{children}</Box>
       </AccordionDetails>
     </Accordion>

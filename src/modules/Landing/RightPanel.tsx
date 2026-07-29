@@ -320,7 +320,6 @@ const RightPanel = ({
   );
   const isLeaveManagementPool = selectedPool === "LEAVE_MANAGEMENT_POOL";
   const showAddLeavesForm = isLeaveManagementPool && addLeavesFormPool === selectedPool;
-  console.log(showAddLeavesForm)
  
   // const hasPoolStatus = rows.some((row) => {
   //   const rowData = row as unknown as Record<string, unknown>;

@@ -16,7 +16,6 @@ export const apiRequest = async <TResponse = unknown, TRequest = unknown>({
     ? `${url}${url.includes("?") ? "&" : "?"}_=${Date.now()}`
     : url;
   const resolvedMethod = isMockJsonRequest ? "GET" : method;
-  console.log('resolvedMethod',resolvedMethod)
 
   const response = await fetch(resolvedUrl, {
     method: resolvedMethod,

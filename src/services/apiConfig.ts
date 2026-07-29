@@ -50,6 +50,10 @@ const apiUrls = {
     real: "/api/drs/decision-codes",
     mock: "/mock/drs/decisionCodes.json",
   },
+  bre: {
+    real: "/api/drs/bre",
+    mock: "/mock/drs/breRetrigger.mock.json",
+  },
   breRetrigger: {
     real: "/api/drs/breRetrigger",
     mock: "/mock/drs/breRetrigger.mock.json",

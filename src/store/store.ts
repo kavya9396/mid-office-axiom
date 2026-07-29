@@ -3,6 +3,7 @@ import apiReducer from "./slices/apiSlice";
 import drsReducer from "./slices/drsSlice";
 import referralUsersReducer from "./slices/referralUsersSlice";
 import decisionCodeReducer from "./slices/decisionCodeSlice";
+import breReducer from "./slices/breSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     drs: drsReducer,
     referralUsers: referralUsersReducer,
     decisionCodes: decisionCodeReducer,
+    bre:breReducer
   },
 });
 

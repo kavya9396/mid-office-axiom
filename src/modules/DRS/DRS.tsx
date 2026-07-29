@@ -14,6 +14,7 @@ import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import type { DRSBreOutput, DRSData } from "../../types/drs.types";
 import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 import { validateDrsFinalBre } from "../../validations/drsBreValidation";
+import { breThunk } from "../../store/thunks/breThunk";
  
 const toText = (value: unknown) => String(value ?? "").trim();
  
@@ -239,8 +240,15 @@ const DRS = () => {
                         sections,
                     }),
                 ).unwrap();
- 
+                console.log('drs api response',drsResponse)
                 try {
+                     const finalBre = await dispatch(
+                        breThunk({
+                            eventName: "BRE-RETAIL",
+                            applicationNumber:safeApplicationNumber
+                        }),
+                    ).unwrap();
+                    console.log('finalBre',finalBre)
                     const breResponse = await dispatch(
                         breRetriggerThunk({
                             eventName: "BRE-RETAIL",

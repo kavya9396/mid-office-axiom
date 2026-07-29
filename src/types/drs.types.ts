@@ -127,6 +127,7 @@ export type DRSResponse = {
 
 export interface DRSData {
   applicationNumber: string;
+  breDecision:BreDecisionResponse;
   submitDate: string;
   totalPremium: number;
   sourceSystem: string;
@@ -533,6 +534,19 @@ export type BreRetriggerRequest = {
 };
 
 export type BreRetriggerResponse = {
+  data: {
+    breOutput: DRSBreOutput;
+    initialBreOutput?: DRSBreOutput;
+    medicalBreOutput?: Record<string, unknown>;
+    financialBreOutput?: Record<string, unknown>;
+  };
+};
+export type BreRequest = {
+  eventName:string;
+  applicationNumber:string;
+};
+
+export type BreResponse = {
   data: {
     breOutput: DRSBreOutput;
     initialBreOutput?: DRSBreOutput;

@@ -30,7 +30,6 @@ const uwToolkitLinks = [
     roles: ["CPT_TASK"],
   },
 ].filter((link) => link.roles.includes(roleType));
-console.log('toolkit links',uwToolkitLinks,roleType)
   
   return (
     <Box
