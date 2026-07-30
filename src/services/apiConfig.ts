@@ -6,7 +6,7 @@
 //  When USE_MOCK = false → every thunk hits the real API URL.
 // ============================================================
  
-export const USE_MOCK = true; // <-- flip this one flag to switch modes
+export const USE_MOCK = false; // <-- flip this one flag to switch modes
  
 // --------------- URL registry --------------------------------
 // Add or edit URLs here; thunk files need no further changes.
@@ -51,19 +51,19 @@ const apiUrls = {
     mock: "/mock/drs/decisionCodes.json",
   },
   bre: {
-    real: "/api/drs/bre",
+    real: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
     mock: "/mock/drs/breRetrigger.mock.json",
   },
   breRetrigger: {
-    real: "/api/drs/breRetrigger",
+    real: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
     mock: "/mock/drs/breRetrigger.mock.json",
   },
   applicantProfileSubmit: {
-    real: "/api/drs/applicant-profile/submit",
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
     mock: "/mock/drs/applicantProfileSubmit.mock.json",
   },
   customerProfileSubmit: {
-    real: "/api/drs/customer-profile/submit",
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
     mock: "/mock/drs/customerProfileSubmit.mock.json",
   },
   referToIt: {
@@ -83,7 +83,7 @@ const apiUrls = {
     mock: "/mock/drs/preIssuanceRequestChangeSubmit.mock.json",
   },
   requirementManagementSave: {
-    real: "/api/drs/requirement-management/submit",
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
     mock: "/mock/drs/requirementManagementSubmit.mock.json",
   },
   completeTask: {
@@ -142,15 +142,15 @@ const apiUrls = {
     mock: "/mock/drs/financial.mock.json",
   },
   financialSubmit: {
-    real: "/api/financial/submit",
+    real: "http://172.30.74.182:8156/icic-finance-service/v1/save",
     mock: "/mock/drs/financial.mock.json",
   },
   financialSaveAndCalculate: {
-    real: "/api/financial/save-and-calculate",
+    real: "http://172.30.74.182:8156/icic-finance-service/v1/save",
     mock: "/mock/drs/financialSaveAndCalculate.mock.json",
   },
   financialCommissionCalculate: {
-    real: "/api/financial/commission/calculate",
+    real: "http://172.30.74.182:8156/icic-finance-service/v1/save",
     mock: "/mock/drs/financialCommissionCalculate.mock.json",
   },
  
@@ -184,6 +184,7 @@ export type ApiKey = keyof typeof apiUrls;
 /** Returns the resolved URL based on the USE_MOCK flag. */
 export const url = (key: ApiKey): string =>
   USE_MOCK ? apiUrls[key].mock : apiUrls[key].real;
+ 
  
  
  
