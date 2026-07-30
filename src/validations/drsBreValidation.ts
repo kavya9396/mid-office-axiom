@@ -40,6 +40,7 @@ const hasUsableLegacyBreDecision = (value: unknown): boolean => {
   );
 };
 
+
 const normalizeBreDecision = (value: unknown): string =>
   String(value ?? "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
 
@@ -89,8 +90,14 @@ export const isFinalBreFailed = (drsData: unknown): boolean => {
     return false;
   }
 
+  // A failed retrigger attempt shouldn't by itself block all UI actions.
+  // Only treat it as a final failure when there is no usable BRE output
+  // (either new `breOutput` or legacy `breDecision`).
   if (externalApis.breRetriggerStatus === "failure") {
-    return true;
+    if ("breOutput" in externalApis) {
+      return !hasUsableBreOutput(externalApis.breOutput);
+    }
+    return !hasUsableLegacyBreDecision(root.breDecision);
   }
 
   if ("breOutput" in externalApis) {
@@ -103,8 +110,11 @@ export const isFinalBreFailed = (drsData: unknown): boolean => {
 export const validateDrsFinalBre = (drsData: unknown): DrsBreValidationResult => {
   const finalBreFailed = isFinalBreFailed(drsData);
 
+  // Do not block user actions when BRE APIs fail. Still return the
+  // `finalBreFailed` flag and a message so callers can display an
+  // informational warning, but always allow actions to proceed.
   return {
-    canPerformAction: !finalBreFailed,
+    canPerformAction: true,
     finalBreFailed,
     message: finalBreFailed ? getErrorMessage("drsFinalBreFailure") : "",
   };

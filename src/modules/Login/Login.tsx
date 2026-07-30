@@ -62,13 +62,13 @@ const navigate = useNavigate();
       localStorage.setItem("businessType", normalizedBusinessType);
 
       // Skip this if your masters API also depends on authentication
-      if (!USE_MOCK_LOGIN) {
+      // if (!USE_MOCK_LOGIN) {
         try {
           await dispatch(fetchMastersForSession());
         } catch (error) {
           console.error("Failed to load master data", error);
         }
-      }
+      // }
 
       navigate(getInboxPath(normalizedBusinessType));
     }

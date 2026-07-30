@@ -1133,20 +1133,29 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             setSubmitLoading(true);
             setSubmitError(null);
 
-            // Merge baseline + updatedDetails to build full master form, convert to display values
+            // Merge baseline + updatedDetails to build full master-form (codes)
             const mergedMasterForm: ApplicantEditForm = {
                 ...(baselineData as ApplicantEditForm),
                 ...(updatedDetails as Partial<ApplicantEditForm>),
             };
-            const fullDisplayDetails = toDisplayFormDetails(mergedMasterForm, applicantProfileMasterOptions);
-            const fullUpdatedProfile = applyUpdatedDetailsToProfile(displayProfile as Partial<SummaryResponse>, fullDisplayDetails);
+
+            // Build profile object for server payload using master codes (not display labels)
+            const fullUpdatedProfileForServer = applyUpdatedDetailsToProfile(
+                displayProfile as Partial<SummaryResponse>,
+                mergedMasterForm as Partial<ApplicantEditForm>
+            );
+
+            // Build payload data: send full DRS data structure when available, with the updated summary
+            const payloadData = drsData
+                ? ({ ...(drsData as Record<string, unknown>), summary: [fullUpdatedProfileForServer] } as Record<string, unknown>)
+                : { summary: [fullUpdatedProfileForServer] };
 
             const payload: ApplicantProfileSubmitRequest = {
                 applicationNo: applicationNumber,
                 roleType,
                 userId: userId,
                 sections: ["summary"],
-                data: { summary: [fullUpdatedProfile] },
+                data: payloadData as any,
             };
 
             const response = await dispatch(applicantProfileSubmitThunk(payload)).unwrap();

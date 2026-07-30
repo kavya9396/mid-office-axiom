@@ -248,16 +248,17 @@ const DRS = () => {
         if (validation.canPerformAction) {
             return;
         }
- 
-        const target = event.target instanceof HTMLElement ? event.target : null;
+
+        // use Element to support SVG and other non-HTMLElement targets
+        const target = event.target instanceof Element ? event.target : null;
         if (target?.closest("[data-drs-validation-exempt='true']")) {
             return;
         }
- 
+
         if (target?.closest("[data-drs-bre-retrigger='true']")) {
             return;
         }
- 
+
         event.preventDefault();
         event.stopPropagation();
     }, [drsData]);

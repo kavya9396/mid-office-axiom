@@ -1,0 +1,127 @@
+{\rtf1\ansi\deff0{\fonttbl{\f0 Calibri;}}
+\f0\fs24 Low-Level Design (LLD) \'97 Mid Office Axiom\par
+\par
+Overview\par
+- Project: Mid-office-axiom (React + TypeScript + Vite)\par
+- Purpose: Underwriting / claims / mid-office workflow UI\par
+- Key tech: React, TypeScript, Vite, MUI, React Router, React Hook Form, Redux-style store with thunks, Jest\par
+\par
+High-level Architecture\par
+- SPA built with React + Vite.\par
+- Router: React Router; protected routes via ProtectedRoute.\par
+- UI: MUI components, custom UI primitives in src/components/ui.\par
+- State: Centralized store under src/store with thunks in src/store/thunks.\par
+- Network: src/services contains api.ts, apiConfig.ts, and endpoints.ts.\par
+- Modules: feature folders under src/modules (Login, DRS, Grievance, Group, Landing, Retail, QuickLinks, etc.).\par
+\par
+Important Files and Paths\par
+- Entry: src/main.tsx \'97 app bootstrap\par
+- Root layout & routes: src/routes/RootLayout.tsx, src/routes/AppRoutes.tsx, src/routes/routes.ts\par
+- App container: src/App.tsx\par
+- Modules: src/modules/* (per-folder feature components)\par
+- UI primitives: src/components/ui/* (Button, TextField, Checkbox, etc.)\par
+- Services: src/services/api.ts, src/services/apiConfig.ts, src/services/endpoints.ts\par
+- Store: src/store/*, src/store/thunks/*, and src/store/hooks.ts\par
+- Hooks: src/hooks/* (e.g., useAppContext.ts, useColumnConfig.ts)\par
+- Validations & messages: src/validations, src/config/errorMessages.ts\par
+- Assets: src/assets/ (logos, illustrations)\par
+- Tests: src/setupTests.ts, jest.config.cjs and tsconfig.jest.json\par
+\par
+Module: Login\par
+- Key files:\par
+  - src/modules/Login/Login.tsx\par
+- Responsibilities:\par
+  - Render login form (React Hook Form + MUI custom fields)\par
+  - Validate credentials, dispatch loginThunk from src/store/thunks/authThunk\par
+  - Persist token, username, password, businessType to localStorage\par
+  - Optionally dispatch fetchMastersForSession (master-data thunk)\par
+  - Navigate to inbox using getInboxPath\par
+- Sequence:\par
+  1. User submits form\par
+  2. loginThunk dispatched -> API call\par
+  3. On success: store token; dispatch fetchMastersForSession (if required)\par
+  4. Navigate to inbox route\par
+\par
+Authentication & Session\par
+- Thunks: authThunk (login), sessionMastersThunk (fetchMastersForSession)\par
+- Token storage: localStorage keys: token, username, password, businessType\par
+- Protected routes: ProtectedRoute.tsx checks auth token and/or store state\par
+- API client: api.ts uses apiConfig.ts for base URL and interceptors (attach token header)\par
+\par
+State Management (Store)\par
+- Structure:\par
+  - store/slices or similar for feature slices\par
+  - store/thunks/* for async operations\par
+  - store/hooks.ts for useAppDispatch and typed useSelector\par
+- Common slices:\par
+  - auth \'97 login status, user info, token\par
+  - sessionMasters \'97 master data required across app\par
+  - inbox \'97 list of tasks, filters, pagination\par
+  - ui \'97 global UI states (loading overlays, toasts)\par
+\par
+API Design & Endpoints\par
+- Single API layer at src/services/api.ts with helper endpoints.ts.\par
+- Responsibilities: one place for HTTP client, request/response normalization, retry/backoff and error handling\par
+- Example endpoints: POST /auth/login, GET /masters/session, GET /inbox/tasks\par
+\par
+Routing\par
+- AppRoutes.tsx composes application routes.\par
+- ProtectedRoute.tsx enforces authentication and role/business-type routing.\par
+- getInboxPath(businessType) returns route to the business-specific inbox (e.g., retail)\par
+\par
+Components & UI\par
+- Atomic primitives in src/components/ui (TextField, Checkbox, Button).\par
+- Page-level components in src/modules/* act as containers and orchestrate data fetching.\par
+- Shared layout components in src/layout (headers, footers, sidebars)\par
+\par
+Hooks\par
+- useAppContext.ts \'97 application-level context and helpers\par
+- useColumnConfig.ts \'97 column configuration logic and persistence\par
+\par
+Utilities\par
+- src/utils contains style helpers, constants, and small helpers (e.g., centerFlex, columnFlex)\par
+- src/validations centralizes React Hook Form validation schemas\par
+- src/config/errorMessages.json and src/config/errorMessages.ts centralize textual errors\par
+\par
+Data Models (TypeScript types)\par
+- Types stored under src/store/types or src/types: User/Auth response, Master data, Task/Inbox item\par
+\par
+Error Handling\par
+- Thunks should try/catch and return standardized error objects to UI\par
+- Global API error interceptor to handle 401 (session expiry) and refresh/redirect to login\par
+- UI: snackbar/toast for transient messages; inline helper text for form errors\par
+\par
+Testing\par
+- Unit tests: Jest + React Testing Library\par
+- src/setupTests.ts contains test setup\par
+\par
+Build & Run\par
+- Dev: npm run dev (Vite)\par
+- Build: npm run build\par
+- Test: npm run test\par
+\par
+Deployment\par
+- Vite build output -> static hosting (Netlify, S3 + CloudFront, or similar)\par
+- Environment-specific apiConfig base URLs\par
+\par
+Non-Functional Considerations\par
+- Performance: lazy-load route-level modules, memoize heavy lists\par
+- Security: never persist plaintext passwords in production, use secure HTTP-only cookies or secure storage\par
+- Accessibility: follow MUI accessibility defaults, add aria-* where needed\par
+\par
+Open Implementation Notes (repo-specific)\par
+- src/modules/Login/Login.tsx currently uses a USE_MOCK_LOGIN flag; adjust based on environment\par
+- fetchMastersForSession is used post-login \'97 ensure its data shape and storage in sessionMasters slice\par
+- Confirm the exact slice/file names under src/store and update this doc if they differ\par
+\par
+Appendix: Key locations to review in repo\par
+- src/modules/Login/Login.tsx\par
+- src/routes/AppRoutes.tsx\par
+- src/routes/ProtectedRoute.tsx\par
+- src/services/api.ts\par
+- src/services/apiConfig.ts\par
+- src/services/endpoints.ts\par
+- src/store/thunks/authThunk.ts\par
+- src/store/thunks/sessionMastersThunk.ts\par
+- src/components/ui\par
+}
