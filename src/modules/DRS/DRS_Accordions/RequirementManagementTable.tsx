@@ -189,31 +189,7 @@ const getDefaultTeam = (): LookupTeam => {
     return "UW";
 };
 
-const mapStoredTeamToDisplay = (team: string): string => {
-    const normalized = team.trim().toLowerCase();
-
-    if (!normalized) {
-        return "";
-    }
-
-    if (normalized.includes("cvt")) {
-        return "CVT Team";
-    }
-
-    if (normalized === "gops" || normalized.includes("dvt")) {
-        return "DVT Team";
-    }
-
-    if (normalized === "uw") {
-        return "UW";
-    }
-
-    if (normalized === "system requirement") {
-        return "System Requirement";
-    }
-
-    return team;
-};
+// mapStoredTeamToDisplay removed — use mapDisplayTeamToStored or master mapping where needed
 
 const normalizeStatus = (status: string) => {
     const trimmed = status.trim();
@@ -307,125 +283,23 @@ const createDraftRow = (): EditableRequirementRow => ({
     __lookupMessage: "",
 });
 
-const normalizeExistingRow = (
-    row: Partial<AdditionalRequirementRow>,
-    index: number,
-): EditableRequirementRow => ({
-    ...INITIAL_ROW_STATE,
-    ...row,
-    team: mapStoredTeamToDisplay(String(row.team ?? "")) || getDefaultTeam(),
-    status: normalizeStatus(String(row.status ?? "")),
-    raisedDate: String(row.raisedDate ?? ""),
-    raisedBy: String(row.raisedBy ?? ""),
-    receivedDate: String(row.receivedDate ?? ""),
-    receivedBy: String(row.receivedBy ?? ""),
-    __rowId: `existing-${index}-${String(row.fupCode ?? "")}-${String(row.description ?? "")}`,
-    __isDraft: false,
-    __isLocal: false,
-    __errors: {},
-    __lookupMessage: "",
-});
-
-const mapBreRequirementToRow = (requirement: BreRequirementRow): AdditionalRequirementRow => ({
-    ...INITIAL_ROW_STATE,
-    team: "UW",
-    profile: "",
-    category: String(requirement.requirementType ?? ""),
-    subCategory: String(requirement.requirementValue ?? ""),
-    document: String(requirement.ruleName ?? ""),
-    reason: String(requirement.metaphorName ?? ""),
-    fupCode: String(requirement.ruleId ?? ""),
-    description: String(requirement.ruleName ?? requirement.requirementValue ?? ""),
-    status: "Pending",
-});
-
-const validateDraftRow = (row: EditableRequirementRow, requiresProfile: boolean): RowErrors => {
-    const errors: RowErrors = {};
-    const requiredSelectionFields = getRequiredSelectionFields(requiresProfile);
-
-    requiredSelectionFields.forEach((field) => {
-        if (!String(row[field] ?? "").trim()) {
-            errors[field] = "Required";
-        }
-    });
-
-    if (!String(row.status ?? "").trim()) {
-        errors.status = "Required";
-    }
-
-    return errors;
+const normalizeExistingRow = (row: AdditionalRequirementRow, index: number): EditableRequirementRow => {
+    return {
+        ...INITIAL_ROW_STATE,
+        ...row,
+        status: normalizeStatus(String(row.status ?? "")),
+        __rowId: String(row.udsLink ?? row.fupCode ?? row.raisedDate ?? index),
+        __isDraft: false,
+        __isLocal: true,
+        __errors: {},
+        __lookupMessage: "",
+    };
 };
 
-const getRowFieldValue = (row: EditableRequirementRow, field: EditableField) =>
-    String(row[field] ?? "");
 
-const savedRequirementTableSx = {
-    "& .MuiTable-root": {
-        tableLayout: "fixed",
-        width: "100%",
-    },
-    "& .MuiTableCell-root": {
-        px: 0.75,
-        py: 0.75,
-        fontSize: "11px",
-        whiteSpace: "normal",
-        overflowWrap: "anywhere",
-        wordBreak: "break-word",
-        verticalAlign: "top",
-    },
-    "& .MuiTableCell-head": {
-        px: 0.75,
-        py: 0.75,
-    },
-    "& .MuiTableCell-root:first-of-type": {
-        width: "auto",
-        minWidth: 0,
-        maxWidth: "unset",
-        pr: "5px",
-        whiteSpace: "nowrap",
-        overflowWrap: "normal",
-        wordBreak: "normal",
-    },
-    "& .MuiTableCell-root:nth-of-type(2)": {
-        width: "110px",
-        minWidth: "110px",
-        maxWidth: "110px",
-        px: 0.5,
-        whiteSpace: "nowrap",
-        overflowWrap: "normal",
-        wordBreak: "normal",
-    },
-    "& .MuiTableCell-head .MuiTypography-root": {
-        fontSize: "11px",
-        lineHeight: 1.15,
-        whiteSpace: "normal",
-    },
-    "& .MuiTableCell-body .MuiTypography-root": {
-        fontSize: "11px",
-        lineHeight: 1.25,
-        whiteSpace: "normal",
-        overflowWrap: "anywhere",
-        wordBreak: "break-word",
-    },
-    "& .MuiFormControl-root": {
-        minWidth: 0,
-        width: "100%",
-    },
-    "& .MuiInputBase-root": {
-        height: 32,
-        minWidth: 0,
-        width: "100%",
-        fontSize: "11px",
-    },
-    "& .MuiSelect-select": {
-        px: "6px !important",
-        py: "6px !important",
-        minHeight: "unset !important",
-        whiteSpace: "nowrap !important",
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-    },
-} as const;
+interface RequirementManagementTableProps {
+    requirements?: AdditionalRequirementRow[];
+}
 
 interface RequirementManagementTableProps {
     requirements?: AdditionalRequirementRow[];
@@ -437,6 +311,29 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const normalizedRoleType = roleType.trim().toLowerCase();
     const isCvtOrDvtRole = normalizedRoleType.includes("cvt") || normalizedRoleType.includes("dvt");
     const shouldShowProfileAndSpecialTest = !isCvtOrDvtRole;
+
+    const mapBreRequirementToRow = (item: BreRequirementRow): AdditionalRequirementRow => {
+        return {
+            team: getDefaultTeam(),
+            profile: "",
+            category: String(item.requirementType ?? ""),
+            subCategory: "",
+            document: "",
+            specialTest: String(item.metaphorName ?? ""),
+            reason: String(item.requirementValue ?? ""),
+            fupCode: String(item.ruleId ?? ""),
+            description: String(item.ruleName ?? item.requirementValue ?? ""),
+            status: "Pending",
+            raisedDate: getTodayDate(),
+            raisedBy: getCurrentActor(),
+            receivedDate: "",
+            receivedBy: "",
+            validity: "",
+            userId: getCurrentUserId(),
+            remarks: "",
+            udsLink: "",
+        } as AdditionalRequirementRow;
+    };
     const reduxRequirements = useSelector((state: RootState) => {
         const drsData = state.drs.data as unknown as Record<string, unknown> | null;
 
@@ -540,9 +437,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const summaryPersonal = (selectedSummary?.personalDetails as Record<string, unknown> | undefined) ?? {};
     const proposalFormAndDocumentsLink = String(
-        (drsData as { quickLinks?: { proposerForm?: string } } | null)?.quickLinks?.proposerForm ??
-        summaryPersonal.UDSLink ??
-        "",
+        (drsData as any)?.quickLinks?.proposerForm ?? (drsData as any)?.data?.quickLinks?.proposerForm ?? summaryPersonal.UDSLink ?? "",
     ).trim();
 
     const openLinkInNewTab = (path: string) => {
@@ -615,6 +510,27 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     }, [drsData, hasRequirementChanges, rows]);
     const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
+
+    const savedRequirementTableSx = {
+        "& .MuiFormControl-root": {
+            minWidth: 0,
+            width: "100%",
+        },
+        "& .MuiInputBase-root": {
+            height: 32,
+            minWidth: 0,
+            width: "100%",
+            fontSize: "11px",
+        },
+        "& .MuiSelect-select": {
+            px: "6px !important",
+            py: "6px !important",
+            minHeight: "unset !important",
+            whiteSpace: "nowrap !important",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+        },
+    } as const;
 
     useEffect(() => {
         const handleOpenRequirementManagement = (event: Event) => {
@@ -1227,6 +1143,41 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         />
     );
 
+    const getRowFieldValue = (row: EditableRequirementRow, field: EditableField): string => {
+        switch (field) {
+            case "team":
+                return String(row.team ?? "");
+            case "profile":
+                return String(row.profile ?? "");
+            case "category":
+                return String(row.category ?? "");
+            case "subCategory":
+                return String(row.subCategory ?? "");
+            case "document":
+                return String(row.document ?? "");
+            case "reason":
+                return String(row.reason ?? "");
+            case "status":
+                return String(row.status ?? "");
+            default:
+                return String((row as any)[field] ?? "");
+        }
+    };
+
+    const validateDraftRow = (row: EditableRequirementRow, requiresProfile: boolean): RowErrors => {
+        const errors: RowErrors = {};
+        const required = getRequiredSelectionFields(requiresProfile);
+        required.forEach((f) => {
+            const v = String(row[f] ?? "").trim();
+            if (!v) {
+                // simple message — kept generic
+                (errors as any)[f] = "This field is required";
+            }
+        });
+
+        return errors;
+    };
+
     const renderReadOnlyField = (value: string, helperText?: string) => (
         <>
             <Typography
@@ -1524,7 +1475,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     />
                                 </Box>
                             </Box>
-                        ) }
+                        )}
 
                         {draftRows.map((row, rowIndex) => {
                             const profileOptions = getProfileOptions(row);
@@ -1716,9 +1667,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     }}
                 >
                     {isVisible && (
-                        <CustomButton
-                            variant="contained"
-                            disabled={draftRows.length > 0}
+                            <CustomButton
+                                variant="contained"
+                                disabled={draftRows.length > 0 || isTableSaved}
                             onClick={async () => {
                                 // Build a full DRS payload by cloning current drsData and replacing requirementManagement
                                 try {
@@ -1789,7 +1740,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     )}
                     {showCptActionButtons && (<><CustomButton
                         variant="contained"
-                        disabled={draftRows.length > 0}
+                        //disabled={draftRows.length > 0 || isTableSaved}
                         onClick={() => {
                             saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
                             setIsTableSaved(true);
@@ -1810,7 +1761,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     </CustomButton>
                         <CustomButton
                             variant="contained"
-                            disabled={draftRows.length > 0}
+                            //disabled={draftRows.length > 0 || isTableSaved}
                             onClick={() => {
                                 saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
                                 setIsTableSaved(true);
