@@ -2,19 +2,23 @@ import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "
 import BackButton from "../../components/layout/BackButton";
 import { Alert, Box, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useRef, type SyntheticEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../../store/store";
 import type { RootState } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
 import { setBreExternalApiOutputs, setDrsData } from "../../store/slices/drsSlice";
+import { completeTaskThunk } from "../../store/thunks/completeTaskThunk";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import type { DRSBreOutput, DRSData } from "../../types/drs.types";
 import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 import { validateDrsFinalBre } from "../../validations/drsBreValidation";
+import ConfirmationDialog from "../../components/layout/ConfirmationDialog";
+import { hasUnsavedRequirementRows } from "../../validations/drsRequirementDecisionValidation";
 import { breThunk } from "../../store/thunks/breThunk";
+import CustomButton from "../../components/ui/Button/Button";
  
 const toText = (value: unknown) => String(value ?? "").trim();
  
@@ -104,6 +108,20 @@ const getSelectedCaseContext = (): Record<string, unknown> => {
         return {};
     }
 };
+
+const normalizeTaskId = (value: unknown): string => {
+    const task = String(value ?? "").trim();
+    if (!task) return "";
+    return task.includes(".") ? task.split(".").pop() ?? "" : task;
+};
+
+const parseInstanceFromCompositeTaskId = (value: unknown): string => {
+    const task = String(value ?? "").trim();
+    if (!task.includes(".")) return "";
+
+    const [instancePart = ""] = task.split(".");
+    return String(instancePart).trim();
+};
  
 const getStoredSearchDrsData = (): DRSData | null => {
     try {
@@ -169,6 +187,49 @@ const DRS = () => {
     const mastersRequestedRef = useRef(false);
     const safeApplicationNumber = applicationNumber ?? "";
     const selectedCaseContext = getSelectedCaseContext();
+    const isSelectedCaseSameApplication = String(selectedCaseContext?.applicationNo ?? "").trim() === String(applicationNumber ?? "").trim();
+
+    const taskIdFromContext = isSelectedCaseSameApplication ? String(selectedCaseContext?.taskId ?? "").trim() : "";
+    const taskComposite = isSelectedCaseSameApplication ? selectedCaseContext?.taskCompositeId : localStorage.getItem("taskCompositeId");
+    const taskIdFromComposite = normalizeTaskId(taskComposite);
+    const taskIdFromStorage = String(localStorage.getItem("taskId") ?? "").trim();
+    const taskIdFromDrs = String(((drsData as unknown) as Record<string, unknown>)?.taskId ?? ((drsData as unknown) as Record<string, unknown>)?.taskID ?? "").trim();
+    const taskId = taskIdFromContext || taskIdFromStorage || taskIdFromComposite || taskIdFromDrs || "";
+
+    const instanceIdFromContext = isSelectedCaseSameApplication ? String(selectedCaseContext?.instanceId ?? "").trim() : "";
+    const instanceIdFromStorage = String(localStorage.getItem("instanceId") ?? "").trim();
+    const instanceIdFromComposite = parseInstanceFromCompositeTaskId(taskComposite);
+    const instanceIdFromDrs = String(((drsData as unknown) as Record<string, unknown>)?.instanceId ?? ((drsData as unknown) as Record<string, unknown>)?.instanceID ?? "").trim();
+    const instanceId = instanceIdFromContext || instanceIdFromStorage || instanceIdFromComposite || instanceIdFromDrs || "";
+
+    const handleCptCloseTask = async () => {
+        if (!taskId || !userId || !safeApplicationNumber || !instanceId) {
+            console.warn("Missing required case identifiers for closing task", { taskId, userId, safeApplicationNumber, instanceId });
+            return;
+        }
+
+        try {
+            await dispatch(
+                completeTaskThunk({
+                    requestContext: {
+                        taskId,
+                        userId,
+                        appNo: safeApplicationNumber,
+                        instanceId,
+                        remarks: "",
+                        decision: "CLOSE_TASK",
+                    },
+                }),
+            ).unwrap();
+
+            // navigate back to inbox after successful close
+            navigate(getInboxPath(safeBusinessType));
+        } catch (err) {
+            console.error("Failed to close CPT task:", err);
+        }
+    };
+    const [confirmationOpen, setConfirmationOpen] = useState(false);
+
     const isSearchReadOnlyMode =
         localStorage.getItem("drsReadOnlyMode") === "true" &&
         selectedCaseContext.source === "searchApplication" &&
@@ -231,16 +292,22 @@ const DRS = () => {
         }
  
         const loadDRSAndBRE = async () => {
+          const requestSections =
+    roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
+    roleType === "CPT_DATA_ENTRY_MR_TASK" ||
+    roleType === "CPT_TASK"
+        ? [...sections, "summary"]
+        : sections;
+        console.log('const requestSections',requestSections)
             try {
                 const drsResponse = await dispatch(
                     drsThunk({
                         applicationNo: safeApplicationNumber,
                         userId,
                         roleType,
-                        sections,
+                        sections : requestSections,
                     }),
                 ).unwrap();
-                console.log('drs api response',drsResponse)
                 try {
                      const finalBre = await dispatch(
                         breThunk({
@@ -361,17 +428,52 @@ const DRS = () => {
                     if (!AccordionComponent) {
                         return null;
                     }
+
+                    const isUwToolkit = String(accordionId) === "uwToolkit";
+
                     return (
                         <Box
                             key={accordionId}
                             data-drs-validation-exempt={accordionId === "breDecision" ? "true" : undefined}
                             sx={{ "& > .MuiContainer-root > .MuiBox-root": { mt: "0 !important" } }}
                         >
+                            {isUwToolkit && (roleType === 'CPT_DATA_ENTRY_NMR_TASK' || roleType === 'CPT_DATA_ENTRY_MR_TASK' || roleType === 'CPT_TASK') && (
+                                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
+                                    <CustomButton
+                                        variant="outlined"
+                                        size="medium"
+                                        sx={{  minWidth: 200,
+                                height: 44,
+                                borderRadius: "50px",
+                                fontWeight: 600,
+                                px: 3,
+                                whiteSpace: "nowrap", }}
+                                        disabled={hasUnsavedRequirementRows(drsData)}
+                                        onClick={() => setConfirmationOpen(true)}
+                                    >
+                                        Save
+                                    </CustomButton>
+                                </Box>
+                            )}
+
                             <AccordionComponent />
                         </Box>
                     );
                 })}
             </Box>
+            {(roleType === 'CPT_DATA_ENTRY_NMR_TASK' || roleType === 'CPT_DATA_ENTRY_MR_TASK' || roleType === 'CPT_TASK') && (
+                <ConfirmationDialog
+                    open={Boolean(confirmationOpen)}
+                    message="Do you want to close the case?"
+                    onClose={() => setConfirmationOpen(false)}
+                    onConfirm={() => {
+                        setConfirmationOpen(false);
+                        void handleCptCloseTask();
+                    }}
+                    title="Close Case"
+                    buttonText="Close"
+                />
+            )}
         </>
     )
 }

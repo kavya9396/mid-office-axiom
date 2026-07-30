@@ -1817,7 +1817,8 @@
       }
     ],
     "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] },
-    "decision_master":[]
+    "decision_master":[],
+    "requirement_status_master":[]
   },
   "unknownTypes": []
 }

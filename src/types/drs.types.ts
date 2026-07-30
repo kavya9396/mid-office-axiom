@@ -746,7 +746,8 @@ export type MasterKey =
   | "uw_decision"
   | "app_status"
   | "misc"
-  |"decision_master";
+  |"decision_master"
+  | "requirement_status_master";
 
 export type MastersData = Partial<
   Record<Exclude<MasterKey, "requirementManagement">, MasterOption[]>

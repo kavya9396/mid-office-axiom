@@ -58,7 +58,7 @@ type Option = {
 };
 
 const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterOption["team"]> = {
-    COPS: "Cops",
+    COPS: "Gops",
     GOPS: "Gops",
     UW: "UW",
 };
@@ -475,7 +475,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const [teamOptionsState, setTeamOptionsState] = useState<Option[]>(EMPTY_OPTIONS);
     const [requirementOptionsCache, setRequirementOptionsCache] = useState<Record<string, Option[]>>({});
-    const requirementStatusOptions = EMPTY_OPTIONS;
+    const [requirementStatusOptions, setRequirementStatusOptions] = useState<Option[]>(EMPTY_OPTIONS);
 
     const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "Exceptional Pool";
     const teamOptions = teamOptionsState;
@@ -789,16 +789,61 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     };
 
     useEffect(() => {
-        // initial load: request only the requirement_mst types so teams populate
         const loadInitial = async () => {
-            const payload = { types: ["requirement_mst"] };
-            const mst = await fetchRequirementMst(payload);
-            if (!mst) return;
-            const teams = parseFirstArrayFromRequirementMst(mst);
-            const opts = teams.map(toOption);
-            setTeamOptionsState(opts.length > 0 ? opts : EMPTY_OPTIONS);
-            // cache the response keyed by types
-            cacheOptionsForPayload(payload, opts);
+            // load teams (requirement_mst) as before
+            try {
+                const payload = { types: ["requirement_mst"] };
+                const mst = await fetchRequirementMst(payload);
+                if (mst) {
+                    const teams = parseFirstArrayFromRequirementMst(mst);
+                    const opts = teams.map(toOption);
+                    setTeamOptionsState(opts.length > 0 ? opts : EMPTY_OPTIONS);
+                    cacheOptionsForPayload(payload, opts);
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            // load requirement status master (try several possible keys returned by API)
+            try {
+                const statusPayload = { types: ["requirementStatus", "requirement_status_master", "requirement_status"] };
+                const resp = await apiRequest<Record<string, unknown>>({ url: apiUrl("masters"), method: "POST", body: statusPayload });
+                const data = (resp as any)?.data ?? resp;
+
+                const statusCandidates: string[] = [];
+                const tryKeys = [
+                    "requirementStatus",
+                    "requirement_status_master",
+                    "requirement_status",
+                    "requirementStatusMaster",
+                    "requirement_status_master"
+                ];
+
+                for (const key of tryKeys) {
+                    const candidate = (data as any)?.[key] ?? (resp as any)?.[key];
+                    if (Array.isArray(candidate) && candidate.length > 0) {
+                        statusCandidates.push(...candidate.map(String));
+                        break;
+                    }
+                }
+
+                // fallback: if data.masterOptions-like shape exists, try to find a first array
+                if (statusCandidates.length === 0 && data && typeof data === "object") {
+                    for (const k of Object.keys(data as Record<string, unknown>)) {
+                        const v = (data as Record<string, unknown>)[k];
+                        if (Array.isArray(v) && v.length > 0) {
+                            statusCandidates.push(...v.map(String));
+                            break;
+                        }
+                    }
+                }
+
+                const statusOpts = statusCandidates.length > 0 ? statusCandidates.map(toOption) : EMPTY_OPTIONS;
+                setRequirementStatusOptions(statusOpts);
+                cacheOptionsForPayload(statusPayload, statusOpts);
+            } catch (e) {
+                // ignore failures to fetch status master
+            }
         };
 
         loadInitial();
