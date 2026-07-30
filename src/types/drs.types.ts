@@ -1111,6 +1111,7 @@ export interface ApplicantProfileSubmitRequest {
   roleType?: string;
   userId?:string;
   memberType?: ApplicantTab;
+  partyId?: string;
   updatedDetails?: Partial<ApplicantEditForm>;
   sections:string[];
   // Optional data object allowing sections like summary to be sent in the request body

@@ -1709,7 +1709,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                                     await apiRequest<{ success?: boolean; message?: string }, unknown>({
                                         url: apiUrl("requirementManagementSave"),
-                                        method: "POST",
+                                        method: "PUT",
                                         body: requestBody,
                                     });
 

@@ -1147,13 +1147,28 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
 
             // Build payload data: send full DRS data structure when available, with the updated summary
             const payloadData = drsData
-                ? ({ ...(drsData as Record<string, unknown>), summary: [fullUpdatedProfileForServer] } as Record<string, unknown>)
+                ? ({ ...(drsData as unknown as Record<string, unknown>), summary: [fullUpdatedProfileForServer] } as Record<string, unknown>)
                 : { summary: [fullUpdatedProfileForServer] };
+
+            // derive partyId from drsData.summary matching the selected applicant tab
+            const drsRecord = drsData as unknown as Record<string, unknown> | null;
+            const drsSummaryMembers = Array.isArray(drsRecord?.summary) ? (drsRecord!.summary as Array<Record<string, unknown>>) : [];
+            const selectedMember = drsSummaryMembers.find((member) =>
+                String(member?.memberType ?? "").toLowerCase() === resolvedApplicantTab.toLowerCase()
+            );
+
+            const derivedPartyId = String(
+                selectedMember?.partyId ?? drsSummaryMembers[0]?.partyId ?? ""
+            ).trim();
+            
 
             const payload: ApplicantProfileSubmitRequest = {
                 applicationNo: applicationNumber,
                 roleType,
                 userId: userId,
+                memberType: resolvedApplicantTab,
+                partyId: derivedPartyId,
+                updatedDetails: updatedDetails,
                 sections: ["summary"],
                 data: payloadData as any,
             };
