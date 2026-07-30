@@ -3006,7 +3006,12 @@ const ViewFinancial = () => {
   };
 
   const handleSave = async () => {
-    const fieldErrors = displayFinancialSections.reduce<Partial<Record<FinancialSectionKey, Record<string, string>>>>(
+    // Validate only the currently active financial section (selected on the left)
+    const activeSection = displayFinancialSections.find((s) => s.key === resolvedActiveSectionId);
+
+    const sectionsToValidate = activeSection ? [activeSection] : displayFinancialSections;
+
+    const fieldErrors = sectionsToValidate.reduce<Partial<Record<FinancialSectionKey, Record<string, string>>>>(
       (accumulator, section) => {
         const sectionErrorsMap = section.items.reduce<Record<string, string>>((errorAccumulator, item) => {
           const value = financialFieldValues[section.key]?.[item.label] ?? "";

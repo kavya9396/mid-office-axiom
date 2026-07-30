@@ -891,10 +891,10 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         [permanentStateOptions]
     );
 
-    const validateForm = () => {
+    const validateForm = (fieldsToValidate: FormField[] = allDialogFields) => {
         const errors: FormErrors = {};
 
-        allDialogFields.forEach((field) => {
+        fieldsToValidate.forEach((field) => {
             const value = String(formData[field.name] ?? "").trim();
             if (optionalFormFields.includes(field.name)) {
                 return;
@@ -1095,7 +1095,20 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     };
 
     const handleSave = async () => {
-        const isValid = validateForm();
+        // Validate only fields relevant to the currently selected applicant info tab
+        let fieldsToValidate: FormField[] = allDialogFields;
+        if (applicantInfoTab === "personalKyc") {
+            fieldsToValidate = editablePersonalKycFields;
+        } else if (applicantInfoTab === "contactAddress") {
+            fieldsToValidate = visibleAddressFields;
+        } else if (applicantInfoTab === "imageDetails") {
+            // imageDetails doesn't have editable fields in the dialog — validate personal KYC by default
+            fieldsToValidate = editablePersonalKycFields;
+        } else if (applicantInfoTab === "fundDetails") {
+            fieldsToValidate = productFields;
+        }
+
+        const isValid = validateForm(fieldsToValidate);
         if (!isValid) {
             return;
         }
