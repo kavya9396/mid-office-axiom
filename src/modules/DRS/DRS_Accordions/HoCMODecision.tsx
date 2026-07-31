@@ -11,7 +11,7 @@ import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
-import { normalizeMasterOptions } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const HoCMODecision = () => {
   const navigate = useNavigate();
@@ -32,10 +32,11 @@ const HoCMODecision = () => {
   const masters = useSelector((state: RootState) => state.drs.masters);
 
   const hoCmoDecisionOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.hoCmoDecision);
-  }, [masters.hoCmoDecision]);
+    return normalizeDecisionOptions(masters, "hoCmoDecision");
+  }, [masters]);
 
-  const dialogMessage = `Kindly reconfirm if you want to proceed with the HO CMO decision as "${decision}"`;
+  const decisionLabel = toMasterLabel(decision, hoCmoDecisionOptions);
+  const dialogMessage = `Kindly reconfirm if you want to proceed with the HO CMO decision as "${decisionLabel}"`;
 
   const isSubmitDisabled = !decision || remarks.trim() === "";
 

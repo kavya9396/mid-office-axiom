@@ -12,7 +12,7 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
-import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
@@ -22,9 +22,7 @@ const ReconsiderationPoolDecision = () => {
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
-  const reconsiderationDecisionOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.reconsiderationDecision);
-  }, [masters.reconsiderationDecision]);
+  const reconsiderationDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "reconsiderationDecision"), [masters]);
 
   const safeBusinessType =
     normalizeBusinessType(businessType) ??

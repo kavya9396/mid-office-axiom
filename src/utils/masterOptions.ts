@@ -88,6 +88,58 @@ export const toMasterKey = (value: string, options: SelectOption[]): string => {
   return textValue;
 };
 
+export const normalizeDecisionOptions = (masters: unknown, masterKey: string, allowFallback = true): SelectOption[] => {
+  try {
+    const masterRecord = masters as Record<string, unknown> | undefined;
+    const misc = masterRecord?.misc;
+
+    const list = toMasterOptionList(misc);
+
+    const keyBase = String(masterKey ?? "")
+      .replace(/Decision$/i, "")
+      .replace(/_/g, "")
+      .toUpperCase();
+
+    const candidates = list.filter((item) => {
+      const t = toText((item as Record<string, unknown>).type ?? (item as Record<string, unknown>).miscMastId ?? "");
+      if (!t) return false;
+      return t.toUpperCase() === keyBase || t.toUpperCase().includes(keyBase) || keyBase.includes(t.toUpperCase());
+    });
+
+    const mapped = candidates
+      .map((option) => {
+        const code = toText((option as Record<string, unknown>).code ?? (option as Record<string, unknown>).key ?? (option as Record<string, unknown>).value);
+        const rawValue = toText((option as Record<string, unknown>).value ?? "");
+        const description = toText((option as Record<string, unknown>).description ?? (option as Record<string, unknown>).label ?? option.code ?? "");
+        const optionType = toText((option as Record<string, unknown>).type ?? (option as Record<string, unknown>).miscMastId ?? "");
+        const isCuw = optionType.toUpperCase() === "CUW";
+        const disabled = Boolean((option as Record<string, unknown>).disabled ?? toText((option as Record<string, unknown>).isActive).toUpperCase() === "N");
+
+        if (!code && !description && !rawValue) return null;
+
+        // For CUW type prefer showing the description; otherwise prefer `value` then description then code.
+        return {
+          label: isCuw ? (description || rawValue || code) : (rawValue || description || code),
+          value: code || rawValue || description,
+          disabled,
+        } as SelectOption;
+      })
+      .filter(Boolean) as SelectOption[];
+
+    if (mapped.length > 0) return mapped;
+
+    if (!allowFallback) {
+      return [];
+    }
+
+    // Fallback to legacy master collection if misc yields nothing
+    const legacy = normalizeMasterOptions(masterRecord?.[masterKey]);
+    return legacy;
+  } catch {
+    return [];
+  }
+};
+
 export const toMasterLabel = (value: string, options: SelectOption[]): string => {
   const textValue = toText(value);
   const selectedOption = options.find(

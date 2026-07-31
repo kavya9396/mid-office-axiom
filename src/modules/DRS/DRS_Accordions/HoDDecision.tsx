@@ -11,7 +11,7 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
-import { normalizeMasterOptions } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -60,9 +60,7 @@ const HoDDecision = () => {
   const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useSelector((state: RootState) => state.drs.masters);
 
-  const hodDecisionOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.hodDecision);
-  }, [masters.hodDecision]);
+  const hodDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "hodDecision"), [masters]);
 
   const lastUwUser = useSelector((state: RootState) => {
     const drsData = state.drs.data as unknown as Record<string, unknown> | null;
@@ -119,11 +117,12 @@ const HoDDecision = () => {
       return "Please select a HoD decision.";
     }
 
-    if (decision === "Refer back to last UW" && lastUwUser) {
-      return `Kindly reconfirm if you want to proceed with the case as "${decision}" for ${lastUwUser}`;
+    const label = toMasterLabel(decision, hodDecisionOptions);
+    if (label === "Refer back to last UW" && lastUwUser) {
+      return `Kindly reconfirm if you want to proceed with the case as "${label}" for ${lastUwUser}`;
     }
 
-    return `Kindly reconfirm if you want to proceed with the case as "${decision}"`;
+    return `Kindly reconfirm if you want to proceed with the case as "${label}"`;
   }, [decision, lastUwUser]);
 
   const isSubmitDisabled = !decision || remarks.trim() === "";

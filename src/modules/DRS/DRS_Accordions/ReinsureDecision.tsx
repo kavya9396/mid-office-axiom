@@ -11,7 +11,7 @@ import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
-import { normalizeMasterOptions } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const ReinsureDecision = () => {
   const navigate = useNavigate();
@@ -31,15 +31,11 @@ const ReinsureDecision = () => {
   const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useSelector((state: RootState) => state.drs.masters);
 
-  const reinsurerDecisionOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.reinsurerDecision);
-  }, [masters.reinsurerDecision]);
+  const reinsurerDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerDecision"), [masters]);
 
-  const reinsurerDecisionIdOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.reinsurerDecisionId);
-  }, [masters.reinsurerDecisionId]);
+  const reinsurerDecisionIdOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerDecisionId"), [masters]);
 
-  const dialogMessage = `Kindly reconfirm if you want to proceed with the reinsurer decision as "${decision}"`;
+  const dialogMessage = `Kindly reconfirm if you want to proceed with the reinsurer decision as "${toMasterLabel(decision, reinsurerDecisionOptions)}"`;
 
   const isSubmitDisabled = !decision || !decisionId || remarks.trim() === "";
 

@@ -14,7 +14,7 @@ import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
-import { normalizeMasterOptions } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions } from "../../../utils/masterOptions";
 
 type PivvDecisionOption = {
   label: string;
@@ -47,14 +47,26 @@ const PIVVDecision = () => {
   );
 
   const workflowPool = useMemo(() => {
-    const sourceRows = Array.isArray(masters.pivvDecision) ? masters.pivvDecision : [];
-    const matched = sourceRows.find((item) => item.value === decision || item.description === decision || item.code === decision) as PivvDecisionOption | undefined;
-    return matched?.workflowPool ?? "";
-  }, [decision, masters.pivvDecision]);
+    const byMaster = Array.isArray(masters.pivvDecision) ? masters.pivvDecision : [];
+    let matched = byMaster.find((item) => item.value === decision || item.description === decision || item.code === decision) as PivvDecisionOption | undefined;
+    if (matched) return matched.workflowPool ?? "";
+
+    // fallback to misc
+    const misc = (masters as Record<string, unknown> | undefined)?.misc;
+    const miscList = Array.isArray(misc) ? misc as unknown[] : [];
+    const matchedMisc = miscList.find((item) => {
+      const row = item as Record<string, unknown>;
+      const code = String(row.code ?? row.value ?? "").trim();
+      const desc = String(row.description ?? row.value ?? "").trim();
+      return code === decision || desc === decision;
+    }) as Record<string, unknown> | undefined;
+
+    return String(matchedMisc?.workflowPool ?? "");
+  }, [decision, masters]);
 
   const decisionOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.pivvDecision);
-  }, [masters.pivvDecision]);
+    return normalizeDecisionOptions(masters, "pivvDecision");
+  }, [masters]);
 
   const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;
 

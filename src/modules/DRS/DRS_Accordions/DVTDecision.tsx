@@ -15,7 +15,7 @@ import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
-import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { getRequirementRows, validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
@@ -34,9 +34,8 @@ const DVTDecision = () => {
     const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
     const masters = useSelector((state: RootState) => state.drs.masters);
     const dvtDecisionOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.dvtDecision);
-        return filterAcceptDecisionOptions(masterOptions, drsData);
-    }, [drsData, masters.dvtDecision]);
+        return filterAcceptDecisionOptions(normalizeDecisionOptions(masters, "dvtDecision"), drsData);
+    }, [drsData, masters]);
     const effectiveDecision = dvtDecisionOptions.some((option) => option.value === decision)
         ? decision
         : "";

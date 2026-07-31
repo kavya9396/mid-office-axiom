@@ -1398,427 +1398,49 @@
         "isActive": "Y"
       }
     ],
-    "cvtDecision": [
+    "misc": [
       {
-        "code": "Accept",
+        "code": "ISS",
         "description": "Accept",
         "value": "Accept",
-        "isActive": "Y"
+        "isActive": "Y",
+        "miscMastId": "COMMUNICATION",
+        "type": "CVT"
       },
       {
-        "code": "Raise Requirements",
+        "code": "ISS",
+        "description": "Accept",
+        "value": "Accept",
+        "isActive": "Y",
+        "miscMastId": "COMMUNICATION",
+        "type": "DVT"
+      },
+       {
+        "code": "STD",
+        "description": "Standard",
+        "value": "Standard",
+        "isActive": "Y",
+        "miscMastId": "COMMUNICATION",
+        "type": "CUW"
+      },
+      {
+        "code": "AMR",
         "description": "Raise Requirements",
         "value": "Raise Requirements",
-        "isActive": "Y"
+        "isActive": "Y",
+        "miscMastId": "COMMUNICATION",
+        "type": "CVT"
       },
       {
-        "code": "Refer to Risk",
-        "description": "Refer to Risk",
-        "value": "Refer to Risk",
-        "isActive": "Y"
-      },
-      {
-        "code": "Reraise PIVV",
-        "description": "Reraise PIVV",
-        "value": "Reraise PIVV",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer to CUW",
-        "description": "Refer to CUW",
-        "value": "Refer to CUW",
-        "isActive": "Y"
-      }
-    ],
-    "dvtDecision": [
-      {
-        "code": "Accept",
-        "description": "Accept",
-        "value": "Accept",
-        "isActive": "Y"
-      },
-      {
-        "code": "Raise Requirements",
-        "description": "Raise Requirements",
-        "value": "Raise Requirements",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer to GUW",
-        "description": "Refer to GUW",
-        "value": "Refer to GUW",
-        "isActive": "Y"
-      }
-    ],
-    "reconsiderationDecision": [
-      {
-        "code": "Release the case",
-        "description": "Release the case",
-        "value": "Release the case",
-        "isActive": "Y"
-      },
-      {
-        "code": "Send back to UW",
-        "description": "Send back to UW",
-        "value": "Send back to UW",
-        "isActive": "Y"
-      }
-    ],
-    "riskDecision": [
-      {
-        "code": "Favourable",
-        "description": "Favourable",
-        "value": "Favourable",
-        "isActive": "Y"
-      },
-      {
-        "code": "Adverse",
-        "description": "Adverse",
-        "value": "Adverse",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer back to UW",
-        "description": "Refer back to UW",
-        "value": "Refer back to UW",
-        "isActive": "Y"
-      }
-    ],
-    "srUwDecision": [
-      {
-        "code": "Agree",
-        "description": "Agree",
-        "value": "Agree",
-        "isActive": "Y"
-      },
-      {
-        "code": "Disagree",
-        "description": "Disagree",
-        "value": "Disagree",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer to CMO",
-        "description": "Refer to CMO",
-        "value": "Refer to CMO",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer back to last UW",
-        "description": "Refer back to last UW",
-        "value": "Refer back to last UW",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer to HoD",
-        "description": "Refer to HoD",
-        "value": "Refer to HoD",
-        "isActive": "Y"
-      }
-    ],
-    "hodDecision": [
-      {
-        "code": "Agree",
-        "description": "Agree",
-        "value": "Agree",
-        "isActive": "Y"
-      },
-      {
-        "code": "Disagree",
-        "description": "Disagree",
-        "value": "Disagree",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer to CMO",
-        "description": "Refer to CMO",
-        "value": "Refer to CMO",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer back to last UW",
-        "description": "Refer back to last UW",
-        "value": "Refer back to last UW",
-        "isActive": "Y"
-      }
-    ],
-    "hoCmoDecision": [
-      {
-        "code": "Approve",
-        "description": "Approve",
-        "value": "Approve",
-        "isActive": "Y"
-      },
-      {
-        "code": "Reject",
-        "description": "Reject",
-        "value": "Reject",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer Back",
-        "description": "Refer Back",
-        "value": "Refer Back",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer to Risk",
-        "description": "Refer to Risk",
-        "value": "Refer to Risk",
-        "isActive": "Y"
-      }
-    ],
-    "reinsurerDecision": [
-      {
-        "code": "Accept",
-        "description": "Accept",
-        "value": "Accept",
-        "isActive": "Y"
-      },
-      {
-        "code": "Reject",
-        "description": "Reject",
-        "value": "Reject",
-        "isActive": "Y"
-      },
-      {
-        "code": "Counter Offer",
-        "description": "Counter Offer",
-        "value": "Counter Offer",
-        "isActive": "Y"
-      },
-      {
-        "code": "Refer Back",
-        "description": "Refer Back",
-        "value": "Refer Back",
-        "isActive": "Y"
-      }
-    ],
-    "reinsurerDecisionId": [
-      {
-        "code": "RES001",
-        "description": "RES001",
-        "value": "RES001",
-        "isActive": "Y"
-      },
-      {
-        "code": "RES002",
-        "description": "RES002",
-        "value": "RES002",
-        "isActive": "Y"
-      },
-      {
-        "code": "RES003",
-        "description": "RES003",
-        "value": "RES003",
-        "isActive": "Y"
-      },
-      {
-        "code": "RES004",
-        "description": "RES004",
-        "value": "RES004",
-        "isActive": "Y"
-      },
-      {
-        "code": "RES005",
-        "description": "RES005",
-        "value": "RES005",
-        "isActive": "Y"
-      }
-    ],
-    "pivvDecision": [
-      {
-        "code": "Customer not speaking",
+        "code": "CNS",
         "description": "Customer not speaking",
         "value": "Customer not speaking",
         "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Another person spoken",
-        "description": "Another person spoken",
-        "value": "Another person spoken",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Pre-recorded video",
-        "description": "Pre-recorded video",
-        "value": "Pre-recorded video",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Customer didn't complete full script - a. Application",
-        "description": "Customer didn't complete full script - a. Application",
-        "value": "Customer didn't complete full script - a. Application",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Customer didn't complete full script - b. Premium",
-        "description": "Customer didn't complete full script - b. Premium",
-        "value": "Customer didn't complete full script - b. Premium",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Customer didn't complete full script - c. Policy term",
-        "description": "Customer didn't complete full script - c. Policy term",
-        "value": "Customer didn't complete full script - c. Policy term",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Customer didn't complete full script - d. Premium paying term",
-        "description": "Customer didn't complete full script - d. Premium paying term",
-        "value": "Customer didn't complete full script - d. Premium paying term",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Customer didn't complete full script - e. Sum assured",
-        "description": "Customer didn't complete full script - e. Sum assured",
-        "value": "Customer didn't complete full script - e. Sum assured",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Problematic case - Customer physical condition not good",
-        "description": "Problematic case - Customer physical condition not good",
-        "value": "Problematic case - Customer physical condition not good",
-        "isActive": "Y",
-        "workflowPool": "CUW Pool"
-      },
-      {
-        "code": "Customer weight different with application form",
-        "description": "Customer weight different with application form",
-        "value": "Customer weight different with application form",
-        "isActive": "Y",
-        "workflowPool": "CUW Pool"
-      },
-      {
-        "code": "Customer profile is not ok",
-        "description": "Customer profile is not ok",
-        "value": "Customer profile is not ok",
-        "isActive": "Y",
-        "workflowPool": "CUW Pool"
-      },
-      {
-        "code": "Customer face not clear in video",
-        "description": "Customer face not clear in video",
-        "value": "Customer face not clear in video",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "Voice is not audible",
-        "description": "Voice is not audible",
-        "value": "Voice is not audible",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "PDF not generated to check script",
-        "description": "PDF not generated to check script",
-        "value": "PDF not generated to check script",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "New PDF not generated as per latest PIVV",
-        "description": "New PDF not generated as per latest PIVV",
-        "value": "New PDF not generated as per latest PIVV",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      },
-      {
-        "code": "PIVV Done",
-        "description": "PIVV Done",
-        "value": "PIVV Done",
-        "isActive": "Y",
-        "workflowPool": "COPS Pool"
-      }
-    ],
-    "exceptionDecision": [
-      {
-        "code": "Send back to last UW",
-        "description": "Send back to last UW",
-        "value": "Send back to last UW",
-        "isActive": "Y"
-      }
-    ],
-    "riskReferralReason": [
-      {
-        "code": "Adverse Profile",
-        "description": "Adverse Profile",
-        "value": "Adverse Profile",
-        "isActive": "Y"
-      },
-      {
-        "code": "DRC Adverse",
-        "description": "DRC Adverse",
-        "value": "DRC Adverse",
-        "isActive": "Y"
-      },
-      {
-        "code": "IIB Adverse",
-        "description": "IIB Adverse",
-        "value": "IIB Adverse",
-        "isActive": "Y"
-      },
-      {
-        "code": "PTRL Adverse",
-        "description": "PTRL Adverse",
-        "value": "PTRL Adverse",
-        "isActive": "Y"
-      }
-    ],
-    "misc": [
-      {
-        "code": "EMAIL",
-        "description": "Email",
-        "value": "EMAIL",
-        "isActive": "Y",
-        "miscMastId": "COMMUNICATION",
-        "type": "CHANNEL"
-      },
-      {
-        "code": "SMS",
-        "description": "SMS",
-        "value": "SMS",
-        "isActive": "Y",
-        "miscMastId": "COMMUNICATION",
-        "type": "CHANNEL"
-      },
-      {
-        "code": "MOBILE",
-        "description": "Mobile Number",
-        "value": "MOBILE",
-        "isActive": "Y",
         "miscMastId": "CONTACT",
-        "type": "CONTACT_TYPE"
-      },
-      {
-        "code": "ADDRESS",
-        "description": "Address Proof",
-        "value": "ADDRESS_PROOF",
-        "isActive": "Y",
-        "miscMastId": "DOCUMENT",
-        "type": "DOCUMENT_TYPE"
-      },
-      {
-        "code": "IDENTITY",
-        "description": "Identity Proof",
-        "value": "IDENTITY_PROOF",
-        "isActive": "Y",
-        "miscMastId": "DOCUMENT",
-        "type": "DOCUMENT_TYPE"
+        "type": "PIVV"
       }
     ],
-    "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] },
-    "decision_master":[],
-    "requirement_status_master":[]
+    "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] }
   },
   "unknownTypes": []
 }

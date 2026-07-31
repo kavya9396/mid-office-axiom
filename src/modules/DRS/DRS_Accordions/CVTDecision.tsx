@@ -191,9 +191,66 @@ const CVTDecision = () => {
     const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
     const masters = useAppSelector((state) => state.drs.masters);
     const cvtDecisionOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.cvtDecision);
-        return filterAcceptDecisionOptions(masterOptions, drsData);
-    }, [drsData, masters.cvtDecision]);
+        // Safely extract an array of MasterOption from masters.misc (supports various shapes)
+        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+        const toMasterList = (options?: unknown) => {
+            if (Array.isArray(options)) return options as unknown[];
+            if (!options || typeof options !== "object") return [] as unknown[];
+
+            const record = options as Record<string, unknown>;
+            if (Array.isArray(record.data)) return record.data as unknown[];
+            if (Array.isArray(record.options)) return record.options as unknown[];
+            if (Array.isArray(record.values)) return record.values as unknown[];
+
+            return Object.values(record).flatMap((v) => (Array.isArray(v) ? v : []));
+        };
+
+        const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
+
+        const cvtRaw = rawList.filter((opt) => String(opt?.type ?? "").trim().toUpperCase() === "CVT");
+
+        // Debug: log master misc and counts when running in browser devtools
+        try {
+            // eslint-disable-next-line no-console
+            console.debug("CVTDecision masters.misc:", misc);
+            // eslint-disable-next-line no-console
+            console.debug("CVTDecision rawList.length:", rawList.length, "cvtRaw.length:", cvtRaw.length);
+        } catch (e) {
+            // ignore
+        }
+
+        const mapped = cvtRaw
+            .map((option) => {
+                const code = String(option.code ?? option.key ?? option.value ?? "").trim();
+                const rawValue = String(option.value ?? "").trim();
+                const description = String(option.description ?? option.label ?? option.code ?? "").trim();
+                const disabled = Boolean(option.disabled ?? (String(option.isActive ?? "").toUpperCase() === "N"));
+
+                if (!description && !code && !rawValue) return null;
+
+                return {
+                    label: rawValue || description || code,
+                    value: code || rawValue || description,
+                    disabled,
+                } as { label: string; value: string; disabled?: boolean };
+            })
+            .filter(Boolean) as { label: string; value: string; disabled?: boolean }[];
+
+        const final = filterAcceptDecisionOptions(mapped, drsData);
+
+        if (final.length === 0) {
+            // Fallback to legacy cvtDecision master (keeps previous behavior)
+            try {
+                const legacy = normalizeMasterOptions((masters as Record<string, unknown>)?.cvtDecision);
+                return filterAcceptDecisionOptions(legacy, drsData);
+            } catch (e) {
+                return final;
+            }
+        }
+
+        return final;
+    }, [drsData, masters?.misc]);
     const effectiveDecision = cvtDecisionOptions.some((option) => option.value === decision)
         ? decision
         : "";

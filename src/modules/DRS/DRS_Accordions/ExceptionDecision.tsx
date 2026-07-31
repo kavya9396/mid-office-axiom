@@ -9,7 +9,7 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { referToItThunk } from "../../../store/thunks/referToItThunk";
-import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const ExceptionDecision = () => {
@@ -30,10 +30,7 @@ const ExceptionDecision = () => {
     normalizeBusinessType(localStorage.getItem("businessType")) ??
     "retail";
 
-  const decisionOptions = useMemo(
-    () => normalizeMasterOptions(masters.exceptionDecision),
-    [masters.exceptionDecision],
-  );
+  const decisionOptions = useMemo(() => normalizeDecisionOptions(masters, "exceptionDecision"), [masters]);
 
   const isSubmitEnabled = decision.trim().length > 0;
 

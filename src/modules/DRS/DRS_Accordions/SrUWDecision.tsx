@@ -12,7 +12,7 @@ import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import type { AppDispatch, RootState } from "../../../store/store";
 import { referralUsersThunk } from "../../../store/thunks/referralUsersThunk";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
-import { normalizeMasterOptions } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { formatDateForUI } from "../../../utils/helpers";
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
@@ -80,9 +80,7 @@ const SrUWDecision = () => {
   const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useSelector((state: RootState) => state.drs.masters);
 
-  const srUwDecisionOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.srUwDecision);
-  }, [masters.srUwDecision]);
+  const srUwDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "srUwDecision"), [masters]);
 
   const hoDOptions = useMemo(
     () =>
@@ -95,8 +93,10 @@ const SrUWDecision = () => {
 
   const lastRoleRef = useRef<string | null>(null);
 
+  const decisionLabel = toMasterLabel(decision, srUwDecisionOptions);
+
   useEffect(() => {
-    if (decision !== "Refer to HoD") {
+    if (decisionLabel !== "Refer to HoD") {
       return;
     }
 
@@ -107,7 +107,7 @@ const SrUWDecision = () => {
 
     lastRoleRef.current = role;
     dispatch(referralUsersThunk({ role }));
-  }, [decision, dispatch]);
+  }, [decisionLabel, dispatch]);
 
   const lastUwUser = useSelector((state: RootState) => {
     const drsData = state.drs.data as unknown as Record<string, unknown> | null;
@@ -164,18 +164,18 @@ const SrUWDecision = () => {
       return "Please select a Sr.UW decision.";
     }
 
-    if (decision === "Refer back to last UW" && lastUwUser) {
-      return `Kindly reconfirm if you want to proceed with the case as "${decision}" for ${lastUwUser}`;
+    if (decisionLabel === "Refer back to last UW" && lastUwUser) {
+      return `Kindly reconfirm if you want to proceed with the case as "${decisionLabel}" for ${lastUwUser}`;
     }
 
-    if (decision === "Refer to HoD") {
+    if (decisionLabel === "Refer to HoD") {
       const selectedName = hoDOptions.find((item) => item.value === selectedHoD)?.label;
       if (selectedName) {
-        return `Kindly reconfirm if you want to proceed with the case as "${decision}" for ${selectedName}`;
+        return `Kindly reconfirm if you want to proceed with the case as "${decisionLabel}" for ${selectedName}`;
       }
     }
 
-    return `Kindly reconfirm if you want to proceed with the case as "${decision}"`;
+    return `Kindly reconfirm if you want to proceed with the case as "${decisionLabel}"`;
   }, [decision, hoDOptions, lastUwUser, selectedHoD]);
 
   const isSubmitDisabled =

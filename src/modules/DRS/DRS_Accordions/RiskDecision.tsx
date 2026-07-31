@@ -8,7 +8,7 @@ import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppSelector } from "../../../store/hooks";
-import { normalizeMasterOptions } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions } from "../../../utils/masterOptions";
 import Logo from "../../../assets/ICICI-Logo.svg";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
@@ -177,12 +177,8 @@ const RiskDecision = () => {
   const { applicationNumber } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
-  const riskDecisionOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.riskDecision);
-  }, [masters.riskDecision]);
-  const riskReferralReasonOptions = useMemo(() => {
-    return normalizeMasterOptions(masters.riskReferralReason);
-  }, [masters.riskReferralReason]);
+  const riskDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "riskDecision"), [masters]);
+  const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason"), [masters]);
   const [remarks, setRemarks] = useState("");
   const [riskDecision, setRiskDecision] = useState("");
   const [riskReferralReason, setRiskReferralReason] = useState("");

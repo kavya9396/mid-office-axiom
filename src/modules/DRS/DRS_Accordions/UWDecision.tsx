@@ -18,7 +18,7 @@ import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
-import { normalizeMasterOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
@@ -101,46 +101,24 @@ const UWDecision = () => {
     const lastRoleRef = useRef<string | null>(null);
 
     const caseUWDecisionOptions = useMemo(() => {
-        const masterOptions = normalizeMasterOptions(masters.caseUWDecision);
-        return filterAcceptDecisionOptions(masterOptions, drsData);
-    }, [drsData, masters.caseUWDecision]);
-    const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
+            return filterAcceptDecisionOptions(normalizeDecisionOptions(masters, "caseUWDecision"), drsData);
+        }, [drsData, masters]);
+        const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
-    const firstUWDecisionOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.firstUWDecision);
-    }, [masters.firstUWDecision]);
-    const parallelUWDecisionOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.parallelUWDecision);
-    }, [masters.parallelUWDecision]);
-    const rejectReasonOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.rejectReason);
-    }, [masters.rejectReason]);
-    const declineReasonOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.declineReason);
-    }, [masters.declineReason]);
-    const postponeReasonOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.postponeReason);
-    }, [masters.postponeReason]);
-    const postponementPeriodOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.postponementPeriod);
-    }, [masters.postponementPeriod]);
-    const riskReferralReasonOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.riskReferralReason);
-    }, [masters.riskReferralReason]);
-    const accuityReferralReasonOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.accuityReferralReason);
-    }, [masters.accuityReferralReason]);
-    const reinsurerReferralReasonOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.reinsurerReferralReason);
-    }, [masters.reinsurerReferralReason]);
-    const holdReasonOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.holdReason);
-    }, [masters.holdReason]);
-    const cuwReferralReasonOptions = useMemo(() => {
-        return normalizeMasterOptions(masters.cuwReferralReason);
-    }, [masters.cuwReferralReason]);
-    const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
+        const firstUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "firstUWDecision"), [masters]);
+        const parallelUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "parallelUWDecision"), [masters]);
+        const rejectReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "rejectReason"), [masters]);
+        const declineReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "declineReason"), [masters]);
+        const postponeReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "postponeReason"), [masters]);
+        const postponementPeriodOptions = useMemo(() => normalizeDecisionOptions(masters, "postponementPeriod"), [masters]);
+        const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason"), [masters]);
+        const accuityReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "acuityReferralReason"), [masters]);
+        const reinsurerReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerReferralReason"), [masters]);
+        const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason"), [masters]);
+        const cuwReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "cuwReferralReason", false), [masters]);
+console.log('caseUWDecisionOptions',caseUWDecisionOptions)
+        const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
 
     const showDecisionCode = [
         "Accept",
