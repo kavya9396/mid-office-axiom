@@ -1565,12 +1565,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             </Box>
 
             <Box sx={{ p: 2, backgroundColor: "#F5F7FA" }}>
-                {import.meta.env.DEV && (
+                {/* {import.meta.env.DEV && (
                     <Box sx={{ mb: 1, p: 1, backgroundColor: "#fff7e6", borderRadius: 1 }}>
                         <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#444" }}>Debug: requirementStatusOptions</Typography>
                         <Typography sx={{ fontSize: 11, color: "#666", whiteSpace: "pre-wrap" }}>{JSON.stringify(requirementStatusOptions, null, 2)}</Typography>
                     </Box>
-                )}
+                )} */}
                 {rows.length === 0 ? (
                     <Box
                         sx={{
