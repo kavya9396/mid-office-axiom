@@ -1107,18 +1107,7 @@ export interface ApplicantEditForm {
 }
 
 export interface ApplicantProfileSubmitRequest {
-  applicationNo: string;
-  roleType?: string;
-  userId?:string;
-  memberType?: ApplicantTab;
-  partyId?: string;
-  updatedDetails?: Partial<ApplicantEditForm>;
-  sections:string[];
-  // Optional data object allowing sections like summary to be sent in the request body
-  data?: {
-    summary?: Partial<SummaryResponse>[];
-    [key: string]: unknown;
-  };
+  data: DRSData;
 }
 
 export interface ApplicantProfileSubmitResponse {

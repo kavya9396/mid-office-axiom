@@ -53,7 +53,6 @@ type FormField = {
 type FormErrors = Partial<Record<keyof ApplicantEditForm, string>>;
 
 const emptyOptions: SelectOption[] = [];
-const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
 const getPersonalKycFields = (options: {
     titleOptions: SelectOption[];
     genderOptions: SelectOption[];
@@ -1146,22 +1145,16 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             setSubmitLoading(true);
             setSubmitError(null);
 
-            // Merge baseline + updatedDetails to build full master-form (codes)
+            // Build updated summary member inside DRS data, and send only this updated DRS JSON.
             const mergedMasterForm: ApplicantEditForm = {
                 ...(baselineData as ApplicantEditForm),
                 ...(updatedDetails as Partial<ApplicantEditForm>),
             };
 
-            // Build profile object for server payload using master codes (not display labels)
             const fullUpdatedProfileForServer = applyUpdatedDetailsToProfile(
                 displayProfile as Partial<SummaryResponse>,
                 mergedMasterForm as Partial<ApplicantEditForm>
             );
-
-            // Build payload data: send full DRS data structure when available, with the updated summary
-            const payloadData = drsData
-                ? ({ ...(drsData as unknown as Record<string, unknown>), summary: [fullUpdatedProfileForServer] } as Record<string, unknown>)
-                : { summary: [fullUpdatedProfileForServer] };
 
             // derive partyId from drsData.summary matching the selected applicant tab
             const drsRecord = drsData as unknown as Record<string, unknown> | null;
@@ -1173,18 +1166,33 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             const derivedPartyId = String(
                 selectedMember?.partyId ?? drsSummaryMembers[0]?.partyId ?? ""
             ).trim();
-            
 
-            const payload: ApplicantProfileSubmitRequest = {
-                applicationNo: applicationNumber,
-                roleType,
-                userId: userId,
+            const updatedSummaryMembers = [...drsSummaryMembers];
+            const selectedMemberIndex = updatedSummaryMembers.findIndex((member) =>
+                String(member?.memberType ?? "").toLowerCase() === resolvedApplicantTab.toLowerCase()
+            );
+
+            const updatedMemberRecord = {
+                ...(selectedMemberIndex >= 0 ? updatedSummaryMembers[selectedMemberIndex] : {}),
+                ...(fullUpdatedProfileForServer as Record<string, unknown>),
                 memberType: resolvedApplicantTab,
                 partyId: derivedPartyId,
-                updatedDetails: updatedDetails,
-                sections: ["summary"],
-                data: payloadData as any,
             };
+
+            if (selectedMemberIndex >= 0) {
+                updatedSummaryMembers[selectedMemberIndex] = updatedMemberRecord;
+            } else {
+                updatedSummaryMembers.push(updatedMemberRecord);
+            }
+
+            const payload: ApplicantProfileSubmitRequest = {
+                data: {
+                    ...(drsRecord ?? {}),
+                    summary: updatedSummaryMembers,
+                } as unknown as DRSData,
+            };
+
+            console.log("Payload passed", payload);
 
             const response = await dispatch(applicantProfileSubmitThunk(payload)).unwrap();
 
