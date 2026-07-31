@@ -22,7 +22,7 @@ const ReconsiderationPoolDecision = () => {
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
-  const reconsiderationDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "reconsiderationDecision"), [masters]);
+  const reconsiderationDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "reconsiderationDecision", true, true), [masters]);
 
   const safeBusinessType =
     normalizeBusinessType(businessType) ??
@@ -59,6 +59,14 @@ const ReconsiderationPoolDecision = () => {
       setSubmitMessage(null);
       setSubmitStatus(null);
 
+      const selectedOption = reconsiderationDecisionOptions.find((o) => o.value === decision) as (typeof reconsiderationDecisionOptions[number] & { code?: string; description?: string }) | undefined;
+      const keyBase = String("reconsiderationDecision").replace(/Decision$/i, "").replace(/_/g, "").toUpperCase();
+      const payloadDecision = selectedOption
+        ? (String(selectedOption.code ?? "").toUpperCase() === keyBase
+          ? String(selectedOption.description ?? selectedOption.value ?? "")
+          : String(selectedOption.value ?? ""))
+        : decision;
+
       const response = await dispatch(
         completeTaskThunk({
           requestContext: {
@@ -67,7 +75,7 @@ const ReconsiderationPoolDecision = () => {
             appNo: taskContext.appNo,
             instanceId: taskContext.instanceId,
             remarks: remark.trim(),
-            decision: decision.trim(),
+            decision: payloadDecision,
           },
         }),
       ).unwrap();

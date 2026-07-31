@@ -1184,8 +1184,12 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             } else {
                 updatedSummaryMembers.push(updatedMemberRecord);
             }
-
+const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
             const payload: ApplicantProfileSubmitRequest = {
+                applicationNo:applicationNumber,
+                roleType:roleType,
+                sections:['summary'],
+                userId:userId,
                 data: {
                     ...(drsRecord ?? {}),
                     summary: updatedSummaryMembers,

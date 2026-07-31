@@ -177,8 +177,8 @@ const RiskDecision = () => {
   const { applicationNumber } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
-  const riskDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "riskDecision"), [masters]);
-  const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason"), [masters]);
+  const riskDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "riskDecision", true, true), [masters]);
+  const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason", true, true), [masters]);
   const [remarks, setRemarks] = useState("");
   const [riskDecision, setRiskDecision] = useState("");
   const [riskReferralReason, setRiskReferralReason] = useState("");

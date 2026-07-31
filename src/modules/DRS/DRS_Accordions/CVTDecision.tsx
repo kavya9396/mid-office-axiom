@@ -208,7 +208,7 @@ const CVTDecision = () => {
 
         const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
 
-        const cvtRaw = rawList.filter((opt) => String(opt?.type ?? "").trim().toUpperCase() === "CVT");
+        const cvtRaw = rawList.filter((opt) => String(opt?.code ?? opt?.key ?? "").trim().toUpperCase() === "CVT");
 
         // Debug: log master misc and counts when running in browser devtools
         try {
@@ -226,16 +226,23 @@ const CVTDecision = () => {
                 const rawValue = String(option.value ?? "").trim();
                 const description = String(option.description ?? option.label ?? option.code ?? "").trim();
                 const disabled = Boolean(option.disabled ?? (String(option.isActive ?? "").toUpperCase() === "N"));
+                const optType = String(option.type ?? "").trim();
 
                 if (!description && !code && !rawValue) return null;
 
+                const val = rawValue || code || description;
+                const lab = rawValue || description || code;
+
                 return {
-                    label: rawValue || description || code,
-                    value: code || rawValue || description,
+                    label: lab,
+                    value: val,
+                    description,
+                    type: optType,
+                    code,
                     disabled,
-                } as { label: string; value: string; disabled?: boolean };
+                } as { label: string; value: string; description: string; type: string; code: string; disabled?: boolean };
             })
-            .filter(Boolean) as { label: string; value: string; disabled?: boolean }[];
+            .filter(Boolean) as { label: string; value: string; description: string; type: string; disabled?: boolean }[];
 
         const final = filterAcceptDecisionOptions(mapped, drsData);
 
@@ -376,6 +383,14 @@ const CVTDecision = () => {
             setSubmitMessage(null);
             setSubmitStatus(null);
 
+            // For CVT decisions the API expects the description to be passed; otherwise pass the selected value.
+            const selectedOption = cvtDecisionOptions.find((o) => o.value === effectiveDecision) as (typeof cvtDecisionOptions[number] & { code?: string }) | undefined;
+            const payloadDecision = selectedOption
+                ? (String(selectedOption.code ?? "").toUpperCase() === "CVT"
+                    ? String(selectedOption.description ?? selectedOption.value ?? "")
+                    : String(selectedOption.value ?? ""))
+                : effectiveDecision;
+
             const response = await dispatch(
                 completeTaskThunk({
                     requestContext: {
@@ -384,7 +399,7 @@ const CVTDecision = () => {
                         appNo: applicationNumber,
                         instanceId,
                         remarks: uwDecisionRemarks.trim(),
-                        decision: effectiveDecision.trim(),
+                        decision: String(payloadDecision).trim(),
                     },
                 }),
             ).unwrap();

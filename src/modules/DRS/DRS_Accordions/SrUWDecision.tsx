@@ -80,7 +80,7 @@ const SrUWDecision = () => {
   const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useSelector((state: RootState) => state.drs.masters);
 
-  const srUwDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "srUwDecision"), [masters]);
+  const srUwDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "srUwDecision", true, true), [masters]);
 
   const hoDOptions = useMemo(
     () =>

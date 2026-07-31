@@ -1399,13 +1399,53 @@
       }
     ],
     "misc": [
-      {
-        "code": "ISS",
-        "description": "Accept",
+       {
+        "code": "REQT_ST",
+        "description": "PEN",
+        "value": "Pending",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "Pending"
+      },
+       {
+        "code": "REQT_ST",
+        "description": "WAIVED",
+        "value": "Waived",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "Waived"
+      },
+       {
+        "code": "REQT_ST",
+        "description": "ACCEPT",
         "value": "Accept",
         "isActive": "Y",
-        "miscMastId": "COMMUNICATION",
-        "type": "CVT"
+        "miscMastId": "1",
+        "type": "Accept"
+      },
+      {
+        "code": "CVT",
+        "description": "ISS",
+        "value": "Accept",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "Accept"
+      },
+      {
+        "code": "CVT",
+        "description": "RAISE_PIVV",
+        "value": "Reraise PIVV",
+        "isActive": "Y",
+        "miscMastId": "2",
+        "type": "Reraise PIVV"
+      },
+      {
+        "code": "CVT",
+        "description": "AMR",
+        "value": "Raise Requirement",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "Raise Requirement"
       },
       {
         "code": "ISS",

@@ -31,9 +31,9 @@ const ReinsureDecision = () => {
   const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useSelector((state: RootState) => state.drs.masters);
 
-  const reinsurerDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerDecision"), [masters]);
+  const reinsurerDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerDecision", true, true), [masters]);
 
-  const reinsurerDecisionIdOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerDecisionId"), [masters]);
+  const reinsurerDecisionIdOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerDecisionId", true, true), [masters]);
 
   const dialogMessage = `Kindly reconfirm if you want to proceed with the reinsurer decision as "${toMasterLabel(decision, reinsurerDecisionOptions)}"`;
 

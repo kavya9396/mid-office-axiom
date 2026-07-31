@@ -60,7 +60,7 @@ const HoDDecision = () => {
   const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useSelector((state: RootState) => state.drs.masters);
 
-  const hodDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "hodDecision"), [masters]);
+  const hodDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "hodDecision", true, true), [masters]);
 
   const lastUwUser = useSelector((state: RootState) => {
     const drsData = state.drs.data as unknown as Record<string, unknown> | null;

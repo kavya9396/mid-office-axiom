@@ -65,7 +65,7 @@ const PIVVDecision = () => {
   }, [decision, masters]);
 
   const decisionOptions = useMemo(() => {
-    return normalizeDecisionOptions(masters, "pivvDecision");
+    return normalizeDecisionOptions(masters, "pivvDecision", true, true);
   }, [masters]);
 
   const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;
@@ -86,6 +86,13 @@ const PIVVDecision = () => {
       setSubmitLoading(true);
       setSubmitMessage(null);
 
+      const selectedOption = decisionOptions.find((o) => o.value === decision) as (typeof decisionOptions[number] & { code?: string; description?: string }) | undefined;
+      const payloadDecision = selectedOption
+        ? (String(selectedOption.code ?? "").toUpperCase() === "PIVV"
+          ? String(selectedOption.description ?? selectedOption.value ?? "")
+          : String(selectedOption.value ?? ""))
+        : decision;
+
       const response = await dispatch(
         completeTaskThunk({
           requestContext: {
@@ -93,7 +100,7 @@ const PIVVDecision = () => {
             userId: taskContext.userId,
             taskId: taskContext.taskId,
             instanceId: taskContext.instanceId,
-            decision,
+            decision: payloadDecision,
             remarks: remarks.trim(),
           },
         }),

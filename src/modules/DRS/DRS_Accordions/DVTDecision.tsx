@@ -15,7 +15,7 @@ import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
-import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { getRequirementRows, validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
@@ -34,7 +34,48 @@ const DVTDecision = () => {
     const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
     const masters = useSelector((state: RootState) => state.drs.masters);
     const dvtDecisionOptions = useMemo(() => {
-        return filterAcceptDecisionOptions(normalizeDecisionOptions(masters, "dvtDecision"), drsData);
+        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+        const toMasterList = (options?: unknown) => {
+            if (Array.isArray(options)) return options as unknown[];
+            if (!options || typeof options !== "object") return [] as unknown[];
+
+            const record = options as Record<string, unknown>;
+            if (Array.isArray(record.data)) return record.data as unknown[];
+            if (Array.isArray(record.options)) return record.options as unknown[];
+            if (Array.isArray(record.values)) return record.values as unknown[];
+
+            return Object.values(record).flatMap((v) => (Array.isArray(v) ? v : []));
+        };
+
+        const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
+        const dvtRaw = rawList.filter((opt) => String(opt?.code ?? opt?.key ?? "").trim().toUpperCase() === "DVT");
+
+        const mapped = dvtRaw
+            .map((option) => {
+                const code = String(option.code ?? option.key ?? option.value ?? "").trim();
+                const rawValue = String(option.value ?? "").trim();
+                const description = String(option.description ?? option.label ?? option.code ?? "").trim();
+                const disabled = Boolean(option.disabled ?? (String(option.isActive ?? "").toUpperCase() === "N"));
+                const optType = String(option.type ?? "").trim();
+
+                if (!description && !code && !rawValue) return null;
+
+                const val = rawValue || code || description;
+                const lab = rawValue || description || code;
+
+                return {
+                    label: lab,
+                    value: val,
+                    description,
+                    type: optType,
+                    code,
+                    disabled,
+                } as { label: string; value: string; description: string; type: string; code: string; disabled?: boolean };
+            })
+            .filter(Boolean) as { label: string; value: string; description: string; type: string; disabled?: boolean }[];
+
+        return filterAcceptDecisionOptions(mapped, drsData);
     }, [drsData, masters]);
     const effectiveDecision = dvtDecisionOptions.some((option) => option.value === decision)
         ? decision
@@ -76,6 +117,13 @@ const DVTDecision = () => {
             setSubmitMessage(null);
             setSubmitStatus(null);
 
+            const selectedOption = dvtDecisionOptions.find((o) => o.value === effectiveDecision) as (typeof dvtDecisionOptions[number] & { code?: string }) | undefined;
+            const payloadDecision = selectedOption
+                ? (String(selectedOption.code ?? selectedOption.type ?? "").toUpperCase() === "DVT"
+                    ? String(selectedOption.description ?? selectedOption.value ?? "")
+                    : String(selectedOption.value ?? ""))
+                : effectiveDecision;
+
             const response = await dispatch(
                 completeTaskThunk({
                     requestContext: {
@@ -84,7 +132,7 @@ const DVTDecision = () => {
                         appNo: taskContext.appNo,
                         instanceId: taskContext.instanceId,
                         remarks: uwDecisionRemarks.trim(),
-                        decision: effectiveDecision.trim(),
+                        decision: String(payloadDecision).trim(),
                     },
                 }),
             ).unwrap();

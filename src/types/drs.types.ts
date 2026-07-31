@@ -1108,6 +1108,10 @@ export interface ApplicantEditForm {
 
 export interface ApplicantProfileSubmitRequest {
   data: DRSData;
+  applicationNo: string;
+  userId: string;
+  roleType: string;
+  sections: string[];
 }
 
 export interface ApplicantProfileSubmitResponse {

@@ -100,24 +100,23 @@ const UWDecision = () => {
 
     const lastRoleRef = useRef<string | null>(null);
 
-    const caseUWDecisionOptions = useMemo(() => {
-            return filterAcceptDecisionOptions(normalizeDecisionOptions(masters, "caseUWDecision"), drsData);
+        const caseUWDecisionOptions = useMemo(() => {
+            return filterAcceptDecisionOptions(normalizeDecisionOptions(masters, "caseUWDecision", true, true), drsData);
         }, [drsData, masters]);
         const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
-        const firstUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "firstUWDecision"), [masters]);
-        const parallelUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "parallelUWDecision"), [masters]);
-        const rejectReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "rejectReason"), [masters]);
-        const declineReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "declineReason"), [masters]);
-        const postponeReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "postponeReason"), [masters]);
-        const postponementPeriodOptions = useMemo(() => normalizeDecisionOptions(masters, "postponementPeriod"), [masters]);
-        const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason"), [masters]);
-        const accuityReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "acuityReferralReason"), [masters]);
-        const reinsurerReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerReferralReason"), [masters]);
-        const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason"), [masters]);
-        const cuwReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "cuwReferralReason", false), [masters]);
-console.log('caseUWDecisionOptions',caseUWDecisionOptions)
+        const firstUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "firstUWDecision", true, true), [masters]);
+        const parallelUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "parallelUWDecision", true, true), [masters]);
+        const rejectReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "rejectReason", true, true), [masters]);
+        const declineReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "declineReason", true, true), [masters]);
+        const postponeReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "postponeReason", true, true), [masters]);
+        const postponementPeriodOptions = useMemo(() => normalizeDecisionOptions(masters, "postponementPeriod", true, true), [masters]);
+        const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason", true, true), [masters]);
+        const accuityReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "acuityReferralReason", true, true), [masters]);
+        const reinsurerReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerReferralReason", true, true), [masters]);
+        const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason", true, true), [masters]);
+        const cuwReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "cuwReferralReason", false, true), [masters]);
         const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
 
     const showDecisionCode = [
@@ -212,6 +211,14 @@ console.log('caseUWDecisionOptions',caseUWDecisionOptions)
             setSubmitMessage(null);
             setSubmitStatus(null);
 
+            const selectedOption = caseUWDecisionOptions.find((o) => o.value === effectiveCaseUWDecision) as (typeof caseUWDecisionOptions[number] & { code?: string; description?: string }) | undefined;
+            const keyBase = String("caseUWDecision").replace(/Decision$/i, "").replace(/_/g, "").toUpperCase();
+            const payloadDecision = selectedOption
+                ? (String(selectedOption.code ?? "").toUpperCase() === keyBase
+                    ? String(selectedOption.description ?? selectedOption.value ?? "")
+                    : String(selectedOption.value ?? ""))
+                : effectiveCaseUWDecision;
+
             const response = await dispatch(
                 completeTaskThunk({
                     requestContext: {
@@ -220,7 +227,7 @@ console.log('caseUWDecisionOptions',caseUWDecisionOptions)
                         appNo: taskContext.appNo,
                         instanceId: taskContext.instanceId,
                         remarks: uwDecisionRemarks.trim(),
-                        decision: effectiveCaseUWDecision.trim(),
+                        decision: String(payloadDecision).trim(),
                     },
                 }),
             ).unwrap();

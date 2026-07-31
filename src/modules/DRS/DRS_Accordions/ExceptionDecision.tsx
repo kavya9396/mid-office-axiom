@@ -30,7 +30,7 @@ const ExceptionDecision = () => {
     normalizeBusinessType(localStorage.getItem("businessType")) ??
     "retail";
 
-  const decisionOptions = useMemo(() => normalizeDecisionOptions(masters, "exceptionDecision"), [masters]);
+  const decisionOptions = useMemo(() => normalizeDecisionOptions(masters, "exceptionDecision", true, true), [masters]);
 
   const isSubmitEnabled = decision.trim().length > 0;
 

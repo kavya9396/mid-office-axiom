@@ -363,6 +363,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         return [];
     });
     const drsData = useSelector((state: RootState) => state.drs.data as unknown);
+    const masters = useSelector((state: RootState) => state.drs.masters);
     const effectiveRequirementMasterRows = EMPTY_REQUIREMENT_MASTER_ROWS;
     const requirementProfileOptions = EMPTY_OPTIONS;
     const requirementCategoryOptions = EMPTY_OPTIONS;
@@ -720,13 +721,132 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 // ignore
             }
 
+            // Prefer masters.misc-based status values when available (code === 'REQT_ST')
+            try {
+                const toMasterList = (options?: unknown) => {
+                    if (Array.isArray(options)) return options as unknown[];
+                    if (!options || typeof options !== "object") return [] as unknown[];
+
+                    const record = options as Record<string, unknown>;
+                    if (Array.isArray(record.data)) return record.data as unknown[];
+                    if (Array.isArray(record.options)) return record.options as unknown[];
+                    if (Array.isArray(record.values)) return record.values as unknown[];
+
+                    return Object.values(record).flatMap((v) => (Array.isArray(v) ? v : []));
+                };
+                // Search for misc across common shapes: masters.misc, masters.data.misc, masters.data, or masters itself
+                const candidateSources = [
+                    (masters as any)?.misc,
+                    (masters as any)?.data?.misc,
+                    (masters as any)?.data,
+                    masters,
+                ];
+
+                const rawList = candidateSources
+                    .flatMap((src) => toMasterList(src))
+                    .filter(Boolean) as Array<Record<string, unknown>>;
+
+                try {
+                    // eslint-disable-next-line no-console
+                    console.debug("RequirementManagement: candidateSources:", candidateSources);
+                    // eslint-disable-next-line no-console
+                    console.debug("RequirementManagement: rawList length:", rawList.length);
+                } catch {
+                    // ignore
+                }
+                const statusRaw = rawList.filter((opt) => String(opt?.code ?? "").trim().toUpperCase() === "REQT_ST");
+
+                let foundFromMisc = false;
+                if (statusRaw.length > 0) {
+                    const extractString = (v: unknown): string => {
+                        if (v === null || v === undefined) return "";
+                        if (typeof v === "string") return v.trim();
+                        if (typeof v === "number" || typeof v === "boolean") return String(v);
+                        if (typeof v === "object") {
+                            try {
+                                // try common fields
+                                const obj = v as Record<string, unknown>;
+                                const candidates = ["label", "description", "value", "name", "code", "key"];
+                                for (const k of candidates) {
+                                    const vv = obj[k];
+                                    if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                    if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                                }
+                                // fallback: find first primitive property
+                                for (const key of Object.keys(obj)) {
+                                    const vv = obj[key];
+                                    if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                    if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                                }
+                            } catch {
+                                // ignore
+                            }
+                        }
+                        return "";
+                    };
+
+                    const mapped = statusRaw
+                        .map((option) => {
+                            const code = extractString(option.code ?? option.key ?? option.value ?? "");
+                            const rawValue = extractString(option.value ?? "");
+                            const description = extractString(option.description ?? option.label ?? option.code ?? "");
+                            if (!description && !code && !rawValue) return null;
+                            const val = rawValue || code || description;
+                            const lab = rawValue || description || code;
+                            return { label: lab, value: val, description } as Option & { description?: string };
+                        })
+                        .filter(Boolean) as Option[];
+
+                    try {
+                        // eslint-disable-next-line no-console
+                        console.debug("RequirementManagement: statusRaw length:", statusRaw.length, "mapped:", mapped);
+                    } catch {
+                        // ignore
+                    }
+
+                    if (mapped.length > 0) {
+                        foundFromMisc = true;
+                        setRequirementStatusOptions(mapped);
+                        cacheOptionsForPayload({ types: ["requirementStatus"] }, mapped);
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+
             // load requirement status master (try several possible keys returned by API)
             try {
+                // If we already populated from misc, skip the generic status fetch to avoid overwriting
+                if (foundFromMisc) return;
                 const statusPayload = { types: ["requirementStatus", "requirement_status_master", "requirement_status"] };
                 const resp = await apiRequest<Record<string, unknown>>({ url: apiUrl("masters"), method: "POST", body: statusPayload });
                 const data = (resp as any)?.data ?? resp;
 
-                const statusCandidates: string[] = [];
+                const statusCandidates: unknown[] = [];
+                const extractString = (v: unknown): string => {
+                    if (v === null || v === undefined) return "";
+                    if (typeof v === "string") return v.trim();
+                    if (typeof v === "number" || typeof v === "boolean") return String(v);
+                    if (typeof v === "object") {
+                        try {
+                            const obj = v as Record<string, unknown>;
+                            const candidates = ["label", "description", "value", "name", "code", "key"];
+                            for (const k of candidates) {
+                                const vv = obj[k];
+                                if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                            }
+                            for (const key of Object.keys(obj)) {
+                                const vv = obj[key];
+                                if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                            }
+                        } catch {
+                            // ignore
+                        }
+                    }
+                    return "";
+                };
                 const tryKeys = [
                     "requirementStatus",
                     "requirement_status_master",
@@ -738,7 +858,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 for (const key of tryKeys) {
                     const candidate = (data as any)?.[key] ?? (resp as any)?.[key];
                     if (Array.isArray(candidate) && candidate.length > 0) {
-                        statusCandidates.push(...candidate.map(String));
+                        statusCandidates.push(...candidate);
                         break;
                     }
                 }
@@ -748,13 +868,20 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     for (const k of Object.keys(data as Record<string, unknown>)) {
                         const v = (data as Record<string, unknown>)[k];
                         if (Array.isArray(v) && v.length > 0) {
-                            statusCandidates.push(...v.map(String));
+                            statusCandidates.push(...v);
                             break;
                         }
                     }
                 }
 
-                const statusOpts = statusCandidates.length > 0 ? statusCandidates.map(toOption) : EMPTY_OPTIONS;
+                const statusOpts = statusCandidates.length > 0
+                    ? statusCandidates
+                          .map((c) => {
+                              const s = extractString(c);
+                              return s ? { label: s, value: s } as Option : null;
+                          })
+                          .filter(Boolean) as Option[]
+                    : EMPTY_OPTIONS;
                 setRequirementStatusOptions(statusOpts);
                 cacheOptionsForPayload(statusPayload, statusOpts);
             } catch (e) {
@@ -1438,6 +1565,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             </Box>
 
             <Box sx={{ p: 2, backgroundColor: "#F5F7FA" }}>
+                {import.meta.env.DEV && (
+                    <Box sx={{ mb: 1, p: 1, backgroundColor: "#fff7e6", borderRadius: 1 }}>
+                        <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#444" }}>Debug: requirementStatusOptions</Typography>
+                        <Typography sx={{ fontSize: 11, color: "#666", whiteSpace: "pre-wrap" }}>{JSON.stringify(requirementStatusOptions, null, 2)}</Typography>
+                    </Box>
+                )}
                 {rows.length === 0 ? (
                     <Box
                         sx={{
@@ -1676,25 +1809,33 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     const source = (drsData && typeof drsData === "object") ? (drsData as Record<string, unknown>) : {};
                                     const cloned: Record<string, unknown> = JSON.parse(JSON.stringify(source || {}));
 
-                                    const payloadRequirements = rows.map((r) => ({
-                                        team: mapDisplayTeamToStored(r.team ?? ""),
-                                        profile: r.profile ?? "",
-                                        category: r.category ?? "",
-                                        subCategory: r.subCategory ?? "",
-                                        document: r.document ?? "",
-                                        reason: r.reason ?? "",
-                                        fupCode: r.fupCode ?? "",
-                                        description: r.description ?? "",
-                                        status: String(r.status ?? "").trim() || "Pending",
-                                        raisedDate: r.raisedDate ?? "",
-                                        raisedBy: r.raisedBy ?? "",
-                                        receivedDate: r.receivedDate ?? "",
-                                        receivedBy: r.receivedBy ?? "",
-                                        validity: r.validity ?? "",
-                                        userId: r.userId ?? "",
-                                        remarks: r.remarks ?? "",
-                                        udsLink: r.udsLink ?? "",
-                                    }));
+                                    const payloadRequirements = rows.map((r) => {
+                                        const statusValue = String(r.status ?? "").trim() || "Pending";
+                                        const matchedStatus = (requirementStatusOptions as Array<Option & { description?: string }>).find(
+                                            (o) => String(o.value ?? "").trim() === statusValue,
+                                        );
+                                        const statusDescription = matchedStatus?.description ?? "";
+
+                                        return {
+                                            team: mapDisplayTeamToStored(r.team ?? ""),
+                                            profile: r.profile ?? "",
+                                            category: r.category ?? "",
+                                            subCategory: r.subCategory ?? "",
+                                            document: r.document ?? "",
+                                            reason: r.reason ?? "",
+                                            fupCode: r.fupCode ?? "",
+                                            description: r.description ?? "",
+                                            status: { value: statusValue, description: statusDescription },
+                                            raisedDate: r.raisedDate ?? "",
+                                            raisedBy: r.raisedBy ?? "",
+                                            receivedDate: r.receivedDate ?? "",
+                                            receivedBy: r.receivedBy ?? "",
+                                            validity: r.validity ?? "",
+                                            userId: r.userId ?? "",
+                                            remarks: r.remarks ?? "",
+                                            udsLink: r.udsLink ?? "",
+                                        };
+                                    });
 
                                     // Replace requirementManagement in cloned object. Support both top-level and data.requirementManagement
                                     if (Array.isArray(cloned.requirementManagement) || cloned.requirementManagement == null) {

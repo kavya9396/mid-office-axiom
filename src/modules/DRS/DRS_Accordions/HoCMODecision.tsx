@@ -32,7 +32,7 @@ const HoCMODecision = () => {
   const masters = useSelector((state: RootState) => state.drs.masters);
 
   const hoCmoDecisionOptions = useMemo(() => {
-    return normalizeDecisionOptions(masters, "hoCmoDecision");
+    return normalizeDecisionOptions(masters, "hoCmoDecision", true, true);
   }, [masters]);
 
   const decisionLabel = toMasterLabel(decision, hoCmoDecisionOptions);

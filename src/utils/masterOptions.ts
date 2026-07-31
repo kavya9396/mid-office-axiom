@@ -4,6 +4,8 @@ export type SelectOption = {
   label: string;
   value: string;
   disabled?: boolean;
+  description?: string;
+  code?: string;
 };
 
 const toText = (value: unknown): string => String(value ?? "").trim();
@@ -88,7 +90,12 @@ export const toMasterKey = (value: string, options: SelectOption[]): string => {
   return textValue;
 };
 
-export const normalizeDecisionOptions = (masters: unknown, masterKey: string, allowFallback = true): SelectOption[] => {
+export const normalizeDecisionOptions = (
+  masters: unknown,
+  masterKey: string,
+  allowFallback = true,
+  matchByCode = false,
+): SelectOption[] => {
   try {
     const masterRecord = masters as Record<string, unknown> | undefined;
     const misc = masterRecord?.misc;
@@ -101,7 +108,13 @@ export const normalizeDecisionOptions = (masters: unknown, masterKey: string, al
       .toUpperCase();
 
     const candidates = list.filter((item) => {
-      const t = toText((item as Record<string, unknown>).type ?? (item as Record<string, unknown>).miscMastId ?? "");
+      const record = item as Record<string, unknown>;
+      if (matchByCode) {
+        const code = toText(record.code ?? record.key ?? record.value ?? "").toUpperCase();
+        return code === keyBase;
+      }
+
+      const t = toText(record.type ?? record.miscMastId ?? "");
       if (!t) return false;
       return t.toUpperCase() === keyBase || t.toUpperCase().includes(keyBase) || keyBase.includes(t.toUpperCase());
     });
@@ -122,6 +135,8 @@ export const normalizeDecisionOptions = (masters: unknown, masterKey: string, al
           label: isCuw ? (description || rawValue || code) : (rawValue || description || code),
           value: code || rawValue || description,
           disabled,
+          description,
+          code,
         } as SelectOption;
       })
       .filter(Boolean) as SelectOption[];
