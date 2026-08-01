@@ -719,6 +719,7 @@ export type MasterKey =
   | "reinsurerReferralReason"
   | "holdReason"
   | "cuwReferralReason"
+  | "reasonRemarks"
   | "resident_status"
   | "marital_status"
   | "education"

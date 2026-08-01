@@ -13,47 +13,98 @@ type Option = {
   disabled?: boolean;
 };
 
-type CustomSelectProps = {
+type BaseSelectProps = {
   label?: string;
-  value?: string;
-  onChange?: (value: string) => void;
   options: Option[];
-
   placeholder?: string;
-  renderValue?: (value: string) => React.ReactNode;
-
   fullWidth?: boolean;
   error?: boolean;
   helperText?: string;
   disabled?: boolean;
 };
 
-export default function CustomSelect({
-  label,
-  value,
-  onChange,
-  options,
-  placeholder = "Select",
-  renderValue,
-  fullWidth = true,
-  error = false,
-  helperText,
-  disabled = false,
-}: CustomSelectProps) {
-  const handleChange = (e: SelectChangeEvent) => {
-    onChange?.(e.target.value);
+type SingleSelectProps = BaseSelectProps & {
+  multiple?: false;
+  value?: string;
+  onChange?: (value: string) => void;
+  renderValue?: (value: string) => React.ReactNode;
+  maxCount?: never;
+};
+
+type MultipleSelectProps = BaseSelectProps & {
+  multiple: true;
+  value?: string[];
+  onChange?: (value: string[]) => void;
+  renderValue?: (value: string[]) => React.ReactNode;
+  maxCount?: number;
+};
+
+type CustomSelectProps = SingleSelectProps | MultipleSelectProps;
+
+export default function CustomSelect(props: CustomSelectProps) {
+  const {
+    label,
+    value,
+    onChange,
+    options,
+    placeholder = "Select",
+    renderValue,
+    fullWidth = true,
+    error = false,
+    helperText,
+    disabled = false,
+    multiple = false,
+  } = props;
+  
+  const maxCount = multiple ? props.maxCount : undefined;
+
+  const handleChange = (e: SelectChangeEvent<string | string[]>) => {
+    const newValue = e.target.value;
+    
+    if (multiple && Array.isArray(newValue) && maxCount) {
+      // Limit selections to maxCount
+      if (newValue.length <= maxCount) {
+        (onChange as ((value: string[]) => void) | undefined)?.(newValue);
+      }
+    } else if (multiple && Array.isArray(newValue)) {
+      (onChange as ((value: string[]) => void) | undefined)?.(newValue);
+    } else if (!multiple && typeof newValue === 'string') {
+      (onChange as ((value: string) => void) | undefined)?.(newValue);
+    }
   };
 
-  const defaultRenderValue = (selected: string) => {
-    if (!selected) {
-      return <span style={{ color: "#9ca3af" }}>{placeholder}</span>;
+  const defaultRenderValue = (selected: string | string[]) => {
+    if (!selected || (Array.isArray(selected) && selected.length === 0)) {
+      return (
+        <span style={{ color: "#9ca3af" }}>
+          {placeholder}
+        </span>
+      );
+    }
+
+    const truncateLabel = (label: string) => {
+      return label.length > 10
+        ? `${label.slice(0, 10)}...`
+        : label;
+    };
+
+    if (Array.isArray(selected)) {
+      return selected
+        .map((value) => {
+          const option = options.find(
+            (opt) => opt.value === value
+          );
+
+          return truncateLabel(option?.label ?? value);
+        })
+        .join(", ");
     }
 
     const selectedOption = options.find(
       (opt) => opt.value === selected
     );
 
-    return selectedOption?.label ?? selected;
+    return truncateLabel(selectedOption?.label ?? selected);
   };
 
   return (
@@ -73,11 +124,12 @@ export default function CustomSelect({
 
       <FormControl fullWidth={fullWidth} error={error}>
         <Select
-          value={value ?? ""}
+          value={value ?? (multiple ? [] : "")}
           disabled={disabled}
           displayEmpty
+          multiple={multiple}
           onChange={handleChange}
-          renderValue={renderValue || defaultRenderValue}
+          renderValue={(renderValue || defaultRenderValue) as (value: string | string[]) => React.ReactNode}
           sx={{
             height: 40,
             borderRadius: "8px",
@@ -101,19 +153,32 @@ export default function CustomSelect({
             },
           }}
         >
-          <MenuItem value="" disabled>
-            {placeholder}
-          </MenuItem>
-
-          {options.map((option) => (
-            <MenuItem
-              key={option.value}
-              value={option.value}
-              disabled={option.disabled}
-            >
-              {option.label}
+          {!multiple && (
+            <MenuItem value="" disabled>
+              {placeholder}
             </MenuItem>
-          ))}
+          )}
+
+          {options.map((option) => {
+            const isDisabled = Boolean(
+              option.disabled || 
+              (multiple && 
+               maxCount && 
+               Array.isArray(value) && 
+               value.length >= maxCount && 
+               !value.includes(option.value))
+            );
+            
+            return (
+              <MenuItem
+                key={option.value}
+                value={option.value}
+                disabled={isDisabled}
+              >
+                {option.label}
+              </MenuItem>
+            );
+          })}
         </Select>
         {!!helperText && <FormHelperText>{helperText}</FormHelperText>}
       </FormControl>

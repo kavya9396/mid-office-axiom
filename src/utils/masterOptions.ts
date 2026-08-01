@@ -182,3 +182,67 @@ export const toMasterLabel = (value: string, options: SelectOption[]): string =>
 
   return textValue;
 };
+
+export type ReasonRemark = {
+  iibCode: string;
+  name: string;
+  value: string;
+  type: "MEDICAL" | "NON_MEDICAL";
+};
+
+export type CategorizedReasonRemarks = {
+  medical: SelectOption[];
+  nonMedical: SelectOption[];
+  both: SelectOption[];
+};
+
+const normalizeReasonRemark = (remark: ReasonRemark): SelectOption => ({
+  label: remark.name || remark.value,
+  value: remark.iibCode || remark.value,
+  disabled: false,
+});
+
+export const extractReasonRemarks = (reasonRemarks?: unknown): ReasonRemark[] => {
+  if (!Array.isArray(reasonRemarks)) {
+    return [];
+  }
+
+  return (reasonRemarks as ReasonRemark[]).filter(
+    (remark) =>
+      remark &&
+      typeof remark === "object" &&
+      (remark.type === "MEDICAL" || remark.type === "NON_MEDICAL")
+  );
+};
+
+export const categorizeReasonRemarks = (reasonRemarks?: unknown): CategorizedReasonRemarks => {
+  const remarks = extractReasonRemarks(reasonRemarks);
+
+  const medical = remarks
+    .filter((remark) => remark.type === "MEDICAL")
+    .map(normalizeReasonRemark);
+
+  const nonMedical = remarks
+    .filter((remark) => remark.type === "NON_MEDICAL")
+    .map(normalizeReasonRemark);
+
+  const both = remarks.map(normalizeReasonRemark);
+
+  return {
+    medical,
+    nonMedical,
+    both,
+  };
+};
+
+export const getMedicalReasonRemarks = (reasonRemarks?: unknown): SelectOption[] => {
+  return categorizeReasonRemarks(reasonRemarks).medical;
+};
+
+export const getNonMedicalReasonRemarks = (reasonRemarks?: unknown): SelectOption[] => {
+  return categorizeReasonRemarks(reasonRemarks).nonMedical;
+};
+
+export const getAllReasonRemarks = (reasonRemarks?: unknown): SelectOption[] => {
+  return categorizeReasonRemarks(reasonRemarks).both;
+};

@@ -1480,7 +1480,71 @@
         "type": "PIVV"
       }
     ],
-    "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] }
+    "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] },
+    "reasonRemarks": [
+      {
+        "iibCode": "2228",
+        "name": "Skin disorder- Psoriasis",
+        "value": "Skin disorder- Psoriasis",
+        "type": "MEDICAL"
+      },
+      {
+        "iibCode": "1513",
+        "name": "Medical conditions that affect mood",
+        "value": "Medical conditions that affect mood",
+        "type": "MEDICAL"
+      },
+      {
+        "iibCode": "1601",
+        "name": "Abnormal detection of pus cells in Urine",
+        "value": "Abnormal detection of pus cells in Urine",
+        "type": "MEDICAL"
+      },
+      {
+        "iibCode": "1001",
+        "name": "Right bundle branch found in Electro cardiogram",
+        "value": "Right bundle branch found in Electro cardiogram",
+        "type": "MEDICAL"
+      },
+      {
+        "iibCode": "1706",
+        "name": "Recent history of Fracture",
+        "value": "Recent history of Fracture",
+        "type": "MEDICAL"
+      },
+      {
+        "iibCode": "4001",
+        "name": "Financially Not Eligible",
+        "value": "Financially Not Eligible",
+        "type": "NON_MEDICAL"
+      },
+      {
+        "iibCode": "2217",
+        "name": "Family History",
+        "value": "Family History",
+        "type": "NON_MEDICAL"
+      },
+      {
+        "iibCode": "3010",
+        "name": "Previous policy found as repudiated / Death claim",
+        "value": "Previous policy found as repudiated / Death claim",
+        "type": "NON_MEDICAL"
+      },
+      {
+        "iibCode": "5005",
+        "name": "Habits",
+        "value": "Habits",
+        "type": "NON_MEDICAL"
+      },
+      {
+        "iibCode": "5006",
+        "name": "Hazardous hobbies",
+        "value": "Hazardous hobbies",
+        "type": "NON_MEDICAL"
+      }
+    ],
+    "decision_master": [],
+    "requirement_status_master": []
   },
   "unknownTypes": []
 }

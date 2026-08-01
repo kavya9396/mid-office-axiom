@@ -18,7 +18,7 @@ import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
-import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { getAllReasonRemarks, getNonMedicalReasonRemarks, normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
@@ -79,14 +79,13 @@ const UWDecision = () => {
     const [uwDecision, setUwDecision] = useState("");
     const [decisionCode, setDecisionCode] = useState("");
     const [rejectReason, setRejectReason] = useState("");
-    const [declineReasons, setDeclineReasons] = useState(["", "", ""]);
+    const [declineReasons, setDeclineReasons] = useState<string[]>([]);
     const [postponeReason, setPostponeReason] = useState("");
     const [postponementPeriod, setPostponementPeriod] = useState("");
     const [smokerStatus, setSmokerStatus] = useState("");
     const [counterOfferTable, setCounterOfferTable] = useState(createCounterOfferTableState);
     const [parallelDecision, setParallelDecision] = useState("");
     const [holdReasons, setHoldReasons] = useState("");
-    const [cuwReasons, setCuwReasons] = useState("");
     const [decisionType, setDecisionType] = useState("counterSign");
     const [referralValue, setReferralValue] = useState("");
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
@@ -94,30 +93,27 @@ const UWDecision = () => {
     const [submitLoading, setSubmitLoading] = useState(false);
     const [submitMessage, setSubmitMessage] = useState<string | null>(null);
     const [submitStatus, setSubmitStatus] = useState<"success" | "failure" | null>(null);
-
     const [excludedUserIds, setExcludedUserIds] = useState<string[]>([]);
     const [selectedThresholdUserId, setSelectedThresholdUserId] = useState("");
 
     const lastRoleRef = useRef<string | null>(null);
 
-        const caseUWDecisionOptions = useMemo(() => {
-            return filterAcceptDecisionOptions(normalizeDecisionOptions(masters, "caseUWDecision", true, true), drsData);
-        }, [drsData, masters]);
-        const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
+    const caseUWDecisionOptions = useMemo(() => {
+        return filterAcceptDecisionOptions(normalizeDecisionOptions(masters, "caseUWDecision", true, true), drsData);
+    }, [drsData, masters]);
+    const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
-        const firstUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "firstUWDecision", true, true), [masters]);
-        const parallelUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "parallelUWDecision", true, true), [masters]);
-        const rejectReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "rejectReason", true, true), [masters]);
-        const declineReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "declineReason", true, true), [masters]);
-        const postponeReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "postponeReason", true, true), [masters]);
-        const postponementPeriodOptions = useMemo(() => normalizeDecisionOptions(masters, "postponementPeriod", true, true), [masters]);
-        const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason", true, true), [masters]);
-        const accuityReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "acuityReferralReason", true, true), [masters]);
-        const reinsurerReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerReferralReason", true, true), [masters]);
-        const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason", true, true), [masters]);
-        const cuwReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "cuwReferralReason", false, true), [masters]);
-        const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
+    const firstUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "firstUWDecision", true, true), [masters]);
+    const parallelUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "parallelUWDecision", true, true), [masters]);
+    const postponementPeriodOptions = useMemo(() => normalizeDecisionOptions(masters, "postponementPeriod", true, true), [masters]);
+    const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason", true, true), [masters]);
+    const reinsurerReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerReferralReason", true, true), [masters]);
+    const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason", true, true), [masters]);
+    const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
+
+    const nonMedicalOptions = getNonMedicalReasonRemarks(masters.reasonRemarks);
+    const allOptions = getAllReasonRemarks(masters.reasonRemarks);
 
     const showDecisionCode = [
         "Accept",
@@ -159,18 +155,6 @@ const UWDecision = () => {
     const resolvedSmokerStatus = isAcceptDecision
         ? (smokerStatus || "Non Smoker")
         : smokerStatus;
-
-    const getDeclineReasonOptions = (index: number) => {
-        const selectedInOtherDropdowns = new Set(
-            declineReasons
-                .filter((reason, reasonIndex) => reasonIndex !== index && reason)
-        );
-
-        return declineReasonOptions.filter(
-            (option) =>
-                !selectedInOtherDropdowns.has(option.value) || option.value === declineReasons[index]
-        );
-    };
 
     const updateCounterOfferCell = (
         rowKey: CounterOfferRowKey,
@@ -266,6 +250,13 @@ const UWDecision = () => {
             return;
         }
 
+        // Validate decline reasons selection
+        if (isDeclineDecision && declineReasons.length === 0) {
+            setSubmitMessage("Please select at least one decline reason.");
+            setSubmitStatus("failure");
+            return;
+        }
+
         setConfirmationDialogOpen(true);
     };
 
@@ -298,11 +289,6 @@ const UWDecision = () => {
         "Refer to Risk": {
             label: "Risk Referral Reasons",
             options: riskReferralReasonOptions,
-        },
-
-        "Refer to Accuity": {
-            label: "Accuity Referral Reasons",
-            options: accuityReferralReasonOptions,
         },
 
         "Refer to Reinsurer": {
@@ -390,7 +376,7 @@ const UWDecision = () => {
                                     setCaseUWDecision(value);
                                     setReferralValue("");
                                     setRejectReason("");
-                                    setDeclineReasons(["", "", ""]);
+                                    setDeclineReasons([]);
                                     setPostponeReason("");
                                     setPostponementPeriod("");
                                     setCounterOfferTable(createCounterOfferTableState());
@@ -459,47 +445,20 @@ const UWDecision = () => {
                                     label="Reject Reason"
                                     value={rejectReason}
                                     onChange={setRejectReason}
-                                    options={rejectReasonOptions}
+                                    options={nonMedicalOptions}
                                 />
                             )}
 
                             {isDeclineDecision && (
                                 <>
                                     <CustomSelect
-                                        label="Decline Reason 1"
-                                        value={declineReasons[0]}
-                                        onChange={(value: string) => {
-                                            setDeclineReasons((prev) => {
-                                                const next = [...prev];
-                                                next[0] = value;
-                                                return next;
-                                            });
-                                        }}
-                                        options={getDeclineReasonOptions(0)}
-                                    />
-                                    <CustomSelect
-                                        label="Decline Reason 2"
-                                        value={declineReasons[1]}
-                                        onChange={(value: string) => {
-                                            setDeclineReasons((prev) => {
-                                                const next = [...prev];
-                                                next[1] = value;
-                                                return next;
-                                            });
-                                        }}
-                                        options={getDeclineReasonOptions(1)}
-                                    />
-                                    <CustomSelect
-                                        label="Decline Reason 3"
-                                        value={declineReasons[2]}
-                                        onChange={(value: string) => {
-                                            setDeclineReasons((prev) => {
-                                                const next = [...prev];
-                                                next[2] = value;
-                                                return next;
-                                            });
-                                        }}
-                                        options={getDeclineReasonOptions(2)}
+                                        label="Decline Reason"
+                                        multiple={true}
+                                        maxCount={3}
+                                        value={declineReasons}
+                                        onChange={setDeclineReasons}
+                                        options={allOptions}
+                                        placeholder="Select reasons"
                                     />
                                 </>
                             )}
@@ -510,7 +469,7 @@ const UWDecision = () => {
                                         label="Postpone Reason"
                                         value={postponeReason}
                                         onChange={setPostponeReason}
-                                        options={postponeReasonOptions}
+                                        options={allOptions}
                                     />
                                     <CustomSelect
                                         label="Postponement Period"
@@ -578,27 +537,14 @@ const UWDecision = () => {
                                 />
                             )}
 
-                            {
-                                caseUWDecisionLabel === "Hold" && (
-                                    <CustomSelect
-                                        label="Hold Reasons"
-                                        value={holdReasons}
-                                        onChange={setHoldReasons}
-                                        options={holdReasonOptions}
-                                    />
-                                )
-                            }
-
-                            {
-                                caseUWDecisionLabel === "Refer to CUW Claim Pool" && (
-                                    <CustomSelect
-                                        label="CUW Claim Pool Reasons"
-                                        value={cuwReasons}
-                                        onChange={setCuwReasons}
-                                        options={cuwReferralReasonOptions}
-                                    />
-                                )
-                            }
+                            {caseUWDecisionLabel === "Hold" && (
+                                <CustomSelect
+                                    label="Hold Reasons"
+                                    value={holdReasons}
+                                    onChange={setHoldReasons}
+                                    options={holdReasonOptions}
+                                />
+                            )}
 
                             {showFirstUWDecision && (
                                 <CustomSelect
