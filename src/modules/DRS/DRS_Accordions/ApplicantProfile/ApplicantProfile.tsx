@@ -30,6 +30,7 @@ import { setProductFaceValue } from "../../../../store/slices/drsSlice"
 // import { updateApplicantProfile } from "../../../../store/slices/drsSlice"
 import { useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
+import { drsThunk } from "../../../../store/thunks/drsThunk"
 import type { RootState } from "../../../../store/store"
 import FundDetails from "./FundDetails"
 import PaymentPayoutDetails from "./PaymentPayoutDetails"
@@ -991,14 +992,67 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         return Object.keys(errors).length === 0;
     };
 
-    const handleOpenEdit = () => {
+    const handleOpenEdit = async () => {
+        setFieldErrors({});
+        setSubmitError(null);
+
+        // Try to fetch latest DRS data for this application and map it to the edit form.
+        try {
+            setSubmitLoading(true);
+
+            if (applicationNumber) {
+                const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+                const drsResponse = await dispatch(
+                    drsThunk({
+                        applicationNo: applicationNumber,
+                        userId,
+                        roleType,
+                        sections: [],
+                    }),
+                ).unwrap();
+
+                const fetchedProfile = buildProfileFromReduxData(drsResponse.data, resolvedApplicantTab) ?? displayProfile;
+
+                const appOverview = (drsResponse.data as unknown as Record<string, unknown>)?.applicationOverview as Record<string, unknown> | undefined;
+                const productList = Array.isArray(appOverview?.productDetail)
+                    ? (appOverview!.productDetail as Array<Record<string, unknown>>)
+                    : ((drsResponse.data?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
+
+                const currentFaceValue = String(productList[0]?.faceValue ?? "");
+
+                const nextFormData = {
+                    ...buildFormData(fetchedProfile),
+                    faceValue: currentFaceValue,
+                };
+
+                const commStateOptions = getStateOptionsForCountry(masters.state, nextFormData.communicationCountry, countryOptions);
+                const permStateOptions = getStateOptionsForCountry(masters.state, nextFormData.permanentCountry, countryOptions);
+
+                const optionMap = {
+                    ...applicantProfileMasterOptions,
+                    communicationState: commStateOptions,
+                    permanentState: permStateOptions,
+                } as Partial<Record<keyof ApplicantEditForm, SelectOption[]>>;
+
+                setFormData(toMasterFormData(nextFormData, optionMap));
+                setOpenEditDialog(true);
+                setSubmitLoading(false);
+                return;
+            }
+        } catch (error) {
+            // If fetch fails, fall back to existing displayProfile mapping
+            console.warn("Failed to fetch DRS data on edit:", error);
+        } finally {
+            setSubmitLoading(false);
+        }
+
+        // Fallback: populate from existing displayProfile in store
         const appOverview = (drsData as unknown as Record<string, unknown> | null)?.applicationOverview as Record<string, unknown> | undefined;
         const productList = Array.isArray(appOverview?.productDetail)
             ? (appOverview!.productDetail as Array<Record<string, unknown>>)
             : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
         const currentFaceValue = String(productList[0]?.faceValue ?? "");
-        setFieldErrors({});
-        setSubmitError(null);
+
         const nextFormData = {
             ...buildFormData(displayProfile),
             faceValue: currentFaceValue,
