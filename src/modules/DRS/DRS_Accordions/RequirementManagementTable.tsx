@@ -567,7 +567,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             ? { team: defaultTeam, profile: "" }
                             : { team: defaultTeam };
                         const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
-                        console.log('payload',payload)
                         const cacheKeyObj = includeBlankProfile ? { team: defaultTeam, profile: "" } : { team: defaultTeam };
                         const cacheKey = JSON.stringify(cacheKeyObj);
 
@@ -688,20 +687,17 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const fetchRequirementMst = async (payload: unknown) => {
         try {
-            console.debug("RequirementManagement: fetching masters with payload:", payload, "url:", apiUrl("masters"));
             const data = await apiRequest<Record<string, unknown>>({ url: apiUrl("masters"), method: "POST", body: payload });
             // mock file structure: { data: { requirement_mst: { ... } } }
             const mst = (data as any)?.data?.requirement_mst ?? (data as any)?.requirement_mst ?? data;
             return mst;
         } catch (err) {
-            console.debug("RequirementManagement: fetch masters failed", err);
             return null;
         }
     };
 
     const cacheOptionsForPayload = (payload: Record<string, unknown>, options: Option[]) => {
         const key = JSON.stringify(payload);
-        console.debug("RequirementManagement: caching options for", payload, options);
         setRequirementOptionsCache((prev) => ({ ...prev, [key]: options }));
     };
 
@@ -746,14 +742,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     .flatMap((src) => toMasterList(src))
                     .filter(Boolean) as Array<Record<string, unknown>>;
 
-                try {
-                    // eslint-disable-next-line no-console
-                    console.debug("RequirementManagement: candidateSources:", candidateSources);
-                    // eslint-disable-next-line no-console
-                    console.debug("RequirementManagement: rawList length:", rawList.length);
-                } catch {
-                    // ignore
-                }
                 const statusRaw = rawList.filter((opt) => String(opt?.code ?? "").trim().toUpperCase() === "REQT_ST");
 
                 let foundFromMisc = false;
@@ -797,12 +785,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         })
                         .filter(Boolean) as Option[];
 
-                    try {
-                        // eslint-disable-next-line no-console
-                        console.debug("RequirementManagement: statusRaw length:", statusRaw.length, "mapped:", mapped);
-                    } catch {
-                        // ignore
-                    }
 
                     if (mapped.length > 0) {
                         foundFromMisc = true;

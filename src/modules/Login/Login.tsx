@@ -18,7 +18,8 @@ import { useNavigate } from "react-router-dom";
 import { loginThunk } from "../../store/thunks/authThunk";
 import { useAppDispatch } from "../../store/hooks";
 import { getInboxPath } from "../../routes/routes";
-import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
+import { loadMasterData } from "../Helper/MasterHelper";
+import { DRS_MASTER_KEYS } from "../DRS/drsMasters";
 
 type LoginForm = {
   username: string;
@@ -64,7 +65,7 @@ const navigate = useNavigate();
       // Skip this if your masters API also depends on authentication
       // if (!USE_MOCK_LOGIN) {
         try {
-          await dispatch(fetchMastersForSession());
+          await loadMasterData(dispatch, {types:DRS_MASTER_KEYS});
         } catch (error) {
           console.error("Failed to load master data", error);
         }

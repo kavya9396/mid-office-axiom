@@ -1,6 +1,6 @@
 import type { ApplicantInfoTab, ApplicantTab } from "../types/drs.types";
 
-export const title = {breDecision:"Bre Decision" }
+export const title = {breDecision:"Bre Decision",decision:"Case Decision" }
 
 export const reasonOptions = [
   { value: "tea", label: "Tea / Coffee Break" },

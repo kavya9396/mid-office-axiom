@@ -3016,7 +3016,6 @@ const ViewFinancial = () => {
         documents: transformFinancialFieldValuesToApiFormat(financialFieldValues),
       };
 
-      console.log("[Financial][Save] request payload:", requestPayload);
 
       const response = await apiRequest<SubmitResponse, unknown>({
         url: url("financialSaveAndCalculate" as ApiKey),

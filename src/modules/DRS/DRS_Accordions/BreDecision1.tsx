@@ -38,7 +38,6 @@ const isfinalBreSuccess =
   finalBreStatus
     ? true
     : false;
-console.log('drsData 1',breDecisionData,finalBreDecisionData);
 const eventName = businessType == 'retail' ? 'BRE-RETAIL' : 'BRE_GROUP';
 const handleRefresh = async () => {
 const response = await dispatch(

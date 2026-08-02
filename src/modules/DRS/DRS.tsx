@@ -58,7 +58,7 @@ const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
 const mapper = {
     "CMO Pool": "RETAIL_CMO_POOL",
     "CUW Pool": "RETAIL_CUW_POOL",
-    "CVT Pool": "RETAIL_CVT_POOL",
+    "CVT_TASK": "CVT_TASK",
     "CPT_TASK":"RETAIL_CPT_POOL",
     "HOD Pool":"RETAIL_HOD_POOL",
     "Sr UW Pool":"RETAIL_SR_UW_POOL",
@@ -299,7 +299,6 @@ const DRS = () => {
     roleType === "CPT_TASK"
         ? [...sections, "summary"]
         : sections;
-        console.log('const requestSections',requestSections)
             try {
                 const drsResponse = await dispatch(
                     drsThunk({

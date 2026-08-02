@@ -31,6 +31,7 @@ import MedicalInsuranceDetails from "./DRS_Accordions/MedicalInsuranceDetails";
 import DocumentRequired from "./DRS_Accordions/DocumentRequired";
 import PreLogin from "./DRS_Accordions/PreLogin";
 import BreDecision1 from "./DRS_Accordions/BreDecision1";
+import Decision from "./DRS_Accordions/decision";
  
 export const accordionRegistry = {
   breDecision1:BreDecision1,
@@ -65,6 +66,7 @@ export const accordionRegistry = {
   medicalInsuranceDetails: MedicalInsuranceDetails,
   documentRequired: DocumentRequired,
   preLogin: PreLogin,
+  decision:Decision
 } as const;
  
 type AccordionKey = keyof typeof accordionRegistry;
@@ -136,13 +138,13 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "requirementManagement",
     "cvtDecision",
     "quickLinks"
-  ],RETAIL_CVT_POOL: [
+  ],CVT_TASK: [
     "breDecision1",
     "summary",
     "applicationOverview",
     "pivvSection",
     "requirementManagement",
-    "cvtDecision",
+    "decision",
     "quickLinks"
   ],
   RETAIL_CPT_POOL: [

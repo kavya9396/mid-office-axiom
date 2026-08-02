@@ -1,3 +1,4 @@
+
 export type GrievanceReport = {
   id: number;
   fupCode: string;
@@ -1255,3 +1256,20 @@ export interface ApplicationDetails {
   lastUser: string;
   roleType: string;
 }
+export type MasterRequest = {
+  types:string[];
+};
+
+export interface MiscMaster {
+  code: string;
+  description: string;
+  value: string;
+  isActive: string;
+  miscMastId: string;
+}
+
+export type MasterResponse = {
+  data: {
+    misc: MiscMaster[];
+  };
+};

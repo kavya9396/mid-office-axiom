@@ -210,15 +210,7 @@ const CVTDecision = () => {
 
         const cvtRaw = rawList.filter((opt) => String(opt?.code ?? opt?.key ?? "").trim().toUpperCase() === "CVT");
 
-        // Debug: log master misc and counts when running in browser devtools
-        try {
-            // eslint-disable-next-line no-console
-            console.debug("CVTDecision masters.misc:", misc);
-            // eslint-disable-next-line no-console
-            console.debug("CVTDecision rawList.length:", rawList.length, "cvtRaw.length:", cvtRaw.length);
-        } catch (e) {
-            // ignore
-        }
+     
 
         const mapped = cvtRaw
             .map((option) => {
