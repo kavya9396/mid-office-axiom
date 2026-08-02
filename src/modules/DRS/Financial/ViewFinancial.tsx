@@ -3,14 +3,12 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
-// import Badge from "../../../components/ui/Badge/Badge";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
 import { useAppContext } from "../../../hooks/useAppContext";
-// import { BriefcaseIcon, PhoneIcon, SmsIcon, WalletIcon } from "../../../icons/Icons";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { apiRequest } from "../../../services/api";
 import { url } from "../../../services/apiConfig";
@@ -22,9 +20,7 @@ import type { ApplicantTab, FinancialResponse, FinancialResponseSection, Financi
 import { applicantTabs } from "../../../utils/constant";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
 import { getErrorMessage } from "../../../config/errorMessages";
-// import { formatCurrencyINR } from "../../../utils/helpers";
 import BreDecision from "../DRS_Accordions/BreDecision";
-// import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
 import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
 import {
@@ -188,37 +184,6 @@ const mapDocumentsToFinancialSections = (
     );
   }
 
-  // const caBalanceSheet = asRecord(documents.ca_balance_sheet);
-  // if (caBalanceSheet) {
-  //   sections.push(
-  //     buildSectionFromItems("caCertifiedBalanceSheet", createItems([
-  //       ["Is Balance Sheet in the name of LA", caBalanceSheet.nameMatchInd],
-  //       ["Fixed Assets", caBalanceSheet.fixedAssets],
-  //       ["Other Investments", caBalanceSheet.otherInvestments],
-  //       ["Cash", caBalanceSheet.cash],
-  //       ["Banks", caBalanceSheet.banks],
-  //       ["Secured Loans", caBalanceSheet.securedLoans],
-  //       ["Net Worth", caBalanceSheet.netWorth],
-  //       ["Derived Income", caBalanceSheet.derivedIncome],
-  //       ["Average Income", caBalanceSheet.derivedIncome],
-  //     ]))
-  //   );
-  // }
-
-  // const caNetworth = asRecord(documents.ca_networth);
-  // if (caNetworth) {
-  //   sections.push(
-  //     buildSectionFromItems("caCertifiedNetWorthStatement", createItems([
-  //       ["Is Net Worth Statement in the name of LA", caNetworth.nameMatchInd],
-  //       ["Is Certified by CA", caNetworth.isCertifiedByCa],
-  //       ["Net Worth as per Statement", caNetworth.netWorth],
-  //       ["Income Earned", caNetworth.incomeEarned],
-  //       ["Derived Income", caNetworth.derivedIncome],
-  //       ["Average Income", caNetworth.derivedIncome],
-  //     ]))
-  //   );
-  // }
-
   const commissionStatement = asRecord(documents.commission_statement);
   if (commissionStatement) {
     const months = getMonthRows(commissionStatement);
@@ -309,7 +274,6 @@ const mapDocumentsToFinancialSections = (
     const years = getYearRows(form16);
     sections.push(
       buildSectionFromItems("form16", createItems([
-        ["Entity", form16.companyName],
         ["ASSESSMENT", years[0]?.assessmentYear],
         ["ASSESSMENT Year 2", years[1]?.assessmentYear],
         ["ASSESSMENT Year 3", years[2]?.assessmentYear],
@@ -319,8 +283,6 @@ const mapDocumentsToFinancialSections = (
         ["Average Annual Income", form16.avgAnnualIncomeCalculated],
         ["Life Assured Pan No", form16.panNumber],
         ["Life Assured Name", form16.partyName],
-        ["Is Life Assured Name Same With Doc Name?", form16.nameMatchInd],
-        ["Company Name", form16.companyName],
       ]))
     );
   }
@@ -409,6 +371,9 @@ const mapDocumentsToFinancialSections = (
         ["Gross Total Income Year 3", years[2]?.grossTotalIncomeCalculated],
         ["Total Gross Total Income", itrNonIndividual.totalGrossTotalIncomeCalculated],
         ["Average Gross Total Income", itrNonIndividual.avgGrossTotalIncomeCalculated],
+        ["Pan Number Matched with Barcode Number", years[0]?.panNumberMatchedWithBarcodeNumber],
+        ["Pan Number Matched with Barcode Number Year 2", years[1]?.panNumberMatchedWithBarcodeNumber],
+        ["Pan Number Matched with Barcode Number Year 3", years[2]?.panNumberMatchedWithBarcodeNumber],
       ]))
     );
   }
@@ -456,6 +421,9 @@ const mapDocumentsToFinancialSections = (
         ["PF deduction - Salaried customers", itrIndividual.pfDeduction],
         ["Life Assured Name", itrIndividual.partyName],
         ["Is Life Assured Name Same?", itrIndividual.nameMatchInd],
+        ["Pan Number Matched with Barcode Number", years[0]?.panNumberMatchedWithBarcodeNumber],
+        ["Pan Number Matched with Barcode Number Year 2", years[1]?.panNumberMatchedWithBarcodeNumber],
+        ["Pan Number Matched with Barcode Number Year 3", years[2]?.panNumberMatchedWithBarcodeNumber],
       ]))
     );
   }
@@ -830,45 +798,6 @@ const getStoredDrsNewTabContext = (): DrsNewTabContext => {
   }
 };
 
-// const getMemberSummary = (member?: MedicalSummaryMember) => {
-//   if (!member) {
-//     return undefined;
-//   }
-
-//   if (member.memberType === "proposer") {
-//     return member.proposerSummary;
-//   }
-
-//   if (member.memberType === "lifeassured1") {
-//     return member.lifeassured1Summary;
-//   }
-
-//   if (member.memberType === "lifeassured2") {
-//     return member.lifeassured2Summary;
-//   }
-
-//   return undefined;
-// };
-
-// const getApplicantHeaderData = (summary?: MedicalSummaryMember) => {
-//   const memberSummary = getMemberSummary(summary);
-
-//   return {
-//     name:
-//       [memberSummary?.firstName, memberSummary?.middleName, memberSummary?.lastName]
-//         .filter(Boolean)
-//         .join(" ") || "-",
-//     dob: memberSummary?.dob ?? "-",
-//     age: memberSummary?.age ?? "-",
-//     gender: memberSummary?.gender ?? "-",
-//     profileImage: memberSummary?.profileImage ?? "",
-//     occupation: memberSummary?.occupation ?? "-",
-//     annualIncome: memberSummary?.annualIncome,
-//     email: memberSummary?.email ?? "-",
-//     mobile: memberSummary?.mobile ?? "-",
-//   };
-// };
-
 const readOnlyBoxSx = {
   minHeight: 38,
   px: 1.25,
@@ -906,9 +835,9 @@ const FORM_16_TABLE_LABELS = [
   "Average Annual Income",
   "Life Assured Pan No",
   "Life Assured Name",
+  "Is Life Assured Name Same With Doc Name?",
+  "Company Name",
 ];
-
-const FORM_16_TOP_FIELDS = ["Entity", "Company Name", "Is Life Assured Name Same With Doc Name?"];
 
 const FORM_16A_TABLE_LABELS = [
   "Assessment Year",
@@ -943,6 +872,7 @@ const ITR_NON_INDIVIDUAL_TABLE_LABELS = [
   "Gross Total Income",
   "Total Gross Total Income",
   "Average Gross Total Income",
+  "Pan Number Matched with Barcode Number",
 ];
 
 const ITR_INDIVIDUAL_TABLE_LABELS = [
@@ -962,6 +892,7 @@ const ITR_INDIVIDUAL_TABLE_LABELS = [
   "PF deduction - Salaried customers",
   "Life Assured Name",
   "Is Life Assured Name Same?",
+  "Pan Number Matched with Barcode Number",
 ];
 
 const PROFIT_AND_LOSS_TABLE_LABELS = [
@@ -1005,7 +936,6 @@ const ITR_INDIVIDUAL_TOP_FIELDS = ["Name of Organisation/Firm", "Permanent Accou
 const PROFIT_AND_LOSS_TOP_FIELDS = ["Name of Organization/Firm"];
 
 const FORM_J_ROW_LABELS = [
-  "Is Form J in the name of LA",
   "Month1",
   "Month2",
   "Month3",
@@ -1019,20 +949,20 @@ const COMMISSION_MONTH_LABELS = ["Month 1", "Month 2", "Month 3", "Month 4", "Mo
 const COMMISSION_AVERAGE_PM_LABEL = "Average commission pm";
 const COMMISSION_AVERAGE_ANNUAL_LABEL = "Average Annual Income";
 
-type CommissionStatementCalculationRequest = {
-  applicationId: string;
-  roleType: string;
-  months: Record<string, string>;
-};
+// type CommissionStatementCalculationRequest = {
+//   applicationId: string;
+//   roleType: string;
+//   months: Record<string, string>;
+// };
 
-type CommissionStatementCalculationResponse = {
-  averageCommissionPm?: string | number;
-  averageAnnualIncome?: string | number;
-  data?: {
-    averageCommissionPm?: string | number;
-    averageAnnualIncome?: string | number;
-  };
-};
+// type CommissionStatementCalculationResponse = {
+//   averageCommissionPm?: string | number;
+//   averageAnnualIncome?: string | number;
+//   data?: {
+//     averageCommissionPm?: string | number;
+//     averageAnnualIncome?: string | number;
+//   };
+// };
 
 type SubmitResponse = {
   success?: boolean;
@@ -1270,53 +1200,130 @@ const isAlwaysReadOnlyFinancialField = (sectionKey: FinancialSectionKey, label: 
 const toStringField = (value: string | number | undefined) =>
   value == null ? undefined : String(value);
 
-const parseCommissionAmount = (value: string) => {
-  const normalizedValue = value.replace(/,/g, "").trim();
+const getString = (value: string | undefined) => {
+  return value && value.trim() !== "" ? value.trim() : undefined;
+};
+
+const getNumeric = (value: string | undefined) => {
+  if (!value || value.trim() === "") {
+    return undefined;
+  }
+
+  const numericValue = Number.parseFloat(value);
+  return Number.isNaN(numericValue) ? undefined : numericValue;
+};
+
+const formatDdMmYyyyToIsoDate = (value: string | undefined) => {
+  const normalizedValue = getString(value);
 
   if (!normalizedValue) {
-    return null;
+    return undefined;
   }
 
-  const amount = Number(normalizedValue);
-  return Number.isFinite(amount) ? amount : null;
-};
-
-const formatCalculatedAmount = (value: number) => {
-  if (Number.isInteger(value)) {
-    return String(value);
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(normalizedValue);
+  if (!match) {
+    return normalizedValue;
   }
 
-  return value.toFixed(2);
+  const [, day, month, year] = match;
+  return `${year}-${month}-${day}`;
 };
 
-const calculateCommissionStatementValues = (months: Record<string, string>) => {
-  const enteredAmounts = COMMISSION_MONTH_LABELS
-    .map((label) => parseCommissionAmount(months[label] ?? ""))
-    .filter((amount): amount is number => amount != null);
+const hasDocumentFields = (document: Record<string, unknown>) => Object.keys(document).length > 0;
 
-  if (enteredAmounts.length === 0) {
-    return {
-      averageCommissionPm: "",
-      averageAnnualIncome: "",
-    };
+const assignTextField = (
+  document: Record<string, unknown>,
+  targetKey: string,
+  value: string | undefined,
+) => {
+  const normalizedValue = getString(value);
+
+  if (normalizedValue) {
+    document[targetKey] = normalizedValue;
   }
-
-  const totalCommission = enteredAmounts.reduce((total, amount) => total + amount, 0);
-  const averageCommissionPm = totalCommission / enteredAmounts.length;
-
-  return {
-    averageCommissionPm: formatCalculatedAmount(averageCommissionPm),
-    averageAnnualIncome: formatCalculatedAmount(averageCommissionPm * 12),
-  };
 };
 
-const getCommissionCalculationResponseValues = (
-  response: CommissionStatementCalculationResponse,
-  fallback: ReturnType<typeof calculateCommissionStatementValues>,
-) => ({
-  averageCommissionPm: String(response.data?.averageCommissionPm ?? response.averageCommissionPm ?? fallback.averageCommissionPm),
-  averageAnnualIncome: String(response.data?.averageAnnualIncome ?? response.averageAnnualIncome ?? fallback.averageAnnualIncome),
-});
+const assignNumberField = (
+  document: Record<string, unknown>,
+  targetKey: string,
+  value: string | undefined,
+) => {
+  const normalizedValue = getNumeric(value);
+
+  if (normalizedValue != null) {
+    document[targetKey] = normalizedValue;
+  }
+};
+
+const buildMonthlyEntries = (
+  values: Record<string, string>,
+  labels: readonly string[],
+  valueKey: string,
+) => {
+  const currentYear = new Date().getFullYear();
+
+  return labels.reduce<Array<Record<string, unknown>>>((months, label, index) => {
+    const amount = getNumeric(values[label]);
+
+    if (amount != null) {
+      months.push({
+        periodYear: currentYear,
+        periodMonth: index + 1,
+        [valueKey]: amount,
+      });
+    }
+
+    return months;
+  }, []);
+};
+
+// const parseCommissionAmount = (value: string) => {
+//   const normalizedValue = value.replace(/,/g, "").trim();
+
+//   if (!normalizedValue) {
+//     return null;
+//   }
+
+//   const amount = Number(normalizedValue);
+//   return Number.isFinite(amount) ? amount : null;
+// };
+
+// const formatCalculatedAmount = (value: number) => {
+//   if (Number.isInteger(value)) {
+//     return String(value);
+//   }
+
+//   return value.toFixed(2);
+// };
+
+// const calculateCommissionStatementValues = (months: Record<string, string>) => {
+//   const enteredAmounts = COMMISSION_MONTH_LABELS
+//     .map((label) => parseCommissionAmount(months[label] ?? ""))
+//     .filter((amount): amount is number => amount != null);
+
+//   if (enteredAmounts.length === 0) {
+//     return {
+//       averageCommissionPm: "",
+//       averageAnnualIncome: "",
+//     };
+//   }
+
+//   const totalCommission = enteredAmounts.reduce((total, amount) => total + amount, 0);
+//   const averageCommissionPm = totalCommission / enteredAmounts.length;
+
+//   return {
+//     averageCommissionPm: formatCalculatedAmount(averageCommissionPm),
+//     averageAnnualIncome: formatCalculatedAmount(averageCommissionPm * 12),
+//   };
+// };
+
+// const getCommissionCalculationResponseValues = (
+//   response: CommissionStatementCalculationResponse,
+//   fallback: ReturnType<typeof calculateCommissionStatementValues>,
+// ) => ({
+//   averageCommissionPm: String(response.data?.averageCommissionPm ?? response.averageCommissionPm ?? fallback.averageCommissionPm),
+//   averageAnnualIncome: String(response.data?.averageAnnualIncome ?? response.averageAnnualIncome ?? fallback.averageAnnualIncome),
+// });
 
 const isSecondaryRepeatedField = (label: string) => {
   const trimmedLabel = label.trim();
@@ -1515,47 +1522,8 @@ const renderForm16Section = (
   sectionErrors: Record<string, string>,
   onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
 ) => {
-  const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
-    accumulator[item.label.toLowerCase()] = item;
-    return accumulator;
-  }, {});
-
   return (
     <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
-          gap: 1.25,
-        }}
-      >
-        {FORM_16_TOP_FIELDS.map((label) => {
-          const item = byLabel[label.toLowerCase()];
-          if (!item) {
-            return null;
-          }
-
-          const required = isFieldMandatory(item);
-          const value = getFieldValue(values, section.key, item.label, item.value);
-
-          return (
-            <Box key={label}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
-                <Typography sx={{ fontSize: 12, color: "#475467" }}>{item.label}</Typography>
-                {required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
-              </Box>
-              {renderFieldValue(
-                value,
-                isEditable && !isAlwaysReadOnlyFinancialField(section.key, item.label),
-                (nextValue) => onFieldValueChange(section.key, item.label, nextValue),
-                required,
-                sectionErrors[item.label]
-              )}
-            </Box>
-          );
-        })}
-      </Box>
-
       {renderMultiYearTableSection(
         section,
         values,
@@ -1901,6 +1869,8 @@ const renderFormJSection = (
     return accumulator;
   }, {});
 
+  const formJNameMatchItem = byLabel["is form j in the name of la"];
+
   const tableRows: FormJTableRow[] = FORM_J_ROW_LABELS.map((rowLabel) => {
     const rowName = rowLabel === "Is Form J in the name of LA" ? rowLabel : rowLabel;
     const receipt1FieldLabel = rowLabel === "Is Form J in the name of LA" ? rowName : `${rowLabel} Receipt1`;
@@ -2012,7 +1982,37 @@ const renderFormJSection = (
     },
   ];
 
-  return <CustomTable title="FORM J" columns={tableColumns} data={tableRows} />;
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+        {formJNameMatchItem && (
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+              gap: 1.25,
+            }}
+          >
+            <Box>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
+                <Typography sx={{ fontSize: 12, color: "#475467" }}>{formJNameMatchItem.label}</Typography>
+                {isFieldMandatory(formJNameMatchItem) && (
+                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>
+                )}
+              </Box>
+              {renderFieldValue(
+                getFieldValue(values, section.key, formJNameMatchItem.label, formJNameMatchItem.value),
+                isEditable && !isAlwaysReadOnlyFinancialField(section.key, formJNameMatchItem.label),
+                (nextValue) => onFieldValueChange(section.key, formJNameMatchItem.label, nextValue),
+                isFieldMandatory(formJNameMatchItem),
+                sectionErrors[formJNameMatchItem.label]
+              )}
+            </Box>
+          </Box>
+        )}
+
+        <CustomTable title="FORM J" columns={tableColumns} data={tableRows} />
+      </Box>
+    );
 };
 
 const renderStandardSection = (
@@ -2148,72 +2148,72 @@ const ViewFinancial = () => {
     void fetchFinancial();
   }, [dispatch, drsApplicationNumber, drsPartyId, financialFetchPayloadError, roleType]);
 
-  const commissionMonthValueKey = useMemo(
-    () => COMMISSION_MONTH_LABELS.map((label) => financialFieldValues.commission_statement?.[label] ?? "").join("|"),
-    [financialFieldValues]
-  );
+  // const commissionMonthValueKey = useMemo(
+  //   () => COMMISSION_MONTH_LABELS.map((label) => financialFieldValues.commission_statement?.[label] ?? "").join("|"),
+  //   [financialFieldValues]
+  // );
 
-  useEffect(() => {
-    if (!isEditable) {
-      return;
-    }
+  // useEffect(() => {
+  //   if (!isEditable) {
+  //     return;
+  //   }
 
-    const enteredMonthValues = commissionMonthValueKey.split("|");
-    const months = COMMISSION_MONTH_LABELS.reduce<Record<string, string>>((accumulator, label, index) => {
-      accumulator[label] = enteredMonthValues[index] ?? "";
-      return accumulator;
-    }, {});
+  //   const enteredMonthValues = commissionMonthValueKey.split("|");
+  //   const months = COMMISSION_MONTH_LABELS.reduce<Record<string, string>>((accumulator, label, index) => {
+  //     accumulator[label] = enteredMonthValues[index] ?? "";
+  //     return accumulator;
+  //   }, {});
 
-    const fallbackValues = calculateCommissionStatementValues(months);
-    const hasEnteredMonth = COMMISSION_MONTH_LABELS.some((label) => months[label].trim());
-    const hasInvalidMonth = COMMISSION_MONTH_LABELS.some((label) => {
-      const value = months[label].trim();
-      return Boolean(value) && parseCommissionAmount(value) == null;
-    });
+  //   const fallbackValues = calculateCommissionStatementValues(months);
+  //   const hasEnteredMonth = COMMISSION_MONTH_LABELS.some((label) => months[label].trim());
+  //   const hasInvalidMonth = COMMISSION_MONTH_LABELS.some((label) => {
+  //     const value = months[label].trim();
+  //     return Boolean(value) && parseCommissionAmount(value) == null;
+  //   });
 
-    if (!hasEnteredMonth) {
-      return;
-    }
+  //   if (!hasEnteredMonth) {
+  //     return;
+  //   }
 
-    if (hasInvalidMonth) {
-      return;
-    }
+  //   if (hasInvalidMonth) {
+  //     return;
+  //   }
 
-    const timeoutId = window.setTimeout(async () => {
-      try {
-        const response = await apiRequest<CommissionStatementCalculationResponse, CommissionStatementCalculationRequest>({
-          url: url("financialCommissionCalculate" as ApiKey),
-          method: "POST",
-          body: {
-            applicationId: safeApplicationId,
-            roleType,
-            months,
-          },
-        });
-        const calculatedValues = getCommissionCalculationResponseValues(response, fallbackValues);
+  //   const timeoutId = window.setTimeout(async () => {
+  //     try {
+  //       const response = await apiRequest<CommissionStatementCalculationResponse, CommissionStatementCalculationRequest>({
+  //         url: url("financialCommissionCalculate" as ApiKey),
+  //         method: "POST",
+  //         body: {
+  //           applicationId: safeApplicationId,
+  //           roleType,
+  //           months,
+  //         },
+  //       });
+  //       const calculatedValues = getCommissionCalculationResponseValues(response, fallbackValues);
 
-        setFinancialFieldValues((currentValues) => ({
-          ...currentValues,
-          commission_statement: {
-            ...currentValues.commission_statement,
-            [COMMISSION_AVERAGE_PM_LABEL]: calculatedValues.averageCommissionPm,
-            [COMMISSION_AVERAGE_ANNUAL_LABEL]: calculatedValues.averageAnnualIncome,
-          },
-        }));
-      } catch {
-        setFinancialFieldValues((currentValues) => ({
-          ...currentValues,
-          commission_statement: {
-            ...currentValues.commission_statement,
-            [COMMISSION_AVERAGE_PM_LABEL]: fallbackValues.averageCommissionPm,
-            [COMMISSION_AVERAGE_ANNUAL_LABEL]: fallbackValues.averageAnnualIncome,
-          },
-        }));
-      }
-    }, 400);
+  //       setFinancialFieldValues((currentValues) => ({
+  //         ...currentValues,
+  //         commission_statement: {
+  //           ...currentValues.commission_statement,
+  //           [COMMISSION_AVERAGE_PM_LABEL]: calculatedValues.averageCommissionPm,
+  //           [COMMISSION_AVERAGE_ANNUAL_LABEL]: calculatedValues.averageAnnualIncome,
+  //         },
+  //       }));
+  //     } catch {
+  //       setFinancialFieldValues((currentValues) => ({
+  //         ...currentValues,
+  //         commission_statement: {
+  //           ...currentValues.commission_statement,
+  //           [COMMISSION_AVERAGE_PM_LABEL]: fallbackValues.averageCommissionPm,
+  //           [COMMISSION_AVERAGE_ANNUAL_LABEL]: fallbackValues.averageAnnualIncome,
+  //         },
+  //       }));
+  //     }
+  //   }, 400);
 
-    return () => window.clearTimeout(timeoutId);
-  }, [commissionMonthValueKey, isEditable, roleType, safeApplicationId]);
+  //   return () => window.clearTimeout(timeoutId);
+  // }, [commissionMonthValueKey, isEditable, roleType, safeApplicationId]);
 
   const availableMemberTypes = useMemo(
     () => financialData?.summary?.map((item) => item.memberType) ?? [],
@@ -2253,37 +2253,6 @@ const ViewFinancial = () => {
 
     return breDecision as Record<string, unknown>;
   }, [storedNewTabContext.breDecision]);
-
-  // const selectedApplicantSummary = useMemo(() => {
-  //   const preferred = financialData?.summary?.find((item) => item.memberType === currentApplicantTab);
-  //   if (preferred) {
-  //     return preferred;
-  //   }
-
-  //   if (visibleTabs[0]) {
-  //     return financialData?.summary?.find((item) => item.memberType === visibleTabs[0].key);
-  //   }
-
-  //   return financialData?.summary?.[0];
-  // }, [currentApplicantTab, financialData, visibleTabs]);
-
-  // const applicantData = isFormalRole
-  //   ? getFormalHeaderData(formalMemberProfile)
-  //   : getApplicantHeaderData(selectedApplicantSummary);
-
-  // const applicantInfoItems = useMemo(
-  //   () => [
-  //     { label: "Occupation", value: applicantData.occupation, icon: <BriefcaseIcon width={16} height={16} /> },
-  //     {
-  //       label: "Annual Income",
-  //       value: formatCurrencyINR(applicantData.annualIncome),
-  //       icon: <WalletIcon width={16} height={16} />,
-  //     },
-  //     { label: "Email", value: applicantData.email, icon: <SmsIcon width={16} height={16} /> },
-  //     { label: "Mobile", value: applicantData.mobile, icon: <PhoneIcon width={16} height={16} /> },
-  //   ],
-  //   [applicantData.annualIncome, applicantData.email, applicantData.mobile, applicantData.occupation]
-  // );
 
   const resolvedActiveSectionId = useMemo(
     () =>
@@ -2437,200 +2406,173 @@ const ViewFinancial = () => {
   ): FinancialDocumentsPayload => {
     const documents: FinancialDocumentsPayload = {};
 
-    // Helper to get numeric value or undefined
-    const getNumeric = (value: string | undefined) => {
-      if (!value || value.trim() === "") return undefined;
-      const num = parseFloat(value);
-      return isNaN(num) ? undefined : num;
-    };
-
-    // Helper to get string value or undefined
-    const getString = (value: string | undefined) => {
-      return value && value.trim() !== "" ? value.trim() : undefined;
-    };
-
     // appointment_letter
     const appointmentLetter = fieldValues.appointment_letter;
     if (appointmentLetter && Object.keys(appointmentLetter).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(appointmentLetter["Name of the company"])) doc.companyName = getString(appointmentLetter["Name of the company"]);
-      if (getString(appointmentLetter["Name of the employee"])) doc.partyName = getString(appointmentLetter["Name of the employee"]);
-      if (getString(appointmentLetter["Joining Date"])) doc.joiningDt = getString(appointmentLetter["Joining Date"]);
-      if (getNumeric(appointmentLetter["CTC"])) doc.grossSalaryPa = getNumeric(appointmentLetter["CTC"]);
-      if (Object.keys(doc).length > 0) documents.appointment_letter = doc;
+        assignTextField(doc, "companyName", appointmentLetter["Name of the company"]);
+        assignTextField(doc, "partyName", appointmentLetter["Name of the employee"]);
+        assignTextField(doc, "joiningDt", formatDdMmYyyyToIsoDate(appointmentLetter["Joining Date"]));
+        assignNumberField(doc, "grossSalaryPa", appointmentLetter["CTC"]);
+        if (hasDocumentFields(doc)) documents.appointment_letter = doc;
     }
 
     // salary_slips
     const salarySlips = fieldValues.salary_slips;
     if (salarySlips && Object.keys(salarySlips).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(salarySlips["Company Name"])) doc.companyName = getString(salarySlips["Company Name"]);
-      if (getString(salarySlips["Life Assured Name"])) doc.partyName = getString(salarySlips["Life Assured Name"]);
-      if (getString(salarySlips["Is Life Assured Name Same?"])) doc.nameMatchInd = getString(salarySlips["Is Life Assured Name Same?"]);
-      if (getString(salarySlips["PF / UAN No"])) doc.pfUan = getString(salarySlips["PF / UAN No"]);
-      if (getNumeric(salarySlips["Annual Bonus/Incentive/Reimbursement"])) doc.annualBonus = getNumeric(salarySlips["Annual Bonus/Incentive/Reimbursement"]);
-      
-      const months: Array<Record<string, unknown>> = [];
-      for (let i = 1; i <= 6; i++) {
-        const salary = getNumeric(salarySlips[`Gross Salary Pm${i}`]);
-        if (salary) {
-          months.push({
-            periodYear: new Date().getFullYear(),
-            periodMonth: i,
-            monthlyGrossSalary: salary
-          });
-        }
-      }
+        assignTextField(doc, "companyName", salarySlips["Company Name"]);
+        assignTextField(doc, "partyName", salarySlips["Life Assured Name"]);
+        assignTextField(doc, "nameMatchInd", salarySlips["Is Life Assured Name Same?"]);
+        assignTextField(doc, "pfUan", salarySlips["PF / UAN No"]);
+        assignNumberField(doc, "annualBonus", salarySlips["Annual Bonus/Incentive/Reimbursement"]);
+
+        const months = buildMonthlyEntries(salarySlips, [
+          "Gross Salary Pm1",
+          "Gross Salary Pm2",
+          "Gross Salary Pm3",
+          "Gross Salary Pm4",
+          "Gross Salary Pm5",
+          "Gross Salary Pm6",
+        ], "monthlyGrossSalary");
+
       if (months.length > 0) doc.months = months;
-      if (Object.keys(doc).length > 0) documents.salary_slips = doc;
+        if (hasDocumentFields(doc)) documents.salary_slips = doc;
     }
 
     // bank_statement
     const bankStatement = fieldValues.bank_statement;
     if (bankStatement && Object.keys(bankStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(bankStatement["Life Assured Name"])) doc.fullName = getString(bankStatement["Life Assured Name"]);
-      if (getString(bankStatement["Is LA Name Match with Doc Name?"])) doc.nameMatchInd = getString(bankStatement["Is LA Name Match with Doc Name?"]);
-      if (getString(bankStatement["Statement Period"])) doc.statementPeriod = getString(bankStatement["Statement Period"]);
-      if (getNumeric(bankStatement["Opening Balance"])) doc.openingBalance = getNumeric(bankStatement["Opening Balance"]);
-      if (getString(bankStatement["Life Insurance Premium Deduction Entry"])) doc.liPremiumDeductionInd = getString(bankStatement["Life Insurance Premium Deduction Entry"]);
-      if (getString(bankStatement["Wine Beer_Entries"])) doc.wineBeerEntriesInd = getString(bankStatement["Wine Beer_Entries"]);
-      if (getString(bankStatement["Med Entry"])) doc.medEntryInd = getString(bankStatement["Med Entry"]);
-      if (getString(bankStatement["Latest 6 months statements given"])) doc.latest6MonthsInd = getString(bankStatement["Latest 6 months statements given"]);
-      if (getString(bankStatement["Any Overdraft(Negative/Debit) Balances"])) doc.overdraftInd = getString(bankStatement["Any Overdraft(Negative/Debit) Balances"]);
-      
-      const months: Array<Record<string, unknown>> = [];
-      for (let i = 1; i <= 6; i++) {
-        const balance = getNumeric(bankStatement[`Monthly Closing Bal ${i}`]);
-        if (balance) {
-          months.push({
-            periodYear: new Date().getFullYear(),
-            periodMonth: i,
-            closingBalance: balance
-          });
-        }
-      }
+        assignTextField(doc, "fullName", bankStatement["Life Assured Name"]);
+        assignTextField(doc, "nameMatchInd", bankStatement["Is LA Name Match with Doc Name?"]);
+        assignTextField(doc, "statementPeriod", bankStatement["Statement Period"]);
+        assignNumberField(doc, "openingBalance", bankStatement["Opening Balance"]);
+        assignTextField(doc, "liPremiumDeductionInd", bankStatement["Life Insurance Premium Deduction Entry"]);
+        assignTextField(doc, "wineBeerEntriesInd", bankStatement["Wine Beer_Entries"]);
+        assignTextField(doc, "medEntryInd", bankStatement["Med Entry"]);
+        assignTextField(doc, "latest6MonthsInd", bankStatement["Latest 6 months statements given"]);
+        assignTextField(doc, "overdraftInd", bankStatement["Any Overdraft(Negative/Debit) Balances"]);
+
+        const months = buildMonthlyEntries(bankStatement, [
+          "Monthly Closing Bal 1",
+          "Monthly Closing Bal 2",
+          "Monthly Closing Bal 3",
+          "Monthly Closing Bal 4",
+          "Monthly Closing Bal 5",
+          "Monthly Closing Bal 6",
+        ], "closingBalance");
+
       if (months.length > 0) doc.months = months;
-      if (Object.keys(doc).length > 0) documents.bank_statement = doc;
+        if (hasDocumentFields(doc)) documents.bank_statement = doc;
     }
 
     // bank_statement_salary_credit
     const bankStatementSalaryCredit = fieldValues.bank_statement_salary_credit;
     if (bankStatementSalaryCredit && Object.keys(bankStatementSalaryCredit).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(bankStatementSalaryCredit["Life Assured Name"])) doc.fullName = getString(bankStatementSalaryCredit["Life Assured Name"]);
-      if (getString(bankStatementSalaryCredit["Is LA Name Match with Doc Name?"])) doc.nameMatchInd = getString(bankStatementSalaryCredit["Is LA Name Match with Doc Name?"]);
-      if (getString(bankStatementSalaryCredit["Salary Credited"])) doc.salaryCreditedInd = getString(bankStatementSalaryCredit["Salary Credited"]);
-      if (getNumeric(bankStatementSalaryCredit["Annual Bonus /Incentive /Reimbursement"])) doc.annualBonus = getNumeric(bankStatementSalaryCredit["Annual Bonus /Incentive /Reimbursement"]);
-      if (getNumeric(bankStatementSalaryCredit["Opening Balance"])) doc.openingBalance = getNumeric(bankStatementSalaryCredit["Opening Balance"]);
-      if (getNumeric(bankStatementSalaryCredit["Closing Balance"])) doc.closingBalance = getNumeric(bankStatementSalaryCredit["Closing Balance"]);
-      if (getString(bankStatementSalaryCredit["Statement Period"])) doc.statementPeriod = getString(bankStatementSalaryCredit["Statement Period"]);
-      
-      const months: Array<Record<string, unknown>> = [];
-      const pmKeys = ["PM1", "PM2", "PM3", "PM4", "PM 5", "PM 6"];
-      for (let i = 0; i < pmKeys.length; i++) {
-        const salary = getNumeric(bankStatementSalaryCredit[`Net Salary Credited ${pmKeys[i]}`]);
-        if (salary) {
-          months.push({
-            periodYear: new Date().getFullYear(),
-            periodMonth: i + 1,
-            netSalaryCredited: salary
-          });
-        }
-      }
+        assignTextField(doc, "fullName", bankStatementSalaryCredit["Life Assured Name"]);
+        assignTextField(doc, "nameMatchInd", bankStatementSalaryCredit["Is LA Name Match with Doc Name?"]);
+        assignTextField(doc, "salaryCreditedInd", bankStatementSalaryCredit["Salary Credited"]);
+        assignNumberField(doc, "annualBonus", bankStatementSalaryCredit["Annual Bonus /Incentive /Reimbursement"]);
+        assignNumberField(doc, "openingBalance", bankStatementSalaryCredit["Opening Balance"]);
+        assignNumberField(doc, "closingBalance", bankStatementSalaryCredit["Closing Balance"]);
+        assignTextField(doc, "statementPeriod", bankStatementSalaryCredit["Statement Period"]);
+
+        const months = buildMonthlyEntries(bankStatementSalaryCredit, [
+          "Net Salary Credited PM1",
+          "Net Salary Credited PM2",
+          "Net Salary Credited PM3",
+          "Net Salary Credited PM4",
+          "Net Salary Credited PM 5",
+          "Net Salary Credited PM 6",
+        ], "netSalaryCredited");
+
       if (months.length > 0) doc.months = months;
-      if (Object.keys(doc).length > 0) documents.bank_statement_salary_credit = doc;
+        if (hasDocumentFields(doc)) documents.bank_statement_salary_credit = doc;
     }
 
     // commission_statement
     const commissionStatement = fieldValues.commission_statement;
     if (commissionStatement && Object.keys(commissionStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-      const months: Array<Record<string, unknown>> = [];
-      for (let i = 1; i <= 6; i++) {
-        const amount = getNumeric(commissionStatement[`Month ${i}`]);
-        if (amount) {
-          months.push({
-            periodYear: new Date().getFullYear(),
-            periodMonth: i,
-            commissionAmount: amount
-          });
-        }
-      }
+        const months = buildMonthlyEntries(commissionStatement, [
+          "Month 1",
+          "Month 2",
+          "Month 3",
+          "Month 4",
+          "Month 5",
+          "Month 6",
+        ], "commissionAmount");
+
       if (months.length > 0) doc.months = months;
-      if (Object.keys(doc).length > 0) documents.commission_statement = doc;
+        if (hasDocumentFields(doc)) documents.commission_statement = doc;
     }
 
     // form_j
     const formJ = fieldValues.form_j;
     if (formJ && Object.keys(formJ).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(formJ["Is Form J in the name of LA"])) doc.nameMatchInd = getString(formJ["Is Form J in the name of LA"]);
-      const months: Array<Record<string, unknown>> = [];
-      for (let i = 1; i <= 6; i++) {
-        const receipt = getNumeric(formJ[`Month${i} Receipt1`]);
-        if (receipt) {
-          months.push({
-            periodYear: new Date().getFullYear(),
-            periodMonth: i,
-            receiptAmount: receipt
-          });
-        }
-      }
+        assignTextField(doc, "nameMatchInd", formJ["Is Form J in the name of LA"]);
+        const months = buildMonthlyEntries(formJ, [
+          "Month1 Receipt1",
+          "Month2 Receipt1",
+          "Month3 Receipt1",
+          "Month4 Receipt1",
+          "Month5 Receipt1",
+          "Month6 Receipt1",
+        ], "receiptAmount");
+
       if (months.length > 0) doc.months = months;
-      if (Object.keys(doc).length > 0) documents.form_j = doc;
+        if (hasDocumentFields(doc)) documents.form_j = doc;
     }
 
     // sip_statement
     const sipStatement = fieldValues.sip_statement;
     if (sipStatement && Object.keys(sipStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(sipStatement["Is SIP Statements in the Name of LA"])) doc.isLaNameSame = getString(sipStatement["Is SIP Statements in the Name of LA"]);
-      if (getString(sipStatement["Latest 6 Months SIP Statements Given"])) doc.latest6MonthsInd = getString(sipStatement["Latest 6 Months SIP Statements Given"]);
-      const months: Array<Record<string, unknown>> = [];
-      for (let i = 1; i <= 6; i++) {
-        const sipAmount = getNumeric(sipStatement[`SIP Per Month ${i === 4 ? "4" : i === 2 ? "2" : i === 5 ? "5" : i === 6 ? "6" : i}`]); 
-        if (sipAmount) {
-          months.push({
-            periodYear: new Date().getFullYear(),
-            periodMonth: i,
-            sipAmount: sipAmount
-          });
-        }
-      }
+        assignTextField(doc, "isLaNameSame", sipStatement["Is SIP Statements in the Name of LA"]);
+        assignTextField(doc, "latest6MonthsInd", sipStatement["Latest 6 Months SIP Statements Given"]);
+        const months = buildMonthlyEntries(sipStatement, [
+          "SIP Per Month 1",
+          "SIP Per Month2",
+          "SIP Per Month 3",
+          "SIP Per Month4",
+          "SIP Per Month 5",
+          "SIP Per Month 6",
+        ], "sipAmount");
+
       if (months.length > 0) doc.months = months;
-      if (Object.keys(doc).length > 0) documents.sip_statement = doc;
+        if (hasDocumentFields(doc)) documents.sip_statement = doc;
     }
 
     // epf_basic
     const epfBasic = fieldValues.epf_basic;
     if (epfBasic && Object.keys(epfBasic).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(epfBasic["Latest Organization Name"])) doc.orgName = getString(epfBasic["Latest Organization Name"]);
-      if (getString(epfBasic["Is Organization Name Same?"])) doc.isOrgNameSame = getString(epfBasic["Is Organization Name Same?"]);
-      if (getNumeric(epfBasic["Income"])) doc.income = getNumeric(epfBasic["Income"]);
-      if (Object.keys(doc).length > 0) documents.epf_basic = doc;
+        assignTextField(doc, "orgName", epfBasic["Latest Organization Name"]);
+        assignTextField(doc, "isOrgNameSame", epfBasic["Is Organization Name Same?"]);
+        assignNumberField(doc, "income", epfBasic["Income"]);
+        if (hasDocumentFields(doc)) documents.epf_basic = doc;
     }
 
     // epf_advanced
     const epfAdvanced = fieldValues.epf_advanced;
     if (epfAdvanced && Object.keys(epfAdvanced).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(epfAdvanced["Latest Organization Name"])) doc.orgName = getString(epfAdvanced["Latest Organization Name"]);
-      if (getString(epfAdvanced["Is Organization Name Same?"])) doc.isOrgNameSame = getString(epfAdvanced["Is Organization Name Same?"]);
-      const months: Array<Record<string, unknown>> = [];
-      for (let i = 1; i <= 6; i++) {
-        const pf = getNumeric(epfAdvanced[`PF Contribution M${i}`]);
-        if (pf) {
-          months.push({
-            periodYear: new Date().getFullYear(),
-            periodMonth: i,
-            pfContribution: pf
-          });
-        }
-      }
+        assignTextField(doc, "orgName", epfAdvanced["Latest Organization Name"]);
+        assignTextField(doc, "isOrgNameSame", epfAdvanced["Is Organization Name Same?"]);
+        const months = buildMonthlyEntries(epfAdvanced, [
+          "PF Contribution M1",
+          "PF Contribution M2",
+          "PF Contribution M3",
+          "PF Contribution M4",
+          "PF Contribution M5",
+          "PF Contribution M6",
+        ], "pfContribution");
+
       if (months.length > 0) doc.months = months;
-      if (Object.keys(doc).length > 0) documents.epf_advanced = doc;
+        if (hasDocumentFields(doc)) documents.epf_advanced = doc;
     }
 
     // form16
@@ -2755,6 +2697,7 @@ const ViewFinancial = () => {
         const suffix = i === 1 ? "" : ` Year ${i}`;
         const assessment = getString(itrIndividual[`Assessment Year${suffix}`]);
         const ackNumber = getString(itrIndividual[`ITR Acknowledgement Number${suffix}`]);
+        const panMatchedWithBarcode = getString(itrIndividual[`Pan Number Matched with Barcode Number${suffix}`]);
         const filingDate = getString(itrIndividual[`Date of Filling ITR${suffix}`]);
         const salary = getNumeric(itrIndividual[`Income from Salary(A)${suffix}`]);
         const house = getNumeric(itrIndividual[`Income from House Property${suffix}`]);
@@ -2764,10 +2707,11 @@ const ViewFinancial = () => {
         const agri = getNumeric(itrIndividual[`Agricultural Income${suffix}`]);
         const exempt = getNumeric(itrIndividual[`Exempt Income(C)${suffix}`]);
         
-        if (assessment || salary || business) {
+        if (assessment || salary || business || panMatchedWithBarcode) {
           const yearObj: Record<string, unknown> = {};
           if (assessment) yearObj.assessmentYear = assessment;
           if (ackNumber) yearObj.ackNumber = ackNumber;
+          if (panMatchedWithBarcode) yearObj.panNumberMatchedWithBarcodeNumber = panMatchedWithBarcode;
           if (filingDate) yearObj.itrFilingDt = filingDate;
           if (salary) yearObj.incomeFromSalary = salary;
           if (house) yearObj.incomeFromHouseProperty = house;
@@ -2801,7 +2745,7 @@ const ViewFinancial = () => {
           const yearObj: Record<string, unknown> = {};
           if (assessment) yearObj.assessmentYear = assessment;
           if (business) yearObj.incomeFromBusiness = business;
-          if (other) yearObj.incomeFromOtherSources = other;
+          if (other) yearObj.exemptIncome = other;
           years.push(yearObj);
         }
       }
@@ -3065,15 +3009,19 @@ const ViewFinancial = () => {
       setSubmitLoading(true);
       setSubmitError(null);
 
+      const requestPayload = {
+        applicationNumber: safeApplicationId,
+        createdBy: "ui-user",
+        partyId: drsPartyId,
+        documents: transformFinancialFieldValuesToApiFormat(financialFieldValues),
+      };
+
+      console.log("[Financial][Save] request payload:", requestPayload);
+
       const response = await apiRequest<SubmitResponse, unknown>({
         url: url("financialSaveAndCalculate" as ApiKey),
         method: "POST",
-        body: {
-          applicationNumber: safeApplicationId,
-          createdBy: "ui-user",
-          partyId: drsPartyId,
-          documents: transformFinancialFieldValuesToApiFormat(financialFieldValues),
-        },
+        body: requestPayload,
       });
 
       const calculatedDocuments = response.data?.documents;
@@ -3320,17 +3268,6 @@ const ViewFinancial = () => {
     }
   };
 
-  // if (isCptPool) {
-  //   return (
-  //     <Container disableGutters>
-  //       <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeApplicationId))} />
-  //       <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
-  //         View Financial Details is not available for CPT Pool.
-  //       </Typography>
-  //     </Container>
-  //   );
-  // }
-
   return (
     <Container disableGutters sx={{ pb: 4 }}>
       <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
@@ -3343,12 +3280,6 @@ const ViewFinancial = () => {
         />
       </Box>
 
-      {/*
-      <BreDecision
-        extraFields={financialData?.breAdditionalFields ?? []}
-        breDecisionOverride={financialData?.breDecision ?? null}
-      />
-      */}
       <BreDecision breDecisionOverride={breDecisionFromStorage as never} />
 
       {!isFormalRole && (
@@ -3371,83 +3302,6 @@ const ViewFinancial = () => {
               <FormalMemberProfile profile={formalMemberProfile} />
             </Box>
           ) : (
-            //   <Box sx={{ px: { xs: 2, md: 3 }, py: 2.25, backgroundColor: "#EBF1F5" }}>
-            //   <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-            //     <Box
-            //       sx={{
-            //         width: 76,
-            //         height: 76,
-            //         borderRadius: "50%",
-            //         backgroundColor: "#EBF1F5",
-            //         display: "flex",
-            //         alignItems: "center",
-            //         justifyContent: "center",
-            //         overflow: "hidden",
-            //         flexShrink: 0,
-            //       }}
-            //     >
-            //       {applicantData.profileImage && (
-            //         <Box
-            //           component="img"
-            //           src={applicantData.profileImage}
-            //           alt={`${applicantData.name}'s photo`}
-            //           sx={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "50%" }}
-            //         />
-            //       )}
-            //     </Box>
-
-            //     <Box sx={{ flex: 1, minWidth: 0 }}>
-            //       <Box
-            //         sx={{
-            //           display: "flex",
-            //           justifyContent: "space-between",
-            //           alignItems: "flex-start",
-            //           gap: 2,
-            //           flexWrap: "wrap",
-            //         }}
-            //       >
-            //         <Box>
-            //           <Typography sx={{ fontSize: 28, fontWeight: 700, color: "#1E293B", lineHeight: 1.15 }}>
-            //             {applicantData.name}
-            //           </Typography>
-            //           <Typography sx={{ fontSize: 14, color: "#4B5563", mt: 0.5 }}>DOB: {applicantData.dob}</Typography>
-            //         </Box>
-
-            //         <Badge label={`${applicantData.gender}, ${applicantData.age} Years`} variant="Neutral" size="medium" />
-            //       </Box>
-
-            //       <Divider sx={{ my: 1.25, borderColor: "#B7C1CB" }} />
-
-            //       <Box
-            //         sx={{
-            //           display: "grid",
-            //           gridTemplateColumns: { xs: "repeat(2, minmax(0, 1fr))", md: "repeat(4, minmax(0, 1fr))" },
-            //           gap: { xs: 1.25, md: 2 },
-            //         }}
-            //       >
-            //         {applicantInfoItems.map((item) => (
-            //           <Box key={item.label} sx={{ display: "flex", alignItems: "flex-start", gap: 0.75, minWidth: 0 }}>
-            //             <Box sx={{ color: "#1E5A8B", mt: 0.2, display: "inline-flex" }}>{item.icon}</Box>
-            //             <Box sx={{ minWidth: 0 }}>
-            //               <Typography sx={{ fontSize: 12, color: "#475569", lineHeight: 1.2 }}>{item.label}</Typography>
-            //               <Typography
-            //                 sx={{
-            //                   fontSize: 18,
-            //                   fontWeight: 600,
-            //                   color: "#111827",
-            //                   lineHeight: 1.3,
-            //                   wordBreak: "break-word",
-            //                 }}
-            //               >
-            //                 {item.value || "-"}
-            //               </Typography>
-            //             </Box>
-            //           </Box>
-            //         ))}
-            //       </Box>
-            //     </Box>
-            //   </Box>
-            // </Box>
             <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
               <ApplicantProfile
                 profile={applicantProfileFromStorage}
@@ -3640,19 +3494,21 @@ const ViewFinancial = () => {
         </Box>
       </Box>
 
-      <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
-        {(submitMessage || submitError) && (
-          <Typography sx={{ mb: 1.5, color: submitError ? "#DE2C3B" : "#067647", fontSize: 13 }}>
-            {submitError ?? submitMessage}
-          </Typography>
-        )}
+      {roleType === "CPT_TASK" && (
+        <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
+          {(submitMessage || submitError) && (
+            <Typography sx={{ mb: 1.5, color: submitError ? "#DE2C3B" : "#067647", fontSize: 13 }}>
+              {submitError ?? submitMessage}
+            </Typography>
+          )}
 
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
-          <CustomButton onClick={handleSave} disabled={submitLoading || !safeApplicationId} sx={{ minWidth: 120 }}>
-            Save
-          </CustomButton>
+          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
+            <CustomButton onClick={handleSave} disabled={submitLoading || !safeApplicationId} sx={{ minWidth: 120 }}>
+              Save
+            </CustomButton>
+          </Box>
         </Box>
-      </Box>
+      )}
     </Container>
   );
 };
