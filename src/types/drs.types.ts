@@ -548,7 +548,7 @@ export type BreRetriggerResponse = {
 };
 export type BreRequest = {
   eventName:string;
-  applicationNumber:string;
+  applicationNumber?:string;
 };
 
 export type BreResponse = {
