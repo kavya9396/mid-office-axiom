@@ -233,11 +233,11 @@ const ApplicationOverview = () => {
    
     trsa: {
       label: "TRSA",
-      value: formatNumberOrDash(applicationInfo?.trsa),
+      value: formatNumberOrDash(sourcingDetail?.trsa),
     },
     tfsa: {
       label: "TFSA",
-      value: formatNumberOrDash(applicationInfo?.tfsa),
+      value: formatNumberOrDash(sourcingDetail?.tfsa),
     },
     policyType: {
       label: "Policy Type",

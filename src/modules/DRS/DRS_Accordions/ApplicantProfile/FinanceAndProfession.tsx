@@ -44,7 +44,10 @@ const FinanceAndProfession = ({ profile }: ApplicantProfileProps) => {
         summaryEntries[0];
 
     const summaryRecord = toRecord(selectedSummaryEntry);
-    const summaryPersonal = toRecord(summaryRecord.personalDetails);
+    // Prefer `personalDetails` when present; fall back to `proposerSummary` used by some mocks
+    const summaryPersonal = Object.keys(toRecord(summaryRecord.personalDetails)).length > 0
+        ? toRecord(summaryRecord.personalDetails)
+        : toRecord(summaryRecord.proposerSummary);
     const summaryApplicantFinancial = toRecord(summaryRecord.applicantFinancialDetails);
     const summaryFinancial = toRecord(summaryRecord.financialDetails);
 
