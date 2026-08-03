@@ -399,7 +399,7 @@
                     "initialSumAssured": "",
                     "customerType": "Individual",
                     "policyType": "",
-                    "modalPremium": 0,
+                    "modalPremium": 1345,
                     "policyTerm": null,
                     "premiumPaymentTerm": 40
                 }
