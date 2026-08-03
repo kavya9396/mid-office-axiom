@@ -722,6 +722,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             }
 
             // Prefer masters.misc-based status values when available (code === 'REQT_ST')
+            let foundFromMisc = false;
             try {
                 const toMasterList = (options?: unknown) => {
                     if (Array.isArray(options)) return options as unknown[];
@@ -755,8 +756,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     // ignore
                 }
                 const statusRaw = rawList.filter((opt) => String(opt?.code ?? "").trim().toUpperCase() === "REQT_ST");
-
-                let foundFromMisc = false;
                 if (statusRaw.length > 0) {
                     const extractString = (v: unknown): string => {
                         if (v === null || v === undefined) return "";
