@@ -2080,7 +2080,8 @@ const ViewFinancial = () => {
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
-  const [isEditable, setIsEditable] = useState(roleType === "CPT_TASK");
+  const [editingSectionKey, setEditingSectionKey] = useState<FinancialSectionKey | null>(null);
+  const [messageSectionKey, setMessageSectionKey] = useState<FinancialSectionKey | null>(null);
   const [sectionErrors, setSectionErrors] = useState<Partial<Record<FinancialSectionKey, Record<string, string>>>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
@@ -2950,8 +2951,8 @@ const ViewFinancial = () => {
   };
 
   const handleSave = async () => {
-    // Validate only the currently active financial section (selected on the left)
-    const activeSection = displayFinancialSections.find((s) => s.key === resolvedActiveSectionId);
+    const savingSectionKey = editingSectionKey ?? (resolvedActiveSectionId as FinancialSectionKey);
+    const activeSection = displayFinancialSections.find((s) => s.key === savingSectionKey);
 
     const sectionsToValidate = activeSection ? [activeSection] : displayFinancialSections;
 
@@ -3009,11 +3010,15 @@ const ViewFinancial = () => {
       setSubmitLoading(true);
       setSubmitError(null);
 
+      const activeSectionValues = {
+        [savingSectionKey]: financialFieldValues[savingSectionKey] ?? {},
+      } as Record<FinancialSectionKey, Record<string, string>>;
+
       const requestPayload = {
         applicationNumber: safeApplicationId,
         createdBy: "ui-user",
         partyId: drsPartyId,
-        documents: transformFinancialFieldValuesToApiFormat(financialFieldValues),
+        documents: transformFinancialFieldValuesToApiFormat(activeSectionValues),
       };
 
       console.log("[Financial][Save] request payload:", requestPayload);
@@ -3260,9 +3265,11 @@ const ViewFinancial = () => {
       }));
 
       setSubmitMessage(response.message ?? "Financial details calculated and submitted successfully.");
-      setIsEditable(roleType === "CPT_TASK");
+      setMessageSectionKey(savingSectionKey);
+      setEditingSectionKey(null);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Failed to calculate and submit financial details.");
+      setMessageSectionKey(savingSectionKey);
     } finally {
       setSubmitLoading(false);
     }
@@ -3410,9 +3417,47 @@ const ViewFinancial = () => {
                   py: 1.25,
                   borderBottom: "1px solid #E4E7EC",
                   backgroundColor: "#F8FAFC",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
                 }}
               >
                 <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>{section.title}</Typography>
+                {roleType === "CPT_TASK" && (
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      {editingSectionKey !== section.key ? (
+                        <CustomButton
+                          sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                          onClick={() => {
+                            setSubmitMessage(null);
+                            setSubmitError(null);
+                            setMessageSectionKey(null);
+                            setSectionErrors((prev) => ({ ...prev, [section.key]: {} }));
+                            setEditingSectionKey(section.key as FinancialSectionKey);
+                          }}
+                        >
+                          Edit
+                        </CustomButton>
+                      ) : (
+                        <CustomButton
+                          sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                          disabled={submitLoading || !safeApplicationId}
+                          onClick={handleSave}
+                        >
+                          {submitLoading ? "Saving..." : "Save"}
+                        </CustomButton>
+                      )}
+                    </Box>
+                    {messageSectionKey === section.key && (submitMessage || submitError) && (
+                      <Typography sx={{ fontSize: 12, color: submitError ? "#DE2C3B" : "#067647", textAlign: "right", maxWidth: 280 }}>
+                        {submitError ?? submitMessage}
+                      </Typography>
+                    )}
+                  </Box>
+                )}
               </Box>
 
               <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
@@ -3420,7 +3465,7 @@ const ViewFinancial = () => {
                   ? renderForm16Section(
                       section,
                       financialFieldValues,
-                      isEditable,
+                      editingSectionKey === section.key,
                       sectionErrors[section.key] ?? {},
                       handleFieldValueChange
                     )
@@ -3428,7 +3473,7 @@ const ViewFinancial = () => {
                     ? renderForm16ASection(
                         section,
                         financialFieldValues,
-                        isEditable,
+                        editingSectionKey === section.key,
                         sectionErrors[section.key] ?? {},
                         handleFieldValueChange
                       )
@@ -3436,7 +3481,7 @@ const ViewFinancial = () => {
                       ? renderComputationOfIncomeSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3444,7 +3489,7 @@ const ViewFinancial = () => {
                       ? renderITRNonIndividualSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3452,7 +3497,7 @@ const ViewFinancial = () => {
                       ? renderITRIndividualSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3460,7 +3505,7 @@ const ViewFinancial = () => {
                       ? renderProfitAndLossSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3468,7 +3513,7 @@ const ViewFinancial = () => {
                       ? renderGstIncomeSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3476,14 +3521,14 @@ const ViewFinancial = () => {
                       ? renderFormJSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
                   : renderStandardSection(
                       section,
                       financialFieldValues,
-                      isEditable,
+                      editingSectionKey === section.key,
                       sectionErrors[section.key] ?? {},
                       handleFieldValueChange
                     )}
@@ -3494,21 +3539,7 @@ const ViewFinancial = () => {
         </Box>
       </Box>
 
-      {roleType === "CPT_TASK" && (
-        <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
-          {(submitMessage || submitError) && (
-            <Typography sx={{ mb: 1.5, color: submitError ? "#DE2C3B" : "#067647", fontSize: 13 }}>
-              {submitError ?? submitMessage}
-            </Typography>
-          )}
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
-            <CustomButton onClick={handleSave} disabled={submitLoading || !safeApplicationId} sx={{ minWidth: 120 }}>
-              Save
-            </CustomButton>
-          </Box>
-        </Box>
-      )}
     </Container>
   );
 };
