@@ -133,6 +133,19 @@ const getSelectedCaseContext = (): Record<string, unknown> => {
 
 const toOption = (value: string): Option => ({ label: value, value });
 
+const dedupeOptions = (options: Option[]) => {
+    const seen = new Set<string>();
+    const result: Option[] = [];
+    for (const opt of options) {
+        const key = String(opt?.value ?? opt?.label ?? "").trim();
+        if (!key) continue;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push({ label: opt.label, value: opt.value });
+    }
+    return result;
+};
+
 const getTodayDate = () => new Date().toISOString().slice(0, 10);
 
 const getCurrentActor = () =>
@@ -817,8 +830,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                     if (mapped.length > 0) {
                         foundFromMisc = true;
-                        setRequirementStatusOptions(mapped);
-                        cacheOptionsForPayload({ types: ["requirementStatus"] }, mapped);
+                        const unique = dedupeOptions(mapped);
+                        setRequirementStatusOptions(unique);
+                        cacheOptionsForPayload({ types: ["requirementStatus"] }, unique);
                     }
                 }
             } catch (e) {
@@ -893,8 +907,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                           })
                           .filter(Boolean) as Option[]
                     : EMPTY_OPTIONS;
-                setRequirementStatusOptions(statusOpts);
-                cacheOptionsForPayload(statusPayload, statusOpts);
+                const uniqueStatusOpts = dedupeOptions(statusOpts);
+                setRequirementStatusOptions(uniqueStatusOpts);
+                cacheOptionsForPayload(statusPayload, uniqueStatusOpts);
             } catch (e) {
                 // ignore failures to fetch status master
             }

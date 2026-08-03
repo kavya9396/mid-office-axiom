@@ -373,7 +373,63 @@ const ViewMedicals = () => {
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
     getStoredApplicantTab();
 
-  const medicalData = medicalMockData as MedicalResponse;
+  const normalizeMockToMedicalResponse = (mock: any): MedicalResponse => {
+    const data = mock?.data ?? {};
+    const applicationId = data.applicationNumber ?? "";
+    const sectionsObj = data.sections ?? {};
+
+    const sections: MedicalSection[] = Object.entries(sectionsObj).map(([title, content]) => {
+      let rows: MedicalTestRow[] = [];
+
+      if (Array.isArray(content)) {
+        rows = content.map((item: any) => ({
+          parameter: item.questionId ?? item.parameter ?? JSON.stringify(item),
+          value: String(item.questionValue ?? item.value ?? ""),
+          unit: "",
+          normalRange: "",
+          status: "normal",
+        }));
+      } else if (content && typeof content === "object") {
+        if (Array.isArray((content as any).answers)) {
+          rows = (content as any).answers.map((a: any) => ({
+            parameter: a.questionId ?? "",
+            value: String(a.questionValue ?? ""),
+            unit: "",
+            normalRange: "",
+            status: "normal",
+          }));
+        } else if (Array.isArray((content as any).readings)) {
+          rows = (content as any).readings.map((r: any) => ({
+            parameter: `Reading ${r.readingSeq ?? ""}`,
+            value: `${r.bpSystolic ?? ""}/${r.bpDiastolic ?? ""}`,
+            unit: "",
+            normalRange: "",
+            status: "normal",
+          }));
+        } else {
+          rows = Object.entries(content).map(([k, v]) => ({
+            parameter: k,
+            value: v === null || v === undefined ? "" : String(v),
+            unit: "",
+            normalRange: "",
+            status: "normal",
+          }));
+        }
+      }
+
+      return { title, rows };
+    });
+
+    return {
+      applicationId,
+      breDecision: {} as any,
+      breAdditionalFields: [],
+      summary: [],
+      sections,
+    };
+  };
+
+  const medicalData = normalizeMockToMedicalResponse(medicalMockData);
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
   const [activeSectionId, setActiveSectionId] = useState<string>("");
   const [isEditable, setIsEditable] = useState(false);
