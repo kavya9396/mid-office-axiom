@@ -1,1960 +1,1328 @@
 {
-
-  "data": {
-
-    "roleType":"CUW Pool",
-
-    "basicDetails": {
-      "applicationNumber": "NB0000021",
-      "lastLoginDate": "2026-05-15T10:30:00",
-
-      "submitDate": "2026-03-17T00:00:00.0",
-
-      "totalPremium": 24,
-
-      "sourceSystem": "UW_PORTAL"
-
-    },
-
-    "applicationInfo": {
-
-      "applicationDate": "2026-03-17T00:00:00.0",
-
-      "comboFlag": "no",
-
-      "storyCode": "ST-1024",
-
-      "pbRiskScore": "Green",
-
-      "comboNumber": "OS31229864",
-
-      "lifeCount": 2,
-
-      "proposerType": "Individual",
-
-      "umCode": "00151772",
-
-      "source": "BRHL",
-
-      "simultaneousPolicies": false,
-
-      "simultaneousLifeSA": 78675,
-
-      "isLAPropSame": false,
-
-      "otherPolicySA": 879653,
-
-      "lifeType": "Main Life",
-
-      "coApplicationFlag": "no",
-
-      "gaVisitorId": "GA-8843021",
-
-      "isTagged": "No",
-
-      "taggedAppNo": "NA",
-
-      "taggedRelation": "NA",
-
-      "spousePolicyNo": "NA"
-
-    },
-
-    "breDecision": {
-
-      "decision": "ST",
-
-      "initialDecision": "ST",
-
-      "remarks": "# TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML## TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML## TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML## TSA > 20L_Default values received# GCD Mandatory for Master Code.# Above NML#",
-
-      "discrepancy": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EIS",
-
-      "timestamp": "01/04/2026, 1300hrs",
-
-      "action": "Regular Medical required",
-
-      "reTriggerCount": 1
-
-    },
-
-    "pivvSection": {
-
-      "pivvPoolDecision": "Pending Review",
-
-      "pivvPoolRemarks": "PIVV verification details are available for review.",
-
-      "reason": "Customer verification pending",
-
-      "userId": "PIVV001",
-
-      "remarkDate": "2026-04-01T13:00:00.000Z"
-
-    },
-
-    "summary": [
-
-      {
-        "memberType": "lifeassured1",
-        "partyId": "735e5edb-2542-4ca6-913e-67c2927f56bc",
-        "jontFlag": true,
-
-        "lifeNumber": "01",
-
-        "clientId": "CL0001",
-
-        "proposerLaRelation": "joint",
-
-        "jointLARelation": "Spouse",
-
-        "jointPRRelation": "Spouse",
-
-        "nriFlag": false,
-
-        "fatfFlag": false,
-
-        "faceMatchDetails": {
-
-          "document": "Aadhar",
-
-          "faceMatchScore": 95,
-
-          "imageQuality": 90,
-
-          "remarks": "Face match successful with high confidence. No discrepancies found between the document and live image."
-
+    "success": true,
+    "data": {
+        "basicDetails": {
+            "applicationNumber": "OS90377382",
+            "lastLoginDate": "2026-08-01T11:59:56.548374",
+            "submitDate": "2026-06-17T00:00",
+            "totalPremium": 11036,
+            "sourceSystem": ""
         },
-
-        "personalDetails": {
-
-          "title": "Mrs",
-
-          "firstName": "Sikha",
-
-          "middleName": "",
-
-          "lastName": "Singhal",
-
-          "gender": "F",
-
-          "maritalStatus": "Married",
-
-          "dob": "1999-07-07T00:00:00.0",
-
-          "age": 52,
-
-          "profileImage": "https://images.unsplash.com/photo-1740252117012-bb53ad05e370?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGUlMjBpY29ufGVufDB8fDB8fHww%22",
-
-          "caseStatus": "Green Case",
-
-          "nationality": "Indian",
-
-          "residentStatus": "Indian Resident",
-
-          "pioStatus": "0",
-
-          "highestQualification": "GRAD",
-
-          "graduationFlag": "Yes",
-
-          "orgName": "ICICI Securities",
-
-          "yearsInServiceOrBusiness": 1,
-
-          "industryType": "Financial Services",
-
-          "birthCountry": "IND",
-
-          "occupationType": "SPVT",
-
-          "netIncomeAmt": 3000000,
-
-          "immigrationStatus": "Indian Resident",
-
-          "orgType": "PRIVATE LTD",
-
-          "latestIncYear": 2026,
-
-          "isPEP": false,
-
-          "panNo": "ABCDE1234F",
-
-          "faceMatchScore": "75%",
-
-          "imageQuality": "980",
-
-          "remarks": "Profile verified",
-
-          "ckycNumber": "CKYC00991",
-
-          "criminalProceeding": "No",
-
-          "incomeProof": "Form 16"
-
+        "applicationInfo": {
+            "applicationDate": "2026-06-17T00:00",
+            "comboFlag": "no",
+            "storyCode": "",
+            "pbRiskScore": "",
+            "comboNumber": "OS90377382",
+            "lifeCount": null,
+            "proposerType": "Individual",
+            "umCode": "",
+            "source": "Agency",
+            "simultaneousPolicies": false,
+            "simultaneousLifeSA": 0,
+            "isLAPropSame": true,
+            "otherPolicySA": 0,
+            "lifeType": "Main Life",
+            "coApplicationFlag": "no",
+            "gaVisitorId": "",
+            "isTagged": "",
+            "taggedAppNo": "NA",
+            "taggedRelation": "NA",
+            "spousePolicyNo": "NA"
         },
-
-        "financialDetails": {
-
-          "annualIncome": 3200000,
-
-          "appliedSumAssured": 4000000,
-
-          "trsa": 4000000,
-
-          "tfsa": 4000000
-
+        "breDecision": {
+            "decision": "Non-STP",
+            "initialDecision": "Non-STP",
+            "remarks": "IDM#ADP#KYP#PST#QNR#AGE#UAC#ECG#RUA#HV1#AUS#H1C#COT#MER#S13#ACR#OCD#PAL#IIN",
+            "discrepancy": "AUS#H1C#IDM#ADP#KYP#PST#QNR#AGE#UAC#ECG#RUA#HV1#COT#MER#ACR#PAL#IIN#S13#OCD#PAN#EIM#ARP#BNK#AAM#CDA#Medicals1#ACY#AGQ#ANN#AAD#ADI#GCR",
+            "timestamp": "03/08/2026, 1114hrs",
+            "action": "BRE_REVALIDATION",
+            "reTriggerCount": 1
         },
-
-        "policyDetails": {
-
-          "productName": "ICICI Pru iProtect Smart",
-
-          "productType": "Term Plan",
-
-          "modalPremium": 9875,
-
-          "channel": "Online"
-
-        },
-
-        "underwriting": {
-
-          "remarks": "Healthy lifestyle declared with no smoking or alcohol habits. Medical examination within acceptable limits. Financial eligibility justified for requested sum assured.",
-
-          "breDecision": {
-
-            "status": "Accept",
-
-            "category": "Standard",
-
-            "coverage": "Full Cover"
-
-          }
-
-        },
-
-        "kycDetails": {
-
-          "panNumber": "APJPK3224R",
-
-          "identityProofType": "Aadhaar Card",
-
-          "identityProofNumber": "987654328236",
-
-          "addressProof": "Aadhaar Card",
-
-          "incomeProof": "Form 16",
-
-          "existingCkycNumber": "NA",
-
-          "pep": "No",
-
-          "criminalProceedings": "No"
-
-        },
-
-        "address": [
-
-          {
-
-            "type": "communication",
-
-            "addressLine1": "PA ADD",
-
-            "addressLine2": "malad",
-
-            "addressLine3": "malad west",
-
-            "landmark": "Malad Station",
-
-            "city": "NASHIK",
-
-            "state": "MH",
-
-            "pinCode": "422002",
-
-            "residingCountry": "India",
-
-            "topCity": "Y/N",
-
-            "negativePinCode": "Y/N"
-
-          },
-
-          {
-
-            "type": "permanent",
-
-            "addressLine1": "PA ADD",
-
-            "addressLine2": "malad",
-
-            "addressLine3": "malad west",
-
-            "landmark": "Malad Station",
-
-            "city": "NASHIK",
-
-            "state": "MH",
-
-            "pinCode": "422002",
-
-            "residingCountry": "India",
-
-            "topCity": "Y/N",
-
-            "negativePinCode": "Y/N"
-
-          }
-
-        ],
-
-        "contactDetails": {
-
-          "mobileNo": "9898989898",
-
-          "alternateMobileNo": "",
-
-          "std": "022",
-
-          "landlineNo": "12345678",
-
-          "emailId": "test@ipru.com",
-
-          "emailPref": "",
-
-          "smsPref": ""
-
-        },
-
-        "applicantFinancialDetails": {
-
-          "occupation": "Salaried",
-
-          "annualIncome": 500000,
-
-          "gstin": "",
-
-          "lastIncomeYear": "",
-
-          "organisationType": "Public",
-
-          "organisationName": "ICICI Bank"
-
-        },
-
-        "healthDetail": {
-
-          "height": "154.9",
-
-          "weight": "56.0",
-
-          "hazardousOccupation": "",
-
-          "illnessOrImpairment": [""],
-
-          "substanceConsumption": [
-
-            {
-
-              "substance": "smoke",
-
-              "consumedAs": "cigarette",
-
-              "quantity": {
-
-                "amount": "",
-
-                "unit": "day/week"
-
-              },
-
-              "noOfYears": 1,
-
-              "advisedByDoctorForAbstinence": ""
-
-            }
-
-          ],
-
-          "medicalQuestionnaire": [
-
-            {
-
-              "qtid": "",
-
-              "value": "",
-
-              "remar": "",
-
-              "subQts": [{ "qtid": "", "value": "", "remark": "" }]
-
-            }
-
-          ]
-
-        },
-
-        "nominee": [
-
-          {
-
-            "relationWithLA": "",
-
-            "firstName": "NOMINEE",
-
-            "lastName": "NAME",
-
-            "dob": "2001-06-07T00:00:00.0",
-
-            "gender": "Female",
-
-            "percentage": "40",
-
-            "proposerNomineeRelation": "wife"
-
-          },
-
-          {
-
-            "relationWithLA": "",
-
-            "firstName": "AARAV",
-
-            "lastName": "SINGHAL",
-
-            "dob": "2010-02-11T00:00:00.0",
-
-            "gender": "Male",
-
-            "percentage": "35",
-
-            "proposerNomineeRelation": "son"
-
-          },
-
-          {
-
-            "relationWithLA": "",
-
-            "firstName": "KAVYA",
-
-            "lastName": "SINGHAL",
-
-            "dob": "2013-09-21T00:00:00.0",
-
-            "gender": "Female",
-
-            "percentage": "25",
-
-            "proposerNomineeRelation": "daughter"
-
-          }
-
-        ],
-
-        "appointee": [
-
-          {
-
-            "relationWithLA": "",
-
-            "firstName": "MEERA",
-
-            "lastName": "SINGHAL",
-
-            "dob": "1988-05-16T00:00:00.0",
-
-            "gender": "Female",
-
-            "relationWithNominee": "Mother"
-
-          },
-
-          {
-
-            "relationWithLA": "",
-
-            "firstName": "ROHAN",
-
-            "lastName": "SINGHAL",
-
-            "dob": "1985-11-09T00:00:00.0",
-
-            "gender": "Male",
-
-            "relationWithNominee": "Father"
-
-          }
-
-        ],
-
-        "genericDetails": {
-
-          "existingPolicyNumber": "NA",
-
-          "clientId": "NA",
-
-          "selfProposed": "Yes",
-
-          "typeOfProposer": "Individual",
-
-          "relationshipWithLifeAssured": "Self",
-
-          "typeOfProposal": "Individual"
-
-        },
-
-        "eiaDetails": {
-
-          "openEIA": "No",
-
-          "existingEIANumber": "NA",
-
-          "preferredRepository": "CDSL",
-
-          "convertPolicies": "No"
-
-        },
-
-        "fundDetails": {
-
-          "allocationStrategy": "Self Allocation",
-
-          "totalAllocation": "100",
-
-          "atpOpted": "Yes",
-
-          "fundDetail": [{
-
-            "name": "Equity Growth Fund",
-
-            "amount": "500000",
-
-            "sourceFund": "Balanced Fund",
-
-            "targetFund": "Equity Growth Fund",
-
-            "switchDate": "2026-06-29",
-
-            "transferPercentage": "25"
-
-          }]
-
-        },
-
-        "payoutDetails": {
-
-          "accountType": "Savings",
-
-          "bankName": "ICICI Bank",
-
-          "branchName": "Nashik Main",
-
-          "ifsc": "ICIC0001234",
-
-          "accountNo": "003401023456",
-
-          "micr": "422229002"
-
-        },
-
-        "advisorDetails": {
-
-          "relationWithAdvisor": "Client",
-
-          "acquaintanceDuration": "3 years",
-
-          "fileSentToCopsDate": "2026-03-18",
-
-          "branchUWDate": "2026-03-19",
-
-          "decalarationDate": "2026-03-17",
-
-          "declarationPlace": "Nashik"
-
-        },
-
-        "questions": [
-
-          {
-
-            "quesCode": "ILLIMPAIRMENT",
-
-            "quesFor": "LA",
-
-            "quesType": "HEALTH",
-
-            "quesAns": "no"
-
-          }
-
-        ],
-
-        "producerDetails": {
-
-          "perfiosBank": "Yes/No",
-
-          "premiumPaymentOption": "RP0",
-
-          "isecExperianCategory": "",
-
-          "gstInNumber": "27DHIPP7812H1Z5",
-
-          "pasaSegmentCitiesFlag": "Tier 1",
-
-          "productSource": "standalone",
-
-          "imputedMarker": "APS_INCOME/Experian",
-
-          "imputedIncome": "692904",
-
-          "prePopulatedValueEdited": "NA",
-
-          "fnaSumAssured": "250000",
-
-          "componentCode": "IWFL/PSPL",
-
-          "cdfWaiverFlag": "Yes/No",
-
-          "youthExpressFlag": "N",
-
-          "atsSource": "PASAIPS",
-
-          "ipsDiscountFlag": false,
-
-          "lumpSumPercentage": "0",
-
-          "accuityRiskIndicator": "",
-
-          "primaryLASumAssured": ""
-
-        },
-
-        "documentDetails": [
-
-          {
-
-            "documentType": "AGE_PROOF",
-
-            "documentName": "AGE_PROOF",
-
-            "documentId": "AAAAA1111A",
-
-            "validityDate": "2099-12-31T00:00:00.0"
-
-          }
-
-        ],
-
-        "bureauDetails": {
-
-          "cibilScore": "772",
-
-          "cibilIncomeSegment": "Medium",
-
-          "cibilEligibilityStatus": "Y",
-
-          "cibilServiceStatus": "Y",
-
-          "experianScore": "789",
-
-          "experianIncomeSegment": "Medium",
-
-          "experianEligibilityStatus": "Y",
-
-          "experianServiceStatus": "Y",
-
-          "payuScore": "741",
-
-          "payuIncomeSegment": "Medium",
-
-          "payuEligibilityStatus": "Y",
-
-          "payuServiceStatus": "Y"
-
-        }
-
-      }
-
-    ],
-
-    "applicationOverview": {
-
-      "sourcingDetail": {
-
-        "agentCode": "00151875",
-
-        "bankCode": "005",
-
-        "corporateAgent": "ICICI PARTNERS",
-
-        "negativeAdvisor": "0",
-
-        "agencyType": "CA",
-
-        "areaCode": "MUM",
-
-        "partnerType": "BANCASSURANCE",
-
-        "lanNumber": "LBNMU00007211286",
-
-        "partnerBank": "ICICI",
-
-        "salesChannel": "Digital Assisted",
-
-        "fscfsm": "01494804",
-
-        "cafosCode": "99999999",
-
-        "companyCode": "NCOMBO",
-
-        "spCode": "7194746",
-
-        "csrlim": "X999Y999Z999",
-
-        "bank": "IBNK",
-
-        "branch": "IPIL",
-
-        "channelCode": "ICICI Bank",
-
-        "drcChannelCode": "ICICI Bank",
-
-        "subChannelCode": "",
-
-        "agentName": ""
-
-      },
-
-      "groupDetails": {
-
-        "coverageOption": "Reducing Cover12",
-
-        "coverageStatus": "JOINT",
-
-        "moratorium": "No",
-
-        "loanType": "L1",
-
-        "bankType": "B1",
-
-        "loanTerm": 24,
-
-        "loanAmount": 10000,
-
-        "typeOfLoan": "Home Loan",
-
-        "dateOfLoanDisbursement": "2025-01-01T00:00:00.0",
-
-        "shareOfLoan": 100,
-
-        "applicantStatus": "Primary Borrower",
-
-        "shareOfLoanJl": 0,
-
-        "applicantStatusJl": "Co-Borrower",
-
-        "masterPolicyHolder": "MPH",
-
-        "masterPolicyHolderCode": "MPH1",
-
-        "fundSource":"Balanced Fund",
-
-        "propserType":"Individual"
-
-      },
-
-      "productDetail": [
-
-        {
-
-          "type": "base",
-
-          "code": "GP1",
-
-          "name": "ICICI PRU SUPER PROTECT CREDIT",
-
-          "faceValue": "10000",
-
-          "coverageOption": "Reducing Cover",
-
-          "term": "24",
-
-          "premiumMode": "Monthly",
-
-          "renewalPremiumMode": "Credit Card",
-
-          "premiumFrequency": "00",
-
-          "annualPremium": 1000,
-
-          "installmentPremium": "24",
-
-          "installmentPremiumWithTax": "28",
-
-          "ratingFactor": "Standard",
-
-          "isEligible": "Y",
-
-          "riskCessationTerm": 33,
-
-          "premiumCessationTerm": 7,
-
-          "paymentAmount": 24,
-
-          "premiumModeFpd": "Credit card",
-
-          "baseAnnualPremium": 6788,
-
-          "premium": 5000,
-
-          "sumAssured": 500000,
-
-          "loanLimit": 40000,
-
-          "deathBenefitPayoutOption": "Lump Sum",
-
-          "benefitOption": "Level",
-
-          "statCode": "STD",
-
-          "incomeBenefitFlag": "No",
-
-          "lifeStageBenefitFlag": "No",
-
-          "statCodeD": "NA",
-
-          "statCodeE": "NA",
-
-          "initialSumAssured": "500000",
-
-          "customerType": "",
-
-          "policyType": "",
-
-          "modalPremium": "",
-
-          "policyTerm": "",
-
-          "premiumPaymentTerm": ""
-
-        }
-
-      ],
-
-      "riderDetails": [
-
-        {
-
-          "riderName": "ICICI Pru Non-Linked Accidental Death and Disability Rider",
-
-          "option": "Accidental Total and Permanent Disability",
-
-          "policyTerm": 44,
-
-          "sumAssured": 5000000,
-
-          "modalPremium": 2300,
-
-          "premiumPaymentTerm": 44
-
-        },
-
-        {
-
-          "riderName": "ICICI Pru Non-Linked Accidental Death and Disability Rider",
-
-          "option": "Accidental Death Benefit",
-
-          "policyTerm": 44,
-
-          "sumAssured": 5000000,
-
-          "modalPremium": 3300,
-
-          "premiumPaymentTerm": 44
-
-        },
-
-        {
-
-          "riderName": "ICICI Pru Non-Linked Health Protect Rider",
-
-          "option": "Critical Illness - 60CI package",
-
-          "policyTerm": 20,
-
-          "sumAssured": 1000000,
-
-          "modalPremium": 3876,
-
-          "premiumPaymentTerm": 20
-
-        }
-
-      ]
-
-    },
-
-    "medicalInsuranceDetails": {
-
-      "medicalProfile": {
-
-        "pastMedicalHistory": "No significant past medical history declared.",
-
-        "currentMedicalCondition": "No current medical condition declared.",
-
-        "remarks": "Medical profile verified with no adverse findings."
-
-      },
-
-      "existingInsuranceDetails": [
-
-        {
-
-          "policyNumber": "OB25175112",
-
-          "plan": "Term",
-
-          "type": "Medical",
-
-          "companyName": "ICICI Pru",
-
-          "sumAssured": 5000000,
-
-          "dateOfCommencement": "2026-03-27"
-
-        }
-
-      ],
-
-      "simultaneousAppliedPolicies": [
-
-        {
-
-          "companyName": "ICICI Pru",
-
-          "sumAssured": 5000000,
-
-          "type": "Medical",
-
-          "plan": "Term",
-
-          "policyStatus": "Active"
-
-        },
-
-        {
-
-          "companyName": "ICICI Pru",
-
-          "sumAssured": 5000000,
-
-          "type": "Medical",
-
-          "plan": "Term",
-
-          "policyStatus": "Active"
-
-        }
-
-      ],
-
-      "approvalRequired": {
-
-        "financial": true,
-
-        "medical": false,
-
-        "both": true
-
-      }
-
-    },
-
-    "documentRequired": {
-
-      "form16": {
-
-        "title": "FORM 16 (Latest Assessment Year)",
-
-        "yearHeaders": ["Year 1", "Year 2", "Year 3"],
-
-        "rows": [
-
-          {
-
-            "label": "Assessment",
-
-            "year1": "AY 25-26",
-
-            "year2": "NA",
-
-            "year3": "NA"
-
-          },
-
-          {
-
-            "label": "Gross Salary PA",
-
-            "year1": "₹ 500000",
-
-            "year2": "NA",
-
-            "year3": "NA"
-
-          },
-
-          {
-
-            "label": "Average Annual Income",
-
-            "year1": "₹ 500000",
-
-            "year2": "NA",
-
-            "year3": "NA"
-
-          },
-
-          {
-
-            "label": "Life Assured Pan No",
-
-            "year1": "AXXXXDXXX2L",
-
-            "year2": "NA",
-
-            "year3": "NA"
-
-          },
-
-          {
-
-            "label": "Life Assured Name",
-
-            "year1": "Rudra Sangha",
-
-            "year2": "NA",
-
-            "year3": "NA"
-
-          }
-
-        ]
-
-      },
-
-      "isLifeAssuredNameSameWithDocName": "Yes",
-
-      "companyName": "ICICI Bank"
-
-    },
-
-    "preLogin": {
-
-      "individualCase": {
-
         "summary": [
-
-          {
-
-            "personalDetails": {
-
-              "title": "Mr",
-
-              "firstName": "Rudra",
-
-              "middleName": "Prakash",
-
-              "lastName": "Sangha",
-
-              "gender": "M",
-
-              "maritalStatus": "Married",
-
-              "dob": "1995-01-02T00:00:00.0",
-
-              "age": 45,
-
-              "highestQualification": "Graduate",
-
-              "designation": "Manager",
-
-              "orgName": "ICICI Bank",
-
-              "isPEP": false,
-
-              "criminalProceeding": "No"
-
-            },
-
-            "applicantFinancialDetails": {
-
-              "occupation": "Salaried",
-
-              "organisationName": "ICICI Bank",
-
-              "annualIncome": 5000000
-
-            },
-
-            "financialDetails": {
-
-              "annualIncome": 5000000,
-
-              "appliedSumAssured": 5000000
-
-            },
-
-            "policyDetails": {
-
-              "productName": "ICICI Pru iProtect Care (Term Plan)",
-
-              "modalPremium": 11243
-
-            },
-
-            "kycDetails": {
-
-              "pep": "No",
-
-              "criminalProceedings": "No"
-
-            },
-
-            "address": [
-
-              {
-
-                "type": "communication",
-
-                "city": "Mumbai",
-
-                "residingCountry": "India"
-
-              }
-
-            ]
-
-          }
-
+            {
+                "memberType": "lifeassured1",
+                "partyId": "7bfafa2d-0c6b-4699-b236-daad8ffc3b68",
+                "jontFlag": false,
+                "lifeNumber": "",
+                "clientId": "NA",
+                "proposerLaRelation": "Self",
+                "jointLARelation": "",
+                "jointPRRelation": "",
+                "nriFlag": false,
+                "fatfFlag": false,
+                "faceMatchDetails": {
+                    "document": "Adhar",
+                    "faceMatchScore": 90,
+                    "imageQuality": "Good",
+                    "remarks": "Matched Properly"
+                },
+                "proposerSummary": {
+                    "title": "",
+                    "firstName": "TRSTR",
+                    "middleName": "",
+                    "lastName": "HGDS",
+                    "gender": "F",
+                    "maritalStatus": "M",
+                    "dob": "1996-03-24T00:00",
+                    "age": 30,
+                    "profileImage": "",
+                    "caseStatus": "DRAFT",
+                    "nationality": "IND",
+                    "countryOfResidence": "IND",
+                    "residentStatus": "IND",
+                    "education": "GRAD",
+                    "pioStatus": "0",
+                    "highestQualification": "GRAD",
+                    "graduationFlag": "",
+                    "orgName": "3I INFOTECH",
+                    "yearsInServiceOrBusiness": null,
+                    "industryType": "",
+                    "birthCountry": "",
+                    "occupationType": "SPVT",
+                    "netIncomeAmt": null,
+                    "immigrationStatus": "Indian Resident",
+                    "orgType": "PVT",
+                    "latestIncYear": 2026,
+                    "isPEP": false,
+                    "panNo": "JJHPL2130B",
+                    "remarks": "",
+                    "ckycNumber": "NA",
+                    "criminalProceeding": "No",
+                    "incomeProof": "Adhr",
+                    "designation": "",
+                    "disabled": "",
+                    "percentageOfImpairment": "",
+                    "typeOfImpairment": "",
+                    "udidNumber": ""
+                },
+                "applicantDetails": {
+                    "dateOfBirth": "1996-03-25",
+                    "gender": "M",
+                    "maritalStatus": "M",
+                    "nationality": "IND",
+                    "countryOfResidence": "IND",
+                    "education": "GRAD"
+                },
+                "financialDetails": {
+                    "annualIncome": 5000000,
+                    "appliedSumAssured": 5000000,
+                    "trsa": 5000000,
+                    "tfesa": 5000000
+                },
+                "policyDetails": {
+                    "productName": "T74",
+                    "productType": "",
+                    "modalPremium": 0,
+                    "channel": "Agency"
+                },
+                "underwriting": {
+                    "remarks": "IDM#ADP#KYP#PST#QNR#AGE#UAC#ECG#RUA#HV1#AUS#H1C#COT#MER#S13#ACR#OCD#PAL#IIN",
+                    "breDecision": {
+                        "status": "Non-STP",
+                        "category": "BRE_REVALIDATION",
+                        "coverage": "IDM#ADP#KYP#PST#QNR#AGE#UAC#ECG#RUA#HV1#AUS#H1C#COT#MER#S13#ACR#OCD#PAL#IIN"
+                    }
+                },
+                "kycDetails": {
+                    "panNumber": "JJHPL2130B",
+                    "identityProofType": "Adhr",
+                    "identityProofNumber": "AAAAA1111A",
+                    "addressProof": "AADH",
+                    "incomeProof": "Adhr",
+                    "ageProof": "DL",
+                    "existingCkycNumber": "NA",
+                    "pep": "No",
+                    "criminalProceedings": "No",
+                    "panFlag": "",
+                    "panAadharSeedingStatus": "",
+                    "identityProofExpiryDate": "",
+                    "pranNo": "123456789123",
+                    "pranNoVerifivation": ""
+                },
+                "address": [
+                    {
+                        "type": "communication",
+                        "addressLine1": "dxsd",
+                        "addressLine2": "afsdaas",
+                        "addressLine3": "sdsad",
+                        "landmark": "",
+                        "city": "sads",
+                        "state": "MH",
+                        "pinCode": "400064",
+                        "residingCountry": "IND",
+                        "topCity": "",
+                        "negativePinCode": ""
+                    },
+                    {
+                        "type": "permanent",
+                        "addressLine1": "MUMBAI",
+                        "addressLine2": "sdsd",
+                        "addressLine3": "sdsassa",
+                        "landmark": "",
+                        "city": "MUMBAI",
+                        "state": "KA",
+                        "pinCode": "400006",
+                        "residingCountry": "IND",
+                        "topCity": "",
+                        "negativePinCode": ""
+                    }
+                ],
+                "contactDetails": {
+                    "mobileNo": "9878761725",
+                    "alternateMobileNo": "",
+                    "std": "",
+                    "landlineNo": "",
+                    "emailId": "TRESTR@GMAIL.COM",
+                    "emailPref": "Y",
+                    "smsPref": "Y"
+                },
+                "applicantFinancialDetails": {
+                    "occupation": "SPVT",
+                    "annualIncome": 5000000,
+                    "gstin": "",
+                    "lastIncomeYear": 2026,
+                    "organisationType": "PVT",
+                    "organisationName": "3I INFOTECH"
+                },
+                "healthDetail": {
+                    "height": "165.1",
+                    "weight": "",
+                    "heightFeet": "",
+                    "heightInches": "0",
+                    "hazardousOccupation": "",
+                    "illnessOrImpairment": [],
+                    "substanceConsumption": [
+                        {
+                            "substance": "",
+                            "consumedAs": "",
+                            "quantity": {
+                                "amount": "",
+                                "unit": "day/week"
+                            },
+                            "noOfYears": null,
+                            "advisedByDoctorForAbstinence": ""
+                        }
+                    ],
+                    "medicalQuestionnaire": [
+                        {
+                            "qtid": "ILLIMPAIRMENT",
+                            "value": "no",
+                            "remar": "",
+                            "subQts": []
+                        }
+                    ]
+                },
+                "nominee": [
+                    {
+                        "relationWithLA": "",
+                        "firstName": "TRSTR",
+                        "lastName": "HGDS",
+                        "dob": "1991-03-12T00:00",
+                        "gender": "F",
+                        "percentage": 0,
+                        "proposerNomineeRelation": ""
+                    }
+                ],
+                "appointee": [],
+                "genericDetails": {
+                    "existingPolicyNumber": "NA",
+                    "clientId": "NA",
+                    "selfProposed": "Yes",
+                    "typeOfProposer": "Individual",
+                    "relationshipWithLifeAssured": "Self",
+                    "typeOfProposal": ""
+                },
+                "eiaDetails": {
+                    "openEIA": "No",
+                    "existingEIANumber": "NA",
+                    "preferredRepository": "",
+                    "convertPolicies": "No"
+                },
+                "fundDetails": {
+                    "allocationStrategy": "",
+                    "totalAllocation": "",
+                    "atpOpted": "",
+                    "fundDetail": []
+                },
+                "paymentDetails": {},
+                "payoutDetails": {},
+                "advisorDetails": {
+                    "relationWithAdvisor": "others",
+                    "acquaintanceDuration": 0,
+                    "fileSentToCopsDate": "",
+                    "branchUWDate": "",
+                    "decalarationDate": "",
+                    "declarationPlace": ""
+                },
+                "questions": [
+                    {
+                        "quesCode": "ILLIMPAIRMENT",
+                        "quesFor": "LA",
+                        "quesType": "HEALTH",
+                        "quesAns": "no"
+                    }
+                ],
+                "producerDetails": {
+                    "perfiosBank": "No",
+                    "premiumPaymentOption": "RP0",
+                    "isecExperianCategory": "",
+                    "gstInNumber": "",
+                    "pasaSegmentCitiesFlag": "",
+                    "productSource": "standalone",
+                    "imputedMarker": "",
+                    "imputedIncome": "0",
+                    "prePopulatedValueEdited": "NA",
+                    "fnaSumAssured": "0",
+                    "componentCode": "PSPL",
+                    "cdfWaiverFlag": "No",
+                    "youthExpressFlag": "N",
+                    "atsSource": "",
+                    "ipsDiscountFlag": "FALSE",
+                    "lumpSumPercentage": "0",
+                    "accuityRiskIndicator": "",
+                    "primaryLASumAssured": ""
+                },
+                "documentDetails": [
+                    {
+                        "documentType": "ID",
+                        "documentName": "Adhr",
+                        "documentId": "AAAAA1111A",
+                        "validityDate": ""
+                    },
+                    {
+                        "documentType": "AGE_PROOF",
+                        "documentName": "DL",
+                        "documentId": "",
+                        "validityDate": ""
+                    },
+                    {
+                        "documentType": "INCOME",
+                        "documentName": "Adhr",
+                        "documentId": "",
+                        "validityDate": ""
+                    },
+                    {
+                        "documentType": "ADDR",
+                        "documentName": "AADH",
+                        "documentId": "",
+                        "validityDate": ""
+                    }
+                ],
+                "bureauDetails": {
+                    "cibilScore": "",
+                    "cibilIncomeSegment": "",
+                    "cibilEligibilityStatus": "N",
+                    "cibilServiceStatus": "N",
+                    "experianScore": "",
+                    "experianIncomeSegment": "",
+                    "experianEligibilityStatus": "N",
+                    "experianServiceStatus": "N",
+                    "payuScore": "",
+                    "payuIncomeSegment": "",
+                    "payuEligibilityStatus": "N",
+                    "payuServiceStatus": "N"
+                }
+            }
         ],
-
-        "medicalInsuranceDetails": {
-
-          "existingInsuranceDetails": [
-
-            {
-
-              "policyNumber": "OB25175112",
-
-              "plan": "Term",
-
-              "type": "Medical",
-
-              "companyName": "ICICI Pru",
-
-              "sumAssured": 5000000,
-
-              "dateOfCommencement": "2026-03-27"
-
-            }
-
-          ],
-
-          "simultaneousAppliedPolicies": [
-
-            {
-
-              "companyName": "ICICI Pru",
-
-              "sumAssured": 5000000,
-
-              "type": "Medical",
-
-              "plan": "Term",
-
-              "policyStatus": "Active"
-
-            }
-
-          ],
-
-          "approvalRequired": {
-
-            "financial": true,
-
-            "medical": false,
-
-            "both": true
-
-          }
-
+        "applicationOverview": {
+            "sourcingDetail": {
+                "agentCode": "00004004",
+                "bankCode": "0FB",
+                "corporateAgent": "",
+                "negativeAdvisor": "",
+                "agencyType": "AG",
+                "areaCode": "",
+                "partnerType": "",
+                "lanNumber": "",
+                "partnerBank": "",
+                "salesChannel": "Agency",
+                "fscfsm": "",
+                "cafosCode": "",
+                "companyCode": "NCOMBO",
+                "spCode": "",
+                "csrlim": "",
+                "bank": "",
+                "branch": "",
+                "channelCode": "Agency",
+                "drcChannelCode": "Agency",
+                "subChannelCode": "",
+                "agentName": ""
+            },
+            "groupDetails": {
+                "coverageOption": "",
+                "coverageStatus": "",
+                "moratorium": "",
+                "loanType": "",
+                "bankType": "",
+                "loanTerm": null,
+                "loanAmount": null,
+                "typeOfLoan": "",
+                "dateOfLoanDisbursement": "",
+                "shareOfLoan": null,
+                "applicantStatus": "",
+                "shareOfLoanJl": null,
+                "applicantStatusJl": "",
+                "masterPolicyHolder": ""
+            },
+            "productDetail": [
+                {
+                    "type": "base",
+                    "code": "T74",
+                    "name": "T74",
+                    "faceValue": "5000000",
+                    "coverageOption": "",
+                    "term": "",
+                    "premiumMode": "",
+                    "renewalPremiumMode": "",
+                    "premiumFrequency": "",
+                    "annualPremium": null,
+                    "installmentPremium": "",
+                    "installmentPremiumWithTax": "",
+                    "ratingFactor": "",
+                    "isEligible": "",
+                    "riskCessationTerm": null,
+                    "premiumCessationTerm": null,
+                    "paymentAmount": null,
+                    "premiumModeFpd": "",
+                    "baseAnnualPremium": null,
+                    "premium": 0,
+                    "sumAssured": 5000000,
+                    "loanLimit": null,
+                    "deathBenefitPayoutOption": "",
+                    "benefitOption": "",
+                    "statCode": "L0Y",
+                    "incomeBenefitFlag": "",
+                    "lifeStageBenefitFlag": "",
+                    "statCodeD": "RP0",
+                    "statCodeE": "LS",
+                    "initialSumAssured": "",
+                    "customerType": "Individual",
+                    "policyType": "",
+                    "modalPremium": 0,
+                    "policyTerm": null,
+                    "premiumPaymentTerm": 40
+                }
+            ],
+            "riderDetails": []
         },
-
-        "documentRequired": {
-
-          "form16": {
-
-            "title": "FORM 16 (Latest Assessment Year)",
-
-            "yearHeaders": ["Year 1", "Year 2", "Year 3"],
-
-            "rows": [
-
-              { "label": "Assessment", "year1": "AY 25-26", "year2": "NA", "year3": "NA" },
-
-              { "label": "Gross Salary PA", "year1": "₹ 500000", "year2": "NA", "year3": "NA" },
-
-              { "label": "Average Annual Income", "year1": "₹ 500000", "year2": "NA", "year3": "NA" },
-
-              { "label": "Life Assured Pan No", "year1": "AXXXXDXXX2L", "year2": "NA", "year3": "NA" },
-
-              { "label": "Life Assured Name", "year1": "Rudra Sangha", "year2": "NA", "year3": "NA" }
-
-            ]
-
-          },
-
-          "isLifeAssuredNameSameWithDocName": "Yes",
-
-          "companyName": "ICICI Bank"
-
-        }
-
-      },
-
-      "keymanInsurance": {
-
-        "summary": [
-
-          {
-
-            "personalDetails": {
-
-              "title": "Mr",
-
-              "firstName": "Arvind",
-
-              "middleName": "Kumar",
-
-              "lastName": "Mehta",
-
-              "gender": "M",
-
-              "maritalStatus": "Married",
-
-              "dob": "1982-04-11T00:00:00.0",
-
-              "age": 44,
-
-              "highestQualification": "MBA",
-
-              "designation": "Chief Technology Officer",
-
-              "orgName": "Axiom Finserve Pvt Ltd",
-
-              "isPEP": false,
-
-              "criminalProceeding": "No"
-
+        "requirementManagement": [
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Medicals",
+                "subCategory": "Grid Medicals",
+                "document": "Blood test",
+                "specialTest": "",
+                "reason": "Mandatory medicals not done",
+                "fupCode": "",
+                "description": "AUS-Blood Test",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
             },
-
-            "applicantFinancialDetails": {
-
-              "occupation": "Keyman - Executive",
-
-              "organisationName": "Axiom Finserve Pvt Ltd",
-
-              "annualIncome": 8500000
-
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Medicals",
+                "subCategory": "Grid Medicals",
+                "document": "Blood test",
+                "specialTest": "",
+                "reason": "Mandatory medicals not done",
+                "fupCode": "",
+                "description": "H1C-Need to go for Blood test",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
             },
-
-            "financialDetails": {
-
-              "annualIncome": 8500000,
-
-              "appliedSumAssured": 12000000
-
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "ID proof",
+                "document": "Drving License",
+                "specialTest": "",
+                "reason": "Documents not submitted",
+                "fupCode": "",
+                "description": "IDM- Upload valid ID proof of proposer (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
             },
-
-            "policyDetails": {
-
-              "productName": "ICICI Pru Keyman Protect",
-
-              "modalPremium": 48200
-
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "Address Proof",
+                "document": "Driving License",
+                "specialTest": "",
+                "reason": "Documents not submitted",
+                "fupCode": "",
+                "description": "ADP-Address proof of the proposer matching with application form (Passport - front & back or Aadhaar - front & back or Driving License or Voter id)",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
             },
-
-            "kycDetails": {
-
-              "pep": "No",
-
-              "criminalProceedings": "No"
-
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "PAN Card",
+                "document": "Photo",
+                "specialTest": "",
+                "reason": "Documents not submitted",
+                "fupCode": "",
+                "description": "KYP- Upload recent photograph of proposer",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
             },
-
-            "address": [
-
-              {
-
-                "type": "communication",
-
-                "city": "Pune",
-
-                "residingCountry": "India"
-
-              }
-
-            ]
-
-          }
-
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "NRI-OCI",
+                "subCategory": "NRI",
+                "document": "Passport",
+                "specialTest": "",
+                "reason": "Document not submitted",
+                "fupCode": "",
+                "description": "PST-Upload proposer passport (front & back)",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Questionnaire",
+                "subCategory": "Non medical",
+                "document": "NRI",
+                "specialTest": "",
+                "reason": "Non medical Questionnaire not submitted",
+                "fupCode": "",
+                "description": "QNR -NRI Questionnaire required",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "Ageproof",
+                "document": "PAN Card",
+                "specialTest": "",
+                "reason": "Documents not submitted",
+                "fupCode": "",
+                "description": "AGE-Age proof of life assured (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Internal",
+                "subCategory": "UAC",
+                "document": "Renewal Pending",
+                "specialTest": "",
+                "reason": "Audit Confirmation",
+                "fupCode": "",
+                "description": "UAC-UW Audit Confirmation Pending",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Medicals",
+                "subCategory": "Grid Medicals",
+                "document": "Cardiac",
+                "specialTest": "",
+                "reason": "Mandatory medicals not done",
+                "fupCode": "",
+                "description": "ECG-Need to go for ECG test",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Medicals",
+                "subCategory": "Grid Medicals",
+                "document": "Blood test",
+                "specialTest": "",
+                "reason": "Mandatory medicals not done",
+                "fupCode": "",
+                "description": "RUA-Need to go for Urine test",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Medicals",
+                "subCategory": "Grid Medicals",
+                "document": "Blood test",
+                "specialTest": "",
+                "reason": "Mandatory medicals not done",
+                "fupCode": "",
+                "description": "HV1-Need to go for Blood test",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Medicals",
+                "subCategory": "Grid Medicals",
+                "document": "Blood test",
+                "specialTest": "",
+                "reason": "Mandatory medicals not done",
+                "fupCode": "",
+                "description": "COT-Need to go for Urine test",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Medicals",
+                "subCategory": "Grid Medicals",
+                "document": "MER/VMER/TU",
+                "specialTest": "",
+                "reason": "Mandatory medicals not done",
+                "fupCode": "",
+                "description": "MER-Physical Examination required",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Internal",
+                "subCategory": "Report",
+                "document": "Agent report",
+                "specialTest": "",
+                "reason": "Document not uploaded",
+                "fupCode": "",
+                "description": "ACR -Agent confidential report not uploaded",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "PAN Card",
+                "document": "PAN /Form 60",
+                "specialTest": "",
+                "reason": "Documents not submitted",
+                "fupCode": "",
+                "description": "PAL- Please submit PAN Card copy linked with your Aadhaar",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Financial",
+                "subCategory": "EDD",
+                "document": "premium payment",
+                "specialTest": "",
+                "reason": "Income proof not given",
+                "fupCode": "",
+                "description": "IIN-Income proof of life assured matching with income declared in application",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Medicals",
+                "subCategory": "Grid Medicals",
+                "document": "Blood test",
+                "specialTest": "",
+                "reason": "Mandatory medicals not done",
+                "fupCode": "",
+                "description": "S13-Need to go for Blood test (Fasting not required)",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Consent",
+                "subCategory": "Customer declaration form",
+                "document": "Annuity",
+                "specialTest": "",
+                "reason": "Document not uplaoded",
+                "fupCode": "",
+                "description": "OCD-Submit digital confirmation via Consent Code",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "PAN Card",
+                "document": "PAN /Form 60",
+                "specialTest": "",
+                "reason": "Documents not submitted",
+                "fupCode": "",
+                "description": "Upload signed (attested) copy of PAN Card or Form 60/61 or Form 97 of person purchasing this policy (Proposer)",
+                "status": "RAISED",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_WRAP",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-wrapper-orchestrator",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Application",
+                "subCategory": "Nominee/PEP/EBI/Personal details",
+                "document": "Family History/Personal details",
+                "specialTest": "",
+                "reason": "Mandatory details are not provided",
+                "fupCode": "",
+                "description": "EIM-Email Id/Mobile no. missing",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "Business Insurance",
+                "subCategory": "Employer - Employee",
+                "document": "PAN",
+                "specialTest": "",
+                "reason": "Documents not submitted",
+                "fupCode": "",
+                "description": "ARP- Upload scanned copy of Authorized Signatory's PAN card",
+                "status": "RAISED",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_WRAP",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-wrapper-orchestrator",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Financial",
+                "subCategory": "EDD",
+                "document": "premium payment",
+                "specialTest": "",
+                "reason": "Income proof not given",
+                "fupCode": "",
+                "description": "BNK-Last 6 month bank statements displaying income as declared in application",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Internal",
+                "subCategory": "Report",
+                "document": "Agent report",
+                "specialTest": "",
+                "reason": "Descrepency Noted on given document",
+                "fupCode": "",
+                "description": "AAM-Application number required on the ACR",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Consent",
+                "subCategory": "Customer declaration form",
+                "document": "Declaration form",
+                "specialTest": "",
+                "reason": "Document provided is Incomplete",
+                "fupCode": "",
+                "description": "CDA-Incomplete Customer Declaration uploaded. Please re-upload complete customer declaration.",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "",
+                "profile": "",
+                "category": "Grid Medicals",
+                "subCategory": "",
+                "document": "",
+                "specialTest": "",
+                "reason": "",
+                "fupCode": "",
+                "description": "",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-29",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Internal",
+                "subCategory": "UAC",
+                "document": "Acuity Check",
+                "specialTest": "",
+                "reason": "Acuity pending",
+                "fupCode": "",
+                "description": "ACY-Underwriter will check and close Accuity open cases ( our customer should not matched with the profile available in GWL and PEP in Accuity system)",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Questionnaire",
+                "subCategory": "Non medical",
+                "document": "Agricuture",
+                "specialTest": "",
+                "reason": "Non medical Questionnaire not submitted",
+                "fupCode": "",
+                "description": "AGQ -Agricultural questionnaire",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "NRI-OCI",
+                "subCategory": "NRI",
+                "document": "Declaration",
+                "specialTest": "",
+                "reason": "Document not submitted",
+                "fupCode": "",
+                "description": "ANN-Submit signed copy of Declaration form confirming your visit to India in the last 24 months of Life Assured.",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "Address Proof",
+                "document": "Driving License",
+                "specialTest": "",
+                "reason": "Mismatch in documents submitted with apllication form",
+                "fupCode": "",
+                "description": "AAD-Mismatch between uploaded address proof and address mentioned in application form. Please provide alternate address proof (Passport - front & back or Aadhaar - front & back or Driving License or Voter ID)",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "ID proof",
+                "document": "PAN Card",
+                "specialTest": "",
+                "reason": "Mismatch in documents submitted with apllication form",
+                "fupCode": "",
+                "description": "Mismatch in identity proof between application form and Aadhaar - Please provide alternate proof (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Application",
+                "subCategory": "Nominee/PEP/EBI/Personal details",
+                "document": "Education/Sign",
+                "specialTest": "",
+                "reason": "Mismatch in information provided",
+                "fupCode": "",
+                "description": "GCR-Upload Graduation Certificate",
+                "status": "PENDING",
+                "isActive": "Y",
+                "raisedDate": "2026-07-31",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-07-31",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": ""
+            }
         ],
-
-        "medicalInsuranceDetails": {
-
-          "existingInsuranceDetails": [
-
-            {
-
-              "policyNumber": "KM88451220",
-
-              "plan": "Term",
-
-              "type": "Keyman",
-
-              "companyName": "ICICI Pru",
-
-              "sumAssured": 7500000,
-
-              "dateOfCommencement": "2025-08-18"
-
-            }
-
-          ],
-
-          "simultaneousAppliedPolicies": [
-
-            {
-
-              "companyName": "ICICI Pru",
-
-              "sumAssured": 12000000,
-
-              "type": "Keyman",
-
-              "plan": "Term",
-
-              "policyStatus": "Under Review"
-
-            }
-
-          ],
-
-          "approvalRequired": {
-
-            "financial": true,
-
-            "medical": true,
-
-            "both": true
-
-          }
-
+        "pivvSection": {
+            "pivvPoolRemarks": "BRE_URMS_EVALUATE",
+            "remarkDate": "2026-08-03T05:42:59.526639",
+            "pivvPoolDecision": "",
+            "reason": "",
+            "userId": "MS-breUrms"
         },
-
-        "documentRequired": {
-
-          "form16": {
-
-            "title": "FORM 16 (Latest Assessment Year)",
-
-            "yearHeaders": ["Year 1", "Year 2", "Year 3"],
-
-            "rows": [
-
-              { "label": "Assessment", "year1": "AY 25-26", "year2": "AY 24-25", "year3": "NA" },
-
-              { "label": "Gross Salary PA", "year1": "₹ 8500000", "year2": "₹ 7800000", "year3": "NA" },
-
-              { "label": "Average Annual Income", "year1": "₹ 8150000", "year2": "NA", "year3": "NA" },
-
-              { "label": "Life Assured Pan No", "year1": "ARVPM4521K", "year2": "NA", "year3": "NA" },
-
-              { "label": "Life Assured Name", "year1": "Arvind Mehta", "year2": "NA", "year3": "NA" }
-
+        "quickLinks": {
+            "proposerForm": "https://udsviewer-uat.iprulifeinsurance.com/App/UdsViewer/document-listing/split?roleid=VkhjeVE3M0dzd1ZmSFg2TW0xTXhLUT09&_uidtype=R1NoN0FWdloxTzhQeU9IbnhRM3ZkZz09&_uidvalue=RndTQldseWpTVnU1OE4ybXhTUVd3Zz09&ntid=UDSMIDOFFICE&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJVMDRMRHBkTlk3QVpMR2FRTlNvQW4zTTN0bFpOcUlaZXp5TUdvYkJxVzVLbkVOSHQiLCJhdWQiOiJ1cm46Ly9jNjA1MTFjMC0xMmEyLTQ3M2MtODBmZC00MjUyOGViNjVhNmEiLCJudElkIjoiVURTTUlET0ZGSUNFIiwiYXV0aCI6IkpqMmhSanQ3NVBRM1FOdjRQcm1GUlBFT2IydGgiLCJpc3MiOiJ1cm46Ly9hcGlnZWUtZWRnZS1KV1QtcG9saWN5LXRlc3QiLCJleHAiOjE3ODU3Mzc2NTAsImlhdCI6MTc4NTczNTg1MCwianRpIjoiNGRiZWJiMzEtYTJjYS00Y2RkLWIxNzEtNTM0ZWJmZjMyZTZjIn0.aiiawjjonjeF2dyu6mCgb_1TbbrJUzCXNF1Bu7tab_Q5HYoqDRsOfUDiCrMmk2QTZI4-uKSsSbdue7Y7J_NK5clLALtZb31QMjYfZkdtz0wbwTon6pXvMli7yLSYQDzj6doSbRbZqS5wNTVDVpHtlj9ZcC9xUg12vW8yOLn3Feq7dJlPLTnjKGS8JIObE4n1FR1rUtkQlfhK10Y3sM5Ejw0znUiZlMarQMRD0UllRTESLEYdgjd64TpEreIUtoVNXv3j-cq2X4YUhzAi6XfMhbd0IHlmuRpUJTrzlm-2ZOxZAuNV8si6DcgN2D2ekzkphP58iemzNMS2T3yIJXUoZSu8xGH3mA5vDaQSbVzrIPwU6GbL55OCPKrGTUlllzkygzm8F3y-m3pDHLqek0_8TOP4Ean1Y2EqEmvYxM6hFWCKq5EKbi47xJ7IHl1pT8D4u-Ar0V-7g7VoFRwqKr033El0j914E0UkrUSf4Au5NyCvlBWgeWmh5NmRM2fXLCdfDxgFyyYQUEy3czqcnNHatpczE-He1D7Bi7vJ0rbGYvMu_Wpfvw0VD8RKeueiQpw7P1lBZC3rCH6GjG6aPHmbhk5IoDbcIf4JYGtIFG1EcHovBqMRVltE_dhyUdwfgCIKvgqrj6rzMc13uwbOeNq48eUXA0qMmKpbenb28Vxq2hY",
+            "previousPolicies": [
+                {
+                    "policyNumber": "OS90377380",
+                    "productName": "ICICI Pru iProtect Smart Plus",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 5000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90383470",
+                    "productName": "ICICI Pru iProtect Smart Plus",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 5000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377381",
+                    "productName": "ICICI Pru iProtect Smart Plus",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 5000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "01112989",
+                    "productName": "ICICI Pru Smart Goal Assure",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "01198580",
+                    "productName": "Group Loan Secure SP",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "ST",
+                    "sumAssured": 5000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "01131662",
+                    "productName": "ICICI Pru Signature Assure",
+                    "productType": "",
+                    "dateOfIssuance": "2026-04-10",
+                    "decision": "J2",
+                    "sumAssured": 2500000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "01198720",
+                    "productName": "ICICI Pru Super Protect Credit",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "J2",
+                    "sumAssured": 600000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "01203756",
+                    "productName": "Guaranteed Income For Tomorrow",
+                    "productType": "",
+                    "dateOfIssuance": "2029-05-28",
+                    "decision": "TXP",
+                    "sumAssured": 6000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "01234450",
+                    "productName": "ICICI Pru iProtect Super",
+                    "productType": "",
+                    "dateOfIssuance": "2026-07-22",
+                    "decision": "XX",
+                    "sumAssured": 11200000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "01234519",
+                    "productName": "Guaranteed Income For Tomorrow",
+                    "productType": "",
+                    "dateOfIssuance": "2026-07-23",
+                    "decision": "XX",
+                    "sumAssured": 1500000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90383470",
+                    "productName": "ICICI Pru iProtect Smart Plus",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 5000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377381",
+                    "productName": "ICICI Pru iProtect Smart Plus",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 5000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377380",
+                    "productName": "ICICI Pru iProtect Smart Plus",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 5000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "01112984",
+                    "productName": "IPRU iProtect Care RP/LP",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "J2",
+                    "sumAssured": 10000000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                }
+            ],
+            "openOtherTasks": [],
+            "riskDetails": [],
+            "auditTrail": [
+                {
+                    "dateTime": "2026-08-03T05:42:59.526639",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-breUrms",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-breUrms",
+                    "uwDecision": "",
+                    "breDecision": "BRE_URMS_EVALUATE"
+                },
+                {
+                    "dateTime": "2026-08-03T05:42:57.050775",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-dedupe",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-dedupe",
+                    "uwDecision": "",
+                    "breDecision": "DEDUPE_POSIDEX_INVOKE"
+                },
+                {
+                    "dateTime": "2026-08-03T05:42:56.424305",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-dedupe",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-dedupe",
+                    "uwDecision": "",
+                    "breDecision": "CLIENT_ENQUIRY_STARTED"
+                },
+                {
+                    "dateTime": "2026-08-03T05:42:56.166869",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-dedupe",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-dedupe",
+                    "uwDecision": "",
+                    "breDecision": "DEDUPE_POSIDEX_INVOKE"
+                },
+                {
+                    "dateTime": "2026-08-03T05:42:55.621343",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-dedupe",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-dedupe",
+                    "uwDecision": "",
+                    "breDecision": "CLIENT_ENQUIRY_STARTED"
+                }
             ]
-
-          },
-
-          "isLifeAssuredNameSameWithDocName": "Yes",
-
-          "companyName": "Axiom Finserve Pvt Ltd"
-
-        }
-
-      },
-
-      "partnershipInsurance": {
-
-        "summary": [
-
-          {
-
-            "personalDetails": {
-
-              "title": "Ms",
-
-              "firstName": "Naina",
-
-              "middleName": "R",
-
-              "lastName": "Shah",
-
-              "gender": "F",
-
-              "maritalStatus": "Single",
-
-              "dob": "1989-09-19T00:00:00.0",
-
-              "age": 36,
-
-              "highestQualification": "CA",
-
-              "designation": "Managing Partner",
-
-              "orgName": "Shah & Rao Associates",
-
-              "isPEP": false,
-
-              "criminalProceeding": "No"
-
-            },
-
-            "applicantFinancialDetails": {
-
-              "occupation": "Partner",
-
-              "organisationName": "Shah & Rao Associates",
-
-              "annualIncome": 6400000
-
-            },
-
-            "financialDetails": {
-
-              "annualIncome": 6400000,
-
-              "appliedSumAssured": 9000000
-
-            },
-
-            "policyDetails": {
-
-              "productName": "ICICI Pru Partnership Protect",
-
-              "modalPremium": 35400
-
-            },
-
-            "kycDetails": {
-
-              "pep": "No",
-
-              "criminalProceedings": "No"
-
-            },
-
-            "address": [
-
-              {
-
-                "type": "communication",
-
-                "city": "Ahmedabad",
-
-                "residingCountry": "India"
-
-              }
-
-            ]
-
-          }
-
-        ],
-
-        "medicalInsuranceDetails": {
-
-          "existingInsuranceDetails": [
-
-            {
-
-              "policyNumber": "PT66510233",
-
-              "plan": "Term",
-
-              "type": "Partnership",
-
-              "companyName": "ICICI Pru",
-
-              "sumAssured": 4500000,
-
-              "dateOfCommencement": "2024-12-05"
-
-            }
-
-          ],
-
-          "simultaneousAppliedPolicies": [
-
-            {
-
-              "companyName": "ICICI Pru",
-
-              "sumAssured": 9000000,
-
-              "type": "Partnership",
-
-              "plan": "Term",
-
-              "policyStatus": "Active"
-
-            }
-
-          ],
-
-          "approvalRequired": {
-
-            "financial": true,
-
-            "medical": false,
-
-            "both": false
-
-          }
-
         },
-
-        "documentRequired": {
-
-          "form16": {
-
-            "title": "FORM 16 (Latest Assessment Year)",
-
-            "yearHeaders": ["Year 1", "Year 2", "Year 3"],
-
-            "rows": [
-
-              { "label": "Assessment", "year1": "AY 25-26", "year2": "AY 24-25", "year3": "AY 23-24" },
-
-              { "label": "Gross Salary PA", "year1": "₹ 6400000", "year2": "₹ 5900000", "year3": "₹ 5200000" },
-
-              { "label": "Average Annual Income", "year1": "₹ 5833333", "year2": "NA", "year3": "NA" },
-
-              { "label": "Life Assured Pan No", "year1": "NAIPS9087Q", "year2": "NA", "year3": "NA" },
-
-              { "label": "Life Assured Name", "year1": "Naina Shah", "year2": "NA", "year3": "NA" }
-
-            ]
-
-          },
-
-          "isLifeAssuredNameSameWithDocName": "Yes",
-
-          "companyName": "Shah & Rao Associates"
-
-        }
-
-      },
-
-      "employeeEmployerInsurance": {
-
-        "summary": [
-
-          {
-
-            "personalDetails": {
-
-              "title": "Mr",
-
-              "firstName": "Devendra",
-
-              "middleName": "S",
-
-              "lastName": "Iyer",
-
-              "gender": "M",
-
-              "maritalStatus": "Married",
-
-              "dob": "1978-12-02T00:00:00.0",
-
-              "age": 47,
-
-              "highestQualification": "Engineer",
-
-              "designation": "Plant Head",
-
-              "orgName": "Nova Manufacturing Ltd",
-
-              "isPEP": false,
-
-              "criminalProceeding": "No"
-
-            },
-
-            "applicantFinancialDetails": {
-
-              "occupation": "Employee - Senior Management",
-
-              "organisationName": "Nova Manufacturing Ltd",
-
-              "annualIncome": 7200000
-
-            },
-
-            "financialDetails": {
-
-              "annualIncome": 7200000,
-
-              "appliedSumAssured": 10000000
-
-            },
-
-            "policyDetails": {
-
-              "productName": "ICICI Pru Employer Employee Protect",
-
-              "modalPremium": 42150
-
-            },
-
-            "kycDetails": {
-
-              "pep": "No",
-
-              "criminalProceedings": "No"
-
-            },
-
-            "address": [
-
-              {
-
-                "type": "communication",
-
-                "city": "Chennai",
-
-                "residingCountry": "India"
-
-              }
-
-            ]
-
-          }
-
-        ],
-
-        "medicalInsuranceDetails": {
-
-          "existingInsuranceDetails": [
-
-            {
-
-              "policyNumber": "EE77004218",
-
-              "plan": "Term",
-
-              "type": "Employer Employee",
-
-              "companyName": "ICICI Pru",
-
-              "sumAssured": 6000000,
-
-              "dateOfCommencement": "2025-02-14"
-
-            }
-
-          ],
-
-          "simultaneousAppliedPolicies": [
-
-            {
-
-              "companyName": "ICICI Pru",
-
-              "sumAssured": 10000000,
-
-              "type": "Employer Employee",
-
-              "plan": "Term",
-
-              "policyStatus": "Active"
-
-            }
-
-          ],
-
-          "approvalRequired": {
-
-            "financial": true,
-
-            "medical": true,
-
-            "both": false
-
-          }
-
-        },
-
-        "documentRequired": {
-
-          "form16": {
-
-            "title": "FORM 16 (Latest Assessment Year)",
-
-            "yearHeaders": ["Year 1", "Year 2", "Year 3"],
-
-            "rows": [
-
-              { "label": "Assessment", "year1": "AY 25-26", "year2": "AY 24-25", "year3": "NA" },
-
-              { "label": "Gross Salary PA", "year1": "₹ 7200000", "year2": "₹ 6900000", "year3": "NA" },
-
-              { "label": "Average Annual Income", "year1": "₹ 7050000", "year2": "NA", "year3": "NA" },
-
-              { "label": "Life Assured Pan No", "year1": "DEVPY2310L", "year2": "NA", "year3": "NA" },
-
-              { "label": "Life Assured Name", "year1": "Devendra Iyer", "year2": "NA", "year3": "NA" }
-
-            ]
-
-          },
-
-          "isLifeAssuredNameSameWithDocName": "Yes",
-
-          "companyName": "Nova Manufacturing Ltd"
-
-        }
-
-      }
-
-    },
-
-    "requirementManagement": [
-
-     {
-
-      "team": "Gops",
-
-      "profile": "-",
-
-      "category": "Declaration",
-
-      "subCategory": "Customer Declaration Form",
-
-      "document": "CDF",
-
-      "specialTest": "-",
-
-      "reason": "Resubmit documents as Documents submitted not clear",
-
-      "fupCode": "GRD",
-
-      "description": "Rescan Group Customer Declaration",
-
-      "status": "Pending",
-
-      "raisedDate": "2025-01-10",
-
-      "raisedBy": "John Doe",
-
-      "receivedDate": "2025-01-12",
-
-      "receivedBy": "Jane Smith",
-
-      "validity": "30 Days",
-
-      "userId": "USR001",
-
-      "remarks": "Awaiting document validation",
-
-      "udsLink": "https://uds.example.com/req/001"
-
+        "decisionHistory": [],
+        "medicals": [],
+        "financials": [],
+        "roleType": "CVT Pool",
+        "userId": "ipru75031"
     }
-
-    ],
-
-   
-
-    "quickLinks": {
-
-      "proposerForm": "https://uds.example.com/req/001",
-
-      "previousPolicies": [
-
-        {
-
-          "policyNumber": "POL123456789",
-
-          "productName": "ICICI Pru iProtect Smart",
-
-          "productType": "Term Plan",
-
-          "dateOfIssuance": "2020-05-15",
-
-          "decision": "Accept",
-
-          "sumAssured": 1200000,
-
-          "medicalReceivedDate": "2020-05-20",
-
-          "medicalValidity": "2020-06-21",
-
-          "financialReceivedDate": "2020-05-22",
-
-          "financialValidity": "2020-06-22"
-
-        },
-
-        {
-
-          "policyNumber": "POL123456789",
-
-          "productName": "ICICI Pru iProtect Smart",
-
-          "productType": "Term Plan",
-
-          "dateOfIssuance": "2020-05-15",
-
-          "decision": "Accept",
-
-          "sumAssured": 1200000,
-
-          "medicalReceivedDate": "2020-05-20",
-
-          "medicalValidity": "2020-06-21",
-
-          "financialReceivedDate": "2020-05-22",
-
-          "financialValidity": "2020-06-22"
-
-        }
-
-      ],
-
-      "openOtherTasks": [
-
-        {
-
-          "status": "Open",
-
-          "serviceID": "SRV987654321",
-
-          "ct": "",
-
-          "st": "",
-
-          "breDate": "2026-05-11 10:15 PM",
-
-          "breDiscrepancy": "Pending financial documents",
-
-          "breRemarks": "Awaiting bank statements for verification",
-
-          "userPool": "Financial Review Team",
-
-          "userName": "neha.patil"
-
-        }
-
-      ],
-
-      "riskDetails": [
-
-        {
-
-          "riskReferralDate": "2026-05-11",
-
-          "riskRevertDate": "2026-05-14",
-
-          "riskDecision": "Refer",
-
-          "riskReportValues": "Risk Score: 75, Financial Risk: High, Medical Risk: Medium"
-
-        }
-
-      ],
-
-      "auditTrail": [
-
-        {
-
-          "dateTime": "2026-05-17T10:30:00",
-
-          "fromPool": "HOD",
-
-          "fromPoolUser": "rahul.sharma",
-
-          "toPool": "Risk Queue",
-
-          "toPoolUser": "neha.patil",
-
-          "subPool": "Medical",
-
-          "userId": "rahul.sharma",
-
-          "decision": "Accept",
-
-          "breDecision": "Triggered",
-
-          "changeDataField": "Medical Report",
-
-          "updatedBreDecision": "Pending",
-
-          "remarks": "accepted"
-
-        },
-
-          {
-
-          "dateTime": "2026-05-15T10:30:00",
-
-          "fromPool": "UW",
-
-          "fromPoolUser": "rahul.sharma",
-
-          "toPool": "Risk Queue",
-
-          "toPoolUser": "neha.patil",
-
-          "subPool": "Medical",
-
-          "userId": "rahul.sharma",
-
-          "decision": "Refer to HOD",
-
-          "breDecision": "Triggered",
-
-          "changeDataField": "Medical Report",
-
-          "updatedBreDecision": "Pending",
-
-          "remarks": "Medical report indicates potential health risk; further review required."
-
-        }
-
-      ]
-
-    },
-
-    "medicals": [{}],
-
-    "financials": [{}]
-
-  }
-
 }

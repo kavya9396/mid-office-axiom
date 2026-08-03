@@ -19,6 +19,14 @@ const normalizeForMatch = (s: unknown) =>
     .replace(/[^a-z0-9]+/g, "")
     .trim();
 
+const skeleton = (s: string) =>
+  s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "")
+    .replace(/[aeiou]+/g, "")
+    .replace(/(.)\1+/g, "$1")
+    .trim();
+
 const toMasterOptionList = (options?: unknown): MasterOption[] => {
   if (Array.isArray(options)) {
     return options as MasterOption[];
@@ -81,7 +89,20 @@ export const toMasterKey = (value: string, options: SelectOption[]): string => {
     const normMatch = options.find((option) => {
       const vNorm = normalizeForMatch(option.value);
       const lNorm = normalizeForMatch(option.label);
-      return vNorm === targetNorm || lNorm === targetNorm || vNorm.includes(targetNorm) || lNorm.includes(targetNorm) || targetNorm.includes(vNorm) || targetNorm.includes(lNorm);
+      // Also compare consonant skeletons to handle abbreviations/short misspellings (eg. Adhr -> Aadhaar)
+      const vSk = skeleton(String(option.value));
+      const lSk = skeleton(String(option.label));
+      const tSk = skeleton(textValue);
+
+      return (
+        vNorm === targetNorm ||
+        lNorm === targetNorm ||
+        vNorm.includes(targetNorm) ||
+        lNorm.includes(targetNorm) ||
+        targetNorm.includes(vNorm) ||
+        targetNorm.includes(lNorm) ||
+        (tSk && (vSk === tSk || lSk === tSk || vSk.includes(tSk) || lSk.includes(tSk)))
+      );
     });
 
     if (normMatch) return normMatch.value;

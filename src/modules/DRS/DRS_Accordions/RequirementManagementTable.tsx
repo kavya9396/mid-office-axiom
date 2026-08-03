@@ -1,4 +1,4 @@
-import { Alert, Box, Chip, Paper, Typography } from "@mui/material";
+import { Alert, Box, Chip, Paper, Typography, Pagination } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { apiRequest } from "../../../services/api";
 import { url as apiUrl } from "../../../services/apiConfig";
@@ -392,6 +392,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         Record<string, Pick<EditableRequirementRow, "status" | "receivedDate" | "receivedBy">>
     >({});
 
+    const [savedPage, setSavedPage] = useState(0);
+    const PAGE_SIZE = 5;
+
     const rows = useMemo(
         () => [
             ...normalizedExistingRows.map((row) => ({
@@ -511,6 +514,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     }, [drsData, hasRequirementChanges, rows]);
     const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
+
+    const totalSavedPages = Math.max(1, Math.ceil(savedRows.length / PAGE_SIZE));
+    const pagedSavedRows = savedRows.slice(savedPage * PAGE_SIZE, (savedPage + 1) * PAGE_SIZE);
+
+    useEffect(() => {
+        if (savedPage >= totalSavedPages) {
+            setSavedPage(0);
+        }
+    }, [savedRows.length, savedPage, totalSavedPages]);
 
     const savedRequirementTableSx = {
         "& .MuiFormControl-root": {
@@ -1603,8 +1615,19 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                 >
                                     <CustomTable<EditableRequirementRow>
                                         columns={savedColumns}
-                                        data={savedRows}
+                                        data={pagedSavedRows}
                                     />
+                                    {savedRows.length > PAGE_SIZE && (
+                                        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                                            <Pagination
+                                                count={totalSavedPages}
+                                                page={savedPage + 1}
+                                                onChange={(_e, p) => setSavedPage(p - 1)}
+                                                color="primary"
+                                                size="small"
+                                            />
+                                        </Box>
+                                    )}
                                 </Box>
                             </Box>
                         )}
