@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTable from "../../../components/ui/Table/Table";
+import CustomTextField from "../../../components/ui/TextField/TextField";
 import type { Column } from "../../../components/ui/Table/Table";
 import { useAppContext } from "../../../hooks/useAppContext";
 import {
@@ -16,7 +17,8 @@ import {
 import type { AdditionalRequirementRow, RequirementMasterOption } from "../../../types/drs.types";
 import { toDisplayValue } from "../../../utils/helpers";
 import type { RootState } from "../../../store/store";
-import { CloseIcon, EditIcon } from "../../../icons/Icons";
+import { CloseIcon, EditIcon, EyeIcon } from "../../../icons/Icons";
+import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import {
     OPEN_REQUIREMENT_MANAGEMENT_EVENT,
     type OpenRequirementManagementEvent,
@@ -40,7 +42,8 @@ type EditableField =
     | "subCategory"
     | "document"
     | "reason"
-    | "status";
+    | "status"
+    | "remarks";
 
 type RowErrors = Partial<Record<EditableField | "lookup", string>>;
 
@@ -297,13 +300,16 @@ const createDraftRow = (): EditableRequirementRow => ({
 });
 
 const normalizeExistingRow = (row: AdditionalRequirementRow, index: number): EditableRequirementRow => {
+    const baseId = String(row.udsLink ?? row.fupCode ?? row.raisedDate ?? "").trim();
+    const uniqueId = baseId ? `${baseId}-${index}` : `existing-${index}`;
+
     return {
         ...INITIAL_ROW_STATE,
         ...row,
         status: normalizeStatus(String(row.status ?? "")),
-        __rowId: String(row.udsLink ?? row.fupCode ?? row.raisedDate ?? index),
+        __rowId: uniqueId,
         __isDraft: false,
-        __isLocal: true,
+        __isLocal: false,
         __errors: {},
         __lookupMessage: "",
     };
@@ -404,20 +410,35 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [sourceRowOverrides, setSourceRowOverrides] = useState<
         Record<string, Pick<EditableRequirementRow, "status" | "receivedDate" | "receivedBy">>
     >({});
+    const [deletedRowIds, setDeletedRowIds] = useState<Set<string>>(() => new Set());
+    const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);
+    const [descriptionDialogText, setDescriptionDialogText] = useState("");
 
     const [savedPage, setSavedPage] = useState(0);
     const PAGE_SIZE = 5;
 
     const rows = useMemo(
         () => [
-            ...normalizedExistingRows.map((row) => ({
-                ...row,
-                ...(sourceRowOverrides[row.__rowId] ?? {}),
-            })),
             ...localRows,
+            ...normalizedExistingRows
+                .filter((row) => !deletedRowIds.has(row.__rowId))
+                .map((row) => ({
+                    ...row,
+                    ...(sourceRowOverrides[row.__rowId] ?? {}),
+                })),
         ],
-        [localRows, normalizedExistingRows, sourceRowOverrides],
+        [localRows, normalizedExistingRows, sourceRowOverrides, deletedRowIds],
     );
+
+    const openDescriptionDialog = (text: string) => {
+        setDescriptionDialogText(text);
+        setDescriptionDialogOpen(true);
+    };
+
+    const closeDescriptionDialog = () => {
+        setDescriptionDialogOpen(false);
+        setDescriptionDialogText("");
+    };
 
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
@@ -578,7 +599,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 setIsTableSaved(false);
                 setHasRequirementChanges(true);
                 didAdd = true;
-                return [...previousRows, createDraftRow()];
+                return [createDraftRow(), ...previousRows];
             });
 
             // If a draft row was added, prefetch master data for the default team
@@ -623,7 +644,17 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         requestAnimationFrame(() => {
             const el = document.getElementById(id);
             if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                try {
+                    // Scroll the document so the element appears near the top with some offset
+                    const rect = el.getBoundingClientRect();
+                    const offset = 80; // leave some space from the top
+                    const absoluteTop = rect.top + window.scrollY - offset;
+                    window.scrollTo({ top: Math.max(0, absoluteTop), behavior: "smooth" });
+                } catch {
+                    // fallback to element scrollIntoView
+                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+
                 const control = el.querySelector('input, select, textarea, button, [tabindex]') as HTMLElement | null;
                 if (control) control.focus();
             }
@@ -1259,12 +1290,37 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const handleDelete = (rowId: string) => {
         setIsTableSaved(false);
         setHasRequirementChanges(true);
-        setLocalRows((previousRows) => previousRows.filter((row) => row.__rowId !== rowId));
+        // if it's a local draft, remove from localRows, otherwise mark as deleted
+        const isLocal = localRows.some((r) => r.__rowId === rowId);
+        if (isLocal) {
+            setLocalRows((previousRows) => previousRows.filter((row) => row.__rowId !== rowId));
+            return;
+        }
+
+        setDeletedRowIds((prev) => new Set(prev).add(rowId));
     };
 
     const handleEditLocalSaved = (rowId: string) => {
         setIsTableSaved(false);
         setHasRequirementChanges(true);
+
+        const existing = rows.find((r) => r.__rowId === rowId && !r.__isLocal);
+        if (existing) {
+            // create a local editable draft prefilled from existing row
+            const draft = {
+                ...existing,
+                __rowId: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+                __isDraft: true,
+                __isLocal: true,
+                __errors: {},
+                __lookupMessage: "",
+            } as EditableRequirementRow;
+            setLocalRows((prev) => [...prev, draft]);
+            setLastAddedDraftRowId(draft.__rowId);
+            return;
+        }
+
+        // if already a local row, just toggle to draft (shouldn't usually happen)
         setLocalRows((previousRows) =>
             previousRows.map((row) =>
                 row.__rowId === rowId
@@ -1393,6 +1449,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             >
                 <EditIcon />
             </Box>
+
+            <CustomDialog open={descriptionDialogOpen} onClose={closeDescriptionDialog} title="Description" maxWidth="sm">
+                <Typography sx={{ whiteSpace: "pre-wrap", fontSize: 14, color: "#182026" }}>{descriptionDialogText}</Typography>
+            </CustomDialog>
             <Box
                 component="span"
                 sx={{
@@ -1418,10 +1478,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         {
             key: "__rowId",
             header: "Actions",
-            width: "auto",
+            width: "5%",
             sticky: "left",
             render: (_value, row) => {
-                if (!row.__isLocal || isTableSaved) {
+                const showActions = row.__isLocal || (!isTableSaved && editableStatusRowIds.has(row.__rowId));
+                if (!showActions) {
                     return renderDisabledActionIcons();
                 }
 
@@ -1476,7 +1537,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         {
             key: "status",
             header: "Status",
-            width: "110px",
+            width: "7%",
             render: (_value, row) => {
                 const canEditStatus = !isTableSaved && (isPendingStatus(row.status) || editableStatusRowIds.has(row.__rowId));
 
@@ -1495,23 +1556,45 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 );
             },
         },
-        { key: "team", header: "Team", width: "6%" },
+        // { key: "team", header: "Team", width: "6%" },
         ...(shouldShowProfileAndSpecialTest
             ? ([{ key: "profile", header: "Profile", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
         { key: "category", header: "Category", width: "8%" },
-        { key: "subCategory", header: "Sub Category", width: "9%" },
-        { key: "document", header: "Document", width: "8%" },
-        { key: "reason", header: "Reason", width: "8%" },
+        { key: "subCategory", header: "Sub Category", width: "10%"},
+        { key: "document", header: "Document", width: "10%" },
+        { key: "reason", header: "Reason", width: "12%" },
         ...(shouldShowProfileAndSpecialTest
             ? ([{ key: "specialTest", header: "Special Test", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
-        { key: "fupCode", header: "FUP Code", width: "6%" },
-        { key: "description", header: "Description", width: shouldShowProfileAndSpecialTest ? "9%" : "12%" },
-        { key: "raisedDate", header: "Raised Date", width: "7%" },
-        { key: "raisedBy", header: "Raised By", width: "7%" },
-        { key: "receivedDate", header: "Received Date", width: "7%" },
-        { key: "receivedBy", header: "Received By", width: "7%" },
+        { key: "fupCode", header: "FUP Code", width: "8%"},
+        { key: "remarks", header: "Extra Remarks", width: "12%", render: (_v, row) => renderReadOnlyField(String(row.remarks ?? "")) },
+        {
+            key: "description",
+            header: "Description",
+            width: shouldShowProfileAndSpecialTest ? "5%" : "7%",
+            render: (_value, row) => {
+                const desc = String(row.description ?? "");
+                if (!desc) return <Typography sx={{ fontSize: 13, color: "#334155" }}>-</Typography>;
+
+                return (
+                    <Box sx={{ display: "flex", alignItems: "start ", justifyContent: "center" }}>
+                        <Box
+                            component="button"
+                            onClick={() => openDescriptionDialog(desc)}
+                            sx={{ border: "none", background: "transparent", p: 0, cursor: "pointer", color: "#0F4C81" }}
+                            aria-label="View description"
+                        >
+                            <EyeIcon />
+                        </Box>
+                    </Box>
+                );
+            },
+        },
+        // { key: "raisedDate", header: "Raised Date", width: "7%" },
+        // { key: "raisedBy", header: "Raised By", width: "7%" },
+        // { key: "receivedDate", header: "Received Date", width: "7%" },
+        // { key: "receivedBy", header: "Received By", width: "7%" },
     ];
 
     return (
@@ -1558,7 +1641,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     setIsTableSaved(false);
                                     setHasRequirementChanges(true);
                                     const draft = createDraftRow();
-                                    setLocalRows((previousRows) => [...previousRows, draft]);
+                                    setLocalRows((previousRows) => [draft, ...previousRows]);
                                     setLastAddedDraftRowId(draft.__rowId);
 
                                     // Prefetch masters for the default team so dropdowns are primed
@@ -1816,6 +1899,19 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             {renderField(
                                                 "Description",
                                                 renderReadOnlyField(row.description),
+                                            )}
+                                            {renderField(
+                                                "Extra Remarks",
+                                                row.__isDraft
+                                                    ? (
+                                                        <CustomTextField
+                                                            value={String(row.remarks ?? "")}
+                                                            onChange={(e) => handleInlineChange(row.__rowId, "remarks", String((e.target as HTMLInputElement).value))}
+                                                            placeholder="Optional remarks"
+                                                            sx={{ width: "100%" }}
+                                                        />
+                                                      )
+                                                    : renderReadOnlyField(row.remarks ?? ""),
                                             )}
                                         </Box>
                                     </Box>

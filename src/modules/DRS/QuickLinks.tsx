@@ -158,7 +158,7 @@ const QuickLinks = () => {
                     // ignore cross-origin focus errors
                 }
             }
-        } catch (e) {
+        } catch  {
             // fallback to simple open
             try { window.open(url, "_blank"); } catch { /* ignore */ }
         }
