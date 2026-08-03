@@ -1398,6 +1398,198 @@
         "isActive": "Y"
       }
     ],
+    "yes_no": [
+      {
+        "code": "YES",
+        "description": "Yes",
+        "value": "Yes",
+        "isActive": "Y"
+      },
+      {
+        "code": "NO",
+        "description": "No",
+        "value": "No",
+        "isActive": "Y"
+      }
+    ],
+    "place_of_examination": [
+      {
+        "code": "CLINIC",
+        "description": "Clinic",
+        "value": "Clinic",
+        "isActive": "Y"
+      },
+      {
+        "code": "RES_OFFICE",
+        "description": "Res/Office",
+        "value": "Res/Office",
+        "isActive": "Y"
+      }
+    ],
+    "mer_education_sd": [
+      {
+        "code": "POST_GRADUATE",
+        "description": "Post Graduate",
+        "value": "Post Graduate",
+        "isActive": "Y"
+      },
+      {
+        "code": "GRADUATE",
+        "description": "Graduate",
+        "value": "Graduate",
+        "isActive": "Y"
+      },
+      {
+        "code": "DIPLOMA",
+        "description": "Diploma",
+        "value": "Diploma",
+        "isActive": "Y"
+      },
+      {
+        "code": "TWELFTH",
+        "description": "12th",
+        "value": "12th",
+        "isActive": "Y"
+      },
+      {
+        "code": "TENTH",
+        "description": "10th",
+        "value": "10th",
+        "isActive": "Y"
+      },
+      {
+        "code": "BELOW_TENTH",
+        "description": "Below 10th",
+        "value": "Below 10th",
+        "isActive": "Y"
+      }
+    ],
+    "mer_occupation_sd": [
+      {
+        "code": "SALARIED",
+        "description": "Salaried",
+        "value": "Salaried",
+        "isActive": "Y"
+      },
+      {
+        "code": "AGRICULTURALIST",
+        "description": "Agriculturalist",
+        "value": "Agriculturalist",
+        "isActive": "Y"
+      },
+      {
+        "code": "ICICI_GROUP_EMPLOYEE",
+        "description": "ICICI Group Employee",
+        "value": "ICICI Group Employee",
+        "isActive": "Y"
+      },
+      {
+        "code": "PROFESSIONAL",
+        "description": "Professional",
+        "value": "Professional",
+        "isActive": "Y"
+      },
+      {
+        "code": "RETIRED",
+        "description": "Retired",
+        "value": "Retired",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED",
+        "description": "Self Employed",
+        "value": "Self Employed",
+        "isActive": "Y"
+      },
+      {
+        "code": "STUDENT",
+        "description": "Student",
+        "value": "Student",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_CA",
+        "description": "Self Employed CA",
+        "value": "Self Employed CA",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_DOCTOR",
+        "description": "Self Employed Doctor",
+        "value": "Self Employed Doctor",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_ARCHITECT",
+        "description": "Self Employed Architect",
+        "value": "Self Employed Architect",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_BUSINESSMAN",
+        "description": "Self Employed Businessman",
+        "value": "Self Employed Businessman",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_CONSULTANT",
+        "description": "Self Employed Consultant",
+        "value": "Self Employed Consultant",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_LAWYER",
+        "description": "Self Employed Lawyer",
+        "value": "Self Employed Lawyer",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_OTHER",
+        "description": "Self Employed Other",
+        "value": "Self Employed Other",
+        "isActive": "Y"
+      },
+      {
+        "code": "OTHER_SPECIFY",
+        "description": "Other(Specify)",
+        "value": "Other(Specify)",
+        "isActive": "Y"
+      }
+    ],
+    "family_relation": [
+      {
+        "code": "BROTHER",
+        "description": "Brother",
+        "value": "Brother",
+        "isActive": "Y"
+      },
+      {
+        "code": "SISTER",
+        "description": "Sister",
+        "value": "Sister",
+        "isActive": "Y"
+      },
+      {
+        "code": "SPOUSE",
+        "description": "Spouse",
+        "value": "Spouse",
+        "isActive": "Y"
+      }
+    ],
+    "dead_or_alive": [
+      {
+        "code": "ALIVE",
+        "description": "Alive",
+        "value": "Alive",
+        "isActive": "Y"
+      },
+      {
+        "code": "DEAD",
+        "description": "Dead",
+        "value": "Dead",
+        "isActive": "Y"
+      }
+    ],
     "misc": [
        {
         "code": "REQT_ST",

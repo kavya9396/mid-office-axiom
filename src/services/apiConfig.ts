@@ -119,6 +119,10 @@ const apiUrls = {
     real: "/api/medical/view",
     mock: "/mock/drs/medical.mock.json",
   },
+  medicalFetch: {
+    real: "http://172.30.74.182:8155/icic-medical-service/v1/medical-data/fetch",
+    mock: "/mock/drs/medical.mock.json",
+  },
   medicalSubmit: {
     real: "/api/medical/submit",
     mock: "/mock/drs/medicalSubmit.mock.json",
@@ -134,6 +138,10 @@ const apiUrls = {
   specialMedicalSubmit: {
     real: "/api/medical/special/submit",
     mock: "/mock/drs/specialMedicalSubmit.mock.json",
+  },
+  medicalSaveAndCalculate: {
+    real: "http://172.30.74.182:8155/icic-medical-service/v1/medical-data/save",
+    mock: "/mock/drs/medicalSaveAndCalculate.mock.json",
   },
  
   // Financial

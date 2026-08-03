@@ -6,7 +6,6 @@ import RootLayout from "./RootLayout";
 import Inbox from "../modules/Landing/Inbox";
 import { PATHS } from "./paths";
 import DRS from "../modules/DRS/DRS";
-import ViewMedicals from "../modules/DRS/Medical/viewMedicals";
 import ViewFinancial from "../modules/DRS/Financial/ViewFinancial";
 import Grievance from "../modules/Grievance/Grievance";
 import GrievanceApplication from "../modules/Grievance/GrievanceApplication";
@@ -16,6 +15,7 @@ import RiskDetailsPage from "../modules/QuickLinks/RiskDetailsPage";
 import OpenTasksPage from "../modules/QuickLinks/OpenTasksPage";
 import UserManagement from "../modules/DRS/UserManagement";
 import SearchApplication from "../modules/Landing/SearchApplication";
+import ViewMedical from "../modules/DRS/Medical Final/ViewMedical";
 
 function BusinessTypeRedirect() {
     return <Navigate to="/inbox" replace />;
@@ -50,7 +50,8 @@ export default function AppRoutes() {
                     {/* APP ROUTES WITH LAYOUT */}
                     <Route path=":businessType" element={<RootLayout />}>
                         <Route path={PATHS.DRS} element={<DRS />} />
-                        <Route path={PATHS.DRS_MEDICAL} element={<ViewMedicals />} />
+                        {/* <Route path={PATHS.DRS_MEDICAL} element={<ViewMedicals />} /> */}
+                        <Route path={PATHS.DRS_MEDICAL} element={<ViewMedical />} />
                         <Route path={PATHS.DRS_FINANCIAL} element={<ViewFinancial />} />
                         <Route path={PATHS.DRS_AUDIT_TRAIL} element={<AuditTrailPage />} />
                         <Route path={PATHS.DRS_OPEN_TASKS} element={<OpenTasksPage />} />

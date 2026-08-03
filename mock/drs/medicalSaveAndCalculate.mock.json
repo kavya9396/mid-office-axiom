@@ -1,7 +1,7 @@
 {
   "response_code": 200,
   "error": false,
-  "message": "40 section(s) fetched successfully",
+  "message": "40 section(s) saved successfully",
   "data": {
     "applicationNumber": "OS90377743",
     "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
@@ -12,31 +12,34 @@
       "mer": {
         "firstName": "Ravi",
         "lastName": "Kumar",
-        "dateOfBirth": "1990-05-12",
         "genderCode": "M",
         "educationCode": "GRAD",
         "occupationCode": "SAL",
         "incomeCode": "5L-10L",
+        "dateOfBirth": "1990-05-12",
         "anyDeclPostPolicy": "N",
-        "partyRole": "LA",
-        "examDate": "2026-07-22",
-        "examPlace": "CLINIC",
-        "examTime": "10:30",
         "examinerName": "Dr Mehta",
         "meCode": "ME001",
+        "examDate": "2026-07-22",
+        "examTime": "10:30",
+        "examPlace": "CLINIC",
         "centreName": "SRL Diagnostics",
         "centreAddress": "Andheri East, Mumbai",
-        "pincode": "400069"
+        "pincode": "400069",
+        "headerStatus": "REUSED",
+        "examStatus": "REUSED",
+        "medAppDtlId": 3,
+        "examId": 4
       },
       "habit_and_addictions": {
         "habits": [
           {
             "applicationNumber": "OS90377743",
             "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "substanceCode": "CIGARETTE",
-            "indicator": "N",
-            "quantity": "0",
-            "startYear": null
+            "substanceCode": "TOBACCO",
+            "indicator": "Y",
+            "quantity": "5/day",
+            "startYear": 2015
           },
           {
             "applicationNumber": "OS90377743",
@@ -45,22 +48,6 @@
             "indicator": "N",
             "quantity": "0",
             "startYear": null
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "substanceCode": "LIQUOR",
-            "indicator": "N",
-            "quantity": "0",
-            "startYear": null
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "substanceCode": "TOBACCO",
-            "indicator": "Y",
-            "quantity": "5/day",
-            "startYear": 2015
           },
           {
             "applicationNumber": "OS90377743",
@@ -78,13 +65,19 @@
             "quantity": "2 pegs/week",
             "startYear": 2018
           }
-        ]
+        ],
+        "rowsInserted": 0,
+        "rowsUpdated": 4,
+        "examId": 4
       },
       "measurement": {
         "heightCm": 170,
         "weightKg": 70,
         "waistCm": 82,
-        "hipsCm": 95
+        "hipsCm": 95,
+        "bmiCalculated": 24.22,
+        "examId": 4,
+        "status": "UPSERTED"
       },
       "family_history": {
         "members": [
@@ -115,20 +108,14 @@
           {
             "applicationNumber": "OS90377743",
             "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "relationType": "SISTER",
-            "memberAge": 29,
-            "healthStatusDesc": "Healthy",
-            "aliveStatus": "A"
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
             "relationType": "SPOUSE",
             "memberAge": 32,
             "healthStatusDesc": "Healthy",
             "aliveStatus": "A"
           }
-        ]
+        ],
+        "rowsInserted": 0,
+        "rowsUpdated": 4
       },
       "blood_pressure_and_pulse": {
         "pulseRate": 72,
@@ -158,6 +145,9 @@
             "readingTime": "10:45"
           }
         ],
+        "rowsInserted": 0,
+        "rowsUpdated": 3,
+        "examId": 4,
         "avgSystolicCalculated": 120,
         "avgDiastolicCalculated": 80
       },
@@ -168,14 +158,7 @@
             "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
             "questionId": "1.a",
             "questionValue": "N",
-            "remark": null
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "questionId": "10.a",
-            "questionValue": "N",
-            "remark": null
+            "remark": ""
           },
           {
             "applicationNumber": "OS90377743",
@@ -187,15 +170,15 @@
           {
             "applicationNumber": "OS90377743",
             "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "questionId": "2.b",
-            "questionValue": "YES",
-            "remark": "Obese"
+            "questionId": "7.a",
+            "questionValue": "Y",
+            "remark": "Mild exertional dyspnea"
           },
           {
             "applicationNumber": "OS90377743",
             "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "questionId": "2.c",
-            "questionValue": "NO",
+            "questionId": "10.a",
+            "questionValue": "N",
             "remark": null
           },
           {
@@ -211,43 +194,10 @@
             "questionId": "21.a",
             "questionValue": "Y",
             "remark": null
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "questionId": "3.a",
-            "questionValue": "YES",
-            "remark": "Had spine L2 brust fracture in July 2024, falling from stairs, mri done, there was L2 burst fracture, spine fusion surgery done, rod implanted 5 days admitted in hospital, no any rod removal done after that ,cannot bend due to rod ,no any other complaints present after that"
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "questionId": "3.b",
-            "questionValue": "YES",
-            "remark": "Usg abdomen done 1 months ago due to routine check up, report was normal there was grade 1 fatty liver, had not taken any treatment for that ,only diet control ,no any complaints present regarding thus"
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "questionId": "3.c",
-            "questionValue": "NO",
-            "remark": null
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "questionId": "4.a",
-            "questionValue": "NO",
-            "remark": null
-          },
-          {
-            "applicationNumber": "OS90377743",
-            "partyId": "68070659-69c9-4e1b-ae12-92f3de80cfca",
-            "questionId": "7.a",
-            "questionValue": "Y",
-            "remark": "Mild exertional dyspnea"
           }
-        ]
+        ],
+        "rowsInserted": 0,
+        "rowsUpdated": 6
       }
     }
   }
