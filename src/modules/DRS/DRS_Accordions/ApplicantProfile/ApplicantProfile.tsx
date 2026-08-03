@@ -349,7 +349,12 @@ const buildProfileFromReduxData = (
         customerDetails[0];
 
     const summaryRecord = toRecord(selectedSummaryEntry);
-    const summaryPersonal = toRecord(summaryRecord.personalDetails);
+    // Some DRS payloads (mocks) use `proposerSummary` while others use `personalDetails`.
+    // Prefer `personalDetails` when present, otherwise fall back to `proposerSummary`.
+    const summaryPersonal =
+        Object.keys(toRecord(summaryRecord.personalDetails)).length > 0
+            ? toRecord(summaryRecord.personalDetails)
+            : toRecord(summaryRecord.proposerSummary);
     const summaryFaceMatchDetails = toRecord(summaryRecord.faceMatchDetails);
     const summaryUnderwriting = toRecord(summaryRecord.underwriting);
     const summaryKyc = toRecord(summaryRecord.kycDetails);
@@ -669,13 +674,45 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             : baseProfile;
 
     const titleOptions = normalizeMasterOptions(masters.title) ?? emptyOptions;
-    const genderOptions = normalizeMasterOptions(masters.gender) ?? emptyOptions;
-    const nationalityOptions = normalizeMasterOptions(masters.nationality) ?? emptyOptions;
-    const residentStatusOptions = normalizeMasterOptions(masters.resident_status) ?? emptyOptions;
-    const idProofOptions = normalizeMasterOptions(masters.idProof) ?? emptyOptions;
-    const addressProofOptions = normalizeMasterOptions(masters.addressProof) ?? emptyOptions;
-    const stateOptions = normalizeMasterOptions(masters.state) ?? emptyOptions;
-    const countryOptions = normalizeMasterOptions(masters.country) ?? emptyOptions;
+    const rawGenderOptions = normalizeMasterOptions(masters.gender) ?? emptyOptions;
+    const rawNationalityOptions = normalizeMasterOptions(masters.nationality) ?? emptyOptions;
+    const rawResidentStatusOptions = normalizeMasterOptions(masters.resident_status) ?? emptyOptions;
+    const rawIdProofOptions = normalizeMasterOptions(masters.idProof) ?? emptyOptions;
+    const rawAddressProofOptions = normalizeMasterOptions(masters.addressProof) ?? emptyOptions;
+    const rawStateOptions = normalizeMasterOptions(masters.state) ?? emptyOptions;
+    const rawCountryOptions = normalizeMasterOptions(masters.country) ?? emptyOptions;
+
+    // Fallbacks when masters are not yet loaded (local dev / mocks)
+    const genderOptions = rawGenderOptions.length > 0 ? rawGenderOptions : [
+        { label: "Female", value: "F" },
+        { label: "Male", value: "M" },
+        { label: "Transgender", value: "TG" },
+    ];
+
+    const nationalityOptions = rawNationalityOptions.length > 0 ? rawNationalityOptions : [
+        { label: "Indian", value: "IND" },
+        { label: "Non-Indian", value: "NON" },
+    ];
+
+    const residentStatusOptions = rawResidentStatusOptions.length > 0 ? rawResidentStatusOptions : [
+        { label: "Indian Resident", value: "IR" },
+        { label: "Non-Resident Indian", value: "NRI" },
+        { label: "Foreign National", value: "FN" },
+    ];
+
+    const idProofOptions = rawIdProofOptions.length > 0 ? rawIdProofOptions : [
+        { label: "Aadhaar", value: "AADH" },
+        { label: "Driving Licence", value: "DL" },
+        { label: "Passport", value: "PASS" },
+    ];
+
+    const addressProofOptions = rawAddressProofOptions.length > 0 ? rawAddressProofOptions : idProofOptions;
+
+    const stateOptions = rawStateOptions.length > 0 ? rawStateOptions : [];
+    const countryOptions = rawCountryOptions.length > 0 ? rawCountryOptions : [
+        { label: "India", value: "IND" },
+        { label: "United States of America", value: "USA" },
+    ];
     const applicantProfileMasterOptions = useMemo<Partial<Record<keyof ApplicantEditForm, SelectOption[]>>>(
         () => ({
             title: titleOptions,
@@ -713,6 +750,13 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
                 ...buildFormData(displayProfile),
                 faceValue: String(productList[0]?.faceValue ?? ""),
             };
+
+            // Normalize some common incoming codes/labels so master matching works reliably
+            nextFormData.gender = toMasterLabel(String(nextFormData.gender ?? ""), genderOptions) || String(nextFormData.gender ?? "");
+            // DRS sometimes uses 'IND' for residentStatus — normalize to label or friendly text
+            nextFormData.residentStatus = toMasterLabel(String(nextFormData.residentStatus ?? ""), residentStatusOptions) || (
+                String(nextFormData.residentStatus ?? "").toUpperCase() === "IND" ? "Indian Resident" : String(nextFormData.residentStatus ?? "")
+            );
 
             // Compute country-specific state options so state values from DRS map to the correct master keys
             const commStateOptions = getStateOptionsForCountry(masters.state, nextFormData.communicationCountry, countryOptions);
@@ -1025,6 +1069,14 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
                     faceValue: currentFaceValue,
                 };
 
+                console.debug("ApplicantProfile: fetched nextFormData before mapping:", nextFormData);
+
+                // Normalize incoming values from fetched profile
+                nextFormData.gender = toMasterLabel(String(nextFormData.gender ?? ""), genderOptions) || String(nextFormData.gender ?? "");
+                nextFormData.residentStatus = toMasterLabel(String(nextFormData.residentStatus ?? ""), residentStatusOptions) || (
+                    String(nextFormData.residentStatus ?? "").toUpperCase() === "IND" ? "Indian Resident" : String(nextFormData.residentStatus ?? "")
+                );
+
                 const commStateOptions = getStateOptionsForCountry(masters.state, nextFormData.communicationCountry, countryOptions);
                 const permStateOptions = getStateOptionsForCountry(masters.state, nextFormData.permanentCountry, countryOptions);
 
@@ -1033,6 +1085,11 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
                     communicationState: commStateOptions,
                     permanentState: permStateOptions,
                 } as Partial<Record<keyof ApplicantEditForm, SelectOption[]>>;
+
+                console.debug("ApplicantProfile: optionMap keys and sizes:", Object.entries(optionMap).map(([k, v]) => [k, (v || []).length]));
+
+                const mapped = toMasterFormData(nextFormData, optionMap);
+                console.debug("ApplicantProfile: mapped formData:", mapped);
 
                 setFormData(toMasterFormData(nextFormData, optionMap));
                 setOpenEditDialog(true);

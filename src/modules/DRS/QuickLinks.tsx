@@ -148,14 +148,26 @@ const QuickLinks = () => {
         }
     }, [dispatch, navigate, roleType, safeApplicationNumber, safeBusinessType]);
 
+    const openOrFocusNamedWindow = (url: string, name: string) => {
+        try {
+            const win = window.open(url, name);
+            if (win) {
+                try {
+                    win.focus();
+                } catch {
+                    // ignore cross-origin focus errors
+                }
+            }
+        } catch  {
+            // fallback to simple open
+            try { window.open(url, "_blank"); } catch { /* ignore */ }
+        }
+    };
+
+    const NEW_TAB_LABELS = new Set(["Proposal Form & Documents", "Previous Policies", "Document link"]);
+
     const handleNavigate = useCallback(
         (label: string, path: string) => {
-            if (label === "Proposal Form & Documents") {
-                if (!path) return;
-                window.open(path, "_blank");
-                return;
-            }
-
             if (label === "Refer to IT") {
                 setReferToItError(null);
                 setOpenReferToItDialog(true);
@@ -165,9 +177,30 @@ const QuickLinks = () => {
             if (!path) return;
 
             const targetUrl = new URL(path, window.location.origin).toString();
-            window.open(targetUrl, "_blank");
+
+            if (NEW_TAB_LABELS.has(label)) {
+                // Use a stable window name so repeated clicks reuse the same tab instead of opening many.
+                const safeName = `drs_${label.replace(/\s+/g, "_").toLowerCase()}_${String(safeApplicationNumber ?? "").replace(/[^a-z0-9_-]/gi, "")}`;
+                openOrFocusNamedWindow(targetUrl, safeName);
+                return;
+            }
+
+            // open same-tab for internal links
+            try {
+                // If the target is same-origin and a route, use navigate; otherwise fallback to location.href
+                if (targetUrl.startsWith(window.location.origin)) {
+                    const relative = targetUrl.slice(window.location.origin.length);
+                    navigate(relative, { replace: false });
+                    return;
+                }
+            } catch {
+                // ignore and fallback
+            }
+
+            // external but not in NEW_TAB_LABELS -> open in same tab
+            window.location.href = targetUrl;
         },
-        []
+        [navigate, safeApplicationNumber]
     );
 
     return (
