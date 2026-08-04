@@ -12,6 +12,7 @@ export const defaultErrorMessages = {
   financialNumericValue: "Enter a numeric value.",
   financialDateFormat: "Enter date in DD/MM/YYYY format.",
   financialValidDate: "Enter a valid date.",
+  financialFutureDateNotAllowed: "Future date is not allowed.",
   applicantValidPan: "Enter a valid PAN number (e.g. ABCDE1234F)",
   applicantValidVoterId: "Enter a valid Voter ID (e.g. ABC1234567)",
   applicantValidAadhaar: "Enter a valid Aadhaar number (12 digits)",

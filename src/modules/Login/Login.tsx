@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Divider, Typography, Link } from "@mui/material";
+import { Box, Divider, Typography, Link, Snackbar, Alert } from "@mui/material";
 
 import LoginImage from "../../assets/Login-Image.svg";
 import IPRULogo from "../../assets/ICICI-Logo.svg";
@@ -29,6 +29,13 @@ const Login = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [status, setStatus] = React.useState<"idle" | "loading">("idle");
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+
+  const openErrorSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  };
 
   const onSubmit = async (data: LoginForm) => {
     setStatus("loading");
@@ -60,9 +67,21 @@ const Login = () => {
       // }
 
       navigate(getInboxPath(normalizedBusinessType));
+      return;
     }
+
+      const responseRecord = res as unknown as Record<string, unknown>;
+      const failedMessage = String(responseRecord?.message ?? "Login failed");
+      openErrorSnackbar(failedMessage || "Login failed");
     } catch (err) {
       console.error("Login failed", err);
+      const errorMessage =
+        typeof err === "string"
+          ? err
+          : err instanceof Error
+            ? err.message
+            : String((err as Record<string, unknown> | null)?.message ?? "Login failed");
+      openErrorSnackbar(errorMessage || "Login failed");
     } finally {
       setStatus("idle");
     }
@@ -259,6 +278,22 @@ const Login = () => {
           <Box component="img" src={IBMLogo} alt="IBM Logo" />
         </Box>
       </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

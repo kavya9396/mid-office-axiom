@@ -27,7 +27,22 @@ export const apiRequest = async <TResponse = unknown, TRequest = unknown>({
   });
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status}`);
+    let errorMessage = `API Error: ${response.status}`;
+
+    try {
+      const errorData = await response.json();
+      if (errorData && typeof errorData === "object" && !Array.isArray(errorData)) {
+        const record = errorData as Record<string, unknown>;
+        const apiMessage = String(record.message ?? "").trim();
+        if (apiMessage) {
+          errorMessage = apiMessage;
+        }
+      }
+    } catch {
+      // Ignore parse failures and keep the status-based fallback message.
+    }
+
+    throw new Error(errorMessage);
   }
 
   const data = await response.json();

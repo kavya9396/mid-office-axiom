@@ -15,6 +15,7 @@ import { url } from "../../../services/apiConfig";
 import type { ApiKey } from "../../../services/apiConfig";
 import { useAppDispatch } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
+import { drsThunk } from "../../../store/thunks/drsThunk";
 import { financialThunk } from "../../../store/thunks/financialThunk";
 import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
@@ -31,11 +32,7 @@ import {
 } from "./financialAccordionConfig";
 import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 
-const DRS_NEW_TAB_CONTEXT_KEY = "drsNewTabContext";
-
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
-const getStoredApplicantTab = () =>
-  (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
 
 type DRSViewTab = "medical" | "financial";
 
@@ -771,31 +768,34 @@ const normalizeFinancialResponse = (response: FinancialResponse): FinancialRespo
   };
 };
 
-type DrsNewTabContext = {
-  applicationNumber?: string;
-  partyId?: string;
-  selectedApplicantTab?: ApplicantTab;
-  breDecision?: unknown;
-  applicantProfile?: unknown;
-  savedAt?: number;
-};
+const mapApplicantTabFromMemberType = (memberType: unknown, index: number): ApplicantTab => {
+  const normalizedMemberType = String(memberType ?? "").trim().toUpperCase();
 
-const getStoredDrsNewTabContext = (): DrsNewTabContext => {
-  try {
-    const rawValue = localStorage.getItem(DRS_NEW_TAB_CONTEXT_KEY);
-    if (!rawValue) {
-      return {};
-    }
-
-    const parsedValue = JSON.parse(rawValue);
-    if (!parsedValue || typeof parsedValue !== "object" || Array.isArray(parsedValue)) {
-      return {};
-    }
-
-    return parsedValue as DrsNewTabContext;
-  } catch {
-    return {};
+  if (normalizedMemberType.includes("PR") || normalizedMemberType.includes("PROPOSER")) {
+    return "proposer";
   }
+
+  if (normalizedMemberType.includes("LIFEASSURED1") || normalizedMemberType.includes("LA1")) {
+    return "lifeassured1";
+  }
+
+  if (normalizedMemberType.includes("LIFEASSURED2") || normalizedMemberType.includes("LA2")) {
+    return "lifeassured2";
+  }
+
+  if (normalizedMemberType.includes("LA") || normalizedMemberType.includes("LIFE")) {
+    return index === 0 ? "lifeassured1" : "lifeassured2";
+  }
+
+  if (index === 0) {
+    return "proposer";
+  }
+
+  if (index === 1) {
+    return "lifeassured1";
+  }
+
+  return "lifeassured2";
 };
 
 const readOnlyBoxSx = {
@@ -948,21 +948,6 @@ const FORM_J_ROW_LABELS = [
 const COMMISSION_MONTH_LABELS = ["Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6"] as const;
 const COMMISSION_AVERAGE_PM_LABEL = "Average commission pm";
 const COMMISSION_AVERAGE_ANNUAL_LABEL = "Average Annual Income";
-
-// type CommissionStatementCalculationRequest = {
-//   applicationId: string;
-//   roleType: string;
-//   months: Record<string, string>;
-// };
-
-// type CommissionStatementCalculationResponse = {
-//   averageCommissionPm?: string | number;
-//   averageAnnualIncome?: string | number;
-//   data?: {
-//     averageCommissionPm?: string | number;
-//     averageAnnualIncome?: string | number;
-//   };
-// };
 
 type SubmitResponse = {
   success?: boolean;
@@ -1277,54 +1262,6 @@ const buildMonthlyEntries = (
   }, []);
 };
 
-// const parseCommissionAmount = (value: string) => {
-//   const normalizedValue = value.replace(/,/g, "").trim();
-
-//   if (!normalizedValue) {
-//     return null;
-//   }
-
-//   const amount = Number(normalizedValue);
-//   return Number.isFinite(amount) ? amount : null;
-// };
-
-// const formatCalculatedAmount = (value: number) => {
-//   if (Number.isInteger(value)) {
-//     return String(value);
-//   }
-
-//   return value.toFixed(2);
-// };
-
-// const calculateCommissionStatementValues = (months: Record<string, string>) => {
-//   const enteredAmounts = COMMISSION_MONTH_LABELS
-//     .map((label) => parseCommissionAmount(months[label] ?? ""))
-//     .filter((amount): amount is number => amount != null);
-
-//   if (enteredAmounts.length === 0) {
-//     return {
-//       averageCommissionPm: "",
-//       averageAnnualIncome: "",
-//     };
-//   }
-
-//   const totalCommission = enteredAmounts.reduce((total, amount) => total + amount, 0);
-//   const averageCommissionPm = totalCommission / enteredAmounts.length;
-
-//   return {
-//     averageCommissionPm: formatCalculatedAmount(averageCommissionPm),
-//     averageAnnualIncome: formatCalculatedAmount(averageCommissionPm * 12),
-//   };
-// };
-
-// const getCommissionCalculationResponseValues = (
-//   response: CommissionStatementCalculationResponse,
-//   fallback: ReturnType<typeof calculateCommissionStatementValues>,
-// ) => ({
-//   averageCommissionPm: String(response.data?.averageCommissionPm ?? response.averageCommissionPm ?? fallback.averageCommissionPm),
-//   averageAnnualIncome: String(response.data?.averageAnnualIncome ?? response.averageAnnualIncome ?? fallback.averageAnnualIncome),
-// });
-
 const isSecondaryRepeatedField = (label: string) => {
   const trimmedLabel = label.trim();
 
@@ -1362,14 +1299,48 @@ const getFinancialFieldValidationError = (sectionKey: FinancialSectionKey, field
   return "";
 };
 
+const toDateInputValue = (value: string) => {
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+
+  if (!match) {
+    return "";
+  }
+
+  const [, day, month, year] = match;
+  return `${year}-${month}-${day}`;
+};
+
+const fromDateInputValue = (value: string) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+
+  if (!match) {
+    return value;
+  }
+
+  const [, year, month, day] = match;
+  return `${day}/${month}/${year}`;
+};
+
+const getTodayDateInputValue = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
 const renderFieldValue = (
   value: string,
   isEditable: boolean,
   onChange: (value: string) => void,
   isRequired = false,
   errorText?: string,
+  fieldRule?: ReturnType<typeof getFinancialFieldRule>,
 ) => {
   if (isEditable) {
+    const isDateField = fieldRule?.inputType === "dateDDMMYYYY";
+
     return (
       <CustomTextField
         fullWidth
@@ -1377,8 +1348,10 @@ const renderFieldValue = (
         required={isRequired}
         error={Boolean(errorText)}
         helperText={errorText}
-        value={value}
-        onChange={(event) => onChange(event.target.value)}
+        type={isDateField ? "date" : undefined}
+        value={isDateField ? toDateInputValue(value) : value}
+        onChange={(event) => onChange(isDateField ? fromDateInputValue(event.target.value) : event.target.value)}
+        slotProps={isDateField ? { htmlInput: { max: fieldRule?.allowFutureDate === false ? getTodayDateInputValue() : undefined } } : undefined}
       />
     );
   }
@@ -2037,6 +2010,7 @@ const renderStandardSection = (
         const required = isFieldMandatory(item);
         const value = getFieldValue(values, section.key, item.label, item.value);
         const isFieldEditable = isEditable && !isAlwaysReadOnlyFinancialField(section.key, item.label);
+        const fieldRule = getFinancialFieldRule(section.key, item.label);
 
         return (
           <Box key={`${section.key}-${item.label}`}>
@@ -2049,7 +2023,8 @@ const renderStandardSection = (
               isFieldEditable,
               (nextValue) => onFieldValueChange(section.key, item.label, nextValue),
               required,
-              sectionErrors[item.label]
+              sectionErrors[item.label],
+              fieldRule
             )}
           </Box>
         );
@@ -2064,13 +2039,16 @@ const ViewFinancial = () => {
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
+  const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
-    getStoredApplicantTab();
+    "proposer";
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [drsContextLoading, setDrsContextLoading] = useState(false);
+  const [drsContextError, setDrsContextError] = useState<string | null>(null);
   const [financialData, setFinancialData] = useState<FinancialResponse | null>(null);
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
   const [financialFieldValues, setFinancialFieldValues] = useState<Record<FinancialSectionKey, Record<string, string>>>(
@@ -2088,31 +2066,45 @@ const ViewFinancial = () => {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
-  const storedNewTabContext = useMemo(() => getStoredDrsNewTabContext(), []);
   const drsDataRecord = drsData as unknown as Record<string, unknown> | null;
   const drsSummaryMembers = asArray(drsDataRecord?.summary);
   const drsApplicationNumber = toDisplay(
     firstDefined(
       drsDataRecord?.applicationNumber,
       safeApplicationId,
-      storedNewTabContext.applicationNumber,
     )
   );
+  const availableMemberTypes = useMemo(
+    () => drsSummaryMembers.map((item, index) => mapApplicantTabFromMemberType(item.memberType, index)),
+    [drsSummaryMembers]
+  );
+  const visibleTabs = useMemo(
+    () => applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key)),
+    [availableMemberTypes]
+  );
+  const currentApplicantTab = useMemo(
+    () =>
+      visibleTabs.some((tab) => tab.key === activeApplicantTab)
+        ? activeApplicantTab
+        : (visibleTabs[0]?.key ?? "proposer"),
+    [activeApplicantTab, visibleTabs]
+  );
   const drsPartyId = useMemo(() => {
-    const selectedMember = drsSummaryMembers.find((member) =>
-      toDisplay(member.memberType).toLowerCase() === activeApplicantTab.toLowerCase()
+    const selectedMember = drsSummaryMembers.find((member, index) =>
+      mapApplicantTabFromMemberType(member.memberType, index) === currentApplicantTab
     );
 
     return toDisplay(
       firstDefined(
         selectedMember?.partyId,
         drsSummaryMembers[0]?.partyId,
-        storedNewTabContext.partyId,
       )
     );
-  }, [activeApplicantTab, drsSummaryMembers, storedNewTabContext.partyId]);
+  }, [currentApplicantTab, drsSummaryMembers]);
   const financialFetchPayloadError =
-    !drsApplicationNumber || !drsPartyId
+    !drsContextLoading &&
+    !drsContextError &&
+    (!drsApplicationNumber || !drsPartyId)
       ? "Application number or party ID is unavailable for financial fetch."
       : null;
   const isFormalRole = isFormalTaskRole(roleType);
@@ -2121,6 +2113,33 @@ const ViewFinancial = () => {
     () => buildFinancialSectionsFromResponse(financialData?.sections),
     [financialData?.sections]
   );
+
+  useEffect(() => {
+    if (!safeApplicationId || !roleType || !userId) {
+      return;
+    }
+
+    const fetchDrsContext = async () => {
+      try {
+        setDrsContextLoading(true);
+        setDrsContextError(null);
+        await dispatch(
+          drsThunk({
+            applicationNo: safeApplicationId,
+            userId,
+            roleType,
+            sections: ["summary", "breDecision"],
+          })
+        ).unwrap();
+      } catch (err) {
+        setDrsContextError(err instanceof Error ? err.message : "Failed to fetch DRS details.");
+      } finally {
+        setDrsContextLoading(false);
+      }
+    };
+
+    void fetchDrsContext();
+  }, [dispatch, roleType, safeApplicationId, userId]);
 
   useEffect(() => {
     const payload: FinancialViewRequest = {
@@ -2148,112 +2167,6 @@ const ViewFinancial = () => {
 
     void fetchFinancial();
   }, [dispatch, drsApplicationNumber, drsPartyId, financialFetchPayloadError, roleType]);
-
-  // const commissionMonthValueKey = useMemo(
-  //   () => COMMISSION_MONTH_LABELS.map((label) => financialFieldValues.commission_statement?.[label] ?? "").join("|"),
-  //   [financialFieldValues]
-  // );
-
-  // useEffect(() => {
-  //   if (!isEditable) {
-  //     return;
-  //   }
-
-  //   const enteredMonthValues = commissionMonthValueKey.split("|");
-  //   const months = COMMISSION_MONTH_LABELS.reduce<Record<string, string>>((accumulator, label, index) => {
-  //     accumulator[label] = enteredMonthValues[index] ?? "";
-  //     return accumulator;
-  //   }, {});
-
-  //   const fallbackValues = calculateCommissionStatementValues(months);
-  //   const hasEnteredMonth = COMMISSION_MONTH_LABELS.some((label) => months[label].trim());
-  //   const hasInvalidMonth = COMMISSION_MONTH_LABELS.some((label) => {
-  //     const value = months[label].trim();
-  //     return Boolean(value) && parseCommissionAmount(value) == null;
-  //   });
-
-  //   if (!hasEnteredMonth) {
-  //     return;
-  //   }
-
-  //   if (hasInvalidMonth) {
-  //     return;
-  //   }
-
-  //   const timeoutId = window.setTimeout(async () => {
-  //     try {
-  //       const response = await apiRequest<CommissionStatementCalculationResponse, CommissionStatementCalculationRequest>({
-  //         url: url("financialCommissionCalculate" as ApiKey),
-  //         method: "POST",
-  //         body: {
-  //           applicationId: safeApplicationId,
-  //           roleType,
-  //           months,
-  //         },
-  //       });
-  //       const calculatedValues = getCommissionCalculationResponseValues(response, fallbackValues);
-
-  //       setFinancialFieldValues((currentValues) => ({
-  //         ...currentValues,
-  //         commission_statement: {
-  //           ...currentValues.commission_statement,
-  //           [COMMISSION_AVERAGE_PM_LABEL]: calculatedValues.averageCommissionPm,
-  //           [COMMISSION_AVERAGE_ANNUAL_LABEL]: calculatedValues.averageAnnualIncome,
-  //         },
-  //       }));
-  //     } catch {
-  //       setFinancialFieldValues((currentValues) => ({
-  //         ...currentValues,
-  //         commission_statement: {
-  //           ...currentValues.commission_statement,
-  //           [COMMISSION_AVERAGE_PM_LABEL]: fallbackValues.averageCommissionPm,
-  //           [COMMISSION_AVERAGE_ANNUAL_LABEL]: fallbackValues.averageAnnualIncome,
-  //         },
-  //       }));
-  //     }
-  //   }, 400);
-
-  //   return () => window.clearTimeout(timeoutId);
-  // }, [commissionMonthValueKey, isEditable, roleType, safeApplicationId]);
-
-  const availableMemberTypes = useMemo(
-    () => financialData?.summary?.map((item) => item.memberType) ?? [],
-    [financialData]
-  );
-
-  const visibleTabs = useMemo(
-    () => applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key)),
-    [availableMemberTypes]
-  );
-
-  const currentApplicantTab = useMemo(
-    () =>
-      visibleTabs.some((tab) => tab.key === activeApplicantTab)
-        ? activeApplicantTab
-        : (visibleTabs[0]?.key ?? "proposer"),
-    [activeApplicantTab, visibleTabs]
-  );
-
-  const applicantProfileFromStorage = useMemo(() => {
-    const profile = storedNewTabContext.applicantProfile;
-    if (!profile || typeof profile !== "object" || Array.isArray(profile)) {
-      return undefined;
-    }
-
-    return {
-      memberType: currentApplicantTab,
-      proposerSummary: profile,
-    } as unknown as Parameters<typeof ApplicantProfile>[0]["profile"];
-  }, [currentApplicantTab, storedNewTabContext.applicantProfile]);
-
-  const breDecisionFromStorage = useMemo(() => {
-    const breDecision = storedNewTabContext.breDecision;
-    if (!breDecision || typeof breDecision !== "object" || Array.isArray(breDecision)) {
-      return null;
-    }
-
-    return breDecision as Record<string, unknown>;
-  }, [storedNewTabContext.breDecision]);
 
   const resolvedActiveSectionId = useMemo(
     () =>
@@ -3287,7 +3200,7 @@ const ViewFinancial = () => {
         />
       </Box>
 
-      <BreDecision breDecisionOverride={breDecisionFromStorage as never} />
+      <BreDecision />
 
       {!isFormalRole && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
@@ -3296,7 +3209,6 @@ const ViewFinancial = () => {
             value={currentApplicantTab}
             onChange={(value: ApplicantTab) => {
               setActiveApplicantTab(value);
-              localStorage.setItem("drsSelectedApplicantTab", value);
             }}
           />
         </Box>
@@ -3311,7 +3223,6 @@ const ViewFinancial = () => {
           ) : (
             <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
               <ApplicantProfile
-                profile={applicantProfileFromStorage}
                 selectedApplicantTab={currentApplicantTab}
                 isApplicantDetailsExpanded
               />
@@ -3320,9 +3231,15 @@ const ViewFinancial = () => {
         </CustomAccordion>
       </Box>
 
-      {loading && <Typography sx={{ color: "#6B7280", mb: 2 }}>Loading financial details...</Typography>}
-      {(financialFetchPayloadError || error) && (
-        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>{financialFetchPayloadError ?? error}</Typography>
+      {(drsContextLoading || loading) && (
+        <Typography sx={{ color: "#6B7280", mb: 2 }}>
+          {drsContextLoading ? "Loading DRS details..." : "Loading financial details..."}
+        </Typography>
+      )}
+      {(drsContextError || financialFetchPayloadError || error) && (
+        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
+          {drsContextError ?? financialFetchPayloadError ?? error}
+        </Typography>
       )}
 
       <Box

@@ -173,6 +173,15 @@ const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const pranRegex = /^\d{12}$/;
 const indiaPincodeRegex = /^\d{6}$/;
 
+const getTodayDateInputValue = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+};
+
 const getGenderByTitle = (title: string): ApplicantEditForm["gender"] | undefined => {
     const normalizedTitle = title.trim().toLowerCase();
 
@@ -923,12 +932,13 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     const validateForm = (/* fieldsToValidate: FormField[] = allDialogFields */) => {
         const errors: FormErrors = {};
 
-        // Only validate these fields per screenshot requirements. PRAN is optional.
+        // Only validate these fields per screenshot requirements.
         const labelMap: Partial<Record<keyof ApplicantEditForm, string>> = {
             dob: "DOB",
             gender: "Gender",
             residentStatus: "Residential Status",
             panNumber: "PAN Number",
+            pranNo: "PRAN Number",
             identityProofType: "Identity Proof",
             identityProofNumber: "Identity Proof Number",
             addressProof: "Address Proof",
@@ -942,6 +952,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             "gender",
             "residentStatus",
             "panNumber",
+            "pranNo",
             "identityProofType",
             "identityProofNumber",
             "addressProof",
@@ -963,8 +974,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             errors.panNumber = getErrorMessage("applicantValidPan");
         }
 
-        // PRAN is optional but validate format if provided
-        if (formData.pranNo && String(formData.pranNo).trim() && !pranRegex.test(String(formData.pranNo).trim())) {
+        if (formData.pranNo.trim() && !pranRegex.test(String(formData.pranNo).trim())) {
             errors.pranNo = "PRAN Number must be exactly 12 digits";
         }
 
@@ -1180,7 +1190,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         setSubmitError(null);
         setSubmitLoading(true);
 
-        // Always validate the dialog fields (PRAN optional)
+        // Always validate the dialog fields
         const isValid = validateForm();
         console.debug("ApplicantProfile: validation result", { isValid, fieldErrors });
         if (!isValid) {
@@ -1340,6 +1350,8 @@ console.log('payload',payload)
             );
         }
         const isFaceValue = field.name === "faceValue";
+        const isPanNumber = field.name === "panNumber";
+        const isDobField = field.name === "dob";
 
         return (
             <>
@@ -1350,10 +1362,23 @@ console.log('payload',payload)
                     sx={{
                         backgroundColor: "#fff",
                         borderRadius: "10px",
+                        ...(isPanNumber
+                            ? {
+                                "& .MuiInputBase-input": {
+                                    textTransform: "uppercase",
+                                },
+                            }
+                            : {}),
                     }}
                     value={formData[field.name]}
                     error={Boolean(fieldErrors[field.name])}
                     helperText={fieldErrors[field.name]}
+                    slotProps={{
+                        htmlInput: {
+                            ...(isPanNumber ? { autoCapitalize: "characters" } : {}),
+                            ...(isDobField ? { max: getTodayDateInputValue() } : {}),
+                        },
+                    }}
                     onChange={(e) =>
                         handleInputChange(field.name, e.target.value)
                     }
