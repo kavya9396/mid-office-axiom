@@ -1489,7 +1489,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                 return (
                     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, whiteSpace: "nowrap" }}>
-                        {/* <Box
+                        <Box
                             component="button"
                             type="button"
                             onClick={() => handleEditLocalSaved(row.__rowId)}
@@ -1509,7 +1509,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             aria-label="Edit requirement"
                         >
                             <EditIcon />
-                        </Box> */}
+                        </Box>
 
                         {isLocalDraft ? (
                             <Box
