@@ -26,38 +26,27 @@ type LoginForm = {
 };
 const Login = () => {
   const { control, handleSubmit } = useForm<LoginForm>();
-const dispatch = useAppDispatch();
-const navigate = useNavigate();
-  const USE_MOCK_LOGIN = true;
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [status, setStatus] = React.useState<"idle" | "loading">("idle");
 
-  const onSubmit = async (data:LoginForm) => {
-  setStatus("loading");
+  const onSubmit = async (data: LoginForm) => {
+    setStatus("loading");
 
-  try {
-     let res;
-
-    if (USE_MOCK_LOGIN) {
-      // Mock API response
-      res = {
-        ldapAuthentication: "Success",
-        token: "mock-token-123456",
-      };
-    } else {
-      // Real API
-      res = await dispatch(
+    try {
+      const res = await dispatch(
         loginThunk({
           username: data.username,
           password: data.password,
-        })
+          source: "Mid Office Transformation",
+        }),
       ).unwrap();
-    }
 
-    if (res?.ldapAuthentication === "Success") {
+      if (res?.status === "SUCCESS") {
       const normalizedBusinessType = "retail";
 
       localStorage.setItem("token", res.token);
-      localStorage.setItem("username", data.username);
+      localStorage.setItem("username", res.username || data.username);
       localStorage.setItem("password", data.password);
       localStorage.setItem("businessType", normalizedBusinessType);
 
@@ -72,12 +61,12 @@ const navigate = useNavigate();
 
       navigate(getInboxPath(normalizedBusinessType));
     }
-  } catch (err) {
-    console.error("Login failed", err);
-  } finally {
-    setStatus("idle");
-  }
-};
+    } catch (err) {
+      console.error("Login failed", err);
+    } finally {
+      setStatus("idle");
+    }
+  };
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>

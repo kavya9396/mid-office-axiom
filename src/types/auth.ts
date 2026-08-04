@@ -3,11 +3,13 @@
 export interface LoginRequest {
   username: string;
   password: string;
+  source: string;
 }
 
 export interface LoginResponse {
+  status: string;
   token: string;
-  userId: string;
-  ldapAuthentication:string;
-  businessType?: string;
+  expiresIn: number;
+  username: string;
+  roles: string[];
 }

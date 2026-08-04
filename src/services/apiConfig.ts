@@ -15,7 +15,7 @@ export const USE_MOCK = false; // <-- flip this one flag to switch modes
 const apiUrls = {
   // Auth
   login: {
-    real: "/mock/auth/login.json",
+    real: "http://172.30.74.182:8103/icic-iam-user-service/v1/login",
     mock: "/mock/auth/login.json",
   },
  
