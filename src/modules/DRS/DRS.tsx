@@ -297,7 +297,7 @@ const DRS = () => {
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK" ||
     roleType === "CPT_TASK"
-        ? [...sections, "summary"]
+        ? [...sections, "summary","breDecision"]
         : sections;
             try {
                 const drsResponse = await dispatch(

@@ -634,6 +634,7 @@ export type AdditionalRequirementRow = {
   userId: string;
   remarks: string;
   udsLink: string;
+  ocrStatus?:string;
 };
 
 export type UserRequest = {

@@ -393,7 +393,7 @@
         "requirementManagement": [
             {
                 "team": "COPS",
-                "profile": "",
+                "profile": "Payer",
                 "category": "KYC",
                 "subCategory": "ID proof",
                 "document": "Drving License",
@@ -401,7 +401,7 @@
                 "reason": "Documents not submitted",
                 "fupCode": "IDM",
                 "description": "IDM- Upload valid ID proof of proposer (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
-                "status": "PENDING",
+                "status": "Pending",
                 "isActive": "Y",
                 "raisedDate": "2026-08-03",
                 "raisedBy": "BRE_URMS",
@@ -410,7 +410,8 @@
                 "validity": "",
                 "userId": "",
                 "remarks": "",
-                "udsLink": ""
+                "udsLink": "",
+                "ocrStatus":"Pass"
             },
             {
                 "team": "COPS",
@@ -422,7 +423,7 @@
                 "reason": "Documents not submitted",
                 "fupCode": "ADP",
                 "description": "ADP-Address proof of the proposer matching with application form (Passport - front & back or Aadhaar - front & back or Driving License or Voter id)",
-                "status": "PENDING",
+                "status": "Raised",
                 "isActive": "Y",
                 "raisedDate": "2026-08-03",
                 "raisedBy": "BRE_URMS",

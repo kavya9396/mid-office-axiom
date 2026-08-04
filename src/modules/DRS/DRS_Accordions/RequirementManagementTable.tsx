@@ -328,7 +328,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const roleType = String(localStorage.getItem("roleType") ?? "");
     const { businessType, applicationNumber } = useAppContext();
     const normalizedRoleType = roleType.trim().toLowerCase();
-    const isCvtOrDvtRole = normalizedRoleType.includes("cvt") || normalizedRoleType.includes("dvt");
+    const isCvtOrDvtRole = normalizedRoleType.includes("CVT_TASK") || normalizedRoleType.includes("dvt");
     const shouldShowProfileAndSpecialTest = !isCvtOrDvtRole;
 
     const mapBreRequirementToRow = (item: BreRequirementRow): AdditionalRequirementRow => {
@@ -1431,7 +1431,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const renderDisabledActionIcons = () => (
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, whiteSpace: "nowrap" }}>
-            <Box
+            {/* <Box
                 component="span"
                 sx={{
                     color: "#CBD5E1",
@@ -1448,7 +1448,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 aria-label="Edit requirement unavailable"
             >
                 <EditIcon />
-            </Box>
+            </Box> */}
 
             <CustomDialog open={descriptionDialogOpen} onClose={closeDescriptionDialog} title="Description" maxWidth="sm">
                 <Typography sx={{ whiteSpace: "pre-wrap", fontSize: 14, color: "#182026" }}>{descriptionDialogText}</Typography>
@@ -1481,6 +1481,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             width: "5%",
             sticky: "left",
             render: (_value, row) => {
+                const isLocalDraft = Boolean(row.__isLocal && row.__isDraft);
                 const showActions = row.__isLocal || (!isTableSaved && editableStatusRowIds.has(row.__rowId));
                 if (!showActions) {
                     return renderDisabledActionIcons();
@@ -1488,7 +1489,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                 return (
                     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, whiteSpace: "nowrap" }}>
-                        <Box
+                        {/* <Box
                             component="button"
                             type="button"
                             onClick={() => handleEditLocalSaved(row.__rowId)}
@@ -1508,28 +1509,50 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             aria-label="Edit requirement"
                         >
                             <EditIcon />
-                        </Box>
-                        <Box
-                            component="button"
-                            type="button"
-                            onClick={() => handleDelete(row.__rowId)}
-                            sx={{
-                                border: "none",
-                                background: "transparent",
-                                cursor: "pointer",
-                                color: "#9A2529",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                width: 22,
-                                height: 22,
-                                flexShrink: 0,
-                                p: 0,
-                            }}
-                            aria-label="Delete requirement"
-                        >
-                            <CloseIcon />
-                        </Box>
+                        </Box> */}
+
+                        {isLocalDraft ? (
+                            <Box
+                                component="span"
+                                sx={{
+                                    color: "#CBD5E1",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 22,
+                                    height: 22,
+                                    flexShrink: 0,
+                                    opacity: 0.55,
+                                    cursor: "not-allowed",
+                                }}
+                                aria-disabled="true"
+                                aria-label="Delete requirement unavailable"
+                            >
+                                <CloseIcon />
+                            </Box>
+                        ) : (
+                            <Box
+                                component="button"
+                                type="button"
+                                onClick={() => handleDelete(row.__rowId)}
+                                sx={{
+                                    border: "none",
+                                    background: "transparent",
+                                    cursor: "pointer",
+                                    color: "#9A2529",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 22,
+                                    height: 22,
+                                    flexShrink: 0,
+                                    p: 0,
+                                }}
+                                aria-label="Delete requirement"
+                            >
+                                <CloseIcon />
+                            </Box>
+                        )}
                     </Box>
                 );
             },
@@ -1541,22 +1564,17 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             render: (_value, row) => {
                 const canEditStatus = !isTableSaved && (isPendingStatus(row.status) || editableStatusRowIds.has(row.__rowId));
 
-                if (!canEditStatus) {
-                    return (
-                        <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
-                            {toDisplayValue(row.status)}
-                        </Typography>
-                    );
-                }
-
+                // Always render the select so the dropdown remains visible,
+                // but disable it when editing isn't allowed (including after save
+                // or when status is not pending).
                 return (
                     <Box sx={{ width: 100, minWidth: 100 }}>
-                        {renderEditableSelect(row, "status", requirementStatusOptions, false)}
+                        {renderEditableSelect(row, "status", requirementStatusOptions, !canEditStatus)}
                     </Box>
                 );
             },
         },
-        // { key: "team", header: "Team", width: "6%" },
+         { key: "ocrStatus", header: "OCR Status", width: "6%" },
         ...(shouldShowProfileAndSpecialTest
             ? ([{ key: "profile", header: "Profile", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
