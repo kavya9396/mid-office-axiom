@@ -518,7 +518,7 @@ const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
     borderRight: "1px solid #D8DDE3",
   };
 
- const renderBreTableCell = (
+  const renderBreTableCell = (
   value: string,
   key: string,
   highlight = false,
@@ -539,7 +539,7 @@ const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
             <Box
               component="span"
               key={`${key}-tok-${idx}`}
-              sx={{ backgroundColor: "#FFF59D", px: 0.4, borderRadius: "2px", mr: 0.5 }}
+              sx={{ backgroundColor: "#FFF59D", borderRadius: "2px" }}
             >
               {part}
             </Box>
@@ -581,7 +581,6 @@ const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
             whiteSpace: "pre-wrap",
             display: "flex",
             flexWrap: "wrap",
-            gap: 0.5,
           }}
         >
           {content}

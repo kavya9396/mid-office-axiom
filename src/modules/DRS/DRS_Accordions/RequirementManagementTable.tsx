@@ -291,7 +291,8 @@ const applyLookupToRow = (
 const createDraftRow = (): EditableRequirementRow => ({
     ...INITIAL_ROW_STATE,
     team: getDefaultTeam(),
-    status: "Pending",
+    // store status as code where possible (use 'PEN' for Pending by default)
+    status: "PEN",
     raisedDate: getTodayDate(),
     raisedBy: getCurrentActor(),
     userId: getCurrentUserId(),
@@ -310,7 +311,22 @@ const normalizeExistingRow = (row: AdditionalRequirementRow, index: number): Edi
     return {
         ...INITIAL_ROW_STATE,
         ...row,
-        status: normalizeStatus(String(row.status ?? "")),
+        // existing row.status may be an object or string; prefer storing code if available
+        status: ((): string => {
+            try {
+                const raw = row.status as unknown;
+                if (!raw) return normalizeStatus("");
+                if (typeof raw === "string") return normalizeStatus(raw);
+                if (typeof raw === "object") {
+                    const obj = raw as Record<string, unknown>;
+                    const code = String(obj.code ?? obj.value ?? obj.description ?? "").trim();
+                    return normalizeStatus(code || "");
+                }
+                return normalizeStatus(String(raw ?? ""));
+            } catch {
+                return normalizeStatus(String(row.status ?? ""));
+            }
+        })(),
         __rowId: uniqueId,
         __isDraft: false,
         __isLocal: false,
@@ -395,6 +411,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const requirementReasonOptions = EMPTY_OPTIONS;
 
     const [teamOptionsState, setTeamOptionsState] = useState<Option[]>(EMPTY_OPTIONS);
+    // profile options are now derived from masters.misc (type: PROFILE) and are standalone
+    const [profileOptionsState, setProfileOptionsState] = useState<Option[]>(EMPTY_OPTIONS);
     const [requirementOptionsCache, setRequirementOptionsCache] = useState<Record<string, Option[]>>({});
     const [requirementStatusOptions, setRequirementStatusOptions] = useState<Option[]>(EMPTY_OPTIONS);
 
@@ -614,13 +632,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 (async () => {
                     try {
                         const defaultTeam = getDefaultTeam();
-                        const includeBlankProfile = !shouldShowProfileAndSpecialTest;
-                        const payloadBody: Record<string, string> = includeBlankProfile
-                            ? { team: defaultTeam, profile: "" }
-                            : { team: defaultTeam };
+                        const payloadBody: Record<string, string> = { team: defaultTeam };
                         const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
-                        console.log('payload',payload)
-                        const cacheKeyObj = includeBlankProfile ? { team: defaultTeam, profile: "" } : { team: defaultTeam };
+                        const cacheKeyObj = { team: defaultTeam };
                         const cacheKey = JSON.stringify(cacheKeyObj);
 
                         if (!requirementOptionsCache[cacheKey]) {
@@ -669,32 +683,19 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     }, [lastAddedDraftRowId]);
 
     const getCategoryOptions = (row: EditableRequirementRow) => {
+        // Category is fetched by team only now — profile is standalone
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest) {
-            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
-        } else {
-            // profile dropdown hidden — use explicit empty profile to match cached payloads
-            payload.profile = "";
-        }
         const cacheKey = JSON.stringify(payload);
         return requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
     };
 
     const getProfileOptions = (row: EditableRequirementRow) => {
-        // When profile is hidden there won't be a profile dropdown, but keep lookup consistent
-        const payload: Record<string, string> = { team: row.team };
-        if (!shouldShowProfileAndSpecialTest) payload.profile = "";
-        const cacheKey = JSON.stringify(payload);
-        return requirementOptionsCache[cacheKey] ?? requirementProfileOptions;
+        // Profile dropdown is standalone and sourced from masters.misc (type: 'PROFILE')
+        return profileOptionsState.length > 0 ? profileOptionsState : requirementProfileOptions;
     };
 
     const getSubCategoryOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest) {
-            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
-        } else {
-            payload.profile = "";
-        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         const cacheKey = JSON.stringify(payload);
         return requirementOptionsCache[cacheKey] ?? requirementSubCategoryOptions;
@@ -702,11 +703,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getDocumentOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest) {
-            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
-        } else {
-            payload.profile = "";
-        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
         const cacheKey = JSON.stringify(payload);
@@ -715,11 +711,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getReasonOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest) {
-            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
-        } else {
-            payload.profile = "";
-        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
         if (String(row.document ?? "").trim()) payload.document = row.document;
@@ -817,7 +808,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 } catch {
                     // ignore
                 }
-                const statusRaw = rawList.filter((opt) => String(opt?.code ?? "").trim().toUpperCase() === "REQT_ST");
+                // misc entries use `type: 'REQT_ST'` to indicate requirement-status rows
+                const statusRaw = rawList.filter((opt) => String(opt?.type ?? "").trim().toUpperCase() === "REQT_ST");
                 if (statusRaw.length > 0) {
                     const extractString = (v: unknown): string => {
                         if (v === null || v === undefined) return "";
@@ -848,12 +840,13 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                     const mapped = statusRaw
                         .map((option) => {
-                            const code = extractString(option.code ?? option.key ?? option.value ?? "");
+                            const code = extractString(option.code ?? option.key ?? "");
                             const rawValue = extractString(option.value ?? "");
-                            const description = extractString(option.description ?? option.label ?? option.code ?? "");
-                            if (!description && !code && !rawValue) return null;
-                            const val = rawValue || code || description;
-                            const lab = rawValue || description || code;
+                            const description = extractString(option.description ?? option.label ?? "");
+                            // prefer code as value, and description as label
+                            const val = code || rawValue || description;
+                            const lab = description || rawValue || code;
+                            if (!val && !lab) return null;
                             return { label: lab, value: val, description } as Option & { description?: string };
                         })
                         .filter(Boolean) as Option[];
@@ -878,6 +871,85 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         }));
                         setRequirementStatusOptions(unique);
                         cacheOptionsForPayload({ types: ["requirementStatus"] }, unique);
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            // Prefer masters.misc-based profile values when available (type === 'PROFILE')
+            try {
+                const toMasterList = (options?: unknown) => {
+                    if (Array.isArray(options)) return options as unknown[];
+                    if (!options || typeof options !== "object") return [] as unknown[];
+
+                    const record = options as Record<string, unknown>;
+                    if (Array.isArray(record.data)) return record.data as unknown[];
+                    if (Array.isArray(record.options)) return record.options as unknown[];
+                    if (Array.isArray(record.values)) return record.values as unknown[];
+
+                    return Object.values(record).flatMap((v) => (Array.isArray(v) ? v : []));
+                };
+
+                const candidateSources = [
+                    (masters as any)?.misc,
+                    (masters as any)?.data?.misc,
+                    (masters as any)?.data,
+                    masters,
+                ];
+
+                const rawList = candidateSources
+                    .flatMap((src) => toMasterList(src))
+                    .filter(Boolean) as Array<Record<string, unknown>>;
+
+                const profileRaw = rawList.filter((opt) => String(opt?.type ?? "").trim().toUpperCase() === "PROFILE");
+                if (profileRaw.length > 0) {
+                    const extractString = (v: unknown): string => {
+                        if (v === null || v === undefined) return "";
+                        if (typeof v === "string") return v.trim();
+                        if (typeof v === "number" || typeof v === "boolean") return String(v);
+                        if (typeof v === "object") {
+                            try {
+                                const obj = v as Record<string, unknown>;
+                                const candidates = ["label", "description", "value", "name", "code", "key"];
+                                for (const k of candidates) {
+                                    const vv = obj[k];
+                                    if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                    if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                                }
+                                for (const key of Object.keys(obj)) {
+                                    const vv = obj[key];
+                                    if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                    if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                                }
+                            } catch {
+                                // ignore
+                            }
+                        }
+                        return "";
+                    };
+
+                    const mapped = profileRaw
+                        .map((option) => {
+                            const code = extractString(option.code ?? option.key ?? option.value ?? "");
+                            const rawValue = extractString(option.value ?? option.description ?? option.label ?? "");
+                            const description = extractString(option.description ?? option.label ?? "");
+                            const val = code || rawValue || description;
+                            const lab = description || rawValue || code;
+                            if (!val && !lab) return null;
+                            return { label: lab, value: val, description } as Option & { description?: string };
+                        })
+                        .filter(Boolean) as Option[];
+
+                    if (mapped.length > 0) {
+                        const unique = dedupeOptions(mapped).map((o) => ({
+                            ...o,
+                            label: (String(o.label ?? "") || "").trim()
+                                ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                                : String(o.label ?? ""),
+                        }));
+                        setProfileOptionsState(unique);
+                        cacheOptionsForPayload({ types: ["profiles_from_misc"] }, unique);
                     }
                 }
             } catch (e) {
@@ -947,8 +1019,21 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 const statusOpts = statusCandidates.length > 0
                     ? statusCandidates
                           .map((c) => {
-                              const s = extractString(c);
-                              return s ? { label: s, value: s } as Option : null;
+                              if (c === null || c === undefined) return null;
+                              if (typeof c === "string") {
+                                  const s = extractString(c);
+                                  return s ? { label: s, value: s } as Option : null;
+                              }
+                              if (typeof c === "object") {
+                                  const obj = c as Record<string, unknown>;
+                                  const code = extractString(obj.code ?? obj.key ?? "");
+                                  const rawValue = extractString(obj.value ?? "");
+                                  const description = extractString(obj.description ?? obj.label ?? "");
+                                  const val = code || rawValue || description;
+                                  const lab = description || rawValue || code || String(val);
+                                  return val ? ({ label: lab, value: val, description } as Option) : null;
+                              }
+                              return null;
                           })
                           .filter(Boolean) as Option[]
                     : EMPTY_OPTIONS;
@@ -970,6 +1055,87 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
         loadInitial();
     }, []);
+
+    // If masters are loaded/updated later, derive profile options from masters.misc (type === 'PROFILE')
+    useEffect(() => {
+        try {
+            const toMasterList = (options?: unknown) => {
+                if (Array.isArray(options)) return options as unknown[];
+                if (!options || typeof options !== "object") return [] as unknown[];
+
+                const record = options as Record<string, unknown>;
+                if (Array.isArray(record.data)) return record.data as unknown[];
+                if (Array.isArray(record.options)) return record.options as unknown[];
+                if (Array.isArray(record.values)) return record.values as unknown[];
+
+                return Object.values(record).flatMap((v) => (Array.isArray(v) ? v : []));
+            };
+
+            const candidateSources = [
+                (masters as any)?.misc,
+                (masters as any)?.data?.misc,
+                (masters as any)?.data,
+                masters,
+            ];
+
+            const rawList = candidateSources
+                .flatMap((src) => toMasterList(src))
+                .filter(Boolean) as Array<Record<string, unknown>>;
+
+            const profileRaw = rawList.filter((opt) => String(opt?.type ?? "").trim().toUpperCase() === "PROFILE");
+            if (profileRaw.length > 0) {
+                const extractString = (v: unknown): string => {
+                    if (v === null || v === undefined) return "";
+                    if (typeof v === "string") return v.trim();
+                    if (typeof v === "number" || typeof v === "boolean") return String(v);
+                    if (typeof v === "object") {
+                        try {
+                            const obj = v as Record<string, unknown>;
+                            const candidates = ["label", "description", "value", "name", "code", "key"];
+                            for (const k of candidates) {
+                                const vv = obj[k];
+                                if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                            }
+                            for (const key of Object.keys(obj)) {
+                                const vv = obj[key];
+                                if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                            }
+                        } catch {
+                            // ignore
+                        }
+                    }
+                    return "";
+                };
+
+                const mapped = profileRaw
+                    .map((option) => {
+                        const code = extractString(option.code ?? option.key ?? option.value ?? "");
+                        const rawValue = extractString(option.value ?? option.description ?? option.label ?? "");
+                        const description = extractString(option.description ?? option.label ?? "");
+                        const val = code || rawValue || description;
+                        const lab = description || rawValue || code;
+                        if (!val && !lab) return null;
+                        return { label: lab, value: val, description } as Option & { description?: string };
+                    })
+                    .filter(Boolean) as Option[];
+
+                if (mapped.length > 0) {
+                    const unique = dedupeOptions(mapped).map((o) => ({
+                        ...o,
+                        label: (String(o.label ?? "") || "").trim()
+                            ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                            : String(o.label ?? ""),
+                    }));
+                    setProfileOptionsState(unique);
+                    cacheOptionsForPayload({ types: ["profiles_from_misc"] }, unique);
+                }
+            }
+        } catch {
+            // ignore
+        }
+    }, [masters]);
 
     const updateRow = (rowId: string, updater: (row: EditableRequirementRow) => EditableRequirementRow) => {
         const currentRow = rows.find((row) => row.__rowId === rowId);
@@ -1119,12 +1285,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 if (!before) return;
 
                 if (field === "team") {
-                    const includeBlankProfile = !shouldShowProfileAndSpecialTest;
-                    const payloadBody: Record<string, string> = includeBlankProfile
-                        ? { team: value, profile: "" }
-                        : { team: value };
+                    // fetch categories and related options by team only; profile is independent
+                    const payloadBody: Record<string, string> = { team: value };
                     const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
-                    const cacheKeyObj = includeBlankProfile ? { team: value, profile: "" } : { team: value };
+                    const cacheKeyObj = { team: value };
                     const cacheKey = JSON.stringify(cacheKeyObj);
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
@@ -1134,49 +1298,34 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     }
                 }
 
-                if (field === "profile") {
-                    const teamVal = before.team || "";
-                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: value } };
-                    const cacheKey = JSON.stringify({ team: teamVal, profile: value });
-                    if (!requirementOptionsCache[cacheKey]) {
-                        const mst = await fetchRequirementMst(payload);
-                        const entries = parseFirstArrayFromRequirementMst(mst);
-                        const opts = entries.map(toOption);
-                        cacheOptionsForPayload({ team: teamVal, profile: value }, opts);
-                    }
-                }
-
                 if (field === "category") {
                     const teamVal = before.team || "";
-                    const profileVal = before.profile || "";
-                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: value } };
-                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: value });
+                    const payload = { types:["requirement_mst"], requirementMst: { team: teamVal, category: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, category: value });
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
                         const entries = parseFirstArrayFromRequirementMst(mst);
                         const opts = entries.map(toOption);
-                        cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: value }, opts);
+                        cacheOptionsForPayload({ team: teamVal, category: value }, opts);
                     }
                 }
 
                 if (field === "subCategory") {
                     const teamVal = before.team || "";
-                    const profileVal = before.profile || "";
-                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: value } };
-                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: value });
+                    const payload = { types:["requirement_mst"], requirementMst: { team: teamVal, category: before.category || "", subCategory: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, category: before.category || "", subCategory: value });
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
                         const entries = parseFirstArrayFromRequirementMst(mst);
                         const opts = entries.map(toOption);
-                        cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: value }, opts);
+                        cacheOptionsForPayload({ team: teamVal, category: before.category || "", subCategory: value }, opts);
                     }
                 }
 
                 if (field === "document") {
                     const teamVal = before.team || "";
-                    const profileVal = before.profile || "";
-                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value } };
-                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value });
+                    const payload = { types:["requirement_mst"], requirementMst: { team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: value });
                     if (!requirementOptionsCache[cacheKey]) {
                             const mst = await fetchRequirementMst(payload);
                             // Prefer explicit `reasons` array when API returns both documents and reasons
@@ -1197,16 +1346,14 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             }
 
                             const opts = entries.map(toOption);
-                            cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value }, opts);
+                            cacheOptionsForPayload({ team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: value }, opts);
                     }
                 }
                 
                 if (field === "reason") {
                     const teamVal = before.team || "";
-                    const profileVal = shouldShowProfileAndSpecialTest ? (before.profile || "") : "";
                     const payloadBody: Record<string, string> = {
                         team: teamVal,
-                        profile: profileVal,
                         category: before.category || "",
                         subCategory: before.subCategory || "",
                         document: before.document || "",
@@ -1716,12 +1863,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     (async () => {
                                         try {
                                             const defaultTeam = getDefaultTeam();
-                                            const includeBlankProfile = !shouldShowProfileAndSpecialTest;
-                                            const payloadBody: Record<string, string> = includeBlankProfile
-                                                ? { team: defaultTeam, profile: "" }
-                                                : { team: defaultTeam };
+                                            const payloadBody: Record<string, string> = { team: defaultTeam };
                                             const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
-                                            const cacheKeyObj = includeBlankProfile ? { team: defaultTeam, profile: "" } : { team: defaultTeam };
+                                            const cacheKeyObj = { team: defaultTeam };
                                             const cacheKey = JSON.stringify(cacheKeyObj);
 
                                             if (!requirementOptionsCache[cacheKey]) {
@@ -1934,7 +2078,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                         row,
                                                         "category",
                                                         categoryOptions,
-                                                        !row.team || (shouldShowProfileAndSpecialTest && !row.profile),
+                                                        !row.team,
                                                     )
                                                     : renderReadOnlyField(row.category),
                                                 true,
@@ -2015,11 +2159,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     const cloned: Record<string, unknown> = JSON.parse(JSON.stringify(source || {}));
 
                                     const payloadRequirements = rows.map((r) => {
-                                        const statusValue = String(r.status ?? "").trim() || "Pending";
+                                        const statusCode = String(r.status ?? "").trim() || "PEN";
                                         const matchedStatus = (requirementStatusOptions as Array<Option & { description?: string }>).find(
-                                            (o) => String(o.value ?? "").trim() === statusValue,
+                                            (o) => String(o.value ?? "").trim() === statusCode || String(o.label ?? "").trim().toLowerCase() === String(r.status ?? "").trim().toLowerCase(),
                                         );
-                                        const statusDescription = matchedStatus?.description ?? "";
+                                        const statusDescription = matchedStatus?.description ?? matchedStatus?.label ?? String(r.status ?? "");
 
                                         return {
                                             team: mapDisplayTeamToStored(r.team ?? ""),
@@ -2030,7 +2174,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             reason: r.reason ?? "",
                                             fupCode: r.fupCode ?? "",
                                             description: r.description ?? "",
-                                            status: { value: statusValue, description: statusDescription },
+                                            status: { value: statusCode, description: statusDescription },
                                             raisedDate: r.raisedDate ?? "",
                                             raisedBy: r.raisedBy ?? "",
                                             receivedDate: r.receivedDate ?? "",

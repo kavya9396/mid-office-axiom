@@ -1591,53 +1591,53 @@
       }
     ],
     "misc": [
-       {
-        "code": "REQT_ST",
-        "description": "PEN",
+      {
+        "code": "PEN",
+        "description": "Pending",
         "value": "Pending",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Pending"
+        "type": "REQT_ST"
       },
-       {
-        "code": "REQT_ST",
-        "description": "WAIVED",
+      {
+        "code": "WAV",
+        "description": "Waived",
         "value": "Waived",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Waived"
+        "type": "REQT_ST"
       },
-       {
-        "code": "REQT_ST",
-        "description": "ACCEPT",
+      {
+        "code": "ACC",
+        "description": "Accept",
         "value": "Accept",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Accept"
+        "type": "REQT_ST"
       },
       {
-        "code": "CVT",
-        "description": "ISS",
+        "code": "ISS",
+        "description": "Accept",
         "value": "Accept",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Accept"
+        "type": "CVT"
       },
       {
-        "code": "CVT",
-        "description": "RAISE_PIVV",
+        "code": "RAISE_PIVV",
+        "description": "Reraise PIVV",
         "value": "Reraise PIVV",
         "isActive": "Y",
         "miscMastId": "2",
-        "type": "Reraise PIVV"
+        "type": "CVT"
       },
       {
-        "code": "CVT",
-        "description": "AMR",
+        "code": "AMR",
+        "description": "Raise Requirement",
         "value": "Raise Requirement",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Raise Requirement"
+        "type": "CVT"
       },
       {
         "code": "ISS",
@@ -1647,7 +1647,7 @@
         "miscMastId": "COMMUNICATION",
         "type": "DVT"
       },
-       {
+      {
         "code": "STD",
         "description": "Standard",
         "value": "Standard",
@@ -1656,23 +1656,47 @@
         "type": "CUW"
       },
       {
-        "code": "AMR",
-        "description": "Raise Requirements",
-        "value": "Raise Requirements",
-        "isActive": "Y",
-        "miscMastId": "COMMUNICATION",
-        "type": "CVT"
-      },
-      {
         "code": "CNS",
         "description": "Customer not speaking",
         "value": "Customer not speaking",
         "isActive": "Y",
         "miscMastId": "CONTACT",
         "type": "PIVV"
+      },
+      {
+        "code": "LA",
+        "description": "Life Assured",
+        "value": "Life Assured",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "PROFILE"
+      },
+      {
+        "code": "PROP",
+        "description": "Proposer",
+        "value": "Proposer",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "PROFILE"
+      },
+      {
+        "code": "PAY",
+        "description": "Payer",
+        "value": "Payer",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "PROFILE"
       }
     ],
-    "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] },
+    "requirement_mst": {
+      "level": "requirement",
+      "teams": ["COPS", "UW"],
+      "categories": [{ "UW": "KYC" }, { "COPS": "medicals" }],
+      "subCategories": [{ "KYC": "address proof" }, { "medicals": "DL" }],
+      "documents": [{ "address proof": "aadhar" }],
+      "reasons": [{ "aadhar": "mismatch" }],
+      "fucpCodes": [{ "mismatch": "AIG" }]
+    },
     "reasonRemarks": [
       {
         "iibCode": "2228",
