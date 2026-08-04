@@ -270,7 +270,7 @@ const Summary = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const isDvtRole = roleType === "DVT Pool";
     const isFormalRole = roleType === "DVT_FORMAL_TASK" || roleType === "GUW_FORMAL_TASK";
-    const canShowRiskAnalytics = roleType !== "DVT Pool" && roleType !== "CVT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW Formal Pool";
+    const canShowRiskAnalytics = roleType !== "DVT Pool" && roleType !== "CVT Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW Formal Pool" && roleType !== "CVT_TASK";
     const hasJointLifeFlag = summaryEntries.some((item) => toBoolean(item.jointFlag ?? item.jontFlag));
     const lockedDvtLifeOption: DvtLifeOption | null = hasJointLifeFlag && summaryEntries.length > 1
         ? "joint"
@@ -310,7 +310,7 @@ const Summary = () => {
         markApplicantTabVisited(activeApplicantTab);
     }, [activeApplicantTab, data]);
 
-    const canOpenMedicalFinancialViews = roleType !== "CVT Pool" && roleType !== "DVT Pool" && roleType !== "CPT_TASK" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
+    const canOpenMedicalFinancialViews = roleType !== "CVT Pool" && roleType !== "CVT_TASK" && roleType !== "DVT Pool" && roleType !== "CPT_TASK" && roleType !== "DVT_FORMAL_TASK" && roleType !== "GUW_FORMAL_TASK";
 
     const activeSummaryEntry = summaryWithTabs.find((item) => item.memberType === activeApplicantTab)?.customer;
     const activeRiskAnalytics = useMemo(() => {

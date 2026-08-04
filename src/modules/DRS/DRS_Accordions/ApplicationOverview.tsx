@@ -233,11 +233,11 @@ const ApplicationOverview = () => {
    
     trsa: {
       label: "TRSA",
-      value: formatNumberOrDash(applicationInfo?.trsa),
+      value: formatNumberOrDash(sourcingDetail?.trsa),
     },
     tfsa: {
       label: "TFSA",
-      value: formatNumberOrDash(applicationInfo?.tfsa),
+      value: formatNumberOrDash(sourcingDetail?.tfsa),
     },
     policyType: {
       label: "Policy Type",
@@ -333,7 +333,7 @@ const ApplicationOverview = () => {
 
   if (isGroupBusiness && (roleType === "DVT_FORMAL_TASK" || roleType === "GUW_FORMAL_TASK")) {
     selectedApplicationDetailKeys = formalPoolDisplayKeys;
-  } else if (roleType === "CVT_POOL" || roleType === "CVT Pool") {
+  } else if (roleType === "CVT_POOL" || roleType === "CVT Pool" || roleType === 'CVT_TASK') {
     selectedApplicationDetailKeys = cvtPoolDisplayKeys;
   } else if (
     roleType === "DVT_POOL" ||
