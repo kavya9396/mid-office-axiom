@@ -58,11 +58,7 @@ export default function CustomSelect(props: CustomSelectProps) {
   
   const maxCount = multiple ? props.maxCount : undefined;
 
-  const formatLabelForDisplay = (raw?: string) => {
-    const s = String(raw ?? "").trim();
-    if (!s) return "";
-    return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
-  };
+  
 
   const handleChange = (e: SelectChangeEvent<string | string[]>) => {
     const newValue = e.target.value;
@@ -88,7 +84,7 @@ export default function CustomSelect(props: CustomSelectProps) {
       );
     }
 
-    const lookupLabel = (val: string) => formatLabelForDisplay(options.find((opt) => opt.value === val)?.label ?? val);
+    const lookupLabel = (val: string) => options.find((opt) => opt.value === val)?.label ?? val;
 
     if (Array.isArray(selected)) {
       return selected.map((v) => lookupLabel(v)).join(", ");
@@ -170,7 +166,7 @@ export default function CustomSelect(props: CustomSelectProps) {
                 value={option.value}
                 disabled={isDisabled}
               >
-                {formatLabelForDisplay(option.label)}
+                {option.label}
               </MenuItem>
             );
           })}

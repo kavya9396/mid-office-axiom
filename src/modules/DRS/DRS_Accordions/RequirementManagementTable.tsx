@@ -1600,8 +1600,26 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 // but disable it when editing isn't allowed (including after save
                 // or when status is not pending).
                 return (
-                    <Box sx={{ width: 100, minWidth: 100 }}>
-                        {renderEditableSelect(row, "status", requirementStatusOptions, !canEditStatus)}
+                    <Box
+                        sx={{
+                            width: 100,
+                            minWidth: 100,
+                            // ensure select text and menu items show capitalized form only in this table
+                            '& .MuiSelect-select': { textTransform: 'capitalize' },
+                            '& .MuiMenuItem-root': { textTransform: 'capitalize' },
+                        }}
+                    >
+                        {renderEditableSelect(
+                            row,
+                            "status",
+                            requirementStatusOptions.map((o) => ({
+                                ...o,
+                                label: (String(o.label ?? "") || "")
+                                    ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                                    : String(o.label ?? ""),
+                            })),
+                            !canEditStatus,
+                        )}
                     </Box>
                 );
             },
@@ -1834,11 +1852,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             />
                                             <Chip
                                                 size="small"
-                                                label={
-                                                    (requirementStatusOptions.find((o) => String(o.value) === String(row.status))?.label) ||
-                                                    (String(row.status ?? "")
-                                                        ? String(row.status).charAt(0).toUpperCase() + String(row.status).slice(1).toLowerCase()
-                                                        : "")
+                                                label={(() => {
+                                                    const rawLabel = requirementStatusOptions.find((o) => String(o.value) === String(row.status))?.label ?? String(row.status ?? "");
+                                                    return rawLabel ? String(rawLabel).charAt(0).toUpperCase() + String(rawLabel).slice(1).toLowerCase() : "";
+                                                })()
                                                 }
                                                 sx={{
                                                     height: 24,
