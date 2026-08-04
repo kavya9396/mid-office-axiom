@@ -113,5 +113,12 @@ export const validateRequirementDecision = (
     };
   }
 
+  if (hasPendingRequirementRows(drsData)) {
+    return {
+      isValid: false,
+      message: getErrorMessage("drsPendingRequirements"),
+    };
+  }
+
   return { isValid: true, message: "" };
 };

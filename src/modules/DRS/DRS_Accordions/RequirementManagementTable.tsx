@@ -17,7 +17,8 @@ import {
 import type { AdditionalRequirementRow, RequirementMasterOption } from "../../../types/drs.types";
 import { toDisplayValue } from "../../../utils/helpers";
 import type { RootState } from "../../../store/store";
-import { CloseIcon, EditIcon, EyeIcon } from "../../../icons/Icons";
+import { CloseIcon, EyeIcon } from "../../../icons/Icons";
+import { getErrorMessage } from "../../../config/errorMessages";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import {
     OPEN_REQUIREMENT_MANAGEMENT_EVENT,
@@ -51,6 +52,7 @@ type EditableRequirementRow = AdditionalRequirementRow & {
     __rowId: string;
     __isDraft: boolean;
     __isLocal: boolean;
+    __isNewLocal?: boolean;
     __errors?: RowErrors;
     __lookupMessage?: string;
 };
@@ -295,6 +297,7 @@ const createDraftRow = (): EditableRequirementRow => ({
     __rowId: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     __isDraft: true,
     __isLocal: true,
+    __isNewLocal: true,
     __errors: {},
     __lookupMessage: "",
 });
@@ -429,6 +432,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         ],
         [localRows, normalizedExistingRows, sourceRowOverrides, deletedRowIds],
     );
+
+    const anyPending = useMemo(() => rows.some((r) => isPendingStatus(String(r.status ?? ""))), [rows]);
 
     const openDescriptionDialog = (text: string) => {
         setDescriptionDialogText(text);
@@ -861,7 +866,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                     if (mapped.length > 0) {
                         foundFromMisc = true;
-                        const unique = dedupeOptions(mapped);
+                        const unique = dedupeOptions(mapped).map((o) => ({
+                            ...o,
+                            label: (String(o.label ?? "") || "").trim()
+                                ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                                : String(o.label ?? ""),
+                            description: (String(o.description ?? "") || "").trim()
+                                ? String(o.description).charAt(0).toUpperCase() + String(o.description).slice(1).toLowerCase()
+                                : String(o.description ?? ""),
+                        }));
                         setRequirementStatusOptions(unique);
                         cacheOptionsForPayload({ types: ["requirementStatus"] }, unique);
                     }
@@ -938,7 +951,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                           })
                           .filter(Boolean) as Option[]
                     : EMPTY_OPTIONS;
-                const uniqueStatusOpts = dedupeOptions(statusOpts);
+                const uniqueStatusOpts = dedupeOptions(statusOpts).map((o) => ({
+                    ...o,
+                    label: (String(o.label ?? "") || "").trim()
+                        ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                        : String(o.label ?? ""),
+                    description: (String(o.description ?? "") || "").trim()
+                        ? String(o.description).charAt(0).toUpperCase() + String(o.description).slice(1).toLowerCase()
+                        : String(o.description ?? ""),
+                }));
                 setRequirementStatusOptions(uniqueStatusOpts);
                 cacheOptionsForPayload(statusPayload, uniqueStatusOpts);
             } catch (e) {
@@ -1265,6 +1286,14 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     };
 
     const handleSave = (rowId: string) => {
+        // Prevent saving if any other row has pending status
+        const otherPending = rows.some((r) => r.__rowId !== rowId && isPendingStatus(String(r.status ?? "")));
+        if (otherPending) {
+            // show a lookup-style error on the draft row
+            setLocalRows((prev) => prev.map((r) => (r.__rowId === rowId ? { ...r, __errors: { ...(r.__errors ?? {}), lookup: getErrorMessage("drsPendingRequirements") } } : r)));
+            return;
+        }
+
         setIsTableSaved(false);
         setHasRequirementChanges(true);
         updateRow(rowId, (row) => {
@@ -1300,40 +1329,42 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         setDeletedRowIds((prev) => new Set(prev).add(rowId));
     };
 
-    const handleEditLocalSaved = (rowId: string) => {
-        setIsTableSaved(false);
-        setHasRequirementChanges(true);
+    // const handleEditLocalSaved = (rowId: string) => {
+    //     setIsTableSaved(false);
+    //     setHasRequirementChanges(true);
 
-        const existing = rows.find((r) => r.__rowId === rowId && !r.__isLocal);
-        if (existing) {
-            // create a local editable draft prefilled from existing row
-            const draft = {
-                ...existing,
-                __rowId: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-                __isDraft: true,
-                __isLocal: true,
-                __errors: {},
-                __lookupMessage: "",
-            } as EditableRequirementRow;
-            setLocalRows((prev) => [...prev, draft]);
-            setLastAddedDraftRowId(draft.__rowId);
-            return;
-        }
+    //     const existing = rows.find((r) => r.__rowId === rowId && !r.__isLocal);
+    //     if (existing) {
+    //         // create a local editable draft prefilled from existing row
+    //         const draft = {
+    //             ...existing,
+    //             __rowId: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    //             __isDraft: true,
+    //             __isLocal: true,
+    //             // mark this as NOT a new add-created row so delete remains disabled
+    //             __isNewLocal: false,
+    //             __errors: {},
+    //             __lookupMessage: "",
+    //         } as EditableRequirementRow;
+    //         setLocalRows((prev) => [...prev, draft]);
+    //         setLastAddedDraftRowId(draft.__rowId);
+    //         return;
+    //     }
 
-        // if already a local row, just toggle to draft (shouldn't usually happen)
-        setLocalRows((previousRows) =>
-            previousRows.map((row) =>
-                row.__rowId === rowId
-                    ? {
-                        ...row,
-                        __isDraft: true,
-                        __errors: {},
-                        __lookupMessage: "",
-                    }
-                    : row,
-            ),
-        );
-    };
+    //     // if already a local row, just toggle to draft (shouldn't usually happen)
+    //     setLocalRows((previousRows) =>
+    //         previousRows.map((row) =>
+    //             row.__rowId === rowId
+    //                 ? {
+    //                     ...row,
+    //                     __isDraft: true,
+    //                     __errors: {},
+    //                     __lookupMessage: "",
+    //                 }
+    //                 : row,
+    //         ),
+    //     );
+    // };
 
     const renderEditableSelect = (
         row: EditableRequirementRow,
@@ -1481,7 +1512,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             width: "5%",
             sticky: "left",
             render: (_value, row) => {
-                const isLocalDraft = Boolean(row.__isLocal && row.__isDraft);
+                const isLocalDraft = Boolean(row.__isLocal && row.__isDraft && (row as any).__isNewLocal);
                 const showActions = row.__isLocal || (!isTableSaved && editableStatusRowIds.has(row.__rowId));
                 if (!showActions) {
                     return renderDisabledActionIcons();
@@ -1489,7 +1520,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                 return (
                     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, whiteSpace: "nowrap" }}>
-                        <Box
+                        {/* <Box
                             component="button"
                             type="button"
                             onClick={() => handleEditLocalSaved(row.__rowId)}
@@ -1509,28 +1540,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             aria-label="Edit requirement"
                         >
                             <EditIcon />
-                        </Box>
+                        </Box> */}
 
                         {isLocalDraft ? (
-                            <Box
-                                component="span"
-                                sx={{
-                                    color: "#CBD5E1",
-                                    display: "inline-flex",
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    width: 22,
-                                    height: 22,
-                                    flexShrink: 0,
-                                    opacity: 0.55,
-                                    cursor: "not-allowed",
-                                }}
-                                aria-disabled="true"
-                                aria-label="Delete requirement unavailable"
-                            >
-                                <CloseIcon />
-                            </Box>
-                        ) : (
                             <Box
                                 component="button"
                                 type="button"
@@ -1549,6 +1561,25 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     p: 0,
                                 }}
                                 aria-label="Delete requirement"
+                            >
+                                <CloseIcon />
+                            </Box>
+                        ) : (
+                            <Box
+                                component="span"
+                                sx={{
+                                    color: "#CBD5E1",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 22,
+                                    height: 22,
+                                    flexShrink: 0,
+                                    opacity: 0.55,
+                                    cursor: "not-allowed",
+                                }}
+                                aria-disabled="true"
+                                aria-label="Delete requirement unavailable"
                             >
                                 <CloseIcon />
                             </Box>
@@ -1802,7 +1833,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             />
                                             <Chip
                                                 size="small"
-                                                label={toDisplayValue(row.status)}
+                                                label={
+                                                    (requirementStatusOptions.find((o) => String(o.value) === String(row.status))?.label) ||
+                                                    (String(row.status ?? "")
+                                                        ? String(row.status).charAt(0).toUpperCase() + String(row.status).slice(1).toLowerCase()
+                                                        : "")
+                                                }
                                                 sx={{
                                                     height: 24,
                                                     backgroundColor: isPendingStatus(row.status) ? "#FFF5D6" : "#E8EEF5",
@@ -1953,7 +1989,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     {isVisible && (
                             <CustomButton
                                 variant="contained"
-                                disabled={draftRows.length > 0 || isTableSaved}
+                                disabled={draftRows.length > 0 || isTableSaved || anyPending}
                             onClick={async () => {
                                 // Build a full DRS payload by cloning current drsData and replacing requirementManagement
                                 try {
@@ -1997,8 +2033,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                         cloned.requirementManagement = payloadRequirements;
                                     }
 
-                                    const requestBody = cloned;
-
+                                    const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+                                    const requestBody = {
+                                        applicationNo: applicationNumber,
+                                        roleType: roleType,
+                                        sections: ["requirementManagement"],
+                                        userId: userId,
+                                        data: cloned,
+                                    } as unknown;
+                                    console.log('requirement save payload', requestBody);
                                     await apiRequest<{ success?: boolean; message?: string }, unknown>({
                                         url: apiUrl("requirementManagementSave"),
                                         method: "PUT",
