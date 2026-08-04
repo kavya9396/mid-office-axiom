@@ -518,7 +518,7 @@ const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
     borderRight: "1px solid #D8DDE3",
   };
 
- const renderBreTableCell = (
+  const renderBreTableCell = (
   value: string,
   key: string,
   highlight = false,
