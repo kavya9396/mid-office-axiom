@@ -60,6 +60,7 @@ type EditableRequirementRow = AdditionalRequirementRow & {
 type Option = {
     label: string;
     value: string;
+    description?: string;
 };
 
 const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterOption["team"]> = {
