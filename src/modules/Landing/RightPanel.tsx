@@ -231,7 +231,7 @@ const roleMapper = {
   "CUW_TASK": "CUW Pool",
   "UW_TASK": "CUW Pool",
   "CMO_TASK": "CMO Pool",
-  "CVT_TASK": "CVT Pool",
+  "CVT_TASK": "CVT_TASK",
   "CPT_TASK": "CPT_TASK",
   "CPT_DATA_ENTRY_NMR_TASK": "CPT_TASK",
   "CPT_DATA_ENTRY_MR_TASK": "CPT_TASK",
