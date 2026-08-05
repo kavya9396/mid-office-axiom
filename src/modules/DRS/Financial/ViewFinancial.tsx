@@ -17,6 +17,8 @@ import { useAppDispatch } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import { financialThunk } from "../../../store/thunks/financialThunk";
+import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
+import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
 import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
@@ -2194,6 +2196,37 @@ const ViewFinancial = () => {
 
     void fetchFinancial();
   }, [dispatch, drsApplicationNumber, drsPartyId, financialFetchPayloadError, roleType]);
+
+  // On page load, call BRE retrigger for FE and store its breOutput as final BRE
+  useEffect(() => {
+    if (!drsApplicationNumber) return;
+
+    const callFe = async () => {
+      try {
+        const response = await dispatch(
+          breRetriggerThunk({ eventName: "FE", applicationNumber: drsApplicationNumber })
+        ).unwrap();
+
+        const payload = response.data ?? {};
+console.log('payload',payload)
+        dispatch(
+          setBreExternalApiOutputs({
+            breOutput: payload.breOutput,
+            initialBreOutput: payload.initialBreOutput ?? undefined,
+            breRetriggerStatus: "success",
+          })
+        );
+      } catch (err) {
+        dispatch(
+          setBreExternalApiOutputs({
+            breRetriggerStatus: "failure",
+          })
+        );
+      }
+    };
+
+    void callFe();
+  }, [dispatch, drsApplicationNumber]);
 
   const resolvedActiveSectionId = useMemo(
     () =>
