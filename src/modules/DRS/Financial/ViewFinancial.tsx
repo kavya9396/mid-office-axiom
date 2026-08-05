@@ -8,6 +8,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
+import { Dialog, DialogTitle, Button, IconButton } from "@mui/material";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
@@ -1339,6 +1340,69 @@ const getTodayDateInputValue = () => {
   return `${year}-${month}-${day}`;
 };
 
+const YearPickerField = ({
+  value,
+  onChange,
+  required,
+  errorText,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  errorText?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 51 }, (_, i) => currentYear - i);
+
+  const displayValue = value || "";
+
+  return (
+    <>
+      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        <CustomTextField
+          fullWidth
+          size="small"
+          required={required}
+          error={Boolean(errorText)}
+          helperText={errorText}
+          value={displayValue}
+          onClick={() => setOpen(true)}
+          slotProps={{ htmlInput: { readOnly: true } }}
+        />
+        <IconButton size="small" onClick={() => setOpen(true)} aria-label="select year">
+          <span role="img" aria-label="calendar">📅</span>
+        </IconButton>
+      </Box>
+
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle sx={{ fontSize: 14, py: 1 }}>Select Year</DialogTitle>
+        <Box sx={{ p: 1, width: 300 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+            {years.map((y) => (
+              <Button
+                key={y}
+                size="small"
+                fullWidth
+                variant={String(value).includes(String(y)) ? "contained" : "outlined"}
+                onClick={() => {
+                  const yy1 = String(y).slice(-2);
+                  const yy2 = String(y + 1).slice(-2);
+                  onChange(`AY ${yy1}-${yy2}`);
+                  setOpen(false);
+                }}
+                sx={{ py: 0.5, fontSize: 12 }}
+              >
+                {y}
+              </Button>
+            ))}
+          </Box>
+        </Box>
+      </Dialog>
+    </>
+  );
+};
+
 const renderFieldValue = (
   value: string,
   isEditable: boolean,
@@ -1346,9 +1410,33 @@ const renderFieldValue = (
   isRequired = false,
   errorText?: string,
   fieldRule?: ReturnType<typeof getFinancialFieldRule>,
+  label?: string,
 ) => {
   if (isEditable) {
     const isDateField = fieldRule?.inputType === "dateDDMMYYYY";
+
+    // Special handling for Assessment Year fields (e.g. "Assessment Year", values like "AY 24-25").
+    const isAssessmentYear = Boolean(label && /assessment\s*year/i.test(label));
+
+    if (isAssessmentYear) {
+      return <YearPickerField value={value} onChange={onChange} required={isRequired} errorText={errorText} />;
+    }
+
+    if (isDateField) {
+      return (
+        <CustomTextField
+          fullWidth
+          size="small"
+          required={isRequired}
+          error={Boolean(errorText)}
+          helperText={errorText}
+          type={"date"}
+          value={toDateInputValue(value)}
+          onChange={(event) => onChange(fromDateInputValue(event.target.value))}
+          slotProps={{ htmlInput: { max: fieldRule?.allowFutureDate === false ? getTodayDateInputValue() : undefined } }}
+        />
+      );
+    }
 
     return (
       <CustomTextField
@@ -1357,10 +1445,8 @@ const renderFieldValue = (
         required={isRequired}
         error={Boolean(errorText)}
         helperText={errorText}
-        type={isDateField ? "date" : undefined}
-        value={isDateField ? toDateInputValue(value) : value}
-        onChange={(event) => onChange(isDateField ? fromDateInputValue(event.target.value) : event.target.value)}
-        slotProps={isDateField ? { htmlInput: { max: fieldRule?.allowFutureDate === false ? getTodayDateInputValue() : undefined } } : undefined}
+        value={value}
+        onChange={(event) => onChange(event.target.value)}
       />
     );
   }
@@ -1463,7 +1549,9 @@ const renderMultiYearTableSection = (
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year1FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
           row.required,
-          sectionErrors[row.year1FieldLabel]
+          sectionErrors[row.year1FieldLabel],
+          undefined,
+          row.year1FieldLabel
         ),
     },
     {
@@ -1474,7 +1562,11 @@ const renderMultiYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year2FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year2FieldLabel
         ),
     },
     {
@@ -1485,7 +1577,11 @@ const renderMultiYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year3FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year3FieldLabel
         ),
     },
   ];
@@ -1576,7 +1672,9 @@ const renderFourYearTableSection = (
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year1FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
           row.required,
-          sectionErrors[row.year1FieldLabel]
+          sectionErrors[row.year1FieldLabel],
+          undefined,
+          row.year1FieldLabel
         ),
     },
     {
@@ -1587,7 +1685,11 @@ const renderFourYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year2FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year2FieldLabel
         ),
     },
     {
@@ -1598,7 +1700,11 @@ const renderFourYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year3FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year3FieldLabel
         ),
     },
     {
@@ -1609,7 +1715,11 @@ const renderFourYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year4FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year4FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year4FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year4FieldLabel
         ),
     },
   ];
@@ -1688,7 +1798,9 @@ const renderITRNonIndividualSection = (
                 isEditable && !isAlwaysReadOnlyFinancialField(section.key, item?.label ?? label),
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
-                sectionErrors[item?.label ?? label]
+                sectionErrors[item?.label ?? label],
+                undefined,
+                item?.label ?? label
               )}
             </Box>
           );
@@ -1745,7 +1857,9 @@ const renderITRIndividualSection = (
                 isEditable && !isAlwaysReadOnlyFinancialField(section.key, item?.label ?? label),
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
-                sectionErrors[item?.label ?? label]
+                sectionErrors[item?.label ?? label],
+                undefined,
+                item?.label ?? label
               )}
             </Box>
           );
@@ -1802,7 +1916,9 @@ const renderProfitAndLossSection = (
                 isEditable && !isAlwaysReadOnlyFinancialField(section.key, item?.label ?? label),
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
-                sectionErrors[item?.label ?? label]
+                sectionErrors[item?.label ?? label],
+                undefined,
+                item?.label ?? label
               )}
             </Box>
           );
@@ -1904,7 +2020,9 @@ const renderFormJSection = (
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt1FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.receipt1FieldLabel, nextValue),
           row.required,
-          sectionErrors[row.receipt1FieldLabel]
+          sectionErrors[row.receipt1FieldLabel],
+          undefined,
+          row.receipt1FieldLabel
         ),
     },
     {
@@ -1915,7 +2033,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt2FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt2FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt2FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt2FieldLabel
         ),
     },
     {
@@ -1926,7 +2048,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt3FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt3FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt3FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt3FieldLabel
         ),
     },
     {
@@ -1937,7 +2063,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt4FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt4FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt4FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt4FieldLabel
         ),
     },
     {
@@ -1948,7 +2078,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt5FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt5FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt5FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt5FieldLabel
         ),
     },
     {
@@ -1959,7 +2093,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt6FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt6FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt6FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt6FieldLabel
         ),
     },
   ];
@@ -1986,7 +2124,9 @@ const renderFormJSection = (
                 isEditable && !isAlwaysReadOnlyFinancialField(section.key, formJNameMatchItem.label),
                 (nextValue) => onFieldValueChange(section.key, formJNameMatchItem.label, nextValue),
                 isFieldMandatory(formJNameMatchItem),
-                sectionErrors[formJNameMatchItem.label]
+                sectionErrors[formJNameMatchItem.label],
+                undefined,
+                formJNameMatchItem.label
               )}
             </Box>
           </Box>
@@ -2033,7 +2173,8 @@ const renderStandardSection = (
               (nextValue) => onFieldValueChange(section.key, item.label, nextValue),
               required,
               sectionErrors[item.label],
-              fieldRule
+              fieldRule,
+              item.label
             )}
           </Box>
         );
