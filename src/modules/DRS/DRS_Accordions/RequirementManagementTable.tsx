@@ -465,7 +465,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         [localRows, normalizedExistingRows, sourceRowOverrides, deletedRowIds],
     );
 
-    const anyPending = useMemo(() => rows.some((r) => isPendingStatus(String(r.status ?? ""))), [rows]);
+    
 
     const openDescriptionDialog = (text: string) => {
         setDescriptionDialogText(text);
