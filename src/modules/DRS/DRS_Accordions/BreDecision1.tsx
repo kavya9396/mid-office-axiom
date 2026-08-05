@@ -12,6 +12,7 @@ import type { AppDispatch } from "../../../store/store";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useState } from "react";
 import type { BreResponse } from "../../../types/drs.types";
+import { formatDate } from "../../../utils/dataFormat";
 
 type BRERow = {
     bre?:string;
@@ -49,9 +50,44 @@ const response = await dispatch(
                     setBreResponse(response);
 }
 
-const breColumns: Column<BRERow>[] = [ { key: "bre", header: "BRE", width: "10%" },
-  { key: "initialBre", header: "Initial BRE", width: "30%" },
-  { key: "finalBre", header: "Final BRE", width: "30%" ,headerRender: () => (
+const breColumns: Column<BRERow>[] = [
+  {
+    key: "bre",
+    header: "BRE",
+    width: "10%",
+  },
+  {
+  key: "initialBre",
+  header: "Initial BRE",
+  width: "30%",
+  render: (value, row) => {
+    if (row.bre === "BRE Discrepancy") {
+      return renderDiscrepancy(value, row.finalBre);
+    }
+
+    if (row.bre === "BRE Decision") {
+      return renderDifference(value, row.finalBre);
+    }
+
+    return value;
+  },
+},
+  {
+   key: "finalBre",
+  header: "Final BRE",
+  width: "30%",
+  render: (value, row) => {
+    if (row.bre === "BRE Discrepancy") {
+      return renderDiscrepancy(value, row.initialBre);
+    }
+
+    if (row.bre === "BRE Decision") {
+      return renderDifference(value, row.initialBre);
+    }
+
+    return value;
+  },
+    headerRender: () => (
       <Box
         sx={{
           display: "flex",
@@ -64,22 +100,25 @@ const breColumns: Column<BRERow>[] = [ { key: "bre", header: "BRE", width: "10%"
           sx={{
             fontSize: "12px",
             fontWeight: 600,
-            minWidth:"300px"
+            minWidth: "300px",
           }}
         >
           Final BRE
         </Typography>
-<Box sx={{ flexGrow: 1 }} />
-          <CustomButton
-            size="small"
-            variant="outlined"
-            sx={{ml:"auto"}}
-            onClick={handleRefresh}
-          >
-            <RefreshIcon />
-          </CustomButton>
+
+        <CustomButton
+          size="small"
+          variant="outlined"
+          sx={{ ml: "auto" }}
+          onClick={handleRefresh}
+        >
+          <RefreshIcon />
+        </CustomButton>
       </Box>
-    )}]
+    ),
+  },
+];
+
   const breTableData: BRERow[] = [
   {
     bre: "BRE Status",
@@ -98,19 +137,76 @@ const breColumns: Column<BRERow>[] = [ { key: "bre", header: "BRE", width: "10%"
     finalBre:
       finalBreDecisionData?.breOutput?.breRemarks ?? "",
   },
-  {
-    bre: "BRE Discrepancy",
-    initialBre: breDecisionData?.discrepancy ?? "",
-    finalBre:
-      finalBreDecisionData?.breOutput?.decisionTypes?.breRequirement ?? "",
-  },
+ {
+  bre: "BRE Discrepancy",
+  initialBre: breDecisionData?.discrepancy ?? "",
+  finalBre:
+    finalBreDecisionData?.breOutput?.decisionTypes?.breRequirement ?? "",
+},
+
   {
     bre: "BRE Timestamp",
-    initialBre: breDecisionData?.timestamp ?? "",
+    initialBre: formatDate(breDecisionData?.timestamp) ?? "",
     finalBre:
-      finalBreDecisionData?.breOutput?.systemDecisionDateTime ?? "",
+      formatDate(finalBreDecisionData?.breOutput?.systemDecisionDateTime) ?? "",
   },
 ];
+
+const renderDiscrepancy = (
+  value?: string,
+  compareValue?: string
+) => {
+  const codes = value?.trim().split(/\s+/) ?? [];
+  const compareCodes = new Set(
+    compareValue?.trim().split(/\s+/) ?? []
+  );
+
+  return (
+    <Box
+      sx={{
+        whiteSpace: "normal",
+        overflowWrap: "anywhere",
+      }}
+    >
+      {codes.map((code) => {
+        const isUpdated = !compareCodes.has(code);
+
+        return (
+          <Box
+            key={code}
+            component="span"
+            sx={{
+              backgroundColor: isUpdated ? "#FFF59D" : "transparent",
+            }}
+          >
+            #{code}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
+
+const renderDifference = (
+  value?: string,
+  compareValue?: string
+) => {
+  const isDifferent = value !== compareValue;
+
+  return (
+    <Box
+      component="span"
+      sx={{
+        backgroundColor: isDifferent ? "#FFF59D" : "transparent",
+        px: isDifferent ? "2px" : 0,
+      }}
+    >
+      {value}
+    </Box>
+  );
+};
+
+
 
 return(
     <Box sx={{p:1}}>

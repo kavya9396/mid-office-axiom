@@ -3,9 +3,9 @@
     "breOutput": {
       "systemDecision": "Non-STP",
       "decisionTypes": {
-        "breDecision": "RM",
+        "breDecision": "ST",
         "breAction": "Regular Medical required",
-        "breRequirement": "IDM ADP KYP AGE OQU UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EIS"
+        "breRequirement": "IDM ADP KYP AGE ABC UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EIS"
       },
       "requirements": [
         {
