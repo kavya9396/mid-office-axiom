@@ -10,7 +10,11 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { apiRequest } from "../../../services/api";
 import { url, type ApiKey } from "../../../services/apiConfig";
+import { useAppDispatch } from "../../../store/hooks";
+import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
 import type { RootState } from "../../../store/store";
+import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
+import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
 import BreDecision from "../DRS_Accordions/BreDecision";
@@ -240,6 +244,36 @@ const findSectionIdByTitle = (
   sections.find((item) => item.groupLabel === "MER" && item.title.trim().toLowerCase() === title.trim().toLowerCase())
     ?.id ?? "";
 
+const mapApplicantTabFromMemberType = (memberType: unknown, index: number): ApplicantTab => {
+  const normalizedMemberType = String(memberType ?? "").trim().toUpperCase();
+
+  if (normalizedMemberType.includes("PR") || normalizedMemberType.includes("PROPOSER")) {
+    return "proposer";
+  }
+
+  if (normalizedMemberType.includes("LIFEASSURED1") || normalizedMemberType.includes("LA1")) {
+    return "lifeassured1";
+  }
+
+  if (normalizedMemberType.includes("LIFEASSURED2") || normalizedMemberType.includes("LA2")) {
+    return "lifeassured2";
+  }
+
+  if (normalizedMemberType.includes("LA") || normalizedMemberType.includes("LIFE")) {
+    return index === 0 ? "lifeassured1" : "lifeassured2";
+  }
+
+  if (index === 0) {
+    return "proposer";
+  }
+
+  if (index === 1) {
+    return "lifeassured1";
+  }
+
+  return "lifeassured2";
+};
+
 const drsViewTabs: { key: DRSViewTab; label: string }[] = [
   { key: "medical", label: "View Medical" },
   { key: "financial", label: "View Financial" },
@@ -266,18 +300,18 @@ const shouldHideMerSubSection = (title: string) => {
   const normalized = title.trim().toLowerCase();
   return (
     // Temporarily hidden subsections.
-    normalized === "mer" ||
-    normalized === "family history and health status" ||
     normalized === "question table" ||
     normalized === "tuw details"
   );
 };
 
 const ViewMedical = () => {
+  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
+  const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
   const roleType = getRoleType();
   const isFormalRole = isFormalTaskRole(roleType);
   const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
@@ -289,6 +323,8 @@ const ViewMedical = () => {
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [drsContextLoading, setDrsContextLoading] = useState(false);
+  const [drsContextError, setDrsContextError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [medicalFetchData, setMedicalFetchData] = useState<MedicalFetchResponse["data"] | null>(null);
@@ -303,16 +339,19 @@ const ViewMedical = () => {
   const isApplicationIdMissing = !safeApplicationId;
   const storedNewTabContext = useMemo(() => getStoredDrsNewTabContext(), []);
   const drsDataRecord = drsData as Record<string, unknown> | null;
+  const drsApplicationNumber = String(drsDataRecord?.applicationNumber ?? safeApplicationId).trim();
+  const drsSummaryMembers = useMemo(
+    () => (Array.isArray(drsDataRecord?.summary) ? (drsDataRecord?.summary as Array<Record<string, unknown>>) : []),
+    [drsDataRecord]
+  );
 
   const availableMemberTypes = useMemo(() => {
-    const fromDrsSummary = Array.isArray(drsDataRecord?.summary)
-      ? (drsDataRecord.summary as Array<Record<string, unknown>>)
-          .map((item) => String(item.memberType ?? ""))
-          .filter(Boolean)
-      : [];
+    const fromDrsSummary = drsSummaryMembers.map((item, index) =>
+      mapApplicantTabFromMemberType(item.memberType, index)
+    );
 
     return fromDrsSummary;
-  }, [drsDataRecord]);
+  }, [drsSummaryMembers]);
 
   const visibleApplicantTabs = useMemo(
     () => applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key)),
@@ -327,12 +366,11 @@ const ViewMedical = () => {
     [activeApplicantTab, visibleApplicantTabs]
   );
 
-  const drsSummaryMembers = useMemo(
-    () => (Array.isArray(drsDataRecord?.summary) ? (drsDataRecord?.summary as Array<Record<string, unknown>>) : []),
-    [drsDataRecord]
-  );
   const activeMemberRecord = useMemo(
-    () => drsSummaryMembers.find((item) => String(item.memberType ?? "").toLowerCase() === currentApplicantTab.toLowerCase()),
+    () =>
+      drsSummaryMembers.find(
+        (item, index) => mapApplicantTabFromMemberType(item.memberType, index) === currentApplicantTab
+      ),
     [currentApplicantTab, drsSummaryMembers]
   );
   const partyId = useMemo(
@@ -344,9 +382,38 @@ const ViewMedical = () => {
   );
 
   const medicalFetchPayloadError =
-    !safeApplicationId || !partyId
+    !drsContextLoading &&
+    !drsContextError &&
+    (!safeApplicationId || !partyId)
       ? "Application number or party ID is unavailable for medical fetch."
       : null;
+
+  useEffect(() => {
+    if (!safeApplicationId || !roleType || !userId) {
+      return;
+    }
+
+    const fetchDrsContext = async () => {
+      try {
+        setDrsContextLoading(true);
+        setDrsContextError(null);
+        await dispatch(
+          drsThunk({
+            applicationNo: safeApplicationId,
+            userId,
+            roleType,
+            sections: ["summary", "breDecision"],
+          })
+        ).unwrap();
+      } catch (error) {
+        setDrsContextError(error instanceof Error ? error.message : "Failed to fetch DRS details.");
+      } finally {
+        setDrsContextLoading(false);
+      }
+    };
+
+    void fetchDrsContext();
+  }, [dispatch, roleType, safeApplicationId, userId]);
 
   const medicalSectionGroups = useMemo<MedicalSectionGroup[]>(
     () => {
@@ -425,6 +492,36 @@ const ViewMedical = () => {
 
     void fetchMedical();
   }, [medicalFetchPayloadError, partyId, safeApplicationId]);
+
+  // On page load, call BRE retrigger for ME and store its breOutput as final BRE
+  useEffect(() => {
+    if (!drsApplicationNumber) return;
+
+    const callMe = async () => {
+      try {
+        const response = await dispatch(
+          breRetriggerThunk({ eventName: "ME", applicationNumber: drsApplicationNumber })
+        ).unwrap();
+
+        const payload = response.data ?? {};
+        dispatch(
+          setBreExternalApiOutputs({
+            breOutput: payload.breOutput,
+            initialBreOutput: payload.initialBreOutput ?? undefined,
+            breRetriggerStatus: "success",
+          })
+        );
+      } catch {
+        dispatch(
+          setBreExternalApiOutputs({
+            breRetriggerStatus: "failure",
+          })
+        );
+      }
+    };
+
+    void callMe();
+  }, [dispatch, drsApplicationNumber]);
 
   const [activeSubSectionId, setActiveSubSectionId] = useState<string>("");
 
@@ -921,9 +1018,15 @@ const ViewMedical = () => {
 
       <BreDecision />
 
-      {loading && <Typography sx={{ color: "#6B7280", mb: 2 }}>Loading medical details...</Typography>}
-      {(medicalFetchPayloadError || fetchError) && (
-        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>{medicalFetchPayloadError ?? fetchError}</Typography>
+      {(drsContextLoading || loading) && (
+        <Typography sx={{ color: "#6B7280", mb: 2 }}>
+          {drsContextLoading ? "Loading DRS details..." : "Loading medical details..."}
+        </Typography>
+      )}
+      {(drsContextError || medicalFetchPayloadError || fetchError) && (
+        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
+          {drsContextError ?? medicalFetchPayloadError ?? fetchError}
+        </Typography>
       )}
 
       {!isFormalRole && (
