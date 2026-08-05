@@ -952,7 +952,6 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             "gender",
             "residentStatus",
             "panNumber",
-            "pranNo",
             "identityProofType",
             "identityProofNumber",
             "addressProof",
