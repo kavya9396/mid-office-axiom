@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Container, Typography, Snackbar, Alert } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -1300,7 +1300,14 @@ const getFinancialFieldValidationError = (sectionKey: FinancialSectionKey, field
 };
 
 const toDateInputValue = (value: string) => {
-  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(value.trim());
+  const trimmed = value.trim();
+
+  // If already ISO format yyyy-mm-dd, return as-is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(trimmed);
 
   if (!match) {
     return "";
@@ -2054,6 +2061,10 @@ const ViewFinancial = () => {
   const [financialFieldValues, setFinancialFieldValues] = useState<Record<FinancialSectionKey, Record<string, string>>>(
     buildInitialFieldValues
   );
+  const [originalFinancialFieldValues, setOriginalFinancialFieldValues] = useState<Record<
+    FinancialSectionKey,
+    Record<string, string>
+  >>(buildInitialFieldValues);
   const [activeSectionId, setActiveSectionId] = useState<string>(financialSections[0]?.key ?? "");
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
@@ -2064,6 +2075,20 @@ const ViewFinancial = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "warning" | "error" | "info">("success");
+
+  useEffect(() => {
+    if (!messageSectionKey) return;
+
+    const msg = submitError ?? submitMessage;
+    if (!msg) return;
+
+    setSnackbarMessage(msg);
+    setSnackbarSeverity(submitError ? "error" : "success");
+    setSnackbarOpen(true);
+  }, [messageSectionKey, submitMessage, submitError]);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
   const drsDataRecord = drsData as unknown as Record<string, unknown> | null;
@@ -2157,7 +2182,9 @@ const ViewFinancial = () => {
         setError(null);
         const response = normalizeFinancialResponse(await dispatch(financialThunk(payload)).unwrap());
         setFinancialData(response);
-        setFinancialFieldValues(buildInitialFieldValues(buildFinancialSectionsFromResponse(response.sections)));
+        const built = buildInitialFieldValues(buildFinancialSectionsFromResponse(response.sections));
+        setFinancialFieldValues(built);
+        setOriginalFinancialFieldValues(built);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch financial details.");
       } finally {
@@ -3180,12 +3207,29 @@ const ViewFinancial = () => {
       setSubmitMessage(response.message ?? "Financial details calculated and submitted successfully.");
       setMessageSectionKey(savingSectionKey);
       setEditingSectionKey(null);
+      setSnackbarMessage("Details saved");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Failed to calculate and submit financial details.");
       setMessageSectionKey(savingSectionKey);
     } finally {
       setSubmitLoading(false);
     }
+  };
+
+  const handleReset = (sectionKey: FinancialSectionKey) => {
+    const originalSection = originalFinancialFieldValues[sectionKey] ?? {};
+    setFinancialFieldValues((prev) => ({
+      ...prev,
+      [sectionKey]: JSON.parse(JSON.stringify(originalSection)),
+    }));
+
+    setEditingSectionKey(null);
+    setSectionErrors((prev) => ({ ...prev, [sectionKey]: {} }));
+    setSubmitMessage(null);
+    setSubmitError(null);
+    setMessageSectionKey(null);
   };
 
   return (
@@ -3201,6 +3245,22 @@ const ViewFinancial = () => {
       </Box>
 
       <BreDecision />
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
       {!isFormalRole && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
@@ -3342,7 +3402,7 @@ const ViewFinancial = () => {
                 }}
               >
                 <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>{section.title}</Typography>
-                {roleType === "CPT_TASK" && (
+                {roleType === "CPT_DATA_ENTRY_NMR_TASK" && (
                   <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
                     <Box sx={{ display: "flex", gap: 1 }}>
                       {editingSectionKey !== section.key ? (
@@ -3359,20 +3419,25 @@ const ViewFinancial = () => {
                           Edit
                         </CustomButton>
                       ) : (
-                        <CustomButton
-                          sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                          disabled={submitLoading || !safeApplicationId}
-                          onClick={handleSave}
-                        >
-                          {submitLoading ? "Saving..." : "Save"}
-                        </CustomButton>
+                        <>
+                          <CustomButton
+                            sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                            disabled={submitLoading || !safeApplicationId}
+                            onClick={handleSave}
+                          >
+                            {submitLoading ? "Saving..." : "Save"}
+                          </CustomButton>
+                          <CustomButton
+                            sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                            disabled={submitLoading}
+                            onClick={() => handleReset(section.key as FinancialSectionKey)}
+                          >
+                            Reset
+                          </CustomButton>
+                        </>
                       )}
                     </Box>
-                    {messageSectionKey === section.key && (submitMessage || submitError) && (
-                      <Typography sx={{ fontSize: 12, color: submitError ? "#DE2C3B" : "#067647", textAlign: "right", maxWidth: 280 }}>
-                        {submitError ?? submitMessage}
-                      </Typography>
-                    )}
+                    {/* submitMessage/submitError shown via snackbar */}
                   </Box>
                 )}
               </Box>

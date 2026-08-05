@@ -54,6 +54,7 @@ const QuickLinks = () => {
     const roleType = localStorage.getItem("roleType") ?? "";
     const visibleButtons = [
         'CPT_TASK',
+        'CPT_DATA_ENTRY_MR_TASK',
         'GUW_FORMAL_TASK',
     ];
 
@@ -107,10 +108,12 @@ const QuickLinks = () => {
         ...(isPoolRole
             ? [
                 { label: "View Medical", path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "" },
-                { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
             ]
             : []),
-        { label: "Search Application", path: getSearchApplicationPath() },
+            ...(roleType == 'CPT_DATA_ENTRY_NMR_TASK' || roleType == 'GUW_FORMAL_TASK' ? [
+                { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
+            ]:[]),
+                { label: "Search Application", path: getSearchApplicationPath() },
     ];
 
     const toggleQuickLinks = useCallback(() => {
