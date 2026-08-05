@@ -1,6 +1,6 @@
 import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "./drs-layouts";
 import BackButton from "../../components/layout/BackButton";
-import { Alert, Box, Typography } from "@mui/material";
+import { Alert, Box, Typography, Snackbar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,7 +16,7 @@ import type { DRSBreOutput, DRSData } from "../../types/drs.types";
 import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 import { validateDrsFinalBre } from "../../validations/drsBreValidation";
 import ConfirmationDialog from "../../components/layout/ConfirmationDialog";
-import { hasUnsavedRequirementRows } from "../../validations/drsRequirementDecisionValidation";
+import { validateRequirementDecision } from "../../validations/drsRequirementDecisionValidation";
 import { breThunk } from "../../store/thunks/breThunk";
 import CustomButton from "../../components/ui/Button/Button";
  
@@ -229,6 +229,7 @@ const DRS = () => {
         }
     };
     const [confirmationOpen, setConfirmationOpen] = useState(false);
+    const [requirementValidationMessage, setRequirementValidationMessage] = useState("");
 
     const isSearchReadOnlyMode =
         localStorage.getItem("drsReadOnlyMode") === "true" &&
@@ -413,6 +414,21 @@ const DRS = () => {
                     {breValidation.message}
                 </Alert>
             )}
+            <Snackbar
+                open={Boolean(requirementValidationMessage)}
+                autoHideDuration={3000}
+                onClose={() => setRequirementValidationMessage("")}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            >
+                <Alert
+                    onClose={() => setRequirementValidationMessage("")}
+                    severity="error"
+                    variant="filled"
+                    sx={{ width: "100%" }}
+                >
+                    {requirementValidationMessage}
+                </Alert>
+            </Snackbar>
             <Box
                 onClickCapture={handleDrsActionCapture}
                 onKeyDownCapture={handleDrsActionCapture}
@@ -448,10 +464,18 @@ const DRS = () => {
                                 fontWeight: 600,
                                 px: 3,
                                 whiteSpace: "nowrap", }}
-                                        disabled={hasUnsavedRequirementRows(drsData)}
-                                        onClick={() => setConfirmationOpen(true)}
+                                        onClick={() => {
+                                            const validation = validateRequirementDecision(drsData, "");
+                                            if (!validation.isValid) {
+                                                setRequirementValidationMessage(validation.message);
+                                                return;
+                                            }
+
+                                            setRequirementValidationMessage("");
+                                            setConfirmationOpen(true);
+                                        }}
                                     >
-                                        Save
+                                        Submit
                                     </CustomButton>
                                 </Box>
                             )}
@@ -464,14 +488,14 @@ const DRS = () => {
             {(roleType === 'CPT_DATA_ENTRY_NMR_TASK' || roleType === 'CPT_DATA_ENTRY_MR_TASK' || roleType === 'CPT_TASK') && (
                 <ConfirmationDialog
                     open={Boolean(confirmationOpen)}
-                    message="Do you want to close the case?"
+                    message="Do you want to complete the task?"
                     onClose={() => setConfirmationOpen(false)}
                     onConfirm={() => {
                         setConfirmationOpen(false);
                         void handleCptCloseTask();
                     }}
-                    title="Close Case"
-                    buttonText="Close"
+                    title="Complete Task"
+                    buttonText="Submit"
                 />
             )}
         </>
