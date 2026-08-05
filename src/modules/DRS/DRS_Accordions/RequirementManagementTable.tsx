@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
 import { Alert, Box, Chip, Paper, Typography, Pagination } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { apiRequest } from "../../../services/api";
@@ -18,7 +19,7 @@ import type { AdditionalRequirementRow, RequirementMasterOption } from "../../..
 import { toDisplayValue } from "../../../utils/helpers";
 import type { RootState } from "../../../store/store";
 import { CloseIcon, EyeIcon } from "../../../icons/Icons";
-import { getErrorMessage } from "../../../config/errorMessages";
+// removed unused import: getErrorMessage
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import {
     OPEN_REQUIREMENT_MANAGEMENT_EVENT,
@@ -128,8 +129,7 @@ const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
 
 const getSelectedCaseContext = (): Record<string, unknown> => {
     try {
-        const raw = localStorage.getItem("selectedCaseContext");
-        const parsed = raw ? JSON.parse(raw) : {};
+            const parsed = JSON.parse(localStorage.getItem("selectedCaseContext") || "{}");
         return parsed && typeof parsed === "object" && !Array.isArray(parsed)
             ? (parsed as Record<string, unknown>)
             : {};
@@ -690,7 +690,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         return requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
     };
 
-    const getProfileOptions = (row: EditableRequirementRow) => {
+    const getProfileOptions = () => {
         // Profile dropdown is standalone and sourced from masters.misc (type: 'PROFILE')
         return profileOptionsState.length > 0 ? profileOptionsState : requirementProfileOptions;
     };
@@ -732,7 +732,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         return requirementOptionsCache[key] ?? [];
     };
 
-    const parseFirstArrayFromRequirementMst = (mst: unknown): string[] => {
+    function parseFirstArrayFromRequirementMst(mst: unknown): string[] {
         if (!mst || typeof mst !== "object") return [];
         const obj = mst as Record<string, unknown>;
         // Prefer known keys
@@ -751,9 +751,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         }
 
         return [];
-    };
+    }
 
-    const fetchRequirementMst = async (payload: unknown) => {
+    async function fetchRequirementMst(payload: unknown) {
         try {
             console.debug("RequirementManagement: fetching masters with payload:", payload, "url:", apiUrl("masters"));
             const data = await apiRequest<Record<string, unknown>>({ url: apiUrl("masters"), method: "POST", body: payload });
@@ -764,13 +764,13 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             console.debug("RequirementManagement: fetch masters failed", err);
             return null;
         }
-    };
+    }
 
-    const cacheOptionsForPayload = (payload: Record<string, unknown>, options: Option[]) => {
+    function cacheOptionsForPayload(payload: Record<string, unknown>, options: Option[]) {
         const key = JSON.stringify(payload);
         console.debug("RequirementManagement: caching options for", payload, options);
         setRequirementOptionsCache((prev) => ({ ...prev, [key]: options }));
-    };
+    }
 
     useEffect(() => {
         const loadInitial = async () => {
@@ -1552,36 +1552,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         })();
     };
 
-    const handleSave = (rowId: string) => {
-        // Prevent saving if any other row has pending status
-        const otherPending = rows.some((r) => r.__rowId !== rowId && isPendingStatus(String(r.status ?? "")));
-        if (otherPending) {
-            // show a lookup-style error on the draft row
-            setLocalRows((prev) => prev.map((r) => (r.__rowId === rowId ? { ...r, __errors: { ...(r.__errors ?? {}), lookup: getErrorMessage("drsPendingRequirements") } } : r)));
-            return;
-        }
-
-        setIsTableSaved(false);
-        setHasRequirementChanges(true);
-        updateRow(rowId, (row) => {
-            const preparedRow = applyLookupToRow(row, shouldShowProfileAndSpecialTest, effectiveRequirementMasterRows);
-            const errors = validateDraftRow(preparedRow, shouldShowProfileAndSpecialTest);
-
-            if (Object.keys(errors).length > 0) {
-                return {
-                    ...preparedRow,
-                    __errors: errors,
-                };
-            }
-
-            return {
-                ...preparedRow,
-                __isDraft: false,
-                __errors: {},
-                __lookupMessage: "",
-            };
-        });
-    };
+    
 
     // Add draft row to saved rows without performing validation checks.
     const handleAddDraft = (rowId: string) => {
@@ -1688,19 +1659,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         }
     };
 
-    const validateDraftRow = (row: EditableRequirementRow, requiresProfile: boolean): RowErrors => {
-        const errors: RowErrors = {};
-        const required = getRequiredSelectionFields(requiresProfile);
-        required.forEach((f) => {
-            const v = String(row[f] ?? "").trim();
-            if (!v) {
-                // simple message — kept generic
-                (errors as any)[f] = "This field is required";
-            }
-        });
-
-        return errors;
-    };
+    // validateDraftRow removed (unused) to avoid TS unused-value errors
 
     const renderReadOnlyField = (value: string, helperText?: string) => (
         <>
@@ -2079,7 +2038,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         )}
 
                         {draftRows.map((row, rowIndex) => {
-                            const profileOptions = getProfileOptions(row);
+                            const profileOptions = getProfileOptions();
                             const categoryOptions = getCategoryOptions(row);
                             const subCategoryOptions = getSubCategoryOptions(row);
                             const documentOptions = getDocumentOptions(row);

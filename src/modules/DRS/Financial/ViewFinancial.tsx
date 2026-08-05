@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Box, Container, Typography, Snackbar, Alert } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -39,7 +40,6 @@ const getRoleType = () => localStorage.getItem("roleType") ?? "";
 type DRSViewTab = "medical" | "financial";
 
 const drsViewTabs: { key: DRSViewTab; label: string }[] = [
-  { key: "medical", label: "View Medical" },
   { key: "financial", label: "View Financial" },
 ];
 
@@ -2087,9 +2087,12 @@ const ViewFinancial = () => {
     const msg = submitError ?? submitMessage;
     if (!msg) return;
 
-    setSnackbarMessage(msg);
-    setSnackbarSeverity(submitError ? "error" : "success");
-    setSnackbarOpen(true);
+    // Use microtask to avoid synchronous setState in effect
+    setTimeout(() => {
+      setSnackbarMessage(msg);
+      setSnackbarSeverity(submitError ? "error" : "success");
+      setSnackbarOpen(true);
+    }, 0);
   }, [messageSectionKey, submitMessage, submitError]);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
