@@ -1690,12 +1690,7 @@
     ],
     "requirement_mst": {
       "level": "requirement",
-      "teams": ["COPS", "UW"],
-      "categories": [{ "UW": "KYC" }, { "COPS": "medicals" }],
-      "subCategories": [{ "KYC": "address proof" }, { "medicals": "DL" }],
-      "documents": [{ "address proof": "aadhar" }],
-      "reasons": [{ "aadhar": "mismatch" }],
-      "fucpCodes": [{ "mismatch": "AIG" }]
+      "fupCodes": ["COPS", "UW"]
     },
     "reasonRemarks": [
       {

@@ -43,6 +43,7 @@ type EditableField =
     | "subCategory"
     | "document"
     | "reason"
+    | "fupCode"
     | "status"
     | "remarks";
 
@@ -718,6 +719,19 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         return requirementOptionsCache[cacheKey] ?? requirementReasonOptions;
     };
 
+    const getFupCodeOptions = (row: EditableRequirementRow): Option[] => {
+        const payload = {
+            team: row.team || "",
+            category: row.category || "",
+            subCategory: row.subCategory || "",
+            document: row.document || "",
+            reason: row.reason || "",
+            fupCodes: true,
+        };
+        const key = JSON.stringify(payload);
+        return requirementOptionsCache[key] ?? [];
+    };
+
     const parseFirstArrayFromRequirementMst = (mst: unknown): string[] => {
         if (!mst || typeof mst !== "object") return [];
         const obj = mst as Record<string, unknown>;
@@ -1005,15 +1019,48 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     }
                 }
 
-                // fallback: if data.masterOptions-like shape exists, try to find a first array
+                // fallback: if data.masterOptions-like shape exists, try to find the most
+                // likely requirement-status array (prefer entries with type === 'REQT_ST'
+                // or codes/descriptions like 'PEN'/'Pending'). Only fall back to the
+                // first array if no better match is found.
                 if (statusCandidates.length === 0 && data && typeof data === "object") {
+                    const arrays: Array<unknown[]> = [];
                     for (const k of Object.keys(data as Record<string, unknown>)) {
                         const v = (data as Record<string, unknown>)[k];
-                        if (Array.isArray(v) && v.length > 0) {
-                            statusCandidates.push(...v);
+                        if (Array.isArray(v) && v.length > 0) arrays.push(v as unknown[]);
+                    }
+
+                    const looksLikeReqStatus = (arr: unknown[]) => {
+                        try {
+                            return arr.some((item) => {
+                                if (!item || typeof item !== "object") return false;
+                                const obj = item as Record<string, unknown>;
+                                const t = String(obj.type ?? "").trim().toUpperCase();
+                                if (t === "REQT_ST") return true;
+                                const code = String(obj.code ?? obj.key ?? "").trim().toUpperCase();
+                                if (code === "PEN" || code === "PENDING") return true;
+                                const desc = String(obj.description ?? obj.value ?? obj.label ?? "").toLowerCase();
+                                if (desc.includes("pending")) return true;
+                                return false;
+                            });
+                        } catch {
+                            return false;
+                        }
+                    };
+
+                    let chosen: unknown[] | null = null;
+                    for (const arr of arrays) {
+                        if (looksLikeReqStatus(arr)) {
+                            chosen = arr;
                             break;
                         }
                     }
+
+                    if (!chosen && arrays.length > 0) {
+                        chosen = arrays[0];
+                    }
+
+                    if (chosen) statusCandidates.push(...chosen);
                 }
 
                 const statusOpts = statusCandidates.length > 0
@@ -1266,6 +1313,14 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         __errors: nextErrors,
                     };
                     break;
+                case "fupCode":
+                    nextRow = {
+                        ...row,
+                        fupCode: value,
+                        // leave description/specialTest to be populated by fetch below
+                        __errors: nextErrors,
+                    };
+                    break;
                 default:
                     nextRow = {
                         ...row,
@@ -1390,7 +1445,29 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         if (detail) {
                                 // Support explicit `requirements` array shape: map `code` -> fupCode, `description` -> description, `special` -> specialTest
                                 const candidate = detail;
+                                // Build FUP options when available
                                 if (Array.isArray(candidate.requirements) && candidate.requirements.length > 0 && typeof candidate.requirements[0] === "object") {
+                                    const fupOptions = candidate.requirements
+                                        .map((req: Record<string, unknown>) => {
+                                            const val = String(req.code ?? req.fupCode ?? req.fup_code ?? req.fup ?? "").trim();
+                                            const lab = String(req.description ?? req.ruleName ?? req.desc ?? val).trim();
+                                            const special = String(req.special ?? req.specialTest ?? req.special_test ?? "").trim();
+                                            if (!val && !lab) return null;
+                                            return { value: val || lab, label: lab || val, description: String(req.description ?? ""), specialTest: special } as Option & { specialTest?: string };
+                                        })
+                                        .filter(Boolean) as Array<Option & { specialTest?: string }>;
+
+                                    if (fupOptions.length > 0) {
+                                        const cacheKeyObj = { team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: before.document || "", reason: value, fupCodes: true };
+                                        const uniqueMap = new Map<string, Option & { description?: string, specialTest?: string }>();
+                                        for (const o of fupOptions) {
+                                            uniqueMap.set(String(o.value), o);
+                                        }
+                                        const unique = Array.from(uniqueMap.values());
+                                        cacheOptionsForPayload(cacheKeyObj, unique.map((o) => ({ label: o.label, value: o.value, description: o.description, specialTest: (o as any).specialTest })));
+                                    }
+
+                                    // Use first requirement to populate fields as before
                                     const req = candidate.requirements[0] as Record<string, unknown>;
                                     const fup = String(req.code ?? req.fupCode ?? req.fup_code ?? req.fup ?? "").trim();
                                     const desc = String(req.description ?? req.desc ?? req.ruleName ?? "").trim();
@@ -1407,9 +1484,33 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                         }));
                                     }
                                 } else {
+                                    // single-object detail fallbacks
                                     const fup = String(detail.fupCode ?? detail.fup_code ?? detail.fup ?? "").trim();
                                     const desc = String(detail.description ?? detail.desc ?? detail.ruleName ?? "").trim();
                                     const specialTest = String(detail.specialTest ?? detail.special_test ?? detail.specialTest ?? "").trim();
+
+                                    // also support explicit fupCodes array
+                                    const explicitFup = Array.isArray(detail.fupCodes) ? detail.fupCodes : Array.isArray(detail.fucpCodes) ? detail.fucpCodes : null;
+                                    if (explicitFup && explicitFup.length > 0) {
+                                        const fupOptions = explicitFup.map((item: unknown) => {
+                                            if (!item) return null;
+                                            if (typeof item === 'string') return { label: String(item), value: String(item) } as Option;
+                                            if (typeof item === 'object') {
+                                                const obj = item as Record<string, unknown>;
+                                                const v = String(obj.code ?? obj.value ?? obj.key ?? "").trim();
+                                                const l = String(obj.description ?? obj.label ?? v).trim();
+                                                return { label: l || v, value: v || l } as Option;
+                                            }
+                                            return null;
+                                        }).filter(Boolean) as Option[];
+
+                                        if (fupOptions.length > 0) {
+                                            const cacheKeyObj = { team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: before.document || "", reason: value, fupCodes: true };
+                                            const uniqueMap = new Map<string, Option>();
+                                            for (const o of fupOptions) uniqueMap.set(String(o.value), o);
+                                            cacheOptionsForPayload(cacheKeyObj, Array.from(uniqueMap.values()) as unknown as Option[]);
+                                        }
+                                    }
 
                                     if (fup || desc || specialTest) {
                                         updateRow(currentRowBefore?.__rowId ?? rowId, (r) => ({
@@ -1425,6 +1526,24 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         }
                     } catch (e) {
                         // ignore extraction errors
+                    }
+                }
+                // when user selects a fupCode, populate description/specialTest from cached options if available
+                if (field === "fupCode") {
+                    try {
+                        const cacheKeyObj = { team: before.team || "", category: before.category || "", subCategory: before.subCategory || "", document: before.document || "", reason: before.reason || "", fupCodes: true };
+                        const cached = requirementOptionsCache[JSON.stringify(cacheKeyObj)] as Array<Option & { description?: string, specialTest?: string }> | undefined;
+                        const match = (cached ?? []).find((o) => String(o.value) === String(value));
+                        if (match) {
+                            updateRow(currentRowBefore?.__rowId ?? rowId, (r) => ({
+                                ...r,
+                                description: match.description ?? r.description,
+                                specialTest: (match as any).specialTest ?? r.specialTest,
+                                __errors: clearErrors(r.__errors, ["lookup"]),
+                            }));
+                        }
+                    } catch {
+                        // ignore
                     }
                 }
             } catch {
@@ -1454,6 +1573,23 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     __errors: errors,
                 };
             }
+
+            return {
+                ...preparedRow,
+                __isDraft: false,
+                __errors: {},
+                __lookupMessage: "",
+            };
+        });
+    };
+
+    // Add draft row to saved rows without performing validation checks.
+    const handleAddDraft = (rowId: string) => {
+        setIsTableSaved(false);
+        setHasRequirementChanges(true);
+
+        updateRow(rowId, (row) => {
+            const preparedRow = applyLookupToRow(row, shouldShowProfileAndSpecialTest, effectiveRequirementMasterRows);
 
             return {
                 ...preparedRow,
@@ -2023,7 +2159,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                 <CustomButton
                                                     variant="contained"
                                                     size="small"
-                                                    onClick={() => handleSave(row.__rowId)}
+                                                    onClick={() => handleAddDraft(row.__rowId)}
                                                     sx={{ borderRadius: 999, px: 2 }}
                                                 >
                                                     Add
@@ -2110,7 +2246,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             )}
                                             {renderField(
                                                 "FUP Code",
-                                                renderReadOnlyField(row.fupCode, row.__isDraft ? row.__lookupMessage : undefined),
+                                                row.__isDraft
+                                                    ? renderEditableSelect(row, "fupCode", getFupCodeOptions(row), !row.reason)
+                                                    : renderReadOnlyField(row.fupCode, row.__isDraft ? row.__lookupMessage : undefined),
                                             )}
                                             {renderField(
                                                 "Description",
