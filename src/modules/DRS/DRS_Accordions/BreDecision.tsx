@@ -415,14 +415,16 @@ const BreDecision = ({
       setBreRetriggerError("Missing DRS response. Unable to retrigger BRE.");
       return;
     }
-const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
+    const eventN = roleType === 'CPT_DATA_ENTRY_NMR_TASK'
+      ? "FE"
+      : (businessType === 'GROUP' ? "BRE_GROUP" : "BRE_RETAIL");
     try {
       setBreRetriggerLoading(true);
       setBreRetriggerError(null);
 
       const response = await dispatch(
         breRetriggerThunk({
-           eventName: eventName,
+           eventName: eventN,
                             applicationNumber:applicationId
         }),
       ).unwrap();
