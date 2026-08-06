@@ -52,9 +52,11 @@ const mapBreOutputToDecision = (
   retrigger:
     // Some BRE retrigger responses include a reTriggerCount or retriggerCount
     // when they come from the retrigger API. Treat any positive count as true.
-    ((breOutput.reTriggerCount ?? (breOutput as any).retriggerCount) as number) > 0
-      ? true
-      : null,
+    (() => {
+      const record = breOutput as unknown as Record<string, unknown>;
+      const raw = record.reTriggerCount ?? record.retriggerCount ?? record.reTriggercount ?? 0;
+      return Number(raw) > 0 ? true : null;
+    })(),
 });
 
 const toText = (value: unknown) => String(value ?? "").trim();
@@ -350,6 +352,12 @@ const BreDecision = ({
     return false;
   })();
 
+  // Compute tokens that differ between initial and final for per-token highlighting
+  const initialDiscrepancySet = new Set(initialDiscrepancyCodes);
+  const finalDiscrepancySet = new Set(finalDiscrepancyCodes);
+  const initialOnlyTokens = initialDiscrepancyCodes.filter((t) => !finalDiscrepancySet.has(t));
+  const finalOnlyTokens = finalDiscrepancyCodes.filter((t) => !initialDiscrepancySet.has(t));
+
   const shouldShowInitialBreSection =
     Boolean(initialBreSource) &&
     (isBreRetriggerFailure || hasDecisionChanged || normalizedInitialBreDecision !== "");
@@ -369,6 +377,7 @@ const BreDecision = ({
       label: "BRE Decision",
       initialValue: shouldShowInitialBreSection ? initialBreDecisionValue : "-",
       finalValue: finalBreDecisionValue,
+      highlight: shouldShowInitialBreSection && hasDecisionChanged,
     },
     {
       label: "BRE Remarks",
@@ -380,6 +389,7 @@ const BreDecision = ({
       label: "BRE Discrepancy",
       initialValue: shouldShowInitialBreSection ? initialBreDiscrepancyValue : "-",
       finalValue: finalBreDiscrepancyValue,
+      // keep highlight flag for backward-compatibility; detailed per-token highlighting handled in render
       highlight: shouldShowInitialBreSection && hasDiscrepancyChanged,
     },
     {
@@ -405,14 +415,16 @@ const BreDecision = ({
       setBreRetriggerError("Missing DRS response. Unable to retrigger BRE.");
       return;
     }
-const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
+    const eventN = roleType === 'CPT_DATA_ENTRY_NMR_TASK'
+      ? "FE"
+      : (businessType === 'GROUP' ? "BRE_GROUP" : "BRE_RETAIL");
     try {
       setBreRetriggerLoading(true);
       setBreRetriggerError(null);
 
       const response = await dispatch(
         breRetriggerThunk({
-           eventName: eventName,
+           eventName: eventN,
                             applicationNumber:applicationId
         }),
       ).unwrap();
@@ -508,51 +520,99 @@ const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
     borderRight: "1px solid #D8DDE3",
   };
 
- const renderBreTableCell = (
+  const renderBreTableCell = (
   value: string,
   key: string,
   highlight = false,
-  ) => (
-    <Box
-      key={key}
-      sx={{
-        px: 0.75,
-        py: 0.5,
-        minHeight: 32,
-        display: "flex",
-        alignItems: "center",
-      }}
-    >
-      <Typography
-        sx={{
-          color: "#161616",
-          fontWeight: 600,
-          fontSize: "12.5px",
-          lineHeight: "17px",
-          overflowWrap: "anywhere",
-          whiteSpace: "pre-wrap",
-        }}
-      >
-        <Box
-          component="span"
-          sx={
-            highlight
-              ? {
-                  backgroundColor: "#FFF59D",
-                  px: 0.4,
-                  borderRadius: "2px",
-                }
-              : undefined
-          }
-        >
+  tokenHighlights: string[] = [],
+  ) => {
+    // If tokenHighlights provided, keep the original string but wrap only matching code tokens
+    let content: React.ReactNode;
+
+    if (tokenHighlights && tokenHighlights.length > 0 && String(value).trim()) {
+      const escaped = tokenHighlights.map((t) => escapeRegExp(t)).join("|");
+      const regex = new RegExp(`(${escaped})`, "gi");
+      const parts = String(value).split(regex);
+
+      content = parts.map((part, idx) => {
+        const isToken = tokenHighlights.includes(String(part).toUpperCase());
+        if (isToken) {
+          return (
+            <Box
+              component="span"
+              key={`${key}-tok-${idx}`}
+              sx={{ backgroundColor: "#FFF59D", borderRadius: "2px" }}
+            >
+              {part}
+            </Box>
+          );
+        }
+
+        return (
+          <Box component="span" key={`${key}-part-${idx}`} sx={{ mr: 0.2 }}>
+            {part}
+          </Box>
+        );
+      });
+    } else {
+      content = (
+        <Box component="span" sx={ highlight ? { backgroundColor: "#FFF59D", px: 0.4, borderRadius: "2px" } : undefined }>
           {value}
         </Box>
-      </Typography>
-    </Box>
-  );
+      );
+    }
+
+    return (
+      <Box
+        key={key}
+        sx={{
+          px: 0.75,
+          py: 0.5,
+          minHeight: 32,
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <Typography
+          sx={{
+            color: "#161616",
+            fontWeight: 600,
+            fontSize: "12.5px",
+            lineHeight: "17px",
+            overflowWrap: "anywhere",
+            whiteSpace: "pre-wrap",
+            display: "flex",
+            flexWrap: "wrap",
+          }}
+        >
+          {content}
+        </Typography>
+      </Box>
+    );
+  };
 const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK' ? "WegaPlus BRE Decision" : "BRE Decision";
   return (
     <Container disableGutters>
+      {/* Full-page overlay when retriggering BRE to show global loader */}
+      {breRetriggerLoading && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            backgroundColor: "rgba(0,0,0,0.35)",
+            zIndex: 1400,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            pointerEvents: "auto",
+          }}
+        >
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+            <CircularProgress size={56} thickness={5} sx={{ color: "#9A2529" }} />
+            <Typography sx={{ color: "#fff", fontWeight: 600 }}>Retriggering BRE...</Typography>
+          </Box>
+        </Box>
+      )}
       <CustomAccordion
       defaultExpanded
         title={breTitle}
@@ -677,18 +737,35 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
                 </Box>
 
                 <Box sx={{ borderRight: "1px solid #E6E8EC" }}>
-                  {renderBreTableCell(
-                    row.initialValue,
-                    `initial-${row.label}-${index}`,
-                    row.highlight,
-                  )}
+                  {row.label === "BRE Discrepancy"
+                    ? renderBreTableCell(
+                        row.initialValue,
+                        `initial-${row.label}-${index}`,
+                        row.highlight,
+                        // highlight tokens present in initial but not in final
+                        initialOnlyTokens,
+                      )
+                    : renderBreTableCell(
+                        row.initialValue,
+                        `initial-${row.label}-${index}`,
+                        // for decision row, use highlight flag
+                        Boolean(row.highlight),
+                      )}
                 </Box>
 
-                {renderBreTableCell(
-                  row.finalValue,
-                  `final-${row.label}-${index}`,
-                  row.highlight,
-                )}
+                {row.label === "BRE Discrepancy"
+                  ? renderBreTableCell(
+                      row.finalValue,
+                      `final-${row.label}-${index}`,
+                      row.highlight,
+                      // highlight tokens present in final but not in initial
+                      finalOnlyTokens,
+                    )
+                  : renderBreTableCell(
+                      row.finalValue,
+                      `final-${row.label}-${index}`,
+                      Boolean(row.highlight),
+                    )}
               </Box>
             ))}
           </Box>
@@ -775,5 +852,7 @@ const breTitle = roleType === 'GUW_FORMAL_TASK' || roleType === 'DVT_FORMAL_TASK
     </Container>
   );
 };
+
+const escapeRegExp = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
 export default BreDecision;

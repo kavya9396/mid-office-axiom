@@ -58,6 +58,8 @@ export default function CustomSelect(props: CustomSelectProps) {
   
   const maxCount = multiple ? props.maxCount : undefined;
 
+  
+
   const handleChange = (e: SelectChangeEvent<string | string[]>) => {
     const newValue = e.target.value;
     
@@ -82,29 +84,13 @@ export default function CustomSelect(props: CustomSelectProps) {
       );
     }
 
-    const truncateLabel = (label: string) => {
-      return label.length > 10
-        ? `${label.slice(0, 10)}...`
-        : label;
-    };
+    const lookupLabel = (val: string) => options.find((opt) => opt.value === val)?.label ?? val;
 
     if (Array.isArray(selected)) {
-      return selected
-        .map((value) => {
-          const option = options.find(
-            (opt) => opt.value === value
-          );
-
-          return truncateLabel(option?.label ?? value);
-        })
-        .join(", ");
+      return selected.map((v) => lookupLabel(v)).join(", ");
     }
 
-    const selectedOption = options.find(
-      (opt) => opt.value === selected
-    );
-
-    return truncateLabel(selectedOption?.label ?? selected);
+    return lookupLabel(selected);
   };
 
   return (
@@ -150,6 +136,11 @@ export default function CustomSelect(props: CustomSelectProps) {
             "& .MuiSelect-select": {
               px: 2,
               py: 1,
+              display: "flex",
+              alignItems: "center",
+              whiteSpace: "normal",
+              overflow: "visible",
+              textOverflow: "unset",
             },
           }}
         >
@@ -170,7 +161,7 @@ export default function CustomSelect(props: CustomSelectProps) {
             );
             
             return (
-              <MenuItem
+                <MenuItem
                 key={option.value}
                 value={option.value}
                 disabled={isDisabled}

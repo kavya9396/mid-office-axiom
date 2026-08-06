@@ -123,7 +123,7 @@
         "sortOrder": 5
       },
       {
-        "code": "GR",
+        "code": "GRAD",
         "description": "Graduate",
         "value": null,
         "isActive": "Y",
@@ -1398,54 +1398,246 @@
         "isActive": "Y"
       }
     ],
+    "yes_no": [
+      {
+        "code": "YES",
+        "description": "Yes",
+        "value": "Yes",
+        "isActive": "Y"
+      },
+      {
+        "code": "NO",
+        "description": "No",
+        "value": "No",
+        "isActive": "Y"
+      }
+    ],
+    "place_of_examination": [
+      {
+        "code": "CLINIC",
+        "description": "Clinic",
+        "value": "Clinic",
+        "isActive": "Y"
+      },
+      {
+        "code": "RES_OFFICE",
+        "description": "Res/Office",
+        "value": "Res/Office",
+        "isActive": "Y"
+      }
+    ],
+    "mer_education_sd": [
+      {
+        "code": "POST_GRADUATE",
+        "description": "Post Graduate",
+        "value": "Post Graduate",
+        "isActive": "Y"
+      },
+      {
+        "code": "GRADUATE",
+        "description": "Graduate",
+        "value": "Graduate",
+        "isActive": "Y"
+      },
+      {
+        "code": "DIPLOMA",
+        "description": "Diploma",
+        "value": "Diploma",
+        "isActive": "Y"
+      },
+      {
+        "code": "TWELFTH",
+        "description": "12th",
+        "value": "12th",
+        "isActive": "Y"
+      },
+      {
+        "code": "TENTH",
+        "description": "10th",
+        "value": "10th",
+        "isActive": "Y"
+      },
+      {
+        "code": "BELOW_TENTH",
+        "description": "Below 10th",
+        "value": "Below 10th",
+        "isActive": "Y"
+      }
+    ],
+    "mer_occupation_sd": [
+      {
+        "code": "SALARIED",
+        "description": "Salaried",
+        "value": "Salaried",
+        "isActive": "Y"
+      },
+      {
+        "code": "AGRICULTURALIST",
+        "description": "Agriculturalist",
+        "value": "Agriculturalist",
+        "isActive": "Y"
+      },
+      {
+        "code": "ICICI_GROUP_EMPLOYEE",
+        "description": "ICICI Group Employee",
+        "value": "ICICI Group Employee",
+        "isActive": "Y"
+      },
+      {
+        "code": "PROFESSIONAL",
+        "description": "Professional",
+        "value": "Professional",
+        "isActive": "Y"
+      },
+      {
+        "code": "RETIRED",
+        "description": "Retired",
+        "value": "Retired",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED",
+        "description": "Self Employed",
+        "value": "Self Employed",
+        "isActive": "Y"
+      },
+      {
+        "code": "STUDENT",
+        "description": "Student",
+        "value": "Student",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_CA",
+        "description": "Self Employed CA",
+        "value": "Self Employed CA",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_DOCTOR",
+        "description": "Self Employed Doctor",
+        "value": "Self Employed Doctor",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_ARCHITECT",
+        "description": "Self Employed Architect",
+        "value": "Self Employed Architect",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_BUSINESSMAN",
+        "description": "Self Employed Businessman",
+        "value": "Self Employed Businessman",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_CONSULTANT",
+        "description": "Self Employed Consultant",
+        "value": "Self Employed Consultant",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_LAWYER",
+        "description": "Self Employed Lawyer",
+        "value": "Self Employed Lawyer",
+        "isActive": "Y"
+      },
+      {
+        "code": "SELF_EMPLOYED_OTHER",
+        "description": "Self Employed Other",
+        "value": "Self Employed Other",
+        "isActive": "Y"
+      },
+      {
+        "code": "OTHER_SPECIFY",
+        "description": "Other(Specify)",
+        "value": "Other(Specify)",
+        "isActive": "Y"
+      }
+    ],
+    "family_relation": [
+      {
+        "code": "BROTHER",
+        "description": "Brother",
+        "value": "Brother",
+        "isActive": "Y"
+      },
+      {
+        "code": "SISTER",
+        "description": "Sister",
+        "value": "Sister",
+        "isActive": "Y"
+      },
+      {
+        "code": "SPOUSE",
+        "description": "Spouse",
+        "value": "Spouse",
+        "isActive": "Y"
+      }
+    ],
+    "dead_or_alive": [
+      {
+        "code": "ALIVE",
+        "description": "Alive",
+        "value": "Alive",
+        "isActive": "Y"
+      },
+      {
+        "code": "DEAD",
+        "description": "Dead",
+        "value": "Dead",
+        "isActive": "Y"
+      }
+    ],
     "misc": [
-       {
-        "code": "REQT_ST",
-        "description": "PEN",
+      {
+        "code": "PEN",
+        "description": "Pending",
         "value": "Pending",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Pending"
+        "type": "REQT_ST"
       },
-       {
-        "code": "REQT_ST",
-        "description": "WAIVED",
+      {
+        "code": "WAV",
+        "description": "Waived",
         "value": "Waived",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Waived"
+        "type": "REQT_ST"
       },
-       {
-        "code": "REQT_ST",
-        "description": "ACCEPT",
+      {
+        "code": "ACC",
+        "description": "Accept",
         "value": "Accept",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Accept"
+        "type": "REQT_ST"
       },
       {
-        "code": "CVT",
-        "description": "ISS",
+        "code": "ISS",
+        "description": "Accept",
         "value": "Accept",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Accept"
+        "type": "CVT"
       },
       {
-        "code": "CVT",
-        "description": "RAISE_PIVV",
+        "code": "RAISE_PIVV",
+        "description": "Reraise PIVV",
         "value": "Reraise PIVV",
         "isActive": "Y",
         "miscMastId": "2",
-        "type": "Reraise PIVV"
+        "type": "CVT"
       },
       {
-        "code": "CVT",
-        "description": "AMR",
+        "code": "AMR",
+        "description": "Raise Requirement",
         "value": "Raise Requirement",
         "isActive": "Y",
         "miscMastId": "1",
-        "type": "Raise Requirement"
+        "type": "CVT"
       },
       {
         "code": "ISS",
@@ -1455,7 +1647,7 @@
         "miscMastId": "COMMUNICATION",
         "type": "DVT"
       },
-       {
+      {
         "code": "STD",
         "description": "Standard",
         "value": "Standard",
@@ -1464,23 +1656,42 @@
         "type": "CUW"
       },
       {
-        "code": "AMR",
-        "description": "Raise Requirements",
-        "value": "Raise Requirements",
-        "isActive": "Y",
-        "miscMastId": "COMMUNICATION",
-        "type": "CVT"
-      },
-      {
         "code": "CNS",
         "description": "Customer not speaking",
         "value": "Customer not speaking",
         "isActive": "Y",
         "miscMastId": "CONTACT",
         "type": "PIVV"
+      },
+      {
+        "code": "LA",
+        "description": "Life Assured",
+        "value": "Life Assured",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "PROFILE"
+      },
+      {
+        "code": "PROP",
+        "description": "Proposer",
+        "value": "Proposer",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "PROFILE"
+      },
+      {
+        "code": "PAY",
+        "description": "Payer",
+        "value": "Payer",
+        "isActive": "Y",
+        "miscMastId": "1",
+        "type": "PROFILE"
       }
     ],
-    "requirement_mst": { "level": "team", "teams": ["COPS", "UW"] },
+    "requirement_mst": {
+      "level": "requirement",
+      "fupCodes": ["COPS", "UW"]
+    },
     "reasonRemarks": [
       {
         "iibCode": "2228",

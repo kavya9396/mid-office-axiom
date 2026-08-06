@@ -187,6 +187,7 @@ return(
                 "&:hover": { backgroundColor: "#f3f4f6" },
               }}
               onClick={() => {
+                // logout: preserve remembered credentials so login fields stay prefilled
                 auth.logout();
                 navigate("/login");
               }}

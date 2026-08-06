@@ -1,6 +1,6 @@
 import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "./drs-layouts";
 import BackButton from "../../components/layout/BackButton";
-import { Alert, Box, Typography } from "@mui/material";
+import { Alert, Box, Typography, Snackbar } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { useCallback, useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -16,7 +16,11 @@ import type { DRSBreOutput, DRSData } from "../../types/drs.types";
 import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 import { validateDrsFinalBre } from "../../validations/drsBreValidation";
 import ConfirmationDialog from "../../components/layout/ConfirmationDialog";
-import { hasUnsavedRequirementRows } from "../../validations/drsRequirementDecisionValidation";
+import {
+    validateRequirementDecision,
+    hasPendingRequirementRows,
+    hasUnsavedRequirementRows,
+} from "../../validations/drsRequirementDecisionValidation";
 import { breThunk } from "../../store/thunks/breThunk";
 import CustomButton from "../../components/ui/Button/Button";
  
@@ -94,7 +98,9 @@ const mapper = {
     "AMR_MEDICAL_TASK":"AMR_MEDICAL_TASK",
     "AMR_NON_MEDICAL_TASK":"AMR_NON_MEDICAL_TASK",
     "ACUITY_TASK":"ACUITY_TASK",
-    "ISSUANCE_TASK":"ISSUANCE_TASK"
+    "ISSUANCE_TASK":"ISSUANCE_TASK",
+    "CPT_DATA_ENTRY_MR_TASK":"CPT_DATA_ENTRY_MR_TASK",
+    "CPT_DATA_ENTRY_NMR_TASK":"CPT_DATA_ENTRY_NMR_TASK",
 }
  
 const getSelectedCaseContext = (): Record<string, unknown> => {
@@ -202,12 +208,12 @@ const DRS = () => {
     const instanceIdFromDrs = String(((drsData as unknown) as Record<string, unknown>)?.instanceId ?? ((drsData as unknown) as Record<string, unknown>)?.instanceID ?? "").trim();
     const instanceId = instanceIdFromContext || instanceIdFromStorage || instanceIdFromComposite || instanceIdFromDrs || "";
 
-    const handleCptCloseTask = async () => {
+    const handleCptCloseTask = async (decision: string = "CLOSE_TASK") => {
         if (!taskId || !userId || !safeApplicationNumber || !instanceId) {
             console.warn("Missing required case identifiers for closing task", { taskId, userId, safeApplicationNumber, instanceId });
             return;
         }
-
+console.log('decision',decision)
         try {
             await dispatch(
                 completeTaskThunk({
@@ -217,7 +223,7 @@ const DRS = () => {
                         appNo: safeApplicationNumber,
                         instanceId,
                         remarks: "",
-                        decision: "CLOSE_TASK",
+                        decision,
                     },
                 }),
             ).unwrap();
@@ -229,6 +235,8 @@ const DRS = () => {
         }
     };
     const [confirmationOpen, setConfirmationOpen] = useState(false);
+    const [pendingConfirmationOpen, setPendingConfirmationOpen] = useState(false);
+    const [requirementValidationMessage, setRequirementValidationMessage] = useState("");
 
     const isSearchReadOnlyMode =
         localStorage.getItem("drsReadOnlyMode") === "true" &&
@@ -297,7 +305,7 @@ const DRS = () => {
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK" ||
     roleType === "CPT_TASK"
-        ? [...sections, "summary"]
+        ? [...sections, "summary","breDecision"]
         : sections;
             try {
                 const drsResponse = await dispatch(
@@ -413,6 +421,21 @@ const DRS = () => {
                     {breValidation.message}
                 </Alert>
             )}
+            <Snackbar
+                open={Boolean(requirementValidationMessage)}
+                autoHideDuration={3000}
+                onClose={() => setRequirementValidationMessage("")}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            >
+                <Alert
+                    onClose={() => setRequirementValidationMessage("")}
+                    severity="error"
+                    variant="filled"
+                    sx={{ width: "100%" }}
+                >
+                    {requirementValidationMessage}
+                </Alert>
+            </Snackbar>
             <Box
                 onClickCapture={handleDrsActionCapture}
                 onKeyDownCapture={handleDrsActionCapture}
@@ -448,10 +471,27 @@ const DRS = () => {
                                 fontWeight: 600,
                                 px: 3,
                                 whiteSpace: "nowrap", }}
-                                        disabled={hasUnsavedRequirementRows(drsData)}
-                                        onClick={() => setConfirmationOpen(true)}
+                                        onClick={() => {
+                                            // block if there are unsaved requirement edits
+                                            if (hasUnsavedRequirementRows(drsData)) {
+                                                const validation = validateRequirementDecision(drsData, "");
+                                                setRequirementValidationMessage(validation.message);
+                                                return;
+                                            }
+
+                                            // if pending requirement rows exist prompt for RAISE_AMR
+                                            if (hasPendingRequirementRows(drsData)) {
+                                                setRequirementValidationMessage("");
+                                                setPendingConfirmationOpen(true);
+                                                return;
+                                            }
+
+                                            // otherwise normal close flow
+                                            setRequirementValidationMessage("");
+                                            setConfirmationOpen(true);
+                                        }}
                                     >
-                                        Save
+                                        Submit
                                     </CustomButton>
                                 </Box>
                             )}
@@ -464,14 +504,28 @@ const DRS = () => {
             {(roleType === 'CPT_DATA_ENTRY_NMR_TASK' || roleType === 'CPT_DATA_ENTRY_MR_TASK' || roleType === 'CPT_TASK') && (
                 <ConfirmationDialog
                     open={Boolean(confirmationOpen)}
-                    message="Do you want to close the case?"
+                    message="Do you want to complete the task?"
                     onClose={() => setConfirmationOpen(false)}
                     onConfirm={() => {
                         setConfirmationOpen(false);
-                        void handleCptCloseTask();
+                        void handleCptCloseTask("CLOSE_TASK");
                     }}
-                    title="Close Case"
-                    buttonText="Close"
+                    title="Complete Task"
+                    buttonText="Submit"
+                />
+            )}
+
+            {(roleType === 'CPT_DATA_ENTRY_NMR_TASK' || roleType === 'CPT_DATA_ENTRY_MR_TASK' || roleType === 'CPT_TASK') && (
+                <ConfirmationDialog
+                    open={Boolean(pendingConfirmationOpen)}
+                    message="There are pending requirement records in the table so case will submit to AMR. Do you want to proceed?"
+                    onClose={() => setPendingConfirmationOpen(false)}
+                    onConfirm={() => {
+                        setPendingConfirmationOpen(false);
+                        void handleCptCloseTask("RAISE_AMR");
+                    }}
+                    title="Pending Requirements"
+                    buttonText="Proceed"
                 />
             )}
         </>

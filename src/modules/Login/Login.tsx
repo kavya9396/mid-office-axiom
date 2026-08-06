@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Divider, Typography, Link } from "@mui/material";
+import { Box, Divider, Typography, Link, Snackbar, Alert } from "@mui/material";
 
 import LoginImage from "../../assets/Login-Image.svg";
 import IPRULogo from "../../assets/ICICI-Logo.svg";
@@ -26,40 +26,50 @@ type LoginForm = {
   password: string;
 };
 const Login = () => {
-  const { control, handleSubmit } = useForm<LoginForm>();
-const dispatch = useAppDispatch();
-const navigate = useNavigate();
-  const USE_MOCK_LOGIN = true;
+  const { control, handleSubmit, reset } = useForm<LoginForm>();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [status, setStatus] = React.useState<"idle" | "loading">("idle");
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [remember, setRemember] = React.useState(false);
 
-  const onSubmit = async (data:LoginForm) => {
-  setStatus("loading");
+  const openErrorSnackbar = (message: string) => {
+    setSnackbarMessage(message);
+    setSnackbarOpen(true);
+  };
 
-  try {
-     let res;
+  const onSubmit = async (data: LoginForm) => {
+    setStatus("loading");
 
-    if (USE_MOCK_LOGIN) {
-      // Mock API response
-      res = {
-        ldapAuthentication: "Success",
-        token: "mock-token-123456",
-      };
-    } else {
-      // Real API
-      res = await dispatch(
+    try {
+      const res = await dispatch(
         loginThunk({
           username: data.username,
           password: data.password,
-        })
+          source: "Mid Office Transformation",
+        }),
       ).unwrap();
-    }
 
-    if (res?.ldapAuthentication === "Success") {
+      if (res?.status === "SUCCESS") {
       const normalizedBusinessType = "retail";
 
       localStorage.setItem("token", res.token);
-      localStorage.setItem("username", data.username);
-      localStorage.setItem("password", data.password);
+      localStorage.setItem("username", res.username || data.username);
+      // Store credentials encrypted only when user opted to remember
+      if (remember) {
+        try {
+          const payload = JSON.stringify({ username: data.username, password: data.password });
+          const encrypted = await encryptString(payload);
+          localStorage.setItem("remember_data", encrypted);
+          localStorage.setItem("remember_me", "true");
+        } catch (e) {
+          console.error("Failed to save remembered credentials", e);
+        }
+      } else {
+        localStorage.removeItem("remember_data");
+        localStorage.removeItem("remember_me");
+      }
       localStorage.setItem("businessType", normalizedBusinessType);
 
       // Skip this if your masters API also depends on authentication
@@ -72,13 +82,44 @@ const navigate = useNavigate();
       // }
 
       navigate(getInboxPath(normalizedBusinessType));
+      return;
     }
-  } catch (err) {
-    console.error("Login failed", err);
-  } finally {
-    setStatus("idle");
-  }
-};
+
+      const responseRecord = res as unknown as Record<string, unknown>;
+      const failedMessage = String(responseRecord?.message ?? "Login failed");
+      openErrorSnackbar(failedMessage || "Login failed");
+    } catch (err) {
+      console.error("Login failed", err);
+      const errorMessage =
+        typeof err === "string"
+          ? err
+          : err instanceof Error
+            ? err.message
+            : String((err as Record<string, unknown> | null)?.message ?? "Login failed");
+      openErrorSnackbar(errorMessage || "Login failed");
+    } finally {
+      setStatus("idle");
+    }
+  };
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const stored = localStorage.getItem("remember_data");
+        const wasRemember = localStorage.getItem("remember_me") === "true";
+        if (stored && wasRemember) {
+          const decrypted = await decryptString(stored);
+          if (decrypted) {
+            const parsed = JSON.parse(decrypted) as { username?: string; password?: string };
+            reset({ username: parsed.username ?? "", password: parsed.password ?? "" });
+            setRemember(true);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load remembered credentials", e);
+      }
+    })();
+  }, [reset]);
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
@@ -222,7 +263,11 @@ const navigate = useNavigate();
                 justifyContent: "space-between",
               }}
             >
-              <CustomCheckbox label="Remember me" />
+              <CustomCheckbox
+                label="Remember me"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
             </Box>
 
             {/* Login Button */}
@@ -271,6 +316,22 @@ const navigate = useNavigate();
           <Box component="img" src={IBMLogo} alt="IBM Logo" />
         </Box>
       </Box>
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

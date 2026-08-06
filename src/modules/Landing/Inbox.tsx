@@ -57,13 +57,15 @@ const Inbox = () => {
   const allRows = Object.values(poolData).flat();
 
   const isRefreshing = useRef(false);
+  const hasLoadedOnce = useRef(false);
 
   const loadData = useCallback(async () => {
     if (isRefreshing.current) return;
     isRefreshing.current = true;
 
     try {
-      setLoading(true);
+      const showLoader = !hasLoadedOnce.current;
+      if (showLoader) setLoading(true);
       const username = localStorage.getItem("username") ?? "";
       const password = localStorage.getItem("password") ?? "";
       const roleResponse = await dispatch(fetchInboxThunk({ username, password })).unwrap();
@@ -113,7 +115,12 @@ const Inbox = () => {
       console.error("Failed to load data:", error);
     } finally {
       isRefreshing.current = false;
-      setLoading(false);
+      // Only hide the loader if we showed it for this call.
+      if (!hasLoadedOnce.current) {
+        setLoading(false);
+      }
+      // Mark that we've completed at least one successful/attempted load.
+      hasLoadedOnce.current = true;
     }
   }, [businessType, dispatch, navigate, selectedPool]);
 

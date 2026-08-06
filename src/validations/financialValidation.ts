@@ -5,13 +5,14 @@ export type FinancialFieldInputType = "freeText" | "numeric" | "dateDDMMYYYY";
 export type FinancialFieldRule = {
   inputType?: FinancialFieldInputType;
   isMandatory?: boolean;
+  allowFutureDate?: boolean;
 };
 
 const financialFieldRules: Record<string, Record<string, FinancialFieldRule>> = {
   appointment_letter: {
     "Name of the company": { inputType: "freeText", isMandatory: false },
     "Name of the employee": { inputType: "freeText", isMandatory: false },
-    "Joining Date": { inputType: "dateDDMMYYYY", isMandatory: true },
+    "Joining Date": { inputType: "dateDDMMYYYY", isMandatory: true, allowFutureDate: false },
     CTC: { inputType: "numeric", isMandatory: true },
   },
   commission_statement: {
@@ -79,6 +80,15 @@ export const validateFinancialFieldValue = (
       parsedDate.getDate() !== day
     ) {
       return getErrorMessage("financialValidDate");
+    }
+
+    if (rule.allowFutureDate === false) {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      if (parsedDate.getTime() > today.getTime()) {
+        return getErrorMessage("financialFutureDateNotAllowed");
+      }
     }
   }
 

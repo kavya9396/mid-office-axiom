@@ -1,11 +1,13 @@
-import { Alert, Box, Chip, Paper, Typography } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
+import { Alert, Box, Chip, Paper, Typography, Pagination } from "@mui/material";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { apiRequest } from "../../../services/api";
 import { url as apiUrl } from "../../../services/apiConfig";
 import { useSelector } from "react-redux";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTable from "../../../components/ui/Table/Table";
+import CustomTextField from "../../../components/ui/TextField/TextField";
 import type { Column } from "../../../components/ui/Table/Table";
 import { useAppContext } from "../../../hooks/useAppContext";
 import {
@@ -16,7 +18,9 @@ import {
 import type { AdditionalRequirementRow, RequirementMasterOption } from "../../../types/drs.types";
 import { toDisplayValue } from "../../../utils/helpers";
 import type { RootState } from "../../../store/store";
-import { CloseIcon, EditIcon } from "../../../icons/Icons";
+import { CloseIcon, EyeIcon } from "../../../icons/Icons";
+// removed unused import: getErrorMessage
+import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import {
     OPEN_REQUIREMENT_MANAGEMENT_EVENT,
     type OpenRequirementManagementEvent,
@@ -40,7 +44,9 @@ type EditableField =
     | "subCategory"
     | "document"
     | "reason"
-    | "status";
+    | "fupCode"
+    | "status"
+    | "remarks";
 
 type RowErrors = Partial<Record<EditableField | "lookup", string>>;
 
@@ -48,6 +54,7 @@ type EditableRequirementRow = AdditionalRequirementRow & {
     __rowId: string;
     __isDraft: boolean;
     __isLocal: boolean;
+    __isNewLocal?: boolean;
     __errors?: RowErrors;
     __lookupMessage?: string;
 };
@@ -55,6 +62,7 @@ type EditableRequirementRow = AdditionalRequirementRow & {
 type Option = {
     label: string;
     value: string;
+    description?: string;
 };
 
 const MASTER_TEAM_BY_UI: Record<LookupTeam, RequirementMasterOption["team"]> = {
@@ -121,8 +129,7 @@ const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
 
 const getSelectedCaseContext = (): Record<string, unknown> => {
     try {
-        const raw = localStorage.getItem("selectedCaseContext");
-        const parsed = raw ? JSON.parse(raw) : {};
+            const parsed = JSON.parse(localStorage.getItem("selectedCaseContext") || "{}");
         return parsed && typeof parsed === "object" && !Array.isArray(parsed)
             ? (parsed as Record<string, unknown>)
             : {};
@@ -132,6 +139,19 @@ const getSelectedCaseContext = (): Record<string, unknown> => {
 };
 
 const toOption = (value: string): Option => ({ label: value, value });
+
+const dedupeOptions = (options: Option[]) => {
+    const seen = new Set<string>();
+    const result: Option[] = [];
+    for (const opt of options) {
+        const key = String(opt?.value ?? opt?.label ?? "").trim();
+        if (!key) continue;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        result.push({ label: opt.label, value: opt.value });
+    }
+    return result;
+};
 
 const getTodayDate = () => new Date().toISOString().slice(0, 10);
 
@@ -272,25 +292,45 @@ const applyLookupToRow = (
 const createDraftRow = (): EditableRequirementRow => ({
     ...INITIAL_ROW_STATE,
     team: getDefaultTeam(),
-    status: "Pending",
+    // store status as code where possible (use 'PEN' for Pending by default)
+    status: "PEN",
     raisedDate: getTodayDate(),
     raisedBy: getCurrentActor(),
     userId: getCurrentUserId(),
     __rowId: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     __isDraft: true,
     __isLocal: true,
+    __isNewLocal: true,
     __errors: {},
     __lookupMessage: "",
 });
 
 const normalizeExistingRow = (row: AdditionalRequirementRow, index: number): EditableRequirementRow => {
+    const baseId = String(row.udsLink ?? row.fupCode ?? row.raisedDate ?? "").trim();
+    const uniqueId = baseId ? `${baseId}-${index}` : `existing-${index}`;
+
     return {
         ...INITIAL_ROW_STATE,
         ...row,
-        status: normalizeStatus(String(row.status ?? "")),
-        __rowId: String(row.udsLink ?? row.fupCode ?? row.raisedDate ?? index),
+        // existing row.status may be an object or string; prefer storing code if available
+        status: ((): string => {
+            try {
+                const raw = row.status as unknown;
+                if (!raw) return normalizeStatus("");
+                if (typeof raw === "string") return normalizeStatus(raw);
+                if (typeof raw === "object") {
+                    const obj = raw as Record<string, unknown>;
+                    const code = String(obj.code ?? obj.value ?? obj.description ?? "").trim();
+                    return normalizeStatus(code || "");
+                }
+                return normalizeStatus(String(raw ?? ""));
+            } catch {
+                return normalizeStatus(String(row.status ?? ""));
+            }
+        })(),
+        __rowId: uniqueId,
         __isDraft: false,
-        __isLocal: true,
+        __isLocal: false,
         __errors: {},
         __lookupMessage: "",
     };
@@ -309,7 +349,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const roleType = String(localStorage.getItem("roleType") ?? "");
     const { businessType, applicationNumber } = useAppContext();
     const normalizedRoleType = roleType.trim().toLowerCase();
-    const isCvtOrDvtRole = normalizedRoleType.includes("cvt") || normalizedRoleType.includes("dvt");
+    const isCvtOrDvtRole = normalizedRoleType.includes("CVT_TASK") || normalizedRoleType.includes("dvt");
     const shouldShowProfileAndSpecialTest = !isCvtOrDvtRole;
 
     const mapBreRequirementToRow = (item: BreRequirementRow): AdditionalRequirementRow => {
@@ -372,6 +412,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const requirementReasonOptions = EMPTY_OPTIONS;
 
     const [teamOptionsState, setTeamOptionsState] = useState<Option[]>(EMPTY_OPTIONS);
+    // profile options are now derived from masters.misc (type: PROFILE) and are standalone
+    const [profileOptionsState, setProfileOptionsState] = useState<Option[]>(EMPTY_OPTIONS);
     const [requirementOptionsCache, setRequirementOptionsCache] = useState<Record<string, Option[]>>({});
     const [requirementStatusOptions, setRequirementStatusOptions] = useState<Option[]>(EMPTY_OPTIONS);
 
@@ -391,17 +433,49 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [sourceRowOverrides, setSourceRowOverrides] = useState<
         Record<string, Pick<EditableRequirementRow, "status" | "receivedDate" | "receivedBy">>
     >({});
+    const [deletedRowIds, setDeletedRowIds] = useState<Set<string>>(() => new Set());
+    const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);
+    const [descriptionDialogText, setDescriptionDialogText] = useState("");
+
+    const [savedPage, setSavedPage] = useState(0);
+    const PAGE_SIZE = 5;
+
+    // Ensure existing rows are editable on initial load only. After a successful save
+    // the handler clears `editableStatusRowIds` so saved rows become read-only.
+    const _editableInitRef = useRef(false);
+    useEffect(() => {
+        if (_editableInitRef.current) return;
+        const ids = new Set<string>(normalizedExistingRows.map((r) => r.__rowId));
+        if (ids.size > 0) {
+            setEditableStatusRowIds(ids);
+            _editableInitRef.current = true;
+        }
+    }, [normalizedExistingRows]);
 
     const rows = useMemo(
         () => [
-            ...normalizedExistingRows.map((row) => ({
-                ...row,
-                ...(sourceRowOverrides[row.__rowId] ?? {}),
-            })),
             ...localRows,
+            ...normalizedExistingRows
+                .filter((row) => !deletedRowIds.has(row.__rowId))
+                .map((row) => ({
+                    ...row,
+                    ...(sourceRowOverrides[row.__rowId] ?? {}),
+                })),
         ],
-        [localRows, normalizedExistingRows, sourceRowOverrides],
+        [localRows, normalizedExistingRows, sourceRowOverrides, deletedRowIds],
     );
+
+    
+
+    const openDescriptionDialog = (text: string) => {
+        setDescriptionDialogText(text);
+        setDescriptionDialogOpen(true);
+    };
+
+    const closeDescriptionDialog = () => {
+        setDescriptionDialogOpen(false);
+        setDescriptionDialogText("");
+    };
 
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
@@ -512,6 +586,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
 
+    const totalSavedPages = Math.max(1, Math.ceil(savedRows.length / PAGE_SIZE));
+    const pagedSavedRows = savedRows.slice(savedPage * PAGE_SIZE, (savedPage + 1) * PAGE_SIZE);
+
+    useEffect(() => {
+        if (savedPage >= totalSavedPages) {
+            setSavedPage(0);
+        }
+    }, [savedRows.length, savedPage, totalSavedPages]);
+
     const savedRequirementTableSx = {
         "& .MuiFormControl-root": {
             minWidth: 0,
@@ -553,7 +636,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 setIsTableSaved(false);
                 setHasRequirementChanges(true);
                 didAdd = true;
-                return [...previousRows, createDraftRow()];
+                return [createDraftRow(), ...previousRows];
             });
 
             // If a draft row was added, prefetch master data for the default team
@@ -562,12 +645,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 (async () => {
                     try {
                         const defaultTeam = getDefaultTeam();
-                        const includeBlankProfile = !shouldShowProfileAndSpecialTest;
-                        const payloadBody: Record<string, string> = includeBlankProfile
-                            ? { team: defaultTeam, profile: "" }
-                            : { team: defaultTeam };
+                        const payloadBody: Record<string, string> = { team: defaultTeam };
                         const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
-                        const cacheKeyObj = includeBlankProfile ? { team: defaultTeam, profile: "" } : { team: defaultTeam };
+                        const cacheKeyObj = { team: defaultTeam };
                         const cacheKey = JSON.stringify(cacheKeyObj);
 
                         if (!requirementOptionsCache[cacheKey]) {
@@ -597,7 +677,17 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         requestAnimationFrame(() => {
             const el = document.getElementById(id);
             if (el) {
-                el.scrollIntoView({ behavior: "smooth", block: "center" });
+                try {
+                    // Scroll the document so the element appears near the top with some offset
+                    const rect = el.getBoundingClientRect();
+                    const offset = 80; // leave some space from the top
+                    const absoluteTop = rect.top + window.scrollY - offset;
+                    window.scrollTo({ top: Math.max(0, absoluteTop), behavior: "smooth" });
+                } catch {
+                    // fallback to element scrollIntoView
+                    el.scrollIntoView({ behavior: "smooth", block: "start" });
+                }
+
                 const control = el.querySelector('input, select, textarea, button, [tabindex]') as HTMLElement | null;
                 if (control) control.focus();
             }
@@ -606,32 +696,19 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     }, [lastAddedDraftRowId]);
 
     const getCategoryOptions = (row: EditableRequirementRow) => {
+        // Category is fetched by team only now — profile is standalone
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest) {
-            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
-        } else {
-            // profile dropdown hidden — use explicit empty profile to match cached payloads
-            payload.profile = "";
-        }
         const cacheKey = JSON.stringify(payload);
         return requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
     };
 
-    const getProfileOptions = (row: EditableRequirementRow) => {
-        // When profile is hidden there won't be a profile dropdown, but keep lookup consistent
-        const payload: Record<string, string> = { team: row.team };
-        if (!shouldShowProfileAndSpecialTest) payload.profile = "";
-        const cacheKey = JSON.stringify(payload);
-        return requirementOptionsCache[cacheKey] ?? requirementProfileOptions;
+    const getProfileOptions = () => {
+        // Profile dropdown is standalone and sourced from masters.misc (type: 'PROFILE')
+        return profileOptionsState.length > 0 ? profileOptionsState : requirementProfileOptions;
     };
 
     const getSubCategoryOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest) {
-            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
-        } else {
-            payload.profile = "";
-        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         const cacheKey = JSON.stringify(payload);
         return requirementOptionsCache[cacheKey] ?? requirementSubCategoryOptions;
@@ -639,11 +716,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getDocumentOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest) {
-            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
-        } else {
-            payload.profile = "";
-        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
         const cacheKey = JSON.stringify(payload);
@@ -652,11 +724,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const getReasonOptions = (row: EditableRequirementRow) => {
         const payload: Record<string, string> = { team: row.team };
-        if (shouldShowProfileAndSpecialTest) {
-            if (String(row.profile ?? "").trim()) payload.profile = row.profile;
-        } else {
-            payload.profile = "";
-        }
         if (String(row.category ?? "").trim()) payload.category = row.category;
         if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
         if (String(row.document ?? "").trim()) payload.document = row.document;
@@ -664,7 +731,20 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         return requirementOptionsCache[cacheKey] ?? requirementReasonOptions;
     };
 
-    const parseFirstArrayFromRequirementMst = (mst: unknown): string[] => {
+    const getFupCodeOptions = (row: EditableRequirementRow): Option[] => {
+        const payload = {
+            team: row.team || "",
+            category: row.category || "",
+            subCategory: row.subCategory || "",
+            document: row.document || "",
+            reason: row.reason || "",
+            fupCodes: true,
+        };
+        const key = JSON.stringify(payload);
+        return requirementOptionsCache[key] ?? [];
+    };
+
+    function parseFirstArrayFromRequirementMst(mst: unknown): string[] {
         if (!mst || typeof mst !== "object") return [];
         const obj = mst as Record<string, unknown>;
         // Prefer known keys
@@ -683,9 +763,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         }
 
         return [];
-    };
+    }
 
-    const fetchRequirementMst = async (payload: unknown) => {
+    async function fetchRequirementMst(payload: unknown) {
         try {
             const data = await apiRequest<Record<string, unknown>>({ url: apiUrl("masters"), method: "POST", body: payload });
             // mock file structure: { data: { requirement_mst: { ... } } }
@@ -694,12 +774,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         } catch (err) {
             return null;
         }
-    };
+    }
 
-    const cacheOptionsForPayload = (payload: Record<string, unknown>, options: Option[]) => {
+    function cacheOptionsForPayload(payload: Record<string, unknown>, options: Option[]) {
         const key = JSON.stringify(payload);
         setRequirementOptionsCache((prev) => ({ ...prev, [key]: options }));
-    };
+    }
 
     useEffect(() => {
         const loadInitial = async () => {
@@ -718,6 +798,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             }
 
             // Prefer masters.misc-based status values when available (code === 'REQT_ST')
+            let foundFromMisc = false;
             try {
                 const toMasterList = (options?: unknown) => {
                     if (Array.isArray(options)) return options as unknown[];
@@ -742,9 +823,16 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     .flatMap((src) => toMasterList(src))
                     .filter(Boolean) as Array<Record<string, unknown>>;
 
-                const statusRaw = rawList.filter((opt) => String(opt?.code ?? "").trim().toUpperCase() === "REQT_ST");
-
-                let foundFromMisc = false;
+                try {
+                    // eslint-disable-next-line no-console
+                    console.debug("RequirementManagement: candidateSources:", candidateSources);
+                    // eslint-disable-next-line no-console
+                    console.debug("RequirementManagement: rawList length:", rawList.length);
+                } catch {
+                    // ignore
+                }
+                // misc entries use `type: 'REQT_ST'` to indicate requirement-status rows
+                const statusRaw = rawList.filter((opt) => String(opt?.type ?? "").trim().toUpperCase() === "REQT_ST");
                 if (statusRaw.length > 0) {
                     const extractString = (v: unknown): string => {
                         if (v === null || v === undefined) return "";
@@ -775,12 +863,13 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                     const mapped = statusRaw
                         .map((option) => {
-                            const code = extractString(option.code ?? option.key ?? option.value ?? "");
+                            const code = extractString(option.code ?? option.key ?? "");
                             const rawValue = extractString(option.value ?? "");
-                            const description = extractString(option.description ?? option.label ?? option.code ?? "");
-                            if (!description && !code && !rawValue) return null;
-                            const val = rawValue || code || description;
-                            const lab = rawValue || description || code;
+                            const description = extractString(option.description ?? option.label ?? "");
+                            // prefer code as value, and description as label
+                            const val = code || rawValue || description;
+                            const lab = description || rawValue || code;
+                            if (!val && !lab) return null;
                             return { label: lab, value: val, description } as Option & { description?: string };
                         })
                         .filter(Boolean) as Option[];
@@ -788,8 +877,96 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                     if (mapped.length > 0) {
                         foundFromMisc = true;
-                        setRequirementStatusOptions(mapped);
-                        cacheOptionsForPayload({ types: ["requirementStatus"] }, mapped);
+                        const unique = dedupeOptions(mapped).map((o) => ({
+                            ...o,
+                            label: (String(o.label ?? "") || "").trim()
+                                ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                                : String(o.label ?? ""),
+                            description: (String(o.description ?? "") || "").trim()
+                                ? String(o.description).charAt(0).toUpperCase() + String(o.description).slice(1).toLowerCase()
+                                : String(o.description ?? ""),
+                        }));
+                        setRequirementStatusOptions(unique);
+                        cacheOptionsForPayload({ types: ["requirementStatus"] }, unique);
+                    }
+                }
+            } catch (e) {
+                // ignore
+            }
+
+            // Prefer masters.misc-based profile values when available (type === 'PROFILE')
+            try {
+                const toMasterList = (options?: unknown) => {
+                    if (Array.isArray(options)) return options as unknown[];
+                    if (!options || typeof options !== "object") return [] as unknown[];
+
+                    const record = options as Record<string, unknown>;
+                    if (Array.isArray(record.data)) return record.data as unknown[];
+                    if (Array.isArray(record.options)) return record.options as unknown[];
+                    if (Array.isArray(record.values)) return record.values as unknown[];
+
+                    return Object.values(record).flatMap((v) => (Array.isArray(v) ? v : []));
+                };
+
+                const candidateSources = [
+                    (masters as any)?.misc,
+                    (masters as any)?.data?.misc,
+                    (masters as any)?.data,
+                    masters,
+                ];
+
+                const rawList = candidateSources
+                    .flatMap((src) => toMasterList(src))
+                    .filter(Boolean) as Array<Record<string, unknown>>;
+
+                const profileRaw = rawList.filter((opt) => String(opt?.type ?? "").trim().toUpperCase() === "PROFILE");
+                if (profileRaw.length > 0) {
+                    const extractString = (v: unknown): string => {
+                        if (v === null || v === undefined) return "";
+                        if (typeof v === "string") return v.trim();
+                        if (typeof v === "number" || typeof v === "boolean") return String(v);
+                        if (typeof v === "object") {
+                            try {
+                                const obj = v as Record<string, unknown>;
+                                const candidates = ["label", "description", "value", "name", "code", "key"];
+                                for (const k of candidates) {
+                                    const vv = obj[k];
+                                    if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                    if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                                }
+                                for (const key of Object.keys(obj)) {
+                                    const vv = obj[key];
+                                    if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                    if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                                }
+                            } catch {
+                                // ignore
+                            }
+                        }
+                        return "";
+                    };
+
+                    const mapped = profileRaw
+                        .map((option) => {
+                            const code = extractString(option.code ?? option.key ?? option.value ?? "");
+                            const rawValue = extractString(option.value ?? option.description ?? option.label ?? "");
+                            const description = extractString(option.description ?? option.label ?? "");
+                            const val = code || rawValue || description;
+                            const lab = description || rawValue || code;
+                            if (!val && !lab) return null;
+                            return { label: lab, value: val, description } as Option & { description?: string };
+                        })
+                        .filter(Boolean) as Option[];
+
+                    if (mapped.length > 0) {
+                        const unique = dedupeOptions(mapped).map((o) => ({
+                            ...o,
+                            label: (String(o.label ?? "") || "").trim()
+                                ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                                : String(o.label ?? ""),
+                        }));
+                        setProfileOptionsState(unique);
+                        cacheOptionsForPayload({ types: ["profiles_from_misc"] }, unique);
                     }
                 }
             } catch (e) {
@@ -845,27 +1022,82 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     }
                 }
 
-                // fallback: if data.masterOptions-like shape exists, try to find a first array
+                // fallback: if data.masterOptions-like shape exists, try to find the most
+                // likely requirement-status array (prefer entries with type === 'REQT_ST'
+                // or codes/descriptions like 'PEN'/'Pending'). Only fall back to the
+                // first array if no better match is found.
                 if (statusCandidates.length === 0 && data && typeof data === "object") {
+                    const arrays: Array<unknown[]> = [];
                     for (const k of Object.keys(data as Record<string, unknown>)) {
                         const v = (data as Record<string, unknown>)[k];
-                        if (Array.isArray(v) && v.length > 0) {
-                            statusCandidates.push(...v);
+                        if (Array.isArray(v) && v.length > 0) arrays.push(v as unknown[]);
+                    }
+
+                    const looksLikeReqStatus = (arr: unknown[]) => {
+                        try {
+                            return arr.some((item) => {
+                                if (!item || typeof item !== "object") return false;
+                                const obj = item as Record<string, unknown>;
+                                const t = String(obj.type ?? "").trim().toUpperCase();
+                                if (t === "REQT_ST") return true;
+                                const code = String(obj.code ?? obj.key ?? "").trim().toUpperCase();
+                                if (code === "PEN" || code === "PENDING") return true;
+                                const desc = String(obj.description ?? obj.value ?? obj.label ?? "").toLowerCase();
+                                if (desc.includes("pending")) return true;
+                                return false;
+                            });
+                        } catch {
+                            return false;
+                        }
+                    };
+
+                    let chosen: unknown[] | null = null;
+                    for (const arr of arrays) {
+                        if (looksLikeReqStatus(arr)) {
+                            chosen = arr;
                             break;
                         }
                     }
+
+                    if (!chosen && arrays.length > 0) {
+                        chosen = arrays[0];
+                    }
+
+                    if (chosen) statusCandidates.push(...chosen);
                 }
 
                 const statusOpts = statusCandidates.length > 0
                     ? statusCandidates
                           .map((c) => {
-                              const s = extractString(c);
-                              return s ? { label: s, value: s } as Option : null;
+                              if (c === null || c === undefined) return null;
+                              if (typeof c === "string") {
+                                  const s = extractString(c);
+                                  return s ? { label: s, value: s } as Option : null;
+                              }
+                              if (typeof c === "object") {
+                                  const obj = c as Record<string, unknown>;
+                                  const code = extractString(obj.code ?? obj.key ?? "");
+                                  const rawValue = extractString(obj.value ?? "");
+                                  const description = extractString(obj.description ?? obj.label ?? "");
+                                  const val = code || rawValue || description;
+                                  const lab = description || rawValue || code || String(val);
+                                  return val ? ({ label: lab, value: val, description } as Option) : null;
+                              }
+                              return null;
                           })
                           .filter(Boolean) as Option[]
                     : EMPTY_OPTIONS;
-                setRequirementStatusOptions(statusOpts);
-                cacheOptionsForPayload(statusPayload, statusOpts);
+                const uniqueStatusOpts = dedupeOptions(statusOpts).map((o) => ({
+                    ...o,
+                    label: (String(o.label ?? "") || "").trim()
+                        ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                        : String(o.label ?? ""),
+                    description: (String(o.description ?? "") || "").trim()
+                        ? String(o.description).charAt(0).toUpperCase() + String(o.description).slice(1).toLowerCase()
+                        : String(o.description ?? ""),
+                }));
+                setRequirementStatusOptions(uniqueStatusOpts);
+                cacheOptionsForPayload(statusPayload, uniqueStatusOpts);
             } catch (e) {
                 // ignore failures to fetch status master
             }
@@ -873,6 +1105,87 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
         loadInitial();
     }, []);
+
+    // If masters are loaded/updated later, derive profile options from masters.misc (type === 'PROFILE')
+    useEffect(() => {
+        try {
+            const toMasterList = (options?: unknown) => {
+                if (Array.isArray(options)) return options as unknown[];
+                if (!options || typeof options !== "object") return [] as unknown[];
+
+                const record = options as Record<string, unknown>;
+                if (Array.isArray(record.data)) return record.data as unknown[];
+                if (Array.isArray(record.options)) return record.options as unknown[];
+                if (Array.isArray(record.values)) return record.values as unknown[];
+
+                return Object.values(record).flatMap((v) => (Array.isArray(v) ? v : []));
+            };
+
+            const candidateSources = [
+                (masters as any)?.misc,
+                (masters as any)?.data?.misc,
+                (masters as any)?.data,
+                masters,
+            ];
+
+            const rawList = candidateSources
+                .flatMap((src) => toMasterList(src))
+                .filter(Boolean) as Array<Record<string, unknown>>;
+
+            const profileRaw = rawList.filter((opt) => String(opt?.type ?? "").trim().toUpperCase() === "PROFILE");
+            if (profileRaw.length > 0) {
+                const extractString = (v: unknown): string => {
+                    if (v === null || v === undefined) return "";
+                    if (typeof v === "string") return v.trim();
+                    if (typeof v === "number" || typeof v === "boolean") return String(v);
+                    if (typeof v === "object") {
+                        try {
+                            const obj = v as Record<string, unknown>;
+                            const candidates = ["label", "description", "value", "name", "code", "key"];
+                            for (const k of candidates) {
+                                const vv = obj[k];
+                                if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                            }
+                            for (const key of Object.keys(obj)) {
+                                const vv = obj[key];
+                                if (typeof vv === "string" && vv.trim()) return vv.trim();
+                                if ((typeof vv === "number" || typeof vv === "boolean") && String(vv).trim()) return String(vv);
+                            }
+                        } catch {
+                            // ignore
+                        }
+                    }
+                    return "";
+                };
+
+                const mapped = profileRaw
+                    .map((option) => {
+                        const code = extractString(option.code ?? option.key ?? option.value ?? "");
+                        const rawValue = extractString(option.value ?? option.description ?? option.label ?? "");
+                        const description = extractString(option.description ?? option.label ?? "");
+                        const val = code || rawValue || description;
+                        const lab = description || rawValue || code;
+                        if (!val && !lab) return null;
+                        return { label: lab, value: val, description } as Option & { description?: string };
+                    })
+                    .filter(Boolean) as Option[];
+
+                if (mapped.length > 0) {
+                    const unique = dedupeOptions(mapped).map((o) => ({
+                        ...o,
+                        label: (String(o.label ?? "") || "").trim()
+                            ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                            : String(o.label ?? ""),
+                    }));
+                    setProfileOptionsState(unique);
+                    cacheOptionsForPayload({ types: ["profiles_from_misc"] }, unique);
+                }
+            }
+        } catch {
+            // ignore
+        }
+    }, [masters]);
 
     const updateRow = (rowId: string, updater: (row: EditableRequirementRow) => EditableRequirementRow) => {
         const currentRow = rows.find((row) => row.__rowId === rowId);
@@ -1003,6 +1316,14 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         __errors: nextErrors,
                     };
                     break;
+                case "fupCode":
+                    nextRow = {
+                        ...row,
+                        fupCode: value,
+                        // leave description/specialTest to be populated by fetch below
+                        __errors: nextErrors,
+                    };
+                    break;
                 default:
                     nextRow = {
                         ...row,
@@ -1022,12 +1343,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 if (!before) return;
 
                 if (field === "team") {
-                    const includeBlankProfile = !shouldShowProfileAndSpecialTest;
-                    const payloadBody: Record<string, string> = includeBlankProfile
-                        ? { team: value, profile: "" }
-                        : { team: value };
+                    // fetch categories and related options by team only; profile is independent
+                    const payloadBody: Record<string, string> = { team: value };
                     const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
-                    const cacheKeyObj = includeBlankProfile ? { team: value, profile: "" } : { team: value };
+                    const cacheKeyObj = { team: value };
                     const cacheKey = JSON.stringify(cacheKeyObj);
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
@@ -1037,49 +1356,34 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     }
                 }
 
-                if (field === "profile") {
-                    const teamVal = before.team || "";
-                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: value } };
-                    const cacheKey = JSON.stringify({ team: teamVal, profile: value });
-                    if (!requirementOptionsCache[cacheKey]) {
-                        const mst = await fetchRequirementMst(payload);
-                        const entries = parseFirstArrayFromRequirementMst(mst);
-                        const opts = entries.map(toOption);
-                        cacheOptionsForPayload({ team: teamVal, profile: value }, opts);
-                    }
-                }
-
                 if (field === "category") {
                     const teamVal = before.team || "";
-                    const profileVal = before.profile || "";
-                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: value } };
-                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: value });
+                    const payload = { types:["requirement_mst"], requirementMst: { team: teamVal, category: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, category: value });
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
                         const entries = parseFirstArrayFromRequirementMst(mst);
                         const opts = entries.map(toOption);
-                        cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: value }, opts);
+                        cacheOptionsForPayload({ team: teamVal, category: value }, opts);
                     }
                 }
 
                 if (field === "subCategory") {
                     const teamVal = before.team || "";
-                    const profileVal = before.profile || "";
-                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: value } };
-                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: value });
+                    const payload = { types:["requirement_mst"], requirementMst: { team: teamVal, category: before.category || "", subCategory: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, category: before.category || "", subCategory: value });
                     if (!requirementOptionsCache[cacheKey]) {
                         const mst = await fetchRequirementMst(payload);
                         const entries = parseFirstArrayFromRequirementMst(mst);
                         const opts = entries.map(toOption);
-                        cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: value }, opts);
+                        cacheOptionsForPayload({ team: teamVal, category: before.category || "", subCategory: value }, opts);
                     }
                 }
 
                 if (field === "document") {
                     const teamVal = before.team || "";
-                    const profileVal = before.profile || "";
-                    const payload = { types:["requirement_mst"],requirementMst: { team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value } };
-                    const cacheKey = JSON.stringify({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value });
+                    const payload = { types:["requirement_mst"], requirementMst: { team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: value } };
+                    const cacheKey = JSON.stringify({ team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: value });
                     if (!requirementOptionsCache[cacheKey]) {
                             const mst = await fetchRequirementMst(payload);
                             // Prefer explicit `reasons` array when API returns both documents and reasons
@@ -1100,16 +1404,14 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             }
 
                             const opts = entries.map(toOption);
-                            cacheOptionsForPayload({ team: teamVal, profile: profileVal, category: before.category || "", subCategory: before.subCategory || "", document: value }, opts);
+                            cacheOptionsForPayload({ team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: value }, opts);
                     }
                 }
                 
                 if (field === "reason") {
                     const teamVal = before.team || "";
-                    const profileVal = shouldShowProfileAndSpecialTest ? (before.profile || "") : "";
                     const payloadBody: Record<string, string> = {
                         team: teamVal,
-                        profile: profileVal,
                         category: before.category || "",
                         subCategory: before.subCategory || "",
                         document: before.document || "",
@@ -1146,7 +1448,29 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         if (detail) {
                                 // Support explicit `requirements` array shape: map `code` -> fupCode, `description` -> description, `special` -> specialTest
                                 const candidate = detail;
+                                // Build FUP options when available
                                 if (Array.isArray(candidate.requirements) && candidate.requirements.length > 0 && typeof candidate.requirements[0] === "object") {
+                                    const fupOptions = candidate.requirements
+                                        .map((req: Record<string, unknown>) => {
+                                            const val = String(req.code ?? req.fupCode ?? req.fup_code ?? req.fup ?? "").trim();
+                                            const lab = String(req.description ?? req.ruleName ?? req.desc ?? val).trim();
+                                            const special = String(req.special ?? req.specialTest ?? req.special_test ?? "").trim();
+                                            if (!val && !lab) return null;
+                                            return { value: val || lab, label: lab || val, description: String(req.description ?? ""), specialTest: special } as Option & { specialTest?: string };
+                                        })
+                                        .filter(Boolean) as Array<Option & { specialTest?: string }>;
+
+                                    if (fupOptions.length > 0) {
+                                        const cacheKeyObj = { team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: before.document || "", reason: value, fupCodes: true };
+                                        const uniqueMap = new Map<string, Option & { description?: string, specialTest?: string }>();
+                                        for (const o of fupOptions) {
+                                            uniqueMap.set(String(o.value), o);
+                                        }
+                                        const unique = Array.from(uniqueMap.values());
+                                        cacheOptionsForPayload(cacheKeyObj, unique.map((o) => ({ label: o.label, value: o.value, description: o.description, specialTest: (o as any).specialTest })));
+                                    }
+
+                                    // Use first requirement to populate fields as before
                                     const req = candidate.requirements[0] as Record<string, unknown>;
                                     const fup = String(req.code ?? req.fupCode ?? req.fup_code ?? req.fup ?? "").trim();
                                     const desc = String(req.description ?? req.desc ?? req.ruleName ?? "").trim();
@@ -1163,9 +1487,33 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                         }));
                                     }
                                 } else {
+                                    // single-object detail fallbacks
                                     const fup = String(detail.fupCode ?? detail.fup_code ?? detail.fup ?? "").trim();
                                     const desc = String(detail.description ?? detail.desc ?? detail.ruleName ?? "").trim();
                                     const specialTest = String(detail.specialTest ?? detail.special_test ?? detail.specialTest ?? "").trim();
+
+                                    // also support explicit fupCodes array
+                                    const explicitFup = Array.isArray(detail.fupCodes) ? detail.fupCodes : Array.isArray(detail.fucpCodes) ? detail.fucpCodes : null;
+                                    if (explicitFup && explicitFup.length > 0) {
+                                        const fupOptions = explicitFup.map((item: unknown) => {
+                                            if (!item) return null;
+                                            if (typeof item === 'string') return { label: String(item), value: String(item) } as Option;
+                                            if (typeof item === 'object') {
+                                                const obj = item as Record<string, unknown>;
+                                                const v = String(obj.code ?? obj.value ?? obj.key ?? "").trim();
+                                                const l = String(obj.description ?? obj.label ?? v).trim();
+                                                return { label: l || v, value: v || l } as Option;
+                                            }
+                                            return null;
+                                        }).filter(Boolean) as Option[];
+
+                                        if (fupOptions.length > 0) {
+                                            const cacheKeyObj = { team: teamVal, category: before.category || "", subCategory: before.subCategory || "", document: before.document || "", reason: value, fupCodes: true };
+                                            const uniqueMap = new Map<string, Option>();
+                                            for (const o of fupOptions) uniqueMap.set(String(o.value), o);
+                                            cacheOptionsForPayload(cacheKeyObj, Array.from(uniqueMap.values()) as unknown as Option[]);
+                                        }
+                                    }
 
                                     if (fup || desc || specialTest) {
                                         updateRow(currentRowBefore?.__rowId ?? rowId, (r) => ({
@@ -1183,25 +1531,39 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         // ignore extraction errors
                     }
                 }
+                // when user selects a fupCode, populate description/specialTest from cached options if available
+                if (field === "fupCode") {
+                    try {
+                        const cacheKeyObj = { team: before.team || "", category: before.category || "", subCategory: before.subCategory || "", document: before.document || "", reason: before.reason || "", fupCodes: true };
+                        const cached = requirementOptionsCache[JSON.stringify(cacheKeyObj)] as Array<Option & { description?: string, specialTest?: string }> | undefined;
+                        const match = (cached ?? []).find((o) => String(o.value) === String(value));
+                        if (match) {
+                            updateRow(currentRowBefore?.__rowId ?? rowId, (r) => ({
+                                ...r,
+                                description: match.description ?? r.description,
+                                specialTest: (match as any).specialTest ?? r.specialTest,
+                                __errors: clearErrors(r.__errors, ["lookup"]),
+                            }));
+                        }
+                    } catch {
+                        // ignore
+                    }
+                }
             } catch {
                 // ignore fetch errors
             }
         })();
     };
 
-    const handleSave = (rowId: string) => {
+    
+
+    // Add draft row to saved rows without performing validation checks.
+    const handleAddDraft = (rowId: string) => {
         setIsTableSaved(false);
         setHasRequirementChanges(true);
+
         updateRow(rowId, (row) => {
             const preparedRow = applyLookupToRow(row, shouldShowProfileAndSpecialTest, effectiveRequirementMasterRows);
-            const errors = validateDraftRow(preparedRow, shouldShowProfileAndSpecialTest);
-
-            if (Object.keys(errors).length > 0) {
-                return {
-                    ...preparedRow,
-                    __errors: errors,
-                };
-            }
 
             return {
                 ...preparedRow,
@@ -1210,30 +1572,64 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 __lookupMessage: "",
             };
         });
+
+        // newly added (saved) local rows should allow status editing
+        setEditableStatusRowIds((prev) => {
+            const next = new Set(prev);
+            next.add(rowId);
+            return next;
+        });
     };
 
     const handleDelete = (rowId: string) => {
         setIsTableSaved(false);
         setHasRequirementChanges(true);
-        setLocalRows((previousRows) => previousRows.filter((row) => row.__rowId !== rowId));
+        // if it's a local draft, remove from localRows, otherwise mark as deleted
+        const isLocal = localRows.some((r) => r.__rowId === rowId);
+        if (isLocal) {
+            setLocalRows((previousRows) => previousRows.filter((row) => row.__rowId !== rowId));
+            return;
+        }
+
+        setDeletedRowIds((prev) => new Set(prev).add(rowId));
     };
 
-    const handleEditLocalSaved = (rowId: string) => {
-        setIsTableSaved(false);
-        setHasRequirementChanges(true);
-        setLocalRows((previousRows) =>
-            previousRows.map((row) =>
-                row.__rowId === rowId
-                    ? {
-                        ...row,
-                        __isDraft: true,
-                        __errors: {},
-                        __lookupMessage: "",
-                    }
-                    : row,
-            ),
-        );
-    };
+    // const handleEditLocalSaved = (rowId: string) => {
+    //     setIsTableSaved(false);
+    //     setHasRequirementChanges(true);
+
+    //     const existing = rows.find((r) => r.__rowId === rowId && !r.__isLocal);
+    //     if (existing) {
+    //         // create a local editable draft prefilled from existing row
+    //         const draft = {
+    //             ...existing,
+    //             __rowId: `draft-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    //             __isDraft: true,
+    //             __isLocal: true,
+    //             // mark this as NOT a new add-created row so delete remains disabled
+    //             __isNewLocal: false,
+    //             __errors: {},
+    //             __lookupMessage: "",
+    //         } as EditableRequirementRow;
+    //         setLocalRows((prev) => [...prev, draft]);
+    //         setLastAddedDraftRowId(draft.__rowId);
+    //         return;
+    //     }
+
+    //     // if already a local row, just toggle to draft (shouldn't usually happen)
+    //     setLocalRows((previousRows) =>
+    //         previousRows.map((row) =>
+    //             row.__rowId === rowId
+    //                 ? {
+    //                     ...row,
+    //                     __isDraft: true,
+    //                     __errors: {},
+    //                     __lookupMessage: "",
+    //                 }
+    //                 : row,
+    //         ),
+    //     );
+    // };
 
     const renderEditableSelect = (
         row: EditableRequirementRow,
@@ -1273,19 +1669,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         }
     };
 
-    const validateDraftRow = (row: EditableRequirementRow, requiresProfile: boolean): RowErrors => {
-        const errors: RowErrors = {};
-        const required = getRequiredSelectionFields(requiresProfile);
-        required.forEach((f) => {
-            const v = String(row[f] ?? "").trim();
-            if (!v) {
-                // simple message — kept generic
-                (errors as any)[f] = "This field is required";
-            }
-        });
-
-        return errors;
-    };
+    // validateDraftRow removed (unused) to avoid TS unused-value errors
 
     const renderReadOnlyField = (value: string, helperText?: string) => (
         <>
@@ -1331,7 +1715,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     const renderDisabledActionIcons = () => (
         <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, whiteSpace: "nowrap" }}>
-            <Box
+            {/* <Box
                 component="span"
                 sx={{
                     color: "#CBD5E1",
@@ -1348,7 +1732,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 aria-label="Edit requirement unavailable"
             >
                 <EditIcon />
-            </Box>
+            </Box> */}
+
+            <CustomDialog open={descriptionDialogOpen} onClose={closeDescriptionDialog} title="Description" maxWidth="sm">
+                <Typography sx={{ whiteSpace: "pre-wrap", fontSize: 14, color: "#182026" }}>{descriptionDialogText}</Typography>
+            </CustomDialog>
             <Box
                 component="span"
                 sx={{
@@ -1374,16 +1762,18 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         {
             key: "__rowId",
             header: "Actions",
-            width: "auto",
+            width: "5%",
             sticky: "left",
             render: (_value, row) => {
-                if (!row.__isLocal || isTableSaved) {
+                const isLocalDraft = Boolean(row.__isLocal && row.__isDraft && (row as any).__isNewLocal);
+                const showActions = row.__isLocal || (!isTableSaved && editableStatusRowIds.has(row.__rowId));
+                if (!showActions) {
                     return renderDisabledActionIcons();
                 }
 
                 return (
                     <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 0.5, whiteSpace: "nowrap" }}>
-                        <Box
+                        {/* <Box
                             component="button"
                             type="button"
                             onClick={() => handleEditLocalSaved(row.__rowId)}
@@ -1403,28 +1793,50 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             aria-label="Edit requirement"
                         >
                             <EditIcon />
-                        </Box>
-                        <Box
-                            component="button"
-                            type="button"
-                            onClick={() => handleDelete(row.__rowId)}
-                            sx={{
-                                border: "none",
-                                background: "transparent",
-                                cursor: "pointer",
-                                color: "#9A2529",
-                                display: "inline-flex",
-                                alignItems: "center",
-                                justifyContent: "center",
-                                width: 22,
-                                height: 22,
-                                flexShrink: 0,
-                                p: 0,
-                            }}
-                            aria-label="Delete requirement"
-                        >
-                            <CloseIcon />
-                        </Box>
+                        </Box> */}
+
+                        {isLocalDraft ? (
+                            <Box
+                                component="button"
+                                type="button"
+                                onClick={() => handleDelete(row.__rowId)}
+                                sx={{
+                                    border: "none",
+                                    background: "transparent",
+                                    cursor: "pointer",
+                                    color: "#9A2529",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 22,
+                                    height: 22,
+                                    flexShrink: 0,
+                                    p: 0,
+                                }}
+                                aria-label="Delete requirement"
+                            >
+                                <CloseIcon />
+                            </Box>
+                        ) : (
+                            <Box
+                                component="span"
+                                sx={{
+                                    color: "#CBD5E1",
+                                    display: "inline-flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    width: 22,
+                                    height: 22,
+                                    flexShrink: 0,
+                                    opacity: 0.55,
+                                    cursor: "not-allowed",
+                                }}
+                                aria-disabled="true"
+                                aria-label="Delete requirement unavailable"
+                            >
+                                <CloseIcon />
+                            </Box>
+                        )}
                     </Box>
                 );
             },
@@ -1432,42 +1844,88 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         {
             key: "status",
             header: "Status",
-            width: "110px",
+            width: "7%",
             render: (_value, row) => {
-                const canEditStatus = !isTableSaved && (isPendingStatus(row.status) || editableStatusRowIds.has(row.__rowId));
-
-                if (!canEditStatus) {
-                    return (
-                        <Typography sx={{ fontSize: 12, fontWeight: 600 }}>
-                            {toDisplayValue(row.status)}
-                        </Typography>
-                    );
+                // allow editing status only for draft/local-new rows or rows explicitly marked editable
+                const canEditStatus = Boolean(row.__isDraft) || editableStatusRowIds.has(row.__rowId);
+                if (row.__rowId === lastAddedDraftRowId) {
+                    // help debug why the newly added draft may still be disabled
+                    console.debug("RequirementManagement: status render", {
+                        rowId: row.__rowId,
+                        __isDraft: row.__isDraft,
+                        canEditStatus,
+                        isTableSaved,
+                        editableStatusRowIdsSize: editableStatusRowIds.size,
+                    });
                 }
 
+                // Always render the select so the dropdown remains visible,
+                // but disable it when editing isn't allowed (including after save
+                // or when status is not pending).
                 return (
-                    <Box sx={{ width: 100, minWidth: 100 }}>
-                        {renderEditableSelect(row, "status", requirementStatusOptions, false)}
+                    <Box
+                        sx={{
+                            width: 100,
+                            minWidth: 100,
+                            // ensure select text and menu items show capitalized form only in this table
+                            '& .MuiSelect-select': { textTransform: 'capitalize' },
+                            '& .MuiMenuItem-root': { textTransform: 'capitalize' },
+                        }}
+                    >
+                        {renderEditableSelect(
+                            row,
+                            "status",
+                            requirementStatusOptions.map((o) => ({
+                                ...o,
+                                label: (String(o.label ?? "") || "")
+                                    ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                                    : String(o.label ?? ""),
+                            })),
+                            !canEditStatus,
+                        )}
                     </Box>
                 );
             },
         },
-        { key: "team", header: "Team", width: "6%" },
+         { key: "ocrStatus", header: "OCR Status", width: "6%" },
         ...(shouldShowProfileAndSpecialTest
             ? ([{ key: "profile", header: "Profile", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
         { key: "category", header: "Category", width: "8%" },
-        { key: "subCategory", header: "Sub Category", width: "9%" },
-        { key: "document", header: "Document", width: "8%" },
-        { key: "reason", header: "Reason", width: "8%" },
+        { key: "subCategory", header: "Sub Category", width: "10%"},
+        { key: "document", header: "Document", width: "10%" },
+        { key: "reason", header: "Reason", width: "12%" },
         ...(shouldShowProfileAndSpecialTest
             ? ([{ key: "specialTest", header: "Special Test", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
-        { key: "fupCode", header: "FUP Code", width: "6%" },
-        { key: "description", header: "Description", width: shouldShowProfileAndSpecialTest ? "9%" : "12%" },
-        { key: "raisedDate", header: "Raised Date", width: "7%" },
-        { key: "raisedBy", header: "Raised By", width: "7%" },
-        { key: "receivedDate", header: "Received Date", width: "7%" },
-        { key: "receivedBy", header: "Received By", width: "7%" },
+        { key: "fupCode", header: "FUP Code", width: "8%"},
+        { key: "remarks", header: "Extra Remarks", width: "12%", render: (_v, row) => renderReadOnlyField(String(row.remarks ?? "")) },
+        {
+            key: "description",
+            header: "Description",
+            width: shouldShowProfileAndSpecialTest ? "5%" : "7%",
+            render: (_value, row) => {
+                const desc = String(row.description ?? "");
+                if (!desc) return <Typography sx={{ fontSize: 13, color: "#334155" }}>-</Typography>;
+
+                return (
+                    <Box sx={{ display: "flex", alignItems: "start ", justifyContent: "center" }}>
+                        <Box
+                            component="button"
+                            onClick={() => openDescriptionDialog(desc)}
+                            sx={{ border: "none", background: "transparent", p: 0, cursor: "pointer", color: "#0F4C81" }}
+                            aria-label="View description"
+                        >
+                            <EyeIcon />
+                        </Box>
+                    </Box>
+                );
+            },
+        },
+        // { key: "raisedDate", header: "Raised Date", width: "7%" },
+        // { key: "raisedBy", header: "Raised By", width: "7%" },
+        // { key: "receivedDate", header: "Received Date", width: "7%" },
+        // { key: "receivedBy", header: "Received By", width: "7%" },
     ];
 
     return (
@@ -1510,35 +1968,31 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             px: 1,
                             "&:hover": { backgroundColor: "#FFFFFF" },
                         }}
-                        onClick={() => {
+                        onClick={async () => {
+                                    // mark table as not-saved (there are pending changes)
                                     setIsTableSaved(false);
                                     setHasRequirementChanges(true);
                                     const draft = createDraftRow();
-                                    setLocalRows((previousRows) => [...previousRows, draft]);
+                                    setLocalRows((previousRows) => [draft, ...previousRows]);
                                     setLastAddedDraftRowId(draft.__rowId);
 
                                     // Prefetch masters for the default team so dropdowns are primed
-                                    (async () => {
-                                        try {
-                                            const defaultTeam = getDefaultTeam();
-                                            const includeBlankProfile = !shouldShowProfileAndSpecialTest;
-                                            const payloadBody: Record<string, string> = includeBlankProfile
-                                                ? { team: defaultTeam, profile: "" }
-                                                : { team: defaultTeam };
-                                            const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
-                                            const cacheKeyObj = includeBlankProfile ? { team: defaultTeam, profile: "" } : { team: defaultTeam };
-                                            const cacheKey = JSON.stringify(cacheKeyObj);
+                                    try {
+                                        const defaultTeam = getDefaultTeam();
+                                        const payloadBody: Record<string, string> = { team: defaultTeam };
+                                        const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
+                                        const cacheKeyObj = { team: defaultTeam };
+                                        const cacheKey = JSON.stringify(cacheKeyObj);
 
-                                            if (!requirementOptionsCache[cacheKey]) {
-                                                const mst = await fetchRequirementMst(payload);
-                                                const entries = parseFirstArrayFromRequirementMst(mst);
-                                                const opts = entries.map(toOption);
-                                                cacheOptionsForPayload(cacheKeyObj, opts);
-                                            }
-                                        } catch (e) {
-                                            // ignore
+                                        if (!requirementOptionsCache[cacheKey]) {
+                                            const mst = await fetchRequirementMst(payload);
+                                            const entries = parseFirstArrayFromRequirementMst(mst);
+                                            const opts = entries.map(toOption);
+                                            cacheOptionsForPayload(cacheKeyObj, opts);
                                         }
-                                    })();
+                                    } catch (e) {
+                                        // ignore
+                                    }
                                 }}
                     >
                         + Add Requirement
@@ -1586,14 +2040,25 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                 >
                                     <CustomTable<EditableRequirementRow>
                                         columns={savedColumns}
-                                        data={savedRows}
+                                        data={pagedSavedRows}
                                     />
+                                    {savedRows.length > PAGE_SIZE && (
+                                        <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
+                                            <Pagination
+                                                count={totalSavedPages}
+                                                page={savedPage + 1}
+                                                onChange={(_e, p) => setSavedPage(p - 1)}
+                                                color="primary"
+                                                size="small"
+                                            />
+                                        </Box>
+                                    )}
                                 </Box>
                             </Box>
                         )}
 
                         {draftRows.map((row, rowIndex) => {
-                            const profileOptions = getProfileOptions(row);
+                            const profileOptions = getProfileOptions();
                             const categoryOptions = getCategoryOptions(row);
                             const subCategoryOptions = getSubCategoryOptions(row);
                             const documentOptions = getDocumentOptions(row);
@@ -1646,7 +2111,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             />
                                             <Chip
                                                 size="small"
-                                                label={toDisplayValue(row.status)}
+                                                label={(() => {
+                                                    const rawLabel = requirementStatusOptions.find((o) => String(o.value) === String(row.status))?.label ?? String(row.status ?? "");
+                                                    return rawLabel ? String(rawLabel).charAt(0).toUpperCase() + String(rawLabel).slice(1).toLowerCase() : "";
+                                                })()
+                                                }
                                                 sx={{
                                                     height: 24,
                                                     backgroundColor: isPendingStatus(row.status) ? "#FFF5D6" : "#E8EEF5",
@@ -1669,7 +2138,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                 <CustomButton
                                                     variant="contained"
                                                     size="small"
-                                                    onClick={() => handleSave(row.__rowId)}
+                                                    onClick={() => handleAddDraft(row.__rowId)}
                                                     sx={{ borderRadius: 999, px: 2 }}
                                                 >
                                                     Add
@@ -1724,7 +2193,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                                         row,
                                                         "category",
                                                         categoryOptions,
-                                                        !row.team || (shouldShowProfileAndSpecialTest && !row.profile),
+                                                        !row.team,
                                                     )
                                                     : renderReadOnlyField(row.category),
                                                 true,
@@ -1756,11 +2225,26 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             )}
                                             {renderField(
                                                 "FUP Code",
-                                                renderReadOnlyField(row.fupCode, row.__isDraft ? row.__lookupMessage : undefined),
+                                                row.__isDraft
+                                                    ? renderEditableSelect(row, "fupCode", getFupCodeOptions(row), !row.reason)
+                                                    : renderReadOnlyField(row.fupCode, row.__isDraft ? row.__lookupMessage : undefined),
                                             )}
                                             {renderField(
                                                 "Description",
                                                 renderReadOnlyField(row.description),
+                                            )}
+                                            {renderField(
+                                                "Extra Remarks",
+                                                row.__isDraft
+                                                    ? (
+                                                        <CustomTextField
+                                                            value={String(row.remarks ?? "")}
+                                                            onChange={(e) => handleInlineChange(row.__rowId, "remarks", String((e.target as HTMLInputElement).value))}
+                                                            placeholder="Optional remarks"
+                                                            sx={{ width: "100%" }}
+                                                        />
+                                                      )
+                                                    : renderReadOnlyField(row.remarks ?? ""),
                                             )}
                                         </Box>
                                     </Box>
@@ -1781,10 +2265,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         mt: 1,
                     }}
                 >
+                   
                     {isVisible && (
                             <CustomButton
                                 variant="contained"
-                                disabled={draftRows.length > 0 || isTableSaved}
+                                disabled={isTableSaved || draftRows.length > 0}
                             onClick={async () => {
                                 // Build a full DRS payload by cloning current drsData and replacing requirementManagement
                                 try {
@@ -1792,11 +2277,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     const cloned: Record<string, unknown> = JSON.parse(JSON.stringify(source || {}));
 
                                     const payloadRequirements = rows.map((r) => {
-                                        const statusValue = String(r.status ?? "").trim() || "Pending";
+                                        const statusCode = String(r.status ?? "").trim() || "PEN";
                                         const matchedStatus = (requirementStatusOptions as Array<Option & { description?: string }>).find(
-                                            (o) => String(o.value ?? "").trim() === statusValue,
+                                            (o) => String(o.value ?? "").trim() === statusCode || String(o.label ?? "").trim().toLowerCase() === String(r.status ?? "").trim().toLowerCase(),
                                         );
-                                        const statusDescription = matchedStatus?.description ?? "";
+                                        const statusDescription = matchedStatus?.description ?? matchedStatus?.label ?? String(r.status ?? "");
 
                                         return {
                                             team: mapDisplayTeamToStored(r.team ?? ""),
@@ -1807,7 +2292,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             reason: r.reason ?? "",
                                             fupCode: r.fupCode ?? "",
                                             description: r.description ?? "",
-                                            status: { value: statusValue, description: statusDescription },
+                                            status: { value: statusCode, description: statusDescription },
                                             raisedDate: r.raisedDate ?? "",
                                             raisedBy: r.raisedBy ?? "",
                                             receivedDate: r.receivedDate ?? "",
@@ -1828,8 +2313,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                         cloned.requirementManagement = payloadRequirements;
                                     }
 
-                                    const requestBody = cloned;
-
+                                    const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+                                    const requestBody = {
+                                        applicationNo: applicationNumber,
+                                        roleType: roleType,
+                                        sections: ["requirementManagement"],
+                                        userId: userId,
+                                        data: cloned,
+                                    } as unknown;
+                                    console.log('requirement save payload', requestBody);
                                     await apiRequest<{ success?: boolean; message?: string }, unknown>({
                                         url: apiUrl("requirementManagementSave"),
                                         method: "PUT",
@@ -1858,7 +2350,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                 whiteSpace: "nowrap",
                             }}
                         >
-                            Save
+                             Save
                         </CustomButton>
                     )}
                     {showCptActionButtons && (<><CustomButton

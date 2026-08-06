@@ -1,1 +1,7 @@
-{"ldapAuthentication":"Success","lastLogin":"","token":"1234","businessType":"GROUP"}
+{
+  "status": "SUCCESS",
+  "token": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJpY2ljLWlhbS11c2VyLXNlcnZpY2UiLCJzdWIiOiJpcHJ1NzQ1NzQiLCJleHAiOjE3ODU3NTgzNDAsImlhdCI6MTc4NTc1NDc0MCwicm9sZXMiOltdLCJ1c2VybmFtZSI6ImlwcnU3NDU3NCJ9.vjlHgDbBoS4lVGqwISLUeQTA_hlavBF_-h1g3V80Km8",
+  "expiresIn": 3600,
+  "username": "ipru74574",
+  "roles": []
+}

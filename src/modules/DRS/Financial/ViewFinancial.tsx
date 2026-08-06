@@ -1,4 +1,5 @@
-import { Box, Container, Typography } from "@mui/material";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Box, Container, Typography, Snackbar, Alert } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -7,6 +8,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
+import { Dialog, DialogTitle, Button, IconButton } from "@mui/material";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
@@ -15,7 +17,10 @@ import { url } from "../../../services/apiConfig";
 import type { ApiKey } from "../../../services/apiConfig";
 import { useAppDispatch } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
+import { drsThunk } from "../../../store/thunks/drsThunk";
 import { financialThunk } from "../../../store/thunks/financialThunk";
+import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
+import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
 import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
@@ -31,16 +36,11 @@ import {
 } from "./financialAccordionConfig";
 import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 
-const DRS_NEW_TAB_CONTEXT_KEY = "drsNewTabContext";
-
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
-const getStoredApplicantTab = () =>
-  (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
 
 type DRSViewTab = "medical" | "financial";
 
 const drsViewTabs: { key: DRSViewTab; label: string }[] = [
-  { key: "medical", label: "View Medical" },
   { key: "financial", label: "View Financial" },
 ];
 
@@ -771,31 +771,34 @@ const normalizeFinancialResponse = (response: FinancialResponse): FinancialRespo
   };
 };
 
-type DrsNewTabContext = {
-  applicationNumber?: string;
-  partyId?: string;
-  selectedApplicantTab?: ApplicantTab;
-  breDecision?: unknown;
-  applicantProfile?: unknown;
-  savedAt?: number;
-};
+const mapApplicantTabFromMemberType = (memberType: unknown, index: number): ApplicantTab => {
+  const normalizedMemberType = String(memberType ?? "").trim().toUpperCase();
 
-const getStoredDrsNewTabContext = (): DrsNewTabContext => {
-  try {
-    const rawValue = localStorage.getItem(DRS_NEW_TAB_CONTEXT_KEY);
-    if (!rawValue) {
-      return {};
-    }
-
-    const parsedValue = JSON.parse(rawValue);
-    if (!parsedValue || typeof parsedValue !== "object" || Array.isArray(parsedValue)) {
-      return {};
-    }
-
-    return parsedValue as DrsNewTabContext;
-  } catch {
-    return {};
+  if (normalizedMemberType.includes("PR") || normalizedMemberType.includes("PROPOSER")) {
+    return "proposer";
   }
+
+  if (normalizedMemberType.includes("LIFEASSURED1") || normalizedMemberType.includes("LA1")) {
+    return "lifeassured1";
+  }
+
+  if (normalizedMemberType.includes("LIFEASSURED2") || normalizedMemberType.includes("LA2")) {
+    return "lifeassured2";
+  }
+
+  if (normalizedMemberType.includes("LA") || normalizedMemberType.includes("LIFE")) {
+    return index === 0 ? "lifeassured1" : "lifeassured2";
+  }
+
+  if (index === 0) {
+    return "proposer";
+  }
+
+  if (index === 1) {
+    return "lifeassured1";
+  }
+
+  return "lifeassured2";
 };
 
 const readOnlyBoxSx = {
@@ -948,21 +951,6 @@ const FORM_J_ROW_LABELS = [
 const COMMISSION_MONTH_LABELS = ["Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6"] as const;
 const COMMISSION_AVERAGE_PM_LABEL = "Average commission pm";
 const COMMISSION_AVERAGE_ANNUAL_LABEL = "Average Annual Income";
-
-// type CommissionStatementCalculationRequest = {
-//   applicationId: string;
-//   roleType: string;
-//   months: Record<string, string>;
-// };
-
-// type CommissionStatementCalculationResponse = {
-//   averageCommissionPm?: string | number;
-//   averageAnnualIncome?: string | number;
-//   data?: {
-//     averageCommissionPm?: string | number;
-//     averageAnnualIncome?: string | number;
-//   };
-// };
 
 type SubmitResponse = {
   success?: boolean;
@@ -1277,54 +1265,6 @@ const buildMonthlyEntries = (
   }, []);
 };
 
-// const parseCommissionAmount = (value: string) => {
-//   const normalizedValue = value.replace(/,/g, "").trim();
-
-//   if (!normalizedValue) {
-//     return null;
-//   }
-
-//   const amount = Number(normalizedValue);
-//   return Number.isFinite(amount) ? amount : null;
-// };
-
-// const formatCalculatedAmount = (value: number) => {
-//   if (Number.isInteger(value)) {
-//     return String(value);
-//   }
-
-//   return value.toFixed(2);
-// };
-
-// const calculateCommissionStatementValues = (months: Record<string, string>) => {
-//   const enteredAmounts = COMMISSION_MONTH_LABELS
-//     .map((label) => parseCommissionAmount(months[label] ?? ""))
-//     .filter((amount): amount is number => amount != null);
-
-//   if (enteredAmounts.length === 0) {
-//     return {
-//       averageCommissionPm: "",
-//       averageAnnualIncome: "",
-//     };
-//   }
-
-//   const totalCommission = enteredAmounts.reduce((total, amount) => total + amount, 0);
-//   const averageCommissionPm = totalCommission / enteredAmounts.length;
-
-//   return {
-//     averageCommissionPm: formatCalculatedAmount(averageCommissionPm),
-//     averageAnnualIncome: formatCalculatedAmount(averageCommissionPm * 12),
-//   };
-// };
-
-// const getCommissionCalculationResponseValues = (
-//   response: CommissionStatementCalculationResponse,
-//   fallback: ReturnType<typeof calculateCommissionStatementValues>,
-// ) => ({
-//   averageCommissionPm: String(response.data?.averageCommissionPm ?? response.averageCommissionPm ?? fallback.averageCommissionPm),
-//   averageAnnualIncome: String(response.data?.averageAnnualIncome ?? response.averageAnnualIncome ?? fallback.averageAnnualIncome),
-// });
-
 const isSecondaryRepeatedField = (label: string) => {
   const trimmedLabel = label.trim();
 
@@ -1362,14 +1302,142 @@ const getFinancialFieldValidationError = (sectionKey: FinancialSectionKey, field
   return "";
 };
 
+const toDateInputValue = (value: string) => {
+  const trimmed = value.trim();
+
+  // If already ISO format yyyy-mm-dd, return as-is
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(trimmed);
+
+  if (!match) {
+    return "";
+  }
+
+  const [, day, month, year] = match;
+  return `${year}-${month}-${day}`;
+};
+
+const fromDateInputValue = (value: string) => {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+
+  if (!match) {
+    return value;
+  }
+
+  const [, year, month, day] = match;
+  return `${day}/${month}/${year}`;
+};
+
+const getTodayDateInputValue = () => {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+};
+
+const YearPickerField = ({
+  value,
+  onChange,
+  required,
+  errorText,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  errorText?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: 51 }, (_, i) => currentYear - i);
+
+  const displayValue = value || "";
+
+  return (
+    <>
+      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        <CustomTextField
+          fullWidth
+          size="small"
+          required={required}
+          error={Boolean(errorText)}
+          helperText={errorText}
+          value={displayValue}
+          onClick={() => setOpen(true)}
+          slotProps={{ htmlInput: { readOnly: true } }}
+        />
+        <IconButton size="small" onClick={() => setOpen(true)} aria-label="select year">
+          <span role="img" aria-label="calendar">📅</span>
+        </IconButton>
+      </Box>
+
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle sx={{ fontSize: 14, py: 1 }}>Select Year</DialogTitle>
+        <Box sx={{ p: 1, width: 300 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
+            {years.map((y) => (
+              <Button
+                key={y}
+                size="small"
+                fullWidth
+                variant={String(value).includes(String(y)) ? "contained" : "outlined"}
+                onClick={() => {
+                  const yy1 = String(y).slice(-2);
+                  const yy2 = String(y + 1).slice(-2);
+                  onChange(`AY ${yy1}-${yy2}`);
+                  setOpen(false);
+                }}
+                sx={{ py: 0.5, fontSize: 12 }}
+              >
+                {y}
+              </Button>
+            ))}
+          </Box>
+        </Box>
+      </Dialog>
+    </>
+  );
+};
+
 const renderFieldValue = (
   value: string,
   isEditable: boolean,
   onChange: (value: string) => void,
   isRequired = false,
   errorText?: string,
+  fieldRule?: ReturnType<typeof getFinancialFieldRule>,
+  label?: string,
 ) => {
   if (isEditable) {
+    const isDateField = fieldRule?.inputType === "dateDDMMYYYY";
+
+    // Special handling for Assessment Year fields (e.g. "Assessment Year", values like "AY 24-25").
+    const isAssessmentYear = Boolean(label && /assessment\s*year/i.test(label));
+
+    if (isAssessmentYear) {
+      return <YearPickerField value={value} onChange={onChange} required={isRequired} errorText={errorText} />;
+    }
+
+    if (isDateField) {
+      return (
+        <CustomTextField
+          fullWidth
+          size="small"
+          required={isRequired}
+          error={Boolean(errorText)}
+          helperText={errorText}
+          type={"date"}
+          value={toDateInputValue(value)}
+          onChange={(event) => onChange(fromDateInputValue(event.target.value))}
+          slotProps={{ htmlInput: { max: fieldRule?.allowFutureDate === false ? getTodayDateInputValue() : undefined } }}
+        />
+      );
+    }
+
     return (
       <CustomTextField
         fullWidth
@@ -1481,7 +1549,9 @@ const renderMultiYearTableSection = (
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year1FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
           row.required,
-          sectionErrors[row.year1FieldLabel]
+          sectionErrors[row.year1FieldLabel],
+          undefined,
+          row.year1FieldLabel
         ),
     },
     {
@@ -1492,7 +1562,11 @@ const renderMultiYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year2FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year2FieldLabel
         ),
     },
     {
@@ -1503,7 +1577,11 @@ const renderMultiYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year3FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year3FieldLabel
         ),
     },
   ];
@@ -1594,7 +1672,9 @@ const renderFourYearTableSection = (
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year1FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
           row.required,
-          sectionErrors[row.year1FieldLabel]
+          sectionErrors[row.year1FieldLabel],
+          undefined,
+          row.year1FieldLabel
         ),
     },
     {
@@ -1605,7 +1685,11 @@ const renderFourYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year2FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year2FieldLabel
         ),
     },
     {
@@ -1616,7 +1700,11 @@ const renderFourYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year3FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year3FieldLabel
         ),
     },
     {
@@ -1627,7 +1715,11 @@ const renderFourYearTableSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year4FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.year4FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.year4FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.year4FieldLabel
         ),
     },
   ];
@@ -1706,7 +1798,9 @@ const renderITRNonIndividualSection = (
                 isEditable && !isAlwaysReadOnlyFinancialField(section.key, item?.label ?? label),
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
-                sectionErrors[item?.label ?? label]
+                sectionErrors[item?.label ?? label],
+                undefined,
+                item?.label ?? label
               )}
             </Box>
           );
@@ -1763,7 +1857,9 @@ const renderITRIndividualSection = (
                 isEditable && !isAlwaysReadOnlyFinancialField(section.key, item?.label ?? label),
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
-                sectionErrors[item?.label ?? label]
+                sectionErrors[item?.label ?? label],
+                undefined,
+                item?.label ?? label
               )}
             </Box>
           );
@@ -1820,7 +1916,9 @@ const renderProfitAndLossSection = (
                 isEditable && !isAlwaysReadOnlyFinancialField(section.key, item?.label ?? label),
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
-                sectionErrors[item?.label ?? label]
+                sectionErrors[item?.label ?? label],
+                undefined,
+                item?.label ?? label
               )}
             </Box>
           );
@@ -1922,7 +2020,9 @@ const renderFormJSection = (
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt1FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.receipt1FieldLabel, nextValue),
           row.required,
-          sectionErrors[row.receipt1FieldLabel]
+          sectionErrors[row.receipt1FieldLabel],
+          undefined,
+          row.receipt1FieldLabel
         ),
     },
     {
@@ -1933,7 +2033,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt2FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt2FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt2FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt2FieldLabel
         ),
     },
     {
@@ -1944,7 +2048,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt3FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt3FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt3FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt3FieldLabel
         ),
     },
     {
@@ -1955,7 +2063,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt4FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt4FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt4FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt4FieldLabel
         ),
     },
     {
@@ -1966,7 +2078,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt5FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt5FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt5FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt5FieldLabel
         ),
     },
     {
@@ -1977,7 +2093,11 @@ const renderFormJSection = (
         renderFieldValue(
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.receipt6FieldLabel),
-          (nextValue) => onFieldValueChange(section.key, row.receipt6FieldLabel, nextValue)
+          (nextValue) => onFieldValueChange(section.key, row.receipt6FieldLabel, nextValue),
+          false,
+          undefined,
+          undefined,
+          row.receipt6FieldLabel
         ),
     },
   ];
@@ -2004,7 +2124,9 @@ const renderFormJSection = (
                 isEditable && !isAlwaysReadOnlyFinancialField(section.key, formJNameMatchItem.label),
                 (nextValue) => onFieldValueChange(section.key, formJNameMatchItem.label, nextValue),
                 isFieldMandatory(formJNameMatchItem),
-                sectionErrors[formJNameMatchItem.label]
+                sectionErrors[formJNameMatchItem.label],
+                undefined,
+                formJNameMatchItem.label
               )}
             </Box>
           </Box>
@@ -2037,6 +2159,7 @@ const renderStandardSection = (
         const required = isFieldMandatory(item);
         const value = getFieldValue(values, section.key, item.label, item.value);
         const isFieldEditable = isEditable && !isAlwaysReadOnlyFinancialField(section.key, item.label);
+        const fieldRule = getFinancialFieldRule(section.key, item.label);
 
         return (
           <Box key={`${section.key}-${item.label}`}>
@@ -2049,7 +2172,9 @@ const renderStandardSection = (
               isFieldEditable,
               (nextValue) => onFieldValueChange(section.key, item.label, nextValue),
               required,
-              sectionErrors[item.label]
+              sectionErrors[item.label],
+              fieldRule,
+              item.label
             )}
           </Box>
         );
@@ -2064,54 +2189,93 @@ const ViewFinancial = () => {
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
+  const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
-    getStoredApplicantTab();
+    "proposer";
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [drsContextLoading, setDrsContextLoading] = useState(false);
+  const [drsContextError, setDrsContextError] = useState<string | null>(null);
   const [financialData, setFinancialData] = useState<FinancialResponse | null>(null);
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
   const [financialFieldValues, setFinancialFieldValues] = useState<Record<FinancialSectionKey, Record<string, string>>>(
     buildInitialFieldValues
   );
+  const [originalFinancialFieldValues, setOriginalFinancialFieldValues] = useState<Record<
+    FinancialSectionKey,
+    Record<string, string>
+  >>(buildInitialFieldValues);
   const [activeSectionId, setActiveSectionId] = useState<string>(financialSections[0]?.key ?? "");
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
-  const [isEditable, setIsEditable] = useState(roleType === "CPT_TASK");
+  const [editingSectionKey, setEditingSectionKey] = useState<FinancialSectionKey | null>(null);
+  const [messageSectionKey, setMessageSectionKey] = useState<FinancialSectionKey | null>(null);
   const [sectionErrors, setSectionErrors] = useState<Partial<Record<FinancialSectionKey, Record<string, string>>>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "warning" | "error" | "info">("success");
+
+  useEffect(() => {
+    if (!messageSectionKey) return;
+
+    const msg = submitError ?? submitMessage;
+    if (!msg) return;
+
+    // Use microtask to avoid synchronous setState in effect
+    setTimeout(() => {
+      setSnackbarMessage(msg);
+      setSnackbarSeverity(submitError ? "error" : "success");
+      setSnackbarOpen(true);
+    }, 0);
+  }, [messageSectionKey, submitMessage, submitError]);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
-  const storedNewTabContext = useMemo(() => getStoredDrsNewTabContext(), []);
   const drsDataRecord = drsData as unknown as Record<string, unknown> | null;
   const drsSummaryMembers = asArray(drsDataRecord?.summary);
   const drsApplicationNumber = toDisplay(
     firstDefined(
       drsDataRecord?.applicationNumber,
       safeApplicationId,
-      storedNewTabContext.applicationNumber,
     )
   );
+  const availableMemberTypes = useMemo(
+    () => drsSummaryMembers.map((item, index) => mapApplicantTabFromMemberType(item.memberType, index)),
+    [drsSummaryMembers]
+  );
+  const visibleTabs = useMemo(
+    () => applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key)),
+    [availableMemberTypes]
+  );
+  const currentApplicantTab = useMemo(
+    () =>
+      visibleTabs.some((tab) => tab.key === activeApplicantTab)
+        ? activeApplicantTab
+        : (visibleTabs[0]?.key ?? "proposer"),
+    [activeApplicantTab, visibleTabs]
+  );
   const drsPartyId = useMemo(() => {
-    const selectedMember = drsSummaryMembers.find((member) =>
-      toDisplay(member.memberType).toLowerCase() === activeApplicantTab.toLowerCase()
+    const selectedMember = drsSummaryMembers.find((member, index) =>
+      mapApplicantTabFromMemberType(member.memberType, index) === currentApplicantTab
     );
 
     return toDisplay(
       firstDefined(
         selectedMember?.partyId,
         drsSummaryMembers[0]?.partyId,
-        storedNewTabContext.partyId,
       )
     );
-  }, [activeApplicantTab, drsSummaryMembers, storedNewTabContext.partyId]);
+  }, [currentApplicantTab, drsSummaryMembers]);
   const financialFetchPayloadError =
-    !drsApplicationNumber || !drsPartyId
+    !drsContextLoading &&
+    !drsContextError &&
+    (!drsApplicationNumber || !drsPartyId)
       ? "Application number or party ID is unavailable for financial fetch."
       : null;
   const isFormalRole = isFormalTaskRole(roleType);
@@ -2120,6 +2284,33 @@ const ViewFinancial = () => {
     () => buildFinancialSectionsFromResponse(financialData?.sections),
     [financialData?.sections]
   );
+
+  useEffect(() => {
+    if (!safeApplicationId || !roleType || !userId) {
+      return;
+    }
+
+    const fetchDrsContext = async () => {
+      try {
+        setDrsContextLoading(true);
+        setDrsContextError(null);
+        await dispatch(
+          drsThunk({
+            applicationNo: safeApplicationId,
+            userId,
+            roleType,
+            sections: ["summary", "breDecision"],
+          })
+        ).unwrap();
+      } catch (err) {
+        setDrsContextError(err instanceof Error ? err.message : "Failed to fetch DRS details.");
+      } finally {
+        setDrsContextLoading(false);
+      }
+    };
+
+    void fetchDrsContext();
+  }, [dispatch, roleType, safeApplicationId, userId]);
 
   useEffect(() => {
     const payload: FinancialViewRequest = {
@@ -2137,7 +2328,9 @@ const ViewFinancial = () => {
         setError(null);
         const response = normalizeFinancialResponse(await dispatch(financialThunk(payload)).unwrap());
         setFinancialData(response);
-        setFinancialFieldValues(buildInitialFieldValues(buildFinancialSectionsFromResponse(response.sections)));
+        const built = buildInitialFieldValues(buildFinancialSectionsFromResponse(response.sections));
+        setFinancialFieldValues(built);
+        setOriginalFinancialFieldValues(built);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Failed to fetch financial details.");
       } finally {
@@ -2148,111 +2341,36 @@ const ViewFinancial = () => {
     void fetchFinancial();
   }, [dispatch, drsApplicationNumber, drsPartyId, financialFetchPayloadError, roleType]);
 
-  // const commissionMonthValueKey = useMemo(
-  //   () => COMMISSION_MONTH_LABELS.map((label) => financialFieldValues.commission_statement?.[label] ?? "").join("|"),
-  //   [financialFieldValues]
-  // );
+  // On page load, call BRE retrigger for FE and store its breOutput as final BRE
+  useEffect(() => {
+    if (!drsApplicationNumber) return;
 
-  // useEffect(() => {
-  //   if (!isEditable) {
-  //     return;
-  //   }
+    const callFe = async () => {
+      try {
+        const response = await dispatch(
+          breRetriggerThunk({ eventName: "FE", applicationNumber: drsApplicationNumber })
+        ).unwrap();
 
-  //   const enteredMonthValues = commissionMonthValueKey.split("|");
-  //   const months = COMMISSION_MONTH_LABELS.reduce<Record<string, string>>((accumulator, label, index) => {
-  //     accumulator[label] = enteredMonthValues[index] ?? "";
-  //     return accumulator;
-  //   }, {});
+        const payload = response.data ?? {};
+console.log('payload',payload)
+        dispatch(
+          setBreExternalApiOutputs({
+            breOutput: payload.breOutput,
+            initialBreOutput: payload.initialBreOutput ?? undefined,
+            breRetriggerStatus: "success",
+          })
+        );
+      } catch (err) {
+        dispatch(
+          setBreExternalApiOutputs({
+            breRetriggerStatus: "failure",
+          })
+        );
+      }
+    };
 
-  //   const fallbackValues = calculateCommissionStatementValues(months);
-  //   const hasEnteredMonth = COMMISSION_MONTH_LABELS.some((label) => months[label].trim());
-  //   const hasInvalidMonth = COMMISSION_MONTH_LABELS.some((label) => {
-  //     const value = months[label].trim();
-  //     return Boolean(value) && parseCommissionAmount(value) == null;
-  //   });
-
-  //   if (!hasEnteredMonth) {
-  //     return;
-  //   }
-
-  //   if (hasInvalidMonth) {
-  //     return;
-  //   }
-
-  //   const timeoutId = window.setTimeout(async () => {
-  //     try {
-  //       const response = await apiRequest<CommissionStatementCalculationResponse, CommissionStatementCalculationRequest>({
-  //         url: url("financialCommissionCalculate" as ApiKey),
-  //         method: "POST",
-  //         body: {
-  //           applicationId: safeApplicationId,
-  //           roleType,
-  //           months,
-  //         },
-  //       });
-  //       const calculatedValues = getCommissionCalculationResponseValues(response, fallbackValues);
-
-  //       setFinancialFieldValues((currentValues) => ({
-  //         ...currentValues,
-  //         commission_statement: {
-  //           ...currentValues.commission_statement,
-  //           [COMMISSION_AVERAGE_PM_LABEL]: calculatedValues.averageCommissionPm,
-  //           [COMMISSION_AVERAGE_ANNUAL_LABEL]: calculatedValues.averageAnnualIncome,
-  //         },
-  //       }));
-  //     } catch {
-  //       setFinancialFieldValues((currentValues) => ({
-  //         ...currentValues,
-  //         commission_statement: {
-  //           ...currentValues.commission_statement,
-  //           [COMMISSION_AVERAGE_PM_LABEL]: fallbackValues.averageCommissionPm,
-  //           [COMMISSION_AVERAGE_ANNUAL_LABEL]: fallbackValues.averageAnnualIncome,
-  //         },
-  //       }));
-  //     }
-  //   }, 400);
-
-  //   return () => window.clearTimeout(timeoutId);
-  // }, [commissionMonthValueKey, isEditable, roleType, safeApplicationId]);
-
-  const availableMemberTypes = useMemo(
-    () => financialData?.summary?.map((item) => item.memberType) ?? [],
-    [financialData]
-  );
-
-  const visibleTabs = useMemo(
-    () => applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key)),
-    [availableMemberTypes]
-  );
-
-  const currentApplicantTab = useMemo(
-    () =>
-      visibleTabs.some((tab) => tab.key === activeApplicantTab)
-        ? activeApplicantTab
-        : (visibleTabs[0]?.key ?? "proposer"),
-    [activeApplicantTab, visibleTabs]
-  );
-
-  const applicantProfileFromStorage = useMemo(() => {
-    const profile = storedNewTabContext.applicantProfile;
-    if (!profile || typeof profile !== "object" || Array.isArray(profile)) {
-      return undefined;
-    }
-
-    return {
-      memberType: currentApplicantTab,
-      proposerSummary: profile,
-    } as unknown as Parameters<typeof ApplicantProfile>[0]["profile"];
-  }, [currentApplicantTab, storedNewTabContext.applicantProfile]);
-
-  const breDecisionFromStorage = useMemo(() => {
-    const breDecision = storedNewTabContext.breDecision;
-    if (!breDecision || typeof breDecision !== "object" || Array.isArray(breDecision)) {
-      return null;
-    }
-
-    return breDecision as Record<string, unknown>;
-  }, [storedNewTabContext.breDecision]);
+    void callFe();
+  }, [dispatch, drsApplicationNumber]);
 
   const resolvedActiveSectionId = useMemo(
     () =>
@@ -2950,8 +3068,8 @@ const ViewFinancial = () => {
   };
 
   const handleSave = async () => {
-    // Validate only the currently active financial section (selected on the left)
-    const activeSection = displayFinancialSections.find((s) => s.key === resolvedActiveSectionId);
+    const savingSectionKey = editingSectionKey ?? (resolvedActiveSectionId as FinancialSectionKey);
+    const activeSection = displayFinancialSections.find((s) => s.key === savingSectionKey);
 
     const sectionsToValidate = activeSection ? [activeSection] : displayFinancialSections;
 
@@ -3009,11 +3127,15 @@ const ViewFinancial = () => {
       setSubmitLoading(true);
       setSubmitError(null);
 
+      const activeSectionValues = {
+        [savingSectionKey]: financialFieldValues[savingSectionKey] ?? {},
+      } as Record<FinancialSectionKey, Record<string, string>>;
+
       const requestPayload = {
         applicationNumber: safeApplicationId,
         createdBy: "ui-user",
         partyId: drsPartyId,
-        documents: transformFinancialFieldValuesToApiFormat(financialFieldValues),
+        documents: transformFinancialFieldValuesToApiFormat(activeSectionValues),
       };
 
 
@@ -3259,12 +3381,31 @@ const ViewFinancial = () => {
       }));
 
       setSubmitMessage(response.message ?? "Financial details calculated and submitted successfully.");
-      setIsEditable(roleType === "CPT_TASK");
+      setMessageSectionKey(savingSectionKey);
+      setEditingSectionKey(null);
+      setSnackbarMessage("Details saved");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
     } catch (err) {
       setSubmitError(err instanceof Error ? err.message : "Failed to calculate and submit financial details.");
+      setMessageSectionKey(savingSectionKey);
     } finally {
       setSubmitLoading(false);
     }
+  };
+
+  const handleReset = (sectionKey: FinancialSectionKey) => {
+    const originalSection = originalFinancialFieldValues[sectionKey] ?? {};
+    setFinancialFieldValues((prev) => ({
+      ...prev,
+      [sectionKey]: JSON.parse(JSON.stringify(originalSection)),
+    }));
+
+    setEditingSectionKey(null);
+    setSectionErrors((prev) => ({ ...prev, [sectionKey]: {} }));
+    setSubmitMessage(null);
+    setSubmitError(null);
+    setMessageSectionKey(null);
   };
 
   return (
@@ -3279,7 +3420,23 @@ const ViewFinancial = () => {
         />
       </Box>
 
-      <BreDecision breDecisionOverride={breDecisionFromStorage as never} />
+      <BreDecision />
+
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
 
       {!isFormalRole && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
@@ -3288,7 +3445,6 @@ const ViewFinancial = () => {
             value={currentApplicantTab}
             onChange={(value: ApplicantTab) => {
               setActiveApplicantTab(value);
-              localStorage.setItem("drsSelectedApplicantTab", value);
             }}
           />
         </Box>
@@ -3303,7 +3459,6 @@ const ViewFinancial = () => {
           ) : (
             <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
               <ApplicantProfile
-                profile={applicantProfileFromStorage}
                 selectedApplicantTab={currentApplicantTab}
                 isApplicantDetailsExpanded
               />
@@ -3312,9 +3467,15 @@ const ViewFinancial = () => {
         </CustomAccordion>
       </Box>
 
-      {loading && <Typography sx={{ color: "#6B7280", mb: 2 }}>Loading financial details...</Typography>}
-      {(financialFetchPayloadError || error) && (
-        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>{financialFetchPayloadError ?? error}</Typography>
+      {(drsContextLoading || loading) && (
+        <Typography sx={{ color: "#6B7280", mb: 2 }}>
+          {drsContextLoading ? "Loading DRS details..." : "Loading financial details..."}
+        </Typography>
+      )}
+      {(drsContextError || financialFetchPayloadError || error) && (
+        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
+          {drsContextError ?? financialFetchPayloadError ?? error}
+        </Typography>
       )}
 
       <Box
@@ -3409,9 +3570,52 @@ const ViewFinancial = () => {
                   py: 1.25,
                   borderBottom: "1px solid #E4E7EC",
                   backgroundColor: "#F8FAFC",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 1,
+                  flexWrap: "wrap",
                 }}
               >
                 <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>{section.title}</Typography>
+                {roleType === "CPT_DATA_ENTRY_NMR_TASK" && (
+                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      {editingSectionKey !== section.key ? (
+                        <CustomButton
+                          sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                          onClick={() => {
+                            setSubmitMessage(null);
+                            setSubmitError(null);
+                            setMessageSectionKey(null);
+                            setSectionErrors((prev) => ({ ...prev, [section.key]: {} }));
+                            setEditingSectionKey(section.key as FinancialSectionKey);
+                          }}
+                        >
+                          Edit
+                        </CustomButton>
+                      ) : (
+                        <>
+                          <CustomButton
+                            sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                            disabled={submitLoading || !safeApplicationId}
+                            onClick={handleSave}
+                          >
+                            {submitLoading ? "Saving..." : "Save"}
+                          </CustomButton>
+                          <CustomButton
+                            sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                            disabled={submitLoading}
+                            onClick={() => handleReset(section.key as FinancialSectionKey)}
+                          >
+                            Reset
+                          </CustomButton>
+                        </>
+                      )}
+                    </Box>
+                    {/* submitMessage/submitError shown via snackbar */}
+                  </Box>
+                )}
               </Box>
 
               <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
@@ -3419,7 +3623,7 @@ const ViewFinancial = () => {
                   ? renderForm16Section(
                       section,
                       financialFieldValues,
-                      isEditable,
+                      editingSectionKey === section.key,
                       sectionErrors[section.key] ?? {},
                       handleFieldValueChange
                     )
@@ -3427,7 +3631,7 @@ const ViewFinancial = () => {
                     ? renderForm16ASection(
                         section,
                         financialFieldValues,
-                        isEditable,
+                        editingSectionKey === section.key,
                         sectionErrors[section.key] ?? {},
                         handleFieldValueChange
                       )
@@ -3435,7 +3639,7 @@ const ViewFinancial = () => {
                       ? renderComputationOfIncomeSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3443,7 +3647,7 @@ const ViewFinancial = () => {
                       ? renderITRNonIndividualSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3451,7 +3655,7 @@ const ViewFinancial = () => {
                       ? renderITRIndividualSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3459,7 +3663,7 @@ const ViewFinancial = () => {
                       ? renderProfitAndLossSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3467,7 +3671,7 @@ const ViewFinancial = () => {
                       ? renderGstIncomeSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
@@ -3475,14 +3679,14 @@ const ViewFinancial = () => {
                       ? renderFormJSection(
                           section,
                           financialFieldValues,
-                          isEditable,
+                          editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
                   : renderStandardSection(
                       section,
                       financialFieldValues,
-                      isEditable,
+                      editingSectionKey === section.key,
                       sectionErrors[section.key] ?? {},
                       handleFieldValueChange
                     )}
@@ -3493,21 +3697,7 @@ const ViewFinancial = () => {
         </Box>
       </Box>
 
-      {roleType === "CPT_TASK" && (
-        <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
-          {(submitMessage || submitError) && (
-            <Typography sx={{ mb: 1.5, color: submitError ? "#DE2C3B" : "#067647", fontSize: 13 }}>
-              {submitError ?? submitMessage}
-            </Typography>
-          )}
 
-          <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
-            <CustomButton onClick={handleSave} disabled={submitLoading || !safeApplicationId} sx={{ minWidth: 120 }}>
-              Save
-            </CustomButton>
-          </Box>
-        </Box>
-      )}
     </Container>
   );
 };

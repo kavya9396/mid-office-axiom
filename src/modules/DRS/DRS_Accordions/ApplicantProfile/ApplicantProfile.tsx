@@ -30,6 +30,7 @@ import { setProductFaceValue } from "../../../../store/slices/drsSlice"
 // import { updateApplicantProfile } from "../../../../store/slices/drsSlice"
 import { useParams } from "react-router-dom"
 import { useSelector } from "react-redux"
+import { drsThunk } from "../../../../store/thunks/drsThunk"
 import type { RootState } from "../../../../store/store"
 import FundDetails from "./FundDetails"
 import PaymentPayoutDetails from "./PaymentPayoutDetails"
@@ -170,20 +171,16 @@ const idProofNumberValidationMap: Record<string, { regex: RegExp; messageKey: Er
 
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const pranRegex = /^\d{12}$/;
-const alphabetOnlyRegex = /^[A-Za-z\s]+$/;
 const indiaPincodeRegex = /^\d{6}$/;
-const numericRegex = /^\d+$/;
-const optionalFormFields: Array<keyof ApplicantEditForm> = ["middleName"];
-const communicationAddressFieldNames = new Set<keyof ApplicantEditForm>([
-    "addressProof",
-    "communicationAddressLine1",
-    "communicationAddressLine2",
-    "communicationAddressLine3",
-    "communicationCountry",
-    "communicationState",
-    "communicationCity",
-    "communicationPincode",
-]);
+
+const getTodayDateInputValue = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+
+    return `${year}-${month}-${day}`;
+};
 
 const getGenderByTitle = (title: string): ApplicantEditForm["gender"] | undefined => {
     const normalizedTitle = title.trim().toLowerCase();
@@ -348,7 +345,12 @@ const buildProfileFromReduxData = (
         customerDetails[0];
 
     const summaryRecord = toRecord(selectedSummaryEntry);
-    const summaryPersonal = toRecord(summaryRecord.personalDetails);
+    // Some DRS payloads (mocks) use `proposerSummary` while others use `personalDetails`.
+    // Prefer `personalDetails` when present, otherwise fall back to `proposerSummary`.
+    const summaryPersonal =
+        Object.keys(toRecord(summaryRecord.personalDetails)).length > 0
+            ? toRecord(summaryRecord.personalDetails)
+            : toRecord(summaryRecord.proposerSummary);
     const summaryFaceMatchDetails = toRecord(summaryRecord.faceMatchDetails);
     const summaryUnderwriting = toRecord(summaryRecord.underwriting);
     const summaryKyc = toRecord(summaryRecord.kycDetails);
@@ -536,9 +538,6 @@ const buildProfileFromReduxData = (
     } as unknown as Partial<SummaryResponse>;
 };
 
-const getProductFields = (): FormField[] => [
-    { name: "faceValue", label: "Face Value" },
-];
 
 const buildFormData = (
     profile?: Partial<SummaryResponse>
@@ -552,7 +551,7 @@ const buildFormData = (
     nationality: profile?.applicantDetails?.nationality ?? "",
     residentStatus: profile?.applicantDetails?.residentStatus ?? "",
     pranNo: profile?.kycDetails?.pranNo ?? "",
-    panNumber: profile?.kycDetails?.panNumber ?? "",
+    panNumber: String(profile?.kycDetails?.panNumber ?? "").toUpperCase(),
     identityProofType: profile?.kycDetails?.identityProofType ?? "",
     identityProofNumber: profile?.kycDetails?.identityProofNumber ?? "",
     addressProof: profile?.kycDetails?.addressProof ?? "",
@@ -641,7 +640,6 @@ export const SectionCard = ({
     </Box>
 );
 
-const productFields = getProductFields();
 
 const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExpanded = false }: ApplicantProfileProps) => {
     const roleType = localStorage.getItem("roleType") ?? "";
@@ -668,13 +666,45 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             : baseProfile;
 
     const titleOptions = normalizeMasterOptions(masters.title) ?? emptyOptions;
-    const genderOptions = normalizeMasterOptions(masters.gender) ?? emptyOptions;
-    const nationalityOptions = normalizeMasterOptions(masters.nationality) ?? emptyOptions;
-    const residentStatusOptions = normalizeMasterOptions(masters.resident_status) ?? emptyOptions;
-    const idProofOptions = normalizeMasterOptions(masters.idProof) ?? emptyOptions;
-    const addressProofOptions = normalizeMasterOptions(masters.addressProof) ?? emptyOptions;
-    const stateOptions = normalizeMasterOptions(masters.state) ?? emptyOptions;
-    const countryOptions = normalizeMasterOptions(masters.country) ?? emptyOptions;
+    const rawGenderOptions = normalizeMasterOptions(masters.gender) ?? emptyOptions;
+    const rawNationalityOptions = normalizeMasterOptions(masters.nationality) ?? emptyOptions;
+    const rawResidentStatusOptions = normalizeMasterOptions(masters.resident_status) ?? emptyOptions;
+    const rawIdProofOptions = normalizeMasterOptions(masters.idProof) ?? emptyOptions;
+    const rawAddressProofOptions = normalizeMasterOptions(masters.addressProof) ?? emptyOptions;
+    const rawStateOptions = normalizeMasterOptions(masters.state) ?? emptyOptions;
+    const rawCountryOptions = normalizeMasterOptions(masters.country) ?? emptyOptions;
+
+    // Fallbacks when masters are not yet loaded (local dev / mocks)
+    const genderOptions = useMemo(() => (rawGenderOptions.length > 0 ? rawGenderOptions : [
+        { label: "Female", value: "F" },
+        { label: "Male", value: "M" },
+        { label: "Transgender", value: "TG" },
+    ]), [rawGenderOptions]);
+
+    const nationalityOptions = useMemo(() => (rawNationalityOptions.length > 0 ? rawNationalityOptions : [
+        { label: "Indian", value: "IND" },
+        { label: "Non-Indian", value: "NON" },
+    ]), [rawNationalityOptions]);
+
+    const residentStatusOptions = useMemo(() => (rawResidentStatusOptions.length > 0 ? rawResidentStatusOptions : [
+        { label: "Indian Resident", value: "IR" },
+        { label: "Non-Resident Indian", value: "NRI" },
+        { label: "Foreign National", value: "FN" },
+    ]), [rawResidentStatusOptions]);
+
+    const idProofOptions = useMemo(() => (rawIdProofOptions.length > 0 ? rawIdProofOptions : [
+        { label: "Aadhaar", value: "AADH" },
+        { label: "Driving Licence", value: "DL" },
+        { label: "Passport", value: "PASS" },
+    ]), [rawIdProofOptions]);
+
+    const addressProofOptions = useMemo(() => (rawAddressProofOptions.length > 0 ? rawAddressProofOptions : idProofOptions), [rawAddressProofOptions, idProofOptions]);
+
+    const stateOptions = useMemo(() => (rawStateOptions.length > 0 ? rawStateOptions : []), [rawStateOptions]);
+    const countryOptions = useMemo(() => (rawCountryOptions.length > 0 ? rawCountryOptions : [
+        { label: "India", value: "IND" },
+        { label: "United States of America", value: "USA" },
+    ]), [rawCountryOptions]);
     const applicantProfileMasterOptions = useMemo<Partial<Record<keyof ApplicantEditForm, SelectOption[]>>>(
         () => ({
             title: titleOptions,
@@ -713,6 +743,13 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
                 faceValue: String(productList[0]?.faceValue ?? ""),
             };
 
+            // Normalize some common incoming codes/labels so master matching works reliably
+            nextFormData.gender = toMasterLabel(String(nextFormData.gender ?? ""), genderOptions) || String(nextFormData.gender ?? "");
+            // DRS sometimes uses 'IND' for residentStatus — normalize to label or friendly text
+            nextFormData.residentStatus = toMasterLabel(String(nextFormData.residentStatus ?? ""), residentStatusOptions) || (
+                String(nextFormData.residentStatus ?? "").toUpperCase() === "IND" ? "Indian Resident" : String(nextFormData.residentStatus ?? "")
+            );
+
             // Compute country-specific state options so state values from DRS map to the correct master keys
             const commStateOptions = getStateOptionsForCountry(masters.state, nextFormData.communicationCountry, countryOptions);
             const permStateOptions = getStateOptionsForCountry(masters.state, nextFormData.permanentCountry, countryOptions);
@@ -725,7 +762,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
 
             return toMasterFormData(nextFormData, optionMap);
         },
-        [displayProfile, drsData, applicantProfileMasterOptions, masters.state, countryOptions]
+        [displayProfile, drsData, applicantProfileMasterOptions, masters.state, countryOptions, genderOptions, residentStatusOptions]
     );
 
     const [formData, setFormData] = useState<ApplicantEditForm>(initialFormData);
@@ -733,22 +770,30 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     const normalizedRoleType = roleType.trim().toUpperCase().replace(/\s+/g, " ");
     const isFormalRole = normalizedRoleType === "GUW_FORMAL_TASK" || normalizedRoleType === "DVT_FORMAL_TASK";
     const isDvtFormalTask = normalizedRoleType === "DVT_FORMAL_TASK";
-    const isCVTTask = normalizedRoleType === "CVT Pool";
+    
 
     const personalKycFields = useMemo(
         () => getPersonalKycFields({ titleOptions, genderOptions, residentStatusOptions, idProofOptions }),
         [titleOptions, genderOptions, residentStatusOptions, idProofOptions]
     );
 
-    const editablePersonalKycFields = useMemo(
-        () => isDvtFormalTask
-            ? personalKycFields.filter((field) => (
-                field.name === "dob" ||
-                field.name === "gender"
-            ))
-            : personalKycFields,
-        [isDvtFormalTask, personalKycFields]
-    );
+    // Only allow specific fields to be editable in the dialog per requirement
+    const editablePersonalKycFields = useMemo(() => {
+        const allowed: Array<keyof ApplicantEditForm> = [
+            "panNumber",
+            "dob",
+            "gender",
+            "communicationPincode",
+            "permanentPincode",
+            "residentStatus",
+            "pranNo",
+            "identityProofType",
+            "addressProof",
+            "ageProof",
+        ];
+
+        return personalKycFields.filter((field) => allowed.includes(field.name));
+    }, [personalKycFields]);
 
     const communicationIsIndia = toMasterLabel(formData.communicationCountry, countryOptions).trim().toLowerCase() === "india";
     const permanentIsIndia = toMasterLabel(formData.permanentCountry, countryOptions).trim().toLowerCase() === "india";
@@ -780,17 +825,18 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         ]
     );
 
-    const visibleAddressFields = useMemo(
-        () => isDvtFormalTask
-            ? addressFields.filter((field) => !communicationAddressFieldNames.has(field.name))
-            : addressFields,
-        [isDvtFormalTask, addressFields]
-    );
+    // Only expose pincode and address proof-related fields in the address section
+    const visibleAddressFields = useMemo(() => {
+        const allowedAddrFields: Array<keyof ApplicantEditForm> = [
+            "addressProof",
+            "communicationPincode",
+            "permanentPincode",
+        ];
 
-    const allDialogFields = useMemo(
-        () => [...editablePersonalKycFields, ...visibleAddressFields],
-        [editablePersonalKycFields, visibleAddressFields]
-    );
+        return addressFields.filter((f) => allowedAddrFields.includes(f.name));
+    }, [addressFields]);
+
+    
 
     const hasFundDetails = useMemo(() => {
         const hasAnyFundData = (fund?: Record<string, unknown>) => {
@@ -839,18 +885,26 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     }, [displayProfile?.payoutDetails, drsData?.payoutDetails]);
 
     const visibleApplicantInfoTabs = useMemo(
-        () => applicantInfoTabs.filter((tab) => {
-            if (tab.key === "fundDetails") {
-                return hasFundDetails;
-            }
+        () => {
+            // CVT tasks should only show a minimal set of tabs
+            const normalizedRole = normalizedRoleType;
+            const baseTabs = normalizedRole === "CVT_TASK"
+                ? applicantInfoTabs.filter((t) => ["imageDetails", "personalKyc", "contactAddress", "paymentPayoutDetails"].includes(t.key))
+                : applicantInfoTabs;
 
-            if (tab.key === "paymentPayoutDetails") {
-                return hasPaymentPayoutDetails;
-            }
+            return baseTabs.filter((tab) => {
+                if (tab.key === "fundDetails") {
+                    return hasFundDetails;
+                }
 
-            return true;
-        }),
-        [hasFundDetails, hasPaymentPayoutDetails]
+                if (tab.key === "paymentPayoutDetails") {
+                    return hasPaymentPayoutDetails;
+                }
+
+                return true;
+            });
+        },
+        [hasFundDetails, hasPaymentPayoutDetails, normalizedRoleType]
     );
 
     const activeApplicantInfoTab = useMemo(
@@ -865,11 +919,6 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         [idProofOptions]
     );
 
-    const allowedTitleValues = useMemo(
-        () => new Set(titleOptions.map((option) => option.value)),
-        [titleOptions]
-    );
-
     const allowedAddressProofValues = useMemo(
         () => new Set(addressProofOptions.map((option) => option.value)),
         [addressProofOptions]
@@ -880,106 +929,68 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         [residentStatusOptions]
     );
 
-    const allowedCommunicationStateValues = useMemo(
-        () => new Set(communicationStateOptions.map((option) => option.value)),
-        [communicationStateOptions]
-    );
-
-    const allowedPermanentStateValues = useMemo(
-        () => new Set(permanentStateOptions.map((option) => option.value)),
-        [permanentStateOptions]
-    );
-
-    const validateForm = (fieldsToValidate: FormField[] = allDialogFields) => {
+    const validateForm = (/* fieldsToValidate: FormField[] = allDialogFields */) => {
         const errors: FormErrors = {};
 
-        fieldsToValidate.forEach((field) => {
-            const value = String(formData[field.name] ?? "").trim();
-            if (optionalFormFields.includes(field.name)) {
-                return;
-            }
+        // Only validate these fields per screenshot requirements.
+        const labelMap: Partial<Record<keyof ApplicantEditForm, string>> = {
+            dob: "DOB",
+            gender: "Gender",
+            residentStatus: "Residential Status",
+            panNumber: "PAN Number",
+            pranNo: "PRAN Number",
+            identityProofType: "Identity Proof",
+            identityProofNumber: "Identity Proof Number",
+            addressProof: "Address Proof",
+            ageProof: "Age Proof",
+            communicationPincode: "Comm. Pincode",
+            permanentPincode: "Perm. Pincode",
+        };
+
+        const requiredFields: Array<keyof ApplicantEditForm> = [
+            "dob",
+            "gender",
+            "residentStatus",
+            "panNumber",
+            "identityProofType",
+            "identityProofNumber",
+            "addressProof",
+            "ageProof",
+            "communicationPincode",
+            "permanentPincode",
+        ];
+
+        requiredFields.forEach((fieldName) => {
+            const value = String(formData[fieldName] ?? "").trim();
             if (!value) {
-                errors[field.name] = `${field.label} is required`;
+                const label = labelMap[fieldName] ?? String(fieldName);
+                errors[fieldName] = `${label} is required`;
             }
         });
 
-        if (titleOptions.length > 0 && formData.title && !allowedTitleValues.has(formData.title)) {
-            errors.title = "Select a valid Title";
-        }
-
-        if (isDvtFormalTask) {
-            setFieldErrors(errors);
-            return Object.keys(errors).length === 0;
-        }
-
+        // PAN format check
         if (formData.panNumber.trim() && !panRegex.test(formData.panNumber.trim().toUpperCase())) {
             errors.panNumber = getErrorMessage("applicantValidPan");
         }
 
-        if (idProofOptions.length > 0 && formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
-            errors.identityProofType = "Select a valid Identity Proof";
-        }
-
-        if (residentStatusOptions.length > 0 && formData.residentStatus && !allowedResidentStatusValues.has(formData.residentStatus)) {
-            errors.residentStatus = "Select a valid Residential Status";
-        }
-
-        if (formData.pranNo.trim() && !pranRegex.test(formData.pranNo.trim())) {
+        if (formData.pranNo.trim() && !pranRegex.test(String(formData.pranNo).trim())) {
             errors.pranNo = "PRAN Number must be exactly 12 digits";
         }
 
-        if (idProofOptions.length > 0 && formData.ageProof && !allowedIdProofValues.has(formData.ageProof)) {
-            errors.ageProof = "Select a valid Age Proof";
+        // Pincode validations (must be exactly 6 digits)
+        if (String(formData.communicationPincode ?? "").trim() === "") {
+            errors.communicationPincode = "Comm. Pincode is required";
+        } else if (!indiaPincodeRegex.test(String(formData.communicationPincode).trim())) {
+            errors.communicationPincode = "Comm. Pincode must be exactly 6 digits";
         }
 
-        if (addressProofOptions.length > 0 && formData.addressProof && !allowedAddressProofValues.has(formData.addressProof)) {
-            errors.addressProof = "Select a valid Address Proof";
+        if (String(formData.permanentPincode ?? "").trim() === "") {
+            errors.permanentPincode = "Perm. Pincode is required";
+        } else if (!indiaPincodeRegex.test(String(formData.permanentPincode).trim())) {
+            errors.permanentPincode = "Perm. Pincode must be exactly 6 digits";
         }
 
-        if (formData.communicationCity.trim() && !alphabetOnlyRegex.test(formData.communicationCity.trim())) {
-            errors.communicationCity = "Comm. City must contain only alphabets";
-        }
-
-        if (formData.permanentCity.trim() && !alphabetOnlyRegex.test(formData.permanentCity.trim())) {
-            errors.permanentCity = "Perm. City must contain only alphabets";
-        }
-
-        if (communicationIsIndia) {
-            if (communicationStateOptions.length > 0 && formData.communicationState && !allowedCommunicationStateValues.has(formData.communicationState)) {
-                errors.communicationState = "Select a valid Comm. State";
-            }
-
-            if (formData.communicationPincode.trim() && !indiaPincodeRegex.test(formData.communicationPincode.trim())) {
-                errors.communicationPincode = "Comm. Pincode must be exactly 6 digits";
-            }
-        } else {
-            if (formData.communicationState.trim() && !alphabetOnlyRegex.test(formData.communicationState.trim())) {
-                errors.communicationState = "Comm. State must contain only alphabets";
-            }
-
-            if (formData.communicationPincode.trim() && !numericRegex.test(formData.communicationPincode.trim())) {
-                errors.communicationPincode = "Comm. Pincode must contain only digits";
-            }
-        }
-
-        if (permanentIsIndia) {
-            if (permanentStateOptions.length > 0 && formData.permanentState && !allowedPermanentStateValues.has(formData.permanentState)) {
-                errors.permanentState = "Select a valid Perm. State";
-            }
-
-            if (formData.permanentPincode.trim() && !indiaPincodeRegex.test(formData.permanentPincode.trim())) {
-                errors.permanentPincode = "Perm. Pincode must be exactly 6 digits";
-            }
-        } else {
-            if (formData.permanentState.trim() && !alphabetOnlyRegex.test(formData.permanentState.trim())) {
-                errors.permanentState = "Perm. State must contain only alphabets";
-            }
-
-            if (formData.permanentPincode.trim() && !numericRegex.test(formData.permanentPincode.trim())) {
-                errors.permanentPincode = "Perm. Pincode must contain only digits";
-            }
-        }
-
+        // Identity proof number validation (validate if identityProofNumber provided)
         const selectedProofValidation = idProofNumberValidationMap[toMasterLabel(formData.identityProofType, idProofOptions)];
         if (selectedProofValidation && formData.identityProofNumber.trim()) {
             if (!selectedProofValidation.regex.test(formData.identityProofNumber.trim())) {
@@ -987,18 +998,97 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             }
         }
 
+        // Master-value existence checks: ensure selected values exist in masters when masters are available
+        if (idProofOptions.length > 0 && formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
+            errors.identityProofType = "Select a valid Identity Proof";
+        }
+
+        if (addressProofOptions.length > 0 && formData.addressProof && !allowedAddressProofValues.has(formData.addressProof)) {
+            errors.addressProof = "Select a valid Address Proof";
+        }
+
+        if (residentStatusOptions.length > 0 && formData.residentStatus && !allowedResidentStatusValues.has(formData.residentStatus)) {
+            errors.residentStatus = "Select a valid Residential Status";
+        }
+
         setFieldErrors(errors);
         return Object.keys(errors).length === 0;
     };
 
-    const handleOpenEdit = () => {
+    const handleOpenEdit = async () => {
+        setFieldErrors({});
+        setSubmitError(null);
+
+        // Try to fetch latest DRS data for this application and map it to the edit form.
+        setSubmitLoading(true);
+
+        try {
+            if (applicationNumber) {
+                const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+                const drsResponse = await dispatch(
+                    drsThunk({
+                        applicationNo: applicationNumber,
+                        userId,
+                        roleType,
+                        sections: [],
+                    }),
+                ).unwrap();
+
+                const fetchedProfile = buildProfileFromReduxData(drsResponse.data, resolvedApplicantTab) ?? displayProfile;
+
+                const appOverview = (drsResponse.data as unknown as Record<string, unknown>)?.applicationOverview as Record<string, unknown> | undefined;
+                const productList = Array.isArray(appOverview?.productDetail)
+                    ? (appOverview!.productDetail as Array<Record<string, unknown>>)
+                    : ((drsResponse.data?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
+
+                const currentFaceValue = String(productList[0]?.faceValue ?? "");
+
+                const nextFormData = {
+                    ...buildFormData(fetchedProfile),
+                    faceValue: currentFaceValue,
+                };
+
+                console.debug("ApplicantProfile: fetched nextFormData before mapping:", nextFormData);
+
+                // Normalize incoming values from fetched profile
+                nextFormData.gender = toMasterLabel(String(nextFormData.gender ?? ""), genderOptions) || String(nextFormData.gender ?? "");
+                nextFormData.residentStatus = toMasterLabel(String(nextFormData.residentStatus ?? ""), residentStatusOptions) || (
+                    String(nextFormData.residentStatus ?? "").toUpperCase() === "IND" ? "Indian Resident" : String(nextFormData.residentStatus ?? "")
+                );
+
+                const commStateOptions = getStateOptionsForCountry(masters.state, nextFormData.communicationCountry, countryOptions);
+                const permStateOptions = getStateOptionsForCountry(masters.state, nextFormData.permanentCountry, countryOptions);
+
+                const optionMap = {
+                    ...applicantProfileMasterOptions,
+                    communicationState: commStateOptions,
+                    permanentState: permStateOptions,
+                } as Partial<Record<keyof ApplicantEditForm, SelectOption[]>>;
+
+                console.debug("ApplicantProfile: optionMap keys and sizes:", Object.entries(optionMap).map(([k, v]) => [k, (v || []).length]));
+
+                const mapped = toMasterFormData(nextFormData, optionMap);
+                console.debug("ApplicantProfile: mapped formData:", mapped);
+
+                setFormData(toMasterFormData(nextFormData, optionMap));
+                setOpenEditDialog(true);
+                setSubmitLoading(false);
+                return;
+            }
+        } catch (error) {
+            // If fetch fails, fall back to existing displayProfile mapping
+            console.warn("Failed to fetch DRS data on edit:", error);
+        } finally {
+            setSubmitLoading(false);
+        }
+
+        // Fallback: populate from existing displayProfile in store
         const appOverview = (drsData as unknown as Record<string, unknown> | null)?.applicationOverview as Record<string, unknown> | undefined;
         const productList = Array.isArray(appOverview?.productDetail)
             ? (appOverview!.productDetail as Array<Record<string, unknown>>)
             : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
         const currentFaceValue = String(productList[0]?.faceValue ?? "");
-        setFieldErrors({});
-        setSubmitError(null);
+
         const nextFormData = {
             ...buildFormData(displayProfile),
             faceValue: currentFaceValue,
@@ -1024,7 +1114,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         setFormData((prev) => {
             const nextFormData: ApplicantEditForm = {
                 ...prev,
-                [field]: value,
+                [field]: field === "panNumber" ? value.toUpperCase() : value,
             };
 
             if (field === "communicationCountry") {
@@ -1094,37 +1184,37 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     };
 
     const handleSave = async () => {
-        // Validate only fields relevant to the currently selected applicant info tab
-        let fieldsToValidate: FormField[] = allDialogFields;
-        if (applicantInfoTab === "personalKyc") {
-            fieldsToValidate = editablePersonalKycFields;
-        } else if (applicantInfoTab === "contactAddress") {
-            fieldsToValidate = visibleAddressFields;
-        } else if (applicantInfoTab === "imageDetails") {
-            // imageDetails doesn't have editable fields in the dialog — validate personal KYC by default
-            fieldsToValidate = editablePersonalKycFields;
-        } else if (applicantInfoTab === "fundDetails") {
-            fieldsToValidate = productFields;
-        }
+        // Indicate save started immediately so UI reflects the click
+        console.debug("ApplicantProfile: handleSave invoked", { applicantInfoTab, formData });
+        setSubmitError(null);
+        setSubmitLoading(true);
 
-        const isValid = validateForm(fieldsToValidate);
+        // Always validate the dialog fields
+        const isValid = validateForm();
+        console.debug("ApplicantProfile: validation result", { isValid, fieldErrors });
         if (!isValid) {
+            setSubmitLoading(false);
             return;
         }
 
         if (!applicationNumber) {
             setSubmitError("Application ID is missing");
+            setSubmitLoading(false);
+            console.error("ApplicantProfile: missing applicationNumber, aborting save");
             return;
         }
 
-        const appOverview = (drsData as unknown as Record<string, unknown> | null)?.applicationOverview as Record<string, unknown> | undefined;
-        const productList = Array.isArray(appOverview?.productDetail)
-            ? (appOverview!.productDetail as Array<Record<string, unknown>>)
-            : ((drsData?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
-        const baselineData = toMasterFormData({
-            ...buildFormData(displayProfile),
-            faceValue: String(productList[0]?.faceValue ?? ""),
-        }, applicantProfileMasterOptions);
+            const drsRecordForPayload = drsData as unknown as Record<string, unknown> | null;
+            const appOverview = (drsRecordForPayload as Record<string, unknown> | null)?.applicationOverview as Record<string, unknown> | undefined;
+            const productList = Array.isArray(appOverview?.productDetail)
+                ? (appOverview!.productDetail as Array<Record<string, unknown>>)
+                : ((drsRecordForPayload?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
+
+            const baselineData = toMasterFormData({
+                ...buildFormData(displayProfile),
+                faceValue: String(productList[0]?.faceValue ?? ""),
+            }, applicantProfileMasterOptions);
+            console.debug("ApplicantProfile: baselineData keys", Object.keys(baselineData || {}));
         const updatedDetails = Object.entries(formData).reduce<Partial<ApplicantEditForm>>(
             (acc, [key, value]) => {
                 const formKey = key as keyof ApplicantEditForm;
@@ -1136,14 +1226,11 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             {}
         );
 
-        if (Object.keys(updatedDetails).length === 0) {
-            setOpenEditDialog(false);
-            return;
-        }
+        // Even if no fields changed compared to baseline, still attempt to submit
+        // because validation might have run and server may need the latest snapshot.
+        // Proceed only if validation passed (isValid earlier).
 
         try {
-            setSubmitLoading(true);
-            setSubmitError(null);
 
             // Build updated summary member inside DRS data, and send only this updated DRS JSON.
             const mergedMasterForm: ApplicantEditForm = {
@@ -1195,10 +1282,23 @@ const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username
                     summary: updatedSummaryMembers,
                 } as unknown as DRSData,
             };
+console.log('payload',payload)
+            const pd = payload.data as unknown as Record<string, unknown> | undefined;
+            const maybeSummary = pd?.summary as unknown;
+            console.log("ApplicantProfile: ready to dispatch payload", {
+                applicationNumber,
+                userId,
+                sections: payload.sections,
+                updatedSummaryCount: Array.isArray(maybeSummary) ? (maybeSummary as unknown[]).length : undefined,
+            });
 
-            console.log("Payload passed", payload);
-
-            const response = await dispatch(applicantProfileSubmitThunk(payload)).unwrap();
+            let response;
+            try {
+                response = await dispatch(applicantProfileSubmitThunk(payload)).unwrap();
+            } catch (dispatchError) {
+                console.error("ApplicantProfile: dispatch failed", dispatchError);
+                throw dispatchError;
+            }
 
             const serverUpdatedDetails = response.updatedDetails;
             const finalUpdatedDetails = {
@@ -1248,6 +1348,9 @@ const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username
                 />
             );
         }
+        const isFaceValue = field.name === "faceValue";
+        const isPanNumber = field.name === "panNumber";
+        const isDobField = field.name === "dob";
 
         return (
             <>
@@ -1258,13 +1361,27 @@ const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username
                     sx={{
                         backgroundColor: "#fff",
                         borderRadius: "10px",
+                        ...(isPanNumber
+                            ? {
+                                "& .MuiInputBase-input": {
+                                    textTransform: "uppercase",
+                                },
+                            }
+                            : {}),
                     }}
                     value={formData[field.name]}
                     error={Boolean(fieldErrors[field.name])}
                     helperText={fieldErrors[field.name]}
+                    slotProps={{
+                        htmlInput: {
+                            ...(isPanNumber ? { autoCapitalize: "characters" } : {}),
+                            ...(isDobField ? { max: getTodayDateInputValue() } : {}),
+                        },
+                    }}
                     onChange={(e) =>
                         handleInputChange(field.name, e.target.value)
                     }
+                    disabled={isFaceValue}
                 />
             </>
         );
@@ -1356,28 +1473,7 @@ const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username
                                 ))}
                             </Box>
                         </Box>
-                        {isCVTTask && (
-                    <>
-                        <Divider />
-                        <Box>
-                            <Typography sx={{ color: "#444", fontSize: "14px", fontWeight: 700 }}>Product</Typography>
-                            <Box
-                                sx={{
-                                    display: "grid",
-                                    gridTemplateColumns: "repeat(3, 1fr)",
-                                    gap: 2,
-                                    mt: 1,
-                                }}
-                            >
-                                {productFields.map((field) => (
-                                    <Box key={field.name}>
-                                        {renderField(field)}
-                                    </Box>
-                                ))}
-                            </Box>
-                        </Box>
-                    </>
-                )}
+                        {/* faceValue removed from edit dialog; no product fields rendered */}
             </Box>
         </CustomDialog>
     );
@@ -1395,7 +1491,7 @@ const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username
         <>
             <Box sx={{ mt: 1 }}>
                 {
-                    (roleType === "CVT Pool" || roleType == "DVT_FORMAL_TASK" || roleType == "DVT Pool") && (
+                    (roleType === "CVT Pool" || roleType === "CVT_TASK" || roleType == "DVT_FORMAL_TASK" || roleType == "DVT Pool") && (
                         <Box sx={{ display: "flex", justifyContent: "flex-end", width: "100%", mt: 0.5 }}>
                             <CustomButton
                                 variant="outlined"

@@ -82,6 +82,16 @@ const ApplicationOverview = () => {
     : ((data?.productDetail as unknown as Array<Record<string, unknown>> | undefined) ?? []);
   const firstProduct = productDetails[0];
   const applicationInfo = data?.applicationInfo;
+  // financialDetails are provided per-summary member in the DRs payload; prefer the first summary entry
+  // const rawSummary = Array.isArray(dataRecord?.summary)
+  //   ? (dataRecord.summary as Array<Record<string, unknown>>)
+  //   : Array.isArray((data as unknown as Record<string, unknown>)?.summary)
+  //   ? ((data as unknown as Record<string, unknown>).summary as Array<Record<string, unknown>>)
+  //   : [];
+  //const firstSummary = rawSummary[0] ?? {};
+  // const financialDetails = (firstSummary?.financialDetails ?? firstSummary?.applicantFinancialDetails) as
+  //   | Record<string, unknown>
+  //   | undefined;
   const quickLinks = (dataRecord?.quickLinks as Record<string, unknown> | undefined) ?? {};
   const previousPolicies = Array.isArray(quickLinks.previousPolicies)
     ? (quickLinks.previousPolicies as Array<Record<string, unknown>>)
@@ -158,7 +168,7 @@ const ApplicationOverview = () => {
     },
     modalPremium: {
       label: "Modal Premium",
-      value: formatNumberOrDash(firstProduct?.paymentAmount),
+      value: formatNumberOrDash(firstProduct?.modalPremium),
     },
     premium: {
       label: "Premium",
@@ -223,11 +233,11 @@ const ApplicationOverview = () => {
    
     trsa: {
       label: "TRSA",
-      value: formatNumberOrDash(applicationInfo?.simultaneousLifeSA),
+      value: formatNumberOrDash(sourcingDetail?.trsa),
     },
     tfsa: {
       label: "TFSA",
-      value: formatNumberOrDash(applicationInfo?.otherPolicySA),
+      value: formatNumberOrDash(sourcingDetail?.tfsa),
     },
     policyType: {
       label: "Policy Type",
@@ -323,7 +333,7 @@ const ApplicationOverview = () => {
 
   if (isGroupBusiness && (roleType === "DVT_FORMAL_TASK" || roleType === "GUW_FORMAL_TASK")) {
     selectedApplicationDetailKeys = formalPoolDisplayKeys;
-  } else if (roleType === "CVT_POOL" || roleType === "CVT Pool") {
+  } else if (roleType === "CVT_POOL" || roleType === "CVT Pool" || roleType === 'CVT_TASK') {
     selectedApplicationDetailKeys = cvtPoolDisplayKeys;
   } else if (
     roleType === "DVT_POOL" ||

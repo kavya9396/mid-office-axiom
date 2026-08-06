@@ -13,6 +13,10 @@ export const roleAccessMapper: Record<string, RoleAccess> = {
     canEditFinancial: false,
     canEditMedical: false,
   },
+   "CVT_TASK": {
+    canEditFinancial: false,
+    canEditMedical: false,
+  },
   "CPT_TASK": {
     canEditFinancial: true,
     canEditMedical: true,

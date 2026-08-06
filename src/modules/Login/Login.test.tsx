@@ -118,7 +118,13 @@ describe("Login", () => {
   it("submits credentials and navigates after a successful login", async () => {
     const navigate = jest.fn();
     const dispatch = jest.fn().mockReturnValue(
-      makeDispatchResult({ ldapAuthentication: "Success", token: "token-123", businessType: "GROUP" }),
+      makeDispatchResult({
+        status: "SUCCESS",
+        token: "token-123",
+        expiresIn: 3600,
+        username: "ipru74574",
+        roles: [],
+      }),
     );
 
     mockUseNavigate.mockReturnValue(navigate);
@@ -134,9 +140,11 @@ describe("Login", () => {
       expect(mockLoginThunk).toHaveBeenCalledWith({
         username: "demouser",
         password: "Password1",
+        source: "Mid Office Transformation",
       });
       expect(localStorage.getItem("token")).toBe("token-123");
-      expect(localStorage.getItem("username")).toBe("demouser");
+      expect(localStorage.getItem("username")).toBe("ipru74574");
+      expect(localStorage.getItem("password")).toBe("Password1");
       expect(localStorage.getItem("businessType")).toBe("retail");
       expect(navigate).toHaveBeenCalledWith("/inbox");
     });

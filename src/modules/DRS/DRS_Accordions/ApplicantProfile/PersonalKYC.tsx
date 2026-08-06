@@ -3,6 +3,7 @@ import { GridSection } from "../../../../components/layout/GridSection";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../../store/store";
 import { buildFields, formatDOB, maskAadhaar, maskPAN, withDashFallback } from "../../../../utils/helpers";
+import { normalizeMasterOptions, toMasterLabel } from "../../../../utils/masterOptions";
 import { SectionCard, type ApplicantProfileProps } from "./ApplicantProfile";
 import type { ApplicantTab } from "../../../../types/drs.types";
 
@@ -67,6 +68,12 @@ const buildApplicantName = (parts: Array<unknown>): string =>
 
 const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
     const { data } = useSelector((state: RootState) => state.drs);
+    const masters = useSelector((state: RootState) => state.drs.masters);
+
+    const nationalityOptions = normalizeMasterOptions(masters?.nationality) ?? [];
+    const educationOptions = normalizeMasterOptions(masters?.education) ?? [];
+    const residentStatusOptions = normalizeMasterOptions(masters?.resident_status) ?? [];
+    const countryOptions = normalizeMasterOptions(masters?.country) ?? [];
 
     const selectedMemberType =
         profile?.memberType ??
@@ -87,7 +94,10 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         summaryEntries[0];
 
     const summaryRecord = toRecord(selectedSummaryEntry);
-    const summaryPersonal = toRecord(summaryRecord.personalDetails);
+    // Prefer `personalDetails` when present; fall back to `proposerSummary` used by some mocks
+    const summaryPersonal = Object.keys(toRecord(summaryRecord.personalDetails)).length > 0
+        ? toRecord(summaryRecord.personalDetails)
+        : toRecord(summaryRecord.proposerSummary);
     const summaryKyc = toRecord(summaryRecord.kycDetails);
 
     const customerDetails = data?.customerDetails ?? [];
@@ -128,10 +138,16 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         age: derivedAge,
         gender: mapGender(String(summaryPersonal?.gender ?? fallbackPersonal?.gender ?? "")),
         maritalStatus: mapMaritalStatus(String(summaryPersonal?.maritalStatus ?? fallbackPersonal?.maritalStatus ?? "")),
-        nationality: String(summaryPersonal?.nationality ?? fallbackPersonal?.nationality ?? ""),
-        countryOfResidence: String(summaryPersonal?.residentStatus ?? fallbackPersonal?.residentStatus ?? ""),
-        education: String(summaryPersonal?.highestQualification ?? fallbackPersonal?.highestQualification ?? ""),
-        residentStatus: String(summaryPersonal?.residentStatus ?? fallbackPersonal?.residentStatus ?? ""),
+        nationality: toMasterLabel(String(summaryPersonal?.nationality ?? fallbackPersonal?.nationality ?? ""), nationalityOptions),
+        countryOfResidence: (() => {
+            const raw = String(summaryPersonal?.countryOfResidence ?? summaryPersonal?.residentStatus ?? fallbackPersonal?.countryOfResidence ?? fallbackPersonal?.residentStatus ?? "");
+            const byCountry = toMasterLabel(raw, countryOptions);
+            if (byCountry !== raw) return byCountry;
+            const byResident = toMasterLabel(raw, residentStatusOptions);
+            return byResident;
+        })(),
+        education: toMasterLabel(String(summaryPersonal?.highestQualification ?? fallbackPersonal?.highestQualification ?? ""), educationOptions),
+        residentStatus: toMasterLabel(String(summaryPersonal?.residentStatus ?? fallbackPersonal?.residentStatus ?? ""), residentStatusOptions),
         designation: String(summaryPersonal?.designation ?? fallbackPersonal?.designation ?? ""),
         disabled: String(summaryPersonal?.disabled ?? fallbackPersonal?.disabled ?? ""),
         percentageOfImpairment: String(summaryPersonal?.percentageOfImpairment ?? fallbackPersonal?.percentageOfImpairment ?? ""),
