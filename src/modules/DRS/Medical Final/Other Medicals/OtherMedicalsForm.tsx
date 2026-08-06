@@ -14,6 +14,7 @@ import {
   SMA12_TABLE_ROWS,
   TFT_TABLE_ROWS,
   S13_TABLE_ROWS,
+  RUA_TABLE_ROWS,
   OTHER_MEDICALS_CBC_GROUP_SECTION_LABEL,
   OTHER_MEDICALS_LFT_SECTION_LABEL,
   OTHER_MEDICALS_LIPIDS_SECTION_LABEL,
@@ -21,6 +22,7 @@ import {
   OTHER_MEDICALS_SMA12_GROUP_SECTION_LABEL,
   OTHER_MEDICALS_TFT_GROUP_SECTION_LABEL,
   OTHER_MEDICALS_S13_GROUP_SECTION_LABEL,
+  OTHER_MEDICALS_RUA_GROUP_SECTION_LABEL,
 } from "./otherMedicalsConfig";
 
 type OtherMedicalsFormProps = {
@@ -59,6 +61,14 @@ const buildMasterOptions = () => {
     medical_type: toOptionList(getMasterArray(masterData, "medical_type")),
     gender: toOptionList(getMasterArray(masterData, "gender")),
     negative_positive_reactive: toOptionList(getMasterArray(masterData, "negative_positive_reactive")),
+    rua_sugar_glycosuria: toOptionList(getMasterArray(masterData, "rua_sugar_glycosuria")),
+    rua_albumin_proteinuria: toOptionList(getMasterArray(masterData, "rua_albumin_proteinuria")),
+    rua_rbc_haematuria: toOptionList(getMasterArray(masterData, "rua_rbc_haematuria")),
+    rua_ketone_bodies: toOptionList(getMasterArray(masterData, "rua_ketone_bodies")),
+    rua_urine_colour: toOptionList(getMasterArray(masterData, "rua_urine_colour")),
+    rua_urine_appearance: toOptionList(getMasterArray(masterData, "rua_urine_appearance")),
+    rua_urobilinogen: toOptionList(getMasterArray(masterData, "rua_urobilinogen")),
+    rua_present_absent: toOptionList(getMasterArray(masterData, "rua_present_absent")),
   };
 };
 
@@ -100,6 +110,7 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
   const [sma12TableData, setSma12TableData] = useState<Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>>({});
   const [tftTableData, setTftTableData] = useState<Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>>({});
   const [s13TableData, setS13TableData] = useState<Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>>({});
+  const [ruaTableData, setRuaTableData] = useState<Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>>({});
 
   const masterOptions = useMemo(() => buildMasterOptions(), []);
   const subsectionFields = useMemo(
@@ -226,6 +237,21 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
     }));
   };
 
+  const handleRuaTableChange = (parameterId: string, field: "value" | "labStart" | "labEnd", newValue: string) => {
+    setRuaTableData((prev) => ({
+      ...prev,
+      [parameterId]: {
+        ...prev[parameterId],
+        value: prev[parameterId]?.value || "",
+        labStart: prev[parameterId]?.labStart || "",
+        labEnd: prev[parameterId]?.labEnd || "",
+        unit: prev[parameterId]?.unit || "",
+        findings: prev[parameterId]?.findings || "",
+        [field]: newValue,
+      },
+    }));
+  };
+
   const isCbcGroupSection = selectedSubSection === OTHER_MEDICALS_CBC_GROUP_SECTION_LABEL;
   const isLftSection = selectedSubSection === OTHER_MEDICALS_LFT_SECTION_LABEL;
   const isLipidsSection = selectedSubSection === OTHER_MEDICALS_LIPIDS_SECTION_LABEL;
@@ -233,6 +259,7 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
   const isSma12GroupSection = selectedSubSection === OTHER_MEDICALS_SMA12_GROUP_SECTION_LABEL;
   const isTftGroupSection = selectedSubSection === OTHER_MEDICALS_TFT_GROUP_SECTION_LABEL;
   const isS13GroupSection = selectedSubSection === OTHER_MEDICALS_S13_GROUP_SECTION_LABEL;
+  const isRuaGroupSection = selectedSubSection === OTHER_MEDICALS_RUA_GROUP_SECTION_LABEL;
 
   return (
     <Box>
@@ -737,6 +764,80 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
                     <Typography sx={{ color: "#9CA3AF", fontSize: "14px" }}>-</Typography>
                     <CustomTextField fullWidth size="small" value={rowData.labEnd} onChange={(e) => handleS13TableChange(row.id, "labEnd", e.target.value)} placeholder="Max" sx={{ "& .MuiInputBase-root": { fontSize: "14px" } }} />
                   </Box>
+                  <Typography sx={{ fontSize: "14px", color: "#374151" }}>{rowData.findings || "-"}</Typography>
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
+      )}
+
+      {/* RUA Group Table */}
+      {isRuaGroupSection && (
+        <Box sx={{ mt: 3 }}>
+          <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
+            RUA Test Parameters
+          </Typography>
+          
+          <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "8px", overflow: "hidden", backgroundColor: "#fff" }}>
+            <Box sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", fontWeight: 600, fontSize: "13px", color: "#374151" }}>
+              <Box>Parameter</Box>
+              <Box>Value</Box>
+              <Box>Unit</Box>
+              <Box>Normal Range</Box>
+              <Box>Status</Box>
+            </Box>
+            {RUA_TABLE_ROWS.map((row) => {
+              const rowData = ruaTableData[row.id] || { value: "", labStart: "", labEnd: "", unit: "", findings: "" };
+              const masterKey = row.masterKey as keyof typeof masterOptions;
+              const options = masterKey ? (masterOptions[masterKey] ?? []) : [];
+              
+              return (
+                <Box key={row.id} sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", alignItems: "center", gap: 2, "&:last-child": { borderBottom: "none" }, "&:hover": { backgroundColor: "#F9FAFB" } }}>
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                    <Typography sx={{ fontSize: "14px", color: "#1F2937" }}>{row.parameter}</Typography>
+                    {row.required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
+                  </Box>
+                  
+                  {/* Value field - Dropdown or Text */}
+                  {row.fieldType === "dropdown" ? (
+                    <CustomSelect
+                      value={rowData.value}
+                      onChange={(nextValue) => handleRuaTableChange(row.id, "value", nextValue)}
+                      options={options}
+                      placeholder="Select"
+                    />
+                  ) : (
+                    <CustomTextField
+                      fullWidth
+                      size="small"
+                      value={rowData.value}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        if (row.validation === "numeric") {
+                          if (val === "" || /^\d*\.?\d*$/.test(val)) {
+                            handleRuaTableChange(row.id, "value", val);
+                          }
+                        } else {
+                          handleRuaTableChange(row.id, "value", val);
+                        }
+                      }}
+                      placeholder="Enter value"
+                      sx={{ "& .MuiInputBase-root": { fontSize: "14px" } }}
+                    />
+                  )}
+                  
+                  {/* Unit - Display as text */}
+                  <Typography sx={{ fontSize: "14px", color: "#374151" }}>{rowData.unit || "-"}</Typography>
+                  
+                  {/* Normal Range - Min-Max inputs */}
+                  <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+                    <CustomTextField fullWidth size="small" value={rowData.labStart} onChange={(e) => handleRuaTableChange(row.id, "labStart", e.target.value)} placeholder="Min" sx={{ "& .MuiInputBase-root": { fontSize: "14px" } }} />
+                    <Typography sx={{ color: "#9CA3AF", fontSize: "14px" }}>-</Typography>
+                    <CustomTextField fullWidth size="small" value={rowData.labEnd} onChange={(e) => handleRuaTableChange(row.id, "labEnd", e.target.value)} placeholder="Max" sx={{ "& .MuiInputBase-root": { fontSize: "14px" } }} />
+                  </Box>
+                  
+                  {/* Status - Display as text */}
                   <Typography sx={{ fontSize: "14px", color: "#374151" }}>{rowData.findings || "-"}</Typography>
                 </Box>
               );

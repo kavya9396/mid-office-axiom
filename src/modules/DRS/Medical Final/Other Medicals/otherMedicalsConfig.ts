@@ -63,6 +63,15 @@ export type S13TableRowConfig = {
   conditionalRequirement?: "fbs_or_rbs";
 };
 
+export type RUATableRowConfig = {
+  id: string;
+  parameter: string;
+  required: boolean;
+  fieldType: "dropdown" | "text";
+  validation?: "numeric";
+  masterKey?: "rua_sugar_glycosuria" | "rua_albumin_proteinuria" | "rua_rbc_haematuria" | "rua_ketone_bodies" | "rua_urine_colour" | "rua_urine_appearance" | "negative_positive_reactive" | "rua_urobilinogen" | "rua_present_absent";
+};
+
 export const OTHER_MEDICALS_BLOOD_SUGAR_RANDOM_SECTION_LABEL = "Blood Sugar Random";
 export const OTHER_MEDICALS_CBC_GROUP_SECTION_LABEL = "CBC Group";
 export const OTHER_MEDICALS_COT_SECTION_LABEL = "COT";
@@ -426,6 +435,30 @@ export const RUA_GROUP_SUBSECTION_FORM_FIELDS: OtherMedicalsFieldConfig[] = [
   { id: "diagnosticCentrePincode", label: "Diagnostic Centre Pincode", type: "text", required: false, editable: true, validation: "numeric" },
   { id: "doctorName", label: "Doctor Name", type: "text", required: false, editable: true },
   { id: "doctorRegistrationNo", label: "Doctor Registration No", type: "text", required: false, editable: true },
+];
+
+export const RUA_TABLE_ROWS: RUATableRowConfig[] = [
+  { id: "sugar_glycosuria", parameter: "Sugar/Glycosuria", required: true, fieldType: "dropdown", masterKey: "rua_sugar_glycosuria" },
+  { id: "albumin_proteinuria", parameter: "Albumin/Proteinuria", required: true, fieldType: "dropdown", masterKey: "rua_albumin_proteinuria" },
+  { id: "rbc_haematuria", parameter: "RBC/Haematuria", required: true, fieldType: "dropdown", masterKey: "rua_rbc_haematuria" },
+  { id: "wbc_pus_pyuria", parameter: "WBC/PUS/Pyuria", required: true, fieldType: "text", validation: "numeric" },
+  { id: "epithelial_cells", parameter: "Epithelial Cells", required: true, fieldType: "text", validation: "numeric" },
+  { id: "gravity", parameter: "Gravity", required: true, fieldType: "text", validation: "numeric" },
+  { id: "ketone_bodies", parameter: "Ketone Bodies", required: true, fieldType: "dropdown", masterKey: "rua_ketone_bodies" },
+  { id: "urine_colour", parameter: "Urine Colour", required: false, fieldType: "dropdown", masterKey: "rua_urine_colour" },
+  { id: "urine_ph", parameter: "Urine PH", required: false, fieldType: "text", validation: "numeric" },
+  { id: "urine_quantity", parameter: "Urine Quantity", required: false, fieldType: "text", validation: "numeric" },
+  { id: "urine_appearance", parameter: "Urine Appearance", required: false, fieldType: "dropdown", masterKey: "rua_urine_appearance" },
+  { id: "urine_blood", parameter: "Urine Blood", required: false, fieldType: "dropdown", masterKey: "negative_positive_reactive" },
+  { id: "urine_nitrite", parameter: "Urine Nitrite", required: false, fieldType: "dropdown", masterKey: "negative_positive_reactive" },
+  { id: "urine_bile_salts", parameter: "Urine Bile Salts", required: false, fieldType: "dropdown", masterKey: "negative_positive_reactive" },
+  { id: "urine_bile_pigment", parameter: "Urine Bile Pigment", required: false, fieldType: "dropdown", masterKey: "negative_positive_reactive" },
+  { id: "urine_bilirubin", parameter: "Urine Bilirubin", required: false, fieldType: "dropdown", masterKey: "negative_positive_reactive" },
+  { id: "urine_urobilinogen", parameter: "Urine Urobilinogen", required: false, fieldType: "dropdown", masterKey: "rua_urobilinogen" },
+  { id: "urine_bacteria", parameter: "Urine Bacteria", required: false, fieldType: "dropdown", masterKey: "rua_present_absent" },
+  { id: "urine_casts", parameter: "Urine Casts", required: false, fieldType: "dropdown", masterKey: "rua_present_absent" },
+  { id: "urine_crystal", parameter: "Urine Crystal", required: false, fieldType: "dropdown", masterKey: "rua_present_absent" },
+  { id: "urine_deposit", parameter: "Urine Deposit", required: false, fieldType: "dropdown", masterKey: "rua_present_absent" }
 ];
 
 export const SERUM_COTININE_SUBSECTION_FORM_FIELDS: OtherMedicalsFieldConfig[] = [
