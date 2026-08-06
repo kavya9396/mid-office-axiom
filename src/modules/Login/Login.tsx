@@ -47,47 +47,45 @@ const Login = () => {
         loginThunk({
           username: data.username,
           password: data.password,
-          source: "Mid Office Transformation",
         }),
       ).unwrap();
 
-      if (res?.status === "SUCCESS") {
-      const normalizedBusinessType = "retail";
+      // Check for success: response_code 200 and error false
+      if (res.response_code === 200 && !res.error && res.data) {
+        const normalizedBusinessType = "retail";
 
-      localStorage.setItem("token", res.token);
-      localStorage.setItem("username", res.username || data.username);
-      // Store credentials encrypted only when user opted to remember
-      if (remember) {
-        try {
-          const payload = JSON.stringify({ username: data.username, password: data.password });
-          const encrypted = await encryptString(payload);
-          localStorage.setItem("remember_data", encrypted);
-          localStorage.setItem("remember_me", "true");
-        } catch (e) {
-          console.error("Failed to save remembered credentials", e);
+        localStorage.setItem("token", res.data.token);
+        localStorage.setItem("username", res.data.username || data.username);
+        localStorage.setItem("password", data.password);
+        
+        // Store credentials encrypted only when user opted to remember
+        if (remember) {
+          try {
+            const payload = JSON.stringify({ username: data.username, password: data.password });
+            const encrypted = await encryptString(payload);
+            localStorage.setItem("remember_data", encrypted);
+            localStorage.setItem("remember_me", "true");
+          } catch (e) {
+            console.error("Failed to save remembered credentials", e);
+          }
+        } else {
+          localStorage.removeItem("remember_data");
+          localStorage.removeItem("remember_me");
         }
-      } else {
-        localStorage.removeItem("remember_data");
-        localStorage.removeItem("remember_me");
-      }
-      localStorage.setItem("businessType", normalizedBusinessType);
+        localStorage.setItem("businessType", normalizedBusinessType);
 
-      // Skip this if your masters API also depends on authentication
-      // if (!USE_MOCK_LOGIN) {
         try {
           await dispatch(fetchMastersForSession());
         } catch (error) {
           console.error("Failed to load master data", error);
         }
-      // }
 
-      navigate(getInboxPath(normalizedBusinessType));
-      return;
-    }
+        navigate(getInboxPath(normalizedBusinessType));
+        return;
+      }
 
-      const responseRecord = res as unknown as Record<string, unknown>;
-      const failedMessage = String(responseRecord?.message ?? "Login failed");
-      openErrorSnackbar(failedMessage || "Login failed");
+      // Handle error response from API
+      openErrorSnackbar(res.message || "Login failed");
     } catch (err) {
       console.error("Login failed", err);
       const errorMessage =
@@ -95,8 +93,8 @@ const Login = () => {
           ? err
           : err instanceof Error
             ? err.message
-            : String((err as Record<string, unknown> | null)?.message ?? "Login failed");
-      openErrorSnackbar(errorMessage || "Login failed");
+            : "Login failed";
+      openErrorSnackbar(errorMessage);
     } finally {
       setStatus("idle");
     }

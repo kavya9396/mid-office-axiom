@@ -3,13 +3,23 @@
 export interface LoginRequest {
   username: string;
   password: string;
-  source: string;
+}
+
+export interface LoginResponseData {
+  token: string;
+  expiresIn: number;
+  refreshToken: string;
+  refreshExpiresIn: number;
+  username: string;
+  roles: string[];
+  firstLogin: boolean;
+  firstLoginAt: string | null;
+  lastLoginAt: string | null;
 }
 
 export interface LoginResponse {
-  status: string;
-  token: string;
-  expiresIn: number;
-  username: string;
-  roles: string[];
+  response_code: number;
+  error: boolean;
+  message: string;
+  data: LoginResponseData | null;
 }
