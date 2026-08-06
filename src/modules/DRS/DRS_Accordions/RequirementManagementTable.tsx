@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
 import { Alert, Box, Chip, Paper, Typography, Pagination } from "@mui/material";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { apiRequest } from "../../../services/api";
 import { url as apiUrl } from "../../../services/apiConfig";
 import { useSelector } from "react-redux";
@@ -440,6 +440,18 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [savedPage, setSavedPage] = useState(0);
     const PAGE_SIZE = 5;
 
+    // Ensure existing rows are editable on initial load only. After a successful save
+    // the handler clears `editableStatusRowIds` so saved rows become read-only.
+    const _editableInitRef = useRef(false);
+    useEffect(() => {
+        if (_editableInitRef.current) return;
+        const ids = new Set<string>(normalizedExistingRows.map((r) => r.__rowId));
+        if (ids.size > 0) {
+            setEditableStatusRowIds(ids);
+            _editableInitRef.current = true;
+        }
+    }, [normalizedExistingRows]);
+
     const rows = useMemo(
         () => [
             ...localRows,
@@ -453,7 +465,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         [localRows, normalizedExistingRows, sourceRowOverrides, deletedRowIds],
     );
 
-    const anyPending = useMemo(() => rows.some((r) => isPendingStatus(String(r.status ?? ""))), [rows]);
+    
 
     const openDescriptionDialog = (text: string) => {
         setDescriptionDialogText(text);
@@ -1569,6 +1581,13 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                 __lookupMessage: "",
             };
         });
+
+        // newly added (saved) local rows should allow status editing
+        setEditableStatusRowIds((prev) => {
+            const next = new Set(prev);
+            next.add(rowId);
+            return next;
+        });
     };
 
     const handleDelete = (rowId: string) => {
@@ -1836,7 +1855,18 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             header: "Status",
             width: "7%",
             render: (_value, row) => {
-                const canEditStatus = !isTableSaved && (isPendingStatus(row.status) || editableStatusRowIds.has(row.__rowId));
+                // allow editing status only for draft/local-new rows or rows explicitly marked editable
+                const canEditStatus = Boolean(row.__isDraft) || editableStatusRowIds.has(row.__rowId);
+                if (row.__rowId === lastAddedDraftRowId) {
+                    // help debug why the newly added draft may still be disabled
+                    console.debug("RequirementManagement: status render", {
+                        rowId: row.__rowId,
+                        __isDraft: row.__isDraft,
+                        canEditStatus,
+                        isTableSaved,
+                        editableStatusRowIdsSize: editableStatusRowIds.size,
+                    });
+                }
 
                 // Always render the select so the dropdown remains visible,
                 // but disable it when editing isn't allowed (including after save
@@ -1947,7 +1977,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             px: 1,
                             "&:hover": { backgroundColor: "#FFFFFF" },
                         }}
-                        onClick={() => {
+                        onClick={async () => {
+                                    // mark table as not-saved (there are pending changes)
                                     setIsTableSaved(false);
                                     setHasRequirementChanges(true);
                                     const draft = createDraftRow();
@@ -1955,24 +1986,22 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     setLastAddedDraftRowId(draft.__rowId);
 
                                     // Prefetch masters for the default team so dropdowns are primed
-                                    (async () => {
-                                        try {
-                                            const defaultTeam = getDefaultTeam();
-                                            const payloadBody: Record<string, string> = { team: defaultTeam };
-                                            const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
-                                            const cacheKeyObj = { team: defaultTeam };
-                                            const cacheKey = JSON.stringify(cacheKeyObj);
+                                    try {
+                                        const defaultTeam = getDefaultTeam();
+                                        const payloadBody: Record<string, string> = { team: defaultTeam };
+                                        const payload = { types: ["requirement_mst"], requirementMst: payloadBody };
+                                        const cacheKeyObj = { team: defaultTeam };
+                                        const cacheKey = JSON.stringify(cacheKeyObj);
 
-                                            if (!requirementOptionsCache[cacheKey]) {
-                                                const mst = await fetchRequirementMst(payload);
-                                                const entries = parseFirstArrayFromRequirementMst(mst);
-                                                const opts = entries.map(toOption);
-                                                cacheOptionsForPayload(cacheKeyObj, opts);
-                                            }
-                                        } catch (e) {
-                                            // ignore
+                                        if (!requirementOptionsCache[cacheKey]) {
+                                            const mst = await fetchRequirementMst(payload);
+                                            const entries = parseFirstArrayFromRequirementMst(mst);
+                                            const opts = entries.map(toOption);
+                                            cacheOptionsForPayload(cacheKeyObj, opts);
                                         }
-                                    })();
+                                    } catch (e) {
+                                        // ignore
+                                    }
                                 }}
                     >
                         + Add Requirement
@@ -2245,10 +2274,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         mt: 1,
                     }}
                 >
+                   
                     {isVisible && (
                             <CustomButton
                                 variant="contained"
-                                disabled={draftRows.length > 0 || isTableSaved || anyPending}
+                                disabled={isTableSaved || draftRows.length > 0}
                             onClick={async () => {
                                 // Build a full DRS payload by cloning current drsData and replacing requirementManagement
                                 try {
@@ -2329,7 +2359,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                 whiteSpace: "nowrap",
                             }}
                         >
-                            Save
+                             Save
                         </CustomButton>
                     )}
                     {showCptActionButtons && (<><CustomButton

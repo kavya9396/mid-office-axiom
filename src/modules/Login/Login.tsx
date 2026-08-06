@@ -19,18 +19,20 @@ import { loginThunk } from "../../store/thunks/authThunk";
 import { useAppDispatch } from "../../store/hooks";
 import { getInboxPath } from "../../routes/routes";
 import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
+import { encryptString, decryptString } from "../../utils/crypto";
 
 type LoginForm = {
   username: string;
   password: string;
 };
 const Login = () => {
-  const { control, handleSubmit } = useForm<LoginForm>();
+  const { control, handleSubmit, reset } = useForm<LoginForm>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const [status, setStatus] = React.useState<"idle" | "loading">("idle");
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [remember, setRemember] = React.useState(false);
 
   const openErrorSnackbar = (message: string) => {
     setSnackbarMessage(message);
@@ -54,7 +56,20 @@ const Login = () => {
 
       localStorage.setItem("token", res.token);
       localStorage.setItem("username", res.username || data.username);
-      localStorage.setItem("password", data.password);
+      // Store credentials encrypted only when user opted to remember
+      if (remember) {
+        try {
+          const payload = JSON.stringify({ username: data.username, password: data.password });
+          const encrypted = await encryptString(payload);
+          localStorage.setItem("remember_data", encrypted);
+          localStorage.setItem("remember_me", "true");
+        } catch (e) {
+          console.error("Failed to save remembered credentials", e);
+        }
+      } else {
+        localStorage.removeItem("remember_data");
+        localStorage.removeItem("remember_me");
+      }
       localStorage.setItem("businessType", normalizedBusinessType);
 
       // Skip this if your masters API also depends on authentication
@@ -86,6 +101,25 @@ const Login = () => {
       setStatus("idle");
     }
   };
+
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const stored = localStorage.getItem("remember_data");
+        const wasRemember = localStorage.getItem("remember_me") === "true";
+        if (stored && wasRemember) {
+          const decrypted = await decryptString(stored);
+          if (decrypted) {
+            const parsed = JSON.parse(decrypted) as { username?: string; password?: string };
+            reset({ username: parsed.username ?? "", password: parsed.password ?? "" });
+            setRemember(true);
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load remembered credentials", e);
+      }
+    })();
+  }, [reset]);
 
   return (
     <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
@@ -229,7 +263,11 @@ const Login = () => {
                 justifyContent: "space-between",
               }}
             >
-              <CustomCheckbox label="Remember me" />
+              <CustomCheckbox
+                label="Remember me"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+              />
             </Box>
 
             {/* Login Button */}
