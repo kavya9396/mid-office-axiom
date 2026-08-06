@@ -32,11 +32,13 @@ import DocumentRequired from "./DRS_Accordions/DocumentRequired";
 import PreLogin from "./DRS_Accordions/PreLogin";
 import BreDecision1 from "./DRS_Accordions/BreDecision1";
 import Decision from "./DRS_Accordions/decision";
+import ApplicationOverview1 from "./DRS_Accordions/ApplicationOverview1";
  
 export const accordionRegistry = {
   breDecision1:BreDecision1,
   breDecision: BreDecision,
   applicationOverview: ApplicationOverview,
+  applicationOverview1:ApplicationOverview1,
   requirementManagement: RequirementManagement,
   uwDecision: UWDecision,
   pivvSection: PIVVSection,
@@ -141,7 +143,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   ],CVT_TASK: [
     "breDecision1",
     "summary",
-    "applicationOverview",
+    "applicationOverview1",
     "pivvSection",
     "requirementManagement",
     "decision",

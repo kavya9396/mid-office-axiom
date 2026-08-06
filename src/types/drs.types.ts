@@ -137,6 +137,7 @@ export interface DRSData {
   submitDate: string;
   totalPremium: number;
   sourceSystem: string;
+  applicationOverview:DRSApplicationInfo;
   applicationInfo: DRSApplicationInfo;
   riderDetails?: DRSRiderDetail[];
   sourcingDetail: DRSSourcingDetail;
