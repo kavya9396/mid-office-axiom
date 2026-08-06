@@ -45,8 +45,8 @@ const Login = () => {
     try {
       const res = await dispatch(
         loginThunk({
-          username: data.username,
-          password: data.password,
+          username: btoa(data.username),
+          password: btoa(data.password),
         }),
       ).unwrap();
 
@@ -57,7 +57,10 @@ const Login = () => {
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("username", res.data.username || data.username);
         localStorage.setItem("password", data.password);
-        
+        if (res.data.lastLoginAt) {
+          localStorage.setItem("lastLoginAt", res.data.lastLoginAt);
+        }
+
         // Store credentials encrypted only when user opted to remember
         if (remember) {
           try {

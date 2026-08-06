@@ -202,7 +202,7 @@ const LeftPanel = ({
         {
           !toggle && (
             <Box sx={{ mx: "auto", my: 2 }}>
-                <LastLogin lastLogin={"2026-05-24T11:32:00"} />
+                <LastLogin lastLogin={localStorage.getItem("lastLoginAt") ?? ""} />
             </Box>
           )
         }

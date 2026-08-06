@@ -147,8 +147,8 @@ describe("Login", () => {
 
     await waitFor(() => {
       expect(mockLoginThunk).toHaveBeenCalledWith({
-        username: "demouser",
-        password: "Password1",
+        username: btoa("demouser"),
+        password: btoa("Password1"),
       });
       expect(localStorage.getItem("token")).toBe("token-123");
       expect(localStorage.getItem("username")).toBe("ipru74574");
