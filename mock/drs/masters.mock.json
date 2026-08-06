@@ -20,6 +20,20 @@
         "isActive": "Y"
       }
     ],
+    "negative_positive_reactive": [
+      {
+        "code": "NEGATIVE_NON_REACTIVE",
+        "description": "Negative/Non Reactive",
+        "value": "Negative/Non Reactive",
+        "isActive": "Y"
+      },
+      {
+        "code": "POSITIVE_REACTIVE",
+        "description": "Positive/Reactive",
+        "value": "Positive/Reactive",
+        "isActive": "Y"
+      }
+    ],
     "resident_status": [
       {
         "code": "FN",
@@ -1423,6 +1437,254 @@
         "code": "RES_OFFICE",
         "description": "Res/Office",
         "value": "Res/Office",
+        "isActive": "Y"
+      }
+    ],
+    "medical_type": [
+      {
+        "code": "PAST_MEDICAL",
+        "description": "PAST MEDICAL",
+        "value": "PAST MEDICAL",
+        "isActive": "Y"
+      },
+      {
+        "code": "REGULAR_MEDICAL",
+        "description": "REGULAR MEDICAL",
+        "value": "REGULAR MEDICAL",
+        "isActive": "Y"
+      }
+    ],
+    "special_medical_findings": [
+      {
+        "code": "ABNORMAL",
+        "description": "Abnormal",
+        "value": "Abnormal",
+        "isActive": "Y"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y"
+      },
+      {
+        "code": "MILD_CHANGES",
+        "description": "Mild Changes",
+        "value": "Mild Changes",
+        "isActive": "Y"
+      },
+      {
+        "code": "MODERATE_CHANGES",
+        "description": "Moderate Changes",
+        "value": "Moderate Changes",
+        "isActive": "Y"
+      },
+      {
+        "code": "SEVERE_CHANGES",
+        "description": "Severe Changes",
+        "value": "Severe Changes",
+        "isActive": "Y"
+      }
+    ],
+    "rejection_abnormality": [
+      {
+        "code": "ABNORMAL",
+        "description": "Abnormal",
+        "value": "Abnormal",
+        "isActive": "Y"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y"
+      }
+    ],
+    "abnormal_normal_findings": [
+      {
+        "code": "ABNORMAL",
+        "description": "Abnormal",
+        "value": "Abnormal",
+        "isActive": "Y"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y"
+      }
+    ],
+    "ecg_axis": [
+      {
+        "code": "LAD",
+        "description": "LAD",
+        "value": "LAD",
+        "isActive": "Y"
+      },
+      {
+        "code": "LAHB",
+        "description": "LAHB",
+        "value": "LAHB",
+        "isActive": "Y"
+      },
+      {
+        "code": "LPHB",
+        "description": "LPHB",
+        "value": "LPHB",
+        "isActive": "Y"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y"
+      },
+      {
+        "code": "RAD",
+        "description": "RAD",
+        "value": "RAD",
+        "isActive": "Y"
+      }
+    ],
+    "tmt_findings": [
+      {
+        "code": "POSITIVE",
+        "description": "Positive",
+        "value": "Positive",
+        "isActive": "Y"
+      },
+      {
+        "code": "MILD_CHANGES",
+        "description": "Mild Changes",
+        "value": "Mild Changes",
+        "isActive": "Y"
+      },
+      {
+        "code": "MODERATE_CHANGES",
+        "description": "Moderate Changes",
+        "value": "Moderate Changes",
+        "isActive": "Y"
+      },
+      {
+        "code": "NEGATIVE",
+        "description": "Negative",
+        "value": "Negative",
+        "isActive": "Y"
+      },
+      {
+        "code": "SEVERE_CHANGES",
+        "description": "Severe Changes",
+        "value": "Severe Changes",
+        "isActive": "Y"
+      }
+    ],
+    "tmt_mets": [
+      {
+        "code": "1",
+        "description": "1",
+        "value": "1",
+        "isActive": "Y"
+      },
+      {
+        "code": "2",
+        "description": "2",
+        "value": "2",
+        "isActive": "Y"
+      },
+      {
+        "code": "3",
+        "description": "3",
+        "value": "3",
+        "isActive": "Y"
+      },
+      {
+        "code": "4",
+        "description": "4",
+        "value": "4",
+        "isActive": "Y"
+      },
+      {
+        "code": "5",
+        "description": "5",
+        "value": "5",
+        "isActive": "Y"
+      },
+      {
+        "code": "6",
+        "description": "6",
+        "value": "6",
+        "isActive": "Y"
+      },
+      {
+        "code": "7",
+        "description": "7",
+        "value": "7",
+        "isActive": "Y"
+      },
+      {
+        "code": "8",
+        "description": "8",
+        "value": "8",
+        "isActive": "Y"
+      },
+      {
+        "code": "9",
+        "description": "9",
+        "value": "9",
+        "isActive": "Y"
+      },
+      {
+        "code": "10",
+        "description": "10",
+        "value": "10",
+        "isActive": "Y"
+      },
+      {
+        "code": "11",
+        "description": "11",
+        "value": "11",
+        "isActive": "Y"
+      },
+      {
+        "code": "12",
+        "description": "12",
+        "value": "12",
+        "isActive": "Y"
+      },
+      {
+        "code": "13",
+        "description": "13",
+        "value": "13",
+        "isActive": "Y"
+      },
+      {
+        "code": "14",
+        "description": "14",
+        "value": "14",
+        "isActive": "Y"
+      },
+      {
+        "code": "15",
+        "description": "15",
+        "value": "15",
+        "isActive": "Y"
+      },
+      {
+        "code": "16",
+        "description": "16",
+        "value": "16",
+        "isActive": "Y"
+      },
+      {
+        "code": "17",
+        "description": "17",
+        "value": "17",
+        "isActive": "Y"
+      },
+      {
+        "code": "18",
+        "description": "18",
+        "value": "18",
         "isActive": "Y"
       }
     ],

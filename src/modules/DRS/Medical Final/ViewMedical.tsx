@@ -24,7 +24,9 @@ import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelp
 import MerForm, { type MerFormHandle } from "./MER/MerForm";
 import { getMerConfig } from "./MER/merConfig";
 import OtherMedicalsForm from "./Other Medicals/OtherMedicalsForm";
+import { getOtherMedicalsConfig } from "./Other Medicals/otherMedicalsConfig";
 import SpecialMedicalForm from "./Special Medical/SpecialMedicalForm";
+import { getSpecialMedicalConfig } from "./Special Medical/specialMedicalConfig";
 
 const getStoredApplicantTab = () =>
   (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
@@ -418,6 +420,8 @@ const ViewMedical = () => {
   const medicalSectionGroups = useMemo<MedicalSectionGroup[]>(
     () => {
       const merConfig = getMerConfig();
+      const specialMedicalConfig = getSpecialMedicalConfig();
+      const otherMedicalsConfig = getOtherMedicalsConfig();
 
       return [
         {
@@ -431,18 +435,18 @@ const ViewMedical = () => {
           ],
           fields: merConfig,
         },
-        // {
-        //   key: "specialMedical",
-        //   label: "Special Medical",
-        //   subSections: uniqSectionTitles(specialMedicalConfig.map((field) => field.section)),
-        //   fields: specialMedicalConfig,
-        // },
-        // {
-        //   key: "otherMedicals",
-        //   label: "Other Medicals",
-        //   subSections: uniqSectionTitles(otherMedicalsConfig.map((field) => field.section)),
-        //   fields: otherMedicalsConfig,
-        // },
+        {
+          key: "specialMedical",
+          label: "Special Medical",
+          subSections: uniqSectionTitles(specialMedicalConfig.map((field) => field.section)),
+          fields: specialMedicalConfig,
+        },
+        {
+          key: "otherMedicals",
+          label: "Other Medicals",
+          subSections: uniqSectionTitles(otherMedicalsConfig.map((field) => field.section)),
+          fields: otherMedicalsConfig,
+        },
       ];
     },
     []
