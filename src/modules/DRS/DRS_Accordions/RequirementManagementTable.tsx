@@ -438,7 +438,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [descriptionDialogText, setDescriptionDialogText] = useState("");
 
     // sorting state for table columns (supports 'category' for now)
-    const [sortConfig, setSortConfig] = useState<null | { key: string; direction: "asc" | "desc" }>(null);
+    const [sortConfig] = useState<null | { key: string; direction: "asc" | "desc" }>(null);
 
     const [savedPage, setSavedPage] = useState(0);
     const PAGE_SIZE = 5;
@@ -450,8 +450,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         if (_editableInitRef.current) return;
         const ids = new Set<string>(normalizedExistingRows.map((r) => r.__rowId));
         if (ids.size > 0) {
-            setEditableStatusRowIds(ids);
             _editableInitRef.current = true;
+            setTimeout(() => setEditableStatusRowIds(ids), 0);
         }
     }, [normalizedExistingRows]);
 
@@ -626,7 +626,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     useEffect(() => {
         if (savedPage >= totalSavedPages) {
-            setSavedPage(0);
+            setTimeout(() => setSavedPage(0), 0);
         }
     }, [savedRows.length, savedPage, totalSavedPages]);
 
@@ -885,9 +885,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     .filter(Boolean) as Array<Record<string, unknown>>;
 
                 try {
-                    // eslint-disable-next-line no-console
                     console.debug("RequirementManagement: candidateSources:", candidateSources);
-                    // eslint-disable-next-line no-console
                     console.debug("RequirementManagement: rawList length:", rawList.length);
                 } catch {
                     // ignore
@@ -936,7 +934,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         .filter(Boolean) as Option[];
 
                     try {
-                        // eslint-disable-next-line no-console
                         console.debug("RequirementManagement: statusRaw length:", statusRaw.length, "mapped:", mapped);
                     } catch {
                         // ignore
@@ -1245,7 +1242,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
                             : String(o.label ?? ""),
                     }));
-                    setProfileOptionsState(unique);
+                    setTimeout(() => setProfileOptionsState(unique), 0);
                     cacheOptionsForPayload({ types: ["profiles_from_misc"] }, unique);
                 }
             }
@@ -1958,41 +1955,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         ...(shouldShowProfileAndSpecialTest
             ? ([{ key: "profile", header: "Profile", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
-        {
-            key: "category",
-            header: (
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                    <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Category</Typography>
-                    <Box
-                        component="button"
-                        type="button"
-                        onClick={() => {
-                            const key = "category";
-                            setSortConfig((prev) => {
-                                if (prev && prev.key === key) {
-                                    return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
-                                }
-                                return { key, direction: "asc" };
-                            });
-                        }}
-                        aria-label="Sort by category"
-                        sx={{
-                            border: "none",
-                            background: "transparent",
-                            color: "#000000",
-                            cursor: "pointer",
-                            p: 0,
-                            lineHeight: 1,
-                            fontSize: 12,
-                            textTransform: "none",
-                        }}
-                    >
-                        {sortConfig && sortConfig.key === "category" ? (sortConfig.direction === "asc" ? "▲" : "▼") : "⇅"}
-                    </Box>
-                </Box>
-            ),
-            width: "8%",
-        },
+        { key: "category", header: "Category", width: "8%" },
         { key: "subCategory", header: "Sub Category", width: "10%"},
         { key: "document", header: "Document", width: "10%" },
         { key: "reason", header: "Reason", width: "12%" },
