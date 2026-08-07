@@ -1,7 +1,16 @@
 {
-  "status": "SUCCESS",
-  "token": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJpY2ljLWlhbS11c2VyLXNlcnZpY2UiLCJzdWIiOiJpcHJ1NzQ1NzQiLCJleHAiOjE3ODU3NTgzNDAsImlhdCI6MTc4NTc1NDc0MCwicm9sZXMiOltdLCJ1c2VybmFtZSI6ImlwcnU3NDU3NCJ9.vjlHgDbBoS4lVGqwISLUeQTA_hlavBF_-h1g3V80Km8",
-  "expiresIn": 3600,
-  "username": "ipru74574",
-  "roles": []
+  "response_code": 200,
+  "error": false,
+  "message": "Login successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJpY2ljLWlhbS11c2VyLXNlcnZpY2UiLCJzdWIiOiJpcHJ1NzQ1NzQiLCJleHAiOjE3ODU5OTMyODgsImlhdCI6MTc4NTk5MjA4OCwicm9sZXMiOltdLCJ1c2VybmFtZSI6ImlwcnU3NDU3NCJ9.Ukdhi0ePMoAYK4DEZKV9tqQ5Ho8pqukp6jknamlhb_c",
+    "expiresIn": 1200,
+    "refreshToken": "fZhAtrSXtKoz6kMcHbgHJ1-cPCS6YuTUQTU48ka74ag",
+    "refreshExpiresIn": 300,
+    "username": "ipru74574",
+    "roles": [],
+    "firstLogin": true,
+    "firstLoginAt": "2026-08-06T10:24:48.17740721",
+    "lastLoginAt": "2026-08-06T07:11:54.437576"
+  }
 }

@@ -20,6 +20,20 @@
         "isActive": "Y"
       }
     ],
+    "negative_positive_reactive": [
+      {
+        "code": "NEGATIVE_NON_REACTIVE",
+        "description": "Negative/Non Reactive",
+        "value": "Negative/Non Reactive",
+        "isActive": "Y"
+      },
+      {
+        "code": "POSITIVE_REACTIVE",
+        "description": "Positive/Reactive",
+        "value": "Positive/Reactive",
+        "isActive": "Y"
+      }
+    ],
     "resident_status": [
       {
         "code": "FN",
@@ -1426,6 +1440,254 @@
         "isActive": "Y"
       }
     ],
+    "medical_type": [
+      {
+        "code": "PAST_MEDICAL",
+        "description": "PAST MEDICAL",
+        "value": "PAST MEDICAL",
+        "isActive": "Y"
+      },
+      {
+        "code": "REGULAR_MEDICAL",
+        "description": "REGULAR MEDICAL",
+        "value": "REGULAR MEDICAL",
+        "isActive": "Y"
+      }
+    ],
+    "special_medical_findings": [
+      {
+        "code": "ABNORMAL",
+        "description": "Abnormal",
+        "value": "Abnormal",
+        "isActive": "Y"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y"
+      },
+      {
+        "code": "MILD_CHANGES",
+        "description": "Mild Changes",
+        "value": "Mild Changes",
+        "isActive": "Y"
+      },
+      {
+        "code": "MODERATE_CHANGES",
+        "description": "Moderate Changes",
+        "value": "Moderate Changes",
+        "isActive": "Y"
+      },
+      {
+        "code": "SEVERE_CHANGES",
+        "description": "Severe Changes",
+        "value": "Severe Changes",
+        "isActive": "Y"
+      }
+    ],
+    "rejection_abnormality": [
+      {
+        "code": "ABNORMAL",
+        "description": "Abnormal",
+        "value": "Abnormal",
+        "isActive": "Y"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y"
+      }
+    ],
+    "abnormal_normal_findings": [
+      {
+        "code": "ABNORMAL",
+        "description": "Abnormal",
+        "value": "Abnormal",
+        "isActive": "Y"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y"
+      }
+    ],
+    "ecg_axis": [
+      {
+        "code": "LAD",
+        "description": "LAD",
+        "value": "LAD",
+        "isActive": "Y"
+      },
+      {
+        "code": "LAHB",
+        "description": "LAHB",
+        "value": "LAHB",
+        "isActive": "Y"
+      },
+      {
+        "code": "LPHB",
+        "description": "LPHB",
+        "value": "LPHB",
+        "isActive": "Y"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y"
+      },
+      {
+        "code": "RAD",
+        "description": "RAD",
+        "value": "RAD",
+        "isActive": "Y"
+      }
+    ],
+    "tmt_findings": [
+      {
+        "code": "POSITIVE",
+        "description": "Positive",
+        "value": "Positive",
+        "isActive": "Y"
+      },
+      {
+        "code": "MILD_CHANGES",
+        "description": "Mild Changes",
+        "value": "Mild Changes",
+        "isActive": "Y"
+      },
+      {
+        "code": "MODERATE_CHANGES",
+        "description": "Moderate Changes",
+        "value": "Moderate Changes",
+        "isActive": "Y"
+      },
+      {
+        "code": "NEGATIVE",
+        "description": "Negative",
+        "value": "Negative",
+        "isActive": "Y"
+      },
+      {
+        "code": "SEVERE_CHANGES",
+        "description": "Severe Changes",
+        "value": "Severe Changes",
+        "isActive": "Y"
+      }
+    ],
+    "tmt_mets": [
+      {
+        "code": "1",
+        "description": "1",
+        "value": "1",
+        "isActive": "Y"
+      },
+      {
+        "code": "2",
+        "description": "2",
+        "value": "2",
+        "isActive": "Y"
+      },
+      {
+        "code": "3",
+        "description": "3",
+        "value": "3",
+        "isActive": "Y"
+      },
+      {
+        "code": "4",
+        "description": "4",
+        "value": "4",
+        "isActive": "Y"
+      },
+      {
+        "code": "5",
+        "description": "5",
+        "value": "5",
+        "isActive": "Y"
+      },
+      {
+        "code": "6",
+        "description": "6",
+        "value": "6",
+        "isActive": "Y"
+      },
+      {
+        "code": "7",
+        "description": "7",
+        "value": "7",
+        "isActive": "Y"
+      },
+      {
+        "code": "8",
+        "description": "8",
+        "value": "8",
+        "isActive": "Y"
+      },
+      {
+        "code": "9",
+        "description": "9",
+        "value": "9",
+        "isActive": "Y"
+      },
+      {
+        "code": "10",
+        "description": "10",
+        "value": "10",
+        "isActive": "Y"
+      },
+      {
+        "code": "11",
+        "description": "11",
+        "value": "11",
+        "isActive": "Y"
+      },
+      {
+        "code": "12",
+        "description": "12",
+        "value": "12",
+        "isActive": "Y"
+      },
+      {
+        "code": "13",
+        "description": "13",
+        "value": "13",
+        "isActive": "Y"
+      },
+      {
+        "code": "14",
+        "description": "14",
+        "value": "14",
+        "isActive": "Y"
+      },
+      {
+        "code": "15",
+        "description": "15",
+        "value": "15",
+        "isActive": "Y"
+      },
+      {
+        "code": "16",
+        "description": "16",
+        "value": "16",
+        "isActive": "Y"
+      },
+      {
+        "code": "17",
+        "description": "17",
+        "value": "17",
+        "isActive": "Y"
+      },
+      {
+        "code": "18",
+        "description": "18",
+        "value": "18",
+        "isActive": "Y"
+      }
+    ],
     "mer_education_sd": [
       {
         "code": "POST_GRADUATE",
@@ -1752,6 +2014,280 @@
         "name": "Hazardous hobbies",
         "value": "Hazardous hobbies",
         "type": "NON_MEDICAL"
+      }
+    ],
+    "rua_sugar_glycosuria": [
+      {
+        "code": "NIL_ABSENT",
+        "description": "Nil/Absent",
+        "value": "Nil/Absent",
+        "isActive": "Y"
+      },
+      {
+        "code": "TRACE",
+        "description": "Trace",
+        "value": "Trace",
+        "isActive": "Y"
+      },
+      {
+        "code": "PLUS_1",
+        "description": "+",
+        "value": "+",
+        "isActive": "Y"
+      },
+      {
+        "code": "PLUS_2",
+        "description": "++",
+        "value": "++",
+        "isActive": "Y"
+      },
+      {
+        "code": "PLUS_3",
+        "description": "+++",
+        "value": "+++",
+        "isActive": "Y"
+      },
+      {
+        "code": "PLUS_4",
+        "description": "++++",
+        "value": "++++",
+        "isActive": "Y"
+      }
+    ],
+    "rua_albumin_proteinuria": [
+      {
+        "code": "NIL_ABSENT",
+        "description": "Nil/Absent",
+        "value": "Nil/Absent",
+        "isActive": "Y"
+      },
+      {
+        "code": "TRACE",
+        "description": "Trace/+-",
+        "value": "Trace/+-",
+        "isActive": "Y"
+      },
+      {
+        "code": "MID",
+        "description": "Mid/+",
+        "value": "Mid/+",
+        "isActive": "Y"
+      },
+      {
+        "code": "MODERATE",
+        "description": "Moderate/++",
+        "value": "Moderate/++",
+        "isActive": "Y"
+      },
+      {
+        "code": "MARKED",
+        "description": "Marked/+++",
+        "value": "Marked/+++",
+        "isActive": "Y"
+      }
+    ],
+    "rua_rbc_haematuria": [
+      {
+        "code": "NIL_ABSENT_OCC",
+        "description": "Nil/Absent/Occ",
+        "value": "Nil/Absent/Occ",
+        "isActive": "Y"
+      },
+      {
+        "code": "TRACE_1_4",
+        "description": "Trace/+-/1-4",
+        "value": "Trace/+-/1-4",
+        "isActive": "Y"
+      },
+      {
+        "code": "MILD_5_9",
+        "description": "Mild/+/5-9",
+        "value": "Mild/+/5-9",
+        "isActive": "Y"
+      },
+      {
+        "code": "MODERATE_10_19",
+        "description": "Moderate/++/10-19",
+        "value": "Moderate/++/10-19",
+        "isActive": "Y"
+      },
+      {
+        "code": "MARKED_20_PLUS",
+        "description": "Marked/+++/>=20",
+        "value": "Marked/+++/>=20",
+        "isActive": "Y"
+      }
+    ],
+    "rua_ketone_bodies": [
+      {
+        "code": "PRESENT",
+        "description": "Present",
+        "value": "Present",
+        "isActive": "Y"
+      },
+      {
+        "code": "NIL_ABSENT",
+        "description": "Nil/Absent",
+        "value": "Nil/Absent",
+        "isActive": "Y"
+      }
+    ],
+    "rua_urine_colour": [
+      {
+        "code": "PALE_YELLOW",
+        "description": "Pale Yellow",
+        "value": "Pale Yellow",
+        "isActive": "Y"
+      },
+      {
+        "code": "TRANSPARENT",
+        "description": "Transparent",
+        "value": "Transparent",
+        "isActive": "Y"
+      },
+      {
+        "code": "CLEAR",
+        "description": "Clear",
+        "value": "Clear",
+        "isActive": "Y"
+      },
+      {
+        "code": "COLOURLESS",
+        "description": "Colourless",
+        "value": "Colourless",
+        "isActive": "Y"
+      },
+      {
+        "code": "DARKER_YELLOW",
+        "description": "Darker yellow",
+        "value": "Darker yellow",
+        "isActive": "Y"
+      },
+      {
+        "code": "DARK_ORANGE",
+        "description": "Dark orange",
+        "value": "Dark orange",
+        "isActive": "Y"
+      },
+      {
+        "code": "BROWN",
+        "description": "Brown",
+        "value": "Brown",
+        "isActive": "Y"
+      },
+      {
+        "code": "DARK_BROWN",
+        "description": "Dark brown",
+        "value": "Dark brown",
+        "isActive": "Y"
+      },
+      {
+        "code": "BLACK",
+        "description": "Black",
+        "value": "Black",
+        "isActive": "Y"
+      },
+      {
+        "code": "PINK",
+        "description": "Pink",
+        "value": "Pink",
+        "isActive": "Y"
+      },
+      {
+        "code": "RED",
+        "description": "Red",
+        "value": "Red",
+        "isActive": "Y"
+      },
+      {
+        "code": "BLUE",
+        "description": "Blue",
+        "value": "Blue",
+        "isActive": "Y"
+      },
+      {
+        "code": "GREEN",
+        "description": "Green",
+        "value": "Green",
+        "isActive": "Y"
+      },
+      {
+        "code": "CLOUDY",
+        "description": "Cloudy",
+        "value": "Cloudy",
+        "isActive": "Y"
+      },
+      {
+        "code": "WHITE",
+        "description": "White",
+        "value": "White",
+        "isActive": "Y"
+      },
+      {
+        "code": "MILKY",
+        "description": "Milky",
+        "value": "Milky",
+        "isActive": "Y"
+      },
+      {
+        "code": "OTHER",
+        "description": "Other colour",
+        "value": "Other colour",
+        "isActive": "Y"
+      }
+    ],
+    "rua_urine_appearance": [
+      {
+        "code": "CLEAR",
+        "description": "Clear",
+        "value": "Clear",
+        "isActive": "Y"
+      },
+      {
+        "code": "CLOUDY",
+        "description": "Cloudy",
+        "value": "Cloudy",
+        "isActive": "Y"
+      },
+      {
+        "code": "TURBID",
+        "description": "Turbid",
+        "value": "Turbid",
+        "isActive": "Y"
+      },
+      {
+        "code": "DARK_YELLOW",
+        "description": "Dark Yellow",
+        "value": "Dark Yellow",
+        "isActive": "Y"
+      }
+    ],
+    "rua_urobilinogen": [
+      {
+        "code": "NIL_ABSENT_NORMAL",
+        "description": "Nil/Absent/Normal",
+        "value": "Nil/Absent/Normal",
+        "isActive": "Y"
+      },
+      {
+        "code": "PRESENT_ABNORMAL",
+        "description": "Present/Abnormal",
+        "value": "Present/Abnormal",
+        "isActive": "Y"
+      }
+    ],
+    "rua_present_absent": [
+      {
+        "code": "NIL_ABSENT",
+        "description": "Nil/Absent",
+        "value": "Nil/Absent",
+        "isActive": "Y"
+      },
+      {
+        "code": "PRESENT",
+        "description": "Present",
+        "value": "Present",
+        "isActive": "Y"
       }
     ],
     "decision_master": [],

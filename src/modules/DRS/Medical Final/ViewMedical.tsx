@@ -24,7 +24,9 @@ import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelp
 import MerForm, { type MerFormHandle } from "./MER/MerForm";
 import { getMerConfig } from "./MER/merConfig";
 import OtherMedicalsForm from "./Other Medicals/OtherMedicalsForm";
+import { getOtherMedicalsConfig } from "./Other Medicals/otherMedicalsConfig";
 import SpecialMedicalForm from "./Special Medical/SpecialMedicalForm";
+import { getSpecialMedicalConfig } from "./Special Medical/specialMedicalConfig";
 
 const getStoredApplicantTab = () =>
   (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
@@ -330,6 +332,7 @@ const ViewMedical = () => {
   const [medicalFetchData, setMedicalFetchData] = useState<MedicalFetchResponse["data"] | null>(null);
   const [hasHydratedFromFetch, setHasHydratedFromFetch] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [editingSubSectionId, setEditingSubSectionId] = useState<string | null>(null);
   const merFormRefs = useRef<Record<string, MerFormHandle | null>>({});
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
@@ -418,6 +421,8 @@ const ViewMedical = () => {
   const medicalSectionGroups = useMemo<MedicalSectionGroup[]>(
     () => {
       const merConfig = getMerConfig();
+      const specialMedicalConfig = getSpecialMedicalConfig();
+      const otherMedicalsConfig = getOtherMedicalsConfig();
 
       return [
         {
@@ -431,18 +436,18 @@ const ViewMedical = () => {
           ],
           fields: merConfig,
         },
-        // {
-        //   key: "specialMedical",
-        //   label: "Special Medical",
-        //   subSections: uniqSectionTitles(specialMedicalConfig.map((field) => field.section)),
-        //   fields: specialMedicalConfig,
-        // },
-        // {
-        //   key: "otherMedicals",
-        //   label: "Other Medicals",
-        //   subSections: uniqSectionTitles(otherMedicalsConfig.map((field) => field.section)),
-        //   fields: otherMedicalsConfig,
-        // },
+        {
+          key: "specialMedical",
+          label: "Special Medical",
+          subSections: uniqSectionTitles(specialMedicalConfig.map((field) => field.section)),
+          fields: specialMedicalConfig,
+        },
+        {
+          key: "otherMedicals",
+          label: "Other Medicals",
+          subSections: uniqSectionTitles(otherMedicalsConfig.map((field) => field.section)),
+          fields: otherMedicalsConfig,
+        },
       ];
     },
     []
@@ -758,6 +763,25 @@ const ViewMedical = () => {
 
     return () => observer.disconnect();
   }, [flattenedSubSections, currentApplicantTab]);
+
+  const handleSubSectionEdit = (subSectionId: string) => {
+    setEditingSubSectionId(subSectionId);
+    setSaveMessage(null);
+    setSaveError(null);
+  };
+
+  const handleSubSectionSave = async () => {
+    // TODO: Implement save logic for individual subsection
+    setSaveMessage("Subsection saved successfully.");
+    setEditingSubSectionId(null);
+  };
+
+  const handleSubSectionReset = () => {
+    // TODO: Implement reset logic for individual subsection
+    setEditingSubSectionId(null);
+    setSaveMessage(null);
+    setSaveError(null);
+  };
 
   const handleMedicalSave = async () => {
     setSaveMessage(null);
@@ -1177,11 +1201,47 @@ const ViewMedical = () => {
                       py: 1.25,
                       borderBottom: "1px solid #E4E7EC",
                       backgroundColor: "#F8FAFC",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      gap: 1,
+                      flexWrap: "wrap",
                     }}
                   >
                     <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>
                       {subSection.title}
                     </Typography>
+                    {roleType === "CPT_TASK" && (
+                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          {editingSubSectionId !== subSection.id ? (
+                            <CustomButton
+                              sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                              onClick={() => handleSubSectionEdit(subSection.id)}
+                            >
+                              Edit
+                            </CustomButton>
+                          ) : (
+                            <>
+                              <CustomButton
+                                sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                                disabled={submitLoading || !safeApplicationId}
+                                onClick={handleSubSectionSave}
+                              >
+                                {submitLoading ? "Saving..." : "Save"}
+                              </CustomButton>
+                              <CustomButton
+                                sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                                disabled={submitLoading}
+                                onClick={() => handleSubSectionReset()}
+                              >
+                                Reset
+                              </CustomButton>
+                            </>
+                          )}
+                        </Box>
+                      </Box>
+                    )}
                   </Box>
 
                   <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>

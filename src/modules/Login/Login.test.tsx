@@ -119,11 +119,20 @@ describe("Login", () => {
     const navigate = jest.fn();
     const dispatch = jest.fn().mockReturnValue(
       makeDispatchResult({
-        status: "SUCCESS",
-        token: "token-123",
-        expiresIn: 3600,
-        username: "ipru74574",
-        roles: [],
+        response_code: 200,
+        error: false,
+        message: "Login successful",
+        data: {
+          token: "token-123",
+          expiresIn: 1200,
+          refreshToken: "refresh-token-123",
+          refreshExpiresIn: 300,
+          username: "ipru74574",
+          roles: [],
+          firstLogin: true,
+          firstLoginAt: "2026-08-06T10:24:48.17740721",
+          lastLoginAt: null,
+        },
       }),
     );
 
@@ -138,9 +147,8 @@ describe("Login", () => {
 
     await waitFor(() => {
       expect(mockLoginThunk).toHaveBeenCalledWith({
-        username: "demouser",
-        password: "Password1",
-        source: "Mid Office Transformation",
+        username: btoa("demouser"),
+        password: btoa("Password1"),
       });
       expect(localStorage.getItem("token")).toBe("token-123");
       expect(localStorage.getItem("username")).toBe("ipru74574");

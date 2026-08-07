@@ -8,6 +8,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
+import CustomSelect from "../../../components/ui/Select/Select";
 import { Dialog, DialogTitle, Button, IconButton } from "@mui/material";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
 import { useAppContext } from "../../../hooks/useAppContext";
@@ -1403,6 +1404,72 @@ const YearPickerField = ({
   );
 };
 
+const FinancialYearPickerField = ({
+  value,
+  onChange,
+  required,
+  errorText,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+  required?: boolean;
+  errorText?: string;
+}) => {
+  const [open, setOpen] = useState(false);
+  const currentYear = new Date().getFullYear();
+  // Generate years from current year going back 5 years (no future years)
+  const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
+
+  const displayValue = value || "";
+
+  return (
+    <>
+      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
+        <CustomTextField
+          fullWidth
+          size="small"
+          required={required}
+          error={Boolean(errorText)}
+          helperText={errorText}
+          value={displayValue}
+          onClick={() => setOpen(true)}
+          slotProps={{ htmlInput: { readOnly: true } }}
+        />
+        <IconButton size="small" onClick={() => setOpen(true)} aria-label="select financial year">
+          <span role="img" aria-label="calendar">📅</span>
+        </IconButton>
+      </Box>
+
+      <Dialog open={open} onClose={() => setOpen(false)}>
+        <DialogTitle sx={{ fontSize: 14, py: 1 }}>Select Financial Year</DialogTitle>
+        <Box sx={{ p: 1, width: 300 }}>
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1 }}>
+            {years.map((y) => {
+              const financialYear = `${y}-${y + 1}`;
+              const isSelected = value === financialYear;
+              return (
+                <Button
+                  key={y}
+                  size="small"
+                  fullWidth
+                  variant={isSelected ? "contained" : "outlined"}
+                  onClick={() => {
+                    onChange(financialYear);
+                    setOpen(false);
+                  }}
+                  sx={{ py: 0.5, fontSize: 11 }}
+                >
+                  {financialYear}
+                </Button>
+              );
+            })}
+          </Box>
+        </Box>
+      </Dialog>
+    </>
+  );
+};
+
 const renderFieldValue = (
   value: string,
   isEditable: boolean,
@@ -1414,9 +1481,39 @@ const renderFieldValue = (
 ) => {
   if (isEditable) {
     const isDateField = fieldRule?.inputType === "dateDDMMYYYY";
+    const isYesNoField = fieldRule?.inputType === "yesNo";
+    const isFinancialYearField = fieldRule?.inputType === "financialYear";
 
     // Special handling for Assessment Year fields (e.g. "Assessment Year", values like "AY 24-25").
     const isAssessmentYear = Boolean(label && /assessment\s*year/i.test(label));
+
+    if (isYesNoField) {
+      return (
+        <CustomSelect
+          fullWidth
+          options={[
+            { label: "Yes", value: "YES" },
+            { label: "No", value: "NO" },
+          ]}
+          value={value ? value.toUpperCase() : ""}
+          onChange={(newValue) => onChange(newValue)}
+          error={Boolean(errorText)}
+          helperText={errorText}
+          placeholder="Select Yes or No"
+        />
+      );
+    }
+
+    if (isFinancialYearField) {
+      return (
+        <FinancialYearPickerField 
+          value={value} 
+          onChange={onChange} 
+          required={isRequired} 
+          errorText={errorText} 
+        />
+      );
+    }
 
     if (isAssessmentYear) {
       return <YearPickerField value={value} onChange={onChange} required={isRequired} errorText={errorText} />;
@@ -1451,7 +1548,17 @@ const renderFieldValue = (
     );
   }
 
-  return <Box sx={readOnlyBoxSx}>{value}</Box>;
+  // Read-only display
+  let displayValue = value;
+  
+  // Format Yes/No values for better display
+  if (fieldRule?.inputType === "yesNo" && value) {
+    const upperValue = value.toUpperCase();
+    if (upperValue === "YES") displayValue = "Yes";
+    if (upperValue === "NO") displayValue = "No";
+  }
+
+  return <Box sx={readOnlyBoxSx}>{displayValue}</Box>;
 };
 
 type MultiYearTableRow = {
@@ -1550,7 +1657,7 @@ const renderMultiYearTableSection = (
           (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
           row.required,
           sectionErrors[row.year1FieldLabel],
-          undefined,
+          getFinancialFieldRule(section.key, row.year1FieldLabel),
           row.year1FieldLabel
         ),
     },
@@ -1565,7 +1672,7 @@ const renderMultiYearTableSection = (
           (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue),
           false,
           undefined,
-          undefined,
+          getFinancialFieldRule(section.key, row.year2FieldLabel),
           row.year2FieldLabel
         ),
     },
@@ -1580,7 +1687,7 @@ const renderMultiYearTableSection = (
           (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue),
           false,
           undefined,
-          undefined,
+          getFinancialFieldRule(section.key, row.year3FieldLabel),
           row.year3FieldLabel
         ),
     },
@@ -1673,7 +1780,7 @@ const renderFourYearTableSection = (
           (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
           row.required,
           sectionErrors[row.year1FieldLabel],
-          undefined,
+          getFinancialFieldRule(section.key, row.year1FieldLabel),
           row.year1FieldLabel
         ),
     },
@@ -1688,7 +1795,7 @@ const renderFourYearTableSection = (
           (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue),
           false,
           undefined,
-          undefined,
+          getFinancialFieldRule(section.key, row.year2FieldLabel),
           row.year2FieldLabel
         ),
     },
@@ -1703,7 +1810,7 @@ const renderFourYearTableSection = (
           (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue),
           false,
           undefined,
-          undefined,
+          getFinancialFieldRule(section.key, row.year3FieldLabel),
           row.year3FieldLabel
         ),
     },
@@ -1718,7 +1825,7 @@ const renderFourYearTableSection = (
           (nextValue) => onFieldValueChange(section.key, row.year4FieldLabel, nextValue),
           false,
           undefined,
-          undefined,
+          getFinancialFieldRule(section.key, row.year4FieldLabel),
           row.year4FieldLabel
         ),
     },
@@ -1799,7 +1906,7 @@ const renderITRNonIndividualSection = (
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
                 sectionErrors[item?.label ?? label],
-                undefined,
+                getFinancialFieldRule(section.key, item?.label ?? label),
                 item?.label ?? label
               )}
             </Box>
@@ -1858,7 +1965,7 @@ const renderITRIndividualSection = (
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
                 sectionErrors[item?.label ?? label],
-                undefined,
+                getFinancialFieldRule(section.key, item?.label ?? label),
                 item?.label ?? label
               )}
             </Box>
@@ -1917,7 +2024,7 @@ const renderProfitAndLossSection = (
                 (nextValue) => onFieldValueChange(section.key, item?.label ?? label, nextValue),
                 required,
                 sectionErrors[item?.label ?? label],
-                undefined,
+                getFinancialFieldRule(section.key, item?.label ?? label),
                 item?.label ?? label
               )}
             </Box>
@@ -2125,7 +2232,7 @@ const renderFormJSection = (
                 (nextValue) => onFieldValueChange(section.key, formJNameMatchItem.label, nextValue),
                 isFieldMandatory(formJNameMatchItem),
                 sectionErrors[formJNameMatchItem.label],
-                undefined,
+                getFinancialFieldRule(section.key, formJNameMatchItem.label),
                 formJNameMatchItem.label
               )}
             </Box>
