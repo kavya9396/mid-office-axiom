@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
-import { Alert, Box, Chip, Paper, Typography, Pagination } from "@mui/material";
+import { Alert, Box, Chip, Paper, Typography, Pagination, Tooltip } from "@mui/material";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { apiRequest } from "../../../services/api";
 import { url as apiUrl } from "../../../services/apiConfig";
@@ -417,7 +417,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [requirementOptionsCache, setRequirementOptionsCache] = useState<Record<string, Option[]>>({});
     const [requirementStatusOptions, setRequirementStatusOptions] = useState<Option[]>(EMPTY_OPTIONS);
 
-    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "Exceptional Pool";
+    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "Exceptional Pool" && roleType !== "AMR_MEDICAL_TASK" && roleType !== "AMR_NON_MEDICAL_TASK";
     const teamOptions = teamOptionsState;
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
@@ -437,6 +437,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);
     const [descriptionDialogText, setDescriptionDialogText] = useState("");
 
+    // sorting state for table columns (supports 'category' for now)
+    const [sortConfig] = useState<null | { key: string; direction: "asc" | "desc" }>(null);
+
     const [savedPage, setSavedPage] = useState(0);
     const PAGE_SIZE = 5;
 
@@ -447,8 +450,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         if (_editableInitRef.current) return;
         const ids = new Set<string>(normalizedExistingRows.map((r) => r.__rowId));
         if (ids.size > 0) {
-            setEditableStatusRowIds(ids);
             _editableInitRef.current = true;
+            setTimeout(() => setEditableStatusRowIds(ids), 0);
         }
     }, [normalizedExistingRows]);
 
@@ -487,6 +490,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const summaryEntries = toSummaryEntries(
         (drsData as { summary?: unknown } | null)?.summary,
     );
+
+    const restrictToFinancialKyc =
+        roleType === "CPT_DATA_ENTRY_NMR_TASK" || roleType === "AMR_NON_MEDICAL_TASK";
+    const restrictToMedical =
+        roleType === "CPT_DATA_ENTRY_MR_TASK" || roleType === "AMR_MEDICAL_TASK";
+    const isAmrStatusReadOnly = roleType === "AMR_MEDICAL_TASK" || roleType === "AMR_NON_MEDICAL_TASK";
 
     const selectedSummary = summaryEntries.find((entry, index) => {
         const memberType = String(entry.memberType ?? "").trim().toUpperCase();
@@ -583,7 +592,34 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     useEffect(() => {
         saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), hasRequirementChanges);
     }, [drsData, hasRequirementChanges, rows]);
-    const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
+    const savedRows = useMemo(() => {
+        let base = rows.filter((row) => !row.__isDraft);
+        if (restrictToFinancialKyc) {
+            base = base.filter((r) => {
+                const cat = String(r.category ?? "").trim().toLowerCase();
+                return cat.includes("financial") || cat.includes("kyc");
+            });
+        } else if (restrictToMedical) {
+            base = base.filter((r) => {
+                const cat = String(r.category ?? "").trim().toLowerCase();
+                const doc = String(r.document ?? "").trim().toLowerCase();
+                return cat.includes("medical") || doc.includes("medical");
+            });
+        }
+
+        if (!sortConfig) return base;
+
+        const key = sortConfig.key;
+        const dir = sortConfig.direction === "asc" ? 1 : -1;
+        return [...base].sort((a, b) => {
+            const av = String((a as any)[key] ?? "").trim().toLowerCase();
+            const bv = String((b as any)[key] ?? "").trim().toLowerCase();
+            if (av < bv) return -1 * dir;
+            if (av > bv) return 1 * dir;
+            return 0;
+        });
+    }, [rows, sortConfig, restrictToFinancialKyc]);
+
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
 
     const totalSavedPages = Math.max(1, Math.ceil(savedRows.length / PAGE_SIZE));
@@ -591,7 +627,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
     useEffect(() => {
         if (savedPage >= totalSavedPages) {
-            setSavedPage(0);
+            setTimeout(() => setSavedPage(0), 0);
         }
     }, [savedRows.length, savedPage, totalSavedPages]);
 
@@ -699,7 +735,22 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         // Category is fetched by team only now — profile is standalone
         const payload: Record<string, string> = { team: row.team };
         const cacheKey = JSON.stringify(payload);
-        return requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
+        const opts = requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
+        if (restrictToFinancialKyc) {
+            return (opts ?? []).filter((o) => {
+                const v = String(o.value ?? o.label ?? "").toLowerCase();
+                return v.includes("financial") || v.includes("kyc");
+            });
+        }
+
+        if (restrictToMedical) {
+            return (opts ?? []).filter((o) => {
+                const v = String(o.value ?? o.label ?? "").toLowerCase();
+                return v.includes("medical");
+            });
+        }
+
+        return opts;
     };
 
     const getProfileOptions = () => {
@@ -719,7 +770,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         if (String(row.category ?? "").trim()) payload.category = row.category;
         if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
         const cacheKey = JSON.stringify(payload);
-        return requirementOptionsCache[cacheKey] ?? requirementDocumentOptions;
+        const opts = requirementOptionsCache[cacheKey] ?? requirementDocumentOptions;
+        if (restrictToMedical) {
+            return (opts ?? []).filter((o) => {
+                const v = String(o.value ?? o.label ?? "").toLowerCase();
+                return v.includes("medical");
+            });
+        }
+
+        return opts;
     };
 
     const getReasonOptions = (row: EditableRequirementRow) => {
@@ -827,9 +886,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     .filter(Boolean) as Array<Record<string, unknown>>;
 
                 try {
-                    // eslint-disable-next-line no-console
                     console.debug("RequirementManagement: candidateSources:", candidateSources);
-                    // eslint-disable-next-line no-console
                     console.debug("RequirementManagement: rawList length:", rawList.length);
                 } catch {
                     // ignore
@@ -878,7 +935,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         .filter(Boolean) as Option[];
 
                     try {
-                        // eslint-disable-next-line no-console
                         console.debug("RequirementManagement: statusRaw length:", statusRaw.length, "mapped:", mapped);
                     } catch {
                         // ignore
@@ -1187,7 +1243,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
                             : String(o.label ?? ""),
                     }));
-                    setProfileOptionsState(unique);
+                    setTimeout(() => setProfileOptionsState(unique), 0);
                     cacheOptionsForPayload({ types: ["profiles_from_misc"] }, unique);
                 }
             }
@@ -1868,32 +1924,43 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     });
                 }
 
-                // Always render the select so the dropdown remains visible,
-                // but disable it when editing isn't allowed (including after save
-                // or when status is not pending).
-                return (
-                    <Box
-                        sx={{
-                            width: 100,
-                            minWidth: 100,
-                            // ensure select text and menu items show capitalized form only in this table
-                            '& .MuiSelect-select': { textTransform: 'capitalize' },
-                            '& .MuiMenuItem-root': { textTransform: 'capitalize' },
-                        }}
-                    >
-                        {renderEditableSelect(
-                            row,
-                            "status",
-                            requirementStatusOptions.map((o) => ({
-                                ...o,
-                                label: (String(o.label ?? "") || "")
-                                    ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
-                                    : String(o.label ?? ""),
-                            })),
-                            !canEditStatus,
-                        )}
-                    </Box>
-                );
+                        // For AMR roles we show status as read-only text instead of a dropdown
+                        if (isAmrStatusReadOnly) {
+                            const rawLabel = requirementStatusOptions.find((o) => String(o.value) === String(row.status))?.label ?? String(row.status ?? "");
+                            const formatted = rawLabel ? String(rawLabel).charAt(0).toUpperCase() + String(rawLabel).slice(1).toLowerCase() : "";
+                            return (
+                                <Box sx={{ width: 100, minWidth: 100 }}>
+                                    {renderReadOnlyField(formatted)}
+                                </Box>
+                            );
+                        }
+
+                        // Always render the select so the dropdown remains visible,
+                        // but disable it when editing isn't allowed (including after save
+                        // or when status is not pending).
+                        return (
+                            <Box
+                                sx={{
+                                    width: 100,
+                                    minWidth: 100,
+                                    // ensure select text and menu items show capitalized form only in this table
+                                    '& .MuiSelect-select': { textTransform: 'capitalize' },
+                                    '& .MuiMenuItem-root': { textTransform: 'capitalize' },
+                                }}
+                            >
+                                {renderEditableSelect(
+                                    row,
+                                    "status",
+                                    requirementStatusOptions.map((o) => ({
+                                        ...o,
+                                        label: (String(o.label ?? "") || "")
+                                            ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                                            : String(o.label ?? ""),
+                                    })),
+                                    !canEditStatus,
+                                )}
+                            </Box>
+                        );
             },
         },
          { key: "ocrStatus", header: "OCR Status", width: "6%" },
@@ -1914,19 +1981,21 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             header: "Description",
             width: shouldShowProfileAndSpecialTest ? "5%" : "7%",
             render: (_value, row) => {
-                const desc = String(row.description ?? "");
+                const desc = String(row.description ?? "").trim();
                 if (!desc) return <Typography sx={{ fontSize: 13, color: "#334155" }}>-</Typography>;
 
                 return (
                     <Box sx={{ display: "flex", alignItems: "start ", justifyContent: "center" }}>
-                        <Box
-                            component="button"
-                            onClick={() => openDescriptionDialog(desc)}
-                            sx={{ border: "none", background: "transparent", p: 0, cursor: "pointer", color: "#0F4C81" }}
-                            aria-label="View description"
-                        >
-                            <EyeIcon />
-                        </Box>
+                        <Tooltip title={desc} placement="top">
+                            <Box
+                                component="button"
+                                onClick={() => openDescriptionDialog(desc)}
+                                sx={{ border: "none", background: "transparent", p: 0, cursor: "pointer", color: "#000000" }}
+                                aria-label="View description"
+                            >
+                                <EyeIcon />
+                            </Box>
+                        </Tooltip>
                     </Box>
                 );
             },
