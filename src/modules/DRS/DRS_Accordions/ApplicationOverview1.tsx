@@ -98,10 +98,10 @@ const riderDetails = Array.isArray(applicationOverview?.riderDetails)
   ? applicationOverview.riderDetails
   : [];
 const riderColumns: Column<RiderRow>[] = [
-  { key: "name", header: "Name", width: "30%" },
-  { key: "type", header: "Option", width: "20%" },
-  { key: "sumAssured", header: "Sum Assured", width: "15%" },
-  { key: "paymentAmount", header: "Modal Premium", width: "15%" }]
+  { key: "name", header: "Name", width: "5%" },
+  { key: "type", header: "Option", width: "5%" },
+  { key: "sumAssured", header: "Sum Assured", width: "5%" },
+  { key: "paymentAmount", header: "Modal Premium", width: "50%" }]
  const riderRows: RiderRow[] =
     riderDetails.map((rider) => ({
       name: rider.name ?? rider.riderName,

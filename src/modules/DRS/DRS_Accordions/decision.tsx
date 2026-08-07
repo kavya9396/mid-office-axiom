@@ -5,8 +5,10 @@ import CustomTextField from "../../../components/ui/TextField/TextField";
 import CustomSelect from "../../../components/ui/Select/Select";
 import { useAppSelector } from "../../../store/hooks";
 import { useState } from "react";
+import CustomButton from "../../../components/ui/Button/Button";
 
 interface MiscItem {
+  type: string;
   code: string;
   value: string;
   description: string;
@@ -42,7 +44,7 @@ console.log('miscData',miscData)
 
 const decisionOptions =
   (miscData as MiscItem[])
-    ?.filter((item) => item.code === decisionCode && item.isActive === "Y")
+    ?.filter((item) => item.type === decisionCode && item.isActive === "Y")
     ?.filter((item) => {
       const decisionValue = item.value?.toLowerCase();
 
@@ -106,7 +108,7 @@ console.log('decisionOptions',decisionOptions)
     sessionStorage.setItem("caseDecision", value);
   }}
 />
-                        
+                        <CustomButton>Submit</CustomButton>
           </Box>
           
         </CustomAccordion>

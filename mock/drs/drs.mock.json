@@ -391,7 +391,7 @@
                     "premiumPaymentTerm": 40
                 }
             ],
-            "riderDetails": [{"term":"123","sumAssured":10000}],
+            "riderDetails": [{"name":"Rider 1","sumAssured":10000,"option":10000,"modalPremium":10000}],
             "customer": {
                 "customerType": "GENERAL",
                 "policyType": ""
