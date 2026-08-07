@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
-import { Alert, Box, Chip, Paper, Typography, Pagination } from "@mui/material";
+import { Alert, Box, Chip, Paper, Typography, Pagination, Tooltip } from "@mui/material";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { apiRequest } from "../../../services/api";
 import { url as apiUrl } from "../../../services/apiConfig";
@@ -437,6 +437,9 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);
     const [descriptionDialogText, setDescriptionDialogText] = useState("");
 
+    // sorting state for table columns (supports 'category' for now)
+    const [sortConfig, setSortConfig] = useState<null | { key: string; direction: "asc" | "desc" }>(null);
+
     const [savedPage, setSavedPage] = useState(0);
     const PAGE_SIZE = 5;
 
@@ -487,6 +490,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const summaryEntries = toSummaryEntries(
         (drsData as { summary?: unknown } | null)?.summary,
     );
+
+    const restrictToFinancialKyc =
+        roleType === "CPT_DATA_ENTRY_NMR_TASK" || roleType === "AMR_NON_MEDICAL_TASK";
+    const restrictToMedical =
+        roleType === "CPT_DATA_ENTRY_MR_TASK" || roleType === "AMR_MEDICAL_TASK";
 
     const selectedSummary = summaryEntries.find((entry, index) => {
         const memberType = String(entry.memberType ?? "").trim().toUpperCase();
@@ -583,7 +591,34 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     useEffect(() => {
         saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), hasRequirementChanges);
     }, [drsData, hasRequirementChanges, rows]);
-    const savedRows = useMemo(() => rows.filter((row) => !row.__isDraft), [rows]);
+    const savedRows = useMemo(() => {
+        let base = rows.filter((row) => !row.__isDraft);
+        if (restrictToFinancialKyc) {
+            base = base.filter((r) => {
+                const cat = String(r.category ?? "").trim().toLowerCase();
+                return cat.includes("financial") || cat.includes("kyc");
+            });
+        } else if (restrictToMedical) {
+            base = base.filter((r) => {
+                const cat = String(r.category ?? "").trim().toLowerCase();
+                const doc = String(r.document ?? "").trim().toLowerCase();
+                return cat.includes("medical") || doc.includes("medical");
+            });
+        }
+
+        if (!sortConfig) return base;
+
+        const key = sortConfig.key;
+        const dir = sortConfig.direction === "asc" ? 1 : -1;
+        return [...base].sort((a, b) => {
+            const av = String((a as any)[key] ?? "").trim().toLowerCase();
+            const bv = String((b as any)[key] ?? "").trim().toLowerCase();
+            if (av < bv) return -1 * dir;
+            if (av > bv) return 1 * dir;
+            return 0;
+        });
+    }, [rows, sortConfig, restrictToFinancialKyc]);
+
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
 
     const totalSavedPages = Math.max(1, Math.ceil(savedRows.length / PAGE_SIZE));
@@ -699,7 +734,22 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         // Category is fetched by team only now — profile is standalone
         const payload: Record<string, string> = { team: row.team };
         const cacheKey = JSON.stringify(payload);
-        return requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
+        const opts = requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
+        if (restrictToFinancialKyc) {
+            return (opts ?? []).filter((o) => {
+                const v = String(o.value ?? o.label ?? "").toLowerCase();
+                return v.includes("financial") || v.includes("kyc");
+            });
+        }
+
+        if (restrictToMedical) {
+            return (opts ?? []).filter((o) => {
+                const v = String(o.value ?? o.label ?? "").toLowerCase();
+                return v.includes("medical");
+            });
+        }
+
+        return opts;
     };
 
     const getProfileOptions = () => {
@@ -719,7 +769,15 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         if (String(row.category ?? "").trim()) payload.category = row.category;
         if (String(row.subCategory ?? "").trim()) payload.subCategory = row.subCategory;
         const cacheKey = JSON.stringify(payload);
-        return requirementOptionsCache[cacheKey] ?? requirementDocumentOptions;
+        const opts = requirementOptionsCache[cacheKey] ?? requirementDocumentOptions;
+        if (restrictToMedical) {
+            return (opts ?? []).filter((o) => {
+                const v = String(o.value ?? o.label ?? "").toLowerCase();
+                return v.includes("medical");
+            });
+        }
+
+        return opts;
     };
 
     const getReasonOptions = (row: EditableRequirementRow) => {
@@ -1900,7 +1958,41 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         ...(shouldShowProfileAndSpecialTest
             ? ([{ key: "profile", header: "Profile", width: "7%" }] as Column<EditableRequirementRow>[])
             : []),
-        { key: "category", header: "Category", width: "8%" },
+        {
+            key: "category",
+            header: (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Typography sx={{ fontSize: 13, fontWeight: 700 }}>Category</Typography>
+                    <Box
+                        component="button"
+                        type="button"
+                        onClick={() => {
+                            const key = "category";
+                            setSortConfig((prev) => {
+                                if (prev && prev.key === key) {
+                                    return { key, direction: prev.direction === "asc" ? "desc" : "asc" };
+                                }
+                                return { key, direction: "asc" };
+                            });
+                        }}
+                        aria-label="Sort by category"
+                        sx={{
+                            border: "none",
+                            background: "transparent",
+                            color: "#000000",
+                            cursor: "pointer",
+                            p: 0,
+                            lineHeight: 1,
+                            fontSize: 12,
+                            textTransform: "none",
+                        }}
+                    >
+                        {sortConfig && sortConfig.key === "category" ? (sortConfig.direction === "asc" ? "▲" : "▼") : "⇅"}
+                    </Box>
+                </Box>
+            ),
+            width: "8%",
+        },
         { key: "subCategory", header: "Sub Category", width: "10%"},
         { key: "document", header: "Document", width: "10%" },
         { key: "reason", header: "Reason", width: "12%" },
@@ -1914,19 +2006,21 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             header: "Description",
             width: shouldShowProfileAndSpecialTest ? "5%" : "7%",
             render: (_value, row) => {
-                const desc = String(row.description ?? "");
+                const desc = String(row.description ?? "").trim();
                 if (!desc) return <Typography sx={{ fontSize: 13, color: "#334155" }}>-</Typography>;
 
                 return (
                     <Box sx={{ display: "flex", alignItems: "start ", justifyContent: "center" }}>
-                        <Box
-                            component="button"
-                            onClick={() => openDescriptionDialog(desc)}
-                            sx={{ border: "none", background: "transparent", p: 0, cursor: "pointer", color: "#0F4C81" }}
-                            aria-label="View description"
-                        >
-                            <EyeIcon />
-                        </Box>
+                        <Tooltip title={desc} placement="top">
+                            <Box
+                                component="button"
+                                onClick={() => openDescriptionDialog(desc)}
+                                sx={{ border: "none", background: "transparent", p: 0, cursor: "pointer", color: "#000000" }}
+                                aria-label="View description"
+                            >
+                                <EyeIcon />
+                            </Box>
+                        </Tooltip>
                     </Box>
                 );
             },
