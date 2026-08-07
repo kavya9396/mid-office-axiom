@@ -417,7 +417,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [requirementOptionsCache, setRequirementOptionsCache] = useState<Record<string, Option[]>>({});
     const [requirementStatusOptions, setRequirementStatusOptions] = useState<Option[]>(EMPTY_OPTIONS);
 
-    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "Exceptional Pool";
+    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "Exceptional Pool" && roleType !== "AMR_MEDICAL_TASK" && roleType !== "AMR_NON_MEDICAL_TASK";
     const teamOptions = teamOptionsState;
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
@@ -495,6 +495,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
         roleType === "CPT_DATA_ENTRY_NMR_TASK" || roleType === "AMR_NON_MEDICAL_TASK";
     const restrictToMedical =
         roleType === "CPT_DATA_ENTRY_MR_TASK" || roleType === "AMR_MEDICAL_TASK";
+    const isAmrStatusReadOnly = roleType === "AMR_MEDICAL_TASK" || roleType === "AMR_NON_MEDICAL_TASK";
 
     const selectedSummary = summaryEntries.find((entry, index) => {
         const memberType = String(entry.memberType ?? "").trim().toUpperCase();
@@ -1923,32 +1924,43 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     });
                 }
 
-                // Always render the select so the dropdown remains visible,
-                // but disable it when editing isn't allowed (including after save
-                // or when status is not pending).
-                return (
-                    <Box
-                        sx={{
-                            width: 100,
-                            minWidth: 100,
-                            // ensure select text and menu items show capitalized form only in this table
-                            '& .MuiSelect-select': { textTransform: 'capitalize' },
-                            '& .MuiMenuItem-root': { textTransform: 'capitalize' },
-                        }}
-                    >
-                        {renderEditableSelect(
-                            row,
-                            "status",
-                            requirementStatusOptions.map((o) => ({
-                                ...o,
-                                label: (String(o.label ?? "") || "")
-                                    ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
-                                    : String(o.label ?? ""),
-                            })),
-                            !canEditStatus,
-                        )}
-                    </Box>
-                );
+                        // For AMR roles we show status as read-only text instead of a dropdown
+                        if (isAmrStatusReadOnly) {
+                            const rawLabel = requirementStatusOptions.find((o) => String(o.value) === String(row.status))?.label ?? String(row.status ?? "");
+                            const formatted = rawLabel ? String(rawLabel).charAt(0).toUpperCase() + String(rawLabel).slice(1).toLowerCase() : "";
+                            return (
+                                <Box sx={{ width: 100, minWidth: 100 }}>
+                                    {renderReadOnlyField(formatted)}
+                                </Box>
+                            );
+                        }
+
+                        // Always render the select so the dropdown remains visible,
+                        // but disable it when editing isn't allowed (including after save
+                        // or when status is not pending).
+                        return (
+                            <Box
+                                sx={{
+                                    width: 100,
+                                    minWidth: 100,
+                                    // ensure select text and menu items show capitalized form only in this table
+                                    '& .MuiSelect-select': { textTransform: 'capitalize' },
+                                    '& .MuiMenuItem-root': { textTransform: 'capitalize' },
+                                }}
+                            >
+                                {renderEditableSelect(
+                                    row,
+                                    "status",
+                                    requirementStatusOptions.map((o) => ({
+                                        ...o,
+                                        label: (String(o.label ?? "") || "")
+                                            ? String(o.label).charAt(0).toUpperCase() + String(o.label).slice(1).toLowerCase()
+                                            : String(o.label ?? ""),
+                                    })),
+                                    !canEditStatus,
+                                )}
+                            </Box>
+                        );
             },
         },
          { key: "ocrStatus", header: "OCR Status", width: "6%" },

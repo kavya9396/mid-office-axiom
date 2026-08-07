@@ -457,32 +457,40 @@ const RightPanel = ({
     const claimTaskId = taskFromTaskId;
     const rowData = row as unknown as Record<string, unknown>;
     const instanceId = String(rowData.instanceId ?? rowData.instanceID ?? instanceFromTaskId).trim();
-    if (!claimTaskId) {
+    // Determine mapped role early so AMR roles can skip claim
+    const mappedRoleType =
+      roleMapper[row.roleType as keyof typeof roleMapper] ?? row.roleType;
+    // For AMR roles we skip claiming the task and directly call DRS and BRE
+    const skipClaim = mappedRoleType === "AMR_MEDICAL_TASK" || mappedRoleType === "AMR_NON_MEDICAL_TASK";
+    if (!skipClaim && !claimTaskId) {
       setClaimError("Task id is missing. Unable to claim this case.");
       return;
     }
  
     try {
       setOpeningCaseLoading(true);
-      const claimResponse = await dispatch(
-        claimTaskThunk({ username, password, taskId: claimTaskId }),
-      ).unwrap();
- 
-      const isClaimed =
-        claimResponse.success === true ||
-        claimResponse.state?.toLowerCase() === "claimed";
- 
-      if (!isClaimed) {
-        setClaimError(claimResponse.message || "Failed to claim task.");
-        return;
+
+      // Only attempt to claim when not skipping claim for AMR roles
+      if (!skipClaim) {
+        const claimResponse = await dispatch(
+          claimTaskThunk({ username, password, taskId: claimTaskId }),
+        ).unwrap();
+
+        const isClaimed =
+          claimResponse.success === true ||
+          claimResponse.state?.toLowerCase() === "claimed";
+
+        if (!isClaimed) {
+          setClaimError(claimResponse.message || "Failed to claim task.");
+          setOpeningCaseLoading(false);
+          return;
+        }
       }
- 
-      const mappedRoleType =
-        roleMapper[row.roleType as keyof typeof roleMapper] ?? row.roleType;
 
       localStorage.setItem("roleType", mappedRoleType);
       localStorage.setItem("taskCompositeId", rawTaskId);
-      localStorage.setItem("taskId", claimTaskId);
+      // store taskId only if present
+      if (claimTaskId) localStorage.setItem("taskId", claimTaskId);
       if (instanceId) {
         localStorage.setItem("instanceId", instanceId);
       }
