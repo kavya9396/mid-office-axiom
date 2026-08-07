@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Box, Container, Typography, Snackbar, Alert } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -22,9 +21,11 @@ import { drsThunk } from "../../../store/thunks/drsThunk";
 import { financialThunk } from "../../../store/thunks/financialThunk";
 import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
 import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
-import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest } from "../../../types/drs.types";
+import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest, MasterOption } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
+import { getSessionMasters } from "../../../utils/masterDataSession";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
+import { CircularProgress } from "@mui/material";
 import { getErrorMessage } from "../../../config/errorMessages";
 import BreDecision from "../DRS_Accordions/BreDecision";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
@@ -138,6 +139,47 @@ const asArray = (value: unknown): Record<string, unknown>[] =>
 
 const firstDefined = (...values: unknown[]) => values.find((value) => value !== undefined && value !== null);
 
+// Get masters data from session
+const getMastersData = () => {
+  const masters = getSessionMasters();
+  return masters || {};
+};
+
+// Get display value from code using masters
+const getDisplayValueFromCode = (code: string, masterKey: string): string => {
+  const masters = getMastersData();
+  const masterList = masters[masterKey as keyof typeof masters];
+  
+  if (!Array.isArray(masterList)) {
+    return code;
+  }
+  
+  // Filter to ensure we're working with MasterOption items
+  const option = (masterList as MasterOption[]).find((item) => 
+    String(item.code).toUpperCase() === String(code).toUpperCase()
+  );
+  
+  return option?.value || option?.description || code;
+};
+
+// Get code from display value using masters
+const getCodeFromDisplayValue = (displayValue: string, masterKey: string): string => {
+  const masters = getMastersData();
+  const masterList = masters[masterKey as keyof typeof masters];
+  
+  if (!Array.isArray(masterList)) {
+    return displayValue;
+  }
+  
+  // Filter to ensure we're working with MasterOption items
+  const option = (masterList as MasterOption[]).find((item) => 
+    String(item.value).toUpperCase() === String(displayValue).toUpperCase() ||
+    String(item.description).toUpperCase() === String(displayValue).toUpperCase()
+  );
+  
+  return option?.code || displayValue;
+};
+
 const toDisplay = (value: unknown) => {
   if (value === undefined || value === null) {
     return "";
@@ -145,6 +187,13 @@ const toDisplay = (value: unknown) => {
 
   if (typeof value === "boolean") {
     return value ? "Y" : "N";
+  }
+
+  const stringValue = String(value).trim();
+  
+  // Map Y/N codes to display values from masters
+  if (stringValue === "Y" || stringValue === "N") {
+    return getDisplayValueFromCode(stringValue, "yes_no");
   }
 
   return String(value);
@@ -1209,6 +1258,11 @@ const formatDdMmYyyyToIsoDate = (value: string | undefined) => {
     return undefined;
   }
 
+  const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(normalizedValue);
+  if (isoMatch) {
+    return normalizedValue;
+  }
+
   const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(normalizedValue);
   if (!match) {
     return normalizedValue;
@@ -1241,6 +1295,20 @@ const assignNumberField = (
 
   if (normalizedValue != null) {
     document[targetKey] = normalizedValue;
+  }
+};
+
+const assignYesNoField = (
+  document: Record<string, unknown>,
+  targetKey: string,
+  value: string | undefined,
+) => {
+  const normalizedValue = getString(value);
+
+  if (normalizedValue) {
+    // Convert display value (Yes/No) back to code (Y/N) using masters
+    const code = getCodeFromDisplayValue(normalizedValue, "yes_no");
+    document[targetKey] = code;
   }
 };
 
@@ -1282,22 +1350,27 @@ const isSecondaryRepeatedField = (label: string) => {
 
 const getFinancialFieldValidationError = (sectionKey: FinancialSectionKey, field: FinancialField, value: string) => {
   const rule = getFinancialFieldRule(sectionKey, field.label);
-  const validationError = validateFinancialFieldValue(value, rule);
+  const trimmedValue = value.trim();
 
-  if (validationError) {
-    return validationError;
+  if (trimmedValue) {
+    const validationError = validateFinancialFieldValue(value, rule);
+    if (validationError) {
+      return validationError;
+    }
+
+    return "";
+  }
+
+  if (isSecondaryRepeatedField(field.label)) {
+    return "";
+  }
+
+  if (isFieldMandatory(field)) {
+    return getErrorMessage("financialFieldMandatory");
   }
 
   if (rule) {
     return "";
-  }
-
-  if (!value.trim() && isSecondaryRepeatedField(field.label)) {
-    return "";
-  }
-
-  if (isFieldMandatory(field) && !value.trim()) {
-    return getErrorMessage("financialFieldMandatory");
   }
 
   return "";
@@ -1354,7 +1427,8 @@ const YearPickerField = ({
 }) => {
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 51 }, (_, i) => currentYear - i);
+  // Generate years from (current year - 5) to (current year - 1) for last financial year
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
   const displayValue = value || "";
 
@@ -1377,26 +1451,30 @@ const YearPickerField = ({
       </Box>
 
       <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle sx={{ fontSize: 14, py: 1 }}>Select Year</DialogTitle>
+        <DialogTitle sx={{ fontSize: 14, py: 1 }}>Select Assessment Year</DialogTitle>
         <Box sx={{ p: 1, width: 300 }}>
-          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6 }}>
-            {years.map((y) => (
-              <Button
-                key={y}
-                size="small"
-                fullWidth
-                variant={String(value).includes(String(y)) ? "contained" : "outlined"}
-                onClick={() => {
-                  const yy1 = String(y).slice(-2);
-                  const yy2 = String(y + 1).slice(-2);
-                  onChange(`AY ${yy1}-${yy2}`);
-                  setOpen(false);
-                }}
-                sx={{ py: 0.5, fontSize: 12 }}
-              >
-                {y}
-              </Button>
-            ))}
+          <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1 }}>
+            {years.map((y) => {
+              const yy1 = String(y).slice(-2);
+              const yy2 = String(y + 1).slice(-2);
+              const ayFormat = `AY ${yy1}-${yy2}`;
+              const isSelected = value === ayFormat;
+              return (
+                <Button
+                  key={y}
+                  size="small"
+                  fullWidth
+                  variant={isSelected ? "contained" : "outlined"}
+                  onClick={() => {
+                    onChange(ayFormat);
+                    setOpen(false);
+                  }}
+                  sx={{ py: 0.5, fontSize: 11 }}
+                >
+                  {ayFormat}
+                </Button>
+              );
+            })}
           </Box>
         </Box>
       </Dialog>
@@ -1417,8 +1495,8 @@ const FinancialYearPickerField = ({
 }) => {
   const [open, setOpen] = useState(false);
   const currentYear = new Date().getFullYear();
-  // Generate years from current year going back 5 years (no future years)
-  const years = Array.from({ length: 6 }, (_, i) => currentYear - i);
+  // Generate years from (current year - 5) to (current year - 1) for last financial year
+  const years = Array.from({ length: 5 }, (_, i) => currentYear - 1 - i);
 
   const displayValue = value || "";
 
@@ -1441,12 +1519,14 @@ const FinancialYearPickerField = ({
       </Box>
 
       <Dialog open={open} onClose={() => setOpen(false)}>
-        <DialogTitle sx={{ fontSize: 14, py: 1 }}>Select Financial Year</DialogTitle>
+        <DialogTitle sx={{ fontSize: 14, py: 1 }}>Select Assessment Year</DialogTitle>
         <Box sx={{ p: 1, width: 300 }}>
           <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 1 }}>
             {years.map((y) => {
-              const financialYear = `${y}-${y + 1}`;
-              const isSelected = value === financialYear;
+              const yy1 = String(y).slice(-2);
+              const yy2 = String(y + 1).slice(-2);
+              const ayFormat = `AY ${yy1}-${yy2}`;
+              const isSelected = value === ayFormat;
               return (
                 <Button
                   key={y}
@@ -1454,12 +1534,12 @@ const FinancialYearPickerField = ({
                   fullWidth
                   variant={isSelected ? "contained" : "outlined"}
                   onClick={() => {
-                    onChange(financialYear);
+                    onChange(ayFormat);
                     setOpen(false);
                   }}
                   sx={{ py: 0.5, fontSize: 11 }}
                 >
-                  {financialYear}
+                  {ayFormat}
                 </Button>
               );
             })}
@@ -2303,9 +2383,12 @@ const ViewFinancial = () => {
     "proposer";
 
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [drsContextLoading, setDrsContextLoading] = useState(false);
   const [drsContextError, setDrsContextError] = useState<string | null>(null);
+  const [breRetriggerLoading, setBreRetriggerLoading] = useState(false);
+  const [drsContextLoaded, setDrsContextLoaded] = useState(false);
+  const [financialDataLoaded, setFinancialDataLoaded] = useState(false);
+  const [breRetriggerLoaded, setBreRetriggerLoaded] = useState(false);
   const [financialData, setFinancialData] = useState<FinancialResponse | null>(null);
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
   const [financialFieldValues, setFinancialFieldValues] = useState<Record<FinancialSectionKey, Record<string, string>>>(
@@ -2401,6 +2484,9 @@ const ViewFinancial = () => {
       try {
         setDrsContextLoading(true);
         setDrsContextError(null);
+        setSnackbarMessage("Loading financial details...");
+        setSnackbarSeverity("info");
+        setSnackbarOpen(true);
         await dispatch(
           drsThunk({
             applicationNo: safeApplicationId,
@@ -2409,8 +2495,15 @@ const ViewFinancial = () => {
             sections: ["summary", "breDecision"],
           })
         ).unwrap();
+        // Clear error on success
+        setDrsContextError(null);
+        setDrsContextLoaded(true);
       } catch (err) {
-        setDrsContextError(err instanceof Error ? err.message : "Failed to fetch DRS details.");
+        const message = err instanceof Error ? err.message : "Failed to fetch DRS details.";
+        setDrsContextError(message);
+        setSnackbarMessage(message);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       } finally {
         setDrsContextLoading(false);
       }
@@ -2432,14 +2525,21 @@ const ViewFinancial = () => {
     const fetchFinancial = async () => {
       try {
         setLoading(true);
-        setError(null);
+        setSnackbarMessage("Loading financial details...");
+        setSnackbarSeverity("info");
+        setSnackbarOpen(true);
         const response = normalizeFinancialResponse(await dispatch(financialThunk(payload)).unwrap());
         setFinancialData(response);
         const built = buildInitialFieldValues(buildFinancialSectionsFromResponse(response.sections));
         setFinancialFieldValues(built);
         setOriginalFinancialFieldValues(built);
+        // Clear error on success
+        setFinancialDataLoaded(true);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch financial details.");
+        const message = err instanceof Error ? err.message : "Failed to fetch financial details.";
+        setSnackbarMessage(message);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       } finally {
         setLoading(false);
       }
@@ -2454,12 +2554,15 @@ const ViewFinancial = () => {
 
     const callFe = async () => {
       try {
+        setBreRetriggerLoading(true);
+        setSnackbarMessage("Loading financial details...");
+        setSnackbarSeverity("info");
+        setSnackbarOpen(true);
         const response = await dispatch(
           breRetriggerThunk({ eventName: "FE", applicationNumber: drsApplicationNumber })
         ).unwrap();
 
         const payload = response.data ?? {};
-console.log('payload',payload)
         dispatch(
           setBreExternalApiOutputs({
             breOutput: payload.breOutput,
@@ -2467,17 +2570,31 @@ console.log('payload',payload)
             breRetriggerStatus: "success",
           })
         );
+        setBreRetriggerLoaded(true);
       } catch (err) {
+        const message = err instanceof Error ? err.message : "Failed to fetch financial details.";
         dispatch(
           setBreExternalApiOutputs({
             breRetriggerStatus: "failure",
           })
         );
+        setSnackbarMessage(message);
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
+      } finally {
+        setBreRetriggerLoading(false);
       }
     };
 
     void callFe();
   }, [dispatch, drsApplicationNumber]);
+
+  // Compute showLoader based on loading states and whether all APIs have loaded at least once
+  const showLoader = useMemo(() => {
+    const isLoading = drsContextLoading || loading || breRetriggerLoading;
+    const allLoaded = drsContextLoaded && financialDataLoaded && breRetriggerLoaded;
+    return isLoading && !allLoaded;
+  }, [drsContextLoading, loading, breRetriggerLoading, drsContextLoaded, financialDataLoaded, breRetriggerLoaded]);
 
   const resolvedActiveSectionId = useMemo(
     () =>
@@ -2648,7 +2765,7 @@ console.log('payload',payload)
       const doc: Record<string, unknown> = {};
         assignTextField(doc, "companyName", salarySlips["Company Name"]);
         assignTextField(doc, "partyName", salarySlips["Life Assured Name"]);
-        assignTextField(doc, "nameMatchInd", salarySlips["Is Life Assured Name Same?"]);
+        assignYesNoField(doc, "nameMatchInd", salarySlips["Is Life Assured Name Same?"]);
         assignTextField(doc, "pfUan", salarySlips["PF / UAN No"]);
         assignNumberField(doc, "annualBonus", salarySlips["Annual Bonus/Incentive/Reimbursement"]);
 
@@ -2670,14 +2787,14 @@ console.log('payload',payload)
     if (bankStatement && Object.keys(bankStatement).length > 0) {
       const doc: Record<string, unknown> = {};
         assignTextField(doc, "fullName", bankStatement["Life Assured Name"]);
-        assignTextField(doc, "nameMatchInd", bankStatement["Is LA Name Match with Doc Name?"]);
+        assignYesNoField(doc, "nameMatchInd", bankStatement["Is LA Name Match with Doc Name?"]);
         assignTextField(doc, "statementPeriod", bankStatement["Statement Period"]);
         assignNumberField(doc, "openingBalance", bankStatement["Opening Balance"]);
-        assignTextField(doc, "liPremiumDeductionInd", bankStatement["Life Insurance Premium Deduction Entry"]);
-        assignTextField(doc, "wineBeerEntriesInd", bankStatement["Wine Beer_Entries"]);
-        assignTextField(doc, "medEntryInd", bankStatement["Med Entry"]);
-        assignTextField(doc, "latest6MonthsInd", bankStatement["Latest 6 months statements given"]);
-        assignTextField(doc, "overdraftInd", bankStatement["Any Overdraft(Negative/Debit) Balances"]);
+        assignYesNoField(doc, "liPremiumDeductionInd", bankStatement["Life Insurance Premium Deduction Entry"]);
+        assignYesNoField(doc, "wineBeerEntriesInd", bankStatement["Wine Beer_Entries"]);
+        assignYesNoField(doc, "medEntryInd", bankStatement["Med Entry"]);
+        assignYesNoField(doc, "latest6MonthsInd", bankStatement["Latest 6 months statements given"]);
+        assignYesNoField(doc, "overdraftInd", bankStatement["Any Overdraft(Negative/Debit) Balances"]);
 
         const months = buildMonthlyEntries(bankStatement, [
           "Monthly Closing Bal 1",
@@ -2697,8 +2814,8 @@ console.log('payload',payload)
     if (bankStatementSalaryCredit && Object.keys(bankStatementSalaryCredit).length > 0) {
       const doc: Record<string, unknown> = {};
         assignTextField(doc, "fullName", bankStatementSalaryCredit["Life Assured Name"]);
-        assignTextField(doc, "nameMatchInd", bankStatementSalaryCredit["Is LA Name Match with Doc Name?"]);
-        assignTextField(doc, "salaryCreditedInd", bankStatementSalaryCredit["Salary Credited"]);
+        assignYesNoField(doc, "nameMatchInd", bankStatementSalaryCredit["Is LA Name Match with Doc Name?"]);
+        assignYesNoField(doc, "salaryCreditedInd", bankStatementSalaryCredit["Salary Credited"]);
         assignNumberField(doc, "annualBonus", bankStatementSalaryCredit["Annual Bonus /Incentive /Reimbursement"]);
         assignNumberField(doc, "openingBalance", bankStatementSalaryCredit["Opening Balance"]);
         assignNumberField(doc, "closingBalance", bankStatementSalaryCredit["Closing Balance"]);
@@ -2738,7 +2855,7 @@ console.log('payload',payload)
     const formJ = fieldValues.form_j;
     if (formJ && Object.keys(formJ).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignTextField(doc, "nameMatchInd", formJ["Is Form J in the name of LA"]);
+        assignYesNoField(doc, "nameMatchInd", formJ["Is Form J in the name of LA"]);
         const months = buildMonthlyEntries(formJ, [
           "Month1 Receipt1",
           "Month2 Receipt1",
@@ -2756,8 +2873,8 @@ console.log('payload',payload)
     const sipStatement = fieldValues.sip_statement;
     if (sipStatement && Object.keys(sipStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignTextField(doc, "isLaNameSame", sipStatement["Is SIP Statements in the Name of LA"]);
-        assignTextField(doc, "latest6MonthsInd", sipStatement["Latest 6 Months SIP Statements Given"]);
+        assignYesNoField(doc, "isLaNameSame", sipStatement["Is SIP Statements in the Name of LA"]);
+        assignYesNoField(doc, "latest6MonthsInd", sipStatement["Latest 6 Months SIP Statements Given"]);
         const months = buildMonthlyEntries(sipStatement, [
           "SIP Per Month 1",
           "SIP Per Month2",
@@ -2776,7 +2893,7 @@ console.log('payload',payload)
     if (epfBasic && Object.keys(epfBasic).length > 0) {
       const doc: Record<string, unknown> = {};
         assignTextField(doc, "orgName", epfBasic["Latest Organization Name"]);
-        assignTextField(doc, "isOrgNameSame", epfBasic["Is Organization Name Same?"]);
+        assignYesNoField(doc, "isOrgNameSame", epfBasic["Is Organization Name Same?"]);
         assignNumberField(doc, "income", epfBasic["Income"]);
         if (hasDocumentFields(doc)) documents.epf_basic = doc;
     }
@@ -2786,7 +2903,7 @@ console.log('payload',payload)
     if (epfAdvanced && Object.keys(epfAdvanced).length > 0) {
       const doc: Record<string, unknown> = {};
         assignTextField(doc, "orgName", epfAdvanced["Latest Organization Name"]);
-        assignTextField(doc, "isOrgNameSame", epfAdvanced["Is Organization Name Same?"]);
+        assignYesNoField(doc, "isOrgNameSame", epfAdvanced["Is Organization Name Same?"]);
         const months = buildMonthlyEntries(epfAdvanced, [
           "PF Contribution M1",
           "PF Contribution M2",
@@ -2806,7 +2923,8 @@ console.log('payload',payload)
       const doc: Record<string, unknown> = {};
       if (getString(form16["Company Name"])) doc.companyName = getString(form16["Company Name"]);
       if (getString(form16["Life Assured Name"])) doc.partyName = getString(form16["Life Assured Name"]);
-      if (getString(form16["Is Life Assured Name Same With Doc Name?"])) doc.nameMatchInd = getString(form16["Is Life Assured Name Same With Doc Name?"]);
+      const nameMatch = form16["Is Life Assured Name Same With Doc Name?"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
       
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
@@ -2850,7 +2968,8 @@ console.log('payload',payload)
     const propertyPurchase = fieldValues.property_purchase;
     if (propertyPurchase && Object.keys(propertyPurchase).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(propertyPurchase["Is Property purchased by LA"])) doc.isPurchasedByLa = getString(propertyPurchase["Is Property purchased by LA"]);
+      const isPurchased = propertyPurchase["Is Property purchased by LA"];
+      if (isPurchased) doc.isPurchasedByLa = getCodeFromDisplayValue(isPurchased, "yes_no");
       if (getNumeric(propertyPurchase["Purchase Price"])) doc.purchasePrice = getNumeric(propertyPurchase["Purchase Price"]);
       if (getString(propertyPurchase["Financial Year of Purchase"])) doc.financialYearOfPurchase = getString(propertyPurchase["Financial Year of Purchase"]);
       if (getNumeric(propertyPurchase["Estimated Market Value of Property"])) doc.estimatedMarketValue = getNumeric(propertyPurchase["Estimated Market Value of Property"]);
@@ -2861,7 +2980,8 @@ console.log('payload',payload)
     const propertyValuation = fieldValues.property_valuation;
     if (propertyValuation && Object.keys(propertyValuation).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(propertyValuation["Is Property Valuation Report in the name of LA"])) doc.nameMatchInd = getString(propertyValuation["Is Property Valuation Report in the name of LA"]);
+      const nameMatch = propertyValuation["Is Property Valuation Report in the name of LA"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
       if (getNumeric(propertyValuation["Estimated Market Value of Property(as per report)"])) doc.estimatedMarketValue = getNumeric(propertyValuation["Estimated Market Value of Property(as per report)"]);
       if (Object.keys(doc).length > 0) documents.property_valuation = doc;
     }
@@ -2873,8 +2993,10 @@ console.log('payload',payload)
     const creditCard = fieldValues.credit_card;
     if (creditCard && Object.keys(creditCard).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(creditCard["Is Credit card statement in the name of LA"])) doc.nameMatchInd = getString(creditCard["Is Credit card statement in the name of LA"]);
-      if (getString(creditCard["Is LA Defaulter in the Payment"])) doc.isDefaulter = getString(creditCard["Is LA Defaulter in the Payment"]);
+      const nameMatch = creditCard["Is Credit card statement in the name of LA"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      const isDefaulter = creditCard["Is LA Defaulter in the Payment"];
+      if (isDefaulter) doc.isDefaulter = getCodeFromDisplayValue(isDefaulter, "yes_no");
       if (getString(creditCard["Type of Card"])) doc.cardType = getString(creditCard["Type of Card"]);
       if (getNumeric(creditCard["Credit Limit"])) doc.creditLimit = getNumeric(creditCard["Credit Limit"]);
       if (getNumeric(creditCard["Points Earned"])) doc.pointsEarned = getNumeric(creditCard["Points Earned"]);
@@ -2914,7 +3036,8 @@ console.log('payload',payload)
       const doc: Record<string, unknown> = {};
       if (getString(itrIndividual["Permanent Account Number"])) doc.panNumber = getString(itrIndividual["Permanent Account Number"]);
       if (getString(itrIndividual["Life Assured Name"])) doc.partyName = getString(itrIndividual["Life Assured Name"]);
-      if (getString(itrIndividual["Is Life Assured Name Same?"])) doc.nameMatchInd = getString(itrIndividual["Is Life Assured Name Same?"]);
+      const nameMatch = itrIndividual["Is Life Assured Name Same?"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
       if (getNumeric(itrIndividual["PF deduction - Salaried customers"])) doc.pfDeduction = getNumeric(itrIndividual["PF deduction - Salaried customers"]);
       
       const years: Array<Record<string, unknown>> = [];
@@ -2922,7 +3045,8 @@ console.log('payload',payload)
         const suffix = i === 1 ? "" : ` Year ${i}`;
         const assessment = getString(itrIndividual[`Assessment Year${suffix}`]);
         const ackNumber = getString(itrIndividual[`ITR Acknowledgement Number${suffix}`]);
-        const panMatchedWithBarcode = getString(itrIndividual[`Pan Number Matched with Barcode Number${suffix}`]);
+        const panMatchedWithBarcodeValue = itrIndividual[`Pan Number Matched with Barcode Number${suffix}`];
+        const panMatchedWithBarcode = panMatchedWithBarcodeValue ? getCodeFromDisplayValue(panMatchedWithBarcodeValue, "yes_no") : undefined;
         const filingDate = getString(itrIndividual[`Date of Filling ITR${suffix}`]);
         const salary = getNumeric(itrIndividual[`Income from Salary(A)${suffix}`]);
         const house = getNumeric(itrIndividual[`Income from House Property${suffix}`]);
@@ -3042,8 +3166,10 @@ console.log('payload',payload)
     const fixedDeposit = fieldValues.fixed_deposit_receipt;
     if (fixedDeposit && Object.keys(fixedDeposit).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(fixedDeposit["Is Fixed Deposit Receipt in the name of LA"])) doc.nameMatchInd = getString(fixedDeposit["Is Fixed Deposit Receipt in the name of LA"]);
-      if (getString(fixedDeposit["Is Fixed Deposit Receipts matured"])) doc.isMatured = getString(fixedDeposit["Is Fixed Deposit Receipts matured"]);
+      const nameMatch = fixedDeposit["Is Fixed Deposit Receipt in the name of LA"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      const isMatured = fixedDeposit["Is Fixed Deposit Receipts matured"];
+      if (isMatured) doc.isMatured = getCodeFromDisplayValue(isMatured, "yes_no");
       if (getNumeric(fixedDeposit["Amount Invested"])) doc.amountInvested = getNumeric(fixedDeposit["Amount Invested"]);
       if (getNumeric(fixedDeposit["Income Earned"])) doc.incomeEarned = getNumeric(fixedDeposit["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.fixed_deposit_receipt = doc;
@@ -3053,8 +3179,10 @@ console.log('payload',payload)
     const govtBonds = fieldValues.govt_bonds;
     if (govtBonds && Object.keys(govtBonds).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(govtBonds["Is Bond Certification in the name of LA"])) doc.nameMatchInd = getString(govtBonds["Is Bond Certification in the name of LA"]);
-      if (getString(govtBonds["Is Bond Certificate matured"])) doc.isMatured = getString(govtBonds["Is Bond Certificate matured"]);
+      const nameMatch = govtBonds["Is Bond Certification in the name of LA"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      const isMatured = govtBonds["Is Bond Certificate matured"];
+      if (isMatured) doc.isMatured = getCodeFromDisplayValue(isMatured, "yes_no");
       if (getNumeric(govtBonds["Amount Invested or Maturity Value, whichever higher"])) doc.amountInvested = getNumeric(govtBonds["Amount Invested or Maturity Value, whichever higher"]);
       if (getNumeric(govtBonds["Income Earned"])) doc.incomeEarned = getNumeric(govtBonds["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.govt_bonds = doc;
@@ -3064,8 +3192,10 @@ console.log('payload',payload)
     const loanStatement = fieldValues.loan_statement;
     if (loanStatement && Object.keys(loanStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(loanStatement["Is Loan Statements in the name of LA"])) doc.nameMatchInd = getString(loanStatement["Is Loan Statements in the name of LA"]);
-      if (getString(loanStatement["Is LA Defaulter in the Payment"])) doc.isDefaulter = getString(loanStatement["Is LA Defaulter in the Payment"]);
+      const nameMatch = loanStatement["Is Loan Statements in the name of LA"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      const isDefaulter = loanStatement["Is LA Defaulter in the Payment"];
+      if (isDefaulter) doc.isDefaulter = getCodeFromDisplayValue(isDefaulter, "yes_no");
       if (getNumeric(loanStatement["Monthly EMI as per Schedule"])) doc.monthlyEmi = getNumeric(loanStatement["Monthly EMI as per Schedule"]);
       if (getNumeric(loanStatement["Income Earned"])) doc.incomeEarned = getNumeric(loanStatement["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.loan_statement = doc;
@@ -3075,7 +3205,8 @@ console.log('payload',payload)
     const mutualFund = fieldValues.mutual_fund;
     if (mutualFund && Object.keys(mutualFund).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(mutualFund["Is Mutual Fund Statement in the name of LA"])) doc.nameMatchInd = getString(mutualFund["Is Mutual Fund Statement in the name of LA"]);
+      const nameMatch = mutualFund["Is Mutual Fund Statement in the name of LA"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
       if (getNumeric(mutualFund["Latest Market Value (as per NAV) in Statement"])) doc.latestMarketValue = getNumeric(mutualFund["Latest Market Value (as per NAV) in Statement"]);
       if (getNumeric(mutualFund["Income Earned"])) doc.incomeEarned = getNumeric(mutualFund["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.mutual_fund = doc;
@@ -3109,7 +3240,8 @@ console.log('payload',payload)
     const stockHolding = fieldValues.stock_holding;
     if (stockHolding && Object.keys(stockHolding).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(stockHolding["Is Stock Holding Statement in name of LA/his Business"])) doc.nameMatchInd = getString(stockHolding["Is Stock Holding Statement in name of LA/his Business"]);
+      const nameMatch = stockHolding["Is Stock Holding Statement in name of LA/his Business"];
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
       if (getNumeric(stockHolding["Gross Total Market Value as per the Stmt"])) doc.estimatedMarketValue = getNumeric(stockHolding["Gross Total Market Value as per the Stmt"]);
       if (getNumeric(stockHolding["Income Earned"])) doc.incomeEarned = getNumeric(stockHolding["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.stock_holding = doc;
@@ -3119,8 +3251,10 @@ console.log('payload',payload)
     const vehicleOwnership = fieldValues.vehicle_ownership;
     if (vehicleOwnership && Object.keys(vehicleOwnership).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(vehicleOwnership["Is Registration Papers in the name of LA"])) doc.isRegNameLa = getString(vehicleOwnership["Is Registration Papers in the name of LA"]);
-      if (getString(vehicleOwnership["Is Purchase invoices in the name of LA"])) doc.isInvoiceNameLa = getString(vehicleOwnership["Is Purchase invoices in the name of LA"]);
+      const isRegName = vehicleOwnership["Is Registration Papers in the name of LA"];
+      if (isRegName) doc.isRegNameLa = getCodeFromDisplayValue(isRegName, "yes_no");
+      const isInvoiceName = vehicleOwnership["Is Purchase invoices in the name of LA"];
+      if (isInvoiceName) doc.isInvoiceNameLa = getCodeFromDisplayValue(isInvoiceName, "yes_no");
       if (getNumeric(vehicleOwnership["Purchase Price"])) doc.purchasePrice = getNumeric(vehicleOwnership["Purchase Price"]);
       if (getString(vehicleOwnership["Vehicle RC Number"])) doc.vehicleRcNumber = getString(vehicleOwnership["Vehicle RC Number"]);
       if (Object.keys(doc).length > 0) documents.vehicle_ownership = doc;
@@ -3130,8 +3264,10 @@ console.log('payload',payload)
     const vahan = fieldValues.vahan;
     if (vahan && Object.keys(vahan).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(vahan["Is Registration Papers in the Name of LA"])) doc.isRegNameLa = getString(vahan["Is Registration Papers in the Name of LA"]);
-      if (getString(vahan["Is Purchase Invoices in the Name of LA"])) doc.isInvoiceNameLa = getString(vahan["Is Purchase Invoices in the Name of LA"]);
+      const isRegName = vahan["Is Registration Papers in the Name of LA"];
+      if (isRegName) doc.isRegNameLa = getCodeFromDisplayValue(isRegName, "yes_no");
+      const isInvoiceName = vahan["Is Purchase Invoices in the Name of LA"];
+      if (isInvoiceName) doc.isInvoiceNameLa = getCodeFromDisplayValue(isInvoiceName, "yes_no");
       if (getString(vahan["Car RC Number"])) doc.carRcNumber = getString(vahan["Car RC Number"]);
       if (getNumeric(vahan["IDV"])) doc.idv = getNumeric(vahan["IDV"]);
       if (Object.keys(doc).length > 0) documents.vahan = doc;
@@ -3518,6 +3654,21 @@ console.log('payload',payload)
 
   return (
     <Container disableGutters sx={{ pb: 4 }}>
+      {showLoader && (
+        <Box
+          sx={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 2000,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "rgba(0,0,0,0.25)",
+          }}
+        >
+          <CircularProgress size={64} sx={{ color: "#fff" }} />
+        </Box>
+      )}
       <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
 
       <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
@@ -3540,7 +3691,13 @@ console.log('payload',payload)
           onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
           variant="filled"
-          sx={{ width: "100%" }}
+          sx={{
+            width: "100%",
+            ...(snackbarSeverity === "info" && {
+              backgroundColor: "#0f5b92",
+              color: "#ffffff",
+            }),
+          }}
         >
           {snackbarMessage}
         </Alert>
@@ -3574,17 +3731,6 @@ console.log('payload',payload)
           )}
         </CustomAccordion>
       </Box>
-
-      {(drsContextLoading || loading) && (
-        <Typography sx={{ color: "#6B7280", mb: 2 }}>
-          {drsContextLoading ? "Loading DRS details..." : "Loading financial details..."}
-        </Typography>
-      )}
-      {(drsContextError || financialFetchPayloadError || error) && (
-        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
-          {drsContextError ?? financialFetchPayloadError ?? error}
-        </Typography>
-      )}
 
       <Box
         sx={{

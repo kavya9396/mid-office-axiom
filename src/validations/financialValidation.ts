@@ -476,44 +476,66 @@ export const validateFinancialFieldValue = (
   }
 
   if (rule?.inputType === "financialYear") {
-    // Financial year format: YYYY-YYYY (e.g., 2023-2024)
-    const match = /^(\d{4})-(\d{4})$/.exec(trimmedValue);
+    // Financial year format: AY XX-XX (e.g., AY 25-26)
+    const match = /^AY\s+(\d{2})-(\d{2})$/.exec(trimmedValue);
     if (!match) {
       return getErrorMessage("financialYearFormat");
     }
     
-    const [, startYear, endYear] = match;
-    const startYearNum = Number(startYear);
-    const endYearNum = Number(endYear);
+    const [, startYearShort, endYearShort] = match;
+    const startYearNum = Number(startYearShort);
+    const endYearNum = Number(endYearShort);
     
-    if (endYearNum !== startYearNum + 1) {
+    // Check if years are consecutive (handling century rollover)
+    const isConsecutive = 
+      (endYearNum === startYearNum + 1) || 
+      (startYearNum === 99 && endYearNum === 0);
+    
+    if (!isConsecutive) {
       return getErrorMessage("financialYearInvalid");
     }
 
-    // Validate financial year is within last 5 years till current year
+    // Convert 2-digit year to 4-digit year for validation
     const currentYear = new Date().getFullYear();
-    const earliestYear = currentYear - 5;
+    const currentCentury = Math.floor(currentYear / 100) * 100;
+    const currentYearShort = currentYear % 100;
     
-    if (startYearNum < earliestYear || startYearNum > currentYear) {
+    // Determine full year based on current year
+    let fullStartYear = currentCentury + startYearNum;
+    if (startYearNum > currentYearShort + 10) {
+      fullStartYear -= 100; // Previous century
+    }
+    
+    // Validate financial year is within last 5 years till last financial year (current year - 1)
+    const earliestYear = currentYear - 5;
+    const latestYear = currentYear - 1;
+    
+    if (fullStartYear < earliestYear || fullStartYear > latestYear) {
       return getErrorMessage("financialYearOutOfRange");
     }
   }
 
   if (rule?.inputType === "yesNo") {
     const upperValue = trimmedValue.toUpperCase();
-    if (upperValue !== "YES" && upperValue !== "NO") {
+    if (upperValue !== "YES" && upperValue !== "NO" && upperValue !== "Y" && upperValue !== "N") {
       return getErrorMessage("financialYesNoValue");
     }
   }
 
   if (rule?.inputType === "dateDDMMYYYY") {
-    const match = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(trimmedValue);
+    const isoMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmedValue);
+    const ddMmYyyyMatch = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(trimmedValue);
 
-    if (!match) {
+    const dateMatch = isoMatch ?? ddMmYyyyMatch;
+
+    if (!dateMatch) {
       return getErrorMessage("financialDateFormat");
     }
 
-    const [, dayText, monthText, yearText] = match;
+    const [, first, second, third] = dateMatch;
+    const dayText = isoMatch ? third : first;
+    const monthText = isoMatch ? second : second;
+    const yearText = isoMatch ? first : third;
     const day = Number(dayText);
     const month = Number(monthText);
     const year = Number(yearText);

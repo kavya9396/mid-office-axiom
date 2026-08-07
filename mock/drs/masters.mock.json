@@ -1414,13 +1414,13 @@
     ],
     "yes_no": [
       {
-        "code": "YES",
+        "code": "Y",
         "description": "Yes",
         "value": "Yes",
         "isActive": "Y"
       },
       {
-        "code": "NO",
+        "code": "N",
         "description": "No",
         "value": "No",
         "isActive": "Y"
