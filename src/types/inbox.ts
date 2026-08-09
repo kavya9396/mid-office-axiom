@@ -5,11 +5,6 @@ export type RoleGroup = {
 
 export type UserContextResponse = {
   userId: string;
-  username: string;
-  businessType: string;
-  roleType: string;
-  roles: RoleGroup[];
-  pools?: Record<string, string[]>;
 poolData?: Record<string, tableData[]>;
 };
 export type InboxRequest = {

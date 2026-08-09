@@ -20,6 +20,8 @@ import { useAppDispatch } from "../../store/hooks";
 import { getInboxPath } from "../../routes/routes";
 import { loadMasterData } from "../Helper/MasterHelper";
 import { DRS_MASTER_KEYS } from "../DRS/drsMasters";
+import { decryptString, encryptString } from "../../utils/crypto";
+import { setCredentials } from "../../store/slices/apiSlice";
 
 type LoginForm = {
   username: string;
@@ -52,14 +54,29 @@ const Login = () => {
 
       // Check for success: response_code 200 and error false
       if (res.response_code === 200 && !res.error && res.data) {
-        const normalizedBusinessType = "retail";
 
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("username", res.data.username || data.username);
         localStorage.setItem("password", data.password);
-        if (res.data.lastLoginAt) {
-          localStorage.setItem("lastLoginAt", res.data.lastLoginAt);
-        }
+        const lastLoginAt = res.data.lastLoginAt;
+
+if (lastLoginAt) {
+  localStorage.setItem("lastLoginAt", lastLoginAt);
+}
+         localStorage.setItem(
+    "roles",
+    JSON.stringify(res.data.roles ?? [])
+  );
+
+dispatch(
+  setCredentials({
+    username: res.data.username || data.username,
+    password: data.password,
+    token: res.data.token,
+    refreshToken: res.data.refreshToken,
+    roles: res.data.roles ?? [],
+  })
+);
 
         // Store credentials encrypted only when user opted to remember
         if (remember) {
@@ -75,7 +92,6 @@ const Login = () => {
           localStorage.removeItem("remember_data");
           localStorage.removeItem("remember_me");
         }
-        localStorage.setItem("businessType", normalizedBusinessType);
 
         try {
           await loadMasterData(dispatch, {types:DRS_MASTER_KEYS});
@@ -83,7 +99,7 @@ const Login = () => {
           console.error("Failed to load master data", error);
         }
 
-        navigate(getInboxPath(normalizedBusinessType));
+        navigate(getInboxPath());
         return;
       }
 

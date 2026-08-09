@@ -8,7 +8,7 @@
     "refreshToken": "fZhAtrSXtKoz6kMcHbgHJ1-cPCS6YuTUQTU48ka74ag",
     "refreshExpiresIn": 300,
     "username": "ipru74574",
-    "roles": [],
+    "roles": ["USER_MANAGEMENT","ALLOCATION_DETAILS","LEAVE_MANAGEMENT"],
     "firstLogin": true,
     "firstLoginAt": "2026-08-06T10:24:48.17740721",
     "lastLoginAt": "2026-08-06T07:11:54.437576"

@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import LeftPanel from "./LeftPanel";
 import type { tableData } from "../../types/inbox";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
-import { useAppDispatch } from "../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import RightPanel from "./RightPanel";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
@@ -44,7 +44,20 @@ const Inbox = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { businessType } = useAppContext();
+  const roles = useAppSelector(
+  (state) => state.api.auth.user?.data?.roles ?? []
+);
 
+const username = useAppSelector(
+  (state) => state.api.auth.user?.data?.username ?? ""
+);
+const password = useAppSelector(
+  (state) => state.api.auth.user?.data?.password ?? ""
+);
+const lastLoginAt= useAppSelector(
+  (state) => state.api.auth.user?.data?.lastLoginAt ?? ""
+);
+console.log('username',roles,username,password,lastLoginAt)
   const [toggle, setToggle] = useState(false);
   const [selectedPool, setSelectedPool] = useState<string>(() => {
     return sessionStorage.getItem("selectedPool") ?? ALL_CASES_POOL;
@@ -66,8 +79,6 @@ const Inbox = () => {
     try {
       const showLoader = !hasLoadedOnce.current;
       if (showLoader) setLoading(true);
-      const username = localStorage.getItem("username") ?? "";
-      const password = localStorage.getItem("password") ?? "";
       const roleResponse = await dispatch(fetchInboxThunk({ username, password })).unwrap();
       const poolDataFromAPI = normalizePoolData(roleResponse.poolData);
       const businessTypeFromPoolData = normalizeBusinessType(

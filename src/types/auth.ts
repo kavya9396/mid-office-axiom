@@ -11,6 +11,7 @@ export interface LoginResponseData {
   refreshToken: string;
   refreshExpiresIn: number;
   username: string;
+  password:string;
   roles: string[];
   firstLogin: boolean;
   firstLoginAt: string | null;

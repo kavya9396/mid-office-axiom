@@ -3,7 +3,6 @@ import Login from "../modules/Login/Login";
 import ProtectedRoute from "./ProtectedRoute";
 import BusinessTypeRoute from "./BusinessTypeRoute";
 import RootLayout from "./RootLayout";
-import Inbox from "../modules/Landing/Inbox";
 import { PATHS } from "./paths";
 import DRS from "../modules/DRS/DRS";
 import ViewFinancial from "../modules/DRS/Financial/ViewFinancial";
@@ -16,6 +15,7 @@ import OpenTasksPage from "../modules/QuickLinks/OpenTasksPage";
 import UserManagement from "../modules/DRS/UserManagement";
 import SearchApplication from "../modules/Landing/SearchApplication";
 import ViewMedical from "../modules/DRS/Medical Final/ViewMedical";
+import Inbox1 from "../modules/Landing/Inbox1";
 
 function BusinessTypeRedirect() {
     return <Navigate to="/inbox" replace />;
@@ -33,7 +33,7 @@ export default function AppRoutes() {
 
              {/* Independent Route */}
                 <Route path={PATHS.INBOX} element={<RootLayout />}>
-                    <Route index element={<Inbox />} />
+                    <Route index element={<Inbox1 />} />
                 </Route>
                 <Route path={PATHS.USER_MANAGEMENT} element={<RootLayout />}>
                     <Route index element={<UserManagement />} />
