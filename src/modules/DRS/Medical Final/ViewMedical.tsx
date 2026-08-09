@@ -23,9 +23,9 @@ import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMember
 import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
 import MerForm, { type MerFormHandle } from "./MER/MerForm";
 import { getMerConfig } from "./MER/merConfig";
-import OtherMedicalsForm from "./Other Medicals/OtherMedicalsForm";
+import OtherMedicalsForm, { type OtherMedicalsFormHandle } from "./Other Medicals/OtherMedicalsForm";
 import { getOtherMedicalsConfig } from "./Other Medicals/otherMedicalsConfig";
-import SpecialMedicalForm from "./Special Medical/SpecialMedicalForm";
+import SpecialMedicalForm, { type SpecialMedicalFormHandle } from "./Special Medical/SpecialMedicalForm";
 import { getSpecialMedicalConfig } from "./Special Medical/specialMedicalConfig";
 
 const getStoredApplicantTab = () =>
@@ -334,6 +334,8 @@ const ViewMedical = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [editingSubSectionId, setEditingSubSectionId] = useState<string | null>(null);
   const merFormRefs = useRef<Record<string, MerFormHandle | null>>({});
+  const specialMedicalFormRefs = useRef<Record<string, SpecialMedicalFormHandle | null>>({});
+  const otherMedicalsFormRefs = useRef<Record<string, OtherMedicalsFormHandle | null>>({});
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -764,7 +766,20 @@ const ViewMedical = () => {
     return () => observer.disconnect();
   }, [flattenedSubSections, currentApplicantTab]);
 
+  const getSubSectionEditHandle = (subSectionId: string) => {
+    if (subSectionId.startsWith("mer-")) {
+      return merFormRefs.current[subSectionId];
+    }
+
+    if (subSectionId.startsWith("specialMedical-")) {
+      return specialMedicalFormRefs.current[subSectionId];
+    }
+
+    return otherMedicalsFormRefs.current[subSectionId];
+  };
+
   const handleSubSectionEdit = (subSectionId: string) => {
+    getSubSectionEditHandle(subSectionId)?.beginEdit();
     setEditingSubSectionId(subSectionId);
     setSaveMessage(null);
     setSaveError(null);
@@ -772,12 +787,17 @@ const ViewMedical = () => {
 
   const handleSubSectionSave = async () => {
     // TODO: Implement save logic for individual subsection
+    if (editingSubSectionId) {
+      getSubSectionEditHandle(editingSubSectionId)?.commitEdit();
+    }
     setSaveMessage("Subsection saved successfully.");
     setEditingSubSectionId(null);
   };
 
   const handleSubSectionReset = () => {
-    // TODO: Implement reset logic for individual subsection
+    if (editingSubSectionId) {
+      getSubSectionEditHandle(editingSubSectionId)?.resetEdit();
+    }
     setEditingSubSectionId(null);
     setSaveMessage(null);
     setSaveError(null);
@@ -1253,13 +1273,28 @@ const ViewMedical = () => {
                         selectedSubSection={subSection.title}
                         fields={group.fields}
                         applicationNo={safeApplicationId}
+                        isEditing={editingSubSectionId === subSection.id}
                       />
                     )}
                     {group?.key === "specialMedical" && (
-                      <SpecialMedicalForm selectedSubSection={subSection.title} fields={group.fields} />
+                      <SpecialMedicalForm
+                        ref={(node) => {
+                          specialMedicalFormRefs.current[subSection.id] = node;
+                        }}
+                        selectedSubSection={subSection.title}
+                        fields={group.fields}
+                        isEditing={editingSubSectionId === subSection.id}
+                      />
                     )}
                     {group?.key === "otherMedicals" && (
-                      <OtherMedicalsForm selectedSubSection={subSection.title} fields={group.fields} />
+                      <OtherMedicalsForm
+                        ref={(node) => {
+                          otherMedicalsFormRefs.current[subSection.id] = node;
+                        }}
+                        selectedSubSection={subSection.title}
+                        fields={group.fields}
+                        isEditing={editingSubSectionId === subSection.id}
+                      />
                     )}
                   </Box>
                 </Box>
