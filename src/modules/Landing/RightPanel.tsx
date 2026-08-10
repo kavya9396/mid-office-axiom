@@ -1226,6 +1226,11 @@ const RightPanel = ({
                             } else if (typeof cellValue === "string" && /date|time|timestamp/i.test(String(col.key))) {
                               const formatted = formatDateForUI(cellValue);
                               displayValue = formatted || String(cellValue ?? "");
+                            } else if (col.key === "isMedical") {
+                              // Render boolean flag as friendly text
+                              if (cellValue === true || String(cellValue).toLowerCase() === "true") displayValue = "Medical";
+                              else if (cellValue === false || String(cellValue).toLowerCase() === "false") displayValue = "Non Medical";
+                              else displayValue = String(cellValue ?? "");
                             } else {
                               displayValue = String(cellValue ?? "");
                             }

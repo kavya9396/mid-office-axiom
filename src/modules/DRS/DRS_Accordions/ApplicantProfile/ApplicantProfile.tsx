@@ -412,6 +412,24 @@ const buildProfileFromReduxData = (
         ? rawFundDetail
         : (rawFundDetail && typeof rawFundDetail === "object" ? [rawFundDetail] : []);
 
+    // Determine age in years: prefer explicit age object, then numeric age, then derive from DOB
+    let ageYears = 0;
+    const ageField = personalDetails?.age ?? summaryPersonal?.age ?? undefined;
+        if (ageField && typeof ageField === "object" && "years" in (ageField as Record<string, unknown>)) {
+            ageYears = Number((ageField as Record<string, unknown>).years) || 0;
+        } else if (typeof ageField === "number") {
+            ageYears = ageField as number;
+        } else if (typeof personalDetails?.dob === "string" && personalDetails.dob) {
+            const dob = new Date(String(personalDetails.dob));
+            if (!Number.isNaN(dob.getTime())) {
+                const today = new Date();
+                let years = today.getFullYear() - dob.getFullYear();
+                const m = today.getMonth() - dob.getMonth();
+                if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) years -= 1;
+                ageYears = years >= 0 ? years : 0;
+            }
+        }
+
     return {
         memberType: selectedApplicantTab,
         proposerSummary: {
@@ -420,7 +438,7 @@ const buildProfileFromReduxData = (
             middleName: String(personalDetails?.middleName ?? ""),
             lastName: String(personalDetails?.lastName ?? ""),
             dob: String(personalDetails?.dob ?? ""),
-            age: 0,
+            age: ageYears,
             gender: mapGenderToDisplayValue(String(personalDetails?.gender ?? "")),
             profileImage: String(personalDetails?.profileImage ?? ""),
             caseStatus: String(personalDetails?.caseStatus ?? ""),
@@ -750,6 +768,12 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
                 String(nextFormData.residentStatus ?? "").toUpperCase() === "IND" ? "Indian Resident" : String(nextFormData.residentStatus ?? "")
             );
 
+            // Map proof fields to master labels (use id/address masters where available)
+            nextFormData.identityProofType = toMasterLabel(String(nextFormData.identityProofType ?? ""), idProofOptions) || String(nextFormData.identityProofType ?? "");
+            nextFormData.addressProof = toMasterLabel(String(nextFormData.addressProof ?? ""), addressProofOptions) || String(nextFormData.addressProof ?? "");
+            // Income proof commonly maps to the same id proof master -- fall back gracefully
+            nextFormData.incomeProof = toMasterLabel(String(nextFormData.incomeProof ?? ""), idProofOptions) || String(nextFormData.incomeProof ?? "");
+
             // Compute country-specific state options so state values from DRS map to the correct master keys
             const commStateOptions = getStateOptionsForCountry(masters.state, nextFormData.communicationCountry, countryOptions);
             const permStateOptions = getStateOptionsForCountry(masters.state, nextFormData.permanentCountry, countryOptions);
@@ -928,6 +952,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         () => new Set(residentStatusOptions.map((option) => option.value)),
         [residentStatusOptions]
     );
+
 
     const validateForm = (/* fieldsToValidate: FormField[] = allDialogFields */) => {
         const errors: FormErrors = {};
