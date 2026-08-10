@@ -574,6 +574,7 @@ const buildFormData = (
     identityProofNumber: profile?.kycDetails?.identityProofNumber ?? "",
     addressProof: profile?.kycDetails?.addressProof ?? "",
     ageProof: profile?.kycDetails?.ageProof ?? profile?.kycDetails?.identityProofType ?? "",
+    incomeProof: profile?.kycDetails?.incomeProof ?? "",
     faceValue: "",
     communicationAddressLine1: profile?.communicationAddressDetails?.addressLine1 ?? "",
     communicationAddressLine2: profile?.communicationAddressDetails?.addressLine2 ?? "",
