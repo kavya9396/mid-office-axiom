@@ -512,28 +512,13 @@ const Inbox1 = () => {
           }}
         >
           <RightSideTable
-            selectedRole={
-              activeRole
-            }
-            selectedTask={
-              activeTask
-            }
-            selectedTaskData={
-              selectedTaskData
-            }
-            selectedApplication={
-              selectedApplication
-            }
-            applicationSections={
-              applicationSections
-            }
-            onApplicationClick={
-              handleApplicationClick
-            }
-            onApplicationBack={
-              handleApplicationBack
-            }
-          />
+  selectedRole={activeRole}
+  selectedTask={activeTask}
+  selectedTaskData={selectedTaskData}
+  selectedApplication={selectedApplication}
+  onApplicationClick={handleApplicationClick}
+  onApplicationBack={handleApplicationBack}
+/>
         </Box>
       </Grid>
     </Box>
