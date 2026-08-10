@@ -74,6 +74,8 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
     const educationOptions = normalizeMasterOptions(masters?.education) ?? [];
     const residentStatusOptions = normalizeMasterOptions(masters?.resident_status) ?? [];
     const countryOptions = normalizeMasterOptions(masters?.country) ?? [];
+    const idProofOptions = normalizeMasterOptions(masters?.idProof) ?? [];
+    const addressProofOptions = normalizeMasterOptions(masters?.addressProof) ?? [];
 
     const selectedMemberType =
         profile?.memberType ??
@@ -125,10 +127,19 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
     ]);
 
     const derivedDob = String(summaryPersonal?.dob ?? fallbackPersonal?.dob ?? profile?.applicantDetails?.dateOfBirth ?? "");
-    const apiAge = summaryPersonal?.age ?? fallbackPersonal?.age ?? profile?.proposerSummary?.age;
-    const normalizedApiAge = Number(apiAge);
-    const derivedAge = Number.isFinite(normalizedApiAge) && normalizedApiAge >= 0
-        ? String(normalizedApiAge)
+    const apiAgeRaw = summaryPersonal?.age ?? fallbackPersonal?.age ?? profile?.proposerSummary?.age;
+    let apiAgeNumber: number | undefined;
+    if (apiAgeRaw && typeof apiAgeRaw === "object") {
+        const rec = apiAgeRaw as Record<string, unknown>;
+        if (rec.years !== undefined) apiAgeNumber = Number(rec.years);
+        else if (rec.year !== undefined) apiAgeNumber = Number(rec.year);
+        else if (rec.y !== undefined) apiAgeNumber = Number(rec.y);
+    } else {
+        apiAgeNumber = Number(apiAgeRaw);
+    }
+
+    const derivedAge = Number.isFinite(apiAgeNumber ?? NaN) && (apiAgeNumber as number) >= 0
+        ? String(apiAgeNumber)
         : getAgeFromDob(derivedDob);
 
     const personal = {
@@ -162,11 +173,11 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         panNumber: String(summaryKyc?.panNumber ?? summaryPersonal?.panNo ?? fallbackPersonal?.panNo ?? ""),
         panFlag: String(summaryKyc?.panFlag ?? summaryPersonal?.panFlag ?? fallbackPersonal?.panFlag ?? ""),
         panAadharSeedingStatus: String(summaryKyc?.panAadharSeedingStatus ?? summaryPersonal?.panAadharSeedingStatus ?? fallbackPersonal?.panAadharSeedingStatus ?? ""),
-        identityProofType: String(summaryKyc?.identityProofType ?? primaryDocument?.documentType ?? ""),
+        identityProofType: toMasterLabel(String(summaryKyc?.identityProofType ?? primaryDocument?.documentType ?? ""), idProofOptions),
         identityProofNumber: String(summaryKyc?.identityProofNumber ?? primaryDocument?.documentId ?? ""),
         identityProofExpiryDate: String(summaryKyc?.identityProofExpiryDate ?? primaryDocument?.identityProofExpiryDate ?? ""),
-        addressProof: String(summaryKyc?.addressProof ?? primaryDocument?.documentName ?? ""),
-        incomeProof: String(summaryKyc?.incomeProof ?? summaryPersonal?.incomeProof ?? ""),
+        addressProof: toMasterLabel(String(summaryKyc?.addressProof ?? primaryDocument?.documentName ?? ""), addressProofOptions),
+        incomeProof: toMasterLabel(String(summaryKyc?.incomeProof ?? summaryPersonal?.incomeProof ?? ""), idProofOptions),
         existingCkycNumber: String(summaryKyc?.existingCkycNumber ?? summaryPersonal?.ckycNumber ?? ""),
         pep: toBoolean(summaryKyc?.pep ?? summaryPersonal?.isPEP),
         criminalProceedings: String(
@@ -181,7 +192,10 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
             key: "dateOfBirth",
             format: (value) => formatDOB(String(value ?? "")) || "-",
         },
-        { label: "Age", key: "age" },
+        { label: "Age", key: "age", format: (value) => {
+            const s = String(value ?? "").trim();
+            return s && s !== "-" ? `${s} Years` : "-";
+        } },
         { label: "Gender", key: "gender" },
         { label: "Marital Status", key: "maritalStatus" },
         { label: "Nationality", key: "nationality" },

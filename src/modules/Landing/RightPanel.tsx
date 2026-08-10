@@ -270,6 +270,7 @@ const roleMapper = {
   "RISK_TASK":"RISK_TASK",
   "ACUITY_TASK":"ACUITY_TASK"
 }
+const NON_TRANSFERABLE_COLUMNS = new Set(["applicationNo"]);
  
 const RightPanel = ({
   selectedPool,
@@ -611,14 +612,20 @@ const RightPanel = ({
   const hasTableData = rows.length > 0;
   // ---------------- OPEN DIALOG ----------------
   const openColumnDialog = () => {
-    setLeft(config.hidden);
-    setRight(config.visible);
+    // Ensure non-transferable columns are always in the visible set
+    const hiddenWithoutNonTransferable = config.hidden.filter((k) => !NON_TRANSFERABLE_COLUMNS.has(k));
+    const visibleWithNonTransferable = Array.from(new Set([...(config.visible ?? []), ...Array.from(NON_TRANSFERABLE_COLUMNS)]));
+
+    setLeft(hiddenWithoutNonTransferable);
+    setRight(visibleWithNonTransferable);
     setChecked([]);
     setOpenTransferDialog(true);
   };
  
   // ---------------- MOVE LOGIC ----------------
   const handleToggle = (item: string) => () => {
+    // prevent checking non-transferable columns
+    if (NON_TRANSFERABLE_COLUMNS.has(item)) return;
     setChecked((prev) =>
       prev.includes(item) ? prev.filter((i) => i !== item) : [...prev, item],
     );
@@ -633,7 +640,9 @@ const RightPanel = ({
       return;
     }
  
-    const itemsToMove = checkedFromAvailable.slice(0, availableSlots);
+    // filter out non-transferable just in case
+    const transferable = checkedFromAvailable.filter((i) => !NON_TRANSFERABLE_COLUMNS.has(i));
+    const itemsToMove = transferable.slice(0, availableSlots);
  
     if (checkedFromAvailable.length > availableSlots) {
       setClaimError(`Only ${maxVisibleColumns} columns can be visible at a time.`);
@@ -645,8 +654,10 @@ const RightPanel = ({
   };
  
   const moveLeft = () => {
-    setRight((prev) => prev.filter((i) => !checked.includes(i)));
-    setLeft((prev) => [...prev, ...checked]);
+    // prevent moving non-transferable columns to left
+    const itemsToRemove = checked.filter((i) => !NON_TRANSFERABLE_COLUMNS.has(i));
+    setRight((prev) => prev.filter((i) => !itemsToRemove.includes(i)));
+    setLeft((prev) => [...prev, ...itemsToRemove]);
     setChecked([]);
   };
  
@@ -706,9 +717,13 @@ const RightPanel = ({
   // ---------------- APPLY ----------------
   const handleApply = async () => {
     try {
+      // Ensure non-transferable columns remain visible
+      const finalVisible = Array.from(new Set([...(right ?? []), ...Array.from(NON_TRANSFERABLE_COLUMNS)]));
+      const finalHidden = (left ?? []).filter((k) => !NON_TRANSFERABLE_COLUMNS.has(k));
+
       await updateConfig({
-        visible: right,
-        hidden: left,
+        visible: finalVisible,
+        hidden: finalHidden,
       });
  
       setOpenTransferDialog(false);
@@ -1236,6 +1251,11 @@ const RightPanel = ({
                             } else if (typeof cellValue === "string" && /date|time|timestamp/i.test(String(col.key))) {
                               const formatted = formatDateForUI(cellValue);
                               displayValue = formatted || String(cellValue ?? "");
+                            } else if (col.key === "isMedical") {
+                              // Render boolean flag as friendly text
+                              if (cellValue === true || String(cellValue).toLowerCase() === "true") displayValue = "Medical";
+                              else if (cellValue === false || String(cellValue).toLowerCase() === "false") displayValue = "Non Medical";
+                              else displayValue = String(cellValue ?? "");
                             } else {
                               displayValue = String(cellValue ?? "");
                             }
