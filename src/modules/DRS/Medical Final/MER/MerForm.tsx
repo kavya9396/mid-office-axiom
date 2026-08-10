@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useState } from "react";
+import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../../components/ui/Select/Select";
 import CustomTextField from "../../../../components/ui/TextField/TextField";
 import mastersMockData from "../../../../../mock/drs/masters.mock.json";
@@ -10,12 +10,16 @@ type MerFormProps = {
   selectedSubSection?: string;
   fields: MedicalFinalConfigField[];
   applicationNo?: string;
+  isEditing?: boolean;
 };
 
 export type MerFormHandle = {
   validateForm: () => boolean;
   getFormValues: () => Record<string, string>;
   setFormValues: (nextValues: Record<string, string>) => void;
+  beginEdit: () => void;
+  resetEdit: () => void;
+  commitEdit: () => void;
 };
 
 type MastersOption = {
@@ -93,11 +97,12 @@ const validateField = (
   return "";
 };
 
-const MerForm = forwardRef<MerFormHandle, MerFormProps>(({ selectedSubSection, applicationNo }, ref) => {
+const MerForm = forwardRef<MerFormHandle, MerFormProps>(({ selectedSubSection, applicationNo, isEditing = false }, ref) => {
   const [formValues, setFormValuesState] = useState<Record<string, string>>({
     applicationNo: applicationNo ?? "",
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const editSnapshotRef = useRef<Record<string, string> | null>(null);
 
   const masterOptions = useMemo(() => buildMasterOptions(), []);
   const subsectionFields = useMemo(
@@ -157,12 +162,35 @@ const MerForm = forwardRef<MerFormHandle, MerFormProps>(({ selectedSubSection, a
           ...nextValues,
         }));
       },
+      beginEdit: () => {
+        editSnapshotRef.current = { ...formValues };
+      },
+      resetEdit: () => {
+        if (editSnapshotRef.current) {
+          setFormValuesState(editSnapshotRef.current);
+        }
+        setFormErrors({});
+        editSnapshotRef.current = null;
+      },
+      commitEdit: () => {
+        editSnapshotRef.current = null;
+      },
     }),
     [getResolvedFormValues, formValues, subsectionFields]
   );
 
   return (
-    <Box>
+    <Box
+      component="fieldset"
+      disabled={!isEditing}
+      sx={{
+        border: 0,
+        p: 0,
+        m: 0,
+        minWidth: 0,
+        "& .MuiOutlinedInput-root.Mui-disabled": { backgroundColor: "#F3F4F6" },
+      }}
+    >
       <Box
         sx={{
           display: "grid",
@@ -194,7 +222,7 @@ const MerForm = forwardRef<MerFormHandle, MerFormProps>(({ selectedSubSection, a
                   onChange={(nextValue) => handleValueChange(field, nextValue)}
                   options={options}
                   placeholder="Select"
-                  disabled={!field.editable}
+                  disabled={!isEditing || !field.editable}
                   error={Boolean(error)}
                   helperText={error || " "}
                 />
@@ -205,7 +233,7 @@ const MerForm = forwardRef<MerFormHandle, MerFormProps>(({ selectedSubSection, a
                   type={field.type === "date" ? "date" : (field.type === "number" ? "number" : "text")}
                   value={value}
                   onChange={(event) => handleValueChange(field, event.target.value)}
-                  disabled={!field.editable}
+                  disabled={!isEditing || !field.editable}
                   error={Boolean(error)}
                   helperText={error || " "}
                   placeholder={field.type === "date" ? "YYYY-MM-DD" : ""}

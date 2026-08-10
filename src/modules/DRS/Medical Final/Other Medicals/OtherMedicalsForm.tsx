@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../../components/ui/Select/Select";
 import CustomTextField from "../../../../components/ui/TextField/TextField";
 import mastersMockData from "../../../../../mock/drs/masters.mock.json";
@@ -28,6 +28,27 @@ import {
 type OtherMedicalsFormProps = {
   selectedSubSection?: string;
   fields: MedicalFinalConfigField[];
+  isEditing?: boolean;
+};
+
+export type OtherMedicalsFormHandle = {
+  beginEdit: () => void;
+  resetEdit: () => void;
+  commitEdit: () => void;
+};
+
+type MedicalTableData = Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>;
+
+type OtherMedicalsEditSnapshot = {
+  formValues: Record<string, string>;
+  cbcTableData: MedicalTableData;
+  lftTableData: MedicalTableData;
+  lipidsTableData: MedicalTableData;
+  ogttTableData: MedicalTableData;
+  sma12TableData: MedicalTableData;
+  tftTableData: MedicalTableData;
+  s13TableData: MedicalTableData;
+  ruaTableData: MedicalTableData;
 };
 
 type MastersOption = {
@@ -100,7 +121,7 @@ const validateField = (field: OtherMedicalsFieldConfig, value: string) => {
   return "";
 };
 
-const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
+const OtherMedicalsForm = forwardRef<OtherMedicalsFormHandle, OtherMedicalsFormProps>(({ selectedSubSection, isEditing = false }, ref) => {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const [cbcTableData, setCbcTableData] = useState<Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>>({});
@@ -111,6 +132,7 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
   const [tftTableData, setTftTableData] = useState<Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>>({});
   const [s13TableData, setS13TableData] = useState<Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>>({});
   const [ruaTableData, setRuaTableData] = useState<Record<string, { value: string; labStart: string; labEnd: string; unit: string; findings: string }>>({});
+  const editSnapshotRef = useRef<OtherMedicalsEditSnapshot | null>(null);
 
   const masterOptions = useMemo(() => buildMasterOptions(), []);
   const subsectionFields = useMemo(
@@ -261,8 +283,53 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
   const isS13GroupSection = selectedSubSection === OTHER_MEDICALS_S13_GROUP_SECTION_LABEL;
   const isRuaGroupSection = selectedSubSection === OTHER_MEDICALS_RUA_GROUP_SECTION_LABEL;
 
+  useImperativeHandle(ref, () => ({
+    beginEdit: () => {
+      editSnapshotRef.current = {
+        formValues: structuredClone(formValues),
+        cbcTableData: structuredClone(cbcTableData),
+        lftTableData: structuredClone(lftTableData),
+        lipidsTableData: structuredClone(lipidsTableData),
+        ogttTableData: structuredClone(ogttTableData),
+        sma12TableData: structuredClone(sma12TableData),
+        tftTableData: structuredClone(tftTableData),
+        s13TableData: structuredClone(s13TableData),
+        ruaTableData: structuredClone(ruaTableData),
+      };
+    },
+    resetEdit: () => {
+      const snapshot = editSnapshotRef.current;
+      if (snapshot) {
+        setFormValues(snapshot.formValues);
+        setCbcTableData(snapshot.cbcTableData);
+        setLftTableData(snapshot.lftTableData);
+        setLipidsTableData(snapshot.lipidsTableData);
+        setOgttTableData(snapshot.ogttTableData);
+        setSma12TableData(snapshot.sma12TableData);
+        setTftTableData(snapshot.tftTableData);
+        setS13TableData(snapshot.s13TableData);
+        setRuaTableData(snapshot.ruaTableData);
+      }
+      setFormErrors({});
+      editSnapshotRef.current = null;
+    },
+    commitEdit: () => {
+      editSnapshotRef.current = null;
+    },
+  }), [cbcTableData, formValues, lftTableData, lipidsTableData, ogttTableData, ruaTableData, s13TableData, sma12TableData, tftTableData]);
+
   return (
-    <Box>
+    <Box
+      component="fieldset"
+      disabled={!isEditing}
+      sx={{
+        border: 0,
+        p: 0,
+        m: 0,
+        minWidth: 0,
+        "& .MuiOutlinedInput-root.Mui-disabled": { backgroundColor: "#F3F4F6" },
+      }}
+    >
       {subsectionFields.length === 0 ? (
         <Typography sx={{ color: "#667085", fontSize: 13 }}>
           No field configuration found for this Other Medicals subsection.
@@ -298,7 +365,7 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
                     onChange={(nextValue) => handleValueChange(field, nextValue)}
                     options={options}
                     placeholder="Select"
-                    disabled={!field.editable}
+                    disabled={!isEditing || !field.editable}
                     error={Boolean(error)}
                     helperText={error || " "}
                   />
@@ -309,7 +376,7 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
                     type={field.type === "date" ? "date" : field.type === "number" ? "number" : "text"}
                     value={value}
                     onChange={(event) => handleValueChange(field, event.target.value)}
-                    disabled={!field.editable}
+                    disabled={!isEditing || !field.editable}
                     error={Boolean(error)}
                     helperText={error || " "}
                     placeholder={field.type === "date" ? "YYYY-MM-DD" : ""}
@@ -847,6 +914,8 @@ const OtherMedicalsForm = ({ selectedSubSection }: OtherMedicalsFormProps) => {
       )}
     </Box>
   );
-};
+});
+
+OtherMedicalsForm.displayName = "OtherMedicalsForm";
 
 export default OtherMedicalsForm;

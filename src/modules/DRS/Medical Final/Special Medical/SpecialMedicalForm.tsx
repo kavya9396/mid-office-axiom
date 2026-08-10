@@ -1,5 +1,5 @@
 import { Box, Typography } from "@mui/material";
-import { useMemo, useState } from "react";
+import { forwardRef, useImperativeHandle, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../../components/ui/Select/Select";
 import CustomTextField from "../../../../components/ui/TextField/TextField";
 import mastersMockData from "../../../../../mock/drs/masters.mock.json";
@@ -12,6 +12,13 @@ import {
 type SpecialMedicalFormProps = {
   selectedSubSection?: string;
   fields: MedicalFinalConfigField[];
+  isEditing?: boolean;
+};
+
+export type SpecialMedicalFormHandle = {
+  beginEdit: () => void;
+  resetEdit: () => void;
+  commitEdit: () => void;
 };
 
 type MastersOption = {
@@ -80,9 +87,10 @@ const validateField = (field: SpecialMedicalFieldConfig, value: string) => {
   return "";
 };
 
-const SpecialMedicalForm = ({ selectedSubSection }: SpecialMedicalFormProps) => {
+const SpecialMedicalForm = forwardRef<SpecialMedicalFormHandle, SpecialMedicalFormProps>(({ selectedSubSection, isEditing = false }, ref) => {
   const [formValues, setFormValues] = useState<Record<string, string>>({});
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
+  const editSnapshotRef = useRef<Record<string, string> | null>(null);
 
   const masterOptions = useMemo(() => buildMasterOptions(), []);
   const subsectionFields = useMemo(
@@ -104,8 +112,34 @@ const SpecialMedicalForm = ({ selectedSubSection }: SpecialMedicalFormProps) => 
 
   const maxDate = useMemo(() => new Date().toISOString().split("T")[0], []);
 
+  useImperativeHandle(ref, () => ({
+    beginEdit: () => {
+      editSnapshotRef.current = { ...formValues };
+    },
+    resetEdit: () => {
+      if (editSnapshotRef.current) {
+        setFormValues(editSnapshotRef.current);
+      }
+      setFormErrors({});
+      editSnapshotRef.current = null;
+    },
+    commitEdit: () => {
+      editSnapshotRef.current = null;
+    },
+  }), [formValues]);
+
   return (
-    <Box>
+    <Box
+      component="fieldset"
+      disabled={!isEditing}
+      sx={{
+        border: 0,
+        p: 0,
+        m: 0,
+        minWidth: 0,
+        "& .MuiOutlinedInput-root.Mui-disabled": { backgroundColor: "#F3F4F6" },
+      }}
+    >
       {subsectionFields.length === 0 ? (
         <Typography sx={{ color: "#667085", fontSize: 13 }}>
           No field configuration found for this Special Medical subsection.
@@ -141,7 +175,7 @@ const SpecialMedicalForm = ({ selectedSubSection }: SpecialMedicalFormProps) => 
                     onChange={(nextValue) => handleValueChange(field, nextValue)}
                     options={options}
                     placeholder="Select"
-                    disabled={!field.editable}
+                    disabled={!isEditing || !field.editable}
                     error={Boolean(error)}
                     helperText={error || " "}
                   />
@@ -152,7 +186,7 @@ const SpecialMedicalForm = ({ selectedSubSection }: SpecialMedicalFormProps) => 
                     type={field.type === "date" ? "date" : (field.type === "number" ? "number" : "text")}
                     value={value}
                     onChange={(event) => handleValueChange(field, event.target.value)}
-                    disabled={!field.editable}
+                    disabled={!isEditing || !field.editable}
                     error={Boolean(error)}
                     helperText={error || " "}
                     placeholder={field.type === "date" ? "YYYY-MM-DD" : ""}
@@ -187,6 +221,8 @@ const SpecialMedicalForm = ({ selectedSubSection }: SpecialMedicalFormProps) => 
       )}
     </Box>
   );
-};
+});
+
+SpecialMedicalForm.displayName = "SpecialMedicalForm";
 
 export default SpecialMedicalForm;
