@@ -1,10 +1,24 @@
-import { Box, Grid, Paper, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
-import { KeyRightArrowIcon } from "../../icons/Icons";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
-import LastLogin from "./LastLogin";
-import DynamicRoleTable from "./DynamicRoleTable";
+import {
+  Box,
+  Grid,
+} from "@mui/material";
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../store/hooks";
+
+import {
+  fetchInboxThunk,
+} from "../../store/thunks/inboxThunk";
+
+import LeftTask from "./LeftTask";
+import RightSideTable from "./RightSideTable";
 import ApplicationWorkspace from "./ApplicationWorkspace";
 
 interface InboxItem {
@@ -12,16 +26,22 @@ interface InboxItem {
   [key: string]: unknown;
 }
 
-type PoolData = Record<string, InboxItem[]>;
+type PoolData = Record<
+  string,
+  InboxItem[]
+>;
+
+interface RoleSection {
+  key: string;
+  label: string;
+}
+
 const ROLE_SECTIONS: Record<
   string,
-  {
-    key: string;
-    label: string;
-  }[]
+  RoleSection[]
 > = {
   CVT_TASK: [
-     {
+    {
       key: "drsSummary",
       label: "DRS Summary",
     },
@@ -56,51 +76,6 @@ const ROLE_SECTIONS: Record<
   ],
 };
 
-
-const UPPERCASE_LABEL_PARTS = new Set([
-  "ACCUITY",
-  "AMR",
-  "CMO",
-  "COPS",
-  "CPT",
-  "CUW",
-  "CVT",
-  "DVT",
-  "ECG",
-  "GOPS",
-  "GUW",
-  "HOD",
-  "IT",
-  "MMT",
-  "MR",
-  "NMR",
-  "PIVV",
-  "RI",
-  "SR",
-  "SUW",
-  "TMT",
-  "UW",
-]);
-
-const toDisplayLabel = (value: string): string =>
-  value
-    .replace(/_/g, " ")
-    .split(" ")
-    .filter(Boolean)
-    .map((part) => {
-      const upperPart = part.toUpperCase();
-
-      if (UPPERCASE_LABEL_PARTS.has(upperPart)) {
-        return upperPart;
-      }
-
-      return (
-        part.charAt(0).toUpperCase() +
-        part.slice(1).toLowerCase()
-      );
-    })
-    .join(" ");
-
 const Inbox1 = () => {
   const dispatch = useAppDispatch();
 
@@ -108,109 +83,227 @@ const Inbox1 = () => {
   // AUTH
   // ============================================================
 
-  const reduxUsername = useAppSelector(
-    (state) => state.api.auth.credentials?.username ?? "",
-  );
+  const reduxUsername =
+    useAppSelector(
+      (state) =>
+        state.api.auth.credentials
+          ?.username ?? "",
+    );
 
-  const reduxPassword = useAppSelector(
-    (state) => state.api.auth.credentials?.password ?? "",
-  );
+  const reduxPassword =
+    useAppSelector(
+      (state) =>
+        state.api.auth.credentials
+          ?.password ?? "",
+    );
 
-  const roles = useAppSelector(
-    (state) => state.api.auth.credentials?.roles ?? [],
-  );
+  const roles =
+    useAppSelector(
+      (state) =>
+        state.api.auth.credentials
+          ?.roles ?? [],
+    );
 
   // ============================================================
   // INBOX DATA
   // ============================================================
 
-  const poolData = useAppSelector(
-    (state) => state.inbox.data?.poolData ?? {},
-  ) as PoolData;
+  const poolData =
+    useAppSelector(
+      (state) =>
+        state.inbox.data?.poolData ??
+        {},
+    ) as PoolData;
 
   // ============================================================
   // LOCAL STATE
   // ============================================================
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [
+    isCollapsed,
+    setIsCollapsed,
+  ] = useState(false);
 
-  const [selectedMenu, setSelectedMenu] = useState("");
+  const [
+    isRolesOpen,
+    setIsRolesOpen,
+  ] = useState(true);
 
-  const [isRolesOpen, setIsRolesOpen] = useState(true);
-  const [selectedApplication, setSelectedApplication] =
-  useState<Record<string, unknown> | null>(null);
+  /*
+   * IMPORTANT
+   *
+   * null means:
+   * nothing has been explicitly selected yet.
+   *
+   * Once the user clicks a task:
+   *
+   * selectedRole = null
+   * selectedTask = clicked task
+   *
+   * Once the user clicks a role:
+   *
+   * selectedRole = clicked role
+   * selectedTask = null
+   */
+
+  const [
+    selectedRole,
+    setSelectedRole,
+  ] =
+    useState<string | null>(null);
+
+  const [
+    selectedTask,
+    setSelectedTask,
+  ] =
+    useState<string | null>(null);
+
+  const [
+    selectedApplication,
+    setSelectedApplication,
+  ] =
+    useState<Record<
+      string,
+      unknown
+    > | null>(null);
 
   // ============================================================
-  // LOGIN DETAILS
+  // LOGIN
   // ============================================================
 
   const effectiveUsername =
     reduxUsername ||
-    localStorage.getItem("username") ||
+    localStorage.getItem(
+      "username",
+    ) ||
     "";
 
   const effectivePassword =
     reduxPassword ||
-    localStorage.getItem("password") ||
+    localStorage.getItem(
+      "password",
+    ) ||
     "";
 
   const lastLoginAt =
-    localStorage.getItem("lastLoginAt") ?? "";
+    localStorage.getItem(
+      "lastLoginAt",
+    ) ?? "";
 
   // ============================================================
-  // SIDEBAR ITEMS
+  // TASKS
   // ============================================================
 
-  /**
-   * poolData keys are the task/pool names.
-   *
-   * Example:
-   *
-   * RISK_TASK
-   * CPT_DATA_ENTRY_NMR_TASK
-   */
+  const menuItems = useMemo(
+    () =>
+      Object.keys(poolData)
+        .sort((a, b) =>
+          a.localeCompare(b),
+        )
+        .map((key) => ({
+          label: key,
+          icon: "📂",
+        })),
+    [poolData],
+  );
 
-  const menuItems = Object.keys(poolData)
-    .sort((a, b) => a.localeCompare(b))
-    .map((key) => ({
-      label: key,
-      icon: "📂",
-    }));
+  // ============================================================
+  // DEFAULT SELECTION
+  // ============================================================
+  //
+  // IMPORTANT:
+  //
+  // DO NOT do:
+  //
+  // selectedRole ?? roles[0]
+  //
+  // because when selectedRole is null after clicking
+  // a task, it would immediately select roles[0] again.
+  //
+  // Instead:
+  //
+  // - if user has not selected anything -> first role
+  // - if task is selected -> role stays null
+  // - if role is selected -> task stays null
+  // ============================================================
+
+  const hasExplicitSelection =
+    selectedRole !== null ||
+    selectedTask !== null;
+
+  const defaultRole =
+    !hasExplicitSelection &&
+    roles.length > 0
+      ? roles[0]
+      : null;
+
+  const activeRole =
+    selectedRole ??
+    defaultRole;
+
+  // ============================================================
+  // ACTIVE TASK
+  // ============================================================
+
+  const activeTask =
+    selectedTask;
 
   // ============================================================
   // ACTIVE MENU
   // ============================================================
-
-const activeMenu =
-  selectedMenu &&
-  menuItems.some(
-    (item) => item.label === selectedMenu,
-  )
-    ? selectedMenu
-    : menuItems[0]?.label || "";
+  //
+  // Only a TASK can create an active menu.
+  //
+  // If a role is active, activeMenu is null.
   // ============================================================
-  // SELECTED TASK DATA
+
+  const activeMenu =
+    activeTask &&
+    menuItems.some(
+      (item) =>
+        item.label === activeTask,
+    )
+      ? activeTask
+      : null;
+
+  // ============================================================
+  // TASK DATA
   // ============================================================
 
   const selectedTaskData =
     activeMenu
       ? poolData[activeMenu] ?? []
       : [];
-const applicationSections =
-  ROLE_SECTIONS[activeMenu] ?? [];
+
+  // ============================================================
+  // APPLICATION SECTIONS
+  // ============================================================
+
+  const applicationSections =
+    activeMenu
+      ? ROLE_SECTIONS[
+          activeMenu
+        ] ?? []
+      : [];
+
   // ============================================================
   // FETCH INBOX
   // ============================================================
 
   useEffect(() => {
-    if (!effectiveUsername || !effectivePassword) {
+    if (
+      !effectiveUsername ||
+      !effectivePassword
+    ) {
       return;
     }
 
     dispatch(
       fetchInboxThunk({
-        username: effectiveUsername,
-        password: effectivePassword,
+        username:
+          effectiveUsername,
+        password:
+          effectivePassword,
       }),
     );
   }, [
@@ -220,71 +313,143 @@ const applicationSections =
   ]);
 
   // ============================================================
-  // AUTO SELECT FIRST MENU
+  // ROLE CLICK
   // ============================================================
 
-  // useEffect(() => {
-  //   if (
-  //     !selectedMenu &&
-  //     menuItems.length > 0
-  //   ) {
-  //     setSelectedMenu(
-  //       menuItems[0].label,
-  //     );
-  //   }
-  // }, [
-  //   selectedMenu,
-  //   menuItems,
-  // ]);
+  const handleRoleSelect = (
+    role: string,
+  ) => {
+    console.log(
+      "ROLE CLICKED:",
+      role,
+    );
+
+    /*
+     * Role becomes active.
+     */
+    setSelectedRole(role);
+
+    /*
+     * Task MUST be cleared.
+     */
+    setSelectedTask(null);
+
+    /*
+     * Close application workspace.
+     */
+    setSelectedApplication(null);
+  };
 
   // ============================================================
-  // RESET SELECTED MENU IF API DATA CHANGES
+  // TASK CLICK
   // ============================================================
 
-  // useEffect(() => {
-  //   if (
-  //     selectedMenu &&
-  //     menuItems.length > 0 &&
-  //     !menuItems.some(
-  //       (item) =>
-  //         item.label === selectedMenu,
-  //     )
-  //   ) {
-  //     setSelectedMenu(
-  //       menuItems[0].label,
-  //     );
-  //   }
-  // }, [
-  //   selectedMenu,
-  //   menuItems,
-  // ]);
+  const handleTaskSelect = (
+    task: string,
+  ) => {
+    console.log(
+      "TASK CLICKED:",
+      task,
+    );
+
+    /*
+     * Task becomes active.
+     */
+    setSelectedTask(task);
+
+    /*
+     * VERY IMPORTANT:
+     *
+     * Clear role.
+     *
+     * This allows RightSideTable to render
+     * DynamicRoleTable.
+     */
+    setSelectedRole(null);
+
+    /*
+     * Close application workspace.
+     */
+    setSelectedApplication(null);
+  };
 
   // ============================================================
-  // RENDER
+  // APPLICATION CLICK
   // ============================================================
-if (selectedApplication) {
+
+  const handleApplicationClick = (
+    application: Record<
+      string,
+      unknown
+    >,
+  ) => {
+    setSelectedApplication(
+      application,
+    );
+  };
+
+  // ============================================================
+  // APPLICATION BACK
+  // ============================================================
+
+  const handleApplicationBack =
+    () => {
+      setSelectedApplication(null);
+    };
+
+  // ============================================================
+  // SIDEBAR
+  // ============================================================
+
+  const handleToggleCollapse =
+    () => {
+      setIsCollapsed(
+        (previous) => !previous,
+      );
+    };
+
+  const handleToggleRoles =
+    () => {
+      setIsRolesOpen(
+        (previous) => !previous,
+      );
+    };
+
+  // ============================================================
+  // APPLICATION WORKSPACE
+  // ============================================================
+
+  if (selectedApplication) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "90vh",
+          p: 2,
+          backgroundColor:
+            "#f5f7fa",
+        }}
+      >
+        <ApplicationWorkspace
+          application={
+            selectedApplication
+          }
+          sections={
+            applicationSections
+          }
+          onBack={
+            handleApplicationBack
+          }
+        />
+      </Box>
+    );
+  }
+
+  // ============================================================
+  // MAIN
+  // ============================================================
+
   return (
-    <Box
-      sx={{
-        width: "100%",
-        height: "90vh",
-        p: 2,
-        backgroundColor: "#f5f7fa",
-      }}
-    >
-      <ApplicationWorkspace
-        application={selectedApplication}
-        sections={applicationSections}
-        onBack={() =>
-          setSelectedApplication(null)
-        }
-      />
-    </Box>
-  );
-}
-
-  return (
-    
     <Box
       sx={{
         width: "100%",
@@ -299,419 +464,76 @@ if (selectedApplication) {
           minHeight: 0,
         }}
       >
-        {/* ==================================================== */}
-        {/* LEFT SIDEBAR */}
-        {/* ==================================================== */}
-
-        <Box
-          sx={{
-            width: isCollapsed
-              ? "70px"
-              : "220px",
-
-            flexShrink: 0,
-
-            height: "100%",
-
-            transition:
-              "width 0.3s ease",
-
-            backgroundColor: "#fff",
-
-            overflow: "hidden",
-          }}
-        >
-          <Paper
-            sx={{
-              height: "100%",
-
-              display: "flex",
-
-              flexDirection: "column",
-
-              overflow: "hidden",
-            }}
-          >
-            {/* ================================================= */}
-            {/* COLLAPSE BUTTON */}
-            {/* ================================================= */}
-
-            <Box
-              onClick={() =>
-                setIsCollapsed(
-                  (prev) => !prev,
-                )
-              }
-              sx={{
-                height: "40px",
-
-                minHeight: "40px",
-
-                display: "flex",
-
-                justifyContent:
-                  isCollapsed
-                    ? "center"
-                    : "flex-end",
-
-                alignItems: "center",
-
-                px: 2,
-
-                cursor: "pointer",
-
-                borderBottom:
-                  "1px solid #eee",
-              }}
-            >
-              <KeyRightArrowIcon
-                style={{
-                  color: "#9A2529",
-
-                  transform:
-                    isCollapsed
-                      ? "rotate(0deg)"
-                      : "rotate(180deg)",
-
-                  transition:
-                    "transform 0.3s ease",
-                }}
-              />
-            </Box>
-
-            {/* ================================================= */}
-            {/* SIDEBAR SCROLL AREA */}
-            {/* ================================================= */}
-
-            <Box
-              sx={{
-                flex: 1,
-
-                minHeight: 0,
-
-                overflowY: "auto",
-
-                overflowX: "hidden",
-
-                "&::-webkit-scrollbar": {
-                  width: "6px",
-                },
-
-                "&::-webkit-scrollbar-thumb": {
-                  backgroundColor:
-                    "#c7c7c7",
-
-                  borderRadius: "10px",
-                },
-
-                "&::-webkit-scrollbar-track": {
-                  backgroundColor:
-                    "#f5f5f5",
-                },
-              }}
-            >
-              {/* ============================================== */}
-              {/* USER ROLES */}
-              {/* ============================================== */}
-
-              {roles.length > 0 && (
-                <Box
-                  sx={{
-                    borderBottom:
-                      "1px solid #eee",
-                  }}
-                >
-                  {/* ------------------------------------------ */}
-                  {/* USER HANDLE HEADER */}
-                  {/* ------------------------------------------ */}
-
-                  <Box
-                    onClick={() =>
-                      setIsRolesOpen(
-                        (prev) => !prev,
-                      )
-                    }
-                    sx={{
-                      display: "flex",
-
-                      alignItems:
-                        "center",
-
-                      justifyContent:
-                        isCollapsed
-                          ? "center"
-                          : "space-between",
-
-                      px: 2,
-
-                      py: 1.2,
-
-                      cursor: "pointer",
-
-                      color: "#333",
-
-                      "&:hover": {
-                        backgroundColor:
-                          "#f8f8f8",
-                      },
-                    }}
-                  >
-                    {isCollapsed ? (
-                      <Typography
-                        sx={{
-                          fontSize: "18px",
-                        }}
-                      >
-                        👥
-                      </Typography>
-                    ) : (
-                      <>
-                        <Typography
-                          sx={{
-                            fontSize:
-                              "12px",
-
-                            fontWeight: 700,
-                          }}
-                        >
-                          User Handle
-                        </Typography>
-
-                        <Typography
-                          sx={{
-                            fontSize:
-                              "12px",
-                          }}
-                        >
-                          {isRolesOpen
-                            ? "▲"
-                            : "▼"}
-                        </Typography>
-                      </>
-                    )}
-                  </Box>
-
-                  {/* ------------------------------------------ */}
-                  {/* ROLE ITEMS */}
-                  {/* ------------------------------------------ */}
-
-                  {!isCollapsed &&
-                    isRolesOpen &&
-                    roles.map((role) => (
-                      <Box
-                        key={role}
-                        sx={{
-                          pl: 4,
-
-                          pr: 2,
-
-                          py: 1,
-
-                          color:
-                            "#777",
-
-                          backgroundColor:
-                            "transparent",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            fontSize:
-                              "11px",
-
-                            fontWeight:
-                              400,
-                          }}
-                        >
-                          {toDisplayLabel(
-                            role,
-                          )}
-                        </Typography>
-                      </Box>
-                    ))}
-                </Box>
-              )}
-
-              {/* ============================================== */}
-              {/* POOL / TASK ITEMS */}
-              {/* ============================================== */}
-
-              {menuItems.map(
-                (item) => {
-                  const isActive =
-                    activeMenu ===
-                    item.label;
-
-                  return (
-                    <Box
-                      key={item.label}
-                      onClick={() =>
-                        setSelectedMenu(
-                          item.label,
-                        )
-                      }
-                      sx={{
-                        display: "flex",
-
-                        alignItems:
-                          "center",
-
-                        justifyContent:
-                          isCollapsed
-                            ? "center"
-                            : "flex-start",
-
-                        px: 2,
-
-                        py: 1.2,
-
-                        cursor:
-                          "pointer",
-
-                        color: isActive
-                          ? "#9A2529"
-                          : "#333",
-
-                        backgroundColor:
-                          isActive
-                            ? "#fdf2f2"
-                            : "transparent",
-
-                        borderLeft:
-                          isActive
-                            ? "3px solid #9A2529"
-                            : "3px solid transparent",
-
-                        "&:hover": {
-                          backgroundColor:
-                            "#f8f8f8",
-                        },
-                      }}
-                    >
-                      {isCollapsed ? (
-                        <Box>
-                          {item.icon}
-                        </Box>
-                      ) : (
-                        <Typography
-                          sx={{
-                            fontSize:
-                              "12px",
-
-                            fontWeight:
-                              isActive
-                                ? 600
-                                : 400,
-                          }}
-                        >
-                          {toDisplayLabel(
-                            item.label,
-                          )}
-                        </Typography>
-                      )}
-                    </Box>
-                  );
-                },
-              )}
-            </Box>
-
-            {/* ================================================= */}
-            {/* LAST LOGIN */}
-            {/* ================================================= */}
-
-            {!isCollapsed && (
-              <Box
-                sx={{
-                  flexShrink: 0,
-
-                  py: 1.5,
-
-                  px: 1,
-
-                  borderTop:
-                    "1px solid #eee",
-
-                  backgroundColor:
-                    "#fff",
-
-                  width: "100%",
-                }}
-              >
-                <LastLogin
-                  lastLogin={
-                    lastLoginAt
-                  }
-                />
-              </Box>
-            )}
-          </Paper>
-        </Box>
-
-        {/* ==================================================== */}
+        {/* ================================================== */}
+        {/* LEFT SIDE */}
+        {/* ================================================== */}
+
+        <LeftTask
+          roles={roles}
+          menuItems={menuItems}
+          selectedRole={activeRole}
+          selectedTask={activeTask}
+          isRolesOpen={
+            isRolesOpen
+          }
+          isCollapsed={
+            isCollapsed
+          }
+          lastLoginAt={
+            lastLoginAt
+          }
+          onRoleSelect={
+            handleRoleSelect
+          }
+          onTaskSelect={
+            handleTaskSelect
+          }
+          onToggleRoles={
+            handleToggleRoles
+          }
+          onToggleCollapse={
+            handleToggleCollapse
+          }
+        />
+
+        {/* ================================================== */}
         {/* RIGHT SIDE */}
-        {/* ==================================================== */}
+        {/* ================================================== */}
 
         <Box
           sx={{
             flex: 1,
-
             minWidth: 0,
-
             height: "100%",
-
             p: 2,
-
             overflow: "hidden",
-
             backgroundColor:
               "#f5f7fa",
           }}
         >
-          {activeMenu ? (
-           <DynamicRoleTable
-  title={`${toDisplayLabel(
-    activeMenu,
-  )} Details`}
-  data={selectedTaskData}
-  onApplicationClick={(application) => {
-    console.log(
-      "Selected Application:",
-      application,
-    );
-
-    setSelectedApplication(application);
-  }}
-/>
-          ) : (
-            <Paper
-              elevation={0}
-              sx={{
-                height: "100%",
-
-                display: "flex",
-
-                alignItems:
-                  "center",
-
-                justifyContent:
-                  "center",
-
-                border:
-                  "1px solid #e5e7eb",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "13px",
-
-                  color: "#777",
-                }}
-              >
-                No task pool
-                available
-              </Typography>
-            </Paper>
-          )}
+          <RightSideTable
+            selectedRole={
+              activeRole
+            }
+            selectedTask={
+              activeTask
+            }
+            selectedTaskData={
+              selectedTaskData
+            }
+            selectedApplication={
+              selectedApplication
+            }
+            applicationSections={
+              applicationSections
+            }
+            onApplicationClick={
+              handleApplicationClick
+            }
+            onApplicationBack={
+              handleApplicationBack
+            }
+          />
         </Box>
       </Grid>
     </Box>

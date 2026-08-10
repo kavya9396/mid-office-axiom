@@ -27,8 +27,11 @@ interface SubSection {
 }
 
 /**
- * DRS Summary sub-sections
+ * ============================================================
+ * DRS SUMMARY SUB-SECTIONS
+ * ============================================================
  */
+
 const DRS_SUB_SECTIONS: SubSection[] = [
   {
     key: "summary",
@@ -45,19 +48,31 @@ const DRS_SUB_SECTIONS: SubSection[] = [
 ];
 
 /**
- * Convert section keys into readable labels
- * when API does not provide a label.
+ * ============================================================
+ * FORMAT SECTION LABEL
+ * ============================================================
  */
+
 const formatSectionLabel = (
   value: string,
 ): string => {
   return value
     .replace(/_/g, " ")
-    .replace(/([a-z])([A-Z])/g, "$1 $2")
-    .replace(/\b\w/g, (char) =>
-      char.toUpperCase(),
+    .replace(
+      /([a-z])([A-Z])/g,
+      "$1 $2",
+    )
+    .replace(
+      /\b\w/g,
+      (char) => char.toUpperCase(),
     );
 };
+
+/**
+ * ============================================================
+ * APPLICATION WORKSPACE
+ * ============================================================
+ */
 
 const ApplicationWorkspace = ({
   application,
@@ -66,9 +81,6 @@ const ApplicationWorkspace = ({
 }: ApplicationWorkspaceProps) => {
   /**
    * Make sure DRS Summary appears first.
-   *
-   * If the parent already sends the correct order,
-   * this does not change the remaining order.
    */
   const orderedSections = [
     ...sections.filter(
@@ -90,16 +102,19 @@ const ApplicationWorkspace = ({
     );
 
   /**
-   * DRS Summary currently selected tab.
+   * DRS Summary selected tab.
    */
-  const [selectedDrsSection, setSelectedDrsSection] =
-    useState<string>("summary");
+  const [
+    selectedDrsSection,
+    setSelectedDrsSection,
+  ] = useState<string>("summary");
 
   /**
-   * Application number.
-   *
-   * Supports different possible API field names.
+   * ==========================================================
+   * APPLICATION NUMBER
+   * ==========================================================
    */
+
   const applicationNumber =
     application.applicationNo ??
     application.applicationNumber ??
@@ -108,8 +123,11 @@ const ApplicationWorkspace = ({
     "-";
 
   /**
-   * Select main application section.
+   * ==========================================================
+   * MAIN SECTION CLICK
+   * ==========================================================
    */
+
   const handleSectionClick = (
     sectionKey: string,
   ) => {
@@ -125,8 +143,11 @@ const ApplicationWorkspace = ({
   };
 
   /**
-   * DRS Summary content.
+   * ==========================================================
+   * DRS SUMMARY
+   * ==========================================================
    */
+
   const renderDrsSummary = () => {
     return (
       <Box
@@ -139,9 +160,9 @@ const ApplicationWorkspace = ({
           overflow: "hidden",
         }}
       >
-        {/* ============================================ */}
+        {/* ================================================== */}
         {/* DRS SUB TABS */}
-        {/* ============================================ */}
+        {/* ================================================== */}
 
         <Paper
           elevation={0}
@@ -217,9 +238,9 @@ const ApplicationWorkspace = ({
           </Box>
         </Paper>
 
-        {/* ============================================ */}
+        {/* ================================================== */}
         {/* DRS CONTENT */}
-        {/* ============================================ */}
+        {/* ================================================== */}
 
         <Box
           sx={{
@@ -247,13 +268,20 @@ const ApplicationWorkspace = ({
             },
           }}
         >
+          {/* ================================================= */}
+          {/* SUMMARY */}
+          {/* ================================================= */}
+
           {selectedDrsSection ===
             "summary" && (
-            <SectionContent
-              title="Summary"
+            <DrsApplicationSummary
               application={application}
             />
           )}
+
+          {/* ================================================= */}
+          {/* DISCREPANCY */}
+          {/* ================================================= */}
 
           {selectedDrsSection ===
             "discrepancy" && (
@@ -262,6 +290,10 @@ const ApplicationWorkspace = ({
               application={application}
             />
           )}
+
+          {/* ================================================= */}
+          {/* DECISION */}
+          {/* ================================================= */}
 
           {selectedDrsSection ===
             "decision" && (
@@ -276,8 +308,11 @@ const ApplicationWorkspace = ({
   };
 
   /**
-   * Render main right-side section.
+   * ==========================================================
+   * RENDER MAIN SECTION
+   * ==========================================================
    */
+
   const renderSection = () => {
     switch (selectedSection) {
       case "drsSummary":
@@ -358,6 +393,12 @@ const ApplicationWorkspace = ({
     }
   };
 
+  /**
+   * ==========================================================
+   * MAIN WORKSPACE
+   * ==========================================================
+   */
+
   return (
     <Box
       sx={{
@@ -373,9 +414,9 @@ const ApplicationWorkspace = ({
         overflow: "hidden",
       }}
     >
-      {/* ================================================== */}
+      {/* ==================================================== */}
       {/* LEFT SIDEBAR */}
-      {/* ================================================== */}
+      {/* ==================================================== */}
 
       <Paper
         elevation={0}
@@ -400,9 +441,9 @@ const ApplicationWorkspace = ({
           flexDirection: "column",
         }}
       >
-        {/* ================================================ */}
+        {/* ================================================== */}
         {/* HEADER */}
-        {/* ================================================ */}
+        {/* ================================================== */}
 
         <Box
           sx={{
@@ -432,9 +473,9 @@ const ApplicationWorkspace = ({
           </Typography>
         </Box>
 
-        {/* ================================================ */}
+        {/* ================================================== */}
         {/* APPLICATION NUMBER */}
-        {/* ================================================ */}
+        {/* ================================================== */}
 
         <Box
           sx={{
@@ -477,9 +518,9 @@ const ApplicationWorkspace = ({
           </Typography>
         </Box>
 
-        {/* ================================================ */}
+        {/* ================================================== */}
         {/* SECTION LIST */}
-        {/* ================================================ */}
+        {/* ================================================== */}
 
         <Box
           sx={{
@@ -584,9 +625,9 @@ const ApplicationWorkspace = ({
           )}
         </Box>
 
-        {/* ================================================ */}
+        {/* ================================================== */}
         {/* BACK TO INBOX */}
-        {/* ================================================ */}
+        {/* ================================================== */}
 
         <Box
           onClick={onBack}
@@ -624,9 +665,9 @@ const ApplicationWorkspace = ({
         </Box>
       </Paper>
 
-      {/* ================================================== */}
+      {/* ==================================================== */}
       {/* RIGHT CONTENT */}
-      {/* ================================================== */}
+      {/* ==================================================== */}
 
       <Box
         sx={{
@@ -648,14 +689,816 @@ const ApplicationWorkspace = ({
 };
 
 /**
- * Generic section content.
+ * ============================================================
+ * DRS APPLICATION SUMMARY
+ * ============================================================
  *
- * This is intentionally compact.
+ * This is the main underwriter-friendly summary.
  *
- * Later you can replace this component with
- * your real Summary / Discrepancy / Decision
- * components without changing the workspace.
+ * Instead of showing every application field,
+ * it provides a quick overview of the complete
+ * application.
  */
+
+interface DrsApplicationSummaryProps {
+  application: Record<string, unknown>;
+}
+
+const DrsApplicationSummary = ({
+  application,
+}: DrsApplicationSummaryProps) => {
+  /**
+   * ==========================================================
+   * HELPER TO READ API VALUES
+   * ==========================================================
+   */
+
+  const getValue = (
+    ...keys: string[]
+  ): string => {
+    for (const key of keys) {
+      const value = application[key];
+
+      if (
+        value !== undefined &&
+        value !== null &&
+        value !== ""
+      ) {
+        return String(value);
+      }
+    }
+
+    return "-";
+  };
+
+  /**
+   * ==========================================================
+   * APPLICATION DETAILS
+   * ==========================================================
+   */
+
+  const applicationNumber = getValue(
+    "applicationNo",
+    "applicationNumber",
+    "application_no",
+    "application_number",
+  );
+
+  const productName = getValue(
+    "productName",
+    "product",
+    "productCode",
+  );
+
+  const appliedSA = getValue(
+    "appliedSA",
+    "appliedSa",
+    "sumAssured",
+    "appliedSumAssured",
+  );
+
+  const faceValue = getValue(
+    "faceValue",
+  );
+
+  const channel = getValue(
+    "channel",
+  );
+
+  const subChannel = getValue(
+    "subChannel",
+  );
+
+  const agentCode = getValue(
+    "agentCode",
+  );
+
+  const customerType = getValue(
+    "customerType",
+  );
+
+  /**
+   * ==========================================================
+   * BRE DETAILS
+   * ==========================================================
+   */
+
+  const initialBre = getValue(
+    "initialBreDecision",
+    "initialBRE",
+    "initialBre",
+  );
+
+  const finalBre = getValue(
+    "finalBreDecision",
+    "finalBRE",
+    "finalBre",
+  );
+
+  const initialStatus = getValue(
+    "initialBreStatus",
+    "initialStatus",
+  );
+
+  const finalStatus = getValue(
+    "finalBreStatus",
+    "finalStatus",
+  );
+
+  /**
+   * ==========================================================
+   * APPLICANT / IMAGE DETAILS
+   * ==========================================================
+   */
+
+  const imageQuality = getValue(
+    "imageQuality",
+  );
+
+  const faceMatchScore = getValue(
+    "faceMatchScore",
+  );
+
+  /**
+   * ==========================================================
+   * SUMMARY
+   * ==========================================================
+   */
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+
+        overflowY: "auto",
+
+        pr: 0.5,
+
+        "&::-webkit-scrollbar": {
+          width: "5px",
+        },
+
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor:
+            "#c7c7c7",
+
+          borderRadius: "10px",
+        },
+
+        "&::-webkit-scrollbar-track": {
+          backgroundColor:
+            "#f5f5f5",
+        },
+      }}
+    >
+      {/* ================================================== */}
+      {/* APPLICATION HEADER */}
+      {/* ================================================== */}
+
+      <Box
+        sx={{
+          mb: 1,
+
+          px: 1.5,
+
+          py: 1.2,
+
+          border:
+            "1px solid #e5e7eb",
+
+          borderRadius: "6px",
+
+          backgroundColor:
+            "#fff",
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+
+            justifyContent:
+              "space-between",
+
+            alignItems: "center",
+          }}
+        >
+          <Box>
+            <Typography
+              sx={{
+                fontSize: "15px",
+
+                fontWeight: 600,
+
+                color: "#0D4C7D",
+              }}
+            >
+              Application Summary
+            </Typography>
+
+            <Typography
+              sx={{
+                mt: 0.3,
+
+                fontSize: "10.5px",
+
+                color: "#777",
+              }}
+            >
+              Application No:{" "}
+              <strong>
+                {applicationNumber}
+              </strong>
+            </Typography>
+          </Box>
+
+          {/* FINAL BRE BADGE */}
+
+          <Box
+            sx={{
+              px: 1.2,
+
+              py: 0.5,
+
+              borderRadius: "12px",
+
+              backgroundColor:
+                "#fff4d6",
+
+              color: "#8a6800",
+
+              fontSize: "10px",
+
+              fontWeight: 600,
+            }}
+          >
+            Final BRE: {finalBre}
+          </Box>
+        </Box>
+      </Box>
+
+      {/* ================================================== */}
+      {/* APPLICATION SNAPSHOT */}
+      {/* ================================================== */}
+
+      <SummaryCard title="Application Snapshot">
+        <SummaryGrid
+          items={[
+            [
+              "Product",
+              productName,
+            ],
+            [
+              "Applied SA",
+              appliedSA,
+            ],
+            [
+              "Face Value",
+              faceValue,
+            ],
+            [
+              "Channel",
+              channel,
+            ],
+            [
+              "Sub Channel",
+              subChannel,
+            ],
+            [
+              "Agent Code",
+              agentCode,
+            ],
+            [
+              "Customer Type",
+              customerType,
+            ],
+          ]}
+        />
+      </SummaryCard>
+
+      {/* ================================================== */}
+      {/* BRE OVERVIEW */}
+      {/* ================================================== */}
+
+      <SummaryCard title="BRE Overview">
+        <SummaryGrid
+          items={[
+            [
+              "Initial Status",
+              initialStatus,
+            ],
+            [
+              "Initial BRE",
+              initialBre,
+            ],
+            [
+              "Final Status",
+              finalStatus,
+            ],
+            [
+              "Final BRE",
+              finalBre,
+            ],
+          ]}
+        />
+
+        <Box
+          sx={{
+            mt: 1,
+
+            p: 1,
+
+            borderRadius: "5px",
+
+            backgroundColor:
+              "#fff8e6",
+
+            border:
+              "1px solid #f2df9b",
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize: "10px",
+
+              color: "#765f00",
+
+              lineHeight: 1.5,
+            }}
+          >
+            Application has been routed
+            to RM for review based on
+            the final BRE outcome and
+            outstanding requirements.
+          </Typography>
+        </Box>
+      </SummaryCard>
+
+      {/* ================================================== */}
+      {/* REQUIREMENT STATUS */}
+      {/* ================================================== */}
+
+      <SummaryCard title="Requirement Status">
+        <Box
+          sx={{
+            display: "grid",
+
+            gridTemplateColumns:
+              "repeat(3, 1fr)",
+
+            gap: 1,
+          }}
+        >
+          <StatusBox
+            label="Total Requirements"
+            value="5"
+          />
+
+          <StatusBox
+            label="Completed"
+            value="0"
+          />
+
+          <StatusBox
+            label="Pending"
+            value="5"
+          />
+        </Box>
+
+        {/* REQUIREMENT LIST */}
+
+        <Box sx={{ mt: 1 }}>
+          {[
+            [
+              "KYC",
+              "Driving License",
+            ],
+            [
+              "Medical",
+              "Education / Sign",
+            ],
+            [
+              "Application",
+              "Education / Sign",
+            ],
+            [
+              "KYC",
+              "PAN Card",
+            ],
+            [
+              "NRI-OCI",
+              "Passport",
+            ],
+          ].map(
+            ([category, document]) => (
+              <Box
+                key={`${category}-${document}`}
+                sx={{
+                  display: "flex",
+
+                  justifyContent:
+                    "space-between",
+
+                  alignItems: "center",
+
+                  py: 0.65,
+
+                  borderBottom:
+                    "1px solid #f0f0f0",
+                }}
+              >
+                <Box>
+                  <Typography
+                    sx={{
+                      fontSize:
+                        "10px",
+
+                      fontWeight: 600,
+
+                      color: "#444",
+                    }}
+                  >
+                    {category}
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      fontSize:
+                        "9.5px",
+
+                      color: "#888",
+                    }}
+                  >
+                    {document}
+                  </Typography>
+                </Box>
+
+                <Box
+                  sx={{
+                    px: 0.8,
+
+                    py: 0.25,
+
+                    borderRadius:
+                      "10px",
+
+                    backgroundColor:
+                      "#fff1f1",
+
+                    color: "#9A2529",
+
+                    fontSize:
+                      "9px",
+
+                    fontWeight: 600,
+                  }}
+                >
+                  Pending
+                </Box>
+              </Box>
+            ),
+          )}
+        </Box>
+      </SummaryCard>
+
+      {/* ================================================== */}
+      {/* KEY FLAGS */}
+      {/* ================================================== */}
+
+      <SummaryCard title="Key Flags & Observations">
+        <FlagRow
+          text="Documents are pending for review."
+        />
+
+        <FlagRow
+          text="Mismatch identified in information provided."
+        />
+
+        <FlagRow
+          text="PAN Card has not been submitted."
+        />
+
+        <FlagRow
+          text="Passport has not been submitted."
+        />
+
+        {/* IMAGE DETAILS */}
+
+        <Box sx={{ mt: 1 }}>
+          <SummaryGrid
+            items={[
+              [
+                "Image Quality",
+                imageQuality,
+              ],
+              [
+                "Face Match Score",
+                faceMatchScore,
+              ],
+            ]}
+          />
+        </Box>
+      </SummaryCard>
+
+      {/* ================================================== */}
+      {/* UNDERWRITER ACTION */}
+      {/* ================================================== */}
+
+      <Box
+        sx={{
+          mb: 1,
+
+          p: 1.2,
+
+          borderRadius: "6px",
+
+          backgroundColor:
+            "#f7f9fb",
+
+          border:
+            "1px solid #dfe5ea",
+        }}
+      >
+        <Typography
+          sx={{
+            fontSize: "11px",
+
+            fontWeight: 600,
+
+            color: "#0D4C7D",
+
+            mb: 0.5,
+          }}
+        >
+          Underwriter Action
+        </Typography>
+
+        <Typography
+          sx={{
+            fontSize: "10px",
+
+            color: "#555",
+
+            lineHeight: 1.5,
+          }}
+        >
+          Review the outstanding
+          requirements and identified
+          discrepancies before
+          proceeding with the final
+          CVT decision.
+        </Typography>
+      </Box>
+    </Box>
+  );
+};
+
+/**
+ * ============================================================
+ * SUMMARY CARD
+ * ============================================================
+ */
+
+const SummaryCard = ({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) => {
+  return (
+    <Paper
+      elevation={0}
+      sx={{
+        mb: 1,
+
+        p: 1.2,
+
+        border:
+          "1px solid #e5e7eb",
+
+        borderRadius: "6px",
+
+        backgroundColor:
+          "#fff",
+      }}
+    >
+      <Typography
+        sx={{
+          mb: 1,
+
+          fontSize: "11.5px",
+
+          fontWeight: 600,
+
+          color: "#333",
+        }}
+      >
+        {title}
+      </Typography>
+
+      {children}
+    </Paper>
+  );
+};
+
+/**
+ * ============================================================
+ * SUMMARY GRID
+ * ============================================================
+ */
+
+const SummaryGrid = ({
+  items,
+}: {
+  items: [string, string][];
+}) => {
+  return (
+    <Box
+      sx={{
+        display: "grid",
+
+        gridTemplateColumns:
+          "repeat(3, minmax(0, 1fr))",
+
+        gap: 1,
+      }}
+    >
+      {items.map(
+        ([label, value]) => (
+          <Box
+            key={label}
+            sx={{
+              minWidth: 0,
+
+              px: 0.8,
+
+              py: 0.7,
+
+              backgroundColor:
+                "#f8fafb",
+
+              borderRadius: "4px",
+            }}
+          >
+            <Typography
+              sx={{
+                fontSize:
+                  "9px",
+
+                color: "#888",
+              }}
+            >
+              {label}
+            </Typography>
+
+            <Typography
+              sx={{
+                mt: 0.25,
+
+                fontSize:
+                  "10.5px",
+
+                fontWeight: 600,
+
+                color: "#333",
+
+                wordBreak:
+                  "break-word",
+              }}
+            >
+              {value}
+            </Typography>
+          </Box>
+        ),
+      )}
+    </Box>
+  );
+};
+
+/**
+ * ============================================================
+ * STATUS BOX
+ * ============================================================
+ */
+
+const StatusBox = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) => {
+  return (
+    <Box
+      sx={{
+        p: 1,
+
+        textAlign: "center",
+
+        borderRadius: "5px",
+
+        backgroundColor:
+          "#f7f9fb",
+
+        border:
+          "1px solid #edf0f2",
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: "9px",
+
+          color: "#888",
+        }}
+      >
+        {label}
+      </Typography>
+
+      <Typography
+        sx={{
+          mt: 0.3,
+
+          fontSize: "15px",
+
+          fontWeight: 600,
+
+          color: "#0D4C7D",
+        }}
+      >
+        {value}
+      </Typography>
+    </Box>
+  );
+};
+
+/**
+ * ============================================================
+ * FLAG ROW
+ * ============================================================
+ */
+
+const FlagRow = ({
+  text,
+}: {
+  text: string;
+}) => {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+
+        alignItems: "center",
+
+        gap: 0.8,
+
+        mb: 0.7,
+
+        p: 0.7,
+
+        borderRadius: "4px",
+
+        backgroundColor:
+          "#fff8f8",
+      }}
+    >
+      <Box
+        sx={{
+          width: 6,
+
+          height: 6,
+
+          flexShrink: 0,
+
+          borderRadius: "50%",
+
+          backgroundColor:
+            "#9A2529",
+        }}
+      />
+
+      <Typography
+        sx={{
+          fontSize: "10px",
+
+          color: "#555",
+        }}
+      >
+        {text}
+      </Typography>
+    </Box>
+  );
+};
+
+/**
+ * ============================================================
+ * GENERIC SECTION CONTENT
+ * ============================================================
+ *
+ * Used for sections where you have not yet created
+ * a dedicated UI.
+ */
+
 const SectionContent = ({
   title,
   application,
@@ -668,25 +1511,31 @@ const SectionContent = ({
     "-";
 
   /**
-   * Remove the application-number fields
-   * from the generic information display.
+   * Remove application-number fields
+   * from generic information display.
    */
+
   const informationEntries =
-    Object.entries(application).filter(
-      ([key]) => {
-        const normalizedKey = key
+    Object.entries(
+      application,
+    ).filter(([key]) => {
+      const normalizedKey =
+        key
           .replace(/_/g, "")
           .replace(/\s/g, "")
           .toLowerCase();
 
-        return (
-          normalizedKey !==
+      return (
+        normalizedKey !==
           "applicationno" &&
-          normalizedKey !==
+        normalizedKey !==
           "applicationnumber"
-        );
-      },
-    );
+      );
+    });
+
+  /**
+   * Format field label.
+   */
 
   const formatLabel = (
     key: string,
@@ -704,6 +1553,10 @@ const SectionContent = ({
       );
   };
 
+  /**
+   * Format field value.
+   */
+
   const formatValue = (
     value: unknown,
   ): string => {
@@ -716,7 +1569,8 @@ const SectionContent = ({
     }
 
     if (
-      typeof value === "boolean"
+      typeof value ===
+      "boolean"
     ) {
       return value
         ? "Yes"
@@ -724,7 +1578,8 @@ const SectionContent = ({
     }
 
     if (
-      typeof value === "object"
+      typeof value ===
+      "object"
     ) {
       try {
         return JSON.stringify(
@@ -744,7 +1599,8 @@ const SectionContent = ({
       sx={{
         width: "100%",
 
-        boxSizing: "border-box",
+        boxSizing:
+          "border-box",
 
         border:
           "1px solid #e5e7eb",
@@ -759,9 +1615,9 @@ const SectionContent = ({
         overflow: "visible",
       }}
     >
-      {/* ================================================ */}
+      {/* ================================================== */}
       {/* SECTION HEADER */}
-      {/* ================================================ */}
+      {/* ================================================== */}
 
       <Box
         sx={{
@@ -786,9 +1642,9 @@ const SectionContent = ({
         </Typography>
       </Box>
 
-      {/* ================================================ */}
+      {/* ================================================== */}
       {/* APPLICATION NUMBER */}
-      {/* ================================================ */}
+      {/* ================================================== */}
 
       <Box
         sx={{
@@ -835,9 +1691,9 @@ const SectionContent = ({
         </Typography>
       </Box>
 
-      {/* ================================================ */}
+      {/* ================================================== */}
       {/* APPLICATION DATA */}
-      {/* ================================================ */}
+      {/* ================================================== */}
 
       {informationEntries.length >
       0 ? (
@@ -872,7 +1728,8 @@ const SectionContent = ({
                   border:
                     "1px solid #edf0f2",
 
-                  borderRadius: "5px",
+                  borderRadius:
+                    "5px",
 
                   backgroundColor:
                     "#fff",
@@ -917,7 +1774,8 @@ const SectionContent = ({
           sx={{
             p: 2,
 
-            borderRadius: "5px",
+            borderRadius:
+              "5px",
 
             backgroundColor:
               "#f7f9fb",
@@ -928,7 +1786,9 @@ const SectionContent = ({
         >
           <Typography
             sx={{
-              fontSize: "11px",
+              fontSize:
+                "11px",
+
               color: "#777",
             }}
           >
