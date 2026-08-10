@@ -2,16 +2,25 @@ import { Box, Container, Paper, Stack, Typography } from "@mui/material";
 import { fieldStylesEdit } from "../../utils/styles";
 import CustomTextField from "../../components/ui/TextField/TextField";
 import CustomButton from "../../components/ui/Button/Button";
-import { useState } from "react";
+import BackButton from "../../components/layout/BackButton";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import type { AppDispatch } from "../../store/store";
-import { searchThunk } from "../../store/thunks/searchAppThunk";
-import { setDrsData } from "../../store/slices/drsSlice";
-import type { DRSData } from "../../types/drs.types";
+// import { searchThunk } from "../../store/thunks/searchAppThunk";
+import { drsThunk } from "../../store/thunks/drsThunk";
+import { breThunk } from "../../store/thunks/breThunk";
+import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
+import { setDrsData, setBreExternalApiOutputs } from "../../store/slices/drsSlice";
+import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
+import type { DRSData, DRSBreOutput } from "../../types/drs.types";
+import { useAppContext } from "../../hooks/useAppContext";
+import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
 import BreDecision from "../DRS/DRS_Accordions/BreDecision";
 import ApplicationOverview from "../DRS/DRS_Accordions/ApplicationOverview";
 import Summary from "../DRS/DRS_Accordions/Summary";
 import RequirementManagement from "../DRS/DRS_Accordions/RequirementManagement";
+// import DecisionHistory from "../DRS/DRS_Accordions/DecisionHistory";
 
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -19,6 +28,39 @@ const toRecord = (value: unknown): Record<string, unknown> =>
     : {};
 
 const toText = (value: unknown): string => String(value ?? "").trim();
+
+const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
+  const record = value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
+
+  if (!record) {
+    return null;
+  }
+
+  const decision = toText(record.decision);
+  const initialDecision = toText(record.initialDecision);
+  const remarks = toText(record.remarks);
+  const discrepancy = toText(record.discrepancy);
+
+  if (!decision && !initialDecision && !remarks && !discrepancy) {
+    return null;
+  }
+
+  return {
+    systemDecision: decision,
+    decisionTypes: {
+      breDecision: decision,
+      breAction: toText(record.action),
+      breRequirement: discrepancy,
+      initialDecision,
+    },
+    requirements: [],
+    systemDecisionDateTime: toText(record.timestamp),
+    errorResp: "",
+    breRemarks: remarks,
+  };
+};
 
 const normalizeSummary = (dataRecord: Record<string, unknown>) => {
   const summaryRaw = dataRecord.summary;
@@ -172,16 +214,24 @@ const readOnlyContentSx = {
   "& input, & textarea, & .MuiSelect-select": {
     pointerEvents: "none",
   },
-  "& button:not(.MuiAccordionSummary-root):not([data-drs-readonly-nav='true'])": {
+  "& button:not(.MuiAccordionSummary-root):not([data-drs-readonly-nav='true']):not(.MuiPaginationItem-root)": {
     display: "none",
   },
 };
 
 const SearchApplication = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+  const { businessType } = useAppContext();
   const [searchValue, setSearchValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [hasSearchResult, setHasSearchResult] = useState(false);
+
+  const mastersRequestedRef = useRef(false);
+  const safeBusinessType = normalizeBusinessType(businessType) ?? "retail";
+  const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+  const roleType = (localStorage.getItem("roleType") ?? "CUW Pool").trim();
+  const sections = useMemo(() => ["breDecision", "applicationOverview", "summary", "requirementManagement"], []);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
@@ -204,24 +254,118 @@ const SearchApplication = () => {
       : null;
   };
 
+  const dispatchMastersOnce = useCallback(() => {
+    if (mastersRequestedRef.current) {
+      return;
+    }
+
+    mastersRequestedRef.current = true;
+    dispatch(fetchMastersForSession());
+  }, [dispatch]);
+
   const handleSearch = async () => {
     try {
       setLoading(true);
 
-      const response = await dispatch(
-        searchThunk({
-          applicationNo: searchValue
-        })
-      ).unwrap();
+      // Commenting out searchThunk as drsThunk provides similar functionality
+      // const response = await dispatch(
+      //   searchThunk({
+      //     applicationNo: searchValue
+      //   })
+      // ).unwrap();
 
-      const drsResponseData = getResponseData(response);
+      // const drsResponseData = getResponseData(response);
 
-      if (drsResponseData) {
-        dispatch(setDrsData(drsResponseData));
-        setHasSearchResult(true);
-      } else {
-        setHasSearchResult(false);
-      }
+      // if (drsResponseData) {
+      //   dispatch(setDrsData(drsResponseData));
+      //   setHasSearchResult(true);
+
+        // Load DRS and BRE data after successful search
+        if (userId) {
+          try {
+            const drsResponse = await dispatch(
+              drsThunk({
+                applicationNo: searchValue,
+                userId,
+                roleType,
+                sections,
+              }),
+            ).unwrap();
+
+            // Update the DRS data in Redux with the response from drsThunk
+            // This ensures requirement management and other sections are properly populated
+            if (drsResponse?.data) {
+              const drsResponseData = getResponseData(drsResponse);
+              
+              if (drsResponseData) {
+                dispatch(setDrsData(drsResponseData));
+                setHasSearchResult(true);
+              }
+            }
+
+            try {
+              const finalBre = await dispatch(
+                breThunk({
+                  eventName: "BRE-RETAIL",
+                  applicationNumber: searchValue,
+                }),
+              ).unwrap();
+              console.log("finalBre", finalBre);
+
+              const breResponse = await dispatch(
+                breRetriggerThunk({
+                  eventName: "BRE-RETAIL",
+                  applicationNumber: searchValue,
+                }),
+              ).unwrap();
+
+              const updatedBrePayload = breResponse.data;
+              const dataRecord = drsResponse.data as unknown as Record<string, unknown>;
+              const originalBreOutput =
+                drsResponse.data.externalAPIs?.breOutput ??
+                mapLegacyBreDecisionToOutput(dataRecord.breDecision);
+
+              if (
+                updatedBrePayload?.breOutput ||
+                updatedBrePayload?.initialBreOutput ||
+                updatedBrePayload?.medicalBreOutput ||
+                updatedBrePayload?.financialBreOutput
+              ) {
+                dispatch(
+                  setBreExternalApiOutputs({
+                    breOutput: updatedBrePayload?.breOutput,
+                    initialBreOutput: originalBreOutput ?? updatedBrePayload?.initialBreOutput,
+                    breRetriggerStatus: "success",
+                    medicalBreOutput: updatedBrePayload?.medicalBreOutput,
+                    financialBreOutput: updatedBrePayload?.financialBreOutput,
+                  }),
+                );
+              }
+            } catch (error) {
+              const dataRecord = drsResponse.data as unknown as Record<string, unknown>;
+              const originalBreOutput =
+                drsResponse.data.externalAPIs?.initialBreOutput ??
+                drsResponse.data.externalAPIs?.breOutput ??
+                mapLegacyBreDecisionToOutput(dataRecord.breDecision);
+
+              dispatch(
+                setBreExternalApiOutputs({
+                  initialBreOutput: originalBreOutput ?? undefined,
+                  breRetriggerStatus: "failure",
+                }),
+              );
+              console.error("Failed to retrigger BRE from DRS response:", error);
+            }
+          } catch (error) {
+            console.error("Failed to load DRS:", error);
+            setHasSearchResult(false);
+          } finally {
+            dispatchMastersOnce();
+          }
+        } else {
+          setHasSearchResult(false);
+        }
+      // }
     } catch (error) {
       setHasSearchResult(false);
       console.error("Search failed:", error);
@@ -233,6 +377,11 @@ const SearchApplication = () => {
     <Box sx={pageShellSx}>
       <Container disableGutters>
         <Stack spacing={3}>
+          <BackButton
+            label="Back to inbox"
+            justify="flex-start"
+            onClick={() => navigate(getInboxPath(safeBusinessType))}
+          />
           <Paper elevation={0} sx={surfaceCardSx}>
             <Stack spacing={2} component="form" onSubmit={(event) => {
               event.preventDefault();

@@ -787,30 +787,40 @@ const RightPanel = ({
           width: 300,
           height: 400,
           overflow: "hidden",
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <Box sx={{ px: 2, py: 1, backgroundColor: "#f5f5f5" }}>
           <Typography variant="subtitle1">{title}</Typography>
         </Box>
  
-        <List dense>
-          {items.map((item) => (
-            <ListItem key={item} disablePadding>
-              <Box sx={{ px: 2 }}>
-                <CustomCheckbox
-                  label={columnByKey.get(item)?.label ?? item}
-                  checked={checked.includes(item)}
-                  disabled={
-                    isAvailableList &&
-                    right.length >= maxVisibleColumns &&
-                    !checked.includes(item)
-                  }
-                  onChange={handleToggle(item)}
-                />
-              </Box>
-            </ListItem>
-          ))}
-        </List>
+        <Box
+          sx={{
+            flexGrow: 1,
+            overflowY: "auto",
+            overflowX: "hidden",
+          }}
+        >
+          <List dense>
+            {items.map((item) => (
+              <ListItem key={item} disablePadding>
+                <Box sx={{ px: 2 }}>
+                  <CustomCheckbox
+                    label={columnByKey.get(item)?.label ?? item}
+                    checked={checked.includes(item)}
+                    disabled={
+                      isAvailableList &&
+                      right.length >= maxVisibleColumns &&
+                      !checked.includes(item)
+                    }
+                    onChange={handleToggle(item)}
+                  />
+                </Box>
+              </ListItem>
+            ))}
+          </List>
+        </Box>
       </Paper>
     );
   };
