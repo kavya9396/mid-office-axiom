@@ -94,7 +94,7 @@ export const allColumns: TableColumn<tableData>[] = [
   },
   {
     key: "isMedical",
-    label: "Is Medical",
+    label: "Medical",
   },
   {
     key: "displayName",

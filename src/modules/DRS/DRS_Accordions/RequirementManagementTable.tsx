@@ -1944,8 +1944,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     width: 100,
                                     minWidth: 100,
                                     // ensure select text and menu items show capitalized form only in this table
-                                    '& .MuiSelect-select': { textTransform: 'capitalize' },
-                                    '& .MuiMenuItem-root': { textTransform: 'capitalize' },
+                                    // '& .MuiSelect-select': { textTransform: 'capitalize' },
+                                    // '& .MuiMenuItem-root': { textTransform: 'capitalize' },
                                 }}
                             >
                                 {renderEditableSelect(

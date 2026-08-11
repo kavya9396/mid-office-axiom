@@ -446,7 +446,7 @@
                 "fupCode": "GCR",
                 "requirementId": 10395,
                 "description": "GCR-Upload Graduation Certificate",
-                "status": "PENDING",
+                "status": "Pending",
                 "isActive": "Y",
                 "raisedDate": "2026-08-04",
                 "raisedBy": "BRE_URMS",

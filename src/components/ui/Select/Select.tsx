@@ -1,3 +1,4 @@
+import React from "react";
 import {
   FormControl,
   FormHelperText,
@@ -55,28 +56,47 @@ export default function CustomSelect(props: CustomSelectProps) {
     disabled = false,
     multiple = false,
   } = props;
-  
+
   const maxCount = multiple ? props.maxCount : undefined;
 
-  
+ const toTitleCase = (text: string) =>
+  text
+    .toLowerCase()
+    .split(" ")
+    .map(
+      (word) => word.charAt(0).toUpperCase() + word.slice(1)
+    )
+    .join(" ");
 
-  const handleChange = (e: SelectChangeEvent<string | string[]>) => {
+  const handleChange = (
+    e: SelectChangeEvent<string | string[]>
+  ) => {
     const newValue = e.target.value;
-    
+
     if (multiple && Array.isArray(newValue) && maxCount) {
-      // Limit selections to maxCount
       if (newValue.length <= maxCount) {
-        (onChange as ((value: string[]) => void) | undefined)?.(newValue);
+        (onChange as ((value: string[]) => void) | undefined)?.(
+          newValue
+        );
       }
     } else if (multiple && Array.isArray(newValue)) {
-      (onChange as ((value: string[]) => void) | undefined)?.(newValue);
-    } else if (!multiple && typeof newValue === 'string') {
-      (onChange as ((value: string) => void) | undefined)?.(newValue);
+      (onChange as ((value: string[]) => void) | undefined)?.(
+        newValue
+      );
+    } else if (!multiple && typeof newValue === "string") {
+      (onChange as ((value: string) => void) | undefined)?.(
+        newValue
+      );
     }
   };
 
-  const defaultRenderValue = (selected: string | string[]) => {
-    if (!selected || (Array.isArray(selected) && selected.length === 0)) {
+  const defaultRenderValue = (
+    selected: string | string[]
+  ) => {
+    if (
+      !selected ||
+      (Array.isArray(selected) && selected.length === 0)
+    ) {
       return (
         <span style={{ color: "#9ca3af" }}>
           {placeholder}
@@ -84,10 +104,15 @@ export default function CustomSelect(props: CustomSelectProps) {
       );
     }
 
-    const lookupLabel = (val: string) => options.find((opt) => opt.value === val)?.label ?? val;
+    const lookupLabel = (val: string) => {
+      const label =
+        options.find((opt) => opt.value === val)?.label ?? val;
+
+      return toTitleCase(label);
+    };
 
     if (Array.isArray(selected)) {
-      return selected.map((v) => lookupLabel(v)).join(", ");
+      return selected.map(lookupLabel).join(", ");
     }
 
     return lookupLabel(selected);
@@ -108,18 +133,27 @@ export default function CustomSelect(props: CustomSelectProps) {
         </Typography>
       )}
 
-      <FormControl fullWidth={fullWidth} error={error}>
+      <FormControl
+        fullWidth={fullWidth}
+        error={error}
+      >
         <Select
           value={value ?? (multiple ? [] : "")}
           disabled={disabled}
           displayEmpty
           multiple={multiple}
           onChange={handleChange}
-          renderValue={(renderValue || defaultRenderValue) as (value: string | string[]) => React.ReactNode}
+          renderValue={
+            (renderValue ||
+              defaultRenderValue) as (
+              value: string | string[]
+            ) => React.ReactNode
+          }
           sx={{
             height: 40,
             borderRadius: "8px",
             backgroundColor: "#fff",
+
             "& .MuiOutlinedInput-notchedOutline": {
               borderColor: "rgba(0, 0, 0, 0.23)",
             },
@@ -128,10 +162,11 @@ export default function CustomSelect(props: CustomSelectProps) {
               borderColor: "#9A2529",
             },
 
-            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-              borderColor: "#9A2529",
-              borderWidth: "2px",
-            },
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline":
+              {
+                borderColor: "#9A2529",
+                borderWidth: "2px",
+              },
 
             "& .MuiSelect-select": {
               px: 2,
@@ -152,26 +187,31 @@ export default function CustomSelect(props: CustomSelectProps) {
 
           {options.map((option) => {
             const isDisabled = Boolean(
-              option.disabled || 
-              (multiple && 
-               maxCount && 
-               Array.isArray(value) && 
-               value.length >= maxCount && 
-               !value.includes(option.value))
+              option.disabled ||
+                (multiple &&
+                  maxCount &&
+                  Array.isArray(value) &&
+                  value.length >= maxCount &&
+                  !value.includes(option.value))
             );
-            
+
             return (
-                <MenuItem
+              <MenuItem
                 key={option.value}
                 value={option.value}
                 disabled={isDisabled}
               >
-                {option.label}
+                {toTitleCase(option.label)}
               </MenuItem>
             );
           })}
         </Select>
-        {!!helperText && <FormHelperText>{helperText}</FormHelperText>}
+
+        {!!helperText && (
+          <FormHelperText>
+            {helperText}
+          </FormHelperText>
+        )}
       </FormControl>
     </div>
   );

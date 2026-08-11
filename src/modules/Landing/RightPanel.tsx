@@ -1253,8 +1253,8 @@ const RightPanel = ({
                               displayValue = formatted || String(cellValue ?? "");
                             } else if (col.key === "isMedical") {
                               // Render boolean flag as friendly text
-                              if (cellValue === true || String(cellValue).toLowerCase() === "true") displayValue = "Medical";
-                              else if (cellValue === false || String(cellValue).toLowerCase() === "false") displayValue = "Non Medical";
+                              if (cellValue === true || String(cellValue).toLowerCase() === "true") displayValue = "Yes";
+                              else if (cellValue === false || String(cellValue).toLowerCase() === "false") displayValue = "No";
                               else displayValue = String(cellValue ?? "");
                             } else {
                               displayValue = String(cellValue ?? "");
