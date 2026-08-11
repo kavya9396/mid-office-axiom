@@ -385,7 +385,6 @@
                     "statCodeE": "LS",
                     "initialSumAssured": "",
                     "customerType": "GENERAL",
-                    "policyType": "",
                     "modalPremium": 0,
                     "policyTerm": null,
                     "premiumPaymentTerm": 40
@@ -394,13 +393,16 @@
             "riderDetails": [],
             "customer": {
                 "customerType": "GENERAL",
-                "policyType": ""
+                "proposerName":"",
+                "lifeAssuredName":""
             },
             "policyDetails": {
                 "modalPremium": 0,
                 "policyTerm": null,
                 "premiumPaymentTerm": 40,
-                "paymentMode": "Monthly"
+                "paymentMode": "Monthly",
+                "policyType":"",
+                "policyStatus":""
             }
         },
         "pivvSection": {
