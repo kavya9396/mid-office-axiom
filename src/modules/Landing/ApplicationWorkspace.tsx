@@ -1,9 +1,11 @@
+
 import {
   Box,
   Paper,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import type { ReactNode } from "react";
 
 interface ApplicationSection {
   key: string;
@@ -53,19 +55,11 @@ const DRS_SUB_SECTIONS: SubSection[] = [
  * ============================================================
  */
 
-const formatSectionLabel = (
-  value: string,
-): string => {
+const formatSectionLabel = (value: string): string => {
   return value
     .replace(/_/g, " ")
-    .replace(
-      /([a-z])([A-Z])/g,
-      "$1 $2",
-    )
-    .replace(
-      /\b\w/g,
-      (char) => char.toUpperCase(),
-    );
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
 /**
@@ -80,47 +74,29 @@ const ApplicationWorkspace = ({
   onBack,
 }: ApplicationWorkspaceProps) => {
   /**
-   * Make sure DRS Summary appears first.
+   * Make DRS Summary appear first.
    */
   const orderedSections = [
     ...sections.filter(
-      (section) =>
-        section.key === "drsSummary",
+      (section) => section.key === "drsSummary",
     ),
     ...sections.filter(
-      (section) =>
-        section.key !== "drsSummary",
+      (section) => section.key !== "drsSummary",
     ),
   ];
 
   /**
-   * First section is selected by default.
+   * First section selected by default.
    */
-  const [selectedSection, setSelectedSection] =
-    useState<string>(
-      orderedSections[0]?.key ?? "",
-    );
+  const [selectedSection, setSelectedSection] = useState(
+    orderedSections[0]?.key ?? "",
+  );
 
   /**
    * DRS Summary selected tab.
    */
-  const [
-    selectedDrsSection,
-    setSelectedDrsSection,
-  ] = useState<string>("summary");
-
-  /**
-   * ==========================================================
-   * APPLICATION NUMBER
-   * ==========================================================
-   */
-
-  const applicationNumber =
-    application.applicationNo ??
-    application.applicationNumber ??
-    application.application_no ??
-    application.application_number ??
-    "-";
+  const [selectedDrsSection, setSelectedDrsSection] =
+    useState("summary");
 
   /**
    * ==========================================================
@@ -128,15 +104,9 @@ const ApplicationWorkspace = ({
    * ==========================================================
    */
 
-  const handleSectionClick = (
-    sectionKey: string,
-  ) => {
+  const handleSectionClick = (sectionKey: string) => {
     setSelectedSection(sectionKey);
 
-    /**
-     * Whenever DRS Summary is opened,
-     * default to Summary.
-     */
     if (sectionKey === "drsSummary") {
       setSelectedDrsSection("summary");
     }
@@ -155,6 +125,7 @@ const ApplicationWorkspace = ({
           width: "100%",
           height: "100%",
           minHeight: 0,
+          minWidth: 0,
           display: "flex",
           flexDirection: "column",
           overflow: "hidden",
@@ -168,135 +139,105 @@ const ApplicationWorkspace = ({
           elevation={0}
           sx={{
             flexShrink: 0,
-            mb: 1,
-            border:
-              "1px solid #e5e7eb",
+            mb: 0.75,
+            border: "1px solid #e5e7eb",
             borderRadius: "6px",
             overflow: "hidden",
           }}
         >
           <Box
             sx={{
-              height: "38px",
+              height: "34px",
               display: "flex",
               alignItems: "center",
               backgroundColor: "#fff",
             }}
           >
-            {DRS_SUB_SECTIONS.map(
-              (subSection) => {
-                const isActive =
-                  selectedDrsSection ===
-                  subSection.key;
+            {DRS_SUB_SECTIONS.map((subSection) => {
+              const isActive =
+                selectedDrsSection === subSection.key;
 
-                return (
-                  <Box
-                    key={subSection.key}
-                    onClick={() =>
-                      setSelectedDrsSection(
-                        subSection.key,
-                      )
-                    }
-                    sx={{
-                      height: "100%",
-                      px: 2,
-
-                      display: "flex",
-                      alignItems: "center",
-
-                      cursor: "pointer",
-
-                      fontSize: "11.5px",
-
-                      fontWeight: isActive
-                        ? 600
-                        : 400,
-
-                      color: isActive
-                        ? "#9A2529"
-                        : "#555",
-
-                      borderBottom:
-                        isActive
-                          ? "2px solid #9A2529"
-                          : "2px solid transparent",
-
-                      transition:
-                        "all 0.15s ease",
-
-                      "&:hover": {
-                        backgroundColor:
-                          "#f8f8f8",
-                      },
-                    }}
-                  >
-                    {subSection.label}
-                  </Box>
-                );
-              },
-            )}
+              return (
+                <Box
+                  key={subSection.key}
+                  onClick={() =>
+                    setSelectedDrsSection(
+                      subSection.key,
+                    )
+                  }
+                  sx={{
+                    height: "100%",
+                    px: 1.5,
+                    display: "flex",
+                    alignItems: "center",
+                    cursor: "pointer",
+                    fontSize: "10.5px",
+                    fontWeight: isActive ? 600 : 400,
+                    color: isActive
+                      ? "#9A2529"
+                      : "#555",
+                    borderBottom: isActive
+                      ? "2px solid #9A2529"
+                      : "2px solid transparent",
+                    transition: "all 0.15s ease",
+                    "&:hover": {
+                      backgroundColor: "#f8f8f8",
+                    },
+                  }}
+                >
+                  {subSection.label}
+                </Box>
+              );
+            })}
           </Box>
         </Paper>
 
         {/* ================================================== */}
-        {/* DRS CONTENT */}
+        {/* SCROLLABLE DRS CONTENT */}
         {/* ================================================== */}
 
         <Box
           sx={{
             flex: 1,
             minHeight: 0,
-
+            minWidth: 0,
             overflowY: "auto",
             overflowX: "hidden",
-
             pr: 0.5,
+            pb: 0.5,
 
             "&::-webkit-scrollbar": {
-              width: "5px",
-            },
-
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor:
-                "#c7c7c7",
-              borderRadius: "10px",
+              width: "6px",
             },
 
             "&::-webkit-scrollbar-track": {
-              backgroundColor:
-                "#f5f5f5",
+              backgroundColor: "#f5f5f5",
+            },
+
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#c7c7c7",
+              borderRadius: "4px",
+            },
+
+            "&::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: "#a8a8a8",
             },
           }}
         >
-          {/* ================================================= */}
-          {/* SUMMARY */}
-          {/* ================================================= */}
-
-          {selectedDrsSection ===
-            "summary" && (
+          {selectedDrsSection === "summary" && (
             <DrsApplicationSummary
               application={application}
             />
           )}
 
-          {/* ================================================= */}
-          {/* DISCREPANCY */}
-          {/* ================================================= */}
-
-          {selectedDrsSection ===
-            "discrepancy" && (
+          {selectedDrsSection === "discrepancy" && (
             <SectionContent
               title="Discrepancy"
               application={application}
             />
           )}
 
-          {/* ================================================= */}
-          {/* DECISION */}
-          {/* ================================================= */}
-
-          {selectedDrsSection ===
-            "decision" && (
+          {selectedDrsSection === "decision" && (
             <SectionContent
               title="Decision"
               application={application}
@@ -380,12 +321,9 @@ const ApplicationWorkspace = ({
             title={
               orderedSections.find(
                 (section) =>
-                  section.key ===
-                  selectedSection,
+                  section.key === selectedSection,
               )?.label ??
-              formatSectionLabel(
-                selectedSection,
-              )
+              formatSectionLabel(selectedSection)
             }
             application={application}
           />
@@ -404,13 +342,9 @@ const ApplicationWorkspace = ({
       sx={{
         width: "100%",
         height: "calc(90vh - 16px)",
-
         display: "flex",
-
         gap: 1.5,
-
         minHeight: 0,
-
         overflow: "hidden",
       }}
     >
@@ -422,22 +356,13 @@ const ApplicationWorkspace = ({
         elevation={0}
         sx={{
           width: "210px",
-
           flexShrink: 0,
-
           height: "100%",
-
           minHeight: 0,
-
-          border:
-            "1px solid #e5e7eb",
-
+          border: "1px solid #e5e7eb",
           borderRadius: "8px",
-
           overflow: "hidden",
-
           display: "flex",
-
           flexDirection: "column",
         }}
       >
@@ -448,18 +373,11 @@ const ApplicationWorkspace = ({
         <Box
           sx={{
             height: "42px",
-
             minHeight: "42px",
-
             px: 1.5,
-
             display: "flex",
-
             alignItems: "center",
-
-            backgroundColor:
-              "#0D4C7D",
-
+            backgroundColor: "#0D4C7D",
             color: "#fff",
           }}
         >
@@ -480,13 +398,9 @@ const ApplicationWorkspace = ({
         <Box
           sx={{
             px: 1.5,
-            py: 1.2,
-
-            borderBottom:
-              "1px solid #e5e7eb",
-
-            backgroundColor:
-              "#fafafa",
+            py: 1,
+            borderBottom: "1px solid #e5e7eb",
+            backgroundColor: "#fafafa",
           }}
         >
           <Typography
@@ -500,20 +414,19 @@ const ApplicationWorkspace = ({
 
           <Typography
             sx={{
-              mt: 0.3,
-
-              fontSize: "11.5px",
-
+              mt: 0.25,
+              fontSize: "11px",
               fontWeight: 600,
-
               color: "#0D4C7D",
-
-              wordBreak:
-                "break-word",
+              wordBreak: "break-word",
             }}
           >
             {String(
-              applicationNumber,
+              application.applicationNo ??
+                application.applicationNumber ??
+                application.application_no ??
+                application.application_number ??
+                "-",
             )}
           </Typography>
         </Box>
@@ -525,13 +438,9 @@ const ApplicationWorkspace = ({
         <Box
           sx={{
             flex: 1,
-
             minHeight: 0,
-
             overflowY: "auto",
-
             overflowX: "hidden",
-
             py: 0.75,
 
             "&::-webkit-scrollbar": {
@@ -539,90 +448,60 @@ const ApplicationWorkspace = ({
             },
 
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor:
-                "#c7c7c7",
-
-              borderRadius: "10px",
-            },
-
-            "&::-webkit-scrollbar-track": {
-              backgroundColor:
-                "#f5f5f5",
+              backgroundColor: "#d0d0d0",
+              borderRadius: "4px",
             },
           }}
         >
-          {orderedSections.map(
-            (section) => {
-              const isActive =
-                selectedSection ===
-                section.key;
+          {orderedSections.map((section) => {
+            const isActive =
+              selectedSection === section.key;
 
-              return (
-                <Box
-                  key={section.key}
-                  onClick={() =>
-                    handleSectionClick(
-                      section.key,
-                    )
-                  }
+            return (
+              <Box
+                key={section.key}
+                onClick={() =>
+                  handleSectionClick(section.key)
+                }
+                sx={{
+                  mx: 0.75,
+                  mb: 0.25,
+                  px: 1.25,
+                  py: 0.7,
+                  cursor: "pointer",
+                  borderRadius: "5px",
+                  borderLeft: isActive
+                    ? "3px solid #9A2529"
+                    : "3px solid transparent",
+                  backgroundColor: isActive
+                    ? "#fdf2f2"
+                    : "transparent",
+                  color: isActive
+                    ? "#9A2529"
+                    : "#333",
+                  transition: "all 0.15s ease",
+                  "&:hover": {
+                    backgroundColor: "#f8f8f8",
+                  },
+                }}
+              >
+                <Typography
                   sx={{
-                    mx: 0.75,
-
-                    mb: 0.25,
-
-                    px: 1.25,
-
-                    py: 0.8,
-
-                    cursor: "pointer",
-
-                    borderRadius: "5px",
-
-                    borderLeft:
-                      isActive
-                        ? "3px solid #9A2529"
-                        : "3px solid transparent",
-
-                    backgroundColor:
-                      isActive
-                        ? "#fdf2f2"
-                        : "transparent",
-
-                    color: isActive
-                      ? "#9A2529"
-                      : "#333",
-
-                    transition:
-                      "all 0.15s ease",
-
-                    "&:hover": {
-                      backgroundColor:
-                        "#f8f8f8",
-                    },
+                    fontSize: "11.5px",
+                    fontWeight: isActive
+                      ? 600
+                      : 400,
+                    lineHeight: 1.3,
                   }}
                 >
-                  <Typography
-                    sx={{
-                      fontSize:
-                        "11.5px",
-
-                      fontWeight:
-                        isActive
-                          ? 600
-                          : 400,
-
-                      lineHeight: 1.3,
-                    }}
-                  >
-                    {section.label ||
-                      formatSectionLabel(
-                        section.key,
-                      )}
-                  </Typography>
-                </Box>
-              );
-            },
-          )}
+                  {section.label ||
+                    formatSectionLabel(
+                      section.key,
+                    )}
+                </Typography>
+              </Box>
+            );
+          })}
         </Box>
 
         {/* ================================================== */}
@@ -633,24 +512,14 @@ const ApplicationWorkspace = ({
           onClick={onBack}
           sx={{
             flexShrink: 0,
-
             px: 1.5,
-
-            py: 1.1,
-
-            borderTop:
-              "1px solid #e5e7eb",
-
+            py: 1,
+            borderTop: "1px solid #e5e7eb",
             cursor: "pointer",
-
             color: "#0D4C7D",
-
-            backgroundColor:
-              "#fff",
-
+            backgroundColor: "#fff",
             "&:hover": {
-              backgroundColor:
-                "#f8f8f8",
+              backgroundColor: "#f8f8f8",
             },
           }}
         >
@@ -672,13 +541,9 @@ const ApplicationWorkspace = ({
       <Box
         sx={{
           flex: 1,
-
           minWidth: 0,
-
           height: "100%",
-
           minHeight: 0,
-
           overflow: "hidden",
         }}
       >
@@ -692,12 +557,6 @@ const ApplicationWorkspace = ({
  * ============================================================
  * DRS APPLICATION SUMMARY
  * ============================================================
- *
- * This is the main underwriter-friendly summary.
- *
- * Instead of showing every application field,
- * it provides a quick overview of the complete
- * application.
  */
 
 interface DrsApplicationSummaryProps {
@@ -713,9 +572,7 @@ const DrsApplicationSummary = ({
    * ==========================================================
    */
 
-  const getValue = (
-    ...keys: string[]
-  ): string => {
+  const getValue = (...keys: string[]): string => {
     for (const key of keys) {
       const value = application[key];
 
@@ -733,16 +590,66 @@ const DrsApplicationSummary = ({
 
   /**
    * ==========================================================
-   * APPLICATION DETAILS
+   * APPLICANT DETAILS
    * ==========================================================
    */
 
-  const applicationNumber = getValue(
-    "applicationNo",
-    "applicationNumber",
-    "application_no",
-    "application_number",
+  const applicantName = getValue(
+    "applicantName",
+    "customerName",
+    "name",
+    "insuredName",
+    "proposerName",
+    "applicant_name",
+    "customer_name",
+    "insured_name",
+    "proposer_name",
   );
+
+  const applicantAge = getValue(
+    "age",
+    "applicantAge",
+    "customerAge",
+    "insuredAge",
+    "proposerAge",
+    "applicant_age",
+    "customer_age",
+    "insured_age",
+    "proposer_age",
+  );
+
+  const applicantDob = getValue(
+    "dob",
+    "dateOfBirth",
+    "date_of_birth",
+    "birthDate",
+    "birth_date",
+    "applicantDob",
+    "applicantDOB",
+    "customerDob",
+    "customerDOB",
+    "insuredDob",
+    "insuredDOB",
+  );
+
+  const applicantOccupation = getValue(
+    "occupation",
+    "occupationName",
+    "profession",
+    "applicantOccupation",
+    "customerOccupation",
+    "insuredOccupation",
+    "occupation_name",
+    "applicant_occupation",
+    "customer_occupation",
+    "insured_occupation",
+  );
+
+  /**
+   * ==========================================================
+   * APPLICATION DETAILS
+   * ==========================================================
+   */
 
   const productName = getValue(
     "productName",
@@ -757,29 +664,19 @@ const DrsApplicationSummary = ({
     "appliedSumAssured",
   );
 
-  const faceValue = getValue(
-    "faceValue",
-  );
+  const faceValue = getValue("faceValue");
 
-  const channel = getValue(
-    "channel",
-  );
+  const channel = getValue("channel");
 
-  const subChannel = getValue(
-    "subChannel",
-  );
+  const subChannel = getValue("subChannel");
 
-  const agentCode = getValue(
-    "agentCode",
-  );
+  const agentCode = getValue("agentCode");
 
-  const customerType = getValue(
-    "customerType",
-  );
+  const customerType = getValue("customerType");
 
   /**
    * ==========================================================
-   * BRE DETAILS
+   * BRE DECISION
    * ==========================================================
    */
 
@@ -795,29 +692,15 @@ const DrsApplicationSummary = ({
     "finalBre",
   );
 
-  const initialStatus = getValue(
-    "initialBreStatus",
-    "initialStatus",
-  );
-
-  const finalStatus = getValue(
-    "finalBreStatus",
-    "finalStatus",
-  );
-
   /**
    * ==========================================================
-   * APPLICANT / IMAGE DETAILS
+   * IMAGE DETAILS
    * ==========================================================
    */
 
-  const imageQuality = getValue(
-    "imageQuality",
-  );
+  const imageQuality = getValue("imageQuality");
 
-  const faceMatchScore = getValue(
-    "faceMatchScore",
-  );
+  const faceMatchScore = getValue("faceMatchScore");
 
   /**
    * ==========================================================
@@ -829,208 +712,112 @@ const DrsApplicationSummary = ({
     <Box
       sx={{
         width: "100%",
-        height: "100%",
-
-        overflowY: "auto",
-
-        pr: 0.5,
-
-        "&::-webkit-scrollbar": {
-          width: "5px",
-        },
-
-        "&::-webkit-scrollbar-thumb": {
-          backgroundColor:
-            "#c7c7c7",
-
-          borderRadius: "10px",
-        },
-
-        "&::-webkit-scrollbar-track": {
-          backgroundColor:
-            "#f5f5f5",
-        },
+        minHeight: "100%",
+        display: "flex",
+        flexDirection: "column",
+        gap: 0.75,
+        pb: 1,
       }}
     >
       {/* ================================================== */}
-      {/* APPLICATION HEADER */}
+      {/* APPLICANT DETAILS */}
       {/* ================================================== */}
 
       <Box
         sx={{
-          mb: 1,
-
-          px: 1.5,
-
-          py: 1.2,
-
-          border:
-            "1px solid #e5e7eb",
-
+          flexShrink: 0,
+          px: 1,
+          py: 0.75,
+          border: "1px solid #D1D5DB",
           borderRadius: "6px",
-
-          backgroundColor:
-            "#fff",
+          backgroundColor: "#fff",
         }}
       >
         <Box
           sx={{
-            display: "flex",
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(4, minmax(0, 1fr))",
+            gap: 0.75,
 
-            justifyContent:
-              "space-between",
+            "@media (max-width: 900px)": {
+              gridTemplateColumns:
+                "repeat(2, minmax(0, 1fr))",
+            },
 
-            alignItems: "center",
+            "@media (max-width: 600px)": {
+              gridTemplateColumns: "1fr",
+            },
           }}
         >
-          <Box>
-            <Typography
-              sx={{
-                fontSize: "15px",
+          <ApplicantInfo
+            label="Applicant Name"
+            value={applicantName}
+          />
 
-                fontWeight: 600,
+          <ApplicantInfo
+            label="Age"
+            value={applicantAge}
+          />
 
-                color: "#0D4C7D",
-              }}
-            >
-              Application Summary
-            </Typography>
+          <ApplicantInfo
+            label="Date of Birth"
+            value={applicantDob}
+          />
 
-            <Typography
-              sx={{
-                mt: 0.3,
-
-                fontSize: "10.5px",
-
-                color: "#777",
-              }}
-            >
-              Application No:{" "}
-              <strong>
-                {applicationNumber}
-              </strong>
-            </Typography>
-          </Box>
-
-          {/* FINAL BRE BADGE */}
-
-          <Box
-            sx={{
-              px: 1.2,
-
-              py: 0.5,
-
-              borderRadius: "12px",
-
-              backgroundColor:
-                "#fff4d6",
-
-              color: "#8a6800",
-
-              fontSize: "10px",
-
-              fontWeight: 600,
-            }}
-          >
-            Final BRE: {finalBre}
-          </Box>
+          <ApplicantInfo
+            label="Occupation"
+            value={applicantOccupation}
+          />
         </Box>
       </Box>
 
       {/* ================================================== */}
-      {/* APPLICATION SNAPSHOT */}
+      {/* APPLICATION DETAIL */}
       {/* ================================================== */}
 
-      <SummaryCard title="Application Snapshot">
+      <SummaryCard title="Application Detail">
         <SummaryGrid
           items={[
-            [
-              "Product",
-              productName,
-            ],
-            [
-              "Applied SA",
-              appliedSA,
-            ],
-            [
-              "Face Value",
-              faceValue,
-            ],
-            [
-              "Channel",
-              channel,
-            ],
-            [
-              "Sub Channel",
-              subChannel,
-            ],
-            [
-              "Agent Code",
-              agentCode,
-            ],
-            [
-              "Customer Type",
-              customerType,
-            ],
+            ["Product", productName],
+            ["Applied SA", appliedSA],
+            ["Face Value", faceValue],
+            ["Channel", channel],
+            ["Sub Channel", subChannel],
+            ["Agent Code", agentCode],
+            ["Customer Type", customerType],
+            ["Image Quality", imageQuality],
+            ["Face Match Score", faceMatchScore],
           ]}
         />
       </SummaryCard>
 
       {/* ================================================== */}
-      {/* BRE OVERVIEW */}
+      {/* BRE DECISION - COMPACT */}
       {/* ================================================== */}
 
-      <SummaryCard title="BRE Overview">
-        <SummaryGrid
-          items={[
-            [
-              "Initial Status",
-              initialStatus,
-            ],
-            [
-              "Initial BRE",
-              initialBre,
-            ],
-            [
-              "Final Status",
-              finalStatus,
-            ],
-            [
-              "Final BRE",
-              finalBre,
-            ],
-          ]}
-        />
-
+      <SummaryCard title="BRE Decision">
         <Box
           sx={{
-            mt: 1,
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(2, minmax(0, 1fr))",
+            gap: 0.75,
 
-            p: 1,
-
-            borderRadius: "5px",
-
-            backgroundColor:
-              "#fff8e6",
-
-            border:
-              "1px solid #f2df9b",
+            "@media (max-width: 700px)": {
+              gridTemplateColumns: "1fr",
+            },
           }}
         >
-          <Typography
-            sx={{
-              fontSize: "10px",
+          <CompactDecision
+            label="Initial Decision"
+            value={initialBre}
+          />
 
-              color: "#765f00",
-
-              lineHeight: 1.5,
-            }}
-          >
-            Application has been routed
-            to RM for review based on
-            the final BRE outcome and
-            outstanding requirements.
-          </Typography>
+          <CompactDecision
+            label="Final Decision"
+            value={finalBre}
+          />
         </Box>
       </SummaryCard>
 
@@ -1042,11 +829,9 @@ const DrsApplicationSummary = ({
         <Box
           sx={{
             display: "grid",
-
             gridTemplateColumns:
-              "repeat(3, 1fr)",
-
-            gap: 1,
+              "repeat(3, minmax(0, 1fr))",
+            gap: 0.75,
           }}
         >
           <StatusBox
@@ -1067,97 +852,86 @@ const DrsApplicationSummary = ({
 
         {/* REQUIREMENT LIST */}
 
-        <Box sx={{ mt: 1 }}>
+        <Box
+          sx={{
+            mt: 0.65,
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(5, minmax(0, 1fr))",
+            gap: 0.6,
+
+            "@media (max-width: 1000px)": {
+              gridTemplateColumns:
+                "repeat(3, minmax(0, 1fr))",
+            },
+
+            "@media (max-width: 700px)": {
+              gridTemplateColumns:
+                "repeat(2, minmax(0, 1fr))",
+            },
+          }}
+        >
           {[
-            [
-              "KYC",
-              "Driving License",
-            ],
-            [
-              "Medical",
-              "Education / Sign",
-            ],
-            [
-              "Application",
-              "Education / Sign",
-            ],
-            [
-              "KYC",
-              "PAN Card",
-            ],
-            [
-              "NRI-OCI",
-              "Passport",
-            ],
-          ].map(
-            ([category, document]) => (
-              <Box
-                key={`${category}-${document}`}
+            ["KYC", "Driving License"],
+            ["Medical", "Education / Sign"],
+            ["Application", "Education / Sign"],
+            ["KYC", "PAN Card"],
+            ["NRI-OCI", "Passport"],
+          ].map(([category, document]) => (
+            <Box
+              key={`${category}-${document}`}
+              sx={{
+                minWidth: 0,
+                p: 0.65,
+                border: "1px solid #edf0f2",
+                borderRadius: "5px",
+                backgroundColor: "#fafbfc",
+              }}
+            >
+              <Typography
                 sx={{
-                  display: "flex",
-
-                  justifyContent:
-                    "space-between",
-
-                  alignItems: "center",
-
-                  py: 0.65,
-
-                  borderBottom:
-                    "1px solid #f0f0f0",
+                  fontSize: "9.5px",
+                  fontWeight: 600,
+                  color: "#444",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
                 }}
               >
-                <Box>
-                  <Typography
-                    sx={{
-                      fontSize:
-                        "10px",
+                {category}
+              </Typography>
 
-                      fontWeight: 600,
+              <Typography
+                sx={{
+                  mt: 0.15,
+                  fontSize: "9.5px",
+                  color: "#374151",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {document}
+              </Typography>
 
-                      color: "#444",
-                    }}
-                  >
-                    {category}
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      fontSize:
-                        "9.5px",
-
-                      color: "#888",
-                    }}
-                  >
-                    {document}
-                  </Typography>
-                </Box>
-
-                <Box
-                  sx={{
-                    px: 0.8,
-
-                    py: 0.25,
-
-                    borderRadius:
-                      "10px",
-
-                    backgroundColor:
-                      "#fff1f1",
-
-                    color: "#9A2529",
-
-                    fontSize:
-                      "9px",
-
-                    fontWeight: 600,
-                  }}
-                >
-                  Pending
-                </Box>
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  mt: 0.35,
+                  px: 0.6,
+                  py: 0.15,
+                  borderRadius: "8px",
+                  backgroundColor: "#fff1f1",
+                  color: "#9A2529",
+                  fontSize: "8px",
+                  fontWeight: 600,
+                  lineHeight: 1.2,
+                }}
+              >
+                Pending
               </Box>
-            ),
-          )}
+            </Box>
+          ))}
         </Box>
       </SummaryCard>
 
@@ -1166,37 +940,25 @@ const DrsApplicationSummary = ({
       {/* ================================================== */}
 
       <SummaryCard title="Key Flags & Observations">
-        <FlagRow
-          text="Documents are pending for review."
-        />
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns:
+              "repeat(2, minmax(0, 1fr))",
+            gap: 0.6,
 
-        <FlagRow
-          text="Mismatch identified in information provided."
-        />
+            "@media (max-width: 700px)": {
+              gridTemplateColumns: "1fr",
+            },
+          }}
+        >
+          <FlagRow text="Documents are pending for review." />
 
-        <FlagRow
-          text="PAN Card has not been submitted."
-        />
+          <FlagRow text="Mismatch identified in information provided." />
 
-        <FlagRow
-          text="Passport has not been submitted."
-        />
+          <FlagRow text="PAN Card has not been submitted." />
 
-        {/* IMAGE DETAILS */}
-
-        <Box sx={{ mt: 1 }}>
-          <SummaryGrid
-            items={[
-              [
-                "Image Quality",
-                imageQuality,
-              ],
-              [
-                "Face Match Score",
-                faceMatchScore,
-              ],
-            ]}
-          />
+          <FlagRow text="Passport has not been submitted." />
         </Box>
       </SummaryCard>
 
@@ -1206,28 +968,20 @@ const DrsApplicationSummary = ({
 
       <Box
         sx={{
-          mb: 1,
-
-          p: 1.2,
-
+          flexShrink: 0,
+          px: 1,
+          py: 0.75,
           borderRadius: "6px",
-
-          backgroundColor:
-            "#f7f9fb",
-
-          border:
-            "1px solid #dfe5ea",
+          backgroundColor: "#f7f9fb",
+          border: "1px solid #dfe5ea",
         }}
       >
         <Typography
           sx={{
-            fontSize: "11px",
-
+            fontSize: "10.5px",
             fontWeight: 600,
-
             color: "#0D4C7D",
-
-            mb: 0.5,
+            mb: 0.25,
           }}
         >
           Underwriter Action
@@ -1235,20 +989,68 @@ const DrsApplicationSummary = ({
 
         <Typography
           sx={{
-            fontSize: "10px",
-
+            fontSize: "9.5px",
             color: "#555",
-
-            lineHeight: 1.5,
+            lineHeight: 1.35,
           }}
         >
-          Review the outstanding
-          requirements and identified
-          discrepancies before
-          proceeding with the final
-          CVT decision.
+          Review the outstanding requirements
+          and identified discrepancies before
+          proceeding with the final CVT decision.
         </Typography>
       </Box>
+    </Box>
+  );
+};
+
+/**
+ * ============================================================
+ * APPLICANT INFO
+ * ============================================================
+ */
+
+const ApplicantInfo = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) => {
+  return (
+    <Box
+      sx={{
+        minWidth: 0,
+        px: 0.75,
+        py: 0.5,
+        backgroundColor: "#f8fafb",
+        borderRadius: "4px",
+        border: "1px solid #f0f2f3",
+      }}
+    >
+      <Typography
+        sx={{
+          fontSize: "9.5px",
+          color: "#374151",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {label}
+      </Typography>
+
+      <Typography
+        sx={{
+          mt: 0.15,
+          fontSize: "10px",
+          fontWeight: 600,
+          color: "#333",
+          wordBreak: "break-word",
+          lineHeight: 1.2,
+        }}
+      >
+        {value}
+      </Typography>
     </Box>
   );
 };
@@ -1264,33 +1066,25 @@ const SummaryCard = ({
   children,
 }: {
   title: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }) => {
   return (
     <Paper
       elevation={0}
       sx={{
-        mb: 1,
-
-        p: 1.2,
-
-        border:
-          "1px solid #e5e7eb",
-
+        flexShrink: 0,
+        px: 1,
+        py: 0.75,
+        border: "1px solid #e5e7eb",
         borderRadius: "6px",
-
-        backgroundColor:
-          "#fff",
+        backgroundColor: "#fff",
       }}
     >
       <Typography
         sx={{
-          mb: 1,
-
-          fontSize: "11.5px",
-
+          mb: 0.6,
+          fontSize: "10.5px",
           fontWeight: 600,
-
           color: "#333",
         }}
       >
@@ -1317,61 +1111,163 @@ const SummaryGrid = ({
     <Box
       sx={{
         display: "grid",
-
         gridTemplateColumns:
-          "repeat(3, minmax(0, 1fr))",
+          "repeat(6, minmax(0, 1fr))",
+        gap: 0.6,
 
-        gap: 1,
+        "@media (max-width: 1100px)": {
+          gridTemplateColumns:
+            "repeat(3, minmax(0, 1fr))",
+        },
+
+        "@media (max-width: 700px)": {
+          gridTemplateColumns:
+            "repeat(2, minmax(0, 1fr))",
+        },
       }}
     >
-      {items.map(
-        ([label, value]) => (
-          <Box
-            key={label}
+      {items.map(([label, value]) => (
+        <Box
+          key={label}
+          sx={{
+            minWidth: 0,
+            px: 0.65,
+            py: 0.5,
+            backgroundColor: "#f8fafb",
+            borderRadius: "4px",
+            border: "1px solid #f0f2f3",
+          }}
+        >
+          <Typography
             sx={{
-              minWidth: 0,
-
-              px: 0.8,
-
-              py: 0.7,
-
-              backgroundColor:
-                "#f8fafb",
-
-              borderRadius: "4px",
+              fontSize: "9.5px",
+              color: "#374151",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
             }}
           >
-            <Typography
-              sx={{
-                fontSize:
-                  "9px",
+            {label}
+          </Typography>
 
-                color: "#888",
-              }}
-            >
-              {label}
-            </Typography>
+          <Typography
+            sx={{
+              mt: 0.15,
+              fontSize: "9.5px",
+              fontWeight: 600,
+              color: "#333",
+              wordBreak: "break-word",
+              lineHeight: 1.2,
+            }}
+          >
+            {value}
+          </Typography>
+        </Box>
+      ))}
+    </Box>
+  );
+};
 
-            <Typography
-              sx={{
-                mt: 0.25,
+/**
+ * ============================================================
+ * COMPACT BRE DECISION
+ * ============================================================
+ */
 
-                fontSize:
-                  "10.5px",
+const CompactDecision = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) => {
+  const normalizedValue = value
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
 
-                fontWeight: 600,
+  const isApproved =
+    normalizedValue.includes("approve") ||
+    normalizedValue.includes("accepted") ||
+    normalizedValue === "pass" ||
+    normalizedValue === "passed";
 
-                color: "#333",
+  const isRejected =
+    normalizedValue.includes("reject") ||
+    normalizedValue.includes("decline") ||
+    normalizedValue === "fail" ||
+    normalizedValue === "failed";
 
-                wordBreak:
-                  "break-word",
-              }}
-            >
-              {value}
-            </Typography>
-          </Box>
-        ),
-      )}
+  const isPending =
+    normalizedValue.includes("pending") ||
+    normalizedValue.includes("review") ||
+    normalizedValue === "-";
+
+  return (
+    <Box
+      sx={{
+        minWidth: 0,
+        minHeight: "40px",
+        px: 0.9,
+        py: 0.55,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 1,
+        border: "1px solid #e5e7eb",
+        borderRadius: "5px",
+        backgroundColor: "#fafbfc",
+      }}
+    >
+      {/* LABEL */}
+
+      <Typography
+        sx={{
+          minWidth: 0,
+          fontSize: "9.5px",
+          fontWeight: 500,
+          color: "#4b5563",
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {label}
+      </Typography>
+
+      {/* VALUE */}
+
+      <Box
+        sx={{
+          flexShrink: 0,
+          maxWidth: "55%",
+          px: 0.8,
+          py: 0.25,
+          borderRadius: "10px",
+          backgroundColor: isApproved
+            ? "#ecfdf3"
+            : isRejected
+            ? "#fff1f2"
+            : isPending
+            ? "#fff8e7"
+            : "#eef4f8",
+          color: isApproved
+            ? "#087443"
+            : isRejected
+            ? "#9A2529"
+            : isPending
+            ? "#946200"
+            : "#0D4C7D",
+          fontSize: "9px",
+          fontWeight: 600,
+          lineHeight: 1.2,
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+        }}
+      >
+        {value}
+      </Box>
     </Box>
   );
 };
@@ -1392,24 +1288,17 @@ const StatusBox = ({
   return (
     <Box
       sx={{
-        p: 1,
-
+        p: 0.6,
         textAlign: "center",
-
         borderRadius: "5px",
-
-        backgroundColor:
-          "#f7f9fb",
-
-        border:
-          "1px solid #edf0f2",
+        backgroundColor: "#f7f9fb",
+        border: "1px solid #edf0f2",
       }}
     >
       <Typography
         sx={{
-          fontSize: "9px",
-
-          color: "#888",
+          fontSize: "9.5px",
+          color: "#374151",
         }}
       >
         {label}
@@ -1417,13 +1306,11 @@ const StatusBox = ({
 
       <Typography
         sx={{
-          mt: 0.3,
-
-          fontSize: "15px",
-
+          mt: 0.1,
+          fontSize: "13px",
           fontWeight: 600,
-
           color: "#0D4C7D",
+          lineHeight: 1.1,
         }}
       >
         {value}
@@ -1447,41 +1334,29 @@ const FlagRow = ({
     <Box
       sx={{
         display: "flex",
-
         alignItems: "center",
-
-        gap: 0.8,
-
-        mb: 0.7,
-
-        p: 0.7,
-
+        gap: 0.6,
+        minWidth: 0,
+        p: 0.5,
         borderRadius: "4px",
-
-        backgroundColor:
-          "#fff8f8",
+        backgroundColor: "#fff8f8",
       }}
     >
       <Box
         sx={{
-          width: 6,
-
-          height: 6,
-
+          width: 5,
+          height: 5,
           flexShrink: 0,
-
           borderRadius: "50%",
-
-          backgroundColor:
-            "#9A2529",
+          backgroundColor: "#9A2529",
         }}
       />
 
       <Typography
         sx={{
-          fontSize: "10px",
-
+          fontSize: "9.5px",
           color: "#555",
+          lineHeight: 1.25,
         }}
       >
         {text}
@@ -1494,52 +1369,34 @@ const FlagRow = ({
  * ============================================================
  * GENERIC SECTION CONTENT
  * ============================================================
- *
- * Used for sections where you have not yet created
- * a dedicated UI.
  */
 
 const SectionContent = ({
   title,
   application,
 }: SectionContentProps) => {
-  const applicationNumber =
-    application.applicationNo ??
-    application.applicationNumber ??
-    application.application_no ??
-    application.application_number ??
-    "-";
-
   /**
    * Remove application-number fields
    * from generic information display.
    */
+  const informationEntries = Object.entries(
+    application,
+  ).filter(([key]) => {
+    const normalizedKey = key
+      .replace(/_/g, "")
+      .replace(/\s/g, "")
+      .toLowerCase();
 
-  const informationEntries =
-    Object.entries(
-      application,
-    ).filter(([key]) => {
-      const normalizedKey =
-        key
-          .replace(/_/g, "")
-          .replace(/\s/g, "")
-          .toLowerCase();
-
-      return (
-        normalizedKey !==
-          "applicationno" &&
-        normalizedKey !==
-          "applicationnumber"
-      );
-    });
+    return (
+      normalizedKey !== "applicationno" &&
+      normalizedKey !== "applicationnumber"
+    );
+  });
 
   /**
    * Format field label.
    */
-
-  const formatLabel = (
-    key: string,
-  ): string => {
+  const formatLabel = (key: string): string => {
     return key
       .replace(/_/g, " ")
       .replace(
@@ -1548,15 +1405,13 @@ const SectionContent = ({
       )
       .replace(
         /\b\w/g,
-        (char) =>
-          char.toUpperCase(),
+        (char) => char.toUpperCase(),
       );
   };
 
   /**
    * Format field value.
    */
-
   const formatValue = (
     value: unknown,
   ): string => {
@@ -1568,23 +1423,13 @@ const SectionContent = ({
       return "-";
     }
 
-    if (
-      typeof value ===
-      "boolean"
-    ) {
-      return value
-        ? "Yes"
-        : "No";
+    if (typeof value === "boolean") {
+      return value ? "Yes" : "No";
     }
 
-    if (
-      typeof value ===
-      "object"
-    ) {
+    if (typeof value === "object") {
       try {
-        return JSON.stringify(
-          value,
-        );
+        return JSON.stringify(value);
       } catch {
         return "-";
       }
@@ -1598,21 +1443,12 @@ const SectionContent = ({
       elevation={0}
       sx={{
         width: "100%",
-
-        boxSizing:
-          "border-box",
-
-        border:
-          "1px solid #e5e7eb",
-
+        minHeight: "100%",
+        boxSizing: "border-box",
+        border: "1px solid #e5e7eb",
         borderRadius: "6px",
-
-        backgroundColor:
-          "#fff",
-
-        p: 1.5,
-
-        overflow: "visible",
+        backgroundColor: "#fff",
+        p: 1.25,
       }}
     >
       {/* ================================================== */}
@@ -1621,20 +1457,15 @@ const SectionContent = ({
 
       <Box
         sx={{
-          mb: 1.25,
-
-          pb: 1,
-
-          borderBottom:
-            "1px solid #e5e7eb",
+          mb: 1,
+          pb: 0.75,
+          borderBottom: "1px solid #e5e7eb",
         }}
       >
         <Typography
           sx={{
             fontSize: "14px",
-
             fontWeight: 600,
-
             color: "#0D4C7D",
           }}
         >
@@ -1643,68 +1474,26 @@ const SectionContent = ({
       </Box>
 
       {/* ================================================== */}
-      {/* APPLICATION NUMBER */}
-      {/* ================================================== */}
-
-      <Box
-        sx={{
-          display: "flex",
-
-          alignItems: "center",
-
-          gap: 1,
-
-          mb: 1.5,
-
-          px: 1,
-
-          py: 0.8,
-
-          borderRadius: "5px",
-
-          backgroundColor:
-            "#f7f9fb",
-        }}
-      >
-        <Typography
-          sx={{
-            fontSize: "10.5px",
-
-            color: "#777",
-          }}
-        >
-          Application Number
-        </Typography>
-
-        <Typography
-          sx={{
-            fontSize: "11px",
-
-            fontWeight: 600,
-
-            color: "#333",
-          }}
-        >
-          {String(
-            applicationNumber,
-          )}
-        </Typography>
-      </Box>
-
-      {/* ================================================== */}
       {/* APPLICATION DATA */}
       {/* ================================================== */}
 
-      {informationEntries.length >
-      0 ? (
+      {informationEntries.length > 0 ? (
         <Box
           sx={{
             display: "grid",
-
             gridTemplateColumns:
-              "repeat(2, minmax(0, 1fr))",
+              "repeat(6, minmax(0, 1fr))",
+            gap: 0.75,
 
-            gap: 1,
+            "@media (max-width: 1100px)": {
+              gridTemplateColumns:
+                "repeat(3, minmax(0, 1fr))",
+            },
+
+            "@media (max-width: 700px)": {
+              gridTemplateColumns:
+                "repeat(2, minmax(0, 1fr))",
+            },
           }}
         >
           {informationEntries.map(
@@ -1713,57 +1502,40 @@ const SectionContent = ({
                 key={key}
                 sx={{
                   display: "flex",
-
-                  flexDirection:
-                    "column",
-
-                  gap: 0.35,
-
+                  flexDirection: "column",
+                  gap: 0.25,
                   minWidth: 0,
-
-                  px: 1,
-
-                  py: 0.8,
-
+                  px: 0.8,
+                  py: 0.65,
                   border:
                     "1px solid #edf0f2",
-
-                  borderRadius:
-                    "5px",
-
-                  backgroundColor:
-                    "#fff",
+                  borderRadius: "5px",
+                  backgroundColor: "#fff",
                 }}
               >
                 <Typography
                   sx={{
-                    fontSize:
-                      "9.5px",
-
-                    color: "#888",
-
+                    fontSize: "10px",
+                    color: "#374151",
                     fontWeight: 500,
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
                   }}
                 >
-                  {formatLabel(
-                    key,
-                  )}
+                  {formatLabel(key)}
                 </Typography>
 
                 <Typography
                   sx={{
-                    fontSize:
-                      "11px",
-
+                    fontSize: "10px",
                     color: "#333",
-
                     wordBreak:
                       "break-word",
+                    lineHeight: 1.25,
                   }}
                 >
-                  {formatValue(
-                    value,
-                  )}
+                  {formatValue(value)}
                 </Typography>
               </Box>
             ),
@@ -1772,28 +1544,19 @@ const SectionContent = ({
       ) : (
         <Box
           sx={{
-            p: 2,
-
-            borderRadius:
-              "5px",
-
-            backgroundColor:
-              "#f7f9fb",
-
-            border:
-              "1px solid #edf0f2",
+            p: 1.5,
+            borderRadius: "5px",
+            backgroundColor: "#f7f9fb",
+            border: "1px solid #edf0f2",
           }}
         >
           <Typography
             sx={{
-              fontSize:
-                "11px",
-
+              fontSize: "10.5px",
               color: "#777",
             }}
           >
-            No information
-            available.
+            No information available.
           </Typography>
         </Box>
       )}

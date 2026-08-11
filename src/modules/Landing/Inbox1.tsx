@@ -425,7 +425,6 @@ const Inbox1 = () => {
         sx={{
           width: "100%",
           height: "90vh",
-          p: 2,
           backgroundColor:
             "#f5f7fa",
         }}
