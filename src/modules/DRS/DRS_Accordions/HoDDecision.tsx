@@ -11,6 +11,7 @@ import { useAppContext } from "../../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
@@ -128,6 +129,11 @@ const HoDDecision = () => {
   const isSubmitDisabled = !decision || remarks.trim() === "";
 
   const handleSubmitIntent = () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      return;
+    }
     const requirementValidation = validateRequirementDecision(drsData, decision);
     if (!requirementValidation.isValid) {
       setSubmitMessage(requirementValidation.message);

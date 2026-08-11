@@ -125,6 +125,11 @@ const PIVVDecision = () => {
   };
 
   const handleSubmitIntent = () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      return;
+    }
     const requirementValidation = validateRequirementDecision(drsData, decision);
     if (!requirementValidation.isValid) {
       setSubmitMessage(requirementValidation.message);

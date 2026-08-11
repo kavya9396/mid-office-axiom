@@ -104,8 +104,7 @@ export const validateRequirementDecision = (
   drsData: unknown,
   decisionLabel: string,
 ): { isValid: boolean; message: string } => {
-  void decisionLabel;
-
+  // If there are unsaved local changes, always block submission
   if (hasUnsavedRequirementRows(drsData)) {
     return {
       isValid: false,
@@ -113,7 +112,14 @@ export const validateRequirementDecision = (
     };
   }
 
+  // If there are pending requirement rows, allow submission only when the
+  // selected decision implies raising requirements (e.g., label contains "raise").
   if (hasPendingRequirementRows(drsData)) {
+    const normalized = String(decisionLabel ?? "").trim().toLowerCase();
+    if (normalized.includes("raise")) {
+      return { isValid: true, message: "" };
+    }
+
     return {
       isValid: false,
       message: getErrorMessage("drsPendingRequirements"),

@@ -215,6 +215,11 @@ const DRS = () => {
         }
 console.log('decision',decision)
         try {
+            const breValidation = validateDrsFinalBre(drsData);
+            if (!breValidation.canPerformAction) {
+                setRequirementValidationMessage(breValidation.message || "BRE validation failed");
+                return;
+            }
             await dispatch(
                 completeTaskThunk({
                     requestContext: {
@@ -251,25 +256,12 @@ console.log('decision',decision)
     );
     const breValidation = useMemo(() => validateDrsFinalBre(drsData), [drsData]);
  
+    // Previously this handler blocked all UI interactions when BRE failed.
+    // Keep it as a no-op so users can type/select decisions; submit handlers
+    // perform BRE validation and show the snackbar when needed.
     const handleDrsActionCapture = useCallback((event: SyntheticEvent<HTMLElement>) => {
-        const validation = validateDrsFinalBre(drsData);
-        if (validation.canPerformAction) {
-            return;
-        }
-
-        // use Element to support SVG and other non-HTMLElement targets
-        const target = event.target instanceof Element ? event.target : null;
-        if (target?.closest("[data-drs-validation-exempt='true']")) {
-            return;
-        }
-
-        if (target?.closest("[data-drs-bre-retrigger='true']")) {
-            return;
-        }
-
-        event.preventDefault();
-        event.stopPropagation();
-    }, [drsData]);
+        // Intentionally empty to allow normal interactions.
+    }, []);
  
     const dispatchMastersOnce = useCallback(() => {
         if (mastersRequestedRef.current) {

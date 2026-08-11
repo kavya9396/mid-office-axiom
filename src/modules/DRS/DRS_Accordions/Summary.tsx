@@ -288,7 +288,7 @@ const Summary = () => {
             ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
             : [
                 { key: "lifeassured1" as const, label: "Life Assured 1" },
-                { key: "lifeassured2" as const, label: "Life Assured 2" },
+                { key: "lifeassured2" as const, label: "Life Assured" },
             ])
         : (isLAPropSame
             ? [{ key: "lifeassured1" as const, label: "Life Assured" }]

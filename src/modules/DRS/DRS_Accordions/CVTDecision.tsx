@@ -26,6 +26,7 @@ const DRS_TAB_VISIT_EVENT = "drsApplicantTabsVisitedChanged";
 
 const APPLICANT_TAB_LABELS: Record<ApplicantTab, string> = {
     proposer: "Proposer",
+    lifeassured:"Life Assured",
     lifeassured1: "Life Assured 1",
     lifeassured2: "Life Assured 2",
 };
@@ -252,6 +253,7 @@ const CVTDecision = () => {
     const isDecisionAndRemarksReady =
         uwDecisionRemarks.trim().length > 0 &&
         effectiveDecision.trim().length > 0;
+    const breValidation = useMemo(() => validateDrsFinalBre(drsData), [drsData]);
     const isSubmitEnabled =
         isDecisionAndRemarksReady &&
         hasVisitedAllApplicantTabs;
@@ -406,6 +408,12 @@ const CVTDecision = () => {
     };
 
     const handleSubmitIntent = () => {
+        const breValidation = validateDrsFinalBre(drsData);
+        if (!breValidation.canPerformAction) {
+            setSubmitMessage(breValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
         const applicantTabsValidation = validateApplicantTabsVisited(drsData);
         if (!applicantTabsValidation.isValid) {
             setTabValidationMessage(applicantTabsValidation.message);
@@ -503,8 +511,8 @@ const CVTDecision = () => {
                             />
                         </Box>
 
-                       
-
+                        {/* BRE validation message intentionally not shown upfront.
+                            It will be displayed in the snackbar when user attempts submit. */}
                     </Box>
                     <Box
                         sx={{
