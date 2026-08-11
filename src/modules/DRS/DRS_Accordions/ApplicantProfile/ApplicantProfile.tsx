@@ -688,8 +688,12 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
     const rawGenderOptions = normalizeMasterOptions(masters.gender) ?? emptyOptions;
     const rawNationalityOptions = normalizeMasterOptions(masters.nationality) ?? emptyOptions;
     const rawResidentStatusOptions = normalizeMasterOptions(masters.resident_status) ?? emptyOptions;
-    const rawIdProofOptions = normalizeMasterOptions(masters.idProof) ?? emptyOptions;
-    const rawAddressProofOptions = normalizeMasterOptions(masters.addressProof) ?? emptyOptions;
+    const rawIdProofOptions = normalizeMasterOptions(
+        (masters as any)?.id_proof_type ?? (masters as any)?.id_proof ?? (masters as any)?.idProof ?? (masters as any)?.idProofType
+    ) ?? emptyOptions;
+    const rawAddressProofOptions = normalizeMasterOptions(
+        (masters as any)?.address_proof ?? (masters as any)?.addressProof ?? (masters as any)?.address_proof_type ?? (masters as any)?.addressProofType
+    ) ?? emptyOptions;
     const rawStateOptions = normalizeMasterOptions(masters.state) ?? emptyOptions;
     const rawCountryOptions = normalizeMasterOptions(masters.country) ?? emptyOptions;
 
@@ -772,6 +776,8 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             // Map proof fields to master labels (use id/address masters where available)
             nextFormData.identityProofType = toMasterLabel(String(nextFormData.identityProofType ?? ""), idProofOptions) || String(nextFormData.identityProofType ?? "");
             nextFormData.addressProof = toMasterLabel(String(nextFormData.addressProof ?? ""), addressProofOptions) || String(nextFormData.addressProof ?? "");
+            // Map age proof as well
+            nextFormData.ageProof = toMasterLabel(String(nextFormData.ageProof ?? ""), idProofOptions) || String(nextFormData.ageProof ?? "");
             // Income proof commonly maps to the same id proof master -- fall back gracefully
             nextFormData.incomeProof = toMasterLabel(String(nextFormData.incomeProof ?? ""), idProofOptions) || String(nextFormData.incomeProof ?? "");
 
