@@ -6,7 +6,7 @@
             "initialDecision": "Non-STP",
             "remarks": "ACR#OCD#PAN#KYP#AGE#IDM#ADP",
             "discrepancy": "PAN#GCR#KYP#PST#AGE#UAC#RUA#H1C#MER#ACR#OCD#IIN#QNR#ECG#HV1#COT#S13#PAL#AUS#IDM#ADP",
-            "timestamp": "05/08/2026, 1802hrs",
+            "timestamp": "06/08/2026, 1908hrs",
             "action": "BRE_REVALIDATION",
             "reTriggerCount": 1
         },
@@ -40,7 +40,7 @@
                     "dob": "2026-03-02T00:00",
                     "age": {
                         "years": 0,
-                        "days": 156
+                        "days": 161
                     },
                     "profileImage": "",
                     "caseStatus": "DRAFT",
@@ -391,7 +391,7 @@
                     "premiumPaymentTerm": 40
                 }
             ],
-            "riderDetails": [{"name":"Rider 1","sumAssured":10000,"option":10000,"modalPremium":10000}],
+            "riderDetails": [],
             "customer": {
                 "customerType": "GENERAL",
                 "policyType": ""
@@ -404,11 +404,11 @@
             }
         },
         "pivvSection": {
-            "pivvPoolRemarks": "BRE_URMS_EVALUATE",
-            "remarkDate": "2026-08-05T12:32:39.142143",
+            "pivvPoolRemarks": "BPM_CASE_STATUS",
+            "remarkDate": "2026-08-10T06:25:03.414781",
             "pivvPoolDecision": "",
             "reason": "",
-            "userId": "MS-breUrms"
+            "userId": "MS-group-bpm"
         },
         "requirementManagement": [
             {
@@ -434,28 +434,6 @@
                 "udsLink": "",
                 "ocrStatus": "",
                 "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medical",
-                "subCategory": "Nominee/PEP/EBI/Personal details",
-                "document": "Education/Sign",
-                "specialTest": "N",
-                "reason": "Mismatch in information provided",
-                "fupCode": "GCR",
-                "requirementId": 10395,
-                "description": "GCR-Upload Graduation Certificate",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-04",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-04",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": ""
             },
             {
                 "team": "UW",
@@ -939,7 +917,7 @@
             }
         ],
         "quickLinks": {
-            "proposerForm": "https://udsviewer-uat.iprulifeinsurance.com/App/UdsViewer/document-listing/split?roleid=VkhjeVE3M0dzd1ZmSFg2TW0xTXhLUT09&_uidtype=R1NoN0FWdloxTzhQeU9IbnhRM3ZkZz09&_uidvalue=RzZVN1pSaThyOTh6V0wyRlFSQlh1Zz09&ntid=UDSMIDOFFICE&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJVMDRMRHBkTlk3QVpMR2FRTlNvQW4zTTN0bFpOcUlaZXp5TUdvYkJxVzVLbkVOSHQiLCJhdWQiOiJ1cm46Ly9jNjA1MTFjMC0xMmEyLTQ3M2MtODBmZC00MjUyOGViNjVhNmEiLCJudElkIjoiVURTTUlET0ZGSUNFIiwiYXV0aCI6InRHa3NUWUoxRVg1dWdwVmFLZzJ3V2NBNTJwd0EiLCJpc3MiOiJ1cm46Ly9hcGlnZWUtZWRnZS1KV1QtcG9saWN5LXRlc3QiLCJleHAiOjE3ODU5MzQ5NjAsImlhdCI6MTc4NTkzMzE2MCwianRpIjoiMzdlYjA2ZjEtYjUzZC00NjQ1LWFjY2QtZTdmMzRhNDVjMzBjIn0.nlgs5QyYwaNHm4JdKCHAkisoJ-eCQQrbsg--4RWmdW6CqJu_ym4JDssGcJC_WXp7W0aZ9P8igR6pQel7ziZOuX03v1gm54JC_P4S516py8mz5K-NFwj2Jx-09YaQQjvVWl3UCz-tfbkicEMJuTMX5rV1t0x6bSxtyCp51rRYCgaLo_PUoW7jSXIdGU7D71PbNu4KmcvaZijwEcdNfnjxaxz1Zf-XDF-UDcGH5mhZHCNf8aVLX5zh29aqyJU-pOS4CvG9o7wqe8xWNev52nBekqMsq9CsWB4OnWkmEZ5PmWQ1Viwhlji70wdRr8Y5LN0BpLOo1cBiA20N60xCURrcjO4Y_TpsvxqqAVgvISQVzreRg6U3I0dbcLHrBLY1-iXEnalqPpH-vlcbYVrgkG1HsS__SizuzjsDOYBc6wR587GoGcFMfUUbsSdnuKjBK1gxkBZtdaPc8669ucjHkq46nnh0Y2rMiJUB7NQG6ZruItkzdVrBQ93yFydwk-3Akhf2ov6vL40svFkQVQGtNRGr-R4KV0JmiAZR3NprYBZenrdzw-ck7a90SwVZGREgv5AAZ4Eqc3VA0jL_tfWs1BPTp5xcdZifQaqUGxc25wtmgc8kpZMN1dGZ4qjT0aZV9Ry1bsE8P2Io5-IkuUJaBRf_HE-7WYDUuGmfXAUjsgQOFjY",
+            "proposerForm": "https://udsviewer-uat.iprulifeinsurance.com/App/UdsViewer/document-listing/split?roleid=VkhjeVE3M0dzd1ZmSFg2TW0xTXhLUT09&_uidtype=R1NoN0FWdloxTzhQeU9IbnhRM3ZkZz09&_uidvalue=RzZVN1pSaThyOTh6V0wyRlFSQlh1Zz09&ntid=UDSMIDOFFICE&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJVMDRMRHBkTlk3QVpMR2FRTlNvQW4zTTN0bFpOcUlaZXp5TUdvYkJxVzVLbkVOSHQiLCJhdWQiOiJ1cm46Ly9jNjA1MTFjMC0xMmEyLTQ3M2MtODBmZC00MjUyOGViNjVhNmEiLCJudElkIjoiVURTTUlET0ZGSUNFIiwiYXV0aCI6IlpNNWgyQnVlbng1UVlBWmgxcFpJMmJ3RVZaaWoiLCJpc3MiOiJ1cm46Ly9hcGlnZWUtZWRnZS1KV1QtcG9saWN5LXRlc3QiLCJleHAiOjE3ODYzNDY0OTIsImlhdCI6MTc4NjM0NDY5MiwianRpIjoiMDdkY2IxYjgtOTQxZS00ZDZlLTk5NDAtMGY5ZGUxZTNhZTViIn0.s-d0mnw1IQdCcfpMt4iJLrGQ2z3xT3hUOOiU9NiBuw2ic4iu-0MqQZk9DMQlSQi9RvxIZXoW7UhRUhShiP0Ag7Vx33-cIuLHlLmfAGa4ygiAC-u2qyTWTBFpnrqvzN6j6bvGfZtE6JYVz1K83p-oLx9ZL1zmoCcD8CIRY-7UwITFjBx98o2xfLoNSY7RdBID_GvmX-GMTGY7o8OjflwcBD-KJc2O7O_s5WPx8xByB6rBZlaUK075mWilvyZLCxqVngl3uMCPI-bHN9AM25ymjPptOYK3AQ9GW9uW1FMPCi05p6e3Xi6QXqCMAK1psejVB3XQUHXNK594u46aDBV4VmpHpZMSA56XpbqK5bIHIcW3_G4uMXuPihVxk2DUbrXQD1oOLhIT4dubRmR6qLQhqkoH9POheruLhVMZceN1KGbACbWPv6BFLVq8Oz8CGgIOCidWs_HBe8pVd-kQV8zzPG9HiZrE9Y8XVNIZmEviFqpQnl6TfvKNOlgl8PCOVlV-xjoE3L4cMjxKg4Rp3Qquh_872sX6zdmhaMmoTP1mpxgRbWBwc0tU1kcTNFzz0kstH6s40EOO72sHkP2IDILxFYoMGedUfH8LElsiPPFZJJbG3simn57PZo2WNilatNOzJXg46xQ9F2EUXWhWJO3xKzNUp8B4nMxgL4J4D_Jnj3Y",
             "previousPolicies": [
                 {
                     "policyNumber": "OS90383470",
@@ -1306,7 +1284,51 @@
             "riskDetails": [],
             "auditTrail": [
                 {
-                    "dateTime": "2026-08-05T12:32:39.142143",
+                    "dateTime": "2026-08-10T06:25:03.414781",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-group-bpm",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-group-bpm",
+                    "uwDecision": "",
+                    "breDecision": "BPM_CASE_STATUS"
+                },
+                {
+                    "dateTime": "2026-08-10T06:12:27.095491",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-group-bpm",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-group-bpm",
+                    "uwDecision": "",
+                    "breDecision": "BPM_TASK"
+                },
+                {
+                    "dateTime": "2026-08-10T06:11:43.125999",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-group-bpm",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-group-bpm",
+                    "uwDecision": "",
+                    "breDecision": "BPM_TASK"
+                },
+                {
+                    "dateTime": "2026-08-10T06:10:46.988076",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-group-bpm",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-group-bpm",
+                    "uwDecision": "",
+                    "breDecision": "BPM_TASK"
+                },
+                {
+                    "dateTime": "2026-08-06T13:38:18.720159",
                     "fromPool": "",
                     "fromPoolUser": "MS-breUrms",
                     "toPool": "",

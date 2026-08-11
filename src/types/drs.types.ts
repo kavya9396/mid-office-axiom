@@ -1090,6 +1090,7 @@ export interface ApplicantEditForm {
   identityProofNumber: string;
   addressProof: string;
   ageProof: string;
+  incomeProof: string;
 
   faceValue: string;
 

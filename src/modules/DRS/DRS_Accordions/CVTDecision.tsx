@@ -214,27 +214,23 @@ const CVTDecision = () => {
 
         const mapped = cvtRaw
             .map((option) => {
-                const code = String(option.code ?? option.key ?? option.value ?? "").trim();
-                const rawValue = String(option.value ?? "").trim();
-                const description = String(option.description ?? option.label ?? option.code ?? "").trim();
+                const code = String(option.code ?? option.key ?? "").trim();
+                const description = String(option.description ?? option.label ?? "").trim();
                 const disabled = Boolean(option.disabled ?? (String(option.isActive ?? "").toUpperCase() === "N"));
                 const optType = String(option.type ?? "").trim();
 
-                if (!description && !code && !rawValue) return null;
-
-                const val = rawValue || code || description;
-                const lab = rawValue || description || code;
+                if (!description || !code) return null;
 
                 return {
-                    label: lab,
-                    value: val,
+                    label: description,
+                    value: code,
                     description,
                     type: optType,
                     code,
                     disabled,
                 } as { label: string; value: string; description: string; type: string; code: string; disabled?: boolean };
             })
-            .filter(Boolean) as { label: string; value: string; description: string; type: string; disabled?: boolean }[];
+            .filter(Boolean) as { label: string; value: string; description: string; type: string; code: string; disabled?: boolean }[];
 
         const final = filterAcceptDecisionOptions(mapped, drsData);
 
@@ -244,12 +240,13 @@ const CVTDecision = () => {
                 const legacy = normalizeMasterOptions((masters as Record<string, unknown>)?.cvtDecision);
                 return filterAcceptDecisionOptions(legacy, drsData);
             } catch (e) {
+                console.log("Error: ", e)
                 return final;
             }
         }
 
         return final;
-    }, [drsData, masters?.misc]);
+    }, [drsData, masters]);
     const effectiveDecision = cvtDecisionOptions.some((option) => option.value === decision)
         ? decision
         : "";
@@ -375,13 +372,8 @@ const CVTDecision = () => {
             setSubmitMessage(null);
             setSubmitStatus(null);
 
-            // For CVT decisions the API expects the description to be passed; otherwise pass the selected value.
-            const selectedOption = cvtDecisionOptions.find((o) => o.value === effectiveDecision) as (typeof cvtDecisionOptions[number] & { code?: string }) | undefined;
-            const payloadDecision = selectedOption
-                ? (String(selectedOption.code ?? "").toUpperCase() === "CVT"
-                    ? String(selectedOption.description ?? selectedOption.value ?? "")
-                    : String(selectedOption.value ?? ""))
-                : effectiveDecision;
+            // For CVT decisions, send the code field from the selected option
+            const payloadDecision = effectiveDecision;
 
             const response = await dispatch(
                 completeTaskThunk({
