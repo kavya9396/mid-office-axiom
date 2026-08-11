@@ -34,21 +34,21 @@ const COMMON_FIELDS: RoleField[] = [
   },
   {
     label: "Policy Type",
-    path: "productDetail.0.policyType",
+    path: "policyDetails.policyType",
   },
 ];
 
 const PLAN_FIELDS: RoleField[] = [
   {
     label: "Plan Name",
-    path: "productDetail.0.planName",
+    path: "productDetail.0.type",
   },
 ];
 
 const PREMIUM_FIELDS: RoleField[] = [
   {
     label: "Modal Premium",
-    path: "productDetail.0.faceValue",
+    path: "productDetail.0.modalPremium",
   },
   {
     label: "Policy Term",
@@ -63,10 +63,10 @@ const PREMIUM_FIELDS: RoleField[] = [
     path: "policyDetails.paymentMode",
   },{
     label: "TRSA",
-    path: "policyDetails.paymentMode",
+    path: "sourcingDetail.paymentMode",
   },{
-    label: "TFESA",
-    path: "policyDetails.paymentMode",
+    label: "TFSA",
+    path: "sourcingDetail.tfsa",
   }
 ];
 
