@@ -108,11 +108,11 @@ export const roleWiseConfig: Record<string, RoleField[]> = {
     ...PLAN_FIELDS,
     {
       label: "Application Issued Date",
-      path: "application.issuedDate",
+      path: "applicationInfo.applicationDate",
     },
     {
       label: "UW Decision Date",
-      path: "underwriting.decisionDate",
+      path: "applicationInfo.decisionDate",
     },
   ],
 
@@ -121,11 +121,11 @@ export const roleWiseConfig: Record<string, RoleField[]> = {
     ...PLAN_FIELDS,
     {
       label: "Application Issued Date",
-      path: "application.issuedDate",
+      path: "applicationInfo.applicationDate",
     },
     {
       label: "UW Decision Date",
-      path: "underwriting.decisionDate",
+      path: "applicationInfo.decisionDate",
     },
     {
       label: "Policy Status",
@@ -141,7 +141,7 @@ export const roleWiseConfig: Record<string, RoleField[]> = {
     },
     {
       label: "Premium",
-      path: "productDetail.0.faceValue",
+      path: "productDetail.0.premium",
     },
     {
       label: "Policy Term",
@@ -157,22 +157,22 @@ export const roleWiseConfig: Record<string, RoleField[]> = {
     },
     {
       label: "Master Policy No.",
-      path: "policyDetails.masterPolicyNo",
+      path: "groupDetails.masterPolicyNo",
     },
     {
       label: "LAN No.",
-      path: "policyDetails.lanNo",
+      path: "sourcingDetail.lanNumber",
     },
     {
       label: "Login Date",
-      path: "policyDetails.loginDate",
+      path: "applicationInfo.applicationDate",
     },
   ],
 
   DVT_FORMAL_TASK: [
     {
       label: "Policy No.",
-      path: "productDetail.0.name",
+      path: "groupDetails.masterPolicyNo",
     },
     {
       label: "Agent Code",
@@ -196,23 +196,23 @@ export const roleWiseConfig: Record<string, RoleField[]> = {
     },
     {
       label: "Premium",
-      path: "productDetail.0.faceValue",
+      path: "productDetail.0.premium",
     },
     {
       label: "Cover Requested",
-      path: "productDetail.0.policyTerm",
+      path: "groupDetails.coverRequested",
     },
     {
       label: "Cover Provided",
-      path: "productDetail.0.premiumPaymentTerm",
+      path: "groupDetails.coverProvided",
     },
     {
       label: "Free Cover",
-      path: "policyDetails.freeCover",
+      path: "groupDetails.freeCover",
     },
     {
       label: "Cover Above FCL",
-      path: "policyDetails.coverAboveFcl",
+      path: "groupDetails.coverAboveFcl",
     },
   ],
 };

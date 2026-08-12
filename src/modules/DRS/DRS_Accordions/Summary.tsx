@@ -15,14 +15,15 @@ import { markApplicantTabVisited, syncRequiredApplicantTabs } from "../../../val
 
 const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
     const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
-
+console.log('normalized',normalized)
     if (normalized === "PROPOSER" || normalized.includes("PR")) return "proposer";
+    if (normalized === "LIFEASSURED" || normalized === "LIFE ASSURED") return "lifeassured";
     if (normalized === "LIFEASSURED1" || normalized === "LIFE ASSURED 1") return "lifeassured1";
     if (normalized === "LIFEASSURED2" || normalized === "LIFE ASSURED 2") return "lifeassured2";
     if (normalized.includes("LA") || normalized.includes("LIFE")) return index === 1 ? "lifeassured1" : "lifeassured2";
     if (index === 0) return "proposer";
     if (index === 1) return "lifeassured1";
-    return "lifeassured2";
+    return "lifeassured";
 };
 
 type DvtLifeOption = "main" | "joint";
@@ -281,24 +282,30 @@ const Summary = () => {
     const [selectedDvtLifeOption, setSelectedDvtLifeOption] = useState<DvtLifeOption | null>(null);
     const dvtLifeOption = lockedDvtLifeOption ?? selectedDvtLifeOption ?? inferredDvtLifeOption;
 
+    const normalizeTabLabel = (key: ApplicantTab, originalLabel: string) => {
+console.log('normalizeTabLabel',key,originalLabel)
+        if (key === "lifeassured1") return "Life Assured 1";
+        if (key === "lifeassured2") return "Life Assured 2";
+        if (key === "lifeassured") return "Life Assured";
+        if (key === "proposer") return "Proposer";
+        return originalLabel;
+    };
     const visibleTabs = isFormalRole
         ? []
         : isDvtRole
         ? (dvtLifeOption === "main"
-            ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
+            ? [{ key: "lifeassured1" as const, label: normalizeTabLabel("lifeassured1", "Life Assured") }]
             : [
-                { key: "lifeassured1" as const, label: "Life Assured 1" },
-                { key: "lifeassured2" as const, label: "Life Assured" },
+                { key: "lifeassured1" as const, label: normalizeTabLabel("lifeassured1", "Life Assured 1") },
+                { key: "lifeassured2" as const, label: normalizeTabLabel("lifeassured2", "Life Assured 2") },
             ])
         : (isLAPropSame
-            ? [{ key: "lifeassured1" as const, label: "Life Assured" }]
-            : applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key)));
+            ? availableMemberTypes.map((k) => ({ key: k as ApplicantTab, label: normalizeTabLabel(k as ApplicantTab, String(k)) }))
+            : availableMemberTypes.map((k) => ({ key: k as ApplicantTab, label: normalizeTabLabel(k as ApplicantTab, String(k)) })));
 
-    const activeApplicantTab: ApplicantTab = isLAPropSame
-        ? "lifeassured1"
-        : isFormalRole
-        ? (availableMemberTypes[0] ?? "proposer")
-        : (visibleTabs.find((tab) => tab.key === applicantTab)?.key ?? visibleTabs[0]?.key ?? "proposer");
+    const activeApplicantTab: ApplicantTab = (
+        visibleTabs.find((tab) => tab.key === applicantTab)?.key ?? visibleTabs[0]?.key ?? (availableMemberTypes[0] as ApplicantTab) ?? "proposer"
+    ) as ApplicantTab;
 
     useEffect(() => {
         localStorage.setItem("drsSelectedApplicantTab", activeApplicantTab);

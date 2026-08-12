@@ -12,6 +12,303 @@
         },
         "summary": [
             {
+                "memberType": "proposer",
+                "lifeType": "LA",
+                "customerType": "GENERAL",
+                "partyId": "2dff8e59-2d3d-4b06-9477-174c9e87d3db",
+                "jontFlag": false,
+                "lifeNumber": "",
+                "clientId": "NA",
+                "proposerLaRelation": "Self",
+                "jointLARelation": "",
+                "jointPRRelation": "",
+                "nriFlag": false,
+                "fatfFlag": false,
+                "faceMatchDetails": {
+                    "document": "string",
+                    "faceMatchScore": 0,
+                    "imageQuality": "good",
+                    "remarks": "no"
+                },
+                "proposerSummary": {
+                    "title": "",
+                    "firstName": "TRSTR",
+                    "middleName": "",
+                    "lastName": "HGDS",
+                    "gender": "M",
+                    "maritalStatus": "M",
+                    "dob": "2026-03-02T00:00",
+                    "age": {
+                        "years": 0,
+                        "days": 161
+                    },
+                    "profileImage": "",
+                    "caseStatus": "DRAFT",
+                    "nationality": "IND",
+                    "countryOfResidence": "IND",
+                    "residentStatus": "IND",
+                    "education": "GRAD",
+                    "pioStatus": "0",
+                    "highestQualification": "GRAD",
+                    "graduationFlag": "",
+                    "orgName": "3I INFOTECH",
+                    "yearsInServiceOrBusiness": null,
+                    "industryType": "",
+                    "birthCountry": "",
+                    "occupationType": "SPVT",
+                    "netIncomeAmt": null,
+                    "immigrationStatus": "Indian Resident",
+                    "orgType": "PVT",
+                    "latestIncYear": 2026,
+                    "isPEP": false,
+                    "panNo": "BDRLW0302B",
+                    "remarks": "",
+                    "ckycNumber": "NA",
+                    "criminalProceeding": "No",
+                    "incomeProof": "Adhr",
+                    "designation": "",
+                    "disabled": "",
+                    "percentageOfImpairment": "",
+                    "typeOfImpairment": "",
+                    "udidNumber": ""
+                },
+                "applicantDetails": {
+                    "dateOfBirth": "2026-03-02",
+                    "gender": "M",
+                    "maritalStatus": "M",
+                    "nationality": "IND",
+                    "countryOfResidence": "IND",
+                    "education": "GRAD"
+                },
+                "financialDetails": {
+                    "annualIncome": 5000000,
+                    "appliedSumAssured": 5000000,
+                    "trsa": 11036.0,
+                    "tfsa": "Infinity"
+                },
+                "policyDetails": {
+                    "productName": "T74",
+                    "productType": "",
+                    "modalPremium": 0,
+                    "paymentMode": "Monthly",
+                    "channel": "Agency"
+                },
+                "underwriting": {
+                    "remarks": "ACR#OCD#PAN#KYP#AGE#IDM#ADP",
+                    "breDecision": {
+                        "status": "Non-STP",
+                        "category": "BRE_REVALIDATION",
+                        "coverage": "ACR#OCD#PAN#KYP#AGE#IDM#ADP"
+                    }
+                },
+                "kycDetails": {
+                    "panNumber": "BDRLW0302B",
+                    "identityProofType": "Adhr",
+                    "identityProofNumber": "AAAAA1111A",
+                    "addressProof": "AADH",
+                    "incomeProof": "Adhr",
+                    "ageProof": "AADH",
+                    "existingCkycNumber": "NA",
+                    "pep": "No",
+                    "criminalProceedings": "No",
+                    "panFlag": "Y",
+                    "panAadharSeedingStatus": "",
+                    "identityProofExpiryDate": "",
+                    "pranNo": "123456789123",
+                    "pranNoVerifivation": ""
+                },
+                "address": [
+                    {
+                        "type": "communication",
+                        "addressLine1": "RAM",
+                        "addressLine2": "RAM",
+                        "addressLine3": "RAM",
+                        "landmark": "Near City Mall",
+                        "city": "mumbai1",
+                        "state": "MH",
+                        "pinCode": "400103",
+                        "residingCountry": "IND",
+                        "topCity": "",
+                        "negativePinCode": ""
+                    },
+                    {
+                        "type": "permanent",
+                        "addressLine1": "MUMBAI",
+                        "addressLine2": "dc",
+                        "addressLine3": "sf",
+                        "landmark": "Opposite Bandra Station",
+                        "city": "mumbai1",
+                        "state": "KA",
+                        "pinCode": "400103",
+                        "residingCountry": "IND",
+                        "topCity": "",
+                        "negativePinCode": ""
+                    }
+                ],
+                "contactDetails": {
+                    "mobileNo": "9878761725",
+                    "alternateMobileNo": "9876543210",
+                    "std": "",
+                    "landlineNo": "",
+                    "emailId": "TRESTR@GMAIL.COM",
+                    "emailPref": "Y",
+                    "smsPref": "Y"
+                },
+                "applicantFinancialDetails": {
+                    "occupation": "SPVT",
+                    "annualIncome": 5000000,
+                    "gstin": "",
+                    "lastIncomeYear": 2026,
+                    "organisationType": "PVT",
+                    "organisationName": "3I INFOTECH"
+                },
+                "healthDetail": {
+                    "height": "165.1",
+                    "weight": "",
+                    "heightFeet": "",
+                    "heightInches": "0",
+                    "hazardousOccupation": "",
+                    "illnessOrImpairment": [],
+                    "substanceConsumption": [
+                        {
+                            "substance": "",
+                            "consumedAs": "",
+                            "quantity": {
+                                "amount": "",
+                                "unit": "day/week"
+                            },
+                            "noOfYears": null,
+                            "advisedByDoctorForAbstinence": ""
+                        }
+                    ],
+                    "medicalQuestionnaire": [
+                        {
+                            "qtid": "ILLIMPAIRMENT",
+                            "value": "no",
+                            "remar": "",
+                            "subQts": []
+                        }
+                    ]
+                },
+                "nominee": [
+                    {
+                        "relationWithLA": "",
+                        "firstName": "TRSTR",
+                        "lastName": "HGDS",
+                        "dob": "1991-03-12T00:00",
+                        "gender": "F",
+                        "percentage": 0,
+                        "proposerNomineeRelation": ""
+                    }
+                ],
+                "appointee": [],
+                "genericDetails": {
+                    "existingPolicyNumber": "NA",
+                    "clientId": "NA",
+                    "selfProposed": "Yes",
+                    "typeOfProposer": "Individual",
+                    "relationshipWithLifeAssured": "Self",
+                    "typeOfProposal": ""
+                },
+                "eiaDetails": {
+                    "openEIA": "No",
+                    "existingEIANumber": "NA",
+                    "preferredRepository": "",
+                    "convertPolicies": "No"
+                },
+                "fundDetails": {
+                    "allocationStrategy": "",
+                    "totalAllocation": "",
+                    "atpOpted": "",
+                    "fundDetail": []
+                },
+                "paymentDetails": {},
+                "payoutDetails": {
+                    "accountType": "Savings",
+                    "bankType": "ICICI Bank Ltd",
+                    "branch": "",
+                    "micrCode": "500229012",
+                    "ifscCode": "ICIC0000123",
+                    "accountNumber": "012345678901",
+                    "paymentOptions": "Savings"
+                },
+                "advisorDetails": {
+                    "relationWithAdvisor": "others",
+                    "acquaintanceDuration": 0,
+                    "fileSentToCopsDate": "",
+                    "branchUWDate": "",
+                    "decalarationDate": "",
+                    "declarationPlace": ""
+                },
+                "questions": [
+                    {
+                        "quesCode": "ILLIMPAIRMENT",
+                        "quesFor": "LA",
+                        "quesType": "HEALTH",
+                        "quesAns": "no"
+                    }
+                ],
+                "producerDetails": {
+                    "perfiosBank": "No",
+                    "premiumPaymentOption": "RP0",
+                    "isecExperianCategory": "",
+                    "gstInNumber": "",
+                    "pasaSegmentCitiesFlag": "",
+                    "productSource": "standalone",
+                    "imputedMarker": "",
+                    "imputedIncome": "0",
+                    "prePopulatedValueEdited": "NA",
+                    "fnaSumAssured": "0",
+                    "componentCode": "PSPL",
+                    "cdfWaiverFlag": "No",
+                    "youthExpressFlag": "N",
+                    "atsSource": "",
+                    "ipsDiscountFlag": "FALSE",
+                    "lumpSumPercentage": "0",
+                    "accuityRiskIndicator": "",
+                    "primaryLASumAssured": ""
+                },
+                "documentDetails": [
+                    {
+                        "documentType": "ID",
+                        "documentName": "Adhr",
+                        "documentId": "AAAAA1111A",
+                        "validityDate": ""
+                    },
+                    {
+                        "documentType": "AGE_PROOF",
+                        "documentName": "AADH",
+                        "documentId": "",
+                        "validityDate": ""
+                    },
+                    {
+                        "documentType": "INCOME",
+                        "documentName": "Adhr",
+                        "documentId": "",
+                        "validityDate": ""
+                    },
+                    {
+                        "documentType": "ADDR",
+                        "documentName": "AADH",
+                        "documentId": "",
+                        "validityDate": ""
+                    }
+                ],
+                "bureauDetails": {
+                    "cibilScore": "",
+                    "cibilIncomeSegment": "",
+                    "cibilEligibilityStatus": "N",
+                    "cibilServiceStatus": "N",
+                    "experianScore": "",
+                    "experianIncomeSegment": "",
+                    "experianEligibilityStatus": "N",
+                    "experianServiceStatus": "N",
+                    "payuScore": "",
+                    "payuIncomeSegment": "",
+                    "payuEligibilityStatus": "N",
+                    "payuServiceStatus": "N"
+                }
+            },{
                 "memberType": "lifeassured",
                 "lifeType": "LA",
                 "customerType": "GENERAL",
@@ -311,6 +608,28 @@
             }
         ],
         "applicationOverview": {
+            "applicationInfo": {
+        "applicationDate": "", 
+        "comboFlag": "no", 
+        "storyCode":"",
+        "pbRiskScore":"",
+        "comboNumber": "OS31229864", 
+        "lifeCount": 2, 
+        "proposerType": "Individual", 
+        "umCode": "00151772", 
+        "source": "BRHL", 
+        "simultaneousPolicies": false, 
+        "simultaneousLifeSA": 0, 
+        "isLAPropSame": true, 
+        "otherPolicySA": 879653,
+        "lifeType": "Main Life",
+        "coApplicationFlag": "no" ,
+        "gaVisitorId":"" ,
+		"isTagged":"" ,
+		"taggedAppNo":"" ,
+		"taggedRelation":"",
+		"spousePolicyNo":"" 
+    },
             "sourcingDetail": {
                 "agentCode": "00004004",
                 "bankCode": "0FB",
@@ -350,7 +669,8 @@
                 "applicantStatus": "",
                 "shareOfLoanJl": null,
                 "applicantStatusJl": "",
-                "masterPolicyHolder": ""
+                "masterPolicyHolder": "",
+                "masterPolicyNo":""
             },
             "productDetail": [
                 {
