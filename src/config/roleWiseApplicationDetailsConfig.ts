@@ -216,3 +216,6 @@ export const roleWiseConfig: Record<string, RoleField[]> = {
     },
   ],
 };
+export const getRoleFields = (role: string): RoleField[] => {
+  return roleWiseConfig[role] ?? COMMON_FIELDS;
+};
