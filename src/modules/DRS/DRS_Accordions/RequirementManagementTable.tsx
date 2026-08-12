@@ -2356,10 +2356,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                                     const payloadRequirements = rows.map((r) => {
                                         const statusCode = String(r.status ?? "").trim() || "PEN";
-                                        const matchedStatus = (requirementStatusOptions as Array<Option & { description?: string }>).find(
-                                            (o) => String(o.value ?? "").trim() === statusCode || String(o.label ?? "").trim().toLowerCase() === String(r.status ?? "").trim().toLowerCase(),
-                                        );
-                                        const statusDescription = matchedStatus?.description ?? matchedStatus?.label ?? String(r.status ?? "");
+                                        // const matchedStatus = (requirementStatusOptions as Array<Option & { description?: string }>).find(
+                                        //     (o) => String(o.value ?? "").trim() === statusCode || String(o.label ?? "").trim().toLowerCase() === String(r.status ?? "").trim().toLowerCase(),
+                                        // );
+                                        //const statusDescription = matchedStatus?.description ?? matchedStatus?.label ?? String(r.status ?? "");
 
                                         return {
                                             team: mapDisplayTeamToStored(r.team ?? ""),
