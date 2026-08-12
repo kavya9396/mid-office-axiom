@@ -18,7 +18,7 @@ import { getCompleteTaskResult } from "./completeTaskResponse";
 import { toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
-import { getRequirementRows, validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const DVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
@@ -83,13 +83,12 @@ const DVTDecision = () => {
     const decisionLabel = toMasterLabel(effectiveDecision, dvtDecisionOptions);
     
 
-    const hasRequirements = getRequirementRows(drsData).length > 0;
     const isAcceptDecision = decisionLabel === "Accept";
     const resolvedDecisionCode = isAcceptDecision
         ? (decisionCodes[0]?.value || "")
         : "";
 
-        const isRaiseRequirementsSelected = decisionLabel === "Raise Requirements";
+        
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??

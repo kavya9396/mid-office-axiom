@@ -253,7 +253,7 @@ const CVTDecision = () => {
     const isDecisionAndRemarksReady =
         uwDecisionRemarks.trim().length > 0 &&
         effectiveDecision.trim().length > 0;
-    const breValidation = useMemo(() => validateDrsFinalBre(drsData), [drsData]);
+    
     const isSubmitEnabled =
         isDecisionAndRemarksReady &&
         hasVisitedAllApplicantTabs;

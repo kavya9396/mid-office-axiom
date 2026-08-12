@@ -454,7 +454,7 @@ const ViewMedicals = () => {
   );
 
   const visibleTabs = useMemo(
-    () => applicantTabs.filter((tab) => availableMemberTypes.includes(tab.key)),
+    () => applicantTabs.filter((tab) => (availableMemberTypes as any).includes(tab.key)),
     [availableMemberTypes]
   );
 

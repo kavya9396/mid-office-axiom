@@ -259,7 +259,7 @@ console.log('decision',decision)
     // Previously this handler blocked all UI interactions when BRE failed.
     // Keep it as a no-op so users can type/select decisions; submit handlers
     // perform BRE validation and show the snackbar when needed.
-    const handleDrsActionCapture = useCallback((event: SyntheticEvent<HTMLElement>) => {
+    const handleDrsActionCapture = useCallback((_event: SyntheticEvent<HTMLElement>) => {
         // Intentionally empty to allow normal interactions.
     }, []);
  

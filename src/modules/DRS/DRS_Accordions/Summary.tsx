@@ -1,7 +1,6 @@
 import { Box, Container, MenuItem, Select, Typography } from "@mui/material";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
-import { applicantTabs } from "../../../utils/constant";
 import { useEffect, useMemo, useState } from "react";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { useSelector } from "react-redux";

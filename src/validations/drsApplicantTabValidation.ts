@@ -7,6 +7,7 @@ export const DRS_TAB_VISIT_EVENT = "drsApplicantTabsVisitedChanged";
 
 const APPLICANT_TAB_LABELS: Record<ApplicantTab, string> = {
   proposer: "Proposer",
+  lifeassured: "Life Assured",
   lifeassured1: "Life Assured 1",
   lifeassured2: "Life Assured 2",
 };
