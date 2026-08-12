@@ -81,10 +81,10 @@ const getPersonalKycFields = (options: {
         type: "select",
         options: options.idProofOptions,
     },
-    {
-        name: "identityProofNumber",
-        label: "Identity Proof Number",
-    },
+    // {
+    //     name: "identityProofNumber",
+    //     label: "Identity Proof Number",
+    // },
     {
         name: "ageProof",
         label: "Age Proof",
@@ -146,28 +146,28 @@ const getAddressFields = (options: {
     { name: "permanentPincode", label: "Perm. Pincode" },
 ];
 
-const idProofNumberValidationMap: Record<string, { regex: RegExp; messageKey: ErrorMessageKey }> = {
-    "PAN Card": {
-        regex: /^[A-Z]{5}[0-9]{4}[A-Z]$/,
-        messageKey: "applicantValidPan",
-    },
-    "Voter ID": {
-        regex: /^[A-Z]{3}[0-9]{7}$/i,
-        messageKey: "applicantValidVoterId",
-    },
-    "Aadhaar Card": {
-        regex: /^\d{12}$/,
-        messageKey: "applicantValidAadhaar",
-    },
-    "Passport": {
-        regex: /^[A-PR-WY][1-9]\d{6}$/i,
-        messageKey: "applicantValidPassport",
-    },
-    "Driving's License": {
-        regex: /^[A-Z]{2}[0-9]{2}[0-9A-Z]{9,13}$/i,
-        messageKey: "applicantValidDrivingLicense",
-    },
-};
+// const idProofNumberValidationMap: Record<string, { regex: RegExp; messageKey: ErrorMessageKey }> = {
+//     "PAN Card": {
+//         regex: /^[A-Z]{5}[0-9]{4}[A-Z]$/,
+//         messageKey: "applicantValidPan",
+//     },
+//     "Voter ID": {
+//         regex: /^[A-Z]{3}[0-9]{7}$/i,
+//         messageKey: "applicantValidVoterId",
+//     },
+//     "Aadhaar Card": {
+//         regex: /^\d{12}$/,
+//         messageKey: "applicantValidAadhaar",
+//     },
+//     "Passport": {
+//         regex: /^[A-PR-WY][1-9]\d{6}$/i,
+//         messageKey: "applicantValidPassport",
+//     },
+//     "Driving's License": {
+//         regex: /^[A-Z]{2}[0-9]{2}[0-9A-Z]{9,13}$/i,
+//         messageKey: "applicantValidDrivingLicense",
+//     },
+// };
 
 const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]$/;
 const pranRegex = /^\d{12}$/;
@@ -604,6 +604,7 @@ const applyUpdatedDetailsToProfile = (
         middleName: updatedDetails.middleName ?? profile.proposerSummary?.middleName ?? "",
         lastName: updatedDetails.lastName ?? profile.proposerSummary?.lastName ?? "",
         dob: updatedDetails.dob ?? profile.proposerSummary?.dob ?? "",
+        gender: updatedDetails.gender ?? profile.proposerSummary?.gender ?? "",
     },
     applicantDetails: {
         ...profile.applicantDetails,
@@ -972,7 +973,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             panNumber: "PAN Number",
             pranNo: "PRAN Number",
             identityProofType: "Identity Proof",
-            identityProofNumber: "Identity Proof Number",
+            // identityProofNumber: "Identity Proof Number",
             addressProof: "Address Proof",
             ageProof: "Age Proof",
             communicationPincode: "Comm. Pincode",
@@ -985,7 +986,7 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             "residentStatus",
             "panNumber",
             "identityProofType",
-            "identityProofNumber",
+            // "identityProofNumber",
             "addressProof",
             "ageProof",
             "communicationPincode",
@@ -1023,12 +1024,12 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
         }
 
         // Identity proof number validation (validate if identityProofNumber provided)
-        const selectedProofValidation = idProofNumberValidationMap[toMasterLabel(formData.identityProofType, idProofOptions)];
-        if (selectedProofValidation && formData.identityProofNumber.trim()) {
-            if (!selectedProofValidation.regex.test(formData.identityProofNumber.trim())) {
-                errors.identityProofNumber = getErrorMessage(selectedProofValidation.messageKey);
-            }
-        }
+        // const selectedProofValidation = idProofNumberValidationMap[toMasterLabel(formData.identityProofType, idProofOptions)];
+        // if (selectedProofValidation && formData.identityProofNumber.trim()) {
+        //     if (!selectedProofValidation.regex.test(formData.identityProofNumber.trim())) {
+        //         errors.identityProofNumber = getErrorMessage(selectedProofValidation.messageKey);
+        //     }
+        // }
 
         // Master-value existence checks: ensure selected values exist in masters when masters are available
         if (idProofOptions.length > 0 && formData.identityProofType && !allowedIdProofValues.has(formData.identityProofType)) {
@@ -1186,13 +1187,13 @@ const ApplicantProfile = ({ profile, selectedApplicantTab, isApplicantDetailsExp
             return nextErrors;
         });
 
-        if (field === "identityProofType" && fieldErrors.identityProofNumber) {
-            setFieldErrors((prev) => {
-                const nextErrors = { ...prev };
-                delete nextErrors.identityProofNumber;
-                return nextErrors;
-            });
-        }
+        // if (field === "identityProofType" && fieldErrors.identityProofNumber) {
+        //     setFieldErrors((prev) => {
+        //         const nextErrors = { ...prev };
+        //         delete nextErrors.identityProofNumber;
+        //         return nextErrors;
+        //     });
+        // }
 
         if (field === "communicationCountry") {
             setFieldErrors((prev) => {
