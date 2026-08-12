@@ -36,7 +36,7 @@ import FundDetails from "./FundDetails"
 import PaymentPayoutDetails from "./PaymentPayoutDetails"
 import FormalMemberProfile from "./FormalMemberProfile";
 import { normalizeMasterOptions, toMasterKey, toMasterLabel, type SelectOption } from "../../../../utils/masterOptions";
-import { getErrorMessage, type ErrorMessageKey } from "../../../../config/errorMessages";
+import { getErrorMessage } from "../../../../config/errorMessages";
 
 export interface ApplicantProfileProps {
     profile?: Partial<SummaryResponse>;
