@@ -278,7 +278,6 @@ const mapApplicantTabFromMemberType = (memberType: unknown, index: number): Appl
 
 const drsViewTabs: { key: DRSViewTab; label: string }[] = [
   { key: "medical", label: "View Medical" },
-  { key: "financial", label: "View Financial" },
 ];
 
 const uniqSectionTitles = (titles: string[]) => {
@@ -1231,7 +1230,7 @@ const ViewMedical = () => {
                     <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>
                       {subSection.title}
                     </Typography>
-                    {roleType === "CPT_TASK" && (
+                    {roleType === "CPT_DATA_ENTRY_MR_TASK" && (
                       <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
                         <Box sx={{ display: "flex", gap: 1 }}>
                           {editingSubSectionId !== subSection.id ? (
