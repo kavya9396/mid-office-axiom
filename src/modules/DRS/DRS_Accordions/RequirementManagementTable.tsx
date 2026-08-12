@@ -2370,7 +2370,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             reason: r.reason ?? "",
                                             fupCode: r.fupCode ?? "",
                                             description: r.description ?? "",
-                                            status: { value: statusCode, description: statusDescription },
+                                            status:statusCode,
                                             raisedDate: r.raisedDate ?? "",
                                             raisedBy: r.raisedBy ?? "",
                                             receivedDate: r.receivedDate ?? "",
