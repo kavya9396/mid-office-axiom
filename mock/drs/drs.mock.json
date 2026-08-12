@@ -707,7 +707,8 @@
                     "customerType": "GENERAL",
                     "modalPremium": 0,
                     "policyTerm": null,
-                    "premiumPaymentTerm": 40
+                    "premiumPaymentTerm": 40,
+                    "category":"Savings"
                 }
             ],
             "riderDetails": [],
