@@ -60,7 +60,7 @@ export default function CustomTable<T extends object>({
             {title}
           </Typography>
           {headerAction}
-           {headerAction && <Box>{headerAction}</Box>}
+          {headerAction && <Box>{headerAction}</Box>}
         </Box>
       )}
 
@@ -70,22 +70,28 @@ export default function CustomTable<T extends object>({
           size="small"
           sx={{
             width: "100%",
+            tableLayout: "fixed",
             "& th": {
               backgroundColor: "#E9EEF3",
               color: "#4A4A4A",
-              fontSize: "14px",
+              fontSize: "10px",
               fontWeight: 600,
-              py: 1,
-              px: 2,
+              py: 0.5,
+              px: 1,
+              lineHeight: 1.2,
               borderBottom: "1px solid #D6D6D6",
             },
 
             "& td": {
               color: "#4A4A4A",
-              fontSize: "14px",
-              py: 1.1,
-              px: 2,
+              fontSize: "11px",
+              py: 0.5,
+              px: 1,
+              lineHeight: 1.2,
               borderBottom: "1px solid #E1E1E1",
+              whiteSpace: "normal",
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
             },
 
             "& tr:last-child td": {
@@ -102,11 +108,11 @@ export default function CustomTable<T extends object>({
                     width: col.width,
                     ...(col.sticky
                       ? {
-                          position: "sticky",
-                          [col.sticky]: 0,
-                          zIndex: 3,
-                          backgroundColor: "#E9EEF3",
-                        }
+                        position: "sticky",
+                        [col.sticky]: 0,
+                        zIndex: 3,
+                        backgroundColor: "#E9EEF3",
+                      }
                       : {}),
                   }}
                 >
@@ -119,7 +125,7 @@ export default function CustomTable<T extends object>({
                     }}
                   >
                     {/* HEADER TITLE */}
-                    <Typography
+                    {/* <Typography
                       sx={{
                         fontSize: "12px",
                         fontWeight: 600,
@@ -127,7 +133,21 @@ export default function CustomTable<T extends object>({
                       }}
                     >
                       {col.headerRender ? col.headerRender() : col.header}
-                    </Typography>
+                    </Typography> */}
+
+                     {col.headerRender ? (
+                      col.headerRender()
+                    ) : (
+                      <Typography
+                        sx={{
+                          fontSize: "12px",
+                          fontWeight: 600,
+                          color: "#4A4A4A",
+                        }}
+                      >
+                        {col.header}
+                      </Typography>
+                    )}
 
                     {/* SUB ACTION (Select All) */}
                     {col.renderSelectAll && (
@@ -171,11 +191,11 @@ export default function CustomTable<T extends object>({
                         fontSize: "12px",
                         ...(col.sticky
                           ? {
-                              position: "sticky",
-                              [col.sticky]: 0,
-                              zIndex: 2,
-                              backgroundColor: "#FFFFFF",
-                            }
+                            position: "sticky",
+                            [col.sticky]: 0,
+                            zIndex: 2,
+                            backgroundColor: "#FFFFFF",
+                          }
                           : {}),
                       }}
                     >
@@ -184,7 +204,7 @@ export default function CustomTable<T extends object>({
                       ) : (
                         <Typography
                           sx={{
-                            fontSize: "12px",
+                            fontSize: "10px",
                           }}
                         >
                           {content}
