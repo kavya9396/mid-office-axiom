@@ -1,4 +1,4 @@
-import { Alert, Box, Container, Snackbar, Typography } from "@mui/material"
+import { Alert, Box, Snackbar, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useEffect, useMemo, useState } from "react";
@@ -443,8 +443,8 @@ const CVTDecision = () => {
     };
 
     return (
-        <Container disableGutters>
-            <Box sx={{ mt: 1 }}>
+        <>
+            <Box sx={{ mt: 1,p:1 }}>
                 <CustomAccordion title="CVT Decision" defaultExpanded>
                     <Box
                         sx={{
@@ -519,8 +519,8 @@ const CVTDecision = () => {
                     <Box
                         sx={{
                             display: "flex",
-                            gap: 1,
-                            mt: 1,
+                            justifyContent: "center",
+        mt: "5px",
                         }}
                     >
                         <CustomButton
@@ -646,7 +646,7 @@ const CVTDecision = () => {
                     </Box>
                 </CustomDialog>
             </Box>
-        </Container>
+        </>
     )
 }
 

@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import { useMemo, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs, { type TabItem } from "../../../components/ui/Tabs/Tabs";
@@ -35,8 +35,8 @@ const PreLogin = () => {
   }, [activeTab, data]);
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Pre Login" defaultExpanded>
           <Box sx={{ display: "flex", justifyContent: "center", my: 1, width: "100%" }}>
             <CustomTabs tabs={preLoginTabs} value={activeTab} onChange={setActiveTab} />
@@ -48,7 +48,7 @@ const PreLogin = () => {
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import type { Column } from "../../../components/ui/Table/Table";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTable from "../../../components/ui/Table/Table";
@@ -35,8 +35,8 @@ const AuditTrailAccordion = ({ auditTrail }: AuditTrailProps) => {
   const finalAuditTrail = auditTrail ?? reduxAuditTrail ?? [];
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Audit Trail">
           <CustomTable<AuditTrailRow>
             title="Audit Trail"
@@ -45,7 +45,7 @@ const AuditTrailAccordion = ({ auditTrail }: AuditTrailProps) => {
           />
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

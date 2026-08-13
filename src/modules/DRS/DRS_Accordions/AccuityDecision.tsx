@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -128,8 +128,8 @@ const AccuityDecision = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 1 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion
           title="UW Decision"
           defaultExpanded
@@ -195,7 +195,7 @@ const AccuityDecision = () => {
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

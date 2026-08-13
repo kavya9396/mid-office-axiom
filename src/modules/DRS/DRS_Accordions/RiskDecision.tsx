@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import type { ChangeEvent, MouseEvent } from "react";
 import { useMemo, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -244,8 +244,8 @@ const RiskDecision = () => {
   );
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 1 }}>
+    <>
+      <Box sx={{ mt: 1,p:1 }}>
         <CustomAccordion title="Risk Decision" chip={riskReportButton} defaultExpanded>
           <Box
             sx={{
@@ -496,7 +496,7 @@ const RiskDecision = () => {
           </Box>
         </Box>
       </CustomDialog>
-    </Container>
+    </>
   );
 };
 

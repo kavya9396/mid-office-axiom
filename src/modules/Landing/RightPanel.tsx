@@ -236,7 +236,7 @@ const roleMapper = {
   "CPT_DATA_ENTRY_NMR_TASK": "CPT_DATA_ENTRY_NMR_TASK",
   "CPT_DATA_ENTRY_MR_TASK": "CPT_DATA_ENTRY_MR_TASK",
   "DVT_TASK": "DVT Pool",
-  "PIVV_TASK": "PIVV Pool",
+  "PIVV_TASK": "PIVV_TASK",
   "PRE_ISSUANCE_SERVICING_TASK": "Pre Issuance Servicing Pool",
   "EXCEPTIONAL_TASK": "Exceptional Pool",
   "GUW_TASK": "GUW Pool",

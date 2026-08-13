@@ -1,4 +1,4 @@
-import { Box, Chip, Container, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -106,8 +106,8 @@ const PreIssuanceRequestChange = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Pre Issuance Change Request" defaultExpanded>
           <Box sx={{ mt: 1, p: 2, borderRadius: "8px", backgroundColor: "#F6F6F6" }}>
             <Typography sx={{ fontSize: 12, fontWeight: 600, color: "#4B5563", mb: 1.25 }}>
@@ -255,7 +255,7 @@ const PreIssuanceRequestChange = () => {
           }}
         />
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

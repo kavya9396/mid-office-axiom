@@ -1,4 +1,4 @@
-import { Box, Chip, Container, Typography } from "@mui/material";
+import { Box, Chip, Typography } from "@mui/material";
 import { type ChangeEvent, type DragEvent, useRef, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -100,8 +100,8 @@ const SupportingDocuments = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Supporting Documents" defaultExpanded>
           <Box
             sx={{
@@ -212,7 +212,7 @@ const SupportingDocuments = () => {
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

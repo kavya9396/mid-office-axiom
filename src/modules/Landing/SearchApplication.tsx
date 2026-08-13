@@ -16,7 +16,7 @@ import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
 import type { DRSData, DRSBreOutput } from "../../types/drs.types";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
-import BreDecision from "../DRS/DRS_Accordions/BreDecision";
+import BreDecision from "../DRS/DRS_Accordions/BreDecision_";
 import ApplicationOverview from "../DRS/DRS_Accordions/ApplicationOverview_";
 import Summary from "../DRS/DRS_Accordions/Summary";
 import RequirementManagement from "../DRS/DRS_Accordions/RequirementManagement";

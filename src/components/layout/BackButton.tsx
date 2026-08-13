@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { KeyLeftArrowIcon } from "../../icons/Icons";
 import CustomButton from "../ui/Button/Button";
@@ -29,8 +29,8 @@ const BackButton = ({
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ display: "flex", justifyContent: justify, alignItems: "center", m: 0, pt: 1 }}>
+    // <Container disableGutters>
+      <Box sx={{ display: "flex", justifyContent: justify, alignItems: "center", m: 0,p:1 }}>
         <CustomButton
           variant="text"
           size="small"
@@ -49,7 +49,7 @@ const BackButton = ({
 
         {rightSlot}
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

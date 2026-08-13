@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import { useSelector } from "react-redux";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { GridSection, type GridItem } from "../../../components/layout/GridSection";
@@ -110,15 +110,15 @@ const GroupPolicyDetails = () => {
   ];
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Group Policy Details" defaultExpanded>
           <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
             <GridSection columns={3} items={details} />
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

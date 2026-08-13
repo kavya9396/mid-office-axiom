@@ -27,7 +27,7 @@ import { getSessionMasters } from "../../../utils/masterDataSession";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
 import { CircularProgress } from "@mui/material";
 import { getErrorMessage } from "../../../config/errorMessages";
-import BreDecision from "../DRS_Accordions/BreDecision";
+import BreDecision from "../DRS_Accordions/BreDecision_";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
 import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
 import {

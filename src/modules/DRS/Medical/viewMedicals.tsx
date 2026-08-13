@@ -15,7 +15,7 @@ import { url } from "../../../services/apiConfig";
 import type { RootState } from "../../../store/store";
 import type { ApplicantTab, MedicalResponse, MedicalSection, MedicalSummaryMember, MedicalTestRow } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
-import BreDecision from "../DRS_Accordions/BreDecision";
+import BreDecision from "../DRS_Accordions/BreDecision_";
 import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
 import { buildFormalMemberProfile, getFormalHeaderData, isFormalTaskRole } from "../formalProfileHelpers";

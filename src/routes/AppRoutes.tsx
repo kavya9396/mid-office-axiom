@@ -15,7 +15,8 @@ import OpenTasksPage from "../modules/QuickLinks/OpenTasksPage";
 import UserManagement from "../modules/DRS/UserManagement";
 import SearchApplication from "../modules/Landing/SearchApplication";
 import ViewMedical from "../modules/DRS/Medical Final/ViewMedical";
-import Inbox1 from "../modules/Landing/Inbox1";
+//import Inbox1 from "../modules/Landing/Inbox1";
+import Inbox from "../modules/Landing/Inbox";
 
 function BusinessTypeRedirect() {
     return <Navigate to="/inbox" replace />;
@@ -33,7 +34,7 @@ export default function AppRoutes() {
 
              {/* Independent Route */}
                 <Route path={PATHS.INBOX} element={<RootLayout />}>
-                    <Route index element={<Inbox1 />} />
+                    <Route index element={<Inbox />} />
                 </Route>
                 <Route path={PATHS.USER_MANAGEMENT} element={<RootLayout />}>
                     <Route index element={<UserManagement />} />

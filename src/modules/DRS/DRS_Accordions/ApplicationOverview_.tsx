@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import type { Column } from "../../../components/ui/Table/Table";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTable from "../../../components/ui/Table/Table";
@@ -358,8 +358,8 @@ const ApplicationOverviewA = () => {
     })) ?? [];
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 1 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         {/* <CustomAccordion title="Application Overview" defaultExpanded={userRole ==='CPT'?true:false}> */}
         <CustomAccordion title="Application Details" defaultExpanded>
           <Box sx={{ p: 1, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
@@ -405,7 +405,7 @@ const ApplicationOverviewA = () => {
           )}
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

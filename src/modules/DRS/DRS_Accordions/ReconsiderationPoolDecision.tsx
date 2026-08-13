@@ -1,4 +1,4 @@
-import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
+import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
@@ -120,8 +120,8 @@ const ReconsiderationPoolDecision = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 1 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Reconsideration Pool Decision" defaultExpanded>
           <Box
             sx={{
@@ -250,7 +250,7 @@ const ReconsiderationPoolDecision = () => {
           </Alert>
         </Snackbar>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

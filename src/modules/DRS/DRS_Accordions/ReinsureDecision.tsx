@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -57,8 +57,8 @@ const ReinsureDecision = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Reinsurer Decision" defaultExpanded>
           <Box
             sx={{
@@ -171,7 +171,7 @@ const ReinsureDecision = () => {
           onConfirm={() => navigate(getInboxPath(safeBusinessType))}
         />
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

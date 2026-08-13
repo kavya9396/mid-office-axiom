@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import type { Column } from "../../../components/ui/Table/Table";
@@ -322,8 +322,8 @@ const ClaimSection = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+     <>
+      <Box sx={{ mt: 2,p:1 }}>
         <CustomAccordion title="Claims Section" defaultExpanded>
           <Box sx={{ p: 1 }}>
             <CustomTable<ClaimRow>
@@ -434,7 +434,7 @@ const ClaimSection = () => {
           ))}
         </Box>
       </CustomDialog>
-    </Container>
+    </>
   );
 };
 

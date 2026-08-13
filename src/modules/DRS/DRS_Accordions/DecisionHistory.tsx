@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
 import type { Column } from "../../../components/ui/Table/Table";
@@ -201,8 +201,8 @@ const DecisionHistory = () => {
   }, [historyRows]);
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Decision History" defaultExpanded>
           <Box sx={{ p: 1 }}>
             {sortedRows.length > 0 ? (
@@ -229,7 +229,7 @@ const DecisionHistory = () => {
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

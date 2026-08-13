@@ -1,4 +1,4 @@
-import { Box, Container, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material";
 import { useEffect, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { useAppContext } from "../../../hooks/useAppContext";
@@ -89,8 +89,8 @@ const OpenOtherTasksAccordion = () => {
   }, [applicationNumber, dispatch]);
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Open/Other Tasks" defaultExpanded>
           <Box sx={{ mt: 1, p: 1.5, borderRadius: "8px", backgroundColor: "#F6F6F6" }}>
             <Box sx={{ backgroundColor: "#0B4F8C", px: 2, py: 1, borderRadius: "8px 8px 0 0" }}>
@@ -153,7 +153,7 @@ const OpenOtherTasksAccordion = () => {
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

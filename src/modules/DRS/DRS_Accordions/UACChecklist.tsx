@@ -1,4 +1,4 @@
-import { Box, Container, LinearProgress, TextField, Typography } from "@mui/material";
+import { Box, LinearProgress, TextField, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -227,8 +227,8 @@ const UACChecklist = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="UAC Checklist" defaultExpanded>
           <Box sx={{ mt: 1, borderRadius: "8px", backgroundColor: "#F6F6F6", border: "1px solid #E5E7EB" }}>
             <Box sx={{ p: 2, borderBottom: "1px solid #E6E6E6" }}>
@@ -503,7 +503,7 @@ const UACChecklist = () => {
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

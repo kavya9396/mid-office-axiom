@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import LastUWRemarks from "../LastUWRemarks";
 import { useSelector } from "react-redux";
@@ -20,8 +20,8 @@ const PIVVSection = () => {
 
   return (
     <>
-      <Container disableGutters>
-        <Box sx={{ mt: 2 }}>
+      {/* <Container disableGutters> */}
+        <Box sx={{ p:1 }}>
           <CustomAccordion title="PIVV Section" defaultExpanded>
             <Box
               sx={{
@@ -45,7 +45,7 @@ const PIVVSection = () => {
             </Box>
           </CustomAccordion>
         </Box>
-      </Container>
+      {/* </Container> */}
     </>
   );
 };

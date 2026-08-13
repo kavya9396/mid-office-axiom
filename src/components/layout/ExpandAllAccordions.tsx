@@ -1,4 +1,4 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import CustomButton from "../ui/Button/Button";
 
 interface ExpandAllAccordionProps {
@@ -13,11 +13,12 @@ const ExpandAllAccordions: React.FC<ExpandAllAccordionProps> = ({
   isAllExpanded,
 }) => {
   return (
-    <Container disableGutters>
+    // <Container disableGutters>
       <Box
         sx={{
           display: "flex",
           justifyContent: "flex-end",
+          p:1
         }}
       >
         <CustomButton
@@ -35,7 +36,7 @@ const ExpandAllAccordions: React.FC<ExpandAllAccordionProps> = ({
           {isAllExpanded ? "Collapse All" : "Expand All"}
         </CustomButton>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

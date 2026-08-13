@@ -17,7 +17,7 @@ import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
-import BreDecision from "../DRS_Accordions/BreDecision";
+import BreDecision from "../DRS_Accordions/BreDecision_";
 import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
 import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";

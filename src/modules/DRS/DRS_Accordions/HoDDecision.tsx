@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -145,8 +145,8 @@ const HoDDecision = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="HoD Decision" defaultExpanded>
           <Box
             sx={{
@@ -273,7 +273,7 @@ const HoDDecision = () => {
           onConfirm={() => navigate(getInboxPath(safeBusinessType))}
         />
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

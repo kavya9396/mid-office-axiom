@@ -1,6 +1,5 @@
 import {
   Box,
-  Container,
   Paper,
   Table,
   TableBody,
@@ -62,8 +61,8 @@ const DocumentRequired = ({ data: dataOverride }: DocumentRequiredProps = {}) =>
   }
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{p:1 }}>
         <CustomAccordion title="Documents Required" defaultExpanded>
           <Paper elevation={0} sx={{ border: "1px solid #D8D8D8", borderRadius: "12px", overflow: "hidden" }}>
             <Box sx={{ backgroundColor: "#004A80", color: "#fff", px: 2, py: 1 }}>
@@ -146,7 +145,7 @@ const DocumentRequired = ({ data: dataOverride }: DocumentRequiredProps = {}) =>
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

@@ -1,4 +1,4 @@
-import { Box, Container, MenuItem, Select, Typography } from "@mui/material";
+import { Box, MenuItem, Select, Typography } from "@mui/material";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import { useEffect, useMemo, useState } from "react";
@@ -382,8 +382,8 @@ console.log('normalizeTabLabel',key,originalLabel)
     }, [financialBreOutput, medicalBreOutput, otherRiskOutput]);
 
     return (
-        <Container disableGutters>
-            <Box sx={{ mt: 0.5 }}>
+        // <Container disableGutters>
+            <Box sx={{ p:1 }}>
                 <CustomAccordion
                     title={isFormalRole ? "Member Details":"Applicant Details"}
                     defaultExpanded
@@ -667,7 +667,7 @@ console.log('normalizeTabLabel',key,originalLabel)
                     </CustomDialog>
                 </CustomAccordion>
             </Box>
-        </Container>
+        // </Container>
     );
 };
 

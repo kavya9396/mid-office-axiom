@@ -72,7 +72,7 @@ const mapper = {
     "Reconsideration Pool":"RETAIL_RECONSIDERATION_POOL",
     "Pre Issuance Servicing Pool": "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
     "Exceptional Pool": "RETAIL_EXCEPTIONAL_POOL",
-    "PIVV Pool": "RETAIL_PIVV_POOL",
+    "PIVV_TASK": "PIVV_TASK",
     "DVT Pool":"GROUP_DVT_POOL",
     "1st UW Pool":"RETAIL_CUW_POOL",
     "GUW Pool":"GROUP_GUW_POOL",

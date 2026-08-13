@@ -495,7 +495,7 @@ const riderRows: RiderRow[] =
         ppt: String((rider as Record<string, unknown>).ppt ?? (rider as Record<string, unknown>).premiumPaymentTerm ?? ""),
       })) ?? [];
 return(
-    <Box sx={{p:1,pl:3,pr:3}}>
+    <Box sx={{p:1}}>
   <CustomAccordion title={"Application Overview"} defaultExpanded>
     <Box sx={{pl:1}}>
     <GridSection columns={6} items={items}/>

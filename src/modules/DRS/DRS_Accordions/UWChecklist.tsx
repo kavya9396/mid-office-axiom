@@ -1,4 +1,4 @@
-import { Box, Container, Radio, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
+import { Box, Radio, Table, TableBody, TableCell, TableHead, TableRow, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -53,8 +53,8 @@ const UWChecklist = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="UW Checklist" defaultExpanded>
           <Box sx={{ mt: 1, p: 2, borderRadius: "8px", backgroundColor: "#F6F6F6" }}>
             <Box sx={{ borderRadius: "8px", overflow: "hidden", border: "1px solid #E5E7EB", backgroundColor: "#FFFFFF" }}>
@@ -142,7 +142,7 @@ const UWChecklist = () => {
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

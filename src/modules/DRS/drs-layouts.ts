@@ -1,4 +1,4 @@
-import BreDecision from "./DRS_Accordions/BreDecision";
+//import BreDecision from "./DRS_Accordions/BreDecision_";
 import CVTDecision from "./DRS_Accordions/CVTDecision";
 import DVTDecision from "./DRS_Accordions/DVTDecision";
 import ExceptionDecision from "./DRS_Accordions/ExceptionDecision";
@@ -29,12 +29,13 @@ import CustomerProfile from "./DRS_Accordions/CustomerProfile";
 import MedicalInsuranceDetails from "./DRS_Accordions/MedicalInsuranceDetails";
 import DocumentRequired from "./DRS_Accordions/DocumentRequired";
 import PreLogin from "./DRS_Accordions/PreLogin";
-import BreDecision1 from "./DRS_Accordions/BreDecision1";
+//import BreDecision1 from "./DRS_Accordions/BreDecision";
 import ApplicationOverview from "./DRS_Accordions/ApplicationOverview";
 import Decision from "./DRS_Accordions/decision";
+import BreDecision from "./DRS_Accordions/BreDecision";
  
 export const accordionRegistry = {
-  breDecision1:BreDecision1,
+  //breDecision1:BreDecision1,
   breDecision: BreDecision,
   //applicationOverview: ApplicationOverview,
   applicationOverview: ApplicationOverview,
@@ -140,7 +141,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "cvtDecision",
     "quickLinks"
   ],CVT_TASK: [
-    "breDecision1",
+    "breDecision",
     "summary",
     "applicationOverview1",
     "pivvSection",
@@ -174,9 +175,10 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "requirementManagement",
     "exceptionDecision"
   ],
-  RETAIL_PIVV_POOL: [
+  PIVV_TASK: [
     "applicationOverview",
     "requirementManagement",
+    "decision",
     "pivvDecision",
     "quickLinks",
     "uwToolkit",

@@ -1,4 +1,4 @@
-import { Alert, Box, Container, Snackbar, Typography } from "@mui/material"
+import { Alert, Box, Snackbar, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useEffect, useMemo, useState } from "react";
@@ -188,8 +188,8 @@ const DVTDecision = () => {
     }, [isAcceptDecision, dispatch]);
 
     return (
-        <Container disableGutters>
-            <Box sx={{ mt: 1 }}>
+        <>
+            <Box sx={{ mt: 1,p:1 }}>
                 <CustomAccordion title="DVT Decision" defaultExpanded>
                     <Box
                         sx={{
@@ -345,7 +345,7 @@ const DVTDecision = () => {
                     </Alert>
                 </Snackbar>
             </Box>
-        </Container>
+        </>
     )
 }
 

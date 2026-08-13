@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
@@ -98,8 +98,8 @@ const ExceptionDecision = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 1 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="UW Decision" defaultExpanded>
           <Box
             sx={{
@@ -156,7 +156,7 @@ const ExceptionDecision = () => {
           }}
         />
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

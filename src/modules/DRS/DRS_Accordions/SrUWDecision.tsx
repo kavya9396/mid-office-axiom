@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -201,8 +201,8 @@ const SrUWDecision = () => {
   };
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Sr.UW Decision" defaultExpanded>
           <Box
             sx={{
@@ -375,7 +375,7 @@ const SrUWDecision = () => {
           onConfirm={() => navigate(getInboxPath(safeBusinessType))}
         />
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

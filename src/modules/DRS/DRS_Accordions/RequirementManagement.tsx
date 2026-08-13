@@ -29,8 +29,8 @@ const RequirementManagement = ({ requirements }: RequirementManagementProps) => 
   }, []);
 
   return (
-    <Container disableGutters>
-      <Box ref={containerRef} sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box ref={containerRef} sx={{ p:1 }}>
         <CustomAccordion
           title="Requirement Management"
           expanded={expanded}
@@ -39,7 +39,7 @@ const RequirementManagement = ({ requirements }: RequirementManagementProps) => 
           <RequirementManagementTable requirements={requirements} />
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

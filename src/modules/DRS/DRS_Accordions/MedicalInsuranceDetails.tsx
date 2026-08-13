@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import { useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -203,8 +203,8 @@ const MedicalInsuranceDetails = ({ data: dataOverride }: MedicalInsuranceDetails
   }
 
   return (
-    <Container disableGutters>
-      <Box sx={{ mt: 2 }}>
+    // <Container disableGutters>
+      <Box sx={{ p:1 }}>
         <CustomAccordion title="Medical and Insurance Details" defaultExpanded>
           <Box sx={{ p: 1, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
             <Typography sx={{ fontSize: "13px", fontWeight: 700, color: "#4b5563", mb: 1 }}>Medical Profile</Typography>
@@ -271,7 +271,7 @@ const MedicalInsuranceDetails = ({ data: dataOverride }: MedicalInsuranceDetails
           </Box>
         </CustomAccordion>
       </Box>
-    </Container>
+    // </Container>
   );
 };
 

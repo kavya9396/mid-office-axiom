@@ -1,4 +1,4 @@
-import { Alert, Box, Container, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import { Alert, Box, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -323,8 +323,8 @@ const UWDecision = () => {
     }, [caseUWDecisionLabel, dispatch]);
 
     return (
-        <Container disableGutters>
-            <Box sx={{ mt: 1 }}>
+        // <Container disableGutters>
+            <Box sx={{ p:1 }}>
                 <CustomAccordion title="UW Decision" defaultExpanded>
                     <Box
                         sx={{
@@ -804,7 +804,7 @@ const UWDecision = () => {
                     }}
                 />
             </Box>
-        </Container>
+        // </Container>
     )
 }
 

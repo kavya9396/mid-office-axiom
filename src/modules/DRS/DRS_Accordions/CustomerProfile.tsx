@@ -1,4 +1,4 @@
-import { Alert, Avatar, Box, CircularProgress, Container, IconButton, Typography } from "@mui/material";
+import { Alert, Avatar, Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -301,7 +301,7 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   }
 
   return (
-    <Container disableGutters>
+    <>
       <Box sx={{ mt: 2 }}>
         <CustomAccordion title="Customer Profile" defaultExpanded>
           <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1.5 }}>
@@ -464,7 +464,7 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
       </CustomDialog>
         </CustomAccordion>
       </Box>
-    </Container>
+    </>
   );
 };
 
