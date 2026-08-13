@@ -16,6 +16,9 @@ import type { AppDispatch } from "../../../store/store";
 import { useAppContext } from "../../../hooks/useAppContext";
 import type { BreResponse } from "../../../types/drs.types";
 import { formatDate } from "../../../utils/dataFormat";
+import CustomDialog from "../../../components/ui/Dialog/Dialog";
+import { getInboxPath } from "../../../routes/routes";
+import { useNavigate } from "react-router-dom";
 
 type BRERow = {
   bre?: string;
@@ -25,8 +28,11 @@ type BRERow = {
 
 const BreDecision = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const { applicationNumber, businessType } = useAppContext();
+  const roleType = localStorage.getItem("roleType");
+  console.log('roleType',roleType)
 
   const drsData = useAppSelector((state) => state.drs);
   const finalBreData = useAppSelector((state) => state.bre);
@@ -45,6 +51,7 @@ const BreDecision = () => {
   // for Final BRE.
   const [breResponse, setBreResponse] = useState<BreResponse | null>(null);
   const [isBreApiCalled, setIsBreApiCalled] = useState(false);
+  const [bredialogOpen, setBreDialogOpen] = useState(false);
 
   /**
    * Final BRE API data
@@ -69,7 +76,13 @@ const BreDecision = () => {
    * Refresh BRE API
    */
   const handleRefresh = async () => {
-    try {
+    const count = latestBreDecisionData?.reTriggerCount || 0;
+    if(count > 3){
+      console.log('Refer to IT');
+      setBreDialogOpen(true);
+      
+    }else{
+ try {
       const response = await dispatch(
         breThunk({
           eventName,
@@ -82,6 +95,8 @@ const BreDecision = () => {
     } catch (error) {
       console.error("BRE API failed:", error);
     }
+    }
+   
   };
 
   /**
@@ -235,7 +250,7 @@ const BreDecision = () => {
           >
             Final BRE
           </Typography>
-
+ {(roleType !== "AMR_MEDICAL_TASK"  && roleType !== "AMR_NON_MEDICAL_TASK") && (
           <CustomButton
             size="small"
             variant="outlined"
@@ -249,6 +264,7 @@ const BreDecision = () => {
           >
             <RefreshIcon />
           </CustomButton>
+ )}
         </Box>
       ),
     },
@@ -288,7 +304,9 @@ const BreDecision = () => {
       finalBre: formatDate(finalBreTimestamp) ?? "",
     },
   ];
-
+const referToIT = () => {
+  navigate(getInboxPath())
+}
   return (
     <Box sx={{ p: 1 }}>
       <CustomAccordion
@@ -307,6 +325,31 @@ const BreDecision = () => {
           data={breTableData}
         />
       </CustomAccordion>
+      <CustomDialog  open={bredialogOpen}
+          showCloseIcon={true}
+          onClose={() => setBreDialogOpen(false)} title={"BRE Retriggered"}><Typography
+            sx={{
+              fontSize: "14px",
+              color: "#161616",
+            }}
+          >
+            You have exhausted the retriggered of BRE. Kindly refer this ticket
+            to IT Team.
+          </Typography>
+          
+  <Box
+    sx={{
+      display: "flex",
+      justifyContent: "center",
+      mt: 2,
+    }}
+  ><CustomButton
+              onClick={()=>referToIT()}
+              sx={{ borderRadius: "50px", paddingX: "40px", justifyContent: "center",
+            }}
+            >
+              Refer to IT
+            </CustomButton></Box></CustomDialog>
     </Box>
   );
 };

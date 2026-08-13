@@ -571,6 +571,7 @@ export interface BreDecisionResponse {
   discrepancy: string | null;
   timestamp: string | null;
   retrigger: boolean | null;
+  reTriggerCount: number;
 }
 
 export interface ApplicationOverview {
