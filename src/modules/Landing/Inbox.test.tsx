@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
-import Inbox from "./Inbox";
+import Inbox from "./Inbox_";
 import { ALL_CASES_POOL } from "./LeftPanel";
 import { useAppDispatch } from "../../store/hooks";
 import { fetchInboxThunk } from "../../store/thunks/inboxThunk";

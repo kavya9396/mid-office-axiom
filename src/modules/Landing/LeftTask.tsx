@@ -5,14 +5,16 @@ import {
 } from "@mui/material";
 
 import {
+  useEffect,
+} from "react";
+
+import {
   KeyRightArrowIcon,
 } from "../../icons/Icons";
 
 import LastLogin from "./LastLogin";
 import type { MenuItem } from "../../types/inboxTypes";
 import { toDisplayLabel } from "../../utils/inboxUtils";
-
-
 
 interface LeftTaskProps {
   roles: string[];
@@ -29,6 +31,11 @@ interface LeftTaskProps {
 
   lastLoginAt: string;
 
+  poolData: Record<
+    string,
+    Record<string, unknown>[]
+  >;
+
   onRoleSelect: (
     role: string,
   ) => void;
@@ -42,6 +49,13 @@ interface LeftTaskProps {
   onToggleCollapse: () => void;
 }
 
+const normalizeKey = (
+  value: string,
+) =>
+  value
+    .replace(/[\s_-]/g, "")
+    .toUpperCase();
+
 const LeftTask = ({
   roles,
   menuItems,
@@ -50,11 +64,215 @@ const LeftTask = ({
   isRolesOpen,
   isCollapsed,
   lastLoginAt,
+  poolData,
   onRoleSelect,
   onTaskSelect,
   onToggleRoles,
   onToggleCollapse,
 }: LeftTaskProps) => {
+
+  // ==========================================================
+  // AUTO SELECT ALL CASES
+  // ==========================================================
+
+  useEffect(() => {
+    if (
+      !selectedTask &&
+      menuItems.length > 0
+    ) {
+      onTaskSelect("ALL_CASES");
+    }
+  }, [
+    selectedTask,
+    menuItems.length,
+    onTaskSelect,
+  ]);
+
+  // ==========================================================
+  // TOTAL CASE COUNT
+  // ==========================================================
+
+  const allCasesCount =
+    Object.values(
+      poolData ?? {},
+    ).reduce(
+      (
+        total,
+        cases,
+      ) =>
+        total +
+        (Array.isArray(cases)
+          ? cases.length
+          : 0),
+      0,
+    );
+
+  // ==========================================================
+  // GET TASK COUNT
+  // ==========================================================
+
+  const getTaskCount = (
+    taskName: string,
+  ) => {
+    const normalizedTask =
+      normalizeKey(taskName);
+
+    const matchingPool =
+      Object.entries(
+        poolData ?? {},
+      ).find(
+        ([poolName]) =>
+          normalizeKey(
+            poolName,
+          ) === normalizedTask,
+      );
+
+    return matchingPool
+      ? matchingPool[1].length
+      : 0;
+  };
+
+  // ==========================================================
+  // TASK ITEM
+  // ==========================================================
+
+  const renderTaskItem = (
+    taskName: string,
+  ) => {
+    const isActive =
+      selectedTask === taskName;
+
+    const count =
+      getTaskCount(taskName);
+
+    return (
+      <Box
+        key={taskName}
+        onClick={() =>
+          onTaskSelect(
+            taskName,
+          )
+        }
+        sx={{
+          height: "38px",
+
+          display: "flex",
+
+          alignItems: "center",
+
+          justifyContent:
+            isCollapsed
+              ? "center"
+              : "space-between",
+
+          px: 1.5,
+
+          cursor: "pointer",
+
+          borderLeft:
+            isActive
+              ? "3px solid #9A2529"
+              : "3px solid transparent",
+
+          backgroundColor:
+            isActive
+              ? "#fdf2f2"
+              : "transparent",
+
+          color:
+            isActive
+              ? "#9A2529"
+              : "#333333",
+
+          "&:hover": {
+            backgroundColor:
+              "#f8f8f8",
+          },
+        }}
+      >
+        {isCollapsed ? (
+          <Typography
+            sx={{
+              fontSize: "16px",
+            }}
+          >
+            📂
+          </Typography>
+        ) : (
+          <>
+            <Typography
+              sx={{
+                fontSize: "11px",
+
+                fontWeight:
+                  isActive
+                    ? 600
+                    : 400,
+
+                overflow: "hidden",
+
+                textOverflow:
+                  "ellipsis",
+
+                whiteSpace:
+                  "nowrap",
+
+                flex: 1,
+              }}
+            >
+              {toDisplayLabel(
+                taskName,
+              )}
+            </Typography>
+
+            {/* COUNT */}
+
+            <Box
+              sx={{
+                minWidth: "24px",
+
+                height: "20px",
+
+                px: "5px",
+
+                ml: 1,
+
+                borderRadius:
+                  "10px",
+
+                display: "flex",
+
+                alignItems:
+                  "center",
+
+                justifyContent:
+                  "center",
+
+                flexShrink: 0,
+
+                backgroundColor:
+                  isActive
+                    ? "#9A2529"
+                    : "#eeeeee",
+
+                color:
+                  isActive
+                    ? "#ffffff"
+                    : "#555555",
+
+                fontSize: "10px",
+
+                fontWeight: 600,
+              }}
+            >
+              {count}
+            </Box>
+          </>
+        )}
+      </Box>
+    );
+  };
+
   return (
     <Box
       sx={{
@@ -93,9 +311,10 @@ const LeftTask = ({
             "#ffffff",
         }}
       >
-        {/* =========================================
+
+        {/* =====================================================
             COLLAPSE BUTTON
-           ========================================= */}
+           ===================================================== */}
 
         <Box
           onClick={
@@ -138,9 +357,9 @@ const LeftTask = ({
           />
         </Box>
 
-        {/* =========================================
+        {/* =====================================================
             NAVIGATION
-           ========================================= */}
+           ===================================================== */}
 
         <Box
           sx={{
@@ -152,24 +371,23 @@ const LeftTask = ({
 
             overflowX: "hidden",
 
-            "&::-webkit-scrollbar":
-              {
-                width: "5px",
-              },
+            "&::-webkit-scrollbar": {
+              width: "5px",
+            },
 
-            "&::-webkit-scrollbar-thumb":
-              {
-                backgroundColor:
-                  "#cccccc",
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor:
+                "#cccccc",
 
-                borderRadius:
-                  "10px",
-              },
+              borderRadius:
+                "10px",
+            },
           }}
         >
-          {/* =======================================
+
+          {/* ===================================================
               ROLES
-             ======================================= */}
+             =================================================== */}
 
           {roles.length > 0 && (
             <Box
@@ -248,8 +466,6 @@ const LeftTask = ({
                 )}
               </Box>
 
-              {/* ROLE LIST */}
-
               {!isCollapsed &&
                 isRolesOpen &&
                 roles.map(
@@ -296,11 +512,10 @@ const LeftTask = ({
                               ? "#9A2529"
                               : "#555555",
 
-                          "&:hover":
-                            {
-                              backgroundColor:
-                                "#f8f8f8",
-                            },
+                          "&:hover": {
+                            backgroundColor:
+                              "#f8f8f8",
+                          },
                         }}
                       >
                         <Typography
@@ -325,26 +540,90 @@ const LeftTask = ({
             </Box>
           )}
 
-          {/* =======================================
-              TASKS
-             ======================================= */}
+          {/* ===================================================
+              ALL CASES
+             =================================================== */}
 
-          {menuItems.map(
-            (item) => {
-              const isActive =
+          <Box
+            onClick={() =>
+              onTaskSelect(
+                "ALL_CASES",
+              )
+            }
+            sx={{
+              height: "40px",
+
+              display: "flex",
+
+              alignItems:
+                "center",
+
+              justifyContent:
+                isCollapsed
+                  ? "center"
+                  : "space-between",
+
+              px: 1.5,
+
+              cursor: "pointer",
+
+              borderBottom:
+                "1px solid #eeeeee",
+
+              borderLeft:
                 selectedTask ===
-                item.label;
+                "ALL_CASES"
+                  ? "3px solid #9A2529"
+                  : "3px solid transparent",
 
-              return (
-                <Box
-                  key={item.label}
-                  onClick={() =>
-                    onTaskSelect(
-                      item.label,
-                    )
-                  }
+              backgroundColor:
+                selectedTask ===
+                "ALL_CASES"
+                  ? "#fdf2f2"
+                  : "transparent",
+
+              color:
+                selectedTask ===
+                "ALL_CASES"
+                  ? "#9A2529"
+                  : "#333333",
+
+              "&:hover": {
+                backgroundColor:
+                  "#f8f8f8",
+              },
+            }}
+          >
+            {isCollapsed ? (
+              <Typography
+                sx={{
+                  fontSize: "16px",
+                }}
+              >
+                📋
+              </Typography>
+            ) : (
+              <>
+                <Typography
                   sx={{
-                    height: "38px",
+                    fontSize: "11px",
+
+                    fontWeight: 600,
+                  }}
+                >
+                  All Cases
+                </Typography>
+
+                <Box
+                  sx={{
+                    minWidth: "24px",
+
+                    height: "20px",
+
+                    px: "5px",
+
+                    borderRadius:
+                      "10px",
 
                     display: "flex",
 
@@ -352,66 +631,46 @@ const LeftTask = ({
                       "center",
 
                     justifyContent:
-                      isCollapsed
-                        ? "center"
-                        : "flex-start",
-
-                    px: 1.5,
-
-                    cursor:
-                      "pointer",
-
-                    borderLeft:
-                      isActive
-                        ? "3px solid #9A2529"
-                        : "3px solid transparent",
+                      "center",
 
                     backgroundColor:
-                      isActive
-                        ? "#fdf2f2"
-                        : "transparent",
+                      selectedTask ===
+                      "ALL_CASES"
+                        ? "#9A2529"
+                        : "#eeeeee",
 
                     color:
-                      isActive
-                        ? "#9A2529"
-                        : "#333333",
+                      selectedTask ===
+                      "ALL_CASES"
+                        ? "#ffffff"
+                        : "#555555",
 
-                    "&:hover": {
-                      backgroundColor:
-                        "#f8f8f8",
-                    },
+                    fontSize: "10px",
+
+                    fontWeight: 600,
                   }}
                 >
-                  {isCollapsed ? (
-                    <Typography>
-                      📂
-                    </Typography>
-                  ) : (
-                    <Typography
-                      sx={{
-                        fontSize:
-                          "11px",
-
-                        fontWeight:
-                          isActive
-                            ? 600
-                            : 400,
-                      }}
-                    >
-                      {toDisplayLabel(
-                        item.label,
-                      )}
-                    </Typography>
-                  )}
+                  {allCasesCount}
                 </Box>
-              );
-            },
+              </>
+            )}
+          </Box>
+
+          {/* ===================================================
+              TASKS
+             =================================================== */}
+
+          {menuItems.map(
+            (item) =>
+              renderTaskItem(
+                item.label,
+              ),
           )}
         </Box>
 
-        {/* =========================================
+        {/* =====================================================
             LAST LOGIN
-           ========================================= */}
+           ===================================================== */}
 
         {!isCollapsed && (
           <Box

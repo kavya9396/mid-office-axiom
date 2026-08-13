@@ -1,221 +1,484 @@
-import { Alert, Box, Grid, Snackbar, CircularProgress } from "@mui/material";
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import LeftPanel from "./LeftPanel";
-import type { tableData } from "../../types/inbox";
-import { fetchInboxThunk } from "../../store/thunks/inboxThunk";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import RightPanel from "./RightPanel";
-import { useAppContext } from "../../hooks/useAppContext";
-import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
-import { ALL_CASES_POOL } from "./LeftPanel";
+import {
+  Box,
+  Grid,
+} from "@mui/material";
 
-const normalizePoolData = (poolData: Record<string, tableData[]> = {}) => {
-  return Object.entries(poolData).reduce<Record<string, tableData[]>>(
-    (normalizedPoolData, [poolName, rows]) => {
-      normalizedPoolData[poolName] = Array.isArray(rows) ? rows : [];
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
-      return normalizedPoolData;
+import {
+  useAppDispatch,
+  useAppSelector,
+} from "../../store/hooks";
+
+import {
+  fetchInboxThunk,
+} from "../../store/thunks/inboxThunk";
+
+import LeftTask from "./LeftTask";
+import RightSideTable from "./RightSideTable";
+import ApplicationWorkspace from "./ApplicationWorkspace";
+
+interface InboxItem {
+  id: string | number;
+  [key: string]: unknown;
+}
+
+type PoolData = Record<string, InboxItem[]>;
+
+interface RoleSection {
+  key: string;
+  label: string;
+}
+
+const ROLE_SECTIONS: Record<
+  string,
+  RoleSection[]
+> = {
+  CVT_TASK: [
+    {
+      key: "drsSummary",
+      label: "DRS Summary",
     },
-    {},
-  );
+    {
+      key: "breDecision1",
+      label: "BRE Decision",
+    },
+    {
+      key: "summary",
+      label: "Summary",
+    },
+    {
+      key: "applicationOverview1",
+      label: "Application Overview",
+    },
+    {
+      key: "pivvSection",
+      label: "PIVV Section",
+    },
+    {
+      key: "requirementManagement",
+      label: "Requirement Management",
+    },
+    {
+      key: "decision",
+      label: "Decision",
+    },
+    {
+      key: "quickLinks",
+      label: "Quick Links",
+    },
+  ],
 };
 
-const getNextSelectedPool = (
-  previousPool: string,
-  nextPoolData: Record<string, tableData[]>,
-) => {
-  const nextPoolNames = Object.keys(nextPoolData);
-  const hasPools = nextPoolNames.length > 0;
-
-  if (previousPool === ALL_CASES_POOL && hasPools) {
-    return ALL_CASES_POOL;
-  }
-
-  if (previousPool && nextPoolData[previousPool]) {
-    return previousPool;
-  }
-
-  return hasPools ? nextPoolNames[0] : "";
-};
-
-const Inbox = () => {
+const Inbox1 = () => {
   const dispatch = useAppDispatch();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { businessType } = useAppContext();
+
+  // ============================================================
+  // AUTH
+  // ============================================================
+
+  const reduxUsername = useAppSelector(
+    (state) =>
+      state.api.auth.credentials?.username ?? "",
+  );
+
+  const reduxPassword = useAppSelector(
+    (state) =>
+      state.api.auth.credentials?.password ?? "",
+  );
+
   const roles = useAppSelector(
-  (state) => state.api.auth.user?.data?.roles ?? []
-);
+    (state) =>
+      state.api.auth.credentials?.roles ?? [],
+  );
 
-const username = useAppSelector(
-  (state) => state.api.auth.user?.data?.username ?? ""
-);
-const password = useAppSelector(
-  (state) => state.api.auth.user?.data?.password ?? ""
-);
-const lastLoginAt= useAppSelector(
-  (state) => state.api.auth.user?.data?.lastLoginAt ?? ""
-);
-console.log('username',roles,username,password,lastLoginAt)
-  const [toggle, setToggle] = useState(false);
-  const [selectedPool, setSelectedPool] = useState<string>(() => {
-    return sessionStorage.getItem("selectedPool") ?? ALL_CASES_POOL;
-  });
+  // ============================================================
+  // INBOX DATA
+  // ============================================================
 
-  const [poolData, setPoolData] = useState<Record<string, tableData[]>>({});
-  const [loading, setLoading] = useState(false);
-  const snackbarMessage = (location.state as { snackbarMessage?: string } | null)?.snackbarMessage ?? "";
-  const snackbarOpen = Boolean(snackbarMessage);
-  const allRows = Object.values(poolData).flat();
+  const poolData = useAppSelector(
+    (state) =>
+      state.inbox.data?.poolData ?? {},
+  ) as PoolData;
 
-  const isRefreshing = useRef(false);
-  const hasLoadedOnce = useRef(false);
+  // ============================================================
+  // LOCAL STATE
+  // ============================================================
 
-  const loadData = useCallback(async () => {
-    if (isRefreshing.current) return;
-    isRefreshing.current = true;
+  const [
+    isCollapsed,
+    setIsCollapsed,
+  ] = useState(false);
 
-    try {
-      const showLoader = !hasLoadedOnce.current;
-      if (showLoader) setLoading(true);
-      const roleResponse = await dispatch(fetchInboxThunk({ username, password })).unwrap();
-      const poolDataFromAPI = normalizePoolData(roleResponse.poolData);
-      const businessTypeFromPoolData = normalizeBusinessType(
-        Object.values(poolDataFromAPI)
-          .find((rows) => rows.length > 0)
-          ?.at(0)
-          ?.businessType,
-      );
+  const [
+    isRolesOpen,
+    setIsRolesOpen,
+  ] = useState(true);
 
-      const currentBusinessType = normalizeBusinessType(businessType);
-      const responseBusinessType = normalizeBusinessType(roleResponse.businessType);
-      const resolvedBusinessType =
-        responseBusinessType ??
-        businessTypeFromPoolData ??
-        currentBusinessType ??
-        "retail";
+  const [
+    selectedRole,
+    setSelectedRole,
+  ] = useState<string | null>(null);
 
-      localStorage.setItem("businessType", resolvedBusinessType);
+  const [
+    selectedTask,
+    setSelectedTask,
+  ] = useState<string | null>(null);
 
-      if (currentBusinessType !== resolvedBusinessType) {
-        navigate(getInboxPath(resolvedBusinessType), { replace: true });
-      }
+  const [
+    selectedApplication,
+    setSelectedApplication,
+  ] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
-      setPoolData(poolDataFromAPI);
+  // ============================================================
+  // LOGIN
+  // ============================================================
 
-      const storedPool = sessionStorage.getItem("selectedPool");
+  const effectiveUsername =
+    reduxUsername ||
+    localStorage.getItem("username") ||
+    "";
 
-      // Prefer the current in-memory selection when it still exists in the
-      // freshly loaded pool data to avoid overwriting user selection on refresh.
-      let nextPool = selectedPool;
+  const effectivePassword =
+    reduxPassword ||
+    localStorage.getItem("password") ||
+    "";
 
-      if (!nextPool) {
-        nextPool = storedPool ?? "";
-      }
+  const lastLoginAt =
+    localStorage.getItem("lastLoginAt") ?? "";
 
-      if (!nextPool || !poolDataFromAPI[nextPool]) {
-        // Fallback to computed next pool only when current selection is invalid.
-        const computedPool = getNextSelectedPool(storedPool ?? nextPool, poolDataFromAPI);
-        nextPool = computedPool;
-      }
+  // ============================================================
+  // TASK MENU
+  // ============================================================
 
-      setSelectedPool(nextPool);
-      sessionStorage.setItem("selectedPool", nextPool);
-    } catch (error) {
-      console.error("Failed to load data:", error);
-    } finally {
-      isRefreshing.current = false;
-      // Only hide the loader if we showed it for this call.
-      if (!hasLoadedOnce.current) {
-        setLoading(false);
-      }
-      // Mark that we've completed at least one successful/attempted load.
-      hasLoadedOnce.current = true;
+  const menuItems = useMemo(
+    () =>
+      Object.keys(poolData)
+        .sort((a, b) =>
+          a.localeCompare(b),
+        )
+        .map((key) => ({
+          label: key,
+          icon: "📂",
+        })),
+    [poolData],
+  );
+
+  // ============================================================
+  // ALL CASES
+  // ============================================================
+  //
+  // Combine every pool into one array.
+  //
+  // poolName is added to each record so we know
+  // which pool the case belongs to.
+  //
+  // ============================================================
+
+  const allCases = useMemo(() => {
+    return Object.entries(poolData).flatMap(
+      ([poolName, cases]) =>
+        Array.isArray(cases)
+          ? cases.map((item) => ({
+              ...item,
+              poolName,
+            }))
+          : [],
+    );
+  }, [poolData]);
+
+  // ============================================================
+  // ACTIVE TASK
+  // ============================================================
+  //
+  // No setState/useEffect is required here.
+  //
+  // When API data is available and there is no explicit
+  // selection, ALL_CASES automatically becomes active.
+  //
+  // ============================================================
+
+  const activeTask =
+    selectedTask ??
+    (menuItems.length > 0
+      ? "ALL_CASES"
+      : null);
+
+  // ============================================================
+  // ACTIVE ROLE
+  // ============================================================
+  //
+  // If a task is active, task selection takes priority
+  // over role selection.
+  //
+  // ============================================================
+
+  const activeRole = activeTask
+    ? null
+    : selectedRole ??
+      (roles.length > 0
+        ? roles[0]
+        : null);
+
+  // ============================================================
+  // SELECTED TASK DATA
+  // ============================================================
+  //
+  // ALL_CASES
+  //     -> records from every pool
+  //
+  // CVT_TASK
+  //     -> only CVT_TASK records
+  //
+  // CPT_TASK
+  //     -> only CPT_TASK records
+  //
+  // ============================================================
+
+  const selectedTaskData = useMemo(() => {
+    if (activeTask === "ALL_CASES") {
+      return allCases;
     }
-  }, [businessType, dispatch, navigate, selectedPool]);
+
+    if (activeTask) {
+      const taskCases =
+        poolData[activeTask] ?? [];
+
+      return taskCases.map((item) => ({
+        ...item,
+        poolName: activeTask,
+      }));
+    }
+
+    return [];
+  }, [
+    activeTask,
+    allCases,
+    poolData,
+  ]);
+
+  // ============================================================
+  // APPLICATION SECTIONS
+  // ============================================================
+
+  const applicationSections =
+    activeTask &&
+    activeTask !== "ALL_CASES"
+      ? ROLE_SECTIONS[activeTask] ?? []
+      : [];
+
+  // ============================================================
+  // FETCH INBOX
+  // ============================================================
 
   useEffect(() => {
-    const initialLoadTimeoutId = window.setTimeout(() => {
-      loadData();
-    }, 0);
+    if (
+      !effectiveUsername ||
+      !effectivePassword
+    ) {
+      return;
+    }
 
-    const reloadVisibleInbox = () => {
-      if (document.visibilityState === "visible") {
-        loadData();
-      }
+    dispatch(
+      fetchInboxThunk({
+        username: effectiveUsername,
+        password: effectivePassword,
+      }),
+    );
+  }, [
+    dispatch,
+    effectiveUsername,
+    effectivePassword,
+  ]);
+
+  // ============================================================
+  // ROLE CLICK
+  // ============================================================
+
+  const handleRoleSelect = (
+    role: string,
+  ) => {
+    console.log(
+      "ROLE CLICKED:",
+      role,
+    );
+
+    setSelectedRole(role);
+    setSelectedTask(null);
+    setSelectedApplication(null);
+  };
+
+  // ============================================================
+  // TASK CLICK
+  // ============================================================
+
+  const handleTaskSelect = (
+    task: string,
+  ) => {
+    console.log(
+      "TASK CLICKED:",
+      task,
+    );
+
+    setSelectedTask(task);
+    setSelectedRole(null);
+    setSelectedApplication(null);
+  };
+
+  // ============================================================
+  // APPLICATION CLICK
+  // ============================================================
+
+  const handleApplicationClick = (
+    application: Record<
+      string,
+      unknown
+    >,
+  ) => {
+    setSelectedApplication(
+      application,
+    );
+  };
+
+  // ============================================================
+  // APPLICATION BACK
+  // ============================================================
+
+  const handleApplicationBack =
+    () => {
+      setSelectedApplication(
+        null,
+      );
     };
 
-    const intervalId = window.setInterval(() => {
-      reloadVisibleInbox();
-    }, 30000);
+  // ============================================================
+  // SIDEBAR
+  // ============================================================
 
-    window.addEventListener("focus", reloadVisibleInbox);
-    document.addEventListener("visibilitychange", reloadVisibleInbox);
-
-    return () => {
-      window.clearTimeout(initialLoadTimeoutId);
-      window.clearInterval(intervalId);
-      window.removeEventListener("focus", reloadVisibleInbox);
-      document.removeEventListener("visibilitychange", reloadVisibleInbox);
+  const handleToggleCollapse =
+    () => {
+      setIsCollapsed(
+        (previous) =>
+          !previous,
+      );
     };
-  }, [loadData]);
 
-  // ---------------- UI ----------------
+  const handleToggleRoles =
+    () => {
+      setIsRolesOpen(
+        (previous) =>
+          !previous,
+      );
+    };
+
+  // ============================================================
+  // APPLICATION WORKSPACE
+  // ============================================================
+
+  if (selectedApplication) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "90vh",
+          backgroundColor:
+            "#f5f7fa",
+        }}
+      >
+        <ApplicationWorkspace
+          application={
+            selectedApplication
+          }
+          sections={
+            applicationSections
+          }
+          onBack={
+            handleApplicationBack
+          }
+        />
+      </Box>
+    );
+  }
+
+  // ============================================================
+  // MAIN
+  // ============================================================
+
   return (
-    <Box>
-      {loading && (
-        <Box
-          sx={{
-            position: "fixed",
-            inset: 0,
-            zIndex: 2000,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            backgroundColor: "rgba(0,0,0,0.25)",
-          }}
-        >
-          <CircularProgress size={64} sx={{ color: "#fff" }} />
-        </Box>
-      )}
-      <Grid container sx={{ flexWrap: "nowrap" }} className="bg-grey-200">
-        <LeftPanel
-          selectedPool={selectedPool}
-          toggle={toggle}
-          setToggle={setToggle}
-          onSelectPool={(pool: string) => {
-            setSelectedPool(pool);
-            sessionStorage.setItem("selectedPool", pool);
-          }}
+    <Box
+      sx={{
+        width: "100%",
+        height: "100%",
+      }}
+    >
+      <Grid
+        container
+        sx={{
+          flexWrap: "nowrap",
+          height: "90vh",
+          minHeight: 0,
+        }}
+      >
+        {/* ================================================== */}
+        {/* LEFT SIDE */}
+        {/* ================================================== */}
+
+        <LeftTask
+          roles={roles}
+          menuItems={menuItems}
+          selectedRole={activeRole}
+          selectedTask={activeTask}
+          isRolesOpen={isRolesOpen}
+          isCollapsed={isCollapsed}
+          lastLoginAt={lastLoginAt}
           poolData={poolData}
+          onRoleSelect={
+            handleRoleSelect
+          }
+          onTaskSelect={
+            handleTaskSelect
+          }
+          onToggleRoles={
+            handleToggleRoles
+          }
+          onToggleCollapse={
+            handleToggleCollapse
+          }
         />
 
-        <Box sx={{ flex: 1 }}>
-          <RightPanel
-            key={selectedPool}
-            selectedPool={selectedPool}
-            rows={selectedPool === ALL_CASES_POOL ? allRows : (poolData[selectedPool] ?? [])}
-          />
-        </Box>
+        {/* ================================================== */}
+        {/* RIGHT SIDE */}
+        {/* ================================================== */}
+
+      <Box
+  sx={{
+    flex: 1,
+    minWidth: 0,
+    height: "100%",
+    p: 0,
+    overflow: "hidden",
+    backgroundColor: "#f5f7fa",
+  }}
+>
+  <RightSideTable
+    selectedRole={activeRole}
+    selectedTask={activeTask}
+    selectedTaskData={selectedTaskData}
+    selectedApplication={selectedApplication}
+    onApplicationClick={handleApplicationClick}
+    onApplicationBack={handleApplicationBack}
+  />
+</Box>
       </Grid>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => navigate(location.pathname, { replace: true })}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => navigate(location.pathname, { replace: true })}
-          severity="success"
-          variant="filled"
-          sx={{ width: "100%" }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
     </Box>
   );
 };
 
-export default Inbox;
+export default Inbox1;

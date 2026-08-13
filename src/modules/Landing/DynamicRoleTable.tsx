@@ -24,7 +24,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import {
   FilterIcon,
@@ -40,31 +40,34 @@ interface DynamicRoleTableProps {
     application: Record<string, unknown>,
   ) => void;
 
-  /**
-   * Use a unique storage key for each table/user.
-   *
-   * Example:
-   *
-   * storageKey={`cvt-task-columns-${userId}`}
-   *
-   * If not provided, table title will be used.
-   */
   storageKey?: string;
 }
 
 type SortDirection = "asc" | "desc";
 
 const MAX_VISIBLE_COLUMNS = 9;
-
-/**
- * Convert backend column names into readable labels.
- *
- * Example:
- *
- * applicationNo -> Application No
- * annualPremium -> Annual Premium
- * application_no -> Application No
+const EXCLUDED_COLUMNS = [
+  "id",
+  "taskId",
+  "roleType",
+  "instanceId",
+  "createdBy",
+  "updatedBy",
+];
+/* ============================================================
+ * COLUMN NAME FORMATTER
+ * ============================================================
  */
+const getApplicationNumberColumn = (
+  columns: string[],
+): string | null => {
+  return (
+    columns.find((column) =>
+      isApplicationNumberColumn(column),
+    ) ?? null
+  );
+};
+
 const formatColumnName = (key: string): string => {
   return key
     .replace(/_/g, " ")
@@ -74,9 +77,11 @@ const formatColumnName = (key: string): string => {
     );
 };
 
-/**
- * Format cell values.
+/* ============================================================
+ * CELL VALUE FORMATTER
+ * ============================================================
  */
+
 const formatCellValue = (
   value: unknown,
 ): string => {
@@ -92,9 +97,6 @@ const formatCellValue = (
     return value ? "Yes" : "No";
   }
 
-  /**
-   * Format ISO date.
-   */
   if (
     typeof value === "string" &&
     /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(
@@ -111,9 +113,11 @@ const formatCellValue = (
   return String(value);
 };
 
-/**
- * Check Application Number column.
+/* ============================================================
+ * APPLICATION NUMBER COLUMN
+ * ============================================================
  */
+
 const isApplicationNumberColumn = (
   column: string,
 ): boolean => {
@@ -123,11 +127,56 @@ const isApplicationNumberColumn = (
     .toLowerCase();
 
   return (
-    normalizedColumn ===
-      "applicationnumber" ||
+    normalizedColumn === "applicationnumber" ||
     normalizedColumn === "applicationno"
   );
 };
+
+/* ============================================================
+ * READ SAVED COLUMNS
+ * ============================================================
+ */
+
+const getSavedColumns = (
+  storageKey: string,
+  columns: string[],
+): string[] => {
+  try {
+    const saved = localStorage.getItem(
+      storageKey,
+    );
+
+    if (!saved) {
+      return [];
+    }
+
+    const parsed: unknown = JSON.parse(saved);
+
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+
+    return parsed
+      .filter(
+        (column): column is string =>
+          typeof column === "string" &&
+          columns.includes(column),
+      )
+      .slice(0, MAX_VISIBLE_COLUMNS);
+  } catch (error) {
+    console.error(
+      "Unable to load column configuration:",
+      error,
+    );
+
+    return [];
+  }
+};
+
+/* ============================================================
+ * COMPONENT
+ * ============================================================
+ */
 
 const DynamicRoleTable = ({
   title,
@@ -163,37 +212,139 @@ const DynamicRoleTable = ({
     useState<SortDirection>("asc");
 
   /* ============================================================
-   * SETTINGS / COLUMN STATE
+   * ALL BACKEND COLUMNS
    * ============================================================
    */
 
-  /**
-   * Columns currently visible in table.
+ const columns = useMemo(() => {
+  const allColumns = Array.from(
+    new Set(data.flatMap((row) => Object.keys(row)))
+  );
+
+  return allColumns.filter(
+    (column) => !EXCLUDED_COLUMNS.includes(column)
+  );
+}, [data]);
+
+  /* ============================================================
+   * STORAGE KEY
+   * ============================================================
+   */
+
+  const finalStorageKey =
+    storageKey ||
+    `dynamic-role-table-${title
+      .toLowerCase()
+      .replace(/\s+/g, "-")}`;
+
+  /* ============================================================
+   * COLUMN CONFIGURATION
    *
-   * IMPORTANT:
-   * The order of this array is the order
-   * of columns in the table.
+   * No useEffect is required here.
+   * This avoids React cascading-render warnings.
+   * ============================================================
    */
-  const [selectedColumns, setSelectedColumns] =
-    useState<string[]>([]);
 
-  /**
-   * Columns not currently displayed.
-   */
-  const [availableColumns, setAvailableColumns] =
-    useState<string[]>([]);
+  const [columnConfig, setColumnConfig] =
+    useState<Record<string, string[]>>({});
 
-  /**
-   * Settings dialog.
+const selectedColumns = useMemo(() => {
+  const applicationColumn =
+    getApplicationNumberColumn(columns);
+
+  const configured =
+    columnConfig[finalStorageKey];
+
+  const savedColumns = configured
+    ? configured
+    : getSavedColumns(
+        finalStorageKey,
+        columns,
+      );
+
+  const validSavedColumns = savedColumns.filter(
+    (column) => columns.includes(column),
+  );
+
+  // No Application Number found in API
+  if (!applicationColumn) {
+    return (
+      validSavedColumns.length > 0
+        ? validSavedColumns
+        : columns
+    ).slice(0, MAX_VISIBLE_COLUMNS);
+  }
+
+  // Remove Application Number first
+  const otherColumns = validSavedColumns.filter(
+    (column) => column !== applicationColumn,
+  );
+
+  // If Application Number is already configured,
+  // preserve the user's column order.
+  const orderedColumns = validSavedColumns.includes(
+    applicationColumn,
+  )
+    ? validSavedColumns
+    : [
+        applicationColumn,
+        ...validSavedColumns,
+      ];
+
+  // If there is no saved configuration,
+  // Application Number + first 8 columns.
+  if (validSavedColumns.length === 0) {
+    return [
+      applicationColumn,
+      ...columns
+        .filter(
+          (column) =>
+            column !== applicationColumn,
+        )
+        .slice(0, MAX_VISIBLE_COLUMNS - 1),
+    ];
+  }
+
+  // Ensure Application Number is always present.
+  if (orderedColumns.includes(applicationColumn)) {
+    return orderedColumns.slice(
+      0,
+      MAX_VISIBLE_COLUMNS,
+    );
+  }
+
+  return [
+    applicationColumn,
+    ...otherColumns,
+  ].slice(0, MAX_VISIBLE_COLUMNS);
+}, [
+  columnConfig,
+  finalStorageKey,
+  columns,
+]);
+
+const availableColumns = useMemo(() => {
+  const applicationColumn =
+    getApplicationNumberColumn(columns);
+
+  return columns.filter(
+    (column) =>
+      column !== applicationColumn &&
+      !selectedColumns.includes(column),
+  );
+}, [
+  columns,
+  selectedColumns,
+]);
+
+  /* ============================================================
+   * SETTINGS DIALOG
+   * ============================================================
    */
+
   const [settingsOpen, setSettingsOpen] =
     useState(false);
 
-  /**
-   * Temporary settings.
-   *
-   * Changes are applied only after clicking Save.
-   */
   const [
     tempSelectedColumns,
     setTempSelectedColumns,
@@ -205,166 +356,18 @@ const DynamicRoleTable = ({
   ] = useState<string[]>([]);
 
   /* ============================================================
-   * ALL BACKEND COLUMNS
-   * ============================================================
-   */
-
-  const columns = useMemo(() => {
-    const columnSet = new Set<string>();
-
-    data.forEach((row) => {
-      Object.keys(row).forEach((key) => {
-        columnSet.add(key);
-      });
-    });
-
-    return Array.from(columnSet);
-  }, [data]);
-
-  /* ============================================================
-   * LOCAL STORAGE KEY
-   * ============================================================
-   */
-
-  const finalStorageKey =
-    storageKey ||
-    `dynamic-role-table-${title
-      .toLowerCase()
-      .replace(/\s+/g, "-")}`;
-
-  /* ============================================================
-   * LOAD SAVED COLUMN CONFIGURATION
-   * ============================================================
-   */
-
-  useEffect(() => {
-    if (columns.length === 0) {
-      setSelectedColumns([]);
-      setAvailableColumns([]);
-      return;
-    }
-
-    let savedColumns: string[] = [];
-
-    try {
-      const saved =
-        localStorage.getItem(
-          finalStorageKey,
-        );
-
-      if (saved) {
-        const parsed = JSON.parse(saved);
-
-        if (Array.isArray(parsed)) {
-          savedColumns = parsed.filter(
-            (column): column is string =>
-              typeof column === "string" &&
-              columns.includes(column),
-          );
-        }
-      }
-    } catch (error) {
-      console.error(
-        "Unable to load column configuration:",
-        error,
-      );
-    }
-
-    /**
-     * First time:
-     * Select first 9 columns.
-     */
-    if (savedColumns.length === 0) {
-      const defaultSelected =
-        columns.slice(
-          0,
-          MAX_VISIBLE_COLUMNS,
-        );
-
-      const defaultAvailable =
-        columns.slice(
-          MAX_VISIBLE_COLUMNS,
-        );
-
-      setSelectedColumns(
-        defaultSelected,
-      );
-
-      setAvailableColumns(
-        defaultAvailable,
-      );
-
-      return;
-    }
-
-    /**
-     * Restore saved sequence.
-     *
-     * Also protect against more than 9
-     * columns being stored.
-     */
-    const selected =
-      savedColumns.slice(
-        0,
-        MAX_VISIBLE_COLUMNS,
-      );
-
-    /**
-     * New backend columns automatically
-     * become available columns.
-     */
-    const available = columns.filter(
-      (column) =>
-        !selected.includes(column),
-    );
-
-    setSelectedColumns(selected);
-    setAvailableColumns(available);
-  }, [
-    columns,
-    finalStorageKey,
-  ]);
-
-  /* ============================================================
-   * SAVE COLUMN CONFIGURATION
-   * ============================================================
-   */
-
-  useEffect(() => {
-    if (selectedColumns.length === 0) {
-      return;
-    }
-
-    try {
-      localStorage.setItem(
-        finalStorageKey,
-        JSON.stringify(
-          selectedColumns,
-        ),
-      );
-    } catch (error) {
-      console.error(
-        "Unable to save column configuration:",
-        error,
-      );
-    }
-  }, [
-    selectedColumns,
-    finalStorageKey,
-  ]);
-
-  /* ============================================================
    * SEARCH
    * ============================================================
    */
 
   const filteredData = useMemo(() => {
-    if (!searchText.trim()) {
+    const search = searchText
+      .trim()
+      .toLowerCase();
+
+    if (!search) {
       return data;
     }
-
-    const search =
-      searchText.toLowerCase();
 
     return data.filter((row) =>
       columns.some((column) =>
@@ -383,80 +386,54 @@ const DynamicRoleTable = ({
    * SORT
    * ============================================================
    */
+const sortedData = useMemo(() => {
+  if (!sortColumn) {
+    return filteredData;
+  }
 
-  const sortedData = useMemo(() => {
-    if (!sortColumn) {
-      return filteredData;
+  return [...filteredData].sort((a, b) => {
+    const aValue = a[sortColumn];
+    const bValue = b[sortColumn];
+
+    const aEmpty =
+      aValue === null ||
+      aValue === undefined ||
+      aValue === "";
+
+    const bEmpty =
+      bValue === null ||
+      bValue === undefined ||
+      bValue === "";
+
+    if (aEmpty && bEmpty) return 0;
+    if (aEmpty) return 1;
+    if (bEmpty) return -1;
+
+    let comparison: number;
+
+    const aNumber = Number(aValue);
+    const bNumber = Number(bValue);
+
+    if (!Number.isNaN(aNumber) && !Number.isNaN(bNumber)) {
+      comparison = aNumber - bNumber;
+    } else {
+      comparison = String(aValue)
+        .toLowerCase()
+        .localeCompare(
+          String(bValue).toLowerCase(),
+          undefined,
+          {
+            numeric: true,
+            sensitivity: "base",
+          },
+        );
     }
 
-    return [...filteredData].sort(
-      (a, b) => {
-        const aValue =
-          a[sortColumn];
-
-        const bValue =
-          b[sortColumn];
-
-        /**
-         * Empty values at bottom.
-         */
-        if (
-          aValue === null ||
-          aValue === undefined ||
-          aValue === ""
-        ) {
-          return 1;
-        }
-
-        if (
-          bValue === null ||
-          bValue === undefined ||
-          bValue === ""
-        ) {
-          return -1;
-        }
-
-        const aNumber = Number(aValue);
-        const bNumber = Number(bValue);
-
-        let result = 0;
-
-        /**
-         * Numeric sorting.
-         */
-        if (
-          !isNaN(aNumber) &&
-          !isNaN(bNumber)
-        ) {
-          result =
-            aNumber - bNumber;
-        } else {
-          /**
-           * String sorting.
-           */
-          result = String(aValue)
-            .toLowerCase()
-            .localeCompare(
-              String(bValue).toLowerCase(),
-              undefined,
-              {
-                numeric: true,
-                sensitivity: "base",
-              },
-            );
-        }
-
-        return sortDirection ===
-          "asc"
-          ? result
-          : -result;
-      },
-    );
-  }, [
-    filteredData,
-    sortColumn,
-    sortDirection,
-  ]);
+    return sortDirection === "asc"
+      ? comparison
+      : -comparison;
+  });
+}, [filteredData, sortColumn, sortDirection]);
 
   /* ============================================================
    * PAGINATION
@@ -501,7 +478,7 @@ const DynamicRoleTable = ({
   };
 
   /* ============================================================
-   * SETTINGS OPEN
+   * OPEN SETTINGS
    * ============================================================
    */
 
@@ -518,7 +495,7 @@ const DynamicRoleTable = ({
   };
 
   /* ============================================================
-   * SETTINGS CLOSE
+   * CLOSE SETTINGS
    * ============================================================
    */
 
@@ -534,9 +511,6 @@ const DynamicRoleTable = ({
   const moveToSelected = (
     column: string,
   ) => {
-    /**
-     * Maximum 9 columns.
-     */
     if (
       tempSelectedColumns.length >=
       MAX_VISIBLE_COLUMNS
@@ -547,8 +521,7 @@ const DynamicRoleTable = ({
     setTempAvailableColumns(
       (previous) =>
         previous.filter(
-          (item) =>
-            item !== column,
+          (item) => item !== column,
         ),
     );
 
@@ -566,23 +539,26 @@ const DynamicRoleTable = ({
    */
 
   const moveToAvailable = (
-    column: string,
-  ) => {
-    setTempSelectedColumns(
-      (previous) =>
-        previous.filter(
-          (item) =>
-            item !== column,
-        ),
-    );
+  column: string,
+) => {
+  if (isApplicationNumberColumn(column)) {
+    return;
+  }
 
-    setTempAvailableColumns(
-      (previous) => [
-        ...previous,
-        column,
-      ],
-    );
-  };
+  setTempSelectedColumns(
+    (previous) =>
+      previous.filter(
+        (item) => item !== column,
+      ),
+  );
+
+  setTempAvailableColumns(
+    (previous) => [
+      ...previous,
+      column,
+    ],
+  );
+};
 
   /* ============================================================
    * MOVE ALL -> SELECTED
@@ -624,20 +600,19 @@ const DynamicRoleTable = ({
    * ============================================================
    */
 
-  const moveAllToAvailable =
-    () => {
-      setTempAvailableColumns(
-        (previous) => [
-          ...previous,
-          ...tempSelectedColumns,
-        ],
-      );
+  const moveAllToAvailable = () => {
+    setTempAvailableColumns(
+      (previous) => [
+        ...previous,
+        ...tempSelectedColumns,
+      ],
+    );
 
-      setTempSelectedColumns([]);
-    };
+    setTempSelectedColumns([]);
+  };
 
   /* ============================================================
-   * MOVE SELECTED COLUMN UP
+   * MOVE COLUMN UP
    * ============================================================
    */
 
@@ -654,17 +629,13 @@ const DynamicRoleTable = ({
           ...previous,
         ];
 
-        const current =
-          updated[index];
-
-        const previousItem =
-          updated[index - 1];
-
-        updated[index - 1] =
-          current;
-
-        updated[index] =
-          previousItem;
+        [
+          updated[index - 1],
+          updated[index],
+        ] = [
+          updated[index],
+          updated[index - 1],
+        ];
 
         return updated;
       },
@@ -672,7 +643,7 @@ const DynamicRoleTable = ({
   };
 
   /* ============================================================
-   * MOVE SELECTED COLUMN DOWN
+   * MOVE COLUMN DOWN
    * ============================================================
    */
 
@@ -681,8 +652,7 @@ const DynamicRoleTable = ({
   ) => {
     if (
       index ===
-      tempSelectedColumns.length -
-        1
+      tempSelectedColumns.length - 1
     ) {
       return;
     }
@@ -693,16 +663,13 @@ const DynamicRoleTable = ({
           ...previous,
         ];
 
-        const current =
-          updated[index];
-
-        const next =
-          updated[index + 1];
-
-        updated[index] = next;
-
-        updated[index + 1] =
-          current;
+        [
+          updated[index],
+          updated[index + 1],
+        ] = [
+          updated[index + 1],
+          updated[index],
+        ];
 
         return updated;
       },
@@ -714,54 +681,70 @@ const DynamicRoleTable = ({
    * ============================================================
    */
 
-  const handleSaveSettings =
-    () => {
-      if (
-        tempSelectedColumns.length ===
-        0
-      ) {
-        return;
-      }
+  const handleSaveSettings = () => {
+    if (
+      tempSelectedColumns.length === 0
+    ) {
+      return;
+    }
 
-      setSelectedColumns([
-        ...tempSelectedColumns,
-      ]);
+    const updatedColumns =
+      tempSelectedColumns.slice(
+        0,
+        MAX_VISIBLE_COLUMNS,
+      );
 
-      setAvailableColumns([
-        ...tempAvailableColumns,
-      ]);
+    setColumnConfig(
+      (previous) => ({
+        ...previous,
+        [finalStorageKey]:
+          updatedColumns,
+      }),
+    );
 
-      setSettingsOpen(false);
+    try {
+      localStorage.setItem(
+        finalStorageKey,
+        JSON.stringify(
+          updatedColumns,
+        ),
+      );
+    } catch (error) {
+      console.error(
+        "Unable to save column configuration:",
+        error,
+      );
+    }
 
-      setPage(0);
-    };
+    setSettingsOpen(false);
+    setPage(0);
+  };
 
   /* ============================================================
    * RESET SETTINGS
    * ============================================================
    */
 
-  const handleResetColumns =
-    () => {
-      const defaultSelected =
-        columns.slice(
-          0,
-          MAX_VISIBLE_COLUMNS,
-        );
-
-      const defaultAvailable =
-        columns.slice(
-          MAX_VISIBLE_COLUMNS,
-        );
-
-      setTempSelectedColumns(
-        defaultSelected,
+  const handleResetColumns = () => {
+    const defaultSelected =
+      columns.slice(
+        0,
+        MAX_VISIBLE_COLUMNS,
       );
 
-      setTempAvailableColumns(
-        defaultAvailable,
+    const defaultAvailable =
+      columns.slice(
+        MAX_VISIBLE_COLUMNS,
       );
-    };
+
+    setTempSelectedColumns(
+      defaultSelected,
+    );
+
+    setTempAvailableColumns(
+      defaultAvailable,
+    );
+  };
 
   /* ============================================================
    * RENDER
@@ -770,47 +753,35 @@ const DynamicRoleTable = ({
 
   return (
     <>
-      {/* ========================================================
-          MAIN TABLE
-          ======================================================== */}
-
       <Paper
         elevation={0}
         sx={{
-          mt: 2,
+          mt: 0,
           width: "100%",
-
           border:
             "1px solid #d9dfe4",
-
           borderRadius: "10px",
-
           overflow: "hidden",
-
           backgroundColor: "#fff",
-
           boxShadow:
             "0 1px 3px rgba(0,0,0,0.04)",
         }}
       >
         {/* ======================================================
-            BLUE TITLE HEADER
-            ====================================================== */}
+            TITLE HEADER
+            ======================================================
+        */}
 
         <Box
           sx={{
             height: "38px",
-
-            px: 1.75,
-
+            px: 1.5,
             display: "flex",
             alignItems: "center",
             justifyContent:
               "space-between",
-
             backgroundColor:
               "#0D4C7D",
-
             color: "#fff",
           }}
         >
@@ -818,8 +789,6 @@ const DynamicRoleTable = ({
             sx={{
               fontSize: "13px",
               fontWeight: 600,
-              letterSpacing:
-                "0.1px",
             }}
           >
             {title}
@@ -830,23 +799,13 @@ const DynamicRoleTable = ({
             sx={{
               minWidth: "52px",
               height: "26px",
-
               px: 1.5,
-
               color: "#0D4C7D",
-
-              backgroundColor:
-                "#fff",
-
+              backgroundColor: "#fff",
               borderRadius: "5px",
-
-              textTransform:
-                "none",
-
+              textTransform: "none",
               fontSize: "11px",
-
               fontWeight: 500,
-
               "&:hover": {
                 backgroundColor:
                   "#f3f5f6",
@@ -859,68 +818,51 @@ const DynamicRoleTable = ({
 
         {/* ======================================================
             TOOLBAR
-            ====================================================== */}
+            ======================================================
+        */}
 
         <Box
           sx={{
-            height: "42px",
-
-            px: 1.25,
-
+            height: "36px",
+            px: 1,
             display: "flex",
             alignItems: "center",
-            justifyContent:
-              "flex-end",
-
-            gap: 0.75,
-
-            backgroundColor:
-              "#fff",
-
+            justifyContent: "flex-end",
+            gap: 0.5,
+            backgroundColor: "#fff",
             borderBottom:
               "1px solid #e3e6e8",
           }}
         >
-          {/* Search Input */}
-
           {showSearch && (
             <TextField
               size="small"
               value={searchText}
-              onChange={(
-                event: React.ChangeEvent<HTMLInputElement>,
-              ) => {
+              onChange={(event) => {
                 setSearchText(
                   event.target.value,
                 );
-
                 setPage(0);
               }}
               placeholder="Search..."
               autoFocus
               sx={{
-                width: "210px",
+                width: "200px",
 
-                "& .MuiInputBase-root":
-                  {
-                    height:
-                      "30px",
-                    fontSize:
-                      "11px",
-                    borderRadius:
-                      "6px",
-                  },
+                "& .MuiInputBase-root": {
+                  height: "28px",
+                  fontSize: "11px",
+                  borderRadius: "5px",
+                },
 
                 "& .MuiOutlinedInput-input":
                   {
                     padding:
-                      "6px 9px",
+                      "5px 8px",
                   },
               }}
             />
           )}
-
-          {/* Search */}
 
           <IconButton
             size="small"
@@ -931,17 +873,12 @@ const DynamicRoleTable = ({
               )
             }
             sx={{
-              width: "32px",
-              height: "30px",
-
+              width: "30px",
+              height: "28px",
               border:
                 "1px solid #dfe3e6",
-
-              borderRadius:
-                "6px",
-
+              borderRadius: "5px",
               color: "#454b50",
-
               "&:hover": {
                 backgroundColor:
                   "#f4f6f7",
@@ -951,22 +888,15 @@ const DynamicRoleTable = ({
             <SearchIcon />
           </IconButton>
 
-          {/* Filter */}
-
           <IconButton
             size="small"
             sx={{
-              width: "32px",
-              height: "30px",
-
+              width: "30px",
+              height: "28px",
               border:
                 "1px solid #dfe3e6",
-
-              borderRadius:
-                "6px",
-
+              borderRadius: "5px",
               color: "#454b50",
-
               "&:hover": {
                 backgroundColor:
                   "#f4f6f7",
@@ -976,25 +906,18 @@ const DynamicRoleTable = ({
             <FilterIcon />
           </IconButton>
 
-          {/* Settings */}
-
           <IconButton
             size="small"
             onClick={
               handleOpenSettings
             }
             sx={{
-              width: "32px",
-              height: "30px",
-
+              width: "30px",
+              height: "28px",
               border:
                 "1px solid #dfe3e6",
-
-              borderRadius:
-                "6px",
-
+              borderRadius: "5px",
               color: "#454b50",
-
               "&:hover": {
                 backgroundColor:
                   "#f4f6f7",
@@ -1007,269 +930,130 @@ const DynamicRoleTable = ({
 
         {/* ======================================================
             TABLE
-            ====================================================== */}
+            ======================================================
+        */}
 
-        <TableContainer
-          sx={{
-            width: "100%",
+       <TableContainer
+  sx={{
+    width: "100%",
+    overflowX: "hidden",
+    overflowY: "auto",
 
-            overflowX:
-              "hidden",
+    // Always occupy the available table area
+    minHeight: "calc(100vh - 175px)",
+    maxHeight: "calc(100vh - 185px)",
 
-            overflowY: "auto",
+    "&::-webkit-scrollbar": {
+      width: "6px",
+    },
 
-            maxHeight:
-              "calc(90vh - 185px)",
+    "&::-webkit-scrollbar-thumb": {
+      backgroundColor: "#c7cdd3",
+      borderRadius: "10px",
+    },
 
-            "&::-webkit-scrollbar":
-              {
-                width: "6px",
-              },
-
-            "&::-webkit-scrollbar-thumb":
-              {
-                backgroundColor:
-                  "#c7cdd3",
-
-                borderRadius:
-                  "10px",
-              },
-
-            "&::-webkit-scrollbar-track":
-              {
-                backgroundColor:
-                  "#f7f8f9",
-              },
-          }}
-        >
+    "&::-webkit-scrollbar-track": {
+      backgroundColor: "#f7f8f9",
+    },
+  }}
+>
           <Table
             stickyHeader
             size="small"
             sx={{
               width: "100%",
+              tableLayout: "fixed",
 
-              tableLayout:
-                "fixed",
-
-              "& .MuiTableCell-root":
-                {
-                  boxSizing:
-                    "border-box",
-                },
+              "& .MuiTableCell-root": {
+                boxSizing:
+                  "border-box",
+              },
             }}
           >
             {/* ==================================================
                 TABLE HEADER
-                ================================================== */}
+                ==================================================
+            */}
 
-            <TableHead>
-              <TableRow>
-                {selectedColumns.map(
-                  (column) => {
-                    const isSorted =
-                      sortColumn ===
-                      column;
+          <TableHead>
+  <TableRow>
+    {selectedColumns.map((column) => {
+      const isSorted = sortColumn === column;
 
-                    return (
-                      <TableCell
-                        key={column}
-                        onClick={() =>
-                          handleSort(
-                            column,
-                          )
-                        }
-                        sx={{
-                          height:
-                            "34px",
+      return (
+        <TableCell
+          key={column}
+          onClick={() => handleSort(column)}
+          sx={{
+            height: "30px",
+            padding: "0 10px",
+            backgroundColor: "#eef1f4",
+            color: "#20252a",
+            fontSize: "11px",
+            fontWeight: 600,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            borderBottom: "1px solid #d9dde1",
+            cursor: "pointer",
+            userSelect: "none",
 
-                          padding:
-                            "0 10px",
+            "&:hover": {
+              backgroundColor: "#e7ebee",
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "3px",
+              maxWidth: "100%",
+              minWidth: 0,
+            }}
+          >
+            <Typography
+              component="span"
+              sx={{
+                fontSize: "11px",
+                fontWeight: 600,
+                lineHeight: 1.2,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {formatColumnName(column)}
+            </Typography>
 
-                          backgroundColor:
-                            "#eef1f4",
-
-                          color:
-                            "#20252a",
-
-                          fontSize:
-                            "11.5px",
-
-                          fontWeight: 600,
-
-                          whiteSpace:
-                            "nowrap",
-
-                          overflow:
-                            "hidden",
-
-                          textOverflow:
-                            "ellipsis",
-
-                          borderBottom:
-                            "1px solid #d9dde1",
-
-                          cursor:
-                            "pointer",
-
-                          userSelect:
-                            "none",
-
-                          "&:hover":
-                            {
-                              backgroundColor:
-                                "#e7ebee",
-                            },
-                        }}
-                      >
-                        <Box
-                          sx={{
-                            display:
-                              "flex",
-
-                            alignItems:
-                              "center",
-
-                            justifyContent:
-                              "space-between",
-
-                            width:
-                              "100%",
-
-                            minWidth:
-                              0,
-                          }}
-                        >
-                          {/* Column Name */}
-
-                          <Typography
-                            component="span"
-                            sx={{
-                              fontSize:
-                                "11.5px",
-
-                              fontWeight:
-                                600,
-
-                              overflow:
-                                "hidden",
-
-                              textOverflow:
-                                "ellipsis",
-
-                              whiteSpace:
-                                "nowrap",
-                            }}
-                          >
-                            {formatColumnName(
-                              column,
-                            )}
-                          </Typography>
-
-                          {/* Sort Icon */}
-
-                          <Box
-                            sx={{
-                              display:
-                                "flex",
-
-                              alignItems:
-                                "center",
-
-                              justifyContent:
-                                "center",
-
-                              ml: 0.5,
-
-                              flexShrink:
-                                0,
-
-                              width:
-                                "14px",
-
-                              fontSize:
-                                "13px",
-
-                              color:
-                                isSorted
-                                  ? "#0D4C7D"
-                                  : "#777",
-                            }}
-                          >
-                            {!isSorted && (
-                              <Typography
-                                component="span"
-                                sx={{
-                                  fontSize:
-                                    "13px",
-
-                                  lineHeight:
-                                    1,
-
-                                  color:
-                                    "#73797e",
-                                }}
-                              >
-                                ↕
-                              </Typography>
-                            )}
-
-                            {isSorted &&
-                              sortDirection ===
-                                "asc" && (
-                                <Typography
-                                  component="span"
-                                  sx={{
-                                    fontSize:
-                                      "13px",
-
-                                    lineHeight:
-                                      1,
-
-                                    fontWeight:
-                                      700,
-
-                                    color:
-                                      "#0D4C7D",
-                                  }}
-                                >
-                                  ↑
-                                </Typography>
-                              )}
-
-                            {isSorted &&
-                              sortDirection ===
-                                "desc" && (
-                                <Typography
-                                  component="span"
-                                  sx={{
-                                    fontSize:
-                                      "13px",
-
-                                    lineHeight:
-                                      1,
-
-                                    fontWeight:
-                                      700,
-
-                                    color:
-                                      "#0D4C7D",
-                                  }}
-                                >
-                                  ↓
-                                </Typography>
-                              )}
-                          </Box>
-                        </Box>
-                      </TableCell>
-                    );
-                  },
-                )}
-              </TableRow>
-            </TableHead>
+            <Typography
+              component="span"
+              sx={{
+                flexShrink: 0,
+                fontSize: "10px",
+                lineHeight: 1,
+                fontWeight: isSorted ? 700 : 400,
+                color: isSorted
+                  ? "#0D4C7D"
+                  : "#8a8f94",
+              }}
+            >
+              {isSorted
+                ? sortDirection === "asc"
+                  ? "▲"
+                  : "▼"
+                : "↕"}
+            </Typography>
+          </Box>
+        </TableCell>
+      );
+    })}
+  </TableRow>
+</TableHead>
 
             {/* ==================================================
                 TABLE BODY
-                ================================================== */}
+                ==================================================
+            */}
 
             <TableBody>
               {paginatedData.length >
@@ -1280,14 +1064,14 @@ const DynamicRoleTable = ({
                     rowIndex,
                   ) => (
                     <TableRow
-                      key={String(
+                      key={`${String(
                         row.id ??
-                          rowIndex,
-                      )}
+                          "row",
+                      )}-${rowIndex}`}
                       hover
                       sx={{
                         height:
-                          "38px",
+                          "30px",
 
                         "&:nth-of-type(even)":
                           {
@@ -1295,16 +1079,14 @@ const DynamicRoleTable = ({
                               "#fafafa",
                           },
 
-                        "&:hover":
-                          {
-                            backgroundColor:
-                              "#f3f7fa",
-                          },
+                        "&:hover": {
+                          backgroundColor:
+                            "#f3f7fa",
+                        },
 
                         "&:last-child td":
                           {
-                            borderBottom:
-                              0,
+                            borderBottom: 0,
                           },
                       }}
                     >
@@ -1334,31 +1116,23 @@ const DynamicRoleTable = ({
                               }
                               sx={{
                                 height:
-                                  "38px",
-
+                                  "30px",
                                 padding:
                                   "0 10px",
-
                                 fontSize:
-                                  "11.5px",
-
+                                  "11px",
                                 lineHeight:
-                                  1.2,
-
+                                  1.1,
                                 color:
                                   isApplicationNumber
                                     ? "#155a87"
                                     : "#4b5055",
-
                                 whiteSpace:
                                   "nowrap",
-
                                 overflow:
                                   "hidden",
-
                                 textOverflow:
                                   "ellipsis",
-
                                 borderBottom:
                                   "1px solid #eeeeee",
                               }}
@@ -1374,16 +1148,12 @@ const DynamicRoleTable = ({
                                   sx={{
                                     cursor:
                                       "pointer",
-
                                     color:
                                       "#155a87",
-
                                     fontWeight:
                                       500,
-
                                     textDecoration:
                                       "underline",
-
                                     textUnderlineOffset:
                                       "2px",
 
@@ -1418,16 +1188,12 @@ const DynamicRoleTable = ({
                     align="center"
                     sx={{
                       height:
-                        "100px",
-
+                        "80px",
                       color:
                         "#8a8f94",
-
                       fontSize:
-                        "12px",
-
-                      borderBottom:
-                        0,
+                        "11px",
+                      borderBottom: 0,
                     }}
                   >
                     No data available
@@ -1440,7 +1206,8 @@ const DynamicRoleTable = ({
 
         {/* ======================================================
             PAGINATION
-            ====================================================== */}
+            ======================================================
+        */}
 
         <TablePagination
           component="div"
@@ -1466,7 +1233,6 @@ const DynamicRoleTable = ({
                 10,
               ),
             );
-
             setPage(0);
           }}
           rowsPerPageOptions={[
@@ -1477,8 +1243,8 @@ const DynamicRoleTable = ({
           ]}
           labelRowsPerPage="Show"
           sx={{
-            minHeight:
-              "38px",
+            minHeight: "34px",
+            height: "34px",
 
             borderTop:
               "1px solid #e3e6e8",
@@ -1486,11 +1252,9 @@ const DynamicRoleTable = ({
             "& .MuiTablePagination-toolbar":
               {
                 minHeight:
-                  "38px",
-
+                  "34px",
                 height:
-                  "38px",
-
+                  "34px",
                 padding:
                   "0 8px 0 16px",
               },
@@ -1499,7 +1263,6 @@ const DynamicRoleTable = ({
               {
                 fontSize:
                   "11px",
-
                 color:
                   "#555",
               },
@@ -1519,7 +1282,7 @@ const DynamicRoleTable = ({
             "& .MuiIconButton-root":
               {
                 padding:
-                  "4px",
+                  "3px",
               },
           }}
         />
@@ -1527,44 +1290,36 @@ const DynamicRoleTable = ({
 
       {/* ========================================================
           COLUMN SETTINGS DIALOG
-          ======================================================== */}
+          ========================================================
+      */}
 
       <Dialog
-        open={settingsOpen}
-        onClose={
-          handleCloseSettings
-        }
-        maxWidth="md"
-        fullWidth
-        PaperProps={{
-          sx: {
-            borderRadius:
-              "10px",
-
-            overflow:
-              "hidden",
-          },
-        }}
-      >
+  open={settingsOpen}
+  onClose={handleCloseSettings}
+  maxWidth="md"
+  fullWidth
+  sx={{
+    "& .MuiDialog-paper": {
+      borderRadius: "10px",
+      overflow: "hidden",
+    },
+  }}
+>
         {/* ======================================================
             DIALOG HEADER
-            ====================================================== */}
+            ======================================================
+        */}
 
         <DialogTitle
           sx={{
             px: 2.5,
             py: 1.5,
-
             backgroundColor:
               "#0D4C7D",
-
             color: "#fff",
-
             display: "flex",
-
             alignItems:
               "center",
-
             justifyContent:
               "space-between",
           }}
@@ -1574,7 +1329,6 @@ const DynamicRoleTable = ({
               sx={{
                 fontSize:
                   "14px",
-
                 fontWeight:
                   600,
               }}
@@ -1586,20 +1340,17 @@ const DynamicRoleTable = ({
               sx={{
                 fontSize:
                   "10.5px",
-
-                opacity:
-                  0.85,
-
+                opacity: 0.85,
                 mt: 0.25,
               }}
             >
               Select up to{" "}
-              {MAX_VISIBLE_COLUMNS}{" "}
+              {
+                MAX_VISIBLE_COLUMNS
+              }{" "}
               columns
             </Typography>
           </Box>
-
-          {/* Using text X instead of MUI Close icon */}
 
           <IconButton
             onClick={
@@ -1631,12 +1382,12 @@ const DynamicRoleTable = ({
 
         {/* ======================================================
             DIALOG CONTENT
-            ====================================================== */}
+            ======================================================
+        */}
 
         <DialogContent
           sx={{
             p: 2.5,
-
             backgroundColor:
               "#f7f8fa",
           }}
@@ -1644,46 +1395,33 @@ const DynamicRoleTable = ({
           <Box
             sx={{
               display: "flex",
-
               alignItems:
                 "center",
-
               gap: 1.5,
-
               width: "100%",
             }}
           >
-            {/* ==================================================
-                AVAILABLE COLUMNS
-                ================================================== */}
+            {/* AVAILABLE */}
 
             <Box
               sx={{
                 flex: 1,
-
                 backgroundColor:
                   "#fff",
-
                 border:
                   "1px solid #dfe3e8",
-
                 borderRadius:
                   "8px",
-
                 overflow:
                   "hidden",
               }}
             >
-              {/* Header */}
-
               <Box
                 sx={{
                   px: 1.5,
                   py: 1,
-
                   borderBottom:
                     "1px solid #e5e7eb",
-
                   backgroundColor:
                     "#f3f5f7",
                 }}
@@ -1692,10 +1430,8 @@ const DynamicRoleTable = ({
                   sx={{
                     fontSize:
                       "12px",
-
                     fontWeight:
                       600,
-
                     color:
                       "#333",
                   }}
@@ -1707,10 +1443,8 @@ const DynamicRoleTable = ({
                   sx={{
                     fontSize:
                       "10px",
-
                     color:
                       "#777",
-
                     mt: 0.2,
                   }}
                 >
@@ -1721,43 +1455,20 @@ const DynamicRoleTable = ({
                 </Typography>
               </Box>
 
-              {/* List */}
-
               <List
                 dense
                 sx={{
                   height:
                     "300px",
-
                   overflowY:
                     "auto",
-
                   p: 0,
-
-                  "&::-webkit-scrollbar":
-                    {
-                      width:
-                        "5px",
-                    },
-
-                  "&::-webkit-scrollbar-thumb":
-                    {
-                      backgroundColor:
-                        "#c5c5c5",
-
-                      borderRadius:
-                        "10px",
-                    },
                 }}
               >
                 {tempAvailableColumns.map(
-                  (
-                    column,
-                  ) => (
+                  (column) => (
                     <ListItem
-                      key={
-                        column
-                      }
+                      key={column}
                       disablePadding
                     >
                       <ListItemButton
@@ -1772,19 +1483,9 @@ const DynamicRoleTable = ({
                         }
                         sx={{
                           minHeight:
-                            "34px",
-
-                          py:
-                            0.25,
-
-                          px:
-                            1,
-
-                          "&:hover":
-                            {
-                              backgroundColor:
-                                "#f1f6fa",
-                            },
+                            "32px",
+                          py: 0,
+                          px: 1,
                         }}
                       >
                         <ListItemIcon
@@ -1811,16 +1512,20 @@ const DynamicRoleTable = ({
                         </ListItemIcon>
 
                         <ListItemText
-                          primary={formatColumnName(
-                            column,
-                          )}
-                          primaryTypographyProps={{
-                            fontSize:
-                              "11px",
-
-                            color:
-                              "#444",
-                          }}
+                          primary={
+                            <Typography
+                              sx={{
+                                fontSize:
+                                  "11px",
+                                color:
+                                  "#444",
+                              }}
+                            >
+                              {formatColumnName(
+                                column,
+                              )}
+                            </Typography>
+                          }
                         />
                       </ListItemButton>
                     </ListItem>
@@ -1831,9 +1536,7 @@ const DynamicRoleTable = ({
                   0 && (
                   <Box
                     sx={{
-                      py:
-                        5,
-
+                      py: 5,
                       textAlign:
                         "center",
                     }}
@@ -1842,7 +1545,6 @@ const DynamicRoleTable = ({
                       sx={{
                         fontSize:
                           "11px",
-
                         color:
                           "#999",
                       }}
@@ -1855,26 +1557,19 @@ const DynamicRoleTable = ({
               </List>
             </Box>
 
-            {/* ==================================================
-                TRANSFER BUTTONS
-                ================================================== */}
+            {/* TRANSFER BUTTONS */}
 
             <Box
               sx={{
                 display:
                   "flex",
-
                 flexDirection:
                   "column",
-
                 gap: 0.75,
-
                 alignItems:
                   "center",
               }}
             >
-              {/* ALL TO SELECTED */}
-
               <Button
                 onClick={
                   moveAllToSelected
@@ -1888,48 +1583,22 @@ const DynamicRoleTable = ({
                 sx={{
                   minWidth:
                     "38px",
-
-                  width:
-                    "38px",
-
-                  height:
-                    "32px",
-
-                  minHeight:
-                    "32px",
-
-                  padding:
-                    0,
-
+                  width: "38px",
+                  height: "32px",
+                  padding: 0,
                   border:
                     "1px solid #d5dbe0",
-
                   backgroundColor:
                     "#fff",
-
-                  color:
-                    "#555",
-
+                  color: "#555",
                   borderRadius:
                     "6px",
-
                   fontSize:
                     "16px",
-
-                  lineHeight:
-                    1,
-
-                  "&:hover":
-                    {
-                      backgroundColor:
-                        "#f1f6fa",
-                    },
                 }}
               >
                 →
               </Button>
-
-              {/* ALL TO AVAILABLE */}
 
               <Button
                 onClick={
@@ -1942,88 +1611,51 @@ const DynamicRoleTable = ({
                 sx={{
                   minWidth:
                     "38px",
-
-                  width:
-                    "38px",
-
-                  height:
-                    "32px",
-
-                  minHeight:
-                    "32px",
-
-                  padding:
-                    0,
-
+                  width: "38px",
+                  height: "32px",
+                  padding: 0,
                   border:
                     "1px solid #d5dbe0",
-
                   backgroundColor:
                     "#fff",
-
-                  color:
-                    "#555",
-
+                  color: "#555",
                   borderRadius:
                     "6px",
-
                   fontSize:
                     "16px",
-
-                  lineHeight:
-                    1,
-
-                  "&:hover":
-                    {
-                      backgroundColor:
-                        "#f1f6fa",
-                    },
                 }}
               >
                 ←
               </Button>
             </Box>
 
-            {/* ==================================================
-                SELECTED COLUMNS
-                ================================================== */}
+            {/* SELECTED */}
 
             <Box
               sx={{
                 flex: 1,
-
                 backgroundColor:
                   "#fff",
-
                 border:
                   "1px solid #dfe3e8",
-
                 borderRadius:
                   "8px",
-
                 overflow:
                   "hidden",
               }}
             >
-              {/* Header */}
-
               <Box
                 sx={{
                   px: 1.5,
                   py: 1,
-
                   borderBottom:
                     "1px solid #e5e7eb",
-
                   backgroundColor:
                     "#f3f5f7",
-
                   display:
                     "flex",
-
                   alignItems:
                     "center",
-
                   justifyContent:
                     "space-between",
                 }}
@@ -2033,10 +1665,8 @@ const DynamicRoleTable = ({
                     sx={{
                       fontSize:
                         "12px",
-
                       fontWeight:
                         600,
-
                       color:
                         "#333",
                     }}
@@ -2048,13 +1678,11 @@ const DynamicRoleTable = ({
                     sx={{
                       fontSize:
                         "10px",
-
                       color:
                         tempSelectedColumns.length >=
                         MAX_VISIBLE_COLUMNS
                           ? "#9A2529"
                           : "#777",
-
                       mt: 0.2,
                     }}
                   >
@@ -2069,33 +1697,14 @@ const DynamicRoleTable = ({
                 </Box>
               </Box>
 
-              {/* List */}
-
               <List
                 dense
                 sx={{
                   height:
                     "300px",
-
                   overflowY:
                     "auto",
-
                   p: 0,
-
-                  "&::-webkit-scrollbar":
-                    {
-                      width:
-                        "5px",
-                    },
-
-                  "&::-webkit-scrollbar-thumb":
-                    {
-                      backgroundColor:
-                        "#c5c5c5",
-
-                      borderRadius:
-                        "10px",
-                    },
                 }}
               >
                 {tempSelectedColumns.map(
@@ -2104,37 +1713,25 @@ const DynamicRoleTable = ({
                     index,
                   ) => (
                     <ListItem
-                      key={
-                        column
-                      }
+                      key={column}
                       disablePadding
                     >
-                      <ListItemButton
-                        onClick={() =>
-                          moveToAvailable(
-                            column,
-                          )
-                        }
-                        sx={{
-                          minHeight:
-                            "34px",
-
-                          py:
-                            0.25,
-
-                          px:
-                            1,
-
-                          pr:
-                            0.5,
-
-                          "&:hover":
-                            {
-                              backgroundColor:
-                                "#f1f6fa",
-                            },
-                        }}
-                      >
+                  <ListItemButton
+  onClick={() => {
+    if (!isApplicationNumberColumn(column)) {
+      moveToAvailable(column);
+    }
+  }}
+  sx={{
+    minHeight: "32px",
+    py: 0,
+    px: 1,
+    pr: 0.5,
+    cursor: isApplicationNumberColumn(column)
+      ? "default"
+      : "pointer",
+  }}
+>
                         <ListItemIcon
                           sx={{
                             minWidth:
@@ -2157,46 +1754,40 @@ const DynamicRoleTable = ({
                         </ListItemIcon>
 
                         <ListItemText
-                          primary={formatColumnName(
-                            column,
-                          )}
-                          primaryTypographyProps={{
-                            fontSize:
-                              "11px",
-
-                            color:
-                              "#333",
-
-                            fontWeight:
-                              500,
-                          }}
+                          primary={
+                            <Typography
+                              sx={{
+                                fontSize:
+                                  "11px",
+                                color:
+                                  "#333",
+                                fontWeight:
+                                  500,
+                              }}
+                            >
+                              {formatColumnName(
+                                column,
+                              )}
+                            </Typography>
+                          }
                         />
-
-                        {/* Reorder buttons */}
 
                         <Box
                           sx={{
                             display:
                               "flex",
-
                             alignItems:
                               "center",
-
                             gap:
                               0.25,
-
-                            ml:
-                              1,
+                            ml: 1,
                           }}
                         >
-                          {/* UP */}
-
                           <Button
                             onClick={(
                               event,
                             ) => {
                               event.stopPropagation();
-
                               moveColumnUp(
                                 index,
                               );
@@ -2208,52 +1799,29 @@ const DynamicRoleTable = ({
                             sx={{
                               minWidth:
                                 "24px",
-
                               width:
                                 "24px",
-
                               height:
                                 "24px",
-
-                              minHeight:
-                                "24px",
-
-                              padding:
-                                0,
-
+                              padding: 0,
                               border:
                                 "1px solid #e1e4e7",
-
                               borderRadius:
                                 "4px",
-
                               color:
                                 "#555",
-
                               fontSize:
                                 "13px",
-
-                              lineHeight:
-                                1,
-
-                              "&:hover":
-                                {
-                                  backgroundColor:
-                                    "#edf3f7",
-                                },
                             }}
                           >
                             ↑
                           </Button>
-
-                          {/* DOWN */}
 
                           <Button
                             onClick={(
                               event,
                             ) => {
                               event.stopPropagation();
-
                               moveColumnDown(
                                 index,
                               );
@@ -2266,39 +1834,19 @@ const DynamicRoleTable = ({
                             sx={{
                               minWidth:
                                 "24px",
-
                               width:
                                 "24px",
-
                               height:
                                 "24px",
-
-                              minHeight:
-                                "24px",
-
-                              padding:
-                                0,
-
+                              padding: 0,
                               border:
                                 "1px solid #e1e4e7",
-
                               borderRadius:
                                 "4px",
-
                               color:
                                 "#555",
-
                               fontSize:
                                 "13px",
-
-                              lineHeight:
-                                1,
-
-                              "&:hover":
-                                {
-                                  backgroundColor:
-                                    "#edf3f7",
-                                },
                             }}
                           >
                             ↓
@@ -2313,9 +1861,7 @@ const DynamicRoleTable = ({
                   0 && (
                   <Box
                     sx={{
-                      py:
-                        5,
-
+                      py: 5,
                       textAlign:
                         "center",
                     }}
@@ -2324,7 +1870,6 @@ const DynamicRoleTable = ({
                       sx={{
                         fontSize:
                           "11px",
-
                         color:
                           "#999",
                       }}
@@ -2338,24 +1883,17 @@ const DynamicRoleTable = ({
             </Box>
           </Box>
 
-          {/* ==================================================
-              INFORMATION
-              ================================================== */}
+          {/* INFORMATION */}
 
           <Box
             sx={{
               mt: 1.5,
-
               px: 1.5,
-
               py: 1,
-
               backgroundColor:
                 "#eef5fa",
-
               borderRadius:
                 "6px",
-
               border:
                 "1px solid #d8e7f2",
             }}
@@ -2364,7 +1902,6 @@ const DynamicRoleTable = ({
               sx={{
                 fontSize:
                   "10.5px",
-
                 color:
                   "#456",
               }}
@@ -2381,22 +1918,19 @@ const DynamicRoleTable = ({
 
         {/* ======================================================
             DIALOG FOOTER
-            ====================================================== */}
+            ======================================================
+        */}
 
         <DialogActions
           sx={{
             px: 2.5,
             py: 1.25,
-
             borderTop:
               "1px solid #e5e7eb",
-
             justifyContent:
               "space-between",
           }}
         >
-          {/* Reset */}
-
           <Button
             onClick={
               handleResetColumns
@@ -2404,13 +1938,10 @@ const DynamicRoleTable = ({
             sx={{
               textTransform:
                 "none",
-
               fontSize:
                 "11px",
-
               color:
                 "#555",
-
               minHeight:
                 "30px",
             }}
@@ -2422,12 +1953,9 @@ const DynamicRoleTable = ({
             sx={{
               display:
                 "flex",
-
               gap: 0.75,
             }}
           >
-            {/* Cancel */}
-
             <Button
               onClick={
                 handleCloseSettings
@@ -2435,23 +1963,17 @@ const DynamicRoleTable = ({
               sx={{
                 textTransform:
                   "none",
-
                 fontSize:
                   "11px",
-
                 color:
                   "#555",
-
                 minHeight:
                   "30px",
-
                 px: 1.5,
               }}
             >
               Cancel
             </Button>
-
-            {/* Save */}
 
             <Button
               variant="contained"
@@ -2465,29 +1987,21 @@ const DynamicRoleTable = ({
               sx={{
                 textTransform:
                   "none",
-
                 fontSize:
                   "11px",
-
                 minHeight:
                   "30px",
-
                 minWidth:
                   "70px",
-
                 px: 1.5,
-
                 backgroundColor:
                   "#0D4C7D",
-
                 borderRadius:
                   "5px",
-
-                "&:hover":
-                  {
-                    backgroundColor:
-                      "#093d65",
-                  },
+                "&:hover": {
+                  backgroundColor:
+                    "#093d65",
+                },
               }}
             >
               Save
