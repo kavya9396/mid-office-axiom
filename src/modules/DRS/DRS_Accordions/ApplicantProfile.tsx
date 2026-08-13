@@ -315,7 +315,8 @@ case "Image Details": {
   );
 }
 
-      case "Personal & KYC":
+      case "Personal & KYC": {
+        console.log('selectedApplicant',selectedApplicant)
         return (
           <Box sx={{ p: 1 }}>
             <Typography
@@ -331,7 +332,7 @@ case "Image Details": {
             {/* Personal & KYC content */}
           </Box>
         );
-
+    }
       case "Contact & Address":
         return (
           <Box sx={{ p: 1 }}>
