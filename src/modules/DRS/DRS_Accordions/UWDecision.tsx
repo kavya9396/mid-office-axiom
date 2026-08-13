@@ -471,10 +471,10 @@ const UWDecision = () => {
                                     <Box>
                                         <Typography
                                             sx={{
-                                                fontSize: "12px",
+                                                fontSize: "14px",
                                                 fontWeight: 400,
                                                 color: "#444",
-                                                mb: 0.5,
+                                                mb: 1,
                                             }}
                                         >
                                             Decision Code
@@ -486,9 +486,7 @@ const UWDecision = () => {
                                             disabled
                                             sx={{
                                                 "& .MuiInputBase-root": {
-                                                    height: 36,
-                                                    borderRadius: "6px",
-                                                    backgroundColor: "#fff",
+                                                    borderRadius: "8px",
                                                 },
                                             }}
                                         />

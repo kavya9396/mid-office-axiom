@@ -12,7 +12,7 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
-import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { toMasterLabel } from "../../../utils/masterOptions";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
@@ -22,7 +22,72 @@ const ReconsiderationPoolDecision = () => {
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
-  const reconsiderationDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "reconsiderationDecision", true, true), [masters]);
+  const reconsiderationDecisionOptions = useMemo(() => {
+  const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+  const toMasterList = (options?: unknown): unknown[] => {
+    if (Array.isArray(options)) return options;
+
+    if (!options || typeof options !== "object") {
+      return [];
+    }
+
+    const record = options as Record<string, unknown>;
+
+    if (Array.isArray(record.data)) return record.data;
+    if (Array.isArray(record.options)) return record.options;
+    if (Array.isArray(record.values)) return record.values;
+
+    return Object.values(record).flatMap((value) =>
+      Array.isArray(value) ? value : []
+    );
+  };
+
+  const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
+
+  return rawList
+    .filter(
+      (option) =>
+        String(option?.type ?? "").trim().toUpperCase() === "RECONS"
+    )
+    .map((option) => {
+      const code = String(
+        option.code ?? option.key ?? option.value ?? ""
+      ).trim();
+
+      const description = String(
+        option.description ?? option.label ?? ""
+      ).trim();
+
+      const disabled = Boolean(
+        option.disabled ??
+          (
+            String(option.isActive ?? "")
+              .trim()
+              .toUpperCase() === "N"
+          )
+      );
+
+      if (!code || !description) return null;
+
+      return {
+        label: description,
+        value: code,
+        code,
+        description,
+        type: String(option.type ?? "").trim(),
+        disabled,
+      };
+    })
+    .filter(Boolean) as Array<{
+      label: string;
+      value: string;
+      code: string;
+      description: string;
+      type: string;
+      disabled?: boolean;
+    }>;
+}, [masters]);
 
   const safeBusinessType =
     normalizeBusinessType(businessType) ??
@@ -59,14 +124,6 @@ const ReconsiderationPoolDecision = () => {
       setSubmitMessage(null);
       setSubmitStatus(null);
 
-      const selectedOption = reconsiderationDecisionOptions.find((o) => o.value === decision) as (typeof reconsiderationDecisionOptions[number] & { code?: string; description?: string }) | undefined;
-      const keyBase = String("reconsiderationDecision").replace(/Decision$/i, "").replace(/_/g, "").toUpperCase();
-      const payloadDecision = selectedOption
-        ? (String(selectedOption.code ?? "").toUpperCase() === keyBase
-          ? String(selectedOption.description ?? selectedOption.value ?? "")
-          : String(selectedOption.value ?? ""))
-        : decision;
-
       const response = await dispatch(
         completeTaskThunk({
           requestContext: {
@@ -75,7 +132,7 @@ const ReconsiderationPoolDecision = () => {
             appNo: taskContext.appNo,
             instanceId: taskContext.instanceId,
             remarks: remark.trim(),
-            decision: payloadDecision,
+            decision: decision.trim(),
           },
         }),
       ).unwrap();
