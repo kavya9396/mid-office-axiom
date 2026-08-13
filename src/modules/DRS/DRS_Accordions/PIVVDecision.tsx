@@ -14,7 +14,6 @@ import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
-import { normalizeDecisionOptions } from "../../../utils/masterOptions";
 
 type PivvDecisionOption = {
   label: string;
@@ -28,6 +27,68 @@ const PIVVDecision = () => {
   const { applicationNumber, businessType } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
+  const pivvDecisionOptions = useMemo(() => {
+    const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+    const toMasterList = (options?: unknown): unknown[] => {
+      if (Array.isArray(options)) return options;
+
+      if (!options || typeof options !== "object") {
+        return [];
+      }
+
+      const record = options as Record<string, unknown>;
+
+      if (Array.isArray(record.data)) return record.data;
+      if (Array.isArray(record.options)) return record.options;
+      if (Array.isArray(record.values)) return record.values;
+
+      return Object.values(record).flatMap((value) =>
+        Array.isArray(value) ? value : [],
+      );
+    };
+
+    const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
+
+    return rawList
+      .filter(
+        (option) =>
+          String(option?.type ?? "").trim().toUpperCase() === "PIVV",
+      )
+      .map((option) => {
+        const code = String(
+          option.code ?? option.key ?? option.value ?? "",
+        ).trim();
+
+        const description = String(
+          option.description ?? option.label ?? "",
+        ).trim();
+
+        const disabled = Boolean(
+          option.disabled ??
+          (String(option.isActive ?? "").trim().toUpperCase() === "N"),
+        );
+
+        if (!code || !description) return null;
+
+        return {
+          label: description,
+          value: code,
+          code,
+          description,
+          type: String(option.type ?? "").trim(),
+          disabled,
+        };
+      })
+      .filter(Boolean) as Array<{
+        label: string;
+        value: string;
+        code: string;
+        description: string;
+        type: string;
+        disabled?: boolean;
+      }>;
+  }, [masters]);
 
   const [decision, setDecision] = useState("");
   const [remarks, setRemarks] = useState("");
@@ -48,7 +109,7 @@ const PIVVDecision = () => {
 
   const workflowPool = useMemo(() => {
     const byMaster = Array.isArray(masters.pivvDecision) ? masters.pivvDecision : [];
-    let matched = byMaster.find((item) => item.value === decision || item.description === decision || item.code === decision) as PivvDecisionOption | undefined;
+    const matched = byMaster.find((item) => item.value === decision || item.description === decision || item.code === decision) as PivvDecisionOption | undefined;
     if (matched) return matched.workflowPool ?? "";
 
     // fallback to misc
@@ -64,13 +125,10 @@ const PIVVDecision = () => {
     return String(matchedMisc?.workflowPool ?? "");
   }, [decision, masters]);
 
-  const decisionOptions = useMemo(() => {
-    return normalizeDecisionOptions(masters, "pivvDecision", true, true);
-  }, [masters]);
-
   const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;
 
   const handleSubmit = async () => {
+    console.log("Decision selected", decision.trim())
     const breValidation = validateDrsFinalBre(drsData);
     if (!breValidation.canPerformAction) {
       setSubmitMessage(breValidation.message);
@@ -86,13 +144,6 @@ const PIVVDecision = () => {
       setSubmitLoading(true);
       setSubmitMessage(null);
 
-      const selectedOption = decisionOptions.find((o) => o.value === decision) as (typeof decisionOptions[number] & { code?: string; description?: string }) | undefined;
-      const payloadDecision = selectedOption
-        ? (String(selectedOption.code ?? "").toUpperCase() === "PIVV"
-          ? String(selectedOption.description ?? selectedOption.value ?? "")
-          : String(selectedOption.value ?? ""))
-        : decision;
-
       const response = await dispatch(
         completeTaskThunk({
           requestContext: {
@@ -100,7 +151,7 @@ const PIVVDecision = () => {
             userId: taskContext.userId,
             taskId: taskContext.taskId,
             instanceId: taskContext.instanceId,
-            decision: payloadDecision,
+            decision: decision.trim(),
             remarks: remarks.trim(),
           },
         }),
@@ -152,15 +203,23 @@ const PIVVDecision = () => {
               borderRadius: "6px",
             }}
           >
-            <CustomSelect
-              label="PIVV Pool Decision"
-              value={decision}
-              onChange={(value: string) => {
-                setDecision(value);
-                setSubmitMessage(null);
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "repeat(2, 1fr)",
+                gap: 1,
               }}
-              options={decisionOptions}
-            />
+            >
+              <CustomSelect
+                label="PIVV Pool Decision"
+                value={decision}
+                onChange={(value: string) => {
+                  setDecision(value);
+                  setSubmitMessage(null);
+                }}
+                options={pivvDecisionOptions}
+              />
+            </Box>
 
             <Typography
               sx={{
