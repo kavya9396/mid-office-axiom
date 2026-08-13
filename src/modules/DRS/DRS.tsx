@@ -297,8 +297,8 @@ console.log('decision',decision)
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK" ||
     roleType === "CPT_TASK"
-        ? [...sections, "summary","breDecision"]
-        : sections;
+        ? [...sections, "summary","breDecision","latestBreDecision"]
+        : [...sections,"latestBreDecision"];
             try {
                 const drsResponse = await dispatch(
                     drsThunk({

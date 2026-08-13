@@ -1,15 +1,28 @@
 {
     "success": true,
     "data": {
-        "breDecision": {
-            "decision": "Non-STP",
-            "initialDecision": "Non-STP",
-            "remarks": "ACR#OCD#PAN#KYP#AGE#IDM#ADP",
-            "discrepancy": "PAN#GCR#KYP#PST#AGE#UAC#RUA#H1C#MER#ACR#OCD#IIN#QNR#ECG#HV1#COT#S13#PAL#AUS#IDM#ADP",
-            "timestamp": "06/08/2026, 1908hrs",
-            "action": "BRE_REVALIDATION",
-            "reTriggerCount": 1
-        },
+       "breDecision": {
+      "decision": "RM",
+      "initialDecision": "Non-STP",
+      "isInitial": "Y",
+      "isLatest": "N",
+      "remarks": "Check Basic KYC Document Attestations#NRI Questionnaire Required#NRI: Passport Is Required as Age Proof#QSTN/Document Attached#UW Control#VMR not allowed for other than Standard country#Videography Medical Examination Report eligible case#AMBR47#DRC_Failed#Income Proof Required for Protection",
+      "discrepancy": "IDM#IIN#KYP#PST#QNR#AGE#UAC#ECG#RUA#HV1#AUS#H1C#COT#MER#S13#ACR#OCD#PAL#ADP",
+      "timestamp": "12/08/2026, 2240hrs",
+      "action": "Regular Medical required",
+      "reTriggerCount": 2
+    },"latestBreDecision": {
+      "decision": "RM",
+      "systemDecision": "Non-STP",
+      "isInitial": "N",
+      "isLatest": "Y",
+      "remarks": "Check Basic KYC Document Attestations#NRI: Passport Is Required as Age Proof#NRI Questionnaire Required#QSTN/Document Attached#UW Control#VMR not allowed for other than Standard country#Videography Medical Examination Report eligible case#AMBR47#DRC_Failed#Income Proof Required for Protection",
+      "discrepancy": "IDM#IIN#KYP#PST#QNR#AGE#UAC#ECG#RUA#HV1#AUS#H1C#COT#MER#S13#ACR#OCD#PAL#ADP",
+      "timestamp": "12/08/2026, 2248hrs",
+      "action": "Regular Medical required",
+      "hitSequence": 3,
+      "reTriggerCount": 2
+    },
         "summary": [
             {
                 "memberType": "proposer",

@@ -143,7 +143,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   ],CVT_TASK: [
     "breDecision",
     "summary",
-    "applicationOverview1",
+    "applicationOverview",
     "pivvSection",
     "requirementManagement",
     "decision",

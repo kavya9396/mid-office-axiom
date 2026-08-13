@@ -86,9 +86,7 @@ const Decision = () => {
 
   // ================= STATE =================
 
-  const [selectedDecision, setSelectedDecision] = useState(
-    sessionStorage.getItem("caseDecision") || "",
-  );
+ const [selectedDecision, setSelectedDecision] = useState("");
 
   const [remarks, setRemarks] = useState("");
 
@@ -334,10 +332,7 @@ const Decision = () => {
         "success",
       );
 
-      sessionStorage.setItem(
-        "caseDecision",
-        selectedDecision,
-      );
+     
     } catch (error) {
       // =====================================================
       // API FAILURE
@@ -461,9 +456,19 @@ const Decision = () => {
               </Typography>
             </Box>
 
-            {/* =====================================================
+           
+          </Box>
+ {/* =====================================================
                 CASE DECISION
             ===================================================== */}
+
+ <Box
+                            sx={{
+                                display: "grid",
+                                gridTemplateColumns: "repeat(3, 1fr)",
+                                gap: 1,
+                            }}
+                        >
 
             <Box
               sx={{
@@ -508,8 +513,9 @@ const Decision = () => {
                 />
               </Box>
             </Box>
-          </Box>
 
+            
+</Box>
           {/* =====================================================
               SUBMIT
           ===================================================== */}
@@ -517,7 +523,7 @@ const Decision = () => {
           <Box
             sx={{
               display: "flex",
-              justifyContent: "center",
+              justifyContent: "left",
               mt: "5px",
             }}
           >

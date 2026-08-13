@@ -1,16 +1,19 @@
+import { Box, Typography } from "@mui/material";
+import { useState } from "react";
+import { useDispatch } from "react-redux";
+
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { title } from "../../../utils/constant";
 import { useAppSelector } from "../../../store/hooks";
 import Badge from "../../../components/ui/Badge/Badge";
-import CustomTable, { type Column } from "../../../components/ui/Table/Table";
+import CustomTable, {
+  type Column,
+} from "../../../components/ui/Table/Table";
 import CustomButton from "../../../components/ui/Button/Button";
 import { RefreshIcon } from "../../../icons/Icons";
-import { Box, Typography } from "@mui/material";
 import { breThunk } from "../../../store/thunks/breThunk";
-import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../../../store/store";
 import { useAppContext } from "../../../hooks/useAppContext";
-import { useState } from "react";
 import type { BreResponse } from "../../../types/drs.types";
 import { formatDate } from "../../../utils/dataFormat";
 
@@ -18,39 +21,168 @@ type BRERow = {
   bre?: string;
   initialBre?: string;
   finalBre?: string;
-}
+};
 
 const BreDecision = () => {
   const dispatch = useDispatch<AppDispatch>();
+
   const { applicationNumber, businessType } = useAppContext();
+
   const drsData = useAppSelector((state) => state.drs);
-  const breDecisionData = drsData?.data?.breDecision;
-  const isinitialBreSuccess =
-    breDecisionData
-      ? true
-      : false;
-  const [breResponse, setBreResponse] = useState<BreResponse | null>(null);
   const finalBreData = useAppSelector((state) => state.bre);
-  const finalBreDecisionData =
-    breResponse?.data ?? finalBreData?.data?.data;
 
-  const finalBreStatus = finalBreDecisionData?.breOutput?.decisionTypes?.breDecision;
-  const isfinalBreSuccess =
-    finalBreStatus
-      ? true
-      : false;
-      const storageBusiness = businessType ? businessType : localStorage.getItem("businessType");
-  const eventName = storageBusiness == 'retail' ? 'BRE-RETAIL' : 'BRE-GROUP';
+  // Initial BRE response
+  const breDecisionData = drsData?.data?.breDecision;
+
+  const isInitialBreSuccess = !!breDecisionData;
+
+  // Latest BRE decision from DRS.
+  // This should be displayed initially in Final BRE.
+  const latestBreDecisionData = drsData?.data?.latestBreDecision;
+
+  // Local API response.
+  // Once refresh API is called successfully, this becomes the source
+  // for Final BRE.
+  const [breResponse, setBreResponse] = useState<BreResponse | null>(null);
+  const [isBreApiCalled, setIsBreApiCalled] = useState(false);
+
+  /**
+   * Final BRE API data
+   *
+   * Before refresh:
+   *   latestBreDecisionData is used.
+   *
+   * After refresh:
+   *   breResponse / Redux BRE response is used.
+   */
+  const finalBreDecisionData = isBreApiCalled
+    ? breResponse?.data ?? finalBreData?.data?.data
+    : null;
+
+  const storageBusiness =
+    businessType || localStorage.getItem("businessType");
+
+  const eventName =
+    storageBusiness === "retail" ? "BRE-RETAIL" : "BRE-GROUP";
+
+  /**
+   * Refresh BRE API
+   */
   const handleRefresh = async () => {
-    const response = await dispatch(
-      breThunk({
-        eventName: eventName,
-        applicationNumber: applicationNumber
-      }),
-    ).unwrap();
-    setBreResponse(response);
-  }
+    try {
+      const response = await dispatch(
+        breThunk({
+          eventName,
+          applicationNumber,
+        })
+      ).unwrap();
 
+      setBreResponse(response);
+      setIsBreApiCalled(true);
+    } catch (error) {
+      console.error("BRE API failed:", error);
+    }
+  };
+
+  /**
+   * Final BRE values
+   *
+   * Initially -> latestBreDecisionData
+   * After API -> BRE API response
+   */
+  const finalBreDecision = isBreApiCalled
+    ? finalBreDecisionData?.breOutput?.decisionTypes?.breDecision ?? ""
+    : latestBreDecisionData?.decision ?? "";
+
+  const finalBreRemarks = isBreApiCalled
+    ? finalBreDecisionData?.breOutput?.breRemarks ?? ""
+    : latestBreDecisionData?.remarks ?? "";
+
+  const finalBreDiscrepancy = isBreApiCalled
+    ? finalBreDecisionData?.breOutput?.decisionTypes?.breRequirement ?? ""
+    : latestBreDecisionData?.discrepancy ?? "";
+
+  const finalBreTimestamp = isBreApiCalled
+    ? finalBreDecisionData?.breOutput?.systemDecisionDateTime
+    : latestBreDecisionData?.timestamp;
+
+  /**
+   * Final BRE status
+   */
+  const finalBreStatus = isBreApiCalled
+    ? finalBreDecision
+    : latestBreDecisionData?.decision ?? "";
+
+  const isFinalBreSuccess = !!finalBreStatus;
+
+  /**
+   * Highlight discrepancy values which are different
+   */
+  const renderDiscrepancy = (
+    value?: string,
+    compareValue?: string
+  ) => {
+    const codes = value?.trim().split(/\s+/).filter(Boolean) ?? [];
+
+    const compareCodes = new Set(
+      compareValue?.trim().split(/\s+/).filter(Boolean) ?? []
+    );
+
+    return (
+      <Box
+        sx={{
+          whiteSpace: "normal",
+          overflowWrap: "anywhere",
+        }}
+      >
+        {codes.map((code, index) => {
+          const isUpdated = !compareCodes.has(code);
+
+          return (
+            <Box
+              key={`${code}-${index}`}
+              component="span"
+              sx={{
+                backgroundColor: isUpdated
+                  ? "#FFF59D"
+                  : "transparent",
+              }}
+            >
+              #{code}{" "}
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  };
+
+  /**
+   * Highlight changed decision values
+   */
+  const renderDifference = (
+    value?: string,
+    compareValue?: string
+  ) => {
+    const isDifferent = value !== compareValue;
+
+    return (
+      <Box
+        component="span"
+        sx={{
+          backgroundColor: isDifferent
+            ? "#FFF59D"
+            : "transparent",
+          px: isDifferent ? "2px" : 0,
+        }}
+      >
+        {value}
+      </Box>
+    );
+  };
+
+  /**
+   * BRE table columns
+   */
   const breColumns: Column<BRERow>[] = [
     {
       key: "bre",
@@ -122,99 +254,61 @@ const BreDecision = () => {
     },
   ];
 
+  /**
+   * BRE table data
+   */
   const breTableData: BRERow[] = [
     {
       bre: "BRE Status",
-      initialBre: isinitialBreSuccess ? "Success" : "Failure",
-      finalBre: isfinalBreSuccess ? "Success" : "Failure",
+      initialBre: isInitialBreSuccess
+        ? "Success"
+        : "Failure",
+      finalBre: isFinalBreSuccess
+        ? "Success"
+        : "Failure",
     },
     {
       bre: "BRE Decision",
       initialBre: breDecisionData?.decision ?? "",
-      finalBre:
-        finalBreDecisionData?.breOutput?.decisionTypes?.breDecision ?? "",
+      finalBre: finalBreDecision,
     },
     {
       bre: "BRE Remarks",
       initialBre: breDecisionData?.remarks ?? "",
-      finalBre:
-        finalBreDecisionData?.breOutput?.breRemarks ?? "",
+      finalBre: finalBreRemarks,
     },
     {
       bre: "BRE Discrepancy",
       initialBre: breDecisionData?.discrepancy ?? "",
-      finalBre:
-        finalBreDecisionData?.breOutput?.decisionTypes?.breRequirement ?? "",
+      finalBre: finalBreDiscrepancy,
     },
-
     {
       bre: "BRE Timestamp",
       initialBre: formatDate(breDecisionData?.timestamp) ?? "",
-      finalBre:
-        formatDate(finalBreDecisionData?.breOutput?.systemDecisionDateTime) ?? "",
+      finalBre: formatDate(finalBreTimestamp) ?? "",
     },
   ];
 
-  const renderDiscrepancy = (
-    value?: string,
-    compareValue?: string
-  ) => {
-    const codes = value?.trim().split(/\s+/) ?? [];
-    const compareCodes = new Set(
-      compareValue?.trim().split(/\s+/) ?? []
-    );
-
-    return (
-      <Box
-        sx={{
-          whiteSpace: "normal",
-          overflowWrap: "anywhere",
-        }}
-      >
-        {codes.map((code) => {
-          const isUpdated = !compareCodes.has(code);
-
-          return (
-            <Box
-              key={code}
-              component="span"
-              sx={{
-                backgroundColor: isUpdated ? "#FFF59D" : "transparent",
-              }}
-            >
-              #{code}
-            </Box>
-          );
-        })}
-      </Box>
-    );
-  };
-
-  const renderDifference = (
-    value?: string,
-    compareValue?: string
-  ) => {
-    const isDifferent = value !== compareValue;
-
-    return (
-      <Box
-        component="span"
-        sx={{
-          backgroundColor: isDifferent ? "#FFF59D" : "transparent",
-          px: isDifferent ? "2px" : 0,
-        }}
-      >
-        {value}
-      </Box>
-    );
-  };
-
   return (
     <Box sx={{ p: 1 }}>
-      <CustomAccordion title={title.breDecision} chip={<Badge label={finalBreStatus ?? ""} variant="Low" />} defaultExpanded>
-        <CustomTable title={""} columns={breColumns} data={breTableData} />
+      <CustomAccordion
+        title={title.breDecision}
+        chip={
+          <Badge
+            label={finalBreStatus ?? ""}
+            variant="Low"
+          />
+        }
+        defaultExpanded
+      >
+        <CustomTable
+          title=""
+          columns={breColumns}
+          data={breTableData}
+        />
       </CustomAccordion>
     </Box>
-  )
-}
+  );
+};
+
 export default BreDecision;

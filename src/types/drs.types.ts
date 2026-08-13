@@ -134,6 +134,7 @@ export type DRSResponse = {
 export interface DRSData {
   applicationNumber: string;
   breDecision:BreDecisionResponse;
+  latestBreDecision:BreDecisionResponse;
   submitDate: string;
   totalPremium: number;
   sourceSystem: string;
