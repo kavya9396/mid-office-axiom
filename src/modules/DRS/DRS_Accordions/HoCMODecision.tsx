@@ -11,6 +11,7 @@ import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 
 const HoCMODecision = () => {
@@ -41,6 +42,11 @@ const HoCMODecision = () => {
   const isSubmitDisabled = !decision || remarks.trim() === "";
 
   const handleSubmitIntent = () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      return;
+    }
     const requirementValidation = validateRequirementDecision(drsData, decision);
     if (!requirementValidation.isValid) {
       setSubmitMessage(requirementValidation.message);

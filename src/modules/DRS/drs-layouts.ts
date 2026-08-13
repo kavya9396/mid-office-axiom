@@ -1,4 +1,3 @@
-import ApplicationOverview from "./DRS_Accordions/ApplicationOverview";
 import BreDecision from "./DRS_Accordions/BreDecision";
 import CVTDecision from "./DRS_Accordions/CVTDecision";
 import DVTDecision from "./DRS_Accordions/DVTDecision";
@@ -31,14 +30,14 @@ import MedicalInsuranceDetails from "./DRS_Accordions/MedicalInsuranceDetails";
 import DocumentRequired from "./DRS_Accordions/DocumentRequired";
 import PreLogin from "./DRS_Accordions/PreLogin";
 import BreDecision1 from "./DRS_Accordions/BreDecision1";
+import ApplicationOverview from "./DRS_Accordions/ApplicationOverview";
 import Decision from "./DRS_Accordions/decision";
-import ApplicationOverview1 from "./DRS_Accordions/ApplicationOverview1";
  
 export const accordionRegistry = {
   breDecision1:BreDecision1,
   breDecision: BreDecision,
+  //applicationOverview: ApplicationOverview,
   applicationOverview: ApplicationOverview,
-  applicationOverview1:ApplicationOverview1,
   requirementManagement: RequirementManagement,
   uwDecision: UWDecision,
   pivvSection: PIVVSection,

@@ -18,7 +18,7 @@ import { getCompleteTaskResult } from "./completeTaskResponse";
 import { toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
-import { getRequirementRows, validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const DVTDecision = () => {
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
@@ -83,15 +83,12 @@ const DVTDecision = () => {
     const decisionLabel = toMasterLabel(effectiveDecision, dvtDecisionOptions);
     
 
-    const hasRequirements = getRequirementRows(drsData).length > 0;
     const isAcceptDecision = decisionLabel === "Accept";
     const resolvedDecisionCode = isAcceptDecision
         ? (decisionCodes[0]?.value || "")
         : "";
 
-        const isRaiseRequirementsSelected = decisionLabel === "Raise Requirements";
-        const submitBlocked =
-            isRaiseRequirementsSelected && !hasRequirements;
+        
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
@@ -157,6 +154,12 @@ const DVTDecision = () => {
     };
 
     const handleSubmitIntent = () => {
+        const breValidation = validateDrsFinalBre(drsData);
+        if (!breValidation.canPerformAction) {
+            setSubmitMessage(breValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
         const applicantTabsValidation = validateApplicantTabsVisited(drsData);
         if (!applicantTabsValidation.isValid) {
             setSubmitMessage(applicantTabsValidation.message);
@@ -278,11 +281,7 @@ const DVTDecision = () => {
                         </Box>
 
                        
-                        {decisionLabel === "Raise Requirements" && !hasRequirements && (
-                            <Alert severity="warning" sx={{ mt: 1, py: 0.25, borderRadius: 1 }}>
-                                Please add at least one requirement in the <strong>Requirement Management</strong> section above before selecting "Raise Requirements".
-                            </Alert>
-                        )}
+                        {/* Do not show upfront requirement warning; validate on submit and show snackbar instead. */}
 
                         {/* {hasRequirements && decision !== "" && decision !== "Raise Requirements" && (
                             <Alert severity="error" sx={{ mt: 2, borderRadius: 2 }}>
@@ -300,7 +299,7 @@ const DVTDecision = () => {
                     >
                         <CustomButton
                             variant="contained"
-                            disabled={!effectiveDecision || submitBlocked || submitLoading}
+                            disabled={!effectiveDecision || submitLoading}
                                 onClick={handleSubmitIntent}
                             sx={{
                                 minWidth: 150,

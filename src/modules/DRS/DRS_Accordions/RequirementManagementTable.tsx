@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
-import { Alert, Box, Chip, Paper, Typography, Pagination, Tooltip } from "@mui/material";
+import { Alert, Box, Chip, Paper, Typography, Pagination, Tooltip, Snackbar } from "@mui/material";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { apiRequest } from "../../../services/api";
 import { url as apiUrl } from "../../../services/apiConfig";
@@ -436,6 +436,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [deletedRowIds, setDeletedRowIds] = useState<Set<string>>(() => new Set());
     const [descriptionDialogOpen, setDescriptionDialogOpen] = useState(false);
     const [descriptionDialogText, setDescriptionDialogText] = useState("");
+
+    const [snackbarOpen, setSnackbarOpen] = useState(false);
+    const [snackbarMessage, setSnackbarMessage] = useState("");
+    const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "warning" | "error" | "info">("success");
 
     // sorting state for table columns (supports 'category' for now)
     const [sortConfig] = useState<null | { key: string; direction: "asc" | "desc" }>(null);
@@ -1941,8 +1945,8 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     width: 100,
                                     minWidth: 100,
                                     // ensure select text and menu items show capitalized form only in this table
-                                    '& .MuiSelect-select': { textTransform: 'capitalize' },
-                                    '& .MuiMenuItem-root': { textTransform: 'capitalize' },
+                                    // '& .MuiSelect-select': { textTransform: 'capitalize' },
+                                    // '& .MuiMenuItem-root': { textTransform: 'capitalize' },
                                 }}
                             >
                                 {renderEditableSelect(
@@ -2353,10 +2357,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
 
                                     const payloadRequirements = rows.map((r) => {
                                         const statusCode = String(r.status ?? "").trim() || "PEN";
-                                        const matchedStatus = (requirementStatusOptions as Array<Option & { description?: string }>).find(
-                                            (o) => String(o.value ?? "").trim() === statusCode || String(o.label ?? "").trim().toLowerCase() === String(r.status ?? "").trim().toLowerCase(),
-                                        );
-                                        const statusDescription = matchedStatus?.description ?? matchedStatus?.label ?? String(r.status ?? "");
+                                        // const matchedStatus = (requirementStatusOptions as Array<Option & { description?: string }>).find(
+                                        //     (o) => String(o.value ?? "").trim() === statusCode || String(o.label ?? "").trim().toLowerCase() === String(r.status ?? "").trim().toLowerCase(),
+                                        // );
+                                        //const statusDescription = matchedStatus?.description ?? matchedStatus?.label ?? String(r.status ?? "");
 
                                         return {
                                             team: mapDisplayTeamToStored(r.team ?? ""),
@@ -2367,7 +2371,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                             reason: r.reason ?? "",
                                             fupCode: r.fupCode ?? "",
                                             description: r.description ?? "",
-                                            status: { value: statusCode, description: statusDescription },
+                                            status:statusCode,
                                             raisedDate: r.raisedDate ?? "",
                                             raisedBy: r.raisedBy ?? "",
                                             receivedDate: r.receivedDate ?? "",
@@ -2397,11 +2401,16 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                         data: cloned,
                                     } as unknown;
                                     console.log('requirement save payload', requestBody);
-                                    await apiRequest<{ success?: boolean; message?: string }, unknown>({
+                                    const resp = await apiRequest<{ success?: boolean; message?: string }, unknown>({
                                         url: apiUrl("requirementManagementSave"),
                                         method: "PUT",
                                         body: requestBody,
                                     });
+
+                                    const message = resp?.message ?? (resp?.success ? "Requirements saved successfully." : "Failed to save requirements.");
+                                    setSnackbarMessage(message);
+                                    setSnackbarSeverity(resp?.success ? "success" : "error");
+                                    setSnackbarOpen(true);
 
                                     // persist local snapshot and update state
                                     saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
@@ -2410,6 +2419,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     setEditableStatusRowIds(new Set());
                                 } catch (err) {
                                     console.warn("Requirement save failed", err);
+                                    const errorMsg = err instanceof Error ? err.message : String(err ?? "Failed to save requirements");
+                                    setSnackbarMessage(errorMsg);
+                                    setSnackbarSeverity("error");
+                                    setSnackbarOpen(true);
                                     // persist unsaved flag so user doesn't lose changes
                                     saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), true);
                                     setIsTableSaved(false);
@@ -2472,6 +2485,21 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             {cptSecondaryAction.label}
                         </CustomButton></>)}
                 </Box>
+                <Snackbar
+                    open={snackbarOpen}
+                    autoHideDuration={3000}
+                    onClose={() => setSnackbarOpen(false)}
+                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                >
+                    <Alert
+                        onClose={() => setSnackbarOpen(false)}
+                        severity={snackbarSeverity}
+                        variant="filled"
+                        sx={{ width: "100%" }}
+                    >
+                        {snackbarMessage}
+                    </Alert>
+                </Snackbar>
             </Box>
         </Paper>
     );

@@ -417,7 +417,7 @@ const BreDecision = ({
     }
     const eventN = roleType === 'CPT_DATA_ENTRY_NMR_TASK'
       ? "FE"
-      : (businessType === 'GROUP' ? "BRE_GROUP" : "BRE_RETAIL");
+      : (businessType === 'GROUP' ? "BRE-GROUP" : "BRE-RETAIL");
     try {
       setBreRetriggerLoading(true);
       setBreRetriggerError(null);

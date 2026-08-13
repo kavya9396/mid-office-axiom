@@ -184,6 +184,11 @@ export const toMasterLabel = (value: string, options: SelectOption[]): string =>
 
   if (selectedOption) return selectedOption.label;
 
+  // Try resolving via master key (includes fuzzy/skeleton matching)
+  const resolvedKey = toMasterKey(textValue, options);
+  const resolvedOption = options.find((option) => option.value === resolvedKey);
+  if (resolvedOption) return resolvedOption.label;
+
   // Fallback: case-insensitive exact match
   const lower = textValue.toLowerCase();
   const ci = options.find((option) => option.value.toLowerCase() === lower || option.label.toLowerCase() === lower);

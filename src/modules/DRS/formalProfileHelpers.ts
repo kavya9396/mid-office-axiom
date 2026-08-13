@@ -1,4 +1,4 @@
-import type { ApplicantTab, DRSData, SummaryResponse } from "../../types/drs.types";
+import type { DRSData, SummaryResponse } from "../../types/drs.types";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -21,7 +21,7 @@ const mapGenderToDisplayValue = (gender: string): SummaryResponse["proposerSumma
   return "Other";
 };
 
-const mapMemberType = (memberTypeValue: string | undefined, index: number): ApplicantTab => {
+const mapMemberType = (memberTypeValue: string | undefined, index: number): SummaryResponse["memberType"] => {
   const normalized = memberTypeValue?.trim().toUpperCase() ?? "";
 
   if (normalized === "PROPOSER" || normalized.includes("PR")) {

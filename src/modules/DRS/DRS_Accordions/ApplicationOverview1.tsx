@@ -4,6 +4,9 @@ import { title } from "../../../utils/constant";
 import { GridSection } from "../../../components/layout/GridSection";
 import { useAppSelector } from "../../../store/hooks";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
+import { getRoleWiseConfig } from "../../../config/roleWiseApplicationDetailsConfig1";
+import type { RootState } from "../../../store/store";
+// import { roleWiseConfig } from "../../../config/roleWiseApplicationDetailsConfig";
 
 export type RiderRow = {
   name: string;
@@ -16,53 +19,10 @@ export type RiderRow = {
 
 const ApplicationOverview1 = () => {
     const roleType = localStorage.getItem("roleType");
-    const drsData = useAppSelector((state) => state.drs);
-    const applicationOverview = drsData?.data?.applicationOverview;
-  const roleWiseConfig: Record<string, { label: string; path: string }[]> = {
-  CVT_TASK: [
-    {
-      label: "Product Name",
-      path: "productDetail.0.name",
-    },
-     {
-      label: "Plan Name",
-      path: "productDetail.0.planName",
-    },
-    
-    {
-      label: "Agent Code",
-      path: "sourcingDetail.agentCode",
-    },
-    {
-      label: "Agent Name",
-      path: "sourcingDetail.agentName",
-    },
-     {
-      label: "Sum Assured",
-      path: "productDetail.0.sumAssured",
-    },
-     {
-      label: "Customer Type",
-      path: "productDetail.0.customerType",
-    },
-    {
-      label: "Channel",
-      path: "sourcingDetail.channelCode",
-    },
-     {
-      label: "Sub Channel",
-      path: "sourcingDetail.subChannelCode",
-    },
-    {
-      label: "Policy Type",
-      path: "productDetail.0.policyType",
-    }, {
-      label: "Face Value",
-      path: "productDetail.0.faceValue",
-    }
-  ],
-};
-    console.log('application details',applicationOverview,roleWiseConfig)
+    const businessType = localStorage.getItem("businessType") as "retail" | "group" | null;
+    const drsData = useAppSelector((state: RootState) => state.drs);
+    const applicationOverview = ((drsData.data as unknown) as Record<string, unknown> | undefined)?.applicationOverview;
+// console.log('application details',applicationOverview,roleWiseConfig)
     type GridValue = string | number | boolean | undefined;
 
 const getValue = (
@@ -87,7 +47,7 @@ const getValue = (
   return undefined;
 };
 
-  const items = (roleWiseConfig[roleType ?? ""] || []).map((item) => ({
+  const items = (getRoleWiseConfig(roleType ?? "", businessType)).map((item) => ({
   label: item.label,
   value: getValue(
     applicationOverview as Record<string, unknown>,
@@ -112,7 +72,7 @@ const riderColumns: Column<RiderRow>[] = [
       ppt: rider.ppt ?? rider.premiumPaymentTerm,
     })) ?? [];
 return(
-    <Box sx={{p:1}}>
+    <Box sx={{p:1,pl:3,pr:3}}>
   <CustomAccordion title={title.applicationOverview} defaultExpanded>
     <Box sx={{pl:1}}>
     <GridSection columns={6} items={items}/>

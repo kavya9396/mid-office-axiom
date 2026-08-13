@@ -236,6 +236,12 @@ const UWDecision = () => {
     };
 
     const handleSubmitIntent = () => {
+        const breValidation = validateDrsFinalBre(drsData);
+        if (!breValidation.canPerformAction) {
+            setSubmitMessage(breValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
         const applicantTabsValidation = validateApplicantTabsVisited(drsData);
         if (!applicantTabsValidation.isValid) {
             setSubmitMessage(applicantTabsValidation.message);

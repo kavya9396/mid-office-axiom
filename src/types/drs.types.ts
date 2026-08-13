@@ -788,7 +788,7 @@ export interface PivvSectionResponse {
   pivvSection: PivvSection;
 }
 
-export type ApplicantTab = "proposer" | "lifeassured1" | "lifeassured2";
+export type ApplicantTab = "proposer" | "lifeassured" | "lifeassured1" | "lifeassured2";
 
 export type RiskCard = {
   title: string;

@@ -11,6 +11,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { referToItThunk } from "../../../store/thunks/referToItThunk";
 import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 
 const ExceptionDecision = () => {
   const dispatch = useAppDispatch();
@@ -35,6 +36,11 @@ const ExceptionDecision = () => {
   const isSubmitEnabled = decision.trim().length > 0;
 
   const handleSubmitIntent = () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      return;
+    }
     const selectedDecision = toMasterLabel(decision, decisionOptions);
     const requirementValidation = validateRequirementDecision(drsData, selectedDecision);
     if (!requirementValidation.isValid) {

@@ -11,6 +11,7 @@ import { useAppSelector } from "../../../store/hooks";
 import { normalizeDecisionOptions } from "../../../utils/masterOptions";
 import Logo from "../../../assets/ICICI-Logo.svg";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 
 type RiskReportForm = {
   krnNo: string;
@@ -202,6 +203,11 @@ const RiskDecision = () => {
   };
 
   const handleSubmitIntent = () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      return;
+    }
     const requirementValidation = validateRequirementDecision(drsData, riskDecision);
     if (!requirementValidation.isValid) {
       setSubmitMessage(requirementValidation.message);

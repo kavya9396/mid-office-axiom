@@ -12,6 +12,7 @@ import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import type { AppDispatch, RootState } from "../../../store/store";
 import { referralUsersThunk } from "../../../store/thunks/referralUsersThunk";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { formatDateForUI } from "../../../utils/helpers";
 
@@ -184,6 +185,11 @@ const SrUWDecision = () => {
     (decision === "Refer to HoD" && !selectedHoD);
 
   const handleSubmitIntent = () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      return;
+    }
     const requirementValidation = validateRequirementDecision(drsData, decision);
     if (!requirementValidation.isValid) {
       setSubmitMessage(requirementValidation.message);

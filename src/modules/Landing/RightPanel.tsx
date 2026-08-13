@@ -508,6 +508,12 @@ const RightPanel = ({
 
       const targetBusinessType =
         normalizeBusinessType(row.businessType) ?? safeBusinessType;
+      // persist the selected business type so other pages read correct context
+      try {
+        localStorage.setItem("businessType", targetBusinessType);
+      } catch (e) {
+        // ignore storage errors
+      }
 
       const targetPath =
         row.roleType === "Grievance Pool"
@@ -532,7 +538,8 @@ const RightPanel = ({
       })();
 
       const brePromise = (async () => {
-        const eventName = businessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
+        console.log('businessType',safeBusinessType)
+        const eventName = safeBusinessType == 'retail' ? "BRE-RETAIL" : "BRE-GROUP";
         try {
           const breResp = await dispatch(
             breRetriggerThunk({ eventName: eventName, applicationNumber: appNo }),
@@ -1253,8 +1260,8 @@ const RightPanel = ({
                               displayValue = formatted || String(cellValue ?? "");
                             } else if (col.key === "isMedical") {
                               // Render boolean flag as friendly text
-                              if (cellValue === true || String(cellValue).toLowerCase() === "true") displayValue = "Medical";
-                              else if (cellValue === false || String(cellValue).toLowerCase() === "false") displayValue = "Non Medical";
+                              if (cellValue === true || String(cellValue).toLowerCase() === "true") displayValue = "Yes";
+                              else if (cellValue === false || String(cellValue).toLowerCase() === "false") displayValue = "No";
                               else displayValue = String(cellValue ?? "");
                             } else {
                               displayValue = String(cellValue ?? "");

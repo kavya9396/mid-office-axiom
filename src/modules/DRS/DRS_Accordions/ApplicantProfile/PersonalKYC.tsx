@@ -74,8 +74,20 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
     const educationOptions = normalizeMasterOptions(masters?.education) ?? [];
     const residentStatusOptions = normalizeMasterOptions(masters?.resident_status) ?? [];
     const countryOptions = normalizeMasterOptions(masters?.country) ?? [];
-    const idProofOptions = normalizeMasterOptions(masters?.idProof) ?? [];
-    const addressProofOptions = normalizeMasterOptions(masters?.addressProof) ?? [];
+    const rawIdProofOptions = normalizeMasterOptions(
+        (masters as any)?.id_proof_type ?? (masters as any)?.id_proof ?? (masters as any)?.idProof ?? (masters as any)?.idProofType
+    ) ?? [];
+    const rawAddressProofOptions = normalizeMasterOptions(
+        (masters as any)?.address_proof ?? (masters as any)?.addressProof ?? (masters as any)?.address_proof_type ?? (masters as any)?.addressProofType
+    ) ?? [];
+
+    const idProofOptions = rawIdProofOptions.length > 0 ? rawIdProofOptions : [
+        { label: "Aadhaar", value: "AADH" },
+        { label: "Driving Licence", value: "DL" },
+        { label: "Passport", value: "PASS" },
+    ];
+
+    const addressProofOptions = rawAddressProofOptions.length > 0 ? rawAddressProofOptions : idProofOptions;
 
     const selectedMemberType =
         profile?.memberType ??
@@ -178,6 +190,7 @@ const PersonalKYC = ({ profile }: ApplicantProfileProps) => {
         identityProofExpiryDate: String(summaryKyc?.identityProofExpiryDate ?? primaryDocument?.identityProofExpiryDate ?? ""),
         addressProof: toMasterLabel(String(summaryKyc?.addressProof ?? primaryDocument?.documentName ?? ""), addressProofOptions),
         incomeProof: toMasterLabel(String(summaryKyc?.incomeProof ?? summaryPersonal?.incomeProof ?? ""), idProofOptions),
+        ageProof: toMasterLabel(String(summaryKyc?.ageProof ?? primaryDocument?.documentName ?? summaryPersonal?.ageProof ?? ""), idProofOptions),
         existingCkycNumber: String(summaryKyc?.existingCkycNumber ?? summaryPersonal?.ckycNumber ?? ""),
         pep: toBoolean(summaryKyc?.pep ?? summaryPersonal?.isPEP),
         criminalProceedings: String(

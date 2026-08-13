@@ -100,6 +100,12 @@ const ReconsiderationPoolDecision = () => {
   };
 
   const handleSubmitIntent = () => {
+    const breValidation = validateDrsFinalBre(drsData);
+    if (!breValidation.canPerformAction) {
+      setSubmitMessage(breValidation.message);
+      setSubmitStatus("failure");
+      return;
+    }
     const decisionLabel = toMasterLabel(decision, reconsiderationDecisionOptions);
     const requirementValidation = validateRequirementDecision(drsData, decisionLabel);
     if (!requirementValidation.isValid) {
