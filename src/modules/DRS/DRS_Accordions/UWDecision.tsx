@@ -99,8 +99,74 @@ const UWDecision = () => {
     const lastRoleRef = useRef<string | null>(null);
 
     const caseUWDecisionOptions = useMemo(() => {
-        return filterAcceptDecisionOptions(normalizeDecisionOptions(masters, "caseUWDecision", true, true), drsData);
+        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+        const toMasterList = (options?: unknown): unknown[] => {
+            if (Array.isArray(options)) return options;
+
+            if (!options || typeof options !== "object") {
+                return [];
+            }
+
+            const record = options as Record<string, unknown>;
+
+            if (Array.isArray(record.data)) return record.data;
+            if (Array.isArray(record.options)) return record.options;
+            if (Array.isArray(record.values)) return record.values;
+
+            return Object.values(record).flatMap((value) =>
+                Array.isArray(value) ? value : []
+            );
+        };
+
+        const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
+
+        const cuwOptions = rawList
+            .filter(
+                (option) =>
+                    String(option?.type ?? "").trim().toUpperCase() === "CUW"
+            )
+            .map((option) => {
+                const code = String(
+                    option.code ?? option.key ?? option.value ?? ""
+                ).trim();
+
+                const description = String(
+                    option.description ?? option.label ?? ""
+                ).trim();
+
+                const disabled = Boolean(
+                    option.disabled ??
+                    (
+                        String(option.isActive ?? "")
+                            .trim()
+                            .toUpperCase() === "N"
+                    )
+                );
+
+                if (!code || !description) return null;
+
+                return {
+                    label: description,
+                    value: code,
+                    code,
+                    description,
+                    type: String(option.type ?? "").trim(),
+                    disabled,
+                };
+            })
+            .filter(Boolean) as Array<{
+                label: string;
+                value: string;
+                code: string;
+                description: string;
+                type: string;
+                disabled?: boolean;
+            }>;
+
+        return filterAcceptDecisionOptions(cuwOptions, drsData);
     }, [drsData, masters]);
+
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
@@ -194,15 +260,6 @@ const UWDecision = () => {
             setSubmitLoading(true);
             setSubmitMessage(null);
             setSubmitStatus(null);
-
-            const selectedOption = caseUWDecisionOptions.find((o) => o.value === effectiveCaseUWDecision) as (typeof caseUWDecisionOptions[number] & { code?: string; description?: string }) | undefined;
-            const keyBase = String("caseUWDecision").replace(/Decision$/i, "").replace(/_/g, "").toUpperCase();
-            const payloadDecision = selectedOption
-                ? (String(selectedOption.code ?? "").toUpperCase() === keyBase
-                    ? String(selectedOption.description ?? selectedOption.value ?? "")
-                    : String(selectedOption.value ?? ""))
-                : effectiveCaseUWDecision;
-
             const response = await dispatch(
                 completeTaskThunk({
                     requestContext: {
@@ -211,7 +268,7 @@ const UWDecision = () => {
                         appNo: taskContext.appNo,
                         instanceId: taskContext.instanceId,
                         remarks: uwDecisionRemarks.trim(),
-                        decision: String(payloadDecision).trim(),
+                        decision: effectiveCaseUWDecision.trim(),
                     },
                 }),
             ).unwrap();
