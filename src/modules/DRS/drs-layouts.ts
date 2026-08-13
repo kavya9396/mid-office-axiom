@@ -179,7 +179,6 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "applicationOverview",
     "requirementManagement",
     "decision",
-    "pivvDecision",
     "quickLinks",
     "uwToolkit",
   ],
@@ -200,7 +199,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "breDecision",
     "applicationOverview",
     "requirementManagement",
-    "reconsiderationPoolDecision"
+    "decision"
   ],
   RETAIL_CUW_CLAIM_AUDIT: [
     "applicationOverview",
