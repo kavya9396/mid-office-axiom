@@ -335,9 +335,9 @@
                 "nriFlag": false,
                 "fatfFlag": false,
                 "faceMatchDetails": {
-                    "document": "string",
-                    "faceMatchScore": 0,
-                    "imageQuality": "good",
+                    "document": "aadhar",
+                    "faceMatchScore": 65,
+                    "imageQuality": "ok",
                     "remarks": "no"
                 },
                 "proposerSummary": {

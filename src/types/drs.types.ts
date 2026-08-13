@@ -153,6 +153,7 @@ export interface DRSData {
   advisorDetails: Record<string, string>;
   questions: DRSQuestion[];
   externalAPIs: DRSExternalAPIs;
+  summary:[];
 }
 
 export interface DRSApplicationInfo {

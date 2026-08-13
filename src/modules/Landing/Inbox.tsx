@@ -21,6 +21,8 @@ import {
 import LeftTask from "./LeftTask";
 import RightSideTable from "./RightSideTable";
 import ApplicationWorkspace from "./ApplicationWorkspace";
+import { getDRSPath } from "../../routes/routes";
+import { useNavigate } from "react-router-dom";
 
 interface InboxItem {
   id: string | number;
@@ -76,6 +78,7 @@ const ROLE_SECTIONS: Record<
 
 const Inbox1 = () => {
   const dispatch = useAppDispatch();
+  const navigate= useNavigate();
 
   // ============================================================
   // AUTH
@@ -337,15 +340,24 @@ const Inbox1 = () => {
   // ============================================================
 
   const handleApplicationClick = (
-    application: Record<
-      string,
-      unknown
-    >,
-  ) => {
-    setSelectedApplication(
-      application,
-    );
-  };
+  application: Record<string, unknown>,
+) => {
+  console.log('application',application)
+  const applicationNo = application.applicationNo as string;
+  const targetBusinessType =
+    application.businessType as string;
+
+  const drsPath = getDRSPath(
+    targetBusinessType,
+    applicationNo,
+  );
+
+  if (drsPath) {
+    navigate(drsPath, {
+          state: {
+            application: application}});
+  }
+};
 
   // ============================================================
   // APPLICATION BACK

@@ -1,525 +1,244 @@
-import { accordionRegistry, DRS_LAYOUTS, getPoolWiseAvailableAccordions } from "./drs-layouts";
-import BackButton from "../../components/layout/BackButton";
-import { Alert, Box, Typography, Snackbar } from "@mui/material";
-import { useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useMemo, useRef, useState, type SyntheticEvent } from "react";
+import { useEffect, useMemo } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch } from "../../store/store";
-import type { RootState } from "../../store/store";
-import { drsThunk } from "../../store/thunks/drsThunk";
-import { breRetriggerThunk } from "../../store/thunks/breRetriggerThunk";
-import { setBreExternalApiOutputs, setDrsData } from "../../store/slices/drsSlice";
-import { completeTaskThunk } from "../../store/thunks/completeTaskThunk";
-import { useAppContext } from "../../hooks/useAppContext";
-import { getInboxPath, normalizeBusinessType } from "../../routes/routes";
-import type { DRSBreOutput, DRSData } from "../../types/drs.types";
-import { fetchMastersForSession } from "../../store/thunks/sessionMastersThunk";
-import { validateDrsFinalBre } from "../../validations/drsBreValidation";
-import ConfirmationDialog from "../../components/layout/ConfirmationDialog";
+
 import {
-    validateRequirementDecision,
-    hasPendingRequirementRows,
-    hasUnsavedRequirementRows,
-} from "../../validations/drsRequirementDecisionValidation";
-import { breThunk } from "../../store/thunks/breThunk";
-import CustomButton from "../../components/ui/Button/Button";
- 
-const toText = (value: unknown) => String(value ?? "").trim();
- 
-const mapLegacyBreDecisionToOutput = (value: unknown): DRSBreOutput | null => {
-    const record = value && typeof value === "object" && !Array.isArray(value)
-        ? (value as Record<string, unknown>)
-        : null;
- 
-    if (!record) {
-        return null;
-    }
- 
-    const decision = toText(record.decision);
-    const initialDecision = toText(record.initialDecision);
-    const remarks = toText(record.remarks);
-    const discrepancy = toText(record.discrepancy);
- 
-    if (!decision && !initialDecision && !remarks && !discrepancy) {
-        return null;
-    }
- 
-    return {
-        systemDecision: decision,
-        decisionTypes: {
-            breDecision: decision,
-            breAction: toText(record.action),
-            breRequirement: discrepancy,
-            initialDecision,
-        },
-        requirements: [],
-        systemDecisionDateTime: toText(record.timestamp),
-        errorResp: "",
-        breRemarks: remarks,
-    };
-};
- 
+  accordionRegistry,
+  DRS_LAYOUTS,
+  getPoolWiseAvailableAccordions,
+} from "./drs-layouts";
+
+import { drsThunk } from "../../store/thunks/drsThunk";
+import type { AppDispatch, RootState } from "../../store/store";
+import BackButton from "../../components/layout/BackButton";
+import { title } from "../../utils/constant";
+import { getInboxPath } from "../../routes/routes";
+
+interface ApplicationRow {
+  applicationNo?: string;
+  businessType?: string;
+  roleType?: string;
+  userId?: string;
+  [key: string]: unknown;
+}
+
 const mapper = {
-    "CMO_TASK": "RETAIL_CMO_POOL",
-    "CUW_TASK": "RETAIL_CUW_POOL",
-    "CVT_TASK": "CVT_TASK",
-    "CPT_TASK":"RETAIL_CPT_POOL",
-    "HOD_TASK":"RETAIL_HOD_POOL",
-    "SR_UW_TASK":"RETAIL_SR_UW_POOL",
-    "READY_FOR_ISSUANCE_TASK":"RETAIL_READY_FOR_ISSUANCE_POOL",
-    "SYSTEM_WAIT_POOL_AMR_NON_MEDICAL":"RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
-    "AMR_NON_MEDICAL_TASK":"RETAIL_AMR_NON_MEDICAL",
-    "RECONSIDERATION_TASK":"RETAIL_RECONSIDERATION_POOL",
-    "PRE_ISSUANCE_SERVICING_TASK": "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
-    "EXCEPTIONAL_TASK": "RETAIL_EXCEPTIONAL_POOL",
-    "PIVV_TASK": "PIVV_TASK",
-    "DVT_TASK":"GROUP_DVT_POOL",
-    "GUW_TASK":"GROUP_GUW_POOL",
-    "MMT_TASK":"GROUP_MMT_POOL",
-    "SUW_TASK":"RETAIL_SUW_POOL",
-    "VENDOR_CMO_TASK":"RETAIL_VENDOR_CMO_POOL",
-    "COPS_TASK":"RETAIL_COPS_POOL",
-    "IT_TASK":"RETAIL_IT_POOL",
-    "SYSTEM_WAIT_POOL_AMR_MEDICAL":"RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
-    "RI_TASK":"RETAIL_REINSURER_POOL",
-    "REQUIREMENT_POOL":"RETAIL_REQUIREMENT_REVIEW_POOL",
-    "CUW_CLAIM_AUDIT_TASK":"RETAIL_CUW_CLAIM_AUDIT",
-    "ACCUITY_TASK":"RETAIL_ACCUITY_USER",
-    "ECG_TASK":"RETAIL_ECG_POOL",
-    "TMT_TASK":"RETAIL_TMT_POOL",
-    "GRIEVANCE_TASK":"RETAIL_GRIEVANCE_POOL",
-    "REJECT_TASK":"RETAIL_REJECT_POOL",
-    "GUW_FORMAL_TASK":"GUW_FORMAL_TASK",
-    "DVT_FORMAL_TASK": "DVT_FORMAL_TASK",
-    "RISK_TASK":"RISK_TASK",
-    "PRE_LOGIN_TASK":"PRE_LOGIN_TASK",
-    "AMR_MEDICAL_TASK":"AMR_MEDICAL_TASK",
-    "ACUITY_TASK":"ACUITY_TASK",
-    "ISSUANCE_TASK":"ISSUANCE_TASK",
-    "CPT_DATA_ENTRY_MR_TASK":"CPT_DATA_ENTRY_MR_TASK",
-    "CPT_DATA_ENTRY_NMR_TASK":"CPT_DATA_ENTRY_NMR_TASK",
-}
- 
-const getSelectedCaseContext = (): Record<string, unknown> => {
-    try {
-        const raw = localStorage.getItem("selectedCaseContext");
-        const parsed = raw ? JSON.parse(raw) : {};
-        return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-            ? (parsed as Record<string, unknown>)
-            : {};
-    } catch {
-        return {};
-    }
+  CMO_TASK: "RETAIL_CMO_POOL",
+  CUW_TASK: "RETAIL_CUW_POOL",
+  CVT_TASK: "CVT_TASK",
+  CPT_TASK: "RETAIL_CPT_POOL",
+  HOD_TASK: "RETAIL_HOD_POOL",
+  SR_UW_TASK: "RETAIL_SR_UW_POOL",
+  READY_FOR_ISSUANCE_TASK: "RETAIL_READY_FOR_ISSUANCE_POOL",
+  SYSTEM_WAIT_POOL_AMR_NON_MEDICAL:
+    "RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
+  AMR_NON_MEDICAL_TASK: "RETAIL_AMR_NON_MEDICAL",
+  RECONSIDERATION_TASK:
+    "RETAIL_RECONSIDERATION_POOL",
+  PRE_ISSUANCE_SERVICING_TASK:
+    "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
+  EXCEPTIONAL_TASK: "RETAIL_EXCEPTIONAL_POOL",
+  PIVV_TASK: "PIVV_TASK",
+  DVT_TASK: "GROUP_DVT_POOL",
+  GUW_TASK: "GROUP_GUW_POOL",
+  MMT_TASK: "GROUP_MMT_POOL",
+  SUW_TASK: "RETAIL_SUW_POOL",
+  VENDOR_CMO_TASK: "RETAIL_VENDOR_CMO_POOL",
+  COPS_TASK: "RETAIL_COPS_POOL",
+  IT_TASK: "RETAIL_IT_POOL",
+  SYSTEM_WAIT_POOL_AMR_MEDICAL:
+    "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
+  RI_TASK: "RETAIL_REINSURER_POOL",
+  REQUIREMENT_POOL:
+    "RETAIL_REQUIREMENT_REVIEW_POOL",
+  CUW_CLAIM_AUDIT_TASK:
+    "RETAIL_CUW_CLAIM_AUDIT",
+  ACCUITY_TASK: "RETAIL_ACCUITY_USER",
+  ECG_TASK: "RETAIL_ECG_POOL",
+  TMT_TASK: "RETAIL_TMT_POOL",
+  GRIEVANCE_TASK: "RETAIL_GRIEVANCE_POOL",
+  REJECT_TASK: "RETAIL_REJECT_POOL",
+  GUW_FORMAL_TASK: "GUW_FORMAL_TASK",
+  DVT_FORMAL_TASK: "DVT_FORMAL_TASK",
+  RISK_TASK: "RISK_TASK",
+  PRE_LOGIN_TASK: "PRE_LOGIN_TASK",
+  AMR_MEDICAL_TASK: "AMR_MEDICAL_TASK",
+  ACUITY_TASK: "ACUITY_TASK",
+  ISSUANCE_TASK: "ISSUANCE_TASK",
+  CPT_DATA_ENTRY_MR_TASK:
+    "CPT_DATA_ENTRY_MR_TASK",
+  CPT_DATA_ENTRY_NMR_TASK:
+    "CPT_DATA_ENTRY_NMR_TASK",
 };
 
-const normalizeTaskId = (value: unknown): string => {
-    const task = String(value ?? "").trim();
-    if (!task) return "";
-    return task.includes(".") ? task.split(".").pop() ?? "" : task;
-};
-
-const parseInstanceFromCompositeTaskId = (value: unknown): string => {
-    const task = String(value ?? "").trim();
-    if (!task.includes(".")) return "";
-
-    const [instancePart = ""] = task.split(".");
-    return String(instancePart).trim();
-};
- 
-const getStoredSearchDrsData = (): DRSData | null => {
-    try {
-        const raw = localStorage.getItem("searchApplicationDrsData");
-        const parsed = raw ? JSON.parse(raw) : null;
-        return parsed && typeof parsed === "object" && !Array.isArray(parsed)
-            ? (parsed as DRSData)
-            : null;
-    } catch {
-        return null;
-    }
-};
- 
-const readOnlyContentSx = {
-    "& input, & textarea, & .MuiSelect-select": {
-        pointerEvents: "none",
-    },
-    "& button:not(.MuiAccordionSummary-root):not([data-drs-readonly-nav='true'])": {
-        display: "none",
-    },
-};
- 
-const searchHiddenAccordionIds = new Set([
-    "cvtDecision",
-    "dvtDecision",
-    "uwDecision",
-    "pivvDecision",
-    "maritalStatus",
-    "pep",
-    "exceptionDecision",
-    "hodDecision",
-    "sruwDecision",
-    "hoCMODecision",
-    "reinsurerDecision",
-    "reconsiderationPoolDecision",
-    "accuityDecision",
-    "riskDecision",
-    "decisionHistory",
-    "uwChecklist",
-    "uacChecklist",
-]);
- 
 const DRS = () => {
-    const roleType = localStorage.getItem("roleType") ?? "";
-    const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
-    const { applicationNumber, businessType } = useAppContext();
-    const drsData = useSelector((state: RootState) => state.drs.data);
- 
-    const layout = mapper[roleType as keyof typeof mapper];
-    const layoutAccordions = useMemo(() => (layout ? (DRS_LAYOUTS[layout] ?? []) : []), [layout]);
-    const sections = useMemo(() => layoutAccordions.map((accordion) => String(accordion)), [layoutAccordions]);
-    const visibleAccordions = useMemo(
-        () => getPoolWiseAvailableAccordions(layout, drsData),
-        [layout, drsData],
-    );
-    const navigate = useNavigate();
-    const safeBusinessType =
-        normalizeBusinessType(businessType) ??
-        normalizeBusinessType(localStorage.getItem("businessType")) ??
-        "retail";
- 
-    const dispatch = useDispatch<AppDispatch>();
-    const mastersRequestedRef = useRef(false);
-    const safeApplicationNumber = applicationNumber ?? "";
-    const selectedCaseContext = getSelectedCaseContext();
-    const isSelectedCaseSameApplication = String(selectedCaseContext?.applicationNo ?? "").trim() === String(applicationNumber ?? "").trim();
+  const location = useLocation();
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
-    const taskIdFromContext = isSelectedCaseSameApplication ? String(selectedCaseContext?.taskId ?? "").trim() : "";
-    const taskComposite = isSelectedCaseSameApplication ? selectedCaseContext?.taskCompositeId : localStorage.getItem("taskCompositeId");
-    const taskIdFromComposite = normalizeTaskId(taskComposite);
-    const taskIdFromStorage = String(localStorage.getItem("taskId") ?? "").trim();
-    const taskIdFromDrs = String(((drsData as unknown) as Record<string, unknown>)?.taskId ?? ((drsData as unknown) as Record<string, unknown>)?.taskID ?? "").trim();
-    const taskId = taskIdFromContext || taskIdFromStorage || taskIdFromComposite || taskIdFromDrs || "";
+  // Full row received from Inbox
+  const application =
+    location.state?.application as
+      | ApplicationRow
+      | undefined;
 
-    const instanceIdFromContext = isSelectedCaseSameApplication ? String(selectedCaseContext?.instanceId ?? "").trim() : "";
-    const instanceIdFromStorage = String(localStorage.getItem("instanceId") ?? "").trim();
-    const instanceIdFromComposite = parseInstanceFromCompositeTaskId(taskComposite);
-    const instanceIdFromDrs = String(((drsData as unknown) as Record<string, unknown>)?.instanceId ?? ((drsData as unknown) as Record<string, unknown>)?.instanceID ?? "").trim();
-    const instanceId = instanceIdFromContext || instanceIdFromStorage || instanceIdFromComposite || instanceIdFromDrs || "";
+  // DRS API response from Redux
+  const drsData = useSelector(
+    (state: RootState) => state.drs.data,
+  );
 
-    const handleCptCloseTask = async (decision: string = "CLOSE_TASK") => {
-        if (!taskId || !userId || !safeApplicationNumber || !instanceId) {
-            console.warn("Missing required case identifiers for closing task", { taskId, userId, safeApplicationNumber, instanceId });
-            return;
-        }
-console.log('decision',decision)
-        try {
-            const breValidation = validateDrsFinalBre(drsData);
-            if (!breValidation.canPerformAction) {
-                setRequirementValidationMessage(breValidation.message || "BRE validation failed");
-                return;
-            }
-            await dispatch(
-                completeTaskThunk({
-                    requestContext: {
-                        taskId,
-                        userId,
-                        appNo: safeApplicationNumber,
-                        instanceId,
-                        remarks: "",
-                        decision,
-                    },
-                }),
-            ).unwrap();
+  console.log("FULL APPLICATION ROW:", application);
+  console.log("DRS DATA:", drsData);
 
-            // navigate back to inbox after successful close
-            navigate(getInboxPath(safeBusinessType));
-        } catch (err) {
-            console.error("Failed to close CPT task:", err);
-        }
+  const roleType = application?.roleType ?? "";
+  localStorage.setItem("roleType",roleType);
+
+  // --------------------------------------------------
+  // ROLE TYPE -> POOL / LAYOUT
+  // --------------------------------------------------
+
+  const layout =
+    mapper[
+      roleType as keyof typeof mapper
+    ];
+
+  console.log("Role Type:", roleType);
+  console.log("Layout:", layout);
+
+  // --------------------------------------------------
+  // LAYOUT -> BASE ACCORDIONS
+  // --------------------------------------------------
+
+  const layoutAccordions = useMemo(
+    () =>
+      layout
+        ? DRS_LAYOUTS[layout] ?? []
+        : [],
+    [layout],
+  );
+
+  const sections = useMemo(
+    () =>
+      layoutAccordions.map((accordion) =>
+        String(accordion),
+      ),
+    [layoutAccordions],
+  );
+
+  console.log(
+    "Base Sections:",
+    sections,
+  );
+
+  // --------------------------------------------------
+  // CALL DRS API
+  // --------------------------------------------------
+
+  useEffect(() => {
+    if (
+      !application?.applicationNo ||
+      !roleType ||
+      !layout
+    ) {
+      return;
+    }
+
+    const userId =
+      String(
+        application.userId ??
+          localStorage.getItem("userId") ??
+          localStorage.getItem("username") ??
+          "",
+      ).trim();
+
+    if (!userId) {
+      console.warn(
+        "User ID is missing",
+      );
+      return;
+    }
+
+    const loadDRS = async () => {
+      try {
+        const response =
+          await dispatch(
+            drsThunk({
+              applicationNo:
+                application.applicationNo!,
+              userId,
+              roleType,
+              sections,
+            }),
+          ).unwrap();
+
+        console.log(
+          "DRS API RESPONSE:",
+          response,
+        );
+      } catch (error) {
+        console.error(
+          "Failed to load DRS:",
+          error,
+        );
+      }
     };
-    const [confirmationOpen, setConfirmationOpen] = useState(false);
-    const [pendingConfirmationOpen, setPendingConfirmationOpen] = useState(false);
-    const [requirementValidationMessage, setRequirementValidationMessage] = useState("");
 
-    const isSearchReadOnlyMode =
-        localStorage.getItem("drsReadOnlyMode") === "true" &&
-        selectedCaseContext.source === "searchApplication" &&
-        selectedCaseContext.readOnly === true &&
-        String(selectedCaseContext.applicationNo ?? "") === safeApplicationNumber;
-    const displayAccordions = useMemo(
-        () => isSearchReadOnlyMode
-            ? visibleAccordions.filter((accordionId) => !searchHiddenAccordionIds.has(String(accordionId)))
-            : visibleAccordions,
-        [isSearchReadOnlyMode, visibleAccordions],
+    void loadDRS();
+  }, [
+    dispatch,
+    application?.applicationNo,
+    application?.userId,
+    roleType,
+    layout,
+    sections,
+  ]);
+
+  // --------------------------------------------------
+  // FILTER ACCORDIONS BASED ON API DATA
+  // --------------------------------------------------
+
+  const visibleAccordions =
+    useMemo(
+      () =>
+        getPoolWiseAvailableAccordions(
+          layout,
+          drsData,
+        ),
+      [layout, drsData],
     );
-    const breValidation = useMemo(() => validateDrsFinalBre(drsData), [drsData]);
- 
-    // Previously this handler blocked all UI interactions when BRE failed.
-    // Keep it as a no-op so users can type/select decisions; submit handlers
-    // perform BRE validation and show the snackbar when needed.
-    const handleDrsActionCapture = useCallback((_event: SyntheticEvent<HTMLElement>) => {
-        // Intentionally empty to allow normal interactions.
-    }, []);
- 
-    const dispatchMastersOnce = useCallback(() => {
-        if (mastersRequestedRef.current) {
-            return;
-        }
- 
-        mastersRequestedRef.current = true;
-        dispatch(fetchMastersForSession());
-    }, [dispatch]);
- 
-    useEffect(() => {
-        if (!safeApplicationNumber || !roleType || !isSearchReadOnlyMode) {
-            return;
-        }
- 
-        if (!drsData) {
-            const storedDrsData = getStoredSearchDrsData();
-            if (storedDrsData) {
-                dispatch(setDrsData(storedDrsData));
-            }
-        }
- 
-        dispatchMastersOnce();
-    }, [dispatch, dispatchMastersOnce, drsData, isSearchReadOnlyMode, roleType, safeApplicationNumber]);
- 
-    useEffect(() => {
-        if (!safeApplicationNumber || !roleType || isSearchReadOnlyMode || !userId) {
-            return;
-        }
- 
-        const loadDRSAndBRE = async () => {
-          const requestSections =
-    roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
-    roleType === "CPT_DATA_ENTRY_MR_TASK" ||
-    roleType === "CPT_TASK"
-        ? [...sections, "summary","breDecision","latestBreDecision"]
-        : [...sections,"latestBreDecision"];
-            try {
-                const drsResponse = await dispatch(
-                    drsThunk({
-                        applicationNo: safeApplicationNumber,
-                        userId,
-                        roleType,
-                        sections : requestSections,
-                    }),
-                ).unwrap();
-                try {
-                     const finalBre = await dispatch(
-                        breThunk({
-                            eventName: "BRE-RETAIL",
-                            applicationNumber:safeApplicationNumber
-                        }),
-                    ).unwrap();
-                    console.log('finalBre',finalBre)
-                    const breResponse = await dispatch(
-                        breRetriggerThunk({
-                            eventName: "BRE-RETAIL",
-                            applicationNumber:safeApplicationNumber
-                        }),
-                    ).unwrap();
- 
-                    const updatedBrePayload = breResponse.data;
-                    const dataRecord = drsResponse.data as unknown as Record<string, unknown>;
-                    const originalBreOutput =
-                        drsResponse.data.externalAPIs?.breOutput ??
-                        mapLegacyBreDecisionToOutput(dataRecord.breDecision);
-                    if (
-                        updatedBrePayload?.breOutput ||
-                        updatedBrePayload?.initialBreOutput ||
-                        updatedBrePayload?.medicalBreOutput ||
-                        updatedBrePayload?.financialBreOutput
-                    ) {
-                        dispatch(
-                            setBreExternalApiOutputs({
-                                breOutput: updatedBrePayload?.breOutput,
-                                initialBreOutput: originalBreOutput ?? updatedBrePayload?.initialBreOutput,
-                                breRetriggerStatus: "success",
-                                medicalBreOutput: updatedBrePayload?.medicalBreOutput,
-                                financialBreOutput: updatedBrePayload?.financialBreOutput,
-                            }),
-                        );
-                    }
-                } catch (error) {
-                    const dataRecord = drsResponse.data as unknown as Record<string, unknown>;
-                    const originalBreOutput =
-                        drsResponse.data.externalAPIs?.initialBreOutput ??
-                        drsResponse.data.externalAPIs?.breOutput ??
-                        mapLegacyBreDecisionToOutput(dataRecord.breDecision);
- 
-                    dispatch(
-                        setBreExternalApiOutputs({
-                            initialBreOutput: originalBreOutput ?? undefined,
-                            breRetriggerStatus: "failure",
-                        }),
-                    );
-                    console.error("Failed to retrigger BRE from DRS response:", error);
-                }
-            } catch (error) {
-                console.error("Failed to load DRS:", error);
-            } finally {
-                dispatchMastersOnce();
-            }
-        };
- 
-        void loadDRSAndBRE();
-    }, [dispatch, dispatchMastersOnce, isSearchReadOnlyMode, roleType, safeApplicationNumber, sections, userId]);
- 
- 
-    return (
-        <>
-            <BackButton
-                label="Back to inbox"
-                justify="flex-start"
-                onClick={() => navigate(getInboxPath(safeBusinessType))}
-                rightSlot={roleType != 'MMT Pool' ?
-                    <div style={{ flex: 1, display: "flex", justifyContent: "center" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
-                            <Typography
-                                sx={{
-                                    fontSize: "18px",
-                                    fontWeight: 800,
-                                    color: "#161616",
-                                    lineHeight: 1,
-                                }}
-                            >
-                                Application No. : {safeApplicationNumber}
-                            </Typography>
-                            <Typography
-                                sx={{
-                                    fontSize: "14px",
-                                    fontWeight: 700,
-                                    color: "#0f4c81",
-                                    backgroundColor: "#dcefff",
-                                    border: "1px solid #b8d8f4",
-                                    borderRadius: "999px",
-                                    px: 1.5,
-                                    py: 0.5,
-                                    lineHeight: 1,
-                                }}
-                            >
-                                Business Type : {safeBusinessType.toUpperCase()}
-                            </Typography>
-                        </div>
-                    </div>:''
-                }
-            />
-            {!breValidation.canPerformAction && (
-                <Alert severity="error" sx={{ mb: 2, borderRadius: 2 }}>
-                    {breValidation.message}
-                </Alert>
-            )}
-            <Snackbar
-                open={Boolean(requirementValidationMessage)}
-                autoHideDuration={3000}
-                onClose={() => setRequirementValidationMessage("")}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-            >
-                <Alert
-                    onClose={() => setRequirementValidationMessage("")}
-                    severity="error"
-                    variant="filled"
-                    sx={{ width: "100%" }}
-                >
-                    {requirementValidationMessage}
-                </Alert>
-            </Snackbar>
-            <Box
-                onClickCapture={handleDrsActionCapture}
-                onKeyDownCapture={handleDrsActionCapture}
-                sx={{
-                    ...(isSearchReadOnlyMode ? readOnlyContentSx : {}),
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 1,
-                }}
-            >
-                {displayAccordions.map((accordionId) => {
-                    const AccordionComponent = accordionRegistry[accordionId as keyof typeof accordionRegistry];
-                    if (!AccordionComponent) {
-                        return null;
-                    }
 
-                    const isUwToolkit = String(accordionId) === "uwToolkit";
+  console.log(
+    "Visible Accordions:",
+    visibleAccordions,
+  );
 
-                    return (
-                        <Box
-                            key={accordionId}
-                            data-drs-validation-exempt={accordionId === "breDecision" ? "true" : undefined}
-                            sx={{ "& > .MuiContainer-root > .MuiBox-root": { mt: "0 !important" } }}
-                        >
-                            {isUwToolkit && (roleType === 'CPT_DATA_ENTRY_NMR_TASK' || roleType === 'CPT_DATA_ENTRY_MR_TASK' || roleType === 'CPT_TASK') && (
-                                <Box sx={{ display: 'flex', justifyContent: 'center', mb: 2 }}>
-                                    <CustomButton
-                                        variant="outlined"
-                                        size="medium"
-                                        sx={{  minWidth: 200,
-                                height: 44,
-                                borderRadius: "50px",
-                                fontWeight: 600,
-                                px: 3,
-                                whiteSpace: "nowrap", }}
-                                        onClick={() => {
-                                            // block if there are unsaved requirement edits
-                                            if (hasUnsavedRequirementRows(drsData)) {
-                                                const validation = validateRequirementDecision(drsData, "");
-                                                setRequirementValidationMessage(validation.message);
-                                                return;
-                                            }
+  // --------------------------------------------------
+  // RENDER
+  // --------------------------------------------------
 
-                                            // if pending requirement rows exist prompt for RAISE_AMR
-                                            if (hasPendingRequirementRows(drsData)) {
-                                                setRequirementValidationMessage("");
-                                                setPendingConfirmationOpen(true);
-                                                return;
-                                            }
+  return (
+    <div>
+        <BackButton label={title.backToInbox} onClick={() => navigate(getInboxPath())}/>
+      {visibleAccordions.map(
+        (accordionId) => {
+          const AccordionComponent =
+            accordionRegistry[
+              accordionId
+            ];
 
-                                            // otherwise normal close flow
-                                            setRequirementValidationMessage("");
-                                            setConfirmationOpen(true);
-                                        }}
-                                    >
-                                        Submit
-                                    </CustomButton>
-                                </Box>
-                            )}
+          if (!AccordionComponent) {
+            return null;
+          }
 
-                            <AccordionComponent />
-                        </Box>
-                    );
-                })}
-            </Box>
-            {(roleType === 'CPT_DATA_ENTRY_NMR_TASK' || roleType === 'CPT_DATA_ENTRY_MR_TASK' || roleType === 'CPT_TASK') && (
-                <ConfirmationDialog
-                    open={Boolean(confirmationOpen)}
-                    message="Do you want to complete the task?"
-                    onClose={() => setConfirmationOpen(false)}
-                    onConfirm={() => {
-                        setConfirmationOpen(false);
-                        void handleCptCloseTask("CLOSE_TASK");
-                    }}
-                    title="Complete Task"
-                    buttonText="Submit"
-                />
-            )}
+          return (
+            <div key={accordionId}>
+              <AccordionComponent />
+            </div>
+          );
+        },
+      )}
+    </div>
+  );
+};
 
-            {(roleType === 'CPT_DATA_ENTRY_NMR_TASK' || roleType === 'CPT_DATA_ENTRY_MR_TASK' || roleType === 'CPT_TASK') && (
-                <ConfirmationDialog
-                    open={Boolean(pendingConfirmationOpen)}
-                    message="There are pending requirement records in the table so case will submit to AMR. Do you want to proceed?"
-                    onClose={() => setPendingConfirmationOpen(false)}
-                    onConfirm={() => {
-                        setPendingConfirmationOpen(false);
-                        void handleCptCloseTask("RAISE_AMR");
-                    }}
-                    title="Pending Requirements"
-                    buttonText="Proceed"
-                />
-            )}
-        </>
-    )
-}
- 
-export default DRS
- 
+export default DRS;
