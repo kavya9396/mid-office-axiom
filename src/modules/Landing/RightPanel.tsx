@@ -57,12 +57,12 @@ import { formatDateForUI } from "../../utils/helpers";
 type SortDirection = "asc" | "desc";
 type PoolStatusFilter = "All" | "Active" | "Error";
 type TaskTimingStatus = "normal" | "atRisk" | "due";
-type TaskTimingColumnKey = "start_time" | "at_risk_time" | "due_date";
+type TaskTimingColumnKey = "startTime" | "atRiskTime" | "dueDate";
 
 
 const IST_TIME_ZONE = "Asia/Kolkata";
 const ISO_TIME_ZONE_PATTERN = /(Z|[+-]\d{2}:?\d{2})$/i;
-const TASK_TIMING_COLUMN_KEYS = new Set<TaskTimingColumnKey>(["start_time", "at_risk_time", "due_date"]);
+const TASK_TIMING_COLUMN_KEYS = new Set<TaskTimingColumnKey>(["startTime", "atRiskTime", "dueDate"]);
 const EXCLUDED_ROW_COLUMN_KEYS = new Set(["id", "taskid", "instanceid", "state", "roleType"].map((k) => k.toLowerCase()));
 const taskTimingFormatter = new Intl.DateTimeFormat("en-IN", {
   timeZone: IST_TIME_ZONE,
@@ -207,23 +207,48 @@ const formatTaskTimingValue = (value: unknown) => {
   return timestamp === null ? value : `${taskTimingFormatter.format(new Date(timestamp))}`;
 };
  
-const getTaskTimingStatus = (row: tableData, now: number): TaskTimingStatus => {
-  const startTime = getTimestamp(row.start_time);
-  const atRiskTime = getTimestamp(row.at_risk_time);
-  const dueDate = getTimestamp(row.due_date);
- 
+const getTaskTimingStatus = (
+  row: tableData,
+  now: number,
+): TaskTimingStatus => {
+  const rowData = row as Record<string, unknown>;
+
+  const startTime = getTimestamp(
+    String(
+      rowData.startTime ??
+      rowData.start_time ??
+      "",
+    ),
+  );
+
+  const atRiskTime = getTimestamp(
+    String(
+      rowData.atRiskTime ??
+      rowData.at_risk_time ??
+      "",
+    ),
+  );
+
+  const dueDate = getTimestamp(
+    String(
+      rowData.dueDate ??
+      rowData.due_date ??
+      "",
+    ),
+  );
+
   if (startTime !== null && now < startTime) {
     return "normal";
   }
- 
+
   if (dueDate !== null && now >= dueDate) {
     return "due";
   }
- 
+
   if (atRiskTime !== null && now >= atRiskTime) {
     return "atRisk";
   }
- 
+
   return "normal";
 };
  
