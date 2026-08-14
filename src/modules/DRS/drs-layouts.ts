@@ -145,7 +145,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   ],CVT_TASK: [
     "breDecision",
     "applicantProfile",
-    "summary",
+    // "summary",
     "applicationOverview",
     "pivvSection",
     "requirementManagement",

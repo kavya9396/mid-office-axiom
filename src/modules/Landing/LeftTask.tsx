@@ -5,9 +5,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import {
-  useEffect,
-} from "react";
+import { useEffect } from "react";
 
 import {
   KeyRightArrowIcon,
@@ -35,30 +33,19 @@ interface LeftTaskProps {
 
   lastLoginAt: string;
 
-  poolData: Record<
-    string,
-    Record<string, unknown>[]
-  >;
+  poolData: Record<string, Record<string, unknown>[]>;
 
-  onRoleSelect: (
-    role: string,
-  ) => void;
+  onRoleSelect: (role: string) => void;
 
-  onTaskSelect: (
-    task: string,
-  ) => void;
+  onTaskSelect: (task: string) => void;
 
   onToggleRoles: () => void;
 
   onToggleCollapse: () => void;
 }
 
-const normalizeKey = (
-  value: string,
-) =>
-  value
-    .replace(/[\s_-]/g, "")
-    .toUpperCase();
+const normalizeKey = (value: string) =>
+  value.replace(/[\s_-]/g, "").toUpperCase();
 
 const LeftTask = ({
   roles,
@@ -82,83 +69,47 @@ const LeftTask = ({
   // ==========================================================
 
   useEffect(() => {
-    if (
-      !selectedTask &&
-      menuItems.length > 0
-    ) {
+    if (!selectedTask && menuItems.length > 0) {
       onTaskSelect("ALL_CASES");
     }
-  }, [
-    selectedTask,
-    menuItems.length,
-    onTaskSelect,
-  ]);
+  }, [selectedTask, menuItems.length, onTaskSelect]);
 
   // ==========================================================
   // TOTAL CASE COUNT
   // ==========================================================
 
-  const allCasesCount =
-    Object.values(
-      poolData ?? {},
-    ).reduce(
-      (
-        total,
-        cases,
-      ) =>
-        total +
-        (Array.isArray(cases)
-          ? cases.length
-          : 0),
-      0,
-    );
+  const allCasesCount = Object.values(poolData ?? {}).reduce(
+    (total, cases) => total + (Array.isArray(cases) ? cases.length : 0),
+    0,
+  );
 
   // ==========================================================
   // GET TASK COUNT
   // ==========================================================
 
-  const getTaskCount = (
-    taskName: string,
-  ) => {
-    const normalizedTask =
-      normalizeKey(taskName);
+  const getTaskCount = (taskName: string) => {
+    const normalizedTask = normalizeKey(taskName);
 
-    const matchingPool =
-      Object.entries(
-        poolData ?? {},
-      ).find(
-        ([poolName]) =>
-          normalizeKey(
-            poolName,
-          ) === normalizedTask,
-      );
+    const matchingPool = Object.entries(poolData ?? {}).find(
+      ([poolName]) => normalizeKey(poolName) === normalizedTask,
+    );
 
-    return matchingPool
-      ? matchingPool[1].length
-      : 0;
+    return matchingPool ? matchingPool[1].length : 0;
   };
 
   // ==========================================================
   // TASK ITEM
   // ==========================================================
 
-  const renderTaskItem = (
-    taskName: string,
-  ) => {
-    const isActive =
-      selectedTask === taskName;
+  const renderTaskItem = (taskName: string) => {
+    const isActive = selectedTask === taskName;
 
-    const count =
-      getTaskCount(taskName);
+    const count = getTaskCount(taskName);
 
     return (
       <Box
         key={taskName}
-        onClick={() =>
-          onTaskSelect(
-            taskName,
-          )
-        }
+        onClick={() => onTaskSelect(taskName)}
         sx={{
           height: "38px",
 
@@ -166,33 +117,20 @@ const LeftTask = ({
 
           alignItems: "center",
 
-          justifyContent:
-            isCollapsed
-              ? "center"
-              : "space-between",
+          justifyContent: isCollapsed ? "center" : "space-between",
 
           px: 1.5,
 
           cursor: "pointer",
 
-          borderLeft:
-            isActive
-              ? "3px solid #9A2529"
-              : "3px solid transparent",
+          borderLeft: isActive ? "3px solid #9A2529" : "3px solid transparent",
 
-          backgroundColor:
-            isActive
-              ? "#fdf2f2"
-              : "transparent",
+          backgroundColor: isActive ? "#fdf2f2" : "transparent",
 
-          color:
-            isActive
-              ? "#9A2529"
-              : "#333333",
+          color: isActive ? "#9A2529" : "#333333",
 
           "&:hover": {
-            backgroundColor:
-              "#f8f8f8",
+            backgroundColor: "#f8f8f8",
           },
         }}
       >
@@ -217,25 +155,18 @@ const LeftTask = ({
               sx={{
                 fontSize: "11px",
 
-                fontWeight:
-                  isActive
-                    ? 600
-                    : 400,
+                fontWeight: isActive ? 600 : 400,
 
                 overflow: "hidden",
 
-                textOverflow:
-                  "ellipsis",
+                textOverflow: "ellipsis",
 
-                whiteSpace:
-                  "nowrap",
+                whiteSpace: "nowrap",
 
                 flex: 1,
               }}
             >
-              {toDisplayLabel(
-                taskName,
-              )}
+              {toDisplayLabel(taskName)}
             </Typography>
 
             {/* COUNT */}
@@ -250,28 +181,19 @@ const LeftTask = ({
 
                 ml: 1,
 
-                borderRadius:
-                  "10px",
+                borderRadius: "10px",
 
                 display: "flex",
 
-                alignItems:
-                  "center",
+                alignItems: "center",
 
-                justifyContent:
-                  "center",
+                justifyContent: "center",
 
                 flexShrink: 0,
 
-                backgroundColor:
-                  isActive
-                    ? "#9A2529"
-                    : "#eeeeee",
+                backgroundColor: isActive ? "#9A2529" : "#eeeeee",
 
-                color:
-                  isActive
-                    ? "#ffffff"
-                    : "#555555",
+                color: isActive ? "#ffffff" : "#555555",
 
                 fontSize: "10px",
 
@@ -289,16 +211,13 @@ const LeftTask = ({
   return (
     <Box
       sx={{
-        width: isCollapsed
-          ? "60px"
-          : "220px",
+        width: isCollapsed ? "60px" : "220px",
 
         flexShrink: 0,
 
         height: "100%",
 
-        transition:
-          "width 0.25s ease",
+        transition: "width 0.25s ease",
 
         overflow: "hidden",
       }}
@@ -310,29 +229,23 @@ const LeftTask = ({
 
           display: "flex",
 
-          flexDirection:
-            "column",
+          flexDirection: "column",
 
           overflow: "hidden",
 
-          borderRight:
-            "1px solid #e5e7eb",
+          borderRight: "1px solid #e5e7eb",
 
           borderRadius: 0,
 
-          backgroundColor:
-            "#ffffff",
+          backgroundColor: "#ffffff",
         }}
       >
-
         {/* =====================================================
             COLLAPSE BUTTON
            ===================================================== */}
 
         <Box
-          onClick={
-            onToggleCollapse
-          }
+          onClick={onToggleCollapse}
           sx={{
             height: "40px",
 
@@ -342,30 +255,22 @@ const LeftTask = ({
 
             alignItems: "center",
 
-            justifyContent:
-              isCollapsed
-                ? "center"
-                : "flex-end",
+            justifyContent: isCollapsed ? "center" : "flex-end",
 
             px: 1.5,
 
             cursor: "pointer",
 
-            borderBottom:
-              "1px solid #eeeeee",
+            borderBottom: "1px solid #eeeeee",
           }}
         >
           <KeyRightArrowIcon
             style={{
               color: "#9A2529",
 
-              transform:
-                isCollapsed
-                  ? "rotate(0deg)"
-                  : "rotate(180deg)",
+              transform: isCollapsed ? "rotate(0deg)" : "rotate(180deg)",
 
-              transition:
-                "transform 0.25s ease",
+              transition: "transform 0.25s ease",
             }}
           />
         </Box>
@@ -389,15 +294,12 @@ const LeftTask = ({
             },
 
             "&::-webkit-scrollbar-thumb": {
-              backgroundColor:
-                "#cccccc",
+              backgroundColor: "#cccccc",
 
-              borderRadius:
-                "10px",
+              borderRadius: "10px",
             },
           }}
         >
-
           {/* ===================================================
               ROLES
              =================================================== */}
@@ -405,42 +307,33 @@ const LeftTask = ({
           {roles.length > 0 && (
             <Box
               sx={{
-                borderBottom:
-                  "1px solid #eeeeee",
+                borderBottom: "1px solid #eeeeee",
               }}
             >
               <Box
-                onClick={
-                  onToggleRoles
-                }
+                onClick={onToggleRoles}
                 sx={{
                   height: "38px",
 
                   display: "flex",
 
-                  alignItems:
-                    "center",
+                  alignItems: "center",
 
-                  justifyContent:
-                    isCollapsed
-                      ? "center"
-                      : "space-between",
+                  justifyContent: isCollapsed ? "center" : "space-between",
 
                   px: 1.5,
 
                   cursor: "pointer",
 
                   "&:hover": {
-                    backgroundColor:
-                      "#f8f8f8",
+                    backgroundColor: "#f8f8f8",
                   },
                 }}
               >
                 {isCollapsed ? (
                   <Typography
                     sx={{
-                      fontSize:
-                        "16px",
+                      fontSize: "16px",
                     }}
                   >
                     👥
@@ -449,14 +342,11 @@ const LeftTask = ({
                   <>
                     <Typography
                       sx={{
-                        fontSize:
-                          "11px",
+                        fontSize: "11px",
 
-                        fontWeight:
-                          700,
+                        fontWeight: 700,
 
-                        color:
-                          "#333333",
+                        color: "#333333",
                       }}
                     >
                       User Handle
@@ -464,16 +354,12 @@ const LeftTask = ({
 
                     <Typography
                       sx={{
-                        fontSize:
-                          "10px",
+                        fontSize: "10px",
 
-                        color:
-                          "#777777",
+                        color: "#777777",
                       }}
                     >
-                      {isRolesOpen
-                        ? "▲"
-                        : "▼"}
+                      {isRolesOpen ? "▲" : "▼"}
                     </Typography>
                   </>
                 )}
@@ -481,75 +367,49 @@ const LeftTask = ({
 
               {!isCollapsed &&
                 isRolesOpen &&
-                roles.map(
-                  (role) => {
-                    const isActive =
-                      selectedRole ===
-                      role;
+                roles.map((role) => {
+                  const isActive = selectedRole === role;
 
-                    return (
-                      <Box
-                        key={role}
-                        onClick={() =>
-                          onRoleSelect(
-                            role,
-                          )
-                        }
+                  return (
+                    <Box
+                      key={role}
+                      onClick={() => onRoleSelect(role)}
+                      sx={{
+                        height: "34px",
+
+                        display: "flex",
+
+                        alignItems: "center",
+
+                        px: 2.5,
+
+                        cursor: "pointer",
+
+                        borderLeft: isActive
+                          ? "3px solid #9A2529"
+                          : "3px solid transparent",
+
+                        backgroundColor: isActive ? "#fdf2f2" : "transparent",
+
+                        color: isActive ? "#9A2529" : "#555555",
+
+                        "&:hover": {
+                          backgroundColor: "#f8f8f8",
+                        },
+                      }}
+                    >
+                      <Typography
                         sx={{
-                          height:
-                            "34px",
+                          fontSize: "11px",
 
-                          display:
-                            "flex",
-
-                          alignItems:
-                            "center",
-
-                          px: 2.5,
-
-                          cursor:
-                            "pointer",
-
-                          borderLeft:
-                            isActive
-                              ? "3px solid #9A2529"
-                              : "3px solid transparent",
-
-                          backgroundColor:
-                            isActive
-                              ? "#fdf2f2"
-                              : "transparent",
-
-                          color:
-                            isActive
-                              ? "#9A2529"
-                              : "#555555",
-
-                          "&:hover": {
-                            backgroundColor:
-                              "#f8f8f8",
-                          },
+                          fontWeight: isActive ? 600 : 400,
                         }}
                       >
-                        <Typography
-                          sx={{
-                            fontSize:
-                              "11px",
-
-                            fontWeight:
-                              isActive
-                                ? 600
-                                : 400,
-                          }}
-                        >
-                          {toDisplayLabel(
-                            role,
-                          )}
-                        </Typography>
-                      </Box>
-                    );
-                  },
-                )}
+                        {toDisplayLabel(role)}
+                      </Typography>
+                    </Box>
+                  );
+                })}
             </Box>
           )}
 
@@ -604,30 +464,21 @@ const LeftTask = ({
              =================================================== */}
 
           <Box
-            onClick={() =>
-              onTaskSelect(
-                "ALL_CASES",
-              )
-            }
+            onClick={() => onTaskSelect("ALL_CASES")}
             sx={{
               height: "40px",
 
               display: "flex",
 
-              alignItems:
-                "center",
+              alignItems: "center",
 
-              justifyContent:
-                isCollapsed
-                  ? "center"
-                  : "space-between",
+              justifyContent: isCollapsed ? "center" : "space-between",
 
               px: 1.5,
 
               cursor: "pointer",
 
-              borderBottom:
-                "1px solid #eeeeee",
+              borderBottom: "1px solid #eeeeee",
 
               borderLeft:
                 selectedTask ===
@@ -648,8 +499,7 @@ const LeftTask = ({
                   : "#333333",
 
               "&:hover": {
-                backgroundColor:
-                  "#f8f8f8",
+                backgroundColor: "#f8f8f8",
               },
             }}
           >
@@ -681,16 +531,13 @@ const LeftTask = ({
 
                     px: "5px",
 
-                    borderRadius:
-                      "10px",
+                    borderRadius: "10px",
 
                     display: "flex",
 
-                    alignItems:
-                      "center",
+                    alignItems: "center",
 
-                    justifyContent:
-                      "center",
+                    justifyContent: "center",
 
                     backgroundColor:
                       selectedTask ===
@@ -719,12 +566,7 @@ const LeftTask = ({
               TASKS
              =================================================== */}
 
-          {menuItems.map(
-            (item) =>
-              renderTaskItem(
-                item.label,
-              ),
-          )}
+          {menuItems.map((item) => renderTaskItem(item.label))}
         </Box>
 
         {/* =====================================================
@@ -740,15 +582,10 @@ const LeftTask = ({
 
               py: 1,
 
-              borderTop:
-                "1px solid #eeeeee",
+              borderTop: "1px solid #eeeeee",
             }}
           >
-            <LastLogin
-              lastLogin={
-                lastLoginAt
-              }
-            />
+            <LastLogin lastLogin={lastLoginAt} />
           </Box>
         )}
       </Paper>
