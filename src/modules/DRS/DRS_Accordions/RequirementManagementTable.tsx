@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, @typescript-eslint/no-unused-vars, react-hooks/exhaustive-deps */
 import { Alert, Box, Chip, Paper, Typography, Pagination, Tooltip, Snackbar } from "@mui/material";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { apiRequest } from "../../../services/api";
 import { url as apiUrl } from "../../../services/apiConfig";
 import { useSelector } from "react-redux";
@@ -209,14 +209,22 @@ const getDefaultTeam = (): LookupTeam => {
     return "UW";
 };
 
-// mapStoredTeamToDisplay removed — use mapDisplayTeamToStored or master mapping where needed
+// mapStoredTeamToDisplay removed â€” use mapDisplayTeamToStored or master mapping where needed
 
 const normalizeStatus = (status: string) => {
     const trimmed = status.trim();
     return trimmed || "Pending";
 };
 
-const isPendingStatus = (status: string) => status.trim().toLowerCase() === "pending";
+const isPendingStatus = (status: unknown) => {
+    const normalized = String(status ?? "").trim().toLowerCase();
+    return normalized === "pending" || normalized === "pen";
+};
+
+const isAcceptedStatus = (status: unknown) => {
+    const normalized = String(status ?? "").trim().toLowerCase();
+    return normalized === "acc" || normalized === "accept" || normalized === "accepted";
+};
 
 const getMasterTeamForUiValue = (team: string) => MASTER_TEAM_BY_UI[team as LookupTeam];
 
@@ -417,7 +425,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [requirementOptionsCache, setRequirementOptionsCache] = useState<Record<string, Option[]>>({});
     const [requirementStatusOptions, setRequirementStatusOptions] = useState<Option[]>(EMPTY_OPTIONS);
 
-    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "Exceptional Pool" && roleType !== "AMR_MEDICAL_TASK" && roleType !== "AMR_NON_MEDICAL_TASK";
+    const isVisible = roleType !== "Ready For Issuance Pool" && roleType !== "DVT_FORMAL_TASK" && roleType !== "Exceptional Pool" && roleType !== "AMR_MEDICAL_TASK" && roleType !== "AMR_NON_MEDICAL_TASK" && roleType !== "PIVV_TASK";
     const teamOptions = teamOptionsState;
     const finalRequirements = requirements ?? reduxRequirements;
     const normalizedExistingRows = useMemo(
@@ -447,16 +455,33 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     const [savedPage, setSavedPage] = useState(0);
     const PAGE_SIZE = 5;
 
-    // Ensure existing rows are editable on initial load only. After a successful save
-    // the handler clears `editableStatusRowIds` so saved rows become read-only.
-    const _editableInitRef = useRef(false);
+    // Track statuses received from the API separately from temporary UI changes.
+    // Rows already accepted by the API stay locked, while a pending row remains
+    // editable even after the user temporarily selects Accept, until Save succeeds.
+    const initiallyAcceptedRowIds = useMemo(
+        () =>
+            new Set(
+                normalizedExistingRows
+                    .filter((row) => isAcceptedStatus(row.status))
+                    .map((row) => row.__rowId),
+            ),
+        [normalizedExistingRows],
+    );
+
     useEffect(() => {
-        if (_editableInitRef.current) return;
-        const ids = new Set<string>(normalizedExistingRows.map((r) => r.__rowId));
-        if (ids.size > 0) {
-            _editableInitRef.current = true;
-            setTimeout(() => setEditableStatusRowIds(ids), 0);
-        }
+        const editableIds = normalizedExistingRows
+            .filter((row) => !isAcceptedStatus(row.status))
+            .map((row) => row.__rowId);
+
+        if (editableIds.length === 0) return;
+
+        setTimeout(() => {
+            setEditableStatusRowIds((previousIds) => {
+                const nextIds = new Set(previousIds);
+                editableIds.forEach((rowId) => nextIds.add(rowId));
+                return nextIds;
+            });
+        }, 0);
     }, [normalizedExistingRows]);
 
     const rows = useMemo(
@@ -593,36 +618,73 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "",
         };
 
+ const savedRows = useMemo(() => {
+  let base = rows.filter((row) => !row.__isDraft);
+
+  // Show only PIV records for PIVV task
+  if (roleType === "PIVV_TASK") {
+    base = base.filter(
+      (row) => String(row.fupCode ?? "").trim().toUpperCase() === "PIV"
+    );
+  }
+
+  if (restrictToFinancialKyc) {
+    base = base.filter((r) => {
+      const cat = String(r.category ?? "").trim().toLowerCase();
+      return cat.includes("financial") || cat.includes("kyc");
+    });
+  } else if (restrictToMedical) {
+    base = base.filter((r) => {
+      const cat = String(r.category ?? "").trim().toLowerCase();
+      const doc = String(r.document ?? "").trim().toLowerCase();
+      return cat.includes("medical") || doc.includes("medical");
+    });
+  }
+
+  if (!sortConfig) return base;
+
+  const key = sortConfig.key;
+  const dir = sortConfig.direction === "asc" ? 1 : -1;
+
+  return [...base].sort((a, b) => {
+    const av = String((a as any)[key] ?? "").trim().toLowerCase();
+    const bv = String((b as any)[key] ?? "").trim().toLowerCase();
+
+    if (av < bv) return -1 * dir;
+    if (av > bv) return 1 * dir;
+    return 0;
+  });
+}, [rows, sortConfig, restrictToFinancialKyc, restrictToMedical, roleType]);
+
+    /*
+     * These are the exact rows displayed in the saved-requirements table after
+     * applying role-specific filters. Store only these rows so Decision
+     * validation does not validate hidden requirements from the API response.
+     */
+    const validationRows = useMemo(
+        () => savedRows.map((row) => ({ status: row.status })),
+        [savedRows],
+    );
+
+    // For PIVV, validate only the rows visible in the saved table (FUP code PIV).
+    const hasPendingPivvSavedRow = useMemo(
+        () =>
+            roleType.trim().toUpperCase() === "PIVV_TASK" &&
+            savedRows.some((row) => isPendingStatus(row.status)),
+        [roleType, savedRows],
+    );
+
+    // A requirement table containing rows must be explicitly saved in the
+    // current case, even when every row is already Accept/Accepted.
+    const requiresTableSave = savedRows.length > 0 && !isTableSaved;
+
     useEffect(() => {
-        saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), hasRequirementChanges);
-    }, [drsData, hasRequirementChanges, rows]);
-    const savedRows = useMemo(() => {
-        let base = rows.filter((row) => !row.__isDraft);
-        if (restrictToFinancialKyc) {
-            base = base.filter((r) => {
-                const cat = String(r.category ?? "").trim().toLowerCase();
-                return cat.includes("financial") || cat.includes("kyc");
-            });
-        } else if (restrictToMedical) {
-            base = base.filter((r) => {
-                const cat = String(r.category ?? "").trim().toLowerCase();
-                const doc = String(r.document ?? "").trim().toLowerCase();
-                return cat.includes("medical") || doc.includes("medical");
-            });
-        }
-
-        if (!sortConfig) return base;
-
-        const key = sortConfig.key;
-        const dir = sortConfig.direction === "asc" ? 1 : -1;
-        return [...base].sort((a, b) => {
-            const av = String((a as any)[key] ?? "").trim().toLowerCase();
-            const bv = String((b as any)[key] ?? "").trim().toLowerCase();
-            if (av < bv) return -1 * dir;
-            if (av > bv) return 1 * dir;
-            return 0;
-        });
-    }, [rows, sortConfig, restrictToFinancialKyc]);
+        saveLocalRequirementRows(
+            drsData,
+            validationRows,
+            requiresTableSave || hasRequirementChanges,
+        );
+    }, [drsData, hasRequirementChanges, requiresTableSave, validationRows]);
 
     const draftRows = useMemo(() => rows.filter((row) => row.__isDraft), [rows]);
 
@@ -736,7 +798,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     }, [lastAddedDraftRowId]);
 
     const getCategoryOptions = (row: EditableRequirementRow) => {
-        // Category is fetched by team only now — profile is standalone
+        // Category is fetched by team only now â€” profile is standalone
         const payload: Record<string, string> = { team: row.team };
         const cacheKey = JSON.stringify(payload);
         const opts = requirementOptionsCache[cacheKey] ?? requirementCategoryOptions;
@@ -1281,6 +1343,12 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
     };
 
     const handleInlineChange = (rowId: string, field: EditableField, value: string) => {
+        // Block only rows that were already accepted in the API response.
+        // Do not block a pending row merely because its current unsaved value is Accept.
+        if (field === "status" && initiallyAcceptedRowIds.has(rowId)) {
+            return;
+        }
+
         setIsTableSaved(false);
         setHasRequirementChanges(true);
         if (field === "status") {
@@ -1916,7 +1984,10 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
             width: "7%",
             render: (_value, row) => {
                 // allow editing status only for draft/local-new rows or rows explicitly marked editable
-                const canEditStatus = Boolean(row.__isDraft) || editableStatusRowIds.has(row.__rowId);
+                const canEditStatus =
+                    !isTableSaved &&
+                    !initiallyAcceptedRowIds.has(row.__rowId) &&
+                    (Boolean(row.__isDraft) || editableStatusRowIds.has(row.__rowId));
                 if (row.__rowId === lastAddedDraftRowId) {
                     // help debug why the newly added draft may still be disabled
                     console.debug("RequirementManagement: status render", {
@@ -2348,11 +2419,20 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                     }}
                 >
                    
-                    {isVisible && (
+                    {/* {isVisible && ( */}
                             <CustomButton
                                 variant="contained"
                                 disabled={isTableSaved || draftRows.length > 0}
                             onClick={async () => {
+                                if (hasPendingPivvSavedRow) {
+                                    setSnackbarMessage(
+                                        "Please take action on all pending requirements before saving.",
+                                    );
+                                    setSnackbarSeverity("error");
+                                    setSnackbarOpen(true);
+                                    return;
+                                }
+
                                 // Build a full DRS payload by cloning current drsData and replacing requirementManagement
                                 try {
                                     const source = (drsData && typeof drsData === "object") ? (drsData as Record<string, unknown>) : {};
@@ -2416,10 +2496,16 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     setSnackbarOpen(true);
 
                                     // persist local snapshot and update state
-                                    saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
-                                    setIsTableSaved(true);
-                                    setHasRequirementChanges(false);
-                                    setEditableStatusRowIds(new Set());
+                                    if (resp?.success === false) {
+                                        saveLocalRequirementRows(drsData, validationRows, true);
+                                        setIsTableSaved(false);
+                                        setHasRequirementChanges(true);
+                                    } else {
+                                        saveLocalRequirementRows(drsData, validationRows, false);
+                                        setIsTableSaved(true);
+                                        setHasRequirementChanges(false);
+                                        setEditableStatusRowIds(new Set());
+                                    }
                                 } catch (err) {
                                     console.warn("Requirement save failed", err);
                                     const errorMsg = err instanceof Error ? err.message : String(err ?? "Failed to save requirements");
@@ -2427,7 +2513,7 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                                     setSnackbarSeverity("error");
                                     setSnackbarOpen(true);
                                     // persist unsaved flag so user doesn't lose changes
-                                    saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), true);
+                                    saveLocalRequirementRows(drsData, validationRows, true);
                                     setIsTableSaved(false);
                                     setHasRequirementChanges(true);
                                 }
@@ -2443,15 +2529,11 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                         >
                              Save
                         </CustomButton>
-                    )}
+                     {/* )} */}
                     {showCptActionButtons && (<><CustomButton
                         variant="contained"
                         //disabled={draftRows.length > 0 || isTableSaved}
                         onClick={() => {
-                            saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
-                            setIsTableSaved(true);
-                            setHasRequirementChanges(false);
-                            setEditableStatusRowIds(new Set());
                             openLinkInNewTab(proposalFormAndDocumentsLink);
                         }}
                         sx={{
@@ -2469,10 +2551,6 @@ const RequirementManagementTable = ({ requirements }: RequirementManagementTable
                             variant="contained"
                             //disabled={draftRows.length > 0 || isTableSaved}
                             onClick={() => {
-                                saveLocalRequirementRows(drsData, rows.map((row) => ({ status: row.status })), false);
-                                setIsTableSaved(true);
-                                setHasRequirementChanges(false);
-                                setEditableStatusRowIds(new Set());
                                 persistNewTabContext();
                                 openLinkInNewTab(cptSecondaryAction.path);
                             }}

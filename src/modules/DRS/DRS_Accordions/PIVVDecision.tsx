@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Alert, Box, Container, Snackbar, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -13,13 +13,10 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
-import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
-
-type PivvDecisionOption = {
-  label: string;
-  value: string;
-  workflowPool: "COPS Pool" | "CUW Pool";
-};
+import {
+  getRequirementRows,
+  validateRequirementDecision,
+} from "../../../validations/drsRequirementDecisionValidation";
 
 const PIVVDecision = () => {
   const dispatch = useAppDispatch();
@@ -94,9 +91,21 @@ const PIVVDecision = () => {
   const [remarks, setRemarks] = useState("");
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("info");
 
-  const roleType = localStorage.getItem("roleType") ?? "";
+  const showSnackbar = (
+    message: string,
+    severity: "success" | "error" | "warning" | "info" = "error",
+  ) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
+
   const safeBusinessType =
     normalizeBusinessType(businessType) ??
     normalizeBusinessType(localStorage.getItem("businessType")) ??
@@ -107,42 +116,19 @@ const PIVVDecision = () => {
     [applicationNumber, drsData],
   );
 
-  const workflowPool = useMemo(() => {
-    const byMaster = Array.isArray(masters.pivvDecision) ? masters.pivvDecision : [];
-    const matched = byMaster.find((item) => item.value === decision || item.description === decision || item.code === decision) as PivvDecisionOption | undefined;
-    if (matched) return matched.workflowPool ?? "";
-
-    // fallback to misc
-    const misc = (masters as Record<string, unknown> | undefined)?.misc;
-    const miscList = Array.isArray(misc) ? misc as unknown[] : [];
-    const matchedMisc = miscList.find((item) => {
-      const row = item as Record<string, unknown>;
-      const code = String(row.code ?? row.value ?? "").trim();
-      const desc = String(row.description ?? row.value ?? "").trim();
-      return code === decision || desc === decision;
-    }) as Record<string, unknown> | undefined;
-
-    return String(matchedMisc?.workflowPool ?? "");
-  }, [decision, masters]);
-
   const isSubmitEnabled = decision.trim().length > 0 && remarks.trim().length > 0;
 
   const handleSubmit = async () => {
     console.log("Decision selected", decision.trim())
     const breValidation = validateDrsFinalBre(drsData);
     if (!breValidation.canPerformAction) {
-      setSubmitMessage(breValidation.message);
-      return;
-    }
-
-    if (!taskContext.appNo || !roleType || !taskContext.taskId || !taskContext.instanceId || !taskContext.userId || !workflowPool) {
-      setSubmitMessage("Missing required case information. Please open the case from inbox again.");
+      showSnackbar(breValidation.message, "error");
       return;
     }
 
     try {
       setSubmitLoading(true);
-      setSubmitMessage(null);
+      setSnackbarOpen(false);
 
       const response = await dispatch(
         completeTaskThunk({
@@ -158,8 +144,8 @@ const PIVVDecision = () => {
       ).unwrap();
 
       const { success, message } = getCompleteTaskResult(response);
-      setSubmitMessage(message);
       if (!success) {
+        showSnackbar(message, "error");
         return;
       }
 
@@ -169,7 +155,12 @@ const PIVVDecision = () => {
         },
       });
     } catch (error) {
-      setSubmitMessage(error instanceof Error ? error.message : "Failed to submit PIVV decision.");
+      showSnackbar(
+        error instanceof Error
+          ? error.message
+          : "Failed to submit PIVV decision.",
+        "error",
+      );
     } finally {
       setSubmitLoading(false);
     }
@@ -178,16 +169,21 @@ const PIVVDecision = () => {
   const handleSubmitIntent = () => {
     const breValidation = validateDrsFinalBre(drsData);
     if (!breValidation.canPerformAction) {
-      setSubmitMessage(breValidation.message);
+      showSnackbar(breValidation.message, "error");
       return;
     }
-    const requirementValidation = validateRequirementDecision(drsData, decision);
+    const tableRequirementRows = getRequirementRows(drsData);
+    const requirementValidation = validateRequirementDecision(
+      drsData,
+      decision,
+      tableRequirementRows,
+    );
     if (!requirementValidation.isValid) {
-      setSubmitMessage(requirementValidation.message);
+      showSnackbar(requirementValidation.message, "error");
       return;
     }
 
-    setSubmitMessage(null);
+    setSnackbarOpen(false);
     setConfirmationDialogOpen(true);
   };
 
@@ -215,7 +211,7 @@ const PIVVDecision = () => {
                 value={decision}
                 onChange={(value: string) => {
                   setDecision(value);
-                  setSubmitMessage(null);
+                  setSnackbarOpen(false);
                 }}
                 options={pivvDecisionOptions}
               />
@@ -243,7 +239,7 @@ const PIVVDecision = () => {
                 const value = event.target.value;
                 if (value.length <= 10000) {
                   setRemarks(value);
-                  setSubmitMessage(null);
+                  setSnackbarOpen(false);
                 }
               }}
               sx={{ backgroundColor: "#fff" }}
@@ -253,29 +249,12 @@ const PIVVDecision = () => {
               {remarks.length}/10000
             </Typography>
 
-            {!taskContext.taskId && (
-              <Typography sx={{ mt: 0.75, fontSize: 12, color: "#DE2C3B" }}>
-                Task ID is missing. Please open the case from inbox again.
-              </Typography>
-            )}
-
-            {submitMessage && (
-              <Typography
-                sx={{
-                  mt: 0.75,
-                  fontSize: 12,
-                  color: submitMessage.toLowerCase().includes("success") ? "#0F8A3D" : "#DE2C3B",
-                }}
-              >
-                {submitMessage}
-              </Typography>
-            )}
           </Box>
 
           <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
             <CustomButton
               variant="contained"
-              disabled={!isSubmitEnabled || !taskContext.taskId || submitLoading}
+              disabled={!isSubmitEnabled || submitLoading}
               onClick={handleSubmitIntent}
               sx={{
                 minWidth: 150,
@@ -296,9 +275,30 @@ const PIVVDecision = () => {
           message="Do you want to submit the case?"
           onClose={() => setConfirmationDialogOpen(false)}
           onConfirm={() => {
+            setConfirmationDialogOpen(false);
             void handleSubmit();
           }}
         />
+
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={5000}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          onClose={(_, reason) => {
+            if (reason !== "clickaway") {
+              setSnackbarOpen(false);
+            }
+          }}
+        >
+          <Alert
+            severity={snackbarSeverity}
+            variant="filled"
+            onClose={() => setSnackbarOpen(false)}
+            sx={{ width: "100%" }}
+          >
+            {snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Box>
     </Container>
   );

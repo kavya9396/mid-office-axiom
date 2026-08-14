@@ -176,8 +176,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "applicationOverview",
     "requirementManagement",
     "pivvDecision",
-    "quickLinks",
-    "uwToolkit",
+    "quickLinks"
   ],
   RETAIL_READY_FOR_ISSUANCE_POOL: [
     "breDecision",

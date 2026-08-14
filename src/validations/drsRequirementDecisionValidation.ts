@@ -24,12 +24,19 @@ const getSelectedCaseApplicationNo = (): string => {
 
 export const getRequirementStorageKey = (drsData: unknown): string => {
   const root = toRecord(drsData);
+  const nestedData = toRecord(root.data);
   const appInfo = toRecord(root.applicationInfo);
+  const nestedAppInfo = toRecord(nestedData.applicationInfo);
+
   const applicationNo =
     toText(root.applicationNo) ||
     toText(root.appNo) ||
+    toText(nestedData.applicationNo) ||
+    toText(nestedData.appNo) ||
     toText(appInfo.applicationNo) ||
     toText(appInfo.appNo) ||
+    toText(nestedAppInfo.applicationNo) ||
+    toText(nestedAppInfo.appNo) ||
     toText(localStorage.getItem("applicationNumber")) ||
     getSelectedCaseApplicationNo();
 
@@ -43,39 +50,76 @@ const getRequirementUnsavedStorageKey = (drsData: unknown): string =>
 
 export const saveLocalRequirementRows = (
   drsData: unknown,
-  rows: RequirementStatusRow[],
+  visibleRows: RequirementStatusRow[],
   hasUnsavedChanges = false,
 ): void => {
-  localStorage.setItem(getRequirementStorageKey(drsData), JSON.stringify(rows));
-  localStorage.setItem(getRequirementUnsavedStorageKey(drsData), JSON.stringify(hasUnsavedChanges));
+  const rowsToSave = visibleRows.map((row) => ({
+    status: toText(row.status),
+  }));
+
+  localStorage.setItem(
+    getRequirementStorageKey(drsData),
+    JSON.stringify(rowsToSave),
+  );
+  localStorage.setItem(
+    getRequirementUnsavedStorageKey(drsData),
+    String(hasUnsavedChanges),
+  );
 };
 
-const getStoredRequirementRows = (drsData: unknown): RequirementStatusRow[] | null => {
+const getStoredRequirementRows = (
+  drsData: unknown,
+): RequirementStatusRow[] | null => {
   try {
     const raw = localStorage.getItem(getRequirementStorageKey(drsData));
-    if (raw === null) {
-      return null;
-    }
+    if (raw === null) return null;
 
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map((row) => ({ status: toText(toRecord(row).status) })) : [];
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+
+    return parsed.map((row) => ({
+      status: toText(toRecord(row).status),
+    }));
   } catch {
     return null;
   }
 };
 
-export const getRequirementRows = (drsData: unknown): RequirementStatusRow[] => {
-  const root = toRecord(drsData);
-  const directRequirements = Array.isArray(root.requirements) ? root.requirements : [];
-  const requirementManagement = Array.isArray(root.requirementManagement) ? root.requirementManagement : [];
-  const externalApis = toRecord(root.externalAPIs);
-  const breOutput = toRecord(externalApis.breOutput);
-  const breRequirements = Array.isArray(breOutput.requirements) ? breOutput.requirements : [];
-  const storedRows = getStoredRequirementRows(drsData);
-
-  if (storedRows !== null) {
-    return storedRows;
+export const getRequirementRows = (
+  drsData: unknown,
+  visibleRows?: RequirementStatusRow[],
+): RequirementStatusRow[] => {
+  if (visibleRows !== undefined) {
+    return visibleRows.map((row) => ({ status: toText(row.status) }));
   }
+
+  const storedRows = getStoredRequirementRows(drsData);
+  if (storedRows !== null) return storedRows;
+
+  const root = toRecord(drsData);
+  const nestedData = toRecord(root.data);
+  const externalApis = toRecord(root.externalAPIs);
+  const nestedExternalApis = toRecord(nestedData.externalAPIs);
+  const breOutput = toRecord(externalApis.breOutput);
+  const nestedBreOutput = toRecord(nestedExternalApis.breOutput);
+
+  const directRequirements = Array.isArray(root.requirements)
+    ? root.requirements
+    : Array.isArray(nestedData.requirements)
+      ? nestedData.requirements
+      : [];
+
+  const requirementManagement = Array.isArray(root.requirementManagement)
+    ? root.requirementManagement
+    : Array.isArray(nestedData.requirementManagement)
+      ? nestedData.requirementManagement
+      : [];
+
+  const breRequirements = Array.isArray(breOutput.requirements)
+    ? breOutput.requirements
+    : Array.isArray(nestedBreOutput.requirements)
+      ? nestedBreOutput.requirements
+      : [];
 
   return [
     ...directRequirements,
@@ -86,7 +130,9 @@ export const getRequirementRows = (drsData: unknown): RequirementStatusRow[] => 
 
 export const hasUnsavedRequirementRows = (drsData: unknown): boolean => {
   try {
-    return JSON.parse(localStorage.getItem(getRequirementUnsavedStorageKey(drsData)) ?? "false") === true;
+    return (
+      localStorage.getItem(getRequirementUnsavedStorageKey(drsData)) === "true"
+    );
   } catch {
     return false;
   }
@@ -94,17 +140,22 @@ export const hasUnsavedRequirementRows = (drsData: unknown): boolean => {
 
 const isPendingRequirement = (status: string): boolean => {
   const normalized = status.trim().toLowerCase();
-  return normalized === "" || normalized === "pending";
+  return normalized === "" || normalized === "pending" || normalized === "pen";
 };
 
-export const hasPendingRequirementRows = (drsData: unknown): boolean =>
-  getRequirementRows(drsData).some((row) => isPendingRequirement(toText(row.status)));
+export const hasPendingRequirementRows = (
+  drsData: unknown,
+  visibleRows?: RequirementStatusRow[],
+): boolean =>
+  getRequirementRows(drsData, visibleRows).some((row) =>
+    isPendingRequirement(toText(row.status)),
+  );
 
 export const validateRequirementDecision = (
   drsData: unknown,
   decisionLabel: string,
+  visibleRows?: RequirementStatusRow[],
 ): { isValid: boolean; message: string } => {
-  // If there are unsaved local changes, always block submission
   if (hasUnsavedRequirementRows(drsData)) {
     return {
       isValid: false,
@@ -112,11 +163,10 @@ export const validateRequirementDecision = (
     };
   }
 
-  // If there are pending requirement rows, allow submission only when the
-  // selected decision implies raising requirements (e.g., label contains "raise").
-  if (hasPendingRequirementRows(drsData)) {
-    const normalized = String(decisionLabel ?? "").trim().toLowerCase();
-    if (normalized.includes("raise")) {
+  if (hasPendingRequirementRows(drsData, visibleRows)) {
+    const normalizedDecision = toText(decisionLabel).toLowerCase();
+
+    if (normalizedDecision.includes("raise")) {
       return { isValid: true, message: "" };
     }
 

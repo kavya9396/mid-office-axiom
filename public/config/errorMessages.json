@@ -2,7 +2,7 @@
   "drsFinalBreFailure": "Final BRE is failed. Please retrigger BRE before performing any action on this case.",
   "drsApplicantTabsPending": "Please visit {tabs} before taking decision.",
   "drsApplicantTabsNotVisited": "Please visit all applicant tabs at least once before submitting.",
-  "drsPendingRequirements": "Pending requirements are available. Please select Raise Requirement before taking another decision.",
+  "drsPendingRequirements": "Pending requirements are available. Please take a action.",
   "drsUnsavedRequirementChanges": "Please save Requirement Management changes before taking decision.",
   "financialAtLeastOneMonthMandatory": "Atleast 1 month data is mandatory.",
   "financialFieldMandatory": "This field is mandatory.",
