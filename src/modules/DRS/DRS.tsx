@@ -9,6 +9,7 @@ import {
 } from "./drs-layouts";
 
 import { drsThunk } from "../../store/thunks/drsThunk";
+import { breThunk } from "../../store/thunks/breThunk";
 import type { AppDispatch, RootState } from "../../store/store";
 import BackButton from "../../components/layout/BackButton";
 import { title } from "../../utils/constant";
@@ -33,8 +34,7 @@ const mapper = {
   SYSTEM_WAIT_POOL_AMR_NON_MEDICAL:
     "RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
   AMR_NON_MEDICAL_TASK: "RETAIL_AMR_NON_MEDICAL",
-  RECONSIDERATION_TASK:
-    "RETAIL_RECONSIDERATION_POOL",
+  RECONSIDERATION_TASK: "RETAIL_RECONSIDERATION_POOL",
   PRE_ISSUANCE_SERVICING_TASK:
     "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
   EXCEPTIONAL_TASK: "RETAIL_EXCEPTIONAL_POOL",
@@ -49,10 +49,8 @@ const mapper = {
   SYSTEM_WAIT_POOL_AMR_MEDICAL:
     "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
   RI_TASK: "RETAIL_REINSURER_POOL",
-  REQUIREMENT_POOL:
-    "RETAIL_REQUIREMENT_REVIEW_POOL",
-  CUW_CLAIM_AUDIT_TASK:
-    "RETAIL_CUW_CLAIM_AUDIT",
+  REQUIREMENT_POOL: "RETAIL_REQUIREMENT_REVIEW_POOL",
+  CUW_CLAIM_AUDIT_TASK: "RETAIL_CUW_CLAIM_AUDIT",
   ACCUITY_TASK: "RETAIL_ACCUITY_USER",
   ECG_TASK: "RETAIL_ECG_POOL",
   TMT_TASK: "RETAIL_TMT_POOL",
@@ -65,55 +63,36 @@ const mapper = {
   AMR_MEDICAL_TASK: "AMR_MEDICAL_TASK",
   ACUITY_TASK: "ACUITY_TASK",
   ISSUANCE_TASK: "ISSUANCE_TASK",
-  CPT_DATA_ENTRY_MR_TASK:
-    "CPT_DATA_ENTRY_MR_TASK",
-  CPT_DATA_ENTRY_NMR_TASK:
-    "CPT_DATA_ENTRY_NMR_TASK",
-};
+  CPT_DATA_ENTRY_MR_TASK: "CPT_DATA_ENTRY_MR_TASK",
+  CPT_DATA_ENTRY_NMR_TASK: "CPT_DATA_ENTRY_NMR_TASK",
+} as const;
 
 const DRS = () => {
   const location = useLocation();
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  // Full row received from Inbox
-  const application =
-    location.state?.application as
-      | ApplicationRow
-      | undefined;
+  const application = location.state?.application as
+    | ApplicationRow
+    | undefined;
 
-  // DRS API response from Redux
   const drsData = useSelector(
     (state: RootState) => state.drs.data,
   );
 
-  console.log("FULL APPLICATION ROW:", application);
-  console.log("DRS DATA:", drsData);
+  const roleType = application?.roleType?.trim() ?? "";
 
-  const roleType = application?.roleType ?? "";
-  localStorage.setItem("roleType",roleType);
-
-  // --------------------------------------------------
-  // ROLE TYPE -> POOL / LAYOUT
-  // --------------------------------------------------
+  useEffect(() => {
+    if (roleType) {
+      localStorage.setItem("roleType", roleType);
+    }
+  }, [roleType]);
 
   const layout =
-    mapper[
-      roleType as keyof typeof mapper
-    ];
-
-  console.log("Role Type:", roleType);
-  console.log("Layout:", layout);
-
-  // --------------------------------------------------
-  // LAYOUT -> BASE ACCORDIONS
-  // --------------------------------------------------
+    mapper[roleType as keyof typeof mapper];
 
   const layoutAccordions = useMemo(
-    () =>
-      layout
-        ? DRS_LAYOUTS[layout] ?? []
-        : [],
+    () => (layout ? DRS_LAYOUTS[layout] ?? [] : []),
     [layout],
   );
 
@@ -124,66 +103,77 @@ const DRS = () => {
       ),
     [layoutAccordions],
   );
+const storageBusiness =
+    application?.businessType || localStorage.getItem("businessType");
 
-  console.log(
-    "Base Sections:",
-    sections,
-  );
-
-  // --------------------------------------------------
-  // CALL DRS API
-  // --------------------------------------------------
-
+  const eventName =
+    storageBusiness === "retail" ? "BRE-RETAIL" : "BRE-GROUP";
   useEffect(() => {
-    if (
-      !application?.applicationNo ||
-      !roleType ||
-      !layout
-    ) {
+    const applicationNo =
+      application?.applicationNo?.trim();
+
+    if (!applicationNo || !roleType || !layout) {
       return;
     }
 
-    const userId =
-      String(
-        application.userId ??
-          localStorage.getItem("userId") ??
-          localStorage.getItem("username") ??
-          "",
-      ).trim();
+    const userId = String(
+      application?.userId ??
+        localStorage.getItem("userId") ??
+        localStorage.getItem("username") ??
+        "",
+    ).trim();
 
     if (!userId) {
-      console.warn(
-        "User ID is missing",
-      );
+      console.warn("User ID is missing");
       return;
     }
 
-    const loadDRS = async () => {
-      try {
-        const response =
-          await dispatch(
+    const loadPageData = async () => {
+      const [drsResult, breResult] =
+        await Promise.allSettled([
+          dispatch(
             drsThunk({
-              applicationNo:
-                application.applicationNo!,
+              applicationNo,
               userId,
               roleType,
               sections,
             }),
-          ).unwrap();
+          ).unwrap(),
 
+          dispatch(
+            breThunk({
+              eventName: eventName,
+              applicationNumber: applicationNo,
+            }),
+          ).unwrap(),
+        ]);
+
+      if (drsResult.status === "fulfilled") {
         console.log(
           "DRS API RESPONSE:",
-          response,
+          drsResult.value,
         );
-      } catch (error) {
+      } else {
         console.error(
           "Failed to load DRS:",
-          error,
+          drsResult.reason,
+        );
+      }
+
+      if (breResult.status === "fulfilled") {
+        console.log(
+          "BRE API RESPONSE:",
+          breResult.value,
+        );
+      } else {
+        console.error(
+          "Failed to load BRE:",
+          breResult.reason,
         );
       }
     };
 
-    void loadDRS();
+    void loadPageData();
   }, [
     dispatch,
     application?.applicationNo,
@@ -193,50 +183,36 @@ const DRS = () => {
     sections,
   ]);
 
-  // --------------------------------------------------
-  // FILTER ACCORDIONS BASED ON API DATA
-  // --------------------------------------------------
-
-  const visibleAccordions =
-    useMemo(
-      () =>
-        getPoolWiseAvailableAccordions(
-          layout,
-          drsData,
-        ),
-      [layout, drsData],
-    );
-
-  console.log(
-    "Visible Accordions:",
-    visibleAccordions,
+  const visibleAccordions = useMemo(
+    () =>
+      getPoolWiseAvailableAccordions(
+        layout,
+        drsData,
+      ),
+    [layout, drsData],
   );
-
-  // --------------------------------------------------
-  // RENDER
-  // --------------------------------------------------
 
   return (
     <div>
-        <BackButton label={title.backToInbox} onClick={() => navigate(getInboxPath())}/>
-      {visibleAccordions.map(
-        (accordionId) => {
-          const AccordionComponent =
-            accordionRegistry[
-              accordionId
-            ];
+      <BackButton
+        label={title.backToInbox}
+        onClick={() => navigate(getInboxPath())}
+      />
 
-          if (!AccordionComponent) {
-            return null;
-          }
+      {visibleAccordions.map((accordionId) => {
+        const AccordionComponent =
+          accordionRegistry[accordionId];
 
-          return (
-            <div key={accordionId}>
-              <AccordionComponent />
-            </div>
-          );
-        },
-      )}
+        if (!AccordionComponent) {
+          return null;
+        }
+
+        return (
+          <div key={accordionId}>
+            <AccordionComponent />
+          </div>
+        );
+      })}
     </div>
   );
 };
