@@ -78,7 +78,7 @@ const ROLE_SECTIONS: Record<
 
 const Inbox1 = () => {
   const dispatch = useAppDispatch();
-  const navigate= useNavigate();
+  const navigate = useNavigate();
 
   // ============================================================
   // AUTH
@@ -190,9 +190,9 @@ const Inbox1 = () => {
       ([poolName, cases]) =>
         Array.isArray(cases)
           ? cases.map((item) => ({
-              ...item,
-              poolName,
-            }))
+            ...item,
+            poolName,
+          }))
           : [],
     );
   }, [poolData]);
@@ -226,9 +226,9 @@ const Inbox1 = () => {
   const activeRole = activeTask
     ? null
     : selectedRole ??
-      (roles.length > 0
-        ? roles[0]
-        : null);
+    (roles.length > 0
+      ? roles[0]
+      : null);
 
   // ============================================================
   // SELECTED TASK DATA
@@ -273,7 +273,7 @@ const Inbox1 = () => {
 
   const applicationSections =
     activeTask &&
-    activeTask !== "ALL_CASES"
+      activeTask !== "ALL_CASES"
       ? ROLE_SECTIONS[activeTask] ?? []
       : [];
 
@@ -325,11 +325,6 @@ const Inbox1 = () => {
   const handleTaskSelect = (
     task: string,
   ) => {
-    console.log(
-      "TASK CLICKED:",
-      task,
-    );
-
     setSelectedTask(task);
     setSelectedRole(null);
     setSelectedApplication(null);
@@ -340,24 +335,26 @@ const Inbox1 = () => {
   // ============================================================
 
   const handleApplicationClick = (
-  application: Record<string, unknown>,
-) => {
-  console.log('application',application)
-  const applicationNo = application.applicationNo as string;
-  const targetBusinessType =
-    application.businessType as string;
+    application: Record<string, unknown>,
+  ) => {
+    console.log('application', application)
+    const applicationNo = application.applicationNo as string;
+    const targetBusinessType =
+      application.businessType as string;
 
-  const drsPath = getDRSPath(
-    targetBusinessType,
-    applicationNo,
-  );
+    const drsPath = getDRSPath(
+      targetBusinessType,
+      applicationNo,
+    );
 
-  if (drsPath) {
-    navigate(drsPath, {
-          state: {
-            application: application}});
-  }
-};
+    if (drsPath) {
+      navigate(drsPath, {
+        state: {
+          application: application
+        }
+      });
+    }
+  };
 
   // ============================================================
   // APPLICATION BACK
@@ -399,7 +396,7 @@ const Inbox1 = () => {
       <Box
         sx={{
           width: "100%",
-          height: "90vh",
+          height: "91vh",
           backgroundColor:
             "#f5f7fa",
         }}
@@ -434,7 +431,7 @@ const Inbox1 = () => {
         container
         sx={{
           flexWrap: "nowrap",
-          height: "90vh",
+          height: "91vh",
           minHeight: 0,
         }}
       >
@@ -469,25 +466,25 @@ const Inbox1 = () => {
         {/* RIGHT SIDE */}
         {/* ================================================== */}
 
-      <Box
-  sx={{
-    flex: 1,
-    minWidth: 0,
-    height: "100%",
-    p: 0,
-    overflow: "hidden",
-    backgroundColor: "#f5f7fa",
-  }}
->
-  <RightSideTable
-    selectedRole={activeRole}
-    selectedTask={activeTask}
-    selectedTaskData={selectedTaskData}
-    selectedApplication={selectedApplication}
-    onApplicationClick={handleApplicationClick}
-    onApplicationBack={handleApplicationBack}
-  />
-</Box>
+        {/* <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            height: "100%",
+            p: 0,
+            overflow: "hidden",
+            backgroundColor: "#f5f7fa",
+          }}
+        > */}
+          <RightSideTable
+            selectedRole={activeRole}
+            selectedTask={activeTask}
+            selectedTaskData={selectedTaskData}
+            selectedApplication={selectedApplication}
+            onApplicationClick={handleApplicationClick}
+            onApplicationBack={handleApplicationBack}
+          />
+        {/* </Box> */}
       </Grid>
     </Box>
   );

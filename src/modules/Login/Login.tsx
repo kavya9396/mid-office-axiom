@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Divider, Typography, Link, Snackbar, Alert } from "@mui/material";
 
 import LoginImage from "../../assets/Login-Image.svg";
-import IPRULogo from "../../assets/ICICI-Logo.svg";
+import IPRULogo from "../../assets/ICICI Logo.svg";
 import AxiomLogo from "../../assets/Axiom Logo.svg";
 import IBMLogo from "../../assets/IBM Logo.svg";
 
@@ -195,8 +195,8 @@ dispatch(
             <Box
               component="img"
               src={IPRULogo}
-              alt="ICICI Prudential Logo"
-              sx={{ height: 40 }}
+              alt="ICICI Life Logo"
+              sx={{ height: 60 }}
             />
           </Box>
 

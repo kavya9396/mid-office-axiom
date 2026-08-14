@@ -31,6 +31,7 @@ import {
   SearchIcon,
   SettingsIcon,
 } from "../../icons/Icons";
+import CustomButton from "../../components/ui/Button/Button";
 
 interface DynamicRoleTableProps {
   title: string;
@@ -41,6 +42,8 @@ interface DynamicRoleTableProps {
   ) => void;
 
   storageKey?: string;
+
+  showAddButton?: boolean;
 }
 
 type SortDirection = "asc" | "desc";
@@ -53,7 +56,12 @@ const EXCLUDED_COLUMNS = [
   "instanceId",
   "createdBy",
   "updatedBy",
+  "role",
+  "businessType",
+  "startTime",
+  "atRiskTime"
 ];
+
 /* ============================================================
  * COLUMN NAME FORMATTER
  * ============================================================
@@ -76,6 +84,156 @@ const formatColumnName = (key: string): string => {
       char.toUpperCase(),
     );
 };
+
+const escapeHtml = (value: string): string => {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+};
+
+const sanitizeFileNamePart = (
+  value: string,
+): string => {
+  return value
+    .replace(/[<>:"/\\|?*]+/g, "_")
+    .trim() || "Export";
+};
+
+const getExportValue = (
+  value: unknown,
+): string => {
+  if (
+    value === null ||
+    value === undefined
+  ) {
+    return "";
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  return String(value);
+};
+
+
+const downloadRowsAsExcel = ({
+  rows,
+  columnKeys,
+  title,
+}: {
+  rows: Record<string, unknown>[];
+  columnKeys: string[];
+  title: string;
+}) => {
+  const headerCells = columnKeys
+    .map(
+      (key) =>
+        `<th>${escapeHtml(
+          formatColumnName(key),
+        )}</th>`,
+    )
+    .join("");
+
+  const bodyRows = rows
+    .map((row) => {
+      const cells = columnKeys
+        .map((key) => {
+          const value = getExportValue(
+            row[key],
+          );
+
+          return `
+            <td style="mso-number-format:'\\@';">
+              ${escapeHtml(value)}
+            </td>
+          `;
+        })
+        .join("");
+
+      return `<tr>${cells}</tr>`;
+    })
+    .join("");
+
+  const worksheetName = escapeHtml(
+    sanitizeFileNamePart(title).slice(0, 31),
+  );
+
+  const workbook = `
+    <html
+      xmlns:o="urn:schemas-microsoft-com:office:office"
+      xmlns:x="urn:schemas-microsoft-com:office:excel"
+      xmlns="http://www.w3.org/TR/REC-html40"
+    >
+      <head>
+        <meta charset="UTF-8" />
+
+        <xml>
+          <x:ExcelWorkbook>
+            <x:ExcelWorksheets>
+              <x:ExcelWorksheet>
+                <x:Name>
+                  ${worksheetName}
+                </x:Name>
+
+                <x:WorksheetOptions>
+                  <x:DisplayGridlines/>
+                </x:WorksheetOptions>
+              </x:ExcelWorksheet>
+            </x:ExcelWorksheets>
+          </x:ExcelWorkbook>
+        </xml>
+      </head>
+
+      <body>
+        <table>
+          <thead>
+            <tr>
+              ${headerCells}
+            </tr>
+          </thead>
+
+          <tbody>
+            ${bodyRows}
+          </tbody>
+        </table>
+      </body>
+    </html>
+  `;
+
+  const blob = new Blob(
+    [workbook],
+    {
+      type: "application/vnd.ms-excel",
+    },
+  );
+
+  const objectUrl =
+    URL.createObjectURL(blob);
+
+  const link =
+    document.createElement("a");
+
+  link.href = objectUrl;
+
+  link.download = `${sanitizeFileNamePart(
+    title,
+  )}_${new Date()
+    .toISOString()
+    .slice(0, 10)}.xls`;
+
+  document.body.appendChild(link);
+
+  link.click();
+
+  document.body.removeChild(link);
+
+  URL.revokeObjectURL(objectUrl);
+};
+
 
 /* ============================================================
  * CELL VALUE FORMATTER
@@ -173,6 +331,41 @@ const getSavedColumns = (
   }
 };
 
+
+const getRowHighlightColor = (
+  row: Record<string, unknown>,
+): string => {
+  const now = Date.now();
+
+  const dueDate = row.dueDate
+    ? new Date(String(row.dueDate)).getTime()
+    : null;
+
+  const atRiskTime = row.atRiskTime
+    ? new Date(String(row.atRiskTime)).getTime()
+    : null;
+
+  // Due date has highest priority
+  if (
+    dueDate !== null &&
+    !Number.isNaN(dueDate) &&
+    now > dueDate
+  ) {
+    return "#F8D7DA"; // red
+  }
+
+  // At-risk time
+  if (
+    atRiskTime !== null &&
+    !Number.isNaN(atRiskTime) &&
+    now > atRiskTime
+  ) {
+    return "#FFE5B4"; // orange
+  }
+
+  return "transparent";
+};
+
 /* ============================================================
  * COMPONENT
  * ============================================================
@@ -183,6 +376,7 @@ const DynamicRoleTable = ({
   data,
   onApplicationClick,
   storageKey,
+  showAddButton = false,
 }: DynamicRoleTableProps) => {
   /* ============================================================
    * BASIC TABLE STATE
@@ -216,15 +410,15 @@ const DynamicRoleTable = ({
    * ============================================================
    */
 
- const columns = useMemo(() => {
-  const allColumns = Array.from(
-    new Set(data.flatMap((row) => Object.keys(row)))
-  );
+  const columns = useMemo(() => {
+    const allColumns = Array.from(
+      new Set(data.flatMap((row) => Object.keys(row)))
+    );
 
-  return allColumns.filter(
-    (column) => !EXCLUDED_COLUMNS.includes(column)
-  );
-}, [data]);
+    return allColumns.filter(
+      (column) => !EXCLUDED_COLUMNS.includes(column)
+    );
+  }, [data]);
 
   /* ============================================================
    * STORAGE KEY
@@ -248,94 +442,123 @@ const DynamicRoleTable = ({
   const [columnConfig, setColumnConfig] =
     useState<Record<string, string[]>>({});
 
-const selectedColumns = useMemo(() => {
-  const applicationColumn =
-    getApplicationNumberColumn(columns);
+  /**
+ * Columns currently checked in the Available Columns list.
+ *
+ * These columns are only marked for transfer and are not moved
+ * immediately when the checkbox is clicked. They are moved from
+ * Available to Selected only when the user clicks the right-arrow
+ * transfer button.
+ */
+  const [
+    selectedAvailableColumns,
+    setSelectedAvailableColumns,
+  ] = useState<string[]>([]);
 
-  const configured =
-    columnConfig[finalStorageKey];
+  /**
+   * Columns currently checked in the Selected Columns list.
+   *
+   * These columns are only marked for transfer and are not moved
+   * immediately when the checkbox is clicked. They are moved from
+   * Selected to Available only when the user clicks the left-arrow
+   * transfer button.
+   *
+   * The Application Number column is excluded from this selection
+   * because it must always remain in the Selected Columns list.
+   */
+  const [
+    selectedConfiguredColumns,
+    setSelectedConfiguredColumns,
+  ] = useState<string[]>([]);
 
-  const savedColumns = configured
-    ? configured
-    : getSavedColumns(
+  const selectedColumns = useMemo(() => {
+    const applicationColumn =
+      getApplicationNumberColumn(columns);
+
+    const configured =
+      columnConfig[finalStorageKey];
+
+    const savedColumns = configured
+      ? configured
+      : getSavedColumns(
         finalStorageKey,
         columns,
       );
 
-  const validSavedColumns = savedColumns.filter(
-    (column) => columns.includes(column),
-  );
+    const validSavedColumns = savedColumns.filter(
+      (column) => columns.includes(column),
+    );
 
-  // No Application Number found in API
-  if (!applicationColumn) {
-    return (
-      validSavedColumns.length > 0
-        ? validSavedColumns
-        : columns
-    ).slice(0, MAX_VISIBLE_COLUMNS);
-  }
+    // No Application Number found in API
+    if (!applicationColumn) {
+      return (
+        validSavedColumns.length > 0
+          ? validSavedColumns
+          : columns
+      ).slice(0, MAX_VISIBLE_COLUMNS);
+    }
 
-  // Remove Application Number first
-  const otherColumns = validSavedColumns.filter(
-    (column) => column !== applicationColumn,
-  );
+    // Remove Application Number first
+    const otherColumns = validSavedColumns.filter(
+      (column) => column !== applicationColumn,
+    );
 
-  // If Application Number is already configured,
-  // preserve the user's column order.
-  const orderedColumns = validSavedColumns.includes(
-    applicationColumn,
-  )
-    ? validSavedColumns
-    : [
+    // If Application Number is already configured,
+    // preserve the user's column order.
+    const orderedColumns = validSavedColumns.includes(
+      applicationColumn,
+    )
+      ? validSavedColumns
+      : [
         applicationColumn,
         ...validSavedColumns,
       ];
 
-  // If there is no saved configuration,
-  // Application Number + first 8 columns.
-  if (validSavedColumns.length === 0) {
+    // If there is no saved configuration,
+    // Application Number + first 8 columns.
+    if (validSavedColumns.length === 0) {
+      return [
+        applicationColumn,
+        ...columns
+          .filter(
+            (column) =>
+              column !== applicationColumn,
+          )
+          .slice(0, MAX_VISIBLE_COLUMNS - 1),
+      ];
+    }
+
+    // Ensure Application Number is always present.
+    if (orderedColumns.includes(applicationColumn)) {
+      return orderedColumns.slice(
+        0,
+        MAX_VISIBLE_COLUMNS,
+      );
+    }
+
     return [
       applicationColumn,
-      ...columns
-        .filter(
-          (column) =>
-            column !== applicationColumn,
-        )
-        .slice(0, MAX_VISIBLE_COLUMNS - 1),
-    ];
-  }
+      ...otherColumns,
+    ].slice(0, MAX_VISIBLE_COLUMNS);
+  }, [
+    columnConfig,
+    finalStorageKey,
+    columns,
+  ]);
 
-  // Ensure Application Number is always present.
-  if (orderedColumns.includes(applicationColumn)) {
-    return orderedColumns.slice(
-      0,
-      MAX_VISIBLE_COLUMNS,
+  const availableColumns = useMemo(() => {
+    const applicationColumn =
+      getApplicationNumberColumn(columns);
+
+    return columns.filter(
+      (column) =>
+        column !== applicationColumn &&
+        !selectedColumns.includes(column),
     );
-  }
-
-  return [
-    applicationColumn,
-    ...otherColumns,
-  ].slice(0, MAX_VISIBLE_COLUMNS);
-}, [
-  columnConfig,
-  finalStorageKey,
-  columns,
-]);
-
-const availableColumns = useMemo(() => {
-  const applicationColumn =
-    getApplicationNumberColumn(columns);
-
-  return columns.filter(
-    (column) =>
-      column !== applicationColumn &&
-      !selectedColumns.includes(column),
-  );
-}, [
-  columns,
-  selectedColumns,
-]);
+  }, [
+    columns,
+    selectedColumns,
+  ]);
 
   /* ============================================================
    * SETTINGS DIALOG
@@ -386,54 +609,54 @@ const availableColumns = useMemo(() => {
    * SORT
    * ============================================================
    */
-const sortedData = useMemo(() => {
-  if (!sortColumn) {
-    return filteredData;
-  }
-
-  return [...filteredData].sort((a, b) => {
-    const aValue = a[sortColumn];
-    const bValue = b[sortColumn];
-
-    const aEmpty =
-      aValue === null ||
-      aValue === undefined ||
-      aValue === "";
-
-    const bEmpty =
-      bValue === null ||
-      bValue === undefined ||
-      bValue === "";
-
-    if (aEmpty && bEmpty) return 0;
-    if (aEmpty) return 1;
-    if (bEmpty) return -1;
-
-    let comparison: number;
-
-    const aNumber = Number(aValue);
-    const bNumber = Number(bValue);
-
-    if (!Number.isNaN(aNumber) && !Number.isNaN(bNumber)) {
-      comparison = aNumber - bNumber;
-    } else {
-      comparison = String(aValue)
-        .toLowerCase()
-        .localeCompare(
-          String(bValue).toLowerCase(),
-          undefined,
-          {
-            numeric: true,
-            sensitivity: "base",
-          },
-        );
+  const sortedData = useMemo(() => {
+    if (!sortColumn) {
+      return filteredData;
     }
 
-    return sortDirection === "asc"
-      ? comparison
-      : -comparison;
-  });
-}, [filteredData, sortColumn, sortDirection]);
+    return [...filteredData].sort((a, b) => {
+      const aValue = a[sortColumn];
+      const bValue = b[sortColumn];
+
+      const aEmpty =
+        aValue === null ||
+        aValue === undefined ||
+        aValue === "";
+
+      const bEmpty =
+        bValue === null ||
+        bValue === undefined ||
+        bValue === "";
+
+      if (aEmpty && bEmpty) return 0;
+      if (aEmpty) return 1;
+      if (bEmpty) return -1;
+
+      let comparison: number;
+
+      const aNumber = Number(aValue);
+      const bNumber = Number(bValue);
+
+      if (!Number.isNaN(aNumber) && !Number.isNaN(bNumber)) {
+        comparison = aNumber - bNumber;
+      } else {
+        comparison = String(aValue)
+          .toLowerCase()
+          .localeCompare(
+            String(bValue).toLowerCase(),
+            undefined,
+            {
+              numeric: true,
+              sensitivity: "base",
+            },
+          );
+      }
+
+      return sortDirection === "asc"
+        ? comparison
+        : -comparison;
+    });
+  }, [filteredData, sortColumn, sortDirection]);
 
   /* ============================================================
    * PAGINATION
@@ -482,6 +705,20 @@ const sortedData = useMemo(() => {
    * ============================================================
    */
 
+  /**
+ * Opens the column configuration dialog.
+ *
+ * Initializes the temporary Available and Selected column lists
+ * using the currently displayed column configuration. Any previous
+ * checkbox selections are cleared when the dialog is opened.
+ *
+ * Checkbox selections are intentionally kept separate from the
+ * temporary column lists so that clicking a checkbox only marks a
+ * column for transfer. Columns are moved only after the user clicks
+ * the corresponding transfer button.
+ *
+ * @returns {void}
+ */
   const handleOpenSettings = () => {
     setTempSelectedColumns([
       ...selectedColumns,
@@ -491,7 +728,69 @@ const sortedData = useMemo(() => {
       ...availableColumns,
     ]);
 
+    setSelectedAvailableColumns([]);
+    setSelectedConfiguredColumns([]);
+
     setSettingsOpen(true);
+  };
+
+  /**
+   * Toggles the transfer-selection state of an Available column.
+   *
+   * Checking a column marks it for transfer to the Selected Columns
+   * list. Unchecking it removes it from the pending transfer selection.
+   *
+   * The column is not moved immediately. The actual transfer occurs
+   * only when the user clicks the right-arrow button.
+   *
+   * @param {string} column - Column key to toggle.
+   * @returns {void}
+   */
+  const toggleAvailableColumn = (
+    column: string,
+  ) => {
+    setSelectedAvailableColumns(
+      (previous) =>
+        previous.includes(column)
+          ? previous.filter(
+            (item) => item !== column,
+          )
+          : [...previous, column],
+    );
+  };
+
+  /**
+   * Toggles the transfer-selection state of a Selected column.
+   *
+   * Checking a column marks it for transfer back to the Available
+   * Columns list. Unchecking it removes it from the pending transfer
+   * selection.
+   *
+   * The Application Number column is protected and cannot be selected
+   * for removal because it must always remain visible in the table.
+   *
+   * The column is not moved immediately. The actual transfer occurs
+   * only when the user clicks the left-arrow button.
+   *
+   * @param {string} column - Column key to toggle.
+   * @returns {void}
+   */
+  const toggleSelectedColumn = (
+    column: string,
+  ) => {
+    // Application Number cannot be moved out
+    if (isApplicationNumberColumn(column)) {
+      return;
+    }
+
+    setSelectedConfiguredColumns(
+      (previous) =>
+        previous.includes(column)
+          ? previous.filter(
+            (item) => item !== column,
+          )
+          : [...previous, column],
+    );
   };
 
   /* ============================================================
@@ -504,78 +803,36 @@ const sortedData = useMemo(() => {
   };
 
   /* ============================================================
-   * MOVE AVAILABLE -> SELECTED
-   * ============================================================
-   */
-
-  const moveToSelected = (
-    column: string,
-  ) => {
-    if (
-      tempSelectedColumns.length >=
-      MAX_VISIBLE_COLUMNS
-    ) {
-      return;
-    }
-
-    setTempAvailableColumns(
-      (previous) =>
-        previous.filter(
-          (item) => item !== column,
-        ),
-    );
-
-    setTempSelectedColumns(
-      (previous) => [
-        ...previous,
-        column,
-      ],
-    );
-  };
-
-  /* ============================================================
-   * MOVE SELECTED -> AVAILABLE
-   * ============================================================
-   */
-
-  const moveToAvailable = (
-  column: string,
-) => {
-  if (isApplicationNumberColumn(column)) {
-    return;
-  }
-
-  setTempSelectedColumns(
-    (previous) =>
-      previous.filter(
-        (item) => item !== column,
-      ),
-  );
-
-  setTempAvailableColumns(
-    (previous) => [
-      ...previous,
-      column,
-    ],
-  );
-};
-
-  /* ============================================================
    * MOVE ALL -> SELECTED
    * ============================================================
+   * Moves the currently checked Available columns to the Selected
+   * Columns list.
+   *
+   * Only columns explicitly checked by the user are transferred.
+   * Unchecked Available columns remain untouched.
+   *
+   * The transfer is limited by MAX_VISIBLE_COLUMNS so that the table
+   * never displays more than the configured maximum number of columns.
+   *
+   * After the transfer is completed, the Available-side checkbox
+   * selections are cleared.
+   *
+   * @returns {void}
    */
-
-  const moveAllToSelected = () => {
+  const moveSelectedToSelected = () => {
     const remainingSlots =
       MAX_VISIBLE_COLUMNS -
       tempSelectedColumns.length;
 
-    if (remainingSlots <= 0) {
+    if (
+      remainingSlots <= 0 ||
+      selectedAvailableColumns.length === 0
+    ) {
       return;
     }
 
     const columnsToMove =
-      tempAvailableColumns.slice(
+      selectedAvailableColumns.slice(
         0,
         remainingSlots,
       );
@@ -589,26 +846,66 @@ const sortedData = useMemo(() => {
 
     setTempAvailableColumns(
       (previous) =>
-        previous.slice(
-          columnsToMove.length,
+        previous.filter(
+          (column) =>
+            !columnsToMove.includes(column),
         ),
     );
+
+    setSelectedAvailableColumns([]);
   };
 
   /* ============================================================
    * MOVE ALL -> AVAILABLE
    * ============================================================
    */
+  /**
+   * Moves the currently checked Selected columns back to the Available
+   * Columns list.
+   *
+   * Only columns explicitly checked by the user are transferred.
+   * Unchecked Selected columns remain untouched.
+   *
+   * The Application Number column is always protected and will never
+   * be moved to the Available Columns list.
+   *
+   * After the transfer is completed, the Selected-side checkbox
+   * selections are cleared.
+   *
+   * @returns {void}
+   */
+  const moveSelectedToAvailable = () => {
+    if (
+      selectedConfiguredColumns.length === 0
+    ) {
+      return;
+    }
 
-  const moveAllToAvailable = () => {
+    const columnsToMove =
+      selectedConfiguredColumns.filter(
+        (column) =>
+          !isApplicationNumberColumn(column),
+      );
+
+    setTempSelectedColumns(
+      (previous) =>
+        previous.filter(
+          (column) =>
+            !columnsToMove.includes(column),
+        ),
+    );
+
     setTempAvailableColumns(
       (previous) => [
         ...previous,
-        ...tempSelectedColumns,
+        ...columnsToMove.filter(
+          (column) =>
+            !previous.includes(column),
+        ),
       ],
     );
 
-    setTempSelectedColumns([]);
+    setSelectedConfiguredColumns([]);
   };
 
   /* ============================================================
@@ -633,9 +930,9 @@ const sortedData = useMemo(() => {
           updated[index - 1],
           updated[index],
         ] = [
-          updated[index],
-          updated[index - 1],
-        ];
+            updated[index],
+            updated[index - 1],
+          ];
 
         return updated;
       },
@@ -667,9 +964,9 @@ const sortedData = useMemo(() => {
           updated[index],
           updated[index + 1],
         ] = [
-          updated[index + 1],
-          updated[index],
-        ];
+            updated[index + 1],
+            updated[index],
+          ];
 
         return updated;
       },
@@ -746,6 +1043,23 @@ const sortedData = useMemo(() => {
     );
   };
 
+
+  const handleDownloadExcel = () => {
+    if (
+      !sortedData.length ||
+      !selectedColumns.length
+    ) {
+      return;
+    }
+
+    downloadRowsAsExcel({
+      rows: sortedData,
+      columnKeys: selectedColumns,
+      title,
+    });
+  };
+
+
   /* ============================================================
    * RENDER
    * ============================================================
@@ -794,26 +1108,23 @@ const sortedData = useMemo(() => {
             {title}
           </Typography>
 
-          <Button
-            size="small"
-            sx={{
-              minWidth: "52px",
-              height: "26px",
-              px: 1.5,
-              color: "#0D4C7D",
-              backgroundColor: "#fff",
-              borderRadius: "5px",
-              textTransform: "none",
-              fontSize: "11px",
-              fontWeight: 500,
-              "&:hover": {
-                backgroundColor:
-                  "#f3f5f6",
-              },
-            }}
-          >
-            Add
-          </Button>
+          {showAddButton && (
+            <CustomButton
+              variant="contained"
+              size="small"
+              sx={{
+                backgroundColor: "white",
+                color: "#063E6F",
+                fontSize: "10px",
+                "&:hover": {
+                  backgroundColor:
+                    "white",
+                },
+              }}
+            >
+              Add
+            </CustomButton>
+          )}
         </Box>
 
         {/* ======================================================
@@ -827,105 +1138,131 @@ const sortedData = useMemo(() => {
             px: 1,
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-end",
-            gap: 0.5,
+            justifyContent: "space-between",
             backgroundColor: "#fff",
-            borderBottom:
-              "1px solid #e3e6e8",
+            borderBottom: "1px solid #e3e6e8",
           }}
         >
-          {showSearch && (
-            <TextField
-              size="small"
-              value={searchText}
-              onChange={(event) => {
-                setSearchText(
-                  event.target.value,
-                );
-                setPage(0);
-              }}
-              placeholder="Search..."
-              autoFocus
-              sx={{
-                width: "200px",
+          {/* ======================================================
+              DOWNLOAD EXCEL
+              ======================================================
+          */}
 
-                "& .MuiInputBase-root": {
-                  height: "28px",
-                  fontSize: "11px",
-                  borderRadius: "5px",
-                },
-
-                "& .MuiOutlinedInput-input":
-                  {
-                    padding:
-                      "5px 8px",
-                  },
-              }}
-            />
-          )}
-
-          <IconButton
+          <CustomButton
             size="small"
-            onClick={() =>
-              setShowSearch(
-                (previous) =>
-                  !previous,
-              )
-            }
-            sx={{
-              width: "30px",
-              height: "28px",
-              border:
-                "1px solid #dfe3e6",
-              borderRadius: "5px",
-              color: "#454b50",
-              "&:hover": {
-                backgroundColor:
-                  "#f4f6f7",
-              },
-            }}
-          >
-            <SearchIcon />
-          </IconButton>
-
-          <IconButton
-            size="small"
-            sx={{
-              width: "30px",
-              height: "28px",
-              border:
-                "1px solid #dfe3e6",
-              borderRadius: "5px",
-              color: "#454b50",
-              "&:hover": {
-                backgroundColor:
-                  "#f4f6f7",
-              },
-            }}
-          >
-            <FilterIcon />
-          </IconButton>
-
-          <IconButton
-            size="small"
+            variant="outlined"
             onClick={
-              handleOpenSettings
+              handleDownloadExcel
             }
+            sx={{ fontSize: "10px" }}
+          >
+            Download Excel
+          </CustomButton>
+
+          {/* ======================================================
+              RIGHT SIDE TOOLBAR
+              ======================================================
+          */}
+
+          <Box
             sx={{
-              width: "30px",
-              height: "28px",
-              border:
-                "1px solid #dfe3e6",
-              borderRadius: "5px",
-              color: "#454b50",
-              "&:hover": {
-                backgroundColor:
-                  "#f4f6f7",
-              },
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
             }}
           >
-            <SettingsIcon />
-          </IconButton>
+            {showSearch && (
+              <TextField
+                size="small"
+                value={searchText}
+                onChange={(event) => {
+                  setSearchText(event.target.value);
+                  setPage(0);
+                }}
+                placeholder="Search..."
+                autoFocus
+                sx={{
+                  width: "200px",
+
+                  "& .MuiInputBase-root": {
+                    height: "28px",
+                    fontSize: "11px",
+                    borderRadius: "5px",
+                  },
+
+                  "& .MuiOutlinedInput-input": {
+                    padding: "5px 8px",
+                  },
+                }}
+              />
+            )}
+
+            {/* <IconButton
+              size="small"
+              onClick={() =>
+                setShowSearch((previous) => !previous)
+              }
+              sx={{
+                width: "30px",
+                height: "28px",
+                border: "1px solid #dfe3e6",
+                borderRadius: "5px",
+                color: "#454b50",
+
+                "&:hover": {
+                  backgroundColor: "#f4f6f7",
+                },
+              }}
+            >
+            </IconButton> */}
+            <Box sx={{ cursor: "pointer", mt: 0.5 }} onClick={() =>
+              setShowSearch((previous) => !previous)
+            }>
+              <SearchIcon width={32} height={32} />
+            </Box>
+            <Box sx={{ cursor: "pointer", mt: 0.5 }}>
+              <FilterIcon width={32} />
+            </Box>
+
+            <Box sx={{ cursor: "pointer", mt: 0.5 }} onClick={handleOpenSettings}>
+              <SettingsIcon width={32} />
+            </Box>
+
+            {/* <IconButton
+              size="small"
+              sx={{
+                width: "30px",
+                height: "28px",
+                border: "1px solid #dfe3e6",
+                borderRadius: "5px",
+                color: "#454b50",
+
+                "&:hover": {
+                  backgroundColor: "#f4f6f7",
+                },
+              }}
+            >
+              <FilterIcon />
+            </IconButton> */}
+
+            {/* <IconButton
+              size="small"
+              onClick={handleOpenSettings}
+              sx={{
+                width: "30px",
+                height: "28px",
+                border: "1px solid #dfe3e6",
+                borderRadius: "5px",
+                color: "#454b50",
+
+                "&:hover": {
+                  backgroundColor: "#f4f6f7",
+                },
+              }}
+            >
+              <SettingsIcon />
+            </IconButton> */}
+          </Box>
         </Box>
 
         {/* ======================================================
@@ -933,30 +1270,30 @@ const sortedData = useMemo(() => {
             ======================================================
         */}
 
-       <TableContainer
-  sx={{
-    width: "100%",
-    overflowX: "hidden",
-    overflowY: "auto",
+        <TableContainer
+          sx={{
+            width: "100%",
+            overflowX: "hidden",
+            overflowY: "auto",
 
-    // Always occupy the available table area
-    minHeight: "calc(100vh - 175px)",
-    maxHeight: "calc(100vh - 185px)",
+            // Always occupy the available table area
+            minHeight: "calc(100vh - 175px)",
+            maxHeight: "calc(100vh - 185px)",
 
-    "&::-webkit-scrollbar": {
-      width: "6px",
-    },
+            "&::-webkit-scrollbar": {
+              width: "6px",
+            },
 
-    "&::-webkit-scrollbar-thumb": {
-      backgroundColor: "#c7cdd3",
-      borderRadius: "10px",
-    },
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#c7cdd3",
+              borderRadius: "10px",
+            },
 
-    "&::-webkit-scrollbar-track": {
-      backgroundColor: "#f7f8f9",
-    },
-  }}
->
+            "&::-webkit-scrollbar-track": {
+              backgroundColor: "#f7f8f9",
+            },
+          }}
+        >
           <Table
             stickyHeader
             size="small"
@@ -975,80 +1312,80 @@ const sortedData = useMemo(() => {
                 ==================================================
             */}
 
-          <TableHead>
-  <TableRow>
-    {selectedColumns.map((column) => {
-      const isSorted = sortColumn === column;
+            <TableHead>
+              <TableRow>
+                {selectedColumns.map((column) => {
+                  const isSorted = sortColumn === column;
 
-      return (
-        <TableCell
-          key={column}
-          onClick={() => handleSort(column)}
-          sx={{
-            height: "30px",
-            padding: "0 10px",
-            backgroundColor: "#eef1f4",
-            color: "#20252a",
-            fontSize: "11px",
-            fontWeight: 600,
-            whiteSpace: "nowrap",
-            overflow: "hidden",
-            borderBottom: "1px solid #d9dde1",
-            cursor: "pointer",
-            userSelect: "none",
+                  return (
+                    <TableCell
+                      key={column}
+                      onClick={() => handleSort(column)}
+                      sx={{
+                        height: "30px",
+                        padding: "0 10px",
+                        backgroundColor: "#eef1f4",
+                        color: "#20252a",
+                        fontSize: "11px",
+                        fontWeight: 600,
+                        whiteSpace: "nowrap",
+                        overflow: "hidden",
+                        borderBottom: "1px solid #d9dde1",
+                        cursor: "pointer",
+                        userSelect: "none",
 
-            "&:hover": {
-              backgroundColor: "#e7ebee",
-            },
-          }}
-        >
-          <Box
-            sx={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "3px",
-              maxWidth: "100%",
-              minWidth: 0,
-            }}
-          >
-            <Typography
-              component="span"
-              sx={{
-                fontSize: "11px",
-                fontWeight: 600,
-                lineHeight: 1.2,
-                overflow: "hidden",
-                textOverflow: "ellipsis",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {formatColumnName(column)}
-            </Typography>
+                        "&:hover": {
+                          backgroundColor: "#e7ebee",
+                        },
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "3px",
+                          maxWidth: "100%",
+                          minWidth: 0,
+                        }}
+                      >
+                        <Typography
+                          component="span"
+                          sx={{
+                            fontSize: "11px",
+                            fontWeight: 600,
+                            lineHeight: 1.2,
+                            overflow: "hidden",
+                            textOverflow: "ellipsis",
+                            whiteSpace: "nowrap",
+                          }}
+                        >
+                          {formatColumnName(column)}
+                        </Typography>
 
-            <Typography
-              component="span"
-              sx={{
-                flexShrink: 0,
-                fontSize: "10px",
-                lineHeight: 1,
-                fontWeight: isSorted ? 700 : 400,
-                color: isSorted
-                  ? "#0D4C7D"
-                  : "#8a8f94",
-              }}
-            >
-              {isSorted
-                ? sortDirection === "asc"
-                  ? "▲"
-                  : "▼"
-                : "↕"}
-            </Typography>
-          </Box>
-        </TableCell>
-      );
-    })}
-  </TableRow>
-</TableHead>
+                        <Typography
+                          component="span"
+                          sx={{
+                            flexShrink: 0,
+                            fontSize: "10px",
+                            lineHeight: 1,
+                            fontWeight: isSorted ? 700 : 400,
+                            color: isSorted
+                              ? "#0D4C7D"
+                              : "#8a8f94",
+                          }}
+                        >
+                          {isSorted
+                            ? sortDirection === "asc"
+                              ? "▲"
+                              : "▼"
+                            : "↕"}
+                        </Typography>
+                      </Box>
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            </TableHead>
 
             {/* ==================================================
                 TABLE BODY
@@ -1057,7 +1394,7 @@ const sortedData = useMemo(() => {
 
             <TableBody>
               {paginatedData.length >
-              0 ? (
+                0 ? (
                 paginatedData.map(
                   (
                     row,
@@ -1065,31 +1402,35 @@ const sortedData = useMemo(() => {
                   ) => (
                     <TableRow
                       key={`${String(
-                        row.id ??
-                          "row",
+                        row.id ?? "row",
                       )}-${rowIndex}`}
                       hover
                       sx={{
-                        height:
-                          "30px",
+                        height: "30px",
 
-                        "&:nth-of-type(even)":
-                          {
-                            backgroundColor:
-                              "#fafafa",
-                          },
+                        backgroundColor:
+                          getRowHighlightColor(row),
+
+                        "&:nth-of-type(even)": {
+                          backgroundColor:
+                            getRowHighlightColor(row) !== "transparent"
+                              ? getRowHighlightColor(row)
+                              : "#fafafa",
+                        },
 
                         "&:hover": {
                           backgroundColor:
-                            "#f3f7fa",
+                            getRowHighlightColor(row) === "transparent"
+                              ? "#f3f7fa"
+                              : getRowHighlightColor(row),
                         },
 
-                        "&:last-child td":
-                          {
-                            borderBottom: 0,
-                          },
+                        "&:last-child td": {
+                          borderBottom: 0,
+                        },
                       }}
                     >
+
                       {selectedColumns.map(
                         (
                           column,
@@ -1102,7 +1443,7 @@ const sortedData = useMemo(() => {
                           const cellValue =
                             formatCellValue(
                               row[
-                                column
+                              column
                               ],
                             );
 
@@ -1158,10 +1499,10 @@ const sortedData = useMemo(() => {
                                       "2px",
 
                                     "&:hover":
-                                      {
-                                        color:
-                                          "#9A2529",
-                                      },
+                                    {
+                                      color:
+                                        "#9A2529",
+                                    },
                                   }}
                                 >
                                   {
@@ -1250,40 +1591,40 @@ const sortedData = useMemo(() => {
               "1px solid #e3e6e8",
 
             "& .MuiTablePagination-toolbar":
-              {
-                minHeight:
-                  "34px",
-                height:
-                  "34px",
-                padding:
-                  "0 8px 0 16px",
-              },
+            {
+              minHeight:
+                "34px",
+              height:
+                "34px",
+              padding:
+                "0 8px 0 16px",
+            },
 
             "& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows":
-              {
-                fontSize:
-                  "11px",
-                color:
-                  "#555",
-              },
+            {
+              fontSize:
+                "11px",
+              color:
+                "#555",
+            },
 
             "& .MuiTablePagination-select":
-              {
-                fontSize:
-                  "11px",
-              },
+            {
+              fontSize:
+                "11px",
+            },
 
             "& .MuiTablePagination-actions":
-              {
-                marginLeft:
-                  "8px",
-              },
+            {
+              marginLeft:
+                "8px",
+            },
 
             "& .MuiIconButton-root":
-              {
-                padding:
-                  "3px",
-              },
+            {
+              padding:
+                "3px",
+            },
           }}
         />
       </Paper>
@@ -1294,17 +1635,17 @@ const sortedData = useMemo(() => {
       */}
 
       <Dialog
-  open={settingsOpen}
-  onClose={handleCloseSettings}
-  maxWidth="md"
-  fullWidth
-  sx={{
-    "& .MuiDialog-paper": {
-      borderRadius: "10px",
-      overflow: "hidden",
-    },
-  }}
->
+        open={settingsOpen}
+        onClose={handleCloseSettings}
+        maxWidth="md"
+        fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            borderRadius: "10px",
+            overflow: "hidden",
+          },
+        }}
+      >
         {/* ======================================================
             DIALOG HEADER
             ======================================================
@@ -1399,6 +1740,7 @@ const sortedData = useMemo(() => {
                 "center",
               gap: 1.5,
               width: "100%",
+              mt: 2
             }}
           >
             {/* AVAILABLE */}
@@ -1462,7 +1804,7 @@ const sortedData = useMemo(() => {
                     "300px",
                   overflowY:
                     "auto",
-                  p: 0,
+                  p: 1,
                 }}
               >
                 {tempAvailableColumns.map(
@@ -1472,11 +1814,11 @@ const sortedData = useMemo(() => {
                       disablePadding
                     >
                       <ListItemButton
-                        onClick={() =>
-                          moveToSelected(
-                            column,
-                          )
-                        }
+                        // onClick={() =>
+                        //   moveToSelected(
+                        //     column,
+                        //   )
+                        // }
                         disabled={
                           tempSelectedColumns.length >=
                           MAX_VISIBLE_COLUMNS
@@ -1496,19 +1838,23 @@ const sortedData = useMemo(() => {
                         >
                           <Checkbox
                             edge="start"
-                            checked={
-                              false
+                            checked={selectedAvailableColumns.includes(
+                              column,
+                            )}
+                            onChange={() =>
+                              toggleAvailableColumn(column)
                             }
-                            tabIndex={
-                              -1
+                            onClick={(event) =>
+                              event.stopPropagation()
                             }
+                            tabIndex={-1}
                             disableRipple
                             size="small"
                             sx={{
-                              p:
-                                "3px",
+                              p: "3px",
                             }}
                           />
+
                         </ListItemIcon>
 
                         <ListItemText
@@ -1534,32 +1880,32 @@ const sortedData = useMemo(() => {
 
                 {tempAvailableColumns.length ===
                   0 && (
-                  <Box
-                    sx={{
-                      py: 5,
-                      textAlign:
-                        "center",
-                    }}
-                  >
-                    <Typography
+                    <Box
                       sx={{
-                        fontSize:
-                          "11px",
-                        color:
-                          "#999",
+                        py: 5,
+                        textAlign:
+                          "center",
                       }}
                     >
-                      No available
-                      columns
-                    </Typography>
-                  </Box>
-                )}
+                      <Typography
+                        sx={{
+                          fontSize:
+                            "11px",
+                          color:
+                            "#999",
+                        }}
+                      >
+                        No available
+                        columns
+                      </Typography>
+                    </Box>
+                  )}
               </List>
             </Box>
 
             {/* TRANSFER BUTTONS */}
 
-            <Box
+            {/* <Box
               sx={{
                 display:
                   "flex",
@@ -1571,63 +1917,96 @@ const sortedData = useMemo(() => {
               }}
             >
               <Button
-                onClick={
-                  moveAllToSelected
-                }
+                onClick={moveSelectedToSelected}
                 disabled={
-                  tempAvailableColumns.length ===
-                    0 ||
+                  selectedAvailableColumns.length === 0 ||
                   tempSelectedColumns.length >=
-                    MAX_VISIBLE_COLUMNS
+                  MAX_VISIBLE_COLUMNS
                 }
                 sx={{
-                  minWidth:
-                    "38px",
+                  minWidth: "38px",
                   width: "38px",
                   height: "32px",
                   padding: 0,
-                  border:
-                    "1px solid #d5dbe0",
-                  backgroundColor:
-                    "#fff",
+                  border: "1px solid #d5dbe0",
+                  backgroundColor: "#fff",
                   color: "#555",
-                  borderRadius:
-                    "6px",
-                  fontSize:
-                    "16px",
+                  borderRadius: "6px",
+                  fontSize: "16px",
                 }}
               >
                 →
               </Button>
 
+
               <Button
-                onClick={
-                  moveAllToAvailable
-                }
+                onClick={moveSelectedToAvailable}
                 disabled={
-                  tempSelectedColumns.length ===
-                  0
+                  selectedConfiguredColumns.length === 0
                 }
                 sx={{
-                  minWidth:
-                    "38px",
+                  minWidth: "38px",
                   width: "38px",
                   height: "32px",
                   padding: 0,
-                  border:
-                    "1px solid #d5dbe0",
-                  backgroundColor:
-                    "#fff",
+                  border: "1px solid #d5dbe0",
+                  backgroundColor: "#fff",
                   color: "#555",
-                  borderRadius:
-                    "6px",
-                  fontSize:
-                    "16px",
+                  borderRadius: "6px",
+                  fontSize: "16px",
                 }}
               >
                 ←
               </Button>
-            </Box>
+
+            </Box> */}
+
+
+   <Box
+                      sx={{
+                        display:
+                          "flex",
+                        flexDirection:
+                          "column",
+                        alignItems:
+                          "center",
+                        gap: 1,
+                      }}
+                    >
+                      <CustomButton
+                        sx={{
+                          my: 1,
+                        }}
+                        variant="outlined"
+                        size="small"
+                       onClick={moveSelectedToSelected}
+                disabled={
+                  selectedAvailableColumns.length === 0 ||
+                  tempSelectedColumns.length >=
+                  MAX_VISIBLE_COLUMNS
+                }
+                      >
+                        <Box component="span">
+                          ›
+                        </Box>
+                      </CustomButton>
+
+                      <CustomButton
+                        sx={{
+                          my: 1,
+                        }}
+                        variant="outlined"
+                        size="small"
+                        onClick={moveSelectedToAvailable}
+                disabled={
+                  selectedConfiguredColumns.length === 0
+                }
+                      >
+                        <Box component="span">
+                          ‹
+                        </Box>
+                      </CustomButton>
+                    </Box>
 
             {/* SELECTED */}
 
@@ -1680,7 +2059,7 @@ const sortedData = useMemo(() => {
                         "10px",
                       color:
                         tempSelectedColumns.length >=
-                        MAX_VISIBLE_COLUMNS
+                          MAX_VISIBLE_COLUMNS
                           ? "#9A2529"
                           : "#777",
                       mt: 0.2,
@@ -1704,7 +2083,7 @@ const sortedData = useMemo(() => {
                     "300px",
                   overflowY:
                     "auto",
-                  p: 0,
+                  p: 1,
                 }}
               >
                 {tempSelectedColumns.map(
@@ -1716,22 +2095,22 @@ const sortedData = useMemo(() => {
                       key={column}
                       disablePadding
                     >
-                  <ListItemButton
-  onClick={() => {
-    if (!isApplicationNumberColumn(column)) {
-      moveToAvailable(column);
-    }
-  }}
-  sx={{
-    minHeight: "32px",
-    py: 0,
-    px: 1,
-    pr: 0.5,
-    cursor: isApplicationNumberColumn(column)
-      ? "default"
-      : "pointer",
-  }}
->
+                      <ListItemButton
+                        // onClick={() => {
+                        //   if (!isApplicationNumberColumn(column)) {
+                        //     moveToAvailable(column);
+                        //   }
+                        // }}
+                        sx={{
+                          minHeight: "32px",
+                          py: 0,
+                          px: 1,
+                          pr: 0.5,
+                          cursor: isApplicationNumberColumn(column)
+                            ? "default"
+                            : "pointer",
+                        }}
+                      >
                         <ListItemIcon
                           sx={{
                             minWidth:
@@ -1740,15 +2119,24 @@ const sortedData = useMemo(() => {
                         >
                           <Checkbox
                             edge="start"
-                            checked
-                            tabIndex={
-                              -1
+                            checked={
+                              isApplicationNumberColumn(column) ||
+                              selectedConfiguredColumns.includes(
+                                column,
+                              )
                             }
+                            onChange={() =>
+                              toggleSelectedColumn(column)
+                            }
+                            onClick={(event) =>
+                              event.stopPropagation()
+                            }
+                            disabled={isApplicationNumberColumn(column)}
+                            tabIndex={-1}
                             disableRipple
                             size="small"
                             sx={{
-                              p:
-                                "3px",
+                              p: "3px",
                             }}
                           />
                         </ListItemIcon>
@@ -1771,7 +2159,6 @@ const sortedData = useMemo(() => {
                             </Typography>
                           }
                         />
-
                         <Box
                           sx={{
                             display:
@@ -1829,7 +2216,7 @@ const sortedData = useMemo(() => {
                             disabled={
                               index ===
                               tempSelectedColumns.length -
-                                1
+                              1
                             }
                             sx={{
                               minWidth:
@@ -1859,26 +2246,26 @@ const sortedData = useMemo(() => {
 
                 {tempSelectedColumns.length ===
                   0 && (
-                  <Box
-                    sx={{
-                      py: 5,
-                      textAlign:
-                        "center",
-                    }}
-                  >
-                    <Typography
+                    <Box
                       sx={{
-                        fontSize:
-                          "11px",
-                        color:
-                          "#999",
+                        py: 5,
+                        textAlign:
+                          "center",
                       }}
                     >
-                      Select columns
-                      from the left
-                    </Typography>
-                  </Box>
-                )}
+                      <Typography
+                        sx={{
+                          fontSize:
+                            "11px",
+                          color:
+                            "#999",
+                        }}
+                      >
+                        Select columns
+                        from the left
+                      </Typography>
+                    </Box>
+                  )}
               </List>
             </Box>
           </Box>
@@ -1931,82 +2318,46 @@ const sortedData = useMemo(() => {
               "space-between",
           }}
         >
-          <Button
-            onClick={
-              handleResetColumns
-            }
-            sx={{
-              textTransform:
-                "none",
-              fontSize:
-                "11px",
-              color:
-                "#555",
-              minHeight:
-                "30px",
-            }}
-          >
-            Reset to Default
-          </Button>
+
+
 
           <Box
             sx={{
-              display:
-                "flex",
-              gap: 0.75,
+              display: "flex",
+              justifyContent: "center",
+              gap: 1,
+              alignItems: "center",
+              width: "100%",
             }}
           >
-            <Button
-              onClick={
-                handleCloseSettings
-              }
+            <CustomButton
+              size="small"
+              variant="outlined"
+              onClick={handleResetColumns}
               sx={{
-                textTransform:
-                  "none",
-                fontSize:
-                  "11px",
-                color:
-                  "#555",
-                minHeight:
-                  "30px",
-                px: 1.5,
+                fontSize: "12px",
+                borderRadius: "8px",
+                px: 2,
               }}
             >
-              Cancel
-            </Button>
+              Reset
+            </CustomButton>
 
-            <Button
+            <CustomButton
+              size="small"
               variant="contained"
-              onClick={
-                handleSaveSettings
-              }
-              disabled={
-                tempSelectedColumns.length ===
-                0
-              }
+              onClick={handleSaveSettings}
+              disabled={tempSelectedColumns.length === 0}
               sx={{
-                textTransform:
-                  "none",
-                fontSize:
-                  "11px",
-                minHeight:
-                  "30px",
-                minWidth:
-                  "70px",
-                px: 1.5,
-                backgroundColor:
-                  "#0D4C7D",
-                borderRadius:
-                  "5px",
-                "&:hover": {
-                  backgroundColor:
-                    "#093d65",
-                },
+                fontSize: "12px",
+                borderRadius: "8px",
+                px: 2,
               }}
             >
               Save
-            </Button>
+            </CustomButton>
           </Box>
+
         </DialogActions>
       </Dialog>
     </>

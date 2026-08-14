@@ -1,5 +1,5 @@
 import { Box, Button, Divider, Menu, Typography } from "@mui/material";
-import Logo from "../../assets/ICICI-Logo.svg";
+import Logo from "../../assets/ICICI Logo.svg";
 import AxiomLogo from "../../assets/Axiom Logo.svg";
 import { useEffect, useState } from "react";
 import { KeyDownArrowIcon, KeyRightArrowIcon, KeyUpArrowIcon, LogoutIcon, TimerPauseIcon, UserProfileIcon } from "../../icons/Icons";
@@ -54,11 +54,8 @@ return(
       }}
     >
         {/* LEFT LOGO SECTION */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, ml: 2 }}>
-          <Box component="img" src={Logo} alt="ICICI Prudential Logo" />
-
-          <Box sx={{ width: "1px", height: 32, backgroundColor: "#d1d5db" }} />
-
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <Box component="img" sx={{height: 60}} src={Logo} alt="ICICI Life Logo" />
           <Box component="img" src={AxiomLogo} alt="Axiom Logo" />
         </Box>
 

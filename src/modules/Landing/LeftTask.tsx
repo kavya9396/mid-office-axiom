@@ -1,6 +1,7 @@
 import {
   Box,
   Paper,
+  Tooltip,
   Typography,
 } from "@mui/material";
 
@@ -10,11 +11,14 @@ import {
 
 import {
   KeyRightArrowIcon,
+  SearchIcon,
 } from "../../icons/Icons";
 
 import LastLogin from "./LastLogin";
 import type { MenuItem } from "../../types/inboxTypes";
 import { toDisplayLabel } from "../../utils/inboxUtils";
+import { useNavigate } from "react-router-dom";
+import { getSearchApplicationPath } from "../../routes/routes";
 
 interface LeftTaskProps {
   roles: string[];
@@ -70,6 +74,8 @@ const LeftTask = ({
   onToggleRoles,
   onToggleCollapse,
 }: LeftTaskProps) => {
+
+  const navigate = useNavigate();
 
   // ==========================================================
   // AUTO SELECT ALL CASES
@@ -191,13 +197,20 @@ const LeftTask = ({
         }}
       >
         {isCollapsed ? (
-          <Typography
-            sx={{
-              fontSize: "16px",
-            }}
+          <Tooltip
+            title={toDisplayLabel(taskName)}
+            placement="right"
+            arrow
           >
-            📂
-          </Typography>
+            <Typography
+              sx={{
+                fontSize: "16px",
+                cursor: "pointer",
+              }}
+            >
+              📂
+            </Typography>
+          </Tooltip>
         ) : (
           <>
             <Typography
@@ -540,6 +553,52 @@ const LeftTask = ({
             </Box>
           )}
 
+
+          {/* ===================================================
+            SEARCH APPLICATIONS
+          =================================================== */}
+
+          <Box
+            sx={{
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: isCollapsed
+                ? "center"
+                : "space-between",
+              px: 1.5,
+              borderBottom: "1px solid #eeeeee",
+              color: "#333333",
+            }}
+          >
+            {!isCollapsed && (
+              <Typography
+                sx={{
+                  fontSize: "11px",
+                  fontWeight: 600,
+                }}
+              >
+                Search Applications
+              </Typography>
+            )}
+
+            <Box
+              onClick={() =>
+                navigate(getSearchApplicationPath())
+              }
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                cursor: "pointer",
+              }}
+            >
+              <SearchIcon
+                width={32}
+                height={32}
+              />
+            </Box>
+          </Box>
+
           {/* ===================================================
               ALL CASES
              =================================================== */}
@@ -572,19 +631,19 @@ const LeftTask = ({
 
               borderLeft:
                 selectedTask ===
-                "ALL_CASES"
+                  "ALL_CASES"
                   ? "3px solid #9A2529"
                   : "3px solid transparent",
 
               backgroundColor:
                 selectedTask ===
-                "ALL_CASES"
+                  "ALL_CASES"
                   ? "#fdf2f2"
                   : "transparent",
 
               color:
                 selectedTask ===
-                "ALL_CASES"
+                  "ALL_CASES"
                   ? "#9A2529"
                   : "#333333",
 
@@ -635,13 +694,13 @@ const LeftTask = ({
 
                     backgroundColor:
                       selectedTask ===
-                      "ALL_CASES"
+                        "ALL_CASES"
                         ? "#9A2529"
                         : "#eeeeee",
 
                     color:
                       selectedTask ===
-                      "ALL_CASES"
+                        "ALL_CASES"
                         ? "#ffffff"
                         : "#555555",
 
