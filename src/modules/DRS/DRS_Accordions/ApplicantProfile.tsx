@@ -1,11 +1,20 @@
-import { Box, Button, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Container, Tab, Tabs, Typography } from "@mui/material";
 import { useState, type SyntheticEvent } from "react";
-import { useSelector } from "react-redux";
-
+import { useDispatch, useSelector } from "react-redux";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { title } from "../../../utils/constant";
-import type { RootState } from "../../../store/store";
-import EditApplicantProfile from "./EditApplicantProfile";
+import type { AppDispatch, RootState } from "../../../store/store"; import EditApplicantProfile from "./EditApplicantProfile";
+import CustomDialog from "../../../components/ui/Dialog/Dialog";
+import { GridSection } from "../../../components/layout/GridSection";
+import { buildTripleFields, formatCurrencyINR, formatDOB, maskString, toDisplayValue } from "../../../utils/helpers";
+import type { HealthInformation, LifestyleHabits, NomineeRow } from "../../../types/drs.types";
+import type { Column } from "../../../components/ui/Table/Table";
+import CustomTable from "../../../components/ui/Table/Table";
+import { centerFlex } from "../../../utils/styles";
+import KeyValueTable from "../../../components/ui/KeyValueTable/KeyValueTable";
+import { drsThunk } from "../../../store/thunks/drsThunk";
+import { useParams } from "react-router-dom";
+import CustomButton from "../../../components/ui/Button/Button";
 
 /* -------------------------------------------------------------------------- */
 /*                                   TYPES                                    */
@@ -113,8 +122,221 @@ interface PayoutDetails {
   thirdPartyPaymentFlag?: string | boolean;
 }
 
+interface EiaDetails {
+  openEIA?: string | boolean;
+  existingEIANumber?: string;
+  preferredRepository?: string;
+  convertPolicies?: string | boolean;
+}
+
+interface GenericDetails {
+  existingPolicyNumber?: string;
+  clientId?: string;
+  selfProposed?: string | boolean;
+  typeOfProposer?: string;
+  relationshipWithLifeAssured?: string;
+  typeOfProposal?: string;
+}
+
+type NomineeTableRow = Pick<
+  NomineeRow,
+  | "nomineeName"
+  | "nomineeDOB"
+  | "gender"
+  | "relationship"
+  | "accountNumber"
+  | "ifsc"
+  | "sharePercentage"
+>;
+
+type AppointeeTableRow = Pick<
+  NomineeRow,
+  | "appointeeName"
+  | "appointeeGender"
+  | "appointeeDOB"
+  | "appointeeRelationship"
+>;
+
+const nomineeColumns: Column<NomineeTableRow>[] = [
+  {
+    key: "nomineeName",
+    header: "Nominee Name",
+    width: "14%",
+  },
+  {
+    key: "nomineeDOB",
+    header: "Nominee DOB",
+    width: "12%",
+  },
+  {
+    key: "gender",
+    header: "Gender",
+    width: "10%",
+  },
+  {
+    key: "relationship",
+    header: "Relationship",
+    width: "12%",
+  },
+  {
+    key: "accountNumber",
+    header: "Account Number",
+    width: "14%",
+  },
+  {
+    key: "ifsc",
+    header: "IFSC",
+    width: "12%",
+  },
+  {
+    key: "sharePercentage",
+    header: "Share %",
+    width: "10%",
+  },
+];
+
+const appointeeColumns: Column<AppointeeTableRow>[] = [
+  {
+    key: "appointeeName",
+    header: "Appointee Name",
+    width: "14%",
+  },
+  {
+    key: "appointeeGender",
+    header: "Appointee Gender",
+    width: "12%",
+  },
+  {
+    key: "appointeeDOB",
+    header: "Appointee DOB",
+    width: "12%",
+  },
+  {
+    key: "appointeeRelationship",
+    header: "Appointee Relationship",
+    width: "12%",
+  },
+];
+
+interface SummaryNominee {
+  firstName?: string;
+  lastName?: string;
+  dob?: string;
+  gender?: string;
+  proposerNomineeRelation?: string;
+  percentage?: number | string;
+}
+
+interface SummaryAppointee {
+  firstName?: string;
+  lastName?: string;
+  dob?: string;
+  gender?: string;
+  relationWithNominee?: string;
+}
+
+type TripleFieldConfig<T> = {
+  label: string;
+  key: keyof T;
+  format?: (value: T[keyof T]) => string;
+};
+
+type HealthFieldConfig = TripleFieldConfig<HealthInformation>;
+type LifestyleFieldConfig = TripleFieldConfig<LifestyleHabits>;
+
+const conditionHealthFields: HealthFieldConfig[] = [
+  { label: "Diabetes", key: "diabetes" },
+  { label: "Hypertension", key: "hypertension" },
+  { label: "Heart Disease", key: "heartDisease" },
+  { label: "Cancer", key: "cancer" },
+  { label: "Kidney Disease", key: "kidneyDisease" },
+  { label: "Liver Disease", key: "liverDisease" },
+  { label: "Lung Disease", key: "lungDisease" },
+  { label: "Neurological Disorder", key: "neurologicalDisorder" },
+  { label: "Mental Disorder", key: "mentalDisorder" },
+  { label: "HIV/AIDS", key: "hivAids" },
+  { label: "Any Surgery", key: "anySurgery" },
+  { label: "Hospitalization", key: "hospitalization" },
+  { label: "Other Illness", key: "otherIllness" },
+  { label: "Family Heart Disease", key: "familyHeartDisease" },
+  { label: "Family Cancer", key: "familyCancer" },
+  { label: "Family Diabetes", key: "familyDiabetes" },
+  { label: "Gynecological History", key: "gynecologicalHistory" },
+  { label: "Pregnancy History", key: "pregnancyHistory" },
+  { label: "Miscarriage History", key: "miscarriageHistory" },
+];
+
+const normalizeMedicalText = (value: unknown) =>
+  String(value ?? "").trim();
+
+const isYesValue = (value: unknown) => {
+  const normalized = normalizeMedicalText(value).toLowerCase();
+
+  return (
+    normalized === "y" ||
+    normalized === "yes" ||
+    normalized === "true"
+  );
+};
+
+const formatYesValue = (value: unknown) =>
+  isYesValue(value) ? "Yes" : "-";
+
+const formatHeight = (value: unknown) => {
+  const normalized = normalizeMedicalText(value);
+
+  return normalized ? `${normalized} Cms` : "-";
+};
+
+const formatWeight = (value: unknown) => {
+  const normalized = normalizeMedicalText(value);
+
+  return normalized ? `${normalized} Kgs` : "-";
+};
+
+const formatTextOrDash = (value: unknown) =>
+  normalizeMedicalText(value) || "-";
+
+const withMedicalFormat = <T,>(
+  fields: TripleFieldConfig<T>[],
+  format: (value: unknown) => string,
+): TripleFieldConfig<T>[] =>
+  fields.map((field) => ({
+    ...field,
+    format,
+  }));
+
+const toMedicalTripleRows = <T,>(
+  fields: TripleFieldConfig<T>[],
+  placeholderKey: keyof T,
+) => {
+  const placeholderField: TripleFieldConfig<T> = {
+    label: "-",
+    key: placeholderKey,
+    format: () => "-",
+  };
+
+  const rows: Array<{
+    first: TripleFieldConfig<T>;
+    second: TripleFieldConfig<T>;
+    third: TripleFieldConfig<T>;
+  }> = [];
+
+  for (let index = 0; index < fields.length; index += 3) {
+    rows.push({
+      first: fields[index] ?? placeholderField,
+      second: fields[index + 1] ?? placeholderField,
+      third: fields[index + 2] ?? placeholderField,
+    });
+  }
+
+  return rows;
+};
+
 interface SummaryMember {
   memberType: string;
+  clientId?: string;
+  proposerLaRelation?: string;
   faceMatchDetails?: FaceMatchDetails;
   profileImage?: string;
   proposerSummary?: PersonalSummary;
@@ -124,7 +346,15 @@ interface SummaryMember {
   contactDetails?: ContactDetails;
   paymentDetails?: PaymentDetails;
   payoutDetails?: PayoutDetails;
-}
+  genericDetails?: GenericDetails;
+  eiaDetails?: EiaDetails;
+  nominee?: SummaryNominee[];
+  appointee?: SummaryAppointee[];
+  healthInformation?: HealthInformation;
+  healthDetail?: Record<string, unknown>;
+  lifestyleHabits?: LifestyleHabits;
+};
+
 /* -------------------------------------------------------------------------- */
 /*                         TAB CONFIGURATION                                  */
 /* -------------------------------------------------------------------------- */
@@ -207,26 +437,6 @@ const displayValue = (value: unknown): string => {
 
 const formatDateOnly = (value?: string): string =>
   value ? value.split("T")[0] : "-";
-
-const DetailField = ({ label, value }: { label: string; value: unknown }) => (
-  <Box sx={{ minWidth: 0 }}>
-    <Typography sx={{ fontSize: "12px", color: "#333333", lineHeight: 1.35 }}>
-      {label}
-    </Typography>
-    <Typography
-      sx={{
-        mt: "3px",
-        fontSize: "10px",
-        color: "#111111",
-        fontWeight: 700,
-        lineHeight: 1.35,
-        overflowWrap: "anywhere",
-      }}
-    >
-      {displayValue(value)}
-    </Typography>
-  </Box>
-);
 
 const ExpandableDetailField = ({
   label,
@@ -323,8 +533,12 @@ const DetailsCard = ({
 /* -------------------------------------------------------------------------- */
 
 const ApplicantProfile = () => {
+  const dispatch = useDispatch<AppDispatch>();
+  const { applicationNumber } = useParams<{ applicationNumber: string }>();
   const drsData = useSelector((state: RootState) => state.drs.data);
   const drsRecord = (drsData ?? {}) as Record<string, unknown>;
+  const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   /*
    * summary contains objects such as:
@@ -355,15 +569,9 @@ const ApplicantProfile = () => {
   const [selectedDetailTab, setSelectedDetailTab] = useState(0);
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
-  const applicationNumber = String(
-    drsRecord.applicationNumber ??
-      drsRecord.applicationNo ??
-      localStorage.getItem("applicationNumber") ??
-      "",
-  );
-
-  const handleEditProfileSave = () => {
+  const handleEditProfileSave = async () => {
     setEditProfileOpen(false);
+    await refreshApplicantSummary();
   };
 
   /* ------------------------------------------------------------------------ */
@@ -432,118 +640,35 @@ const ApplicantProfile = () => {
               py: 1.5,
             }}
           >
-            <Box
-              sx={{
-                width: "100%",
-                display: "grid",
-                gridTemplateColumns: "2fr 1fr 2fr 2fr",
-                columnGap: 4,
-                alignItems: "center",
-              }}
-            >
-              <Box>
-                <Typography
-                  sx={{
-                    fontSize: "13px",
-                    color: "#666666",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Document
-                </Typography>
+            <GridSection
+              columns={4}
+              items={[
+                {
+                  label: "Document",
+                  value: faceMatchDetails?.document,
+                },
+                {
+                  label: "Face Match Score",
+                  value: faceMatchDetails?.faceMatchScore,
+                },
+                {
+                  label: "Image Quality",
+                  value: faceMatchDetails?.imageQuality,
+                },
+                {
+                  label: "Remarks",
+                  value: faceMatchDetails?.remarks,
+                },
+              ]}
+            />
 
-                <Typography
-                  sx={{
-                    fontSize: "15px",
-                    color: "#111111",
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    mt: "2px",
-                  }}
-                >
-                  {faceMatchDetails?.document || "-"}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography
-                  sx={{
-                    fontSize: "13px",
-                    color: "#666666",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Face Match Score
-                </Typography>
-
-                <Typography
-                  sx={{
-                    fontSize: "15px",
-                    color: "#111111",
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    mt: "2px",
-                  }}
-                >
-                  {faceMatchDetails?.faceMatchScore ?? "-"}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography
-                  sx={{
-                    fontSize: "13px",
-                    color: "#666666",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Image Quality
-                </Typography>
-
-                <Typography
-                  sx={{
-                    fontSize: "15px",
-                    color: "#111111",
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    mt: "2px",
-                  }}
-                >
-                  {faceMatchDetails?.imageQuality || "-"}
-                </Typography>
-              </Box>
-
-              <Box>
-                <Typography
-                  sx={{
-                    fontSize: "13px",
-                    color: "#666666",
-                    lineHeight: 1.4,
-                  }}
-                >
-                  Remarks
-                </Typography>
-
-                <Typography
-                  sx={{
-                    fontSize: "15px",
-                    color: "#111111",
-                    fontWeight: 500,
-                    lineHeight: 1.4,
-                    mt: "2px",
-                  }}
-                >
-                  {faceMatchDetails?.remarks || "-"}
-                </Typography>
-              </Box>
-            </Box>
           </Box>
         );
       }
 
       case "Personal & KYC": {
         const personal = selectedApplicant.proposerSummary ?? {};
-        const applicant = selectedApplicant.applicantDetails ?? {};
+        // const applicant = selectedApplicant.applicantDetails ?? {};
         const kyc = selectedApplicant.kycDetails ?? {};
         const applicantName = [
           personal.firstName,
@@ -554,36 +679,38 @@ const ApplicantProfile = () => {
           .join(" ");
         const age = personal.age?.years;
 
+        const maskLastFour = (value?: string) => value ? maskString(value, { visibleStart: 0, visibleEnd: 4 }) : "-";
+
         const personalFields = [
           { label: "Applicant Name", value: applicantName },
           {
             label: "Date of Birth",
-            value: formatDateOnly(personal.dob || applicant.dateOfBirth),
+            value: formatDateOnly(personal.dob),
           },
           {
             label: "Age",
             value: age === null || age === undefined ? "-" : `${age} Years`,
           },
-          { label: "Gender", value: personal.gender || applicant.gender },
+          { label: "Gender", value: personal.gender },
           {
             label: "Marital Status",
-            value: personal.maritalStatus || applicant.maritalStatus,
+            value: personal.maritalStatus,
           },
           {
             label: "Nationality",
-            value: personal.nationality || applicant.nationality,
+            value: personal.nationality,
           },
           {
             label: "Country of Residence",
-            value: personal.countryOfResidence || applicant.countryOfResidence,
+            value: personal.countryOfResidence,
           },
           {
             label: "Education",
-            value: personal.education || applicant.education,
+            value: personal.education,
           },
           {
             label: "Resident Status",
-            value: personal.immigrationStatus || personal.residentStatus,
+            value: personal.residentStatus,
           },
           { label: "Designation", value: personal.designation },
           { label: "Disabled", value: personal.disabled },
@@ -597,12 +724,18 @@ const ApplicantProfile = () => {
         ];
 
         const kycFields = [
-          { label: "PRAN Number", value: kyc.pranNo },
+          {
+            label: "PRAN Number",
+            value: maskLastFour(kyc.pranNo),
+          },
           {
             label: "PRAN Number Verification",
-            value: kyc.pranNoVerification || kyc.pranNoVerifivation,
+            value: kyc.pranNoVerification,
           },
-          { label: "PAN Number", value: kyc.panNumber },
+          {
+            label: "PAN Number",
+            value: maskLastFour(kyc.panNumber),
+          },
           { label: "PAN Flag", value: kyc.panFlag },
           {
             label: "PAN Aadhar Seeding Status",
@@ -613,7 +746,10 @@ const ApplicantProfile = () => {
             label: "Identity Proof Expiry Date",
             value: formatDateOnly(kyc.identityProofExpiryDate),
           },
-          { label: "Identity Proof Number", value: kyc.identityProofNumber },
+          {
+            label: "Identity Proof Number",
+            value: maskLastFour(kyc.identityProofNumber),
+          },
           { label: "Address Proof", value: kyc.addressProof },
           { label: "Income Proof", value: kyc.incomeProof },
           { label: "CKYC Number", value: kyc.existingCkycNumber },
@@ -630,23 +766,10 @@ const ApplicantProfile = () => {
               borderRadius: "8px",
             }}
           >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, minmax(0, 1fr))",
-                  md: "repeat(3, minmax(0, 1fr))",
-                  lg: "repeat(8, minmax(0, 1fr))",
-                },
-                columnGap: 2,
-                rowGap: 1,
-              }}
-            >
-              {personalFields.map((field) => (
-                <DetailField key={field.label} {...field} />
-              ))}
-            </Box>
+            <GridSection
+              columns={8}
+              items={personalFields}
+            />
 
             <Box sx={{ borderTop: "1px solid #AFAFAF", my: 2 }} />
 
@@ -660,27 +783,14 @@ const ApplicantProfile = () => {
             >
               KYC
             </Typography>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, minmax(0, 1fr))",
-                  md: "repeat(3, minmax(0, 1fr))",
-                  lg: "repeat(8, minmax(0, 1fr))",
-                },
-                columnGap: 2,
-                rowGap: 1,
-              }}
-            >
-              {kycFields.map((field) => (
-                <DetailField key={field.label} {...field} />
-              ))}
-            </Box>
+            <GridSection
+              columns={8}
+              items={kycFields}
+            />
           </Box>
         );
       }
+
       case "Contact & Address": {
         const addresses = selectedApplicant.address ?? [];
         const contact = selectedApplicant.contactDetails ?? {};
@@ -739,90 +849,710 @@ const ApplicantProfile = () => {
         );
       }
 
-      case "Financial & Profession":
-        return (
-          <Box sx={{ p: 1 }}>
-            <Typography
-              sx={{
-                fontSize: "12px",
-                fontWeight: 600,
-                color: "#161616",
-              }}
-            >
-              Financial & Profession
-            </Typography>
+      case "Financial & Profession": {
+        const summaryRecord = selectedApplicant as SummaryMember & {
+          personalDetails?: Record<string, unknown>;
+          applicantFinancialDetails?: Record<string, unknown>;
+          financialDetails?: Record<string, unknown>;
+        };
 
-            {/* Financial & Profession content */}
+        const personalDetails =
+          summaryRecord.personalDetails &&
+            Object.keys(summaryRecord.personalDetails).length > 0
+            ? summaryRecord.personalDetails
+            : {};
+
+        const proposerSummary = selectedApplicant.proposerSummary ?? {};
+
+        const applicantFinancialDetails =
+          summaryRecord.applicantFinancialDetails ?? {};
+
+        const financialDetails = summaryRecord.financialDetails ?? {};
+
+        const customerDetails = Array.isArray(drsRecord.customerDetails)
+          ? (drsRecord.customerDetails as Record<string, unknown>[])
+          : [];
+
+        /*
+         * Find the corresponding customer entry for the selected member.
+         * This keeps the existing fallback behavior from FinanceAndProfession.
+         */
+        const selectedCustomer =
+          customerDetails[selectedMemberTab] ?? customerDetails[0] ?? {};
+
+        const customerPersonalDetails =
+          selectedCustomer.personalDetails &&
+            typeof selectedCustomer.personalDetails === "object"
+            ? (selectedCustomer.personalDetails as Record<string, unknown>)
+            : {};
+
+        const customerFinancialDetails =
+          selectedCustomer.financialDetail &&
+            typeof selectedCustomer.financialDetail === "object"
+            ? (selectedCustomer.financialDetail as Record<string, unknown>)
+            : {};
+
+        const producerDetails =
+          drsRecord.producerDetails &&
+            typeof drsRecord.producerDetails === "object"
+            ? (drsRecord.producerDetails as Record<string, unknown>)
+            : {};
+
+        const occupation =
+          applicantFinancialDetails.occupation ??
+          personalDetails.occupationType ??
+          proposerSummary.designation ??
+          customerPersonalDetails.occupationType ??
+          "";
+
+        const annualIncome =
+          applicantFinancialDetails.annualIncome ??
+          financialDetails.annualIncome ??
+          customerFinancialDetails.annualIncome ??
+          personalDetails.netIncomeAmt ??
+          customerPersonalDetails.netIncomeAmt ??
+          "";
+
+        const gstin =
+          applicantFinancialDetails.gstin ??
+          producerDetails.gstInNumber ??
+          "";
+
+        const industryType =
+          applicantFinancialDetails.industryType ??
+          personalDetails.industryType ??
+          "";
+
+        const organisationType =
+          applicantFinancialDetails.organisationType ??
+          personalDetails.orgType ??
+          customerPersonalDetails.orgType ??
+          "";
+
+        const organisationName =
+          applicantFinancialDetails.organisationName ??
+          personalDetails.orgName ??
+          customerPersonalDetails.orgName ??
+          "";
+
+        const financeFields = [
+          {
+            label: "Occupation",
+            value: displayValue(occupation),
+          },
+          {
+            label: "Annual Income",
+            value:
+              annualIncome !== "" && annualIncome !== null
+                ? formatCurrencyINR(Number(annualIncome))
+                : "-",
+          },
+          {
+            label: "GSTIN",
+            value: displayValue(gstin),
+          },
+          {
+            label: "Industry Type",
+            value: displayValue(industryType),
+          },
+          {
+            label: "Organisation Type",
+            value: displayValue(organisationType),
+          },
+          {
+            label: "Organisation Name",
+            value: displayValue(organisationName),
+          },
+        ];
+
+        return (
+          <Box
+            sx={{
+              mt: 1.5,
+              p: 2,
+              backgroundColor: "#F6F6F6",
+              borderRadius: "8px",
+            }}
+          >
+            <GridSection
+              columns={6}
+              items={financeFields}
+            />
           </Box>
         );
+      }
 
-      case "Medical & Lifestyle":
-        return (
-          <Box sx={{ p: 1 }}>
-            <Typography
-              sx={{
-                fontSize: "12px",
-                fontWeight: 600,
-                color: "#161616",
-              }}
-            >
-              Medical & Lifestyle
-            </Typography>
+      case "Medical & Lifestyle": {
+        const selectedHealthDetail =
+          drsRecord.healthDetail &&
+            typeof drsRecord.healthDetail === "object"
+            ? (drsRecord.healthDetail as Record<string, unknown>)
+            : {};
 
-            {/* Medical & Lifestyle content */}
-          </Box>
+        const applicantHealthDetail =
+          selectedApplicant.healthDetail &&
+            typeof selectedApplicant.healthDetail === "object"
+            ? (selectedApplicant.healthDetail as Record<string, unknown>)
+            : {};
+
+        const healthDetail =
+          Object.keys(applicantHealthDetail).length > 0
+            ? applicantHealthDetail
+            : selectedHealthDetail;
+
+        const substanceConsumption = Array.isArray(
+          healthDetail.substanceConsumption,
+        )
+          ? (healthDetail.substanceConsumption as Array<Record<string, unknown>>)
+          : [];
+
+        const firstSubstance = substanceConsumption[0] ?? {};
+
+        const illnessOrImpairment = Array.isArray(
+          healthDetail.illnessOrImpairment,
+        )
+          ? healthDetail.illnessOrImpairment
+            .map((item) => normalizeMedicalText(item))
+            .filter(Boolean)
+            .join(", ")
+          : "";
+
+        const health: HealthInformation =
+          selectedApplicant.healthInformation ?? {
+            height: normalizeMedicalText(healthDetail.height),
+            weight: normalizeMedicalText(healthDetail.weight),
+
+            diabetes: "",
+            hypertension: "",
+            heartDisease: "",
+            cancer: "",
+            kidneyDisease: "",
+            liverDisease: "",
+            lungDisease: "",
+            neurologicalDisorder: "",
+            mentalDisorder: "",
+            hivAids: "",
+            anySurgery: "",
+            hospitalization: "",
+            otherIllness: illnessOrImpairment,
+            familyHeartDisease: "",
+            familyCancer: "",
+            familyDiabetes: "",
+            gynecologicalHistory: "",
+            pregnancyHistory: "",
+            miscarriageHistory: "",
+          };
+
+        const substanceQuantity =
+          firstSubstance.quantity &&
+            typeof firstSubstance.quantity === "object"
+            ? (firstSubstance.quantity as Record<string, unknown>)
+            : {};
+
+        const lifestyle: LifestyleHabits =
+          selectedApplicant.lifestyleHabits ?? {
+            alcoholConsumption: "",
+            alcoholQuantity: "",
+            smoking: normalizeMedicalText(firstSubstance.substance)
+              ? "Yes"
+              : "",
+            smokingQuantity: normalizeMedicalText(
+              substanceQuantity.amount,
+            ),
+            tobaccoGutka: "",
+            narcotics: "",
+            hazardousOccupation: normalizeMedicalText(
+              healthDetail.hazardousOccupation,
+            ),
+            aviationActivities: "",
+            diving: "",
+            mountaineering: "",
+            otherHazardousActivities: "",
+            racing: "",
+          };
+
+        const formattedBaseHealthFields: HealthFieldConfig[] = [
+          {
+            label: "Height",
+            key: "height",
+            format: formatHeight as (
+              value: HealthInformation[keyof HealthInformation],
+            ) => string,
+          },
+          {
+            label: "Weight",
+            key: "weight",
+            format: formatWeight as (
+              value: HealthInformation[keyof HealthInformation],
+            ) => string,
+          },
+        ];
+
+        const formattedConditionHealthFields =
+          withMedicalFormat<HealthInformation>(
+            conditionHealthFields,
+            formatYesValue,
+          );
+
+        const positiveConditionFields =
+          formattedConditionHealthFields.filter((field) =>
+            isYesValue(health?.[field.key]),
+          );
+
+        const noMedicalHistoryField: HealthFieldConfig = {
+          label: "Other Medical History",
+          key: "diabetes",
+          format: () => "No",
+        };
+
+        const healthFieldsToDisplay = [
+          ...formattedBaseHealthFields,
+          ...(positiveConditionFields.length > 0
+            ? positiveConditionFields
+            : [noMedicalHistoryField]),
+        ];
+
+        const healthInformationRows = buildTripleFields(
+          health,
+          toMedicalTripleRows(
+            healthFieldsToDisplay,
+            "height",
+          ),
         );
 
-      case "Nominee":
-        return (
-          <Box sx={{ p: 1 }}>
-            <Typography
-              sx={{
-                fontSize: "12px",
-                fontWeight: 600,
-                color: "#161616",
-              }}
-            >
-              Nominee
-            </Typography>
+        const lifestyleConditionFields: LifestyleFieldConfig[] =
+          withMedicalFormat<LifestyleHabits>(
+            [
+              {
+                label: "Alcohol Consumption",
+                key: "alcoholConsumption",
+              },
+              {
+                label: "Smoking",
+                key: "smoking",
+              },
+              {
+                label: "Tobacco/Gutka",
+                key: "tobaccoGutka",
+              },
+              {
+                label: "Narcotics",
+                key: "narcotics",
+              },
+              {
+                label: "Hazardous Occupation",
+                key: "hazardousOccupation",
+              },
+              {
+                label: "Aviation Activities",
+                key: "aviationActivities",
+              },
+              {
+                label: "Diving",
+                key: "diving",
+              },
+              {
+                label: "Mountaineering",
+                key: "mountaineering",
+              },
+              {
+                label: "Other Hazardous Activities",
+                key: "otherHazardousActivities",
+              },
+              {
+                label: "Racing",
+                key: "racing",
+              },
+            ],
+            formatYesValue,
+          );
 
-            {/* Nominee content */}
-          </Box>
+        const lifestyleFieldsToDisplay: LifestyleFieldConfig[] = [];
+
+        if (isYesValue(lifestyle?.alcoholConsumption)) {
+          lifestyleFieldsToDisplay.push(
+            {
+              label: "Alcohol Consumption",
+              key: "alcoholConsumption",
+              format: formatYesValue as (
+                value: LifestyleHabits[keyof LifestyleHabits],
+              ) => string,
+            },
+            {
+              label: "Alcohol Quantity",
+              key: "alcoholQuantity",
+              format: formatTextOrDash as (
+                value: LifestyleHabits[keyof LifestyleHabits],
+              ) => string,
+            },
+          );
+        }
+
+        if (isYesValue(lifestyle?.smoking)) {
+          lifestyleFieldsToDisplay.push(
+            {
+              label: "Smoking",
+              key: "smoking",
+              format: formatYesValue as (
+                value: LifestyleHabits[keyof LifestyleHabits],
+              ) => string,
+            },
+            {
+              label: "Smoking Quantity",
+              key: "smokingQuantity",
+              format: formatTextOrDash as (
+                value: LifestyleHabits[keyof LifestyleHabits],
+              ) => string,
+            },
+          );
+        }
+
+        lifestyleConditionFields
+          .filter(
+            (field) =>
+              field.key !== "alcoholConsumption" &&
+              field.key !== "smoking",
+          )
+          .forEach((field) => {
+            if (isYesValue(lifestyle?.[field.key])) {
+              lifestyleFieldsToDisplay.push(field);
+            }
+          });
+
+        const hasLifestyleHabits =
+          lifestyleFieldsToDisplay.length > 0;
+
+        const lifestyleHabitsRows = buildTripleFields(
+          lifestyle,
+          toMedicalTripleRows(
+            lifestyleFieldsToDisplay,
+            "alcoholConsumption",
+          ),
         );
 
-      case "Generic":
         return (
-          <Box sx={{ p: 1 }}>
+          <>
+            <KeyValueTable
+              title="Health Information"
+              rows={healthInformationRows}
+            />
+
+            <Box sx={{ mt: 2 }}>
+              {hasLifestyleHabits ? (
+                <KeyValueTable
+                  title="Lifestyle Habits"
+                  rows={lifestyleHabitsRows}
+                />
+              ) : (
+                <Box
+                  sx={{
+                    backgroundColor: "#F1F1F1",
+                    borderRadius: 5,
+                    overflow: "hidden",
+                    border: "1px solid #E3E3E3",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      px: 2.5,
+                      py: 1.25,
+                      backgroundColor: "#0D4F81",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        color: "#FFFFFF",
+                        fontSize: 14,
+                        fontWeight: 700,
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      Lifestyle Habits
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      ...centerFlex,
+                      bgcolor: "#D2D7DE",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        color: "#4B5563",
+                        fontSize: 14,
+                        fontWeight: 400,
+                        my: 1,
+                      }}
+                    >
+                      No Lifestyle Habits
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          </>
+        );
+      }
+
+      case "Nominee": {
+        const fallbackNominees: SummaryNominee[] = Array.isArray(
+          selectedApplicant.nominee,
+        )
+          ? selectedApplicant.nominee
+          : Array.isArray(drsRecord.nominee)
+            ? (drsRecord.nominee as SummaryNominee[])
+            : [];
+
+        const fallbackAppointees: SummaryAppointee[] = Array.isArray(
+          selectedApplicant.appointee,
+        )
+          ? selectedApplicant.appointee
+          : Array.isArray(drsRecord.appointee)
+            ? (drsRecord.appointee as SummaryAppointee[])
+            : [];
+
+        const mappedFallbackNominees: NomineeTableRow[] =
+          fallbackNominees.map((item) => ({
+            nomineeName: toDisplayValue(
+              [item.firstName, item.lastName]
+                .filter(Boolean)
+                .join(" "),
+            ),
+            nomineeDOB: toDisplayValue(formatDOB(item.dob)),
+            gender: toDisplayValue(item.gender),
+            relationship: toDisplayValue(
+              item.proposerNomineeRelation,
+            ),
+            accountNumber: "-",
+            ifsc: "-",
+            sharePercentage: Number(item.percentage ?? 0),
+          }));
+
+        const mappedFallbackAppointees: AppointeeTableRow[] =
+          fallbackAppointees.map((item) => ({
+            appointeeName: toDisplayValue(
+              [item.firstName, item.lastName]
+                .filter(Boolean)
+                .join(" "),
+            ),
+            appointeeGender: toDisplayValue(item.gender),
+            appointeeDOB: toDisplayValue(formatDOB(item.dob)),
+            appointeeRelationship: toDisplayValue(
+              item.relationWithNominee,
+            ),
+          }));
+
+        /*
+         * If your selected applicant already has the richer nominee
+         * structure, prefer that data. Otherwise use the summary/root
+         * nominee data as the fallback.
+         */
+        const nominees: NomineeTableRow[] = mappedFallbackNominees;
+
+        const appointees: AppointeeTableRow[] =
+          mappedFallbackAppointees;
+
+        if (nominees.length === 0 && appointees.length === 0) {
+          return (
             <Typography
+              component="span"
               sx={{
-                fontSize: "12px",
-                fontWeight: 600,
-                color: "#161616",
+                fontSize: "14px",
+                fontWeight: 700,
               }}
             >
-              Generic
+              No nominees have been selected
             </Typography>
+          );
+        }
 
-            {/* Generic content */}
-          </Box>
-        );
-
-      case "eIA":
         return (
-          <Box sx={{ p: 1 }}>
-            <Typography
-              sx={{
-                fontSize: "12px",
-                fontWeight: 600,
-                color: "#161616",
-              }}
-            >
-              eIA
-            </Typography>
+          <>
+            {nominees.length > 0 ? (
+              <CustomTable<NomineeTableRow>
+                title="Nominee Details"
+                columns={nomineeColumns}
+                data={nominees}
+              />
+            ) : (
+              <Typography
+                component="span"
+                sx={{
+                  fontSize: "14px",
+                  fontWeight: 700,
+                }}
+              >
+                No nominees have been selected
+              </Typography>
+            )}
 
-            {/* eIA content */}
+            <Box sx={{ mt: 2 }}>
+              {appointees.length > 0 ? (
+                <CustomTable<AppointeeTableRow>
+                  title="Appointee Details"
+                  columns={appointeeColumns}
+                  data={appointees}
+                />
+              ) : (
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: "14px",
+                    fontWeight: 700,
+                  }}
+                >
+                  No appointees have been selected
+                </Typography>
+              )}
+            </Box>
+          </>
+        );
+      }
+
+      case "Generic": {
+        const generic = selectedApplicant.genericDetails ?? {};
+
+        const applicationInfo =
+          drsRecord.applicationInfo &&
+            typeof drsRecord.applicationInfo === "object"
+            ? (drsRecord.applicationInfo as Record<string, unknown>)
+            : {};
+
+        const customerDetails = Array.isArray(drsRecord.customerDetails)
+          ? (drsRecord.customerDetails as Record<string, unknown>[])
+          : [];
+
+        const selectedCustomer = customerDetails[selectedMemberTab] ?? {};
+
+        const resolvedClientId =
+          String(
+            selectedApplicant.clientId ??
+            selectedCustomer.clientId ??
+            "",
+          ).trim() ||
+          String(generic.clientId ?? "").trim();
+
+        const selfProposedFromApplicationInfo =
+          typeof applicationInfo.isLAPropSame === "boolean"
+            ? applicationInfo.isLAPropSame
+              ? "Yes"
+              : "No"
+            : String(applicationInfo.isLAPropSame ?? "");
+
+        const existingPolicyNumber =
+          String(
+            generic.existingPolicyNumber ??
+            applicationInfo.spousePolicyNo ??
+            "",
+          );
+
+        const selfProposed =
+          String(
+            generic.selfProposed ??
+            selfProposedFromApplicationInfo,
+          );
+
+        const typeOfProposer =
+          String(
+            generic.typeOfProposer ??
+            applicationInfo.proposerType ??
+            "",
+          );
+
+        const relationshipWithLifeAssured =
+          String(
+            generic.relationshipWithLifeAssured ??
+            selectedApplicant.proposerLaRelation ??
+            selectedCustomer.proposerLaRelation ??
+            "",
+          );
+
+        const typeOfProposal =
+          String(
+            generic.typeOfProposal ??
+            applicationInfo.comboFlag ??
+            "",
+          );
+
+        const genericFields = [
+          {
+            label: "Existing Policy Number",
+            value: displayValue(existingPolicyNumber),
+          },
+          {
+            label: "Client ID",
+            value: displayValue(resolvedClientId),
+          },
+          {
+            label: "Self Proposed",
+            value: displayValue(selfProposed),
+          },
+          {
+            label: "Type of Proposer",
+            value: displayValue(typeOfProposer),
+          },
+          {
+            label: "Relationship with Life Assured",
+            value: displayValue(relationshipWithLifeAssured),
+          },
+          {
+            label: "Type of Proposal",
+            value: displayValue(typeOfProposal),
+          },
+        ];
+
+        return (
+          <Box
+            sx={{
+              mt: 1.5,
+              p: 2,
+              borderRadius: "8px",
+              backgroundColor: "#F6F6F6",
+            }}
+          >
+            <GridSection
+              columns={6}
+              items={genericFields}
+            />
           </Box>
         );
+      }
+
+      case "eIA": {
+        const eia = selectedApplicant.eiaDetails ?? {};
+        const eiaFields = [
+          {
+            label: "Open eIA",
+            value: eia.openEIA,
+          },
+          {
+            label: "Existing eIA Number",
+            value: eia.existingEIANumber,
+          },
+          {
+            label: "Preferred Repository",
+            value: eia.preferredRepository,
+          },
+          {
+            label: "Convert Policies",
+            value: eia.convertPolicies,
+          },
+        ];
+
+        return (
+          <Box
+            sx={{
+              mt: 1.5,
+              p: 2,
+              backgroundColor: "#F6F6F6",
+              borderRadius: "8px",
+            }}
+          >
+            <GridSection columns={4} items={eiaFields} />
+          </Box>
+        );
+      }
 
       case "Payment & Payout": {
         const payment = selectedApplicant.paymentDetails ?? {};
@@ -876,47 +1606,43 @@ const ApplicantProfile = () => {
     }
   };
 
+  const refreshApplicantSummary = async () => {
+    try {
+      await dispatch(
+        drsThunk({
+          applicationNo: applicationNumber ?? "",
+          userId: localStorage.getItem("userId") ?? "",
+          roleType: localStorage.getItem("roleType") ?? "CVT_TASK",
+          sections: ["summary"],
+        }),
+      ).unwrap();
+    } catch (error) {
+      console.error("Failed to refresh applicant summary", error);
+    }
+  };
+
+
   /* ------------------------------------------------------------------------ */
   /*                                   UI                                     */
   /* ------------------------------------------------------------------------ */
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Container disableGutters>
       <CustomAccordion
         title={title.applicantDetails}
         defaultExpanded
         headerActions={
           roleType === "CVT_TASK" ? (
-            <Button
-              type="button"
-              variant="outlined"
-              onClick={(event) => {
-                event.stopPropagation();
-                setEditProfileOpen(true);
-              }}
-              sx={{
-                minWidth: "20px",
-                height: "25px",
-                px: 3,
-                border: "1px solid #A92129",
-                borderRadius: "22px",
-                borderColor: "#A92129",
-                backgroundColor: "#FFFFFF",
-                color: "#A92129",
-                fontSize: "12px",
-                fontWeight: 400,
-                lineHeight: 1,
-                textTransform: "none",
-                boxShadow: "none",
-                "&:hover": {
-                  borderColor: "#A92129",
-                  backgroundColor: "#FFF5F5",
-                  boxShadow: "none",
-                },
-              }}
-            >
-              Edit
-            </Button>
+              <CustomButton
+                variant="outlined"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setEditProfileOpen(true);
+                }}
+                sx={{ borderRadius: "50px", paddingX: "24px" }}
+              >
+                Edit
+              </CustomButton>
           ) : null
         }
       >
@@ -938,6 +1664,16 @@ const ApplicantProfile = () => {
             >
               {/* Applicant Image */}
               <Box
+                component="button"
+                type="button"
+                onClick={() => {
+                  const image = getApplicantImage(selectedApplicant);
+
+                  if (image) {
+                    setPreviewImage(image);
+                    setIsImageDialogOpen(true);
+                  }
+                }}
                 sx={{
                   width: 48,
                   height: 48,
@@ -949,6 +1685,8 @@ const ApplicantProfile = () => {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
+                  padding: 0,
+                  cursor: getApplicantImage(selectedApplicant) ? "pointer" : "default",
                 }}
               >
                 {getApplicantImage(selectedApplicant) ? (
@@ -973,11 +1711,11 @@ const ApplicantProfile = () => {
                       color: "#999999",
                     }}
                   >
-                    {selectedApplicant?.memberType?.charAt(0)?.toUpperCase() ||
-                      "A"}
+                    {selectedApplicant?.memberType?.charAt(0)?.toUpperCase() || "A"}
                   </Typography>
                 )}
               </Box>
+
 
               {/* Proposer / Life Assured Tabs */}
               <Tabs
@@ -1149,12 +1887,42 @@ const ApplicantProfile = () => {
 
       <EditApplicantProfile
         open={editProfileOpen}
-        applicationNumber={applicationNumber}
         memberIndex={selectedMemberTab}
         onClose={() => setEditProfileOpen(false)}
         onSave={handleEditProfileSave}
       />
-    </Box>
+
+      <CustomDialog
+        open={isImageDialogOpen}
+        onClose={() => {
+          setIsImageDialogOpen(false);
+          setPreviewImage(null);
+        }}
+        title="Profile Image"
+        maxWidth="xs"
+        contentSx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          p: 3,
+        }}
+      >
+        {previewImage && (
+          <Box
+            component="img"
+            src={previewImage}
+            alt="Profile preview"
+            sx={{
+              display: "block",
+              maxWidth: "100%",
+              maxHeight: "40vh",
+              objectFit: "contain",
+              borderRadius: "8px",
+            }}
+          />
+        )}
+      </CustomDialog>
+    </Container>
   );
 };
 

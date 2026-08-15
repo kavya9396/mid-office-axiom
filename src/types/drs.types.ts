@@ -153,8 +153,33 @@ export interface DRSData {
   advisorDetails: Record<string, string>;
   questions: DRSQuestion[];
   externalAPIs: DRSExternalAPIs;
-  summary:[];
+  summary: EditableMember[];
 }
+
+export type EditableMember = {
+  memberType?: string;
+  proposerSummary?: {
+    dob?: string;
+    gender?: string;
+    residentStatus?: string;
+    immigrationStatus?: string;
+  };
+  applicantDetails?: {
+    dateOfBirth?: string;
+    gender?: string;
+  };
+  kycDetails?: {
+    panNumber?: string;
+    pranNo?: string;
+    identityProofType?: string;
+    addressProof?: string;
+    ageProof?: string;
+  };
+  address?: {
+    type?: string;
+    pinCode?: string;
+  }[];
+};
 
 export interface DRSApplicationInfo {
   proposerType: string;
@@ -1120,6 +1145,7 @@ export interface ApplicantProfileSubmitRequest {
   userId: string;
   roleType: string;
   sections: string[];
+  isAcuity?: boolean;
 }
 
 export interface ApplicantProfileSubmitResponse {

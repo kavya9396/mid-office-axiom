@@ -1,20 +1,22 @@
 import {
   Box,
-  Button,
   CircularProgress,
-  Dialog,
-  DialogContent,
-  IconButton,
+  Divider,
   MenuItem,
-  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import type { AppDispatch } from "../../../store/store";
+import type { AppDispatch, RootState } from "../../../store/store";
 import { drsThunk } from "../../../store/thunks/drsThunk";
-import { CloseIcon } from "../../../icons/Icons";
+import CustomDialog from "../../../components/ui/Dialog/Dialog";
+import CustomButton from "../../../components/ui/Button/Button";
+import CustomTextField from "../../../components/ui/TextField/TextField";
+import { labelStyles } from "../../../utils/styles";
+import type { ApplicantProfileSubmitRequest } from "../../../types/drs.types";
+import { applicantProfileSubmitThunk } from "../../../store/thunks/applicantProfileSubmitThunk";
+import { useParams } from "react-router-dom";
 
 type Address = {
   type?: string;
@@ -27,11 +29,6 @@ type EditableMember = {
     dob?: string;
     gender?: string;
     residentStatus?: string;
-    immigrationStatus?: string;
-  };
-  applicantDetails?: {
-    dateOfBirth?: string;
-    gender?: string;
   };
   kycDetails?: {
     panNumber?: string;
@@ -60,11 +57,37 @@ type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 interface EditApplicantProfileProps {
   open: boolean;
-  applicationNumber: string;
   memberIndex: number;
   onClose: () => void;
-  onSave?: (values: FormValues, memberIndex: number) => void;
+  onSave?: (
+    values: FormValues,
+    memberIndex: number,
+  ) => void | Promise<void>;
 }
+
+type MasterOption = {
+  code?: string;
+  description?: string;
+  value?: string | null;
+  isActive?: string;
+  hasExpiry?: string;
+};
+
+const getDropdownOptions = (options?: MasterOption[]) =>
+  options
+    ?.filter((item) => item.isActive === "Y")
+    .map((item) => item.description)
+    .filter((description): description is string => Boolean(description)) ?? [];
+
+const getOptionCode = (
+  options: MasterOption[] | undefined,
+  description: string,
+) =>
+  options?.find(
+    (item) =>
+      item.description?.trim().toLowerCase() ===
+      description.trim().toLowerCase(),
+  )?.code ?? "";
 
 const EMPTY_FORM: FormValues = {
   dob: "",
@@ -89,20 +112,14 @@ const findAddress = (addresses: Address[] = [], type: string) =>
 
 const mapMemberToForm = (member?: EditableMember): FormValues => {
   if (!member) return EMPTY_FORM;
+
   const communication = findAddress(member.address, "communication");
   const permanent = findAddress(member.address, "permanent");
 
   return {
-    dob: dateOnly(
-      member.proposerSummary?.dob || member.applicantDetails?.dateOfBirth,
-    ),
-    gender: text(
-      member.proposerSummary?.gender || member.applicantDetails?.gender,
-    ),
-    residentialStatus: text(
-      member.proposerSummary?.immigrationStatus ||
-        member.proposerSummary?.residentStatus,
-    ),
+    dob: dateOnly(member.proposerSummary?.dob),
+    gender: text(member.proposerSummary?.gender),
+    residentialStatus: text(member.proposerSummary?.residentStatus),
     panNumber: text(member.kycDetails?.panNumber).toUpperCase(),
     pranNumber: text(member.kycDetails?.pranNo),
     identityProof: text(member.kycDetails?.identityProofType),
@@ -112,6 +129,7 @@ const mapMemberToForm = (member?: EditableMember): FormValues => {
     permanentPincode: text(permanent?.pinCode),
   };
 };
+
 
 const extractSummary = (response: unknown): EditableMember[] => {
   const result = response as {
@@ -123,7 +141,22 @@ const extractSummary = (response: unknown): EditableMember[] => {
 
 const validate = (values: FormValues): FormErrors => {
   const errors: FormErrors = {};
-  const required: Array<keyof FormValues> = [
+
+  const labels: Record<keyof FormValues, string> = {
+    dob: "DOB",
+    gender: "Gender",
+    residentialStatus: "Residential Status",
+    panNumber: "PAN Number",
+    pranNumber: "PRAN Number",
+    identityProof: "Identity Proof",
+    ageProof: "Age Proof",
+    addressProof: "Address Proof",
+    communicationPincode: "Comm. Pincode",
+    permanentPincode: "Perm. Pincode",
+  };
+
+  // All fields are mandatory except PRAN number.
+  const requiredFields: Array<keyof FormValues> = [
     "dob",
     "gender",
     "residentialStatus",
@@ -134,36 +167,101 @@ const validate = (values: FormValues): FormErrors => {
     "communicationPincode",
     "permanentPincode",
   ];
-  required.forEach((field) => {
-    if (!values[field].trim()) errors[field] = "This field is required";
+
+  // Required field validation
+  requiredFields.forEach((field) => {
+    const value = String(values[field] ?? "").trim();
+
+    if (!value) {
+      errors[field] = `${labels[field]} is required`;
+    }
   });
 
-  if (values.dob && new Date(values.dob) > new Date()) {
-    errors.dob = "Date of birth cannot be in the future";
+  // Explicit dropdown validation
+  const requiredDropdowns: Array<keyof FormValues> = [
+    "gender",
+    "residentialStatus",
+    "identityProof",
+    "ageProof",
+    "addressProof",
+  ];
+
+  requiredDropdowns.forEach((field) => {
+    const value = String(values[field] ?? "").trim();
+
+    if (!value) {
+      errors[field] = `Please select ${labels[field]}`;
+    }
+  });
+
+  // DOB validation
+  if (values.dob) {
+    const dob = new Date(values.dob);
+    const today = new Date();
+
+    today.setHours(0, 0, 0, 0);
+
+    if (Number.isNaN(dob.getTime())) {
+      errors.dob = "Enter a valid DOB";
+    } else if (dob > today) {
+      errors.dob = "DOB cannot be in the future";
+    }
   }
-  if (values.panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(values.panNumber)) {
-    errors.panNumber = "Enter a valid PAN number";
+
+  // PAN validation
+  const pan = values.panNumber.trim().toUpperCase();
+
+  if (pan) {
+    if (pan.length !== 10) {
+      errors.panNumber = "PAN Number must be exactly 10 characters";
+    } else if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
+      errors.panNumber = "Enter a valid PAN Number";
+    }
   }
-  if (values.pranNumber && !/^\d{12}$/.test(values.pranNumber)) {
-    errors.pranNumber = "PRAN number must contain 12 digits";
+
+  // PRAN validation
+  // PRAN is optional.
+  const pran = values.pranNumber.trim();
+
+  if (pran && !/^\d{12}$/.test(pran)) {
+    errors.pranNumber = "PRAN Number must be exactly 12 digits";
   }
-  if (values.communicationPincode && !/^\d{6}$/.test(values.communicationPincode)) {
-    errors.communicationPincode = "Pincode must contain 6 digits";
+
+  // Communication Pincode validation
+  const communicationPincode = values.communicationPincode.trim();
+
+  if (communicationPincode) {
+    if (!/^\d{6}$/.test(communicationPincode)) {
+      errors.communicationPincode =
+        "Comm. Pincode must be exactly 6 digits";
+    }
   }
-  if (values.permanentPincode && !/^\d{6}$/.test(values.permanentPincode)) {
-    errors.permanentPincode = "Pincode must contain 6 digits";
+
+  // Permanent Pincode validation
+  const permanentPincode = values.permanentPincode.trim();
+
+  if (permanentPincode) {
+    if (!/^\d{6}$/.test(permanentPincode)) {
+      errors.permanentPincode =
+        "Perm. Pincode must be exactly 6 digits";
+    }
   }
+
   return errors;
 };
 
 const EditApplicantProfile = ({
   open,
-  applicationNumber,
   memberIndex,
   onClose,
   onSave,
 }: EditApplicantProfileProps) => {
   const dispatch = useDispatch<AppDispatch>();
+  const { applicationNumber } = useParams<{ applicationNumber: string }>();
+  const roleType = localStorage.getItem("roleType") ?? "CVT_TASK";
+  const userId = localStorage.getItem("username") ?? "";
+  const masters = useSelector((state: RootState) => state.drs.masters);
+  const drsData = useSelector((state: RootState) => state.drs.data);
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
@@ -182,7 +280,7 @@ const EditApplicantProfile = ({
         const userId = localStorage.getItem("userId") ?? "";
         const response = await dispatch(
           drsThunk({
-            applicationNo: applicationNumber,
+            applicationNo: applicationNumber ?? "",
             userId,
             roleType,
             sections: ["summary"],
@@ -207,98 +305,411 @@ const EditApplicantProfile = ({
   }, [applicationNumber, dispatch, memberIndex, open]);
 
   const update = (field: keyof FormValues, value: string) => {
-    const nextValue = field === "panNumber" ? value.toUpperCase() : value;
-    setValues((current) => ({ ...current, [field]: nextValue }));
-    setErrors((current) => ({ ...current, [field]: undefined }));
+    let nextValue = value;
+
+    if (field === "panNumber") {
+      nextValue = value
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "")
+        .slice(0, 10);
+    }
+
+    if (field === "pranNumber") {
+      nextValue = value
+        .replace(/\D/g, "")
+        .slice(0, 12);
+    }
+
+    if (
+      field === "communicationPincode" ||
+      field === "permanentPincode"
+    ) {
+      nextValue = value
+        .replace(/\D/g, "")
+        .slice(0, 6);
+    }
+
+    setValues((current) => ({
+      ...current,
+      [field]: nextValue,
+    }));
+
+    // Clear the current field's error as soon as the user changes it.
+    setErrors((current) => {
+      if (!current[field]) {
+        return current;
+      }
+
+      const nextErrors = { ...current };
+      delete nextErrors[field];
+
+      return nextErrors;
+    });
   };
 
-  const handleSave = () => {
+  const createUpdatedMember = (
+    member: EditableMember,
+    formValues: FormValues,
+  ): EditableMember => {
+    return {
+      ...member,
+
+      proposerSummary: {
+        ...member.proposerSummary,
+        dob: formValues.dob,
+        gender: getOptionCode(masters?.gender, formValues.gender),
+        residentStatus: getOptionCode(
+          masters?.resident_status,
+          formValues.residentialStatus,
+        ),
+      },
+
+      kycDetails: {
+        ...member.kycDetails,
+        panNumber: formValues.panNumber.trim().toUpperCase(),
+        pranNo: formValues.pranNumber.trim(),
+        identityProofType: getOptionCode(
+          masters?.idProof,
+          formValues.identityProof,
+        ),
+        ageProof: getOptionCode(
+          masters?.idProof,
+          formValues.ageProof,
+        ),
+        addressProof: getOptionCode(
+          masters?.addressProof,
+          formValues.addressProof,
+        ),
+      },
+
+      address: member.address?.map((address) => {
+        const type = address.type?.trim().toLowerCase();
+
+        if (type === "communication") {
+          return {
+            ...address,
+            pinCode: formValues.communicationPincode.trim(),
+          };
+        }
+
+        if (type === "permanent") {
+          return {
+            ...address,
+            pinCode: formValues.permanentPincode.trim(),
+          };
+        }
+
+        return address;
+      }),
+    };
+  };
+
+  const handleSave = async () => {
     const nextErrors = validate(values);
+
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
-    onSave?.(values, memberIndex);
-    onClose();
+
+    if (Object.keys(nextErrors).length > 0) {
+      return;
+    }
+
+    if (!drsData?.summary?.[memberIndex]) {
+      setApiError("Unable to find applicant details");
+      return;
+    }
+
+    setLoading(true);
+    setApiError("");
+
+    try {
+
+      const currentMember = drsData.summary[memberIndex];
+
+      const updatedMember = createUpdatedMember(
+        currentMember,
+        values,
+      );
+
+      const updatedSummary = drsData.summary.map((member, index) =>
+        index === memberIndex ? updatedMember : member,
+      );
+
+      /*
+       * Payload sent to applicantProfileSubmitThunk:
+       *
+       * {
+       *   applicationNo: "...",
+       *   roleType: "CVT_TASK",
+       *   sections: ["summary"],
+       *   userId: "...",
+       *   data: {
+       *     ...complete DRS data,
+       *     summary: [
+       *       ...existing summary members,
+       *       edited member with updated:
+       *
+       *       proposerSummary.dob
+       *       proposerSummary.gender         -> master code
+       *       proposerSummary.residentStatus -> master code
+       *
+       *       kycDetails.panNumber
+       *       kycDetails.pranNo
+       *       kycDetails.identityProofType   -> master code
+       *       kycDetails.ageProof             -> master code
+       *       kycDetails.addressProof         -> master code
+       *
+       *       address.communication.pinCode
+       *       address.permanent.pinCode
+       *     ]
+       *   }
+       * }
+       */
+
+      const payload: ApplicantProfileSubmitRequest = {
+        applicationNo: applicationNumber ?? "",
+        roleType,
+        sections: ["summary"],
+        userId,
+        data: {
+          ...drsData,
+          summary: updatedSummary,
+        },
+        isAcuity: true,
+      };
+
+      console.log("CVT Edit Profile Payload", payload);
+
+      await dispatch(
+        applicantProfileSubmitThunk(payload),
+      ).unwrap();
+
+      await onSave?.(values, memberIndex);
+      onClose();
+    } catch (error) {
+      setApiError(
+        error instanceof Error
+          ? error.message
+          : "Unable to save applicant details",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const field = (
     name: keyof FormValues,
     label: string,
     options?: string[],
-    inputProps?: Record<string, unknown>,
+    htmlInputProps?: React.InputHTMLAttributes<HTMLInputElement>,
   ) => (
-    <TextField
-      select={Boolean(options)}
-      type={name === "dob" ? "date" : "text"}
-      label={label}
-      value={values[name]}
-      onChange={(event) => update(name, event.target.value)}
-      error={Boolean(errors[name])}
-      helperText={errors[name] ?? " "}
-      InputLabelProps={name === "dob" ? { shrink: true } : undefined}
-      inputProps={inputProps}
-      fullWidth
-      size="small"
-    >
-      {options?.map((option) => (
-        <MenuItem key={option} value={option}>
-          {option}
-        </MenuItem>
-      ))}
-    </TextField>
+    <Box>
+      <Typography sx={labelStyles}>{label}</Typography>
+
+      <CustomTextField
+        select={Boolean(options)}
+        type={name === "dob" ? "date" : "text"}
+        value={values[name]}
+        onChange={(event) => update(name, event.target.value)}
+        error={Boolean(errors[name])}
+        htmlInputProps={htmlInputProps}
+        fullWidth
+        size="small"
+      >
+        {options?.map((option) => (
+          <MenuItem key={option} value={option}>
+            {option}
+          </MenuItem>
+        ))}
+      </CustomTextField>
+
+      {errors[name] && (
+        <Typography
+          sx={{
+            color: "#d32f2f",
+            fontSize: "12px",
+            mt: 0.5,
+          }}
+        >
+          {errors[name]}
+        </Typography>
+      )}
+    </Box>
   );
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="md">
-      <DialogContent>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", mb: 3 }}>
-          <Typography sx={{ color: "#06447D", fontSize: 14, fontWeight: 700 }}>
-            EDIT APPLICANT PROFILE
-          </Typography>
-          <IconButton onClick={onClose} aria-label="Close edit applicant profile">
-            <CloseIcon sx={{ color: "#06447D" }} />
-          </IconButton>
+    <CustomDialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      title={
+        <Typography
+          sx={{
+            color: "#06447D",
+            fontSize: 14,
+            fontWeight: 700,
+          }}
+        >
+          EDIT APPLICANT PROFILE
+        </Typography>
+      }
+      actionsSx={{ justifyContent: "center", pb: 2 }}
+      actions={
+        <CustomButton
+          onClick={handleSave}
+          disabled={loading || Boolean(apiError)}
+          sx={{
+            px: 4,
+            borderRadius: "50px",
+          }}
+        >
+          {loading ? "Saving..." : "Save"}
+        </CustomButton>
+      }
+    >
+      {loading ? (
+        <Box sx={{ minHeight: 300, display: "grid", placeItems: "center" }}>
+          <CircularProgress />
         </Box>
+      ) : (
+        <Box
+          sx={{
+            backgroundColor: "#F6F6F6",
+            borderRadius: 2,
+            p: 2,
+          }}
+        >
+          {apiError && (
+            <Typography
+              color="error"
+              sx={{ mb: 2 }}
+            >
+              {apiError}
+            </Typography>
+          )}
 
-        {loading ? (
-          <Box sx={{ minHeight: 300, display: "grid", placeItems: "center" }}>
-            <CircularProgress />
-          </Box>
-        ) : (
-          <Box sx={{ borderRadius: 2, backgroundColor: "#F6F6F6" }}>
-            {apiError && <Typography color="error" sx={{ mb: 2 }}>{apiError}</Typography>}
-            <Typography sx={{ fontSize: 12, fontWeight: 700, mb: 2 }}>Personal &amp; KYC</Typography>
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
-              {field("dob", "DOB")}
-              {field("gender", "Gender", ["Male", "Female", "Other"])}
-              {field("residentialStatus", "Residential Status", ["Indian Resident", "Non Resident Indian", "Foreign National"])}
-              {field("panNumber", "PAN Number", undefined, { maxLength: 10 })}
-              {field("pranNumber", "PRAN Number", undefined, { maxLength: 12, inputMode: "numeric" })}
-              {field("identityProof", "Identity Proof", ["Aadhaar", "Adhr", "PAN", "Passport", "Voter ID"])}
-              {field("ageProof", "Age Proof", ["Aadhaar", "Adhr", "PAN", "Passport", "Birth Certificate"])}
+          <Box>
+            <Typography
+              sx={{
+                color: "#444",
+                fontSize: "14px",
+                fontWeight: 700,
+                mb: 1,
+              }}
+            >
+              Personal &amp; KYC
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(3, 1fr)",
+                },
+                gap: 1,
+              }}
+            >
+              {field("dob", "DOB", undefined, {
+                max: new Date().toISOString().split("T")[0],
+              })}
+
+              {field(
+                "gender",
+                "Gender",
+                getDropdownOptions(masters?.gender),
+              )}
+
+              {field(
+                "residentialStatus",
+                "Residential Status",
+                getDropdownOptions(masters?.resident_status),
+              )}
+
+              {field(
+                "panNumber",
+                "PAN Number",
+                undefined,
+                { maxLength: 10 }
+              )}
+
+              {field(
+                "pranNumber",
+                "PRAN Number",
+                undefined,
+                {
+                  maxLength: 12,
+                  inputMode: "numeric",
+                }
+              )}
+
+              {field(
+                "identityProof",
+                "Identity Proof",
+                getDropdownOptions(masters?.idProof),
+              )}
+
+              {field(
+                "ageProof",
+                "Age Proof",
+                getDropdownOptions(masters?.idProof),
+              )}
             </Box>
+          </Box>
 
-            <Box sx={{ borderTop: "1px solid #D1D1D1", my: 2 }} />
-            <Typography sx={{ fontSize: 12, fontWeight: 700, mb: 2 }}>Contact &amp; Address</Typography>
-            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", md: "repeat(3, 1fr)" }, gap: 2 }}>
-              {field("addressProof", "Address Proof", ["Aadhaar", "Adhr", "Passport", "Voter ID"])}
-              {field("communicationPincode", "Comm. Pincode", undefined, { maxLength: 6, inputMode: "numeric" })}
-              {field("permanentPincode", "Perm. Pincode", undefined, { maxLength: 6, inputMode: "numeric" })}
+          <Divider sx={{ my: 2 }} />
+
+          <Box>
+            <Typography
+              sx={{
+                color: "#444",
+                fontSize: "14px",
+                fontWeight: 700,
+                mb: 1,
+              }}
+            >
+              Contact &amp; Address
+            </Typography>
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  md: "repeat(3, 1fr)",
+                },
+                gap: 2,
+              }}
+            >
+              {field(
+                "addressProof",
+                "Address Proof",
+                getDropdownOptions(masters?.addressProof),
+              )}
+
+              {field(
+                "communicationPincode",
+                "Comm. Pincode",
+                undefined,
+                {
+                  maxLength: 6,
+                  inputMode: "numeric",
+                }
+              )}
+
+              {field(
+                "permanentPincode",
+                "Perm. Pincode",
+                undefined,
+                {
+                  maxLength: 6,
+                  inputMode: "numeric",
+                }
+              )}
             </Box>
           </Box>
-        )}
-
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 3 }}>
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={loading || Boolean(apiError)}
-            sx={{ minWidth: 168, borderRadius: 5, backgroundColor: "#A92129", textTransform: "none" }}
-          >
-            Save
-          </Button>
         </Box>
-      </DialogContent>
-    </Dialog>
+      )}
+    </CustomDialog>
   );
 };
 

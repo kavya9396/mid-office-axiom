@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Container, Typography } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -32,7 +32,7 @@ const BreDecision = () => {
 
   const { applicationNumber, businessType } = useAppContext();
   const roleType = localStorage.getItem("roleType");
-  console.log('roleType',roleType)
+  console.log('roleType', roleType)
 
   const drsData = useAppSelector((state) => state.drs);
   const finalBreData = useAppSelector((state) => state.bre);
@@ -77,26 +77,26 @@ const BreDecision = () => {
    */
   const handleRefresh = async () => {
     const count = latestBreDecisionData?.reTriggerCount || 0;
-    if(count > 3){
+    if (count > 3) {
       console.log('Refer to IT');
       setBreDialogOpen(true);
-      
-    }else{
- try {
-      const response = await dispatch(
-        breThunk({
-          eventName,
-          applicationNumber,
-        })
-      ).unwrap();
 
-      setBreResponse(response);
-      setIsBreApiCalled(true);
-    } catch (error) {
-      console.error("BRE API failed:", error);
+    } else {
+      try {
+        const response = await dispatch(
+          breThunk({
+            eventName,
+            applicationNumber,
+          })
+        ).unwrap();
+
+        setBreResponse(response);
+        setIsBreApiCalled(true);
+      } catch (error) {
+        console.error("BRE API failed:", error);
+      }
     }
-    }
-   
+
   };
 
   /**
@@ -250,21 +250,21 @@ const BreDecision = () => {
           >
             Final BRE
           </Typography>
- {(roleType !== "AMR_MEDICAL_TASK"  && roleType !== "AMR_NON_MEDICAL_TASK") && (
-          <CustomButton
-            size="small"
-            variant="outlined"
-            sx={{
-              minWidth: "auto",
-              p: 0.5,
-              width: 24,
-              height: 24,
-            }}
-            onClick={handleRefresh}
-          >
-            <RefreshIcon />
-          </CustomButton>
- )}
+          {(roleType !== "AMR_MEDICAL_TASK" && roleType !== "AMR_NON_MEDICAL_TASK") && (
+            <CustomButton
+              size="small"
+              variant="outlined"
+              sx={{
+                minWidth: "auto",
+                p: 0.5,
+                width: 24,
+                height: 24,
+              }}
+              onClick={handleRefresh}
+            >
+              <RefreshIcon />
+            </CustomButton>
+          )}
         </Box>
       ),
     },
@@ -304,11 +304,11 @@ const BreDecision = () => {
       finalBre: formatDate(finalBreTimestamp) ?? "",
     },
   ];
-const referToIT = () => {
-  navigate(getInboxPath())
-}
+  const referToIT = () => {
+    navigate(getInboxPath())
+  }
   return (
-    <Box sx={{ p: 1 }}>
+    <Container disableGutters>
       <CustomAccordion
         title={title.breDecision}
         chip={
@@ -325,32 +325,35 @@ const referToIT = () => {
           data={breTableData}
         />
       </CustomAccordion>
-      <CustomDialog  open={bredialogOpen}
-          showCloseIcon={true}
-          onClose={() => setBreDialogOpen(false)} title={"BRE Retriggered"}><Typography
-            sx={{
-              fontSize: "14px",
-              color: "#161616",
-            }}
-          >
-            You have exhausted the retriggered of BRE. Kindly refer this ticket
-            to IT Team.
-          </Typography>
-          
-  <Box
-    sx={{
-      display: "flex",
-      justifyContent: "center",
-      mt: 2,
-    }}
-  ><CustomButton
-              onClick={()=>referToIT()}
-              sx={{ borderRadius: "50px", paddingX: "40px", justifyContent: "center",
-            }}
-            >
-              Refer to IT
-            </CustomButton></Box></CustomDialog>
-    </Box>
+      <CustomDialog open={bredialogOpen}
+        showCloseIcon={true}
+        onClose={() => setBreDialogOpen(false)} title={"BRE Retriggered"}><Typography
+          sx={{
+            fontSize: "14px",
+            color: "#161616",
+          }}
+        >
+          You have exhausted the retriggered of BRE. Kindly refer this ticket
+          to IT Team.
+        </Typography>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            mt: 2,
+          }}
+        ><CustomButton
+          onClick={() => referToIT()}
+          sx={{
+            borderRadius: "50px", paddingX: "40px", justifyContent: "center",
+          }}
+        >
+            Refer to IT
+          </CustomButton>
+        </Box>
+      </CustomDialog>
+    </Container>
   );
 };
 

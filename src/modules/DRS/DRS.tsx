@@ -13,6 +13,7 @@ import type { AppDispatch, RootState } from "../../store/store";
 import BackButton from "../../components/layout/BackButton";
 import { title } from "../../utils/constant";
 import { getInboxPath } from "../../routes/routes";
+import { Box } from "@mui/material";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -79,8 +80,8 @@ const DRS = () => {
   // Full row received from Inbox
   const application =
     location.state?.application as
-      | ApplicationRow
-      | undefined;
+    | ApplicationRow
+    | undefined;
 
   // DRS API response from Redux
   const drsData = useSelector(
@@ -91,7 +92,7 @@ const DRS = () => {
   console.log("DRS DATA:", drsData);
 
   const roleType = application?.roleType ?? "";
-  localStorage.setItem("roleType",roleType);
+  localStorage.setItem("roleType", roleType);
 
   // --------------------------------------------------
   // ROLE TYPE -> POOL / LAYOUT
@@ -99,7 +100,7 @@ const DRS = () => {
 
   const layout =
     mapper[
-      roleType as keyof typeof mapper
+    roleType as keyof typeof mapper
     ];
 
   console.log("Role Type:", roleType);
@@ -146,9 +147,9 @@ const DRS = () => {
     const userId =
       String(
         application.userId ??
-          localStorage.getItem("userId") ??
-          localStorage.getItem("username") ??
-          "",
+        localStorage.getItem("userId") ??
+        localStorage.getItem("username") ??
+        "",
       ).trim();
 
     if (!userId) {
@@ -217,27 +218,35 @@ const DRS = () => {
   // --------------------------------------------------
 
   return (
-    <div>
-        <BackButton label={title.backToInbox} onClick={() => navigate(getInboxPath())}/>
-      {visibleAccordions.map(
-        (accordionId) => {
-          const AccordionComponent =
-            accordionRegistry[
+    <>
+      <BackButton label={title.backToInbox} onClick={() => navigate(getInboxPath())} />
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+        }}
+      >
+        {visibleAccordions.map(
+          (accordionId) => {
+            const AccordionComponent =
+              accordionRegistry[
               accordionId
-            ];
+              ];
 
-          if (!AccordionComponent) {
-            return null;
-          }
+            if (!AccordionComponent) {
+              return null;
+            }
 
-          return (
-            <div key={accordionId}>
-              <AccordionComponent />
-            </div>
-          );
-        },
-      )}
-    </div>
+            return (
+              <Box key={accordionId}>
+                <AccordionComponent />
+              </Box>
+            );
+          },
+        )}
+      </Box>
+    </>
   );
 };
 
