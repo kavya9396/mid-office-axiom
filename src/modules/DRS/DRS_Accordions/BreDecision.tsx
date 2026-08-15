@@ -31,9 +31,7 @@ const BreDecision = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const { applicationNumber, businessType } =
-    useAppContext();
-
+  const { applicationNumber, businessType } = useAppContext();
   const roleType =
     localStorage.getItem("roleType") ?? "";
 
@@ -376,7 +374,7 @@ const BreDecision = () => {
   };
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Box>
       <CustomAccordion
         title={title.breDecision}
         chip={

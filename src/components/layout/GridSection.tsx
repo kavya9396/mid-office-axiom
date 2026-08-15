@@ -37,10 +37,10 @@ export const GridSection = ({
       >
         {items.map((item) => (
           <Box key={item.label}>
-            <Typography sx={{ color: "#444", fontSize: 14, fontWeight: 400 }}>
+            <Typography sx={{ color: "#444", fontSize: 12, fontWeight: 400 }}>
               {item.label}
             </Typography>
-            <Typography sx={{ color: "#161616", fontWeight: 600, fontSize: 12 }}>
+            <Typography sx={{ color: "#161616", fontWeight: 700, fontSize: 10 }}>
               {item.value ?? "-"}
             </Typography>
           </Box>
