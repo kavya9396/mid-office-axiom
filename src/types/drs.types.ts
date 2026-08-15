@@ -646,7 +646,7 @@ export interface RiderDetail {
 }
 
 export type AdditionalRequirementRow = {
-  requirementId?:string;
+  requirementId?:number;
   team: string;
   profile: string;
   category: string;
@@ -657,11 +657,8 @@ export type AdditionalRequirementRow = {
   fupCode: string;
   description: string;
   status: string;
-  raisedDate: string;
-  raisedBy: string;
-  receivedDate: string;
-  receivedBy: string;
-  validity: string;
+  
+
   userId: string;
   remarks: string;
   udsLink: string;

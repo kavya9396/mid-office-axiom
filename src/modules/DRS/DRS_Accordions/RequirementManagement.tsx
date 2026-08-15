@@ -1,4 +1,5 @@
 import { Box, Button } from "@mui/material";
+import { useState } from "react";
 
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
@@ -10,7 +11,6 @@ import {
 import type { AdditionalRequirementRow } from "../../../types/drs.types";
 import { title } from "../../../utils/constant";
 import RequirementManagementTable from "./RequirementManagementTable";
-import { useLocation } from "react-router-dom";
 
 interface RequirementManagementProps {
   requirements?: AdditionalRequirementRow[];
@@ -27,22 +27,14 @@ type DrsRequirementData = DRSUpdateRequest & {
 
 const normalizeText = (value: unknown): string =>
   value === null || value === undefined ? "" : String(value).trim();
-interface ApplicationRow {
-  applicationNo?: string;
-  businessType?: string;
-  roleType?: string;
-  userId?: string;
-  [key: string]: unknown;
-}
+
 const RequirementManagement = ({
   requirements,
   onAddRequirement,
 }: RequirementManagementProps) => {
-   const location = useLocation();
   const dispatch = useAppDispatch();
- const application = location.state?.application as
-    | ApplicationRow
-    | undefined;
+  const [addRowSignal, setAddRowSignal] = useState(0);
+
   const drsData = useAppSelector(
     (state: RootState) => state.drs.data,
   ) as DrsRequirementData | undefined;
@@ -67,8 +59,13 @@ const RequirementManagement = ({
       throw new Error("DRS data is unavailable. Please reopen the case.");
     }
 
-    const applicationNo =application?.applicationNo;
-    console.log('applicationNo',applicationNo)
+    const applicationNo = normalizeText(
+      drsData.applicationNo ||
+        drsData.applicationNumber ||
+        localStorage.getItem("applicationNumber") ||
+        localStorage.getItem("applicationNo"),
+    );
+
     const userId = normalizeText(
       localStorage.getItem("userId") || drsData.userId,
     );
@@ -95,9 +92,8 @@ const RequirementManagement = ({
       requirementManagement: updatedRows,
       roleType,
       userId,
-      applicationNo
     };
-console.log('updatedDrsPayload',updatedDrsPayload)
+
     await dispatch(updateDrsThunk(updatedDrsPayload)).unwrap();
   };
 
@@ -120,6 +116,7 @@ console.log('updatedDrsPayload',updatedDrsPayload)
               variant="outlined"
               onClick={(event) => {
                 event.stopPropagation();
+                setAddRowSignal((currentSignal) => currentSignal + 1);
                 onAddRequirement?.();
               }}
               sx={{
@@ -157,6 +154,7 @@ console.log('updatedDrsPayload',updatedDrsPayload)
           <RequirementManagementTable
             requirements={requirementRows}
             onSave={handleSaveRequirements}
+            addRowSignal={addRowSignal}
           />
         </Box>
       </CustomAccordion>
