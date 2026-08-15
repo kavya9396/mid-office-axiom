@@ -209,37 +209,35 @@ const LeftTask = ({
   };
 
   return (
-    <Box
-      sx={{
-        width: isCollapsed ? "60px" : "220px",
+   <Box
+  sx={{
+    width: isCollapsed ? "60px" : "220px",
+    flexShrink: 0,
 
-        flexShrink: 0,
+    // Remaining viewport height after the 64px header
+    height: "calc(100dvh - 64px)",
+    maxHeight: "calc(100dvh - 64px)",
+    minHeight: 0,
 
-        height: "100%",
-
-        transition: "width 0.25s ease",
-
-        overflow: "hidden",
-      }}
-    >
-      <Paper
-        elevation={0}
-        sx={{
-          height: "100%",
-
-          display: "flex",
-
-          flexDirection: "column",
-
-          overflow: "hidden",
-
-          borderRight: "1px solid #e5e7eb",
-
-          borderRadius: 0,
-
-          backgroundColor: "#ffffff",
-        }}
-      >
+    transition: "width 0.25s ease",
+    overflow: "hidden",
+    boxSizing: "border-box",
+  }}
+>
+     <Paper
+  elevation={0}
+  sx={{
+    height: "100%",
+    minHeight: 0,
+    display: "flex",
+    flexDirection: "column",
+    overflow: "hidden",
+    borderRight: "1px solid #e5e7eb",
+    borderRadius: 0,
+    backgroundColor: "#ffffff",
+    boxSizing: "border-box",
+  }}
+>
         {/* =====================================================
             COLLAPSE BUTTON
            ===================================================== */}

@@ -646,6 +646,7 @@ export interface RiderDetail {
 }
 
 export type AdditionalRequirementRow = {
+  requirementId?:string;
   team: string;
   profile: string;
   category: string;

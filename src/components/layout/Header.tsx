@@ -1,34 +1,72 @@
-import { Box, Button, Divider, Menu, Typography } from "@mui/material";
-import Logo from "../../assets/ICICI Logo.svg";
-import AxiomLogo from "../../assets/Axiom Logo.svg";
-import { useEffect, useState } from "react";
-import { KeyDownArrowIcon, KeyRightArrowIcon, KeyUpArrowIcon, LogoutIcon, TimerPauseIcon, UserProfileIcon } from "../../icons/Icons";
+import {
+  Box,
+  Button,
+  Divider,
+  Menu,
+  Typography,
+} from "@mui/material";
+import {
+  useEffect,
+  useState,
+  type MouseEvent,
+} from "react";
 import { useNavigate } from "react-router-dom";
-import BreakTime from "./BreakTime";
-import { formatDateForUI } from "../../utils/helpers";
-import { auth } from "../../utils/auth";
-import { useSessionTimeout } from "./sessionTimeoutContext.ts";
 
-const formatDateTime = (date: Date) => formatDateForUI(date);
+import Logo from "../../assets/ICICI Logo.svg";
+import {
+  KeyDownArrowIcon,
+  KeyRightArrowIcon,
+  KeyUpArrowIcon,
+  LogoutIcon,
+  TimerPauseIcon,
+  UserProfileIcon,
+} from "../../icons/Icons";
+import { auth } from "../../utils/auth";
+import { formatDateForUI } from "../../utils/helpers";
+import BreakTime from "./BreakTime";
+import { useSessionTimeout } from "./sessionTimeoutContext";
+
+const HEADER_HEIGHT = 57;
+
+const formatDateTime = (date: Date) =>
+  formatDateForUI(date);
 
 const formatSessionTime = (remainingMs: number) => {
-  const totalSeconds = Math.ceil(remainingMs / 1000);
-  const minutes = Math.floor(totalSeconds / 60).toString().padStart(2, "0");
-  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
+  const totalSeconds = Math.max(
+    0,
+    Math.ceil(remainingMs / 1000),
+  );
+
+  const minutes = Math.floor(totalSeconds / 60)
+    .toString()
+    .padStart(2, "0");
+
+  const seconds = (totalSeconds % 60)
+    .toString()
+    .padStart(2, "0");
 
   return `${minutes}:${seconds}`;
 };
 
 const Header = () => {
-    const navigate = useNavigate();
-    const { remainingMs } = useSessionTimeout();
-    const username = localStorage.getItem("username") ?? "";
-    const [dialogOpen, setDialogOpen] = useState<boolean>(false);
-    const [currentTime, setCurrentTime] = useState(() => formatDateTime(new Date()));
-    const [userMenuAnchor, setUserMenuAnchor] = useState<HTMLElement | null>(
-    null,
+  const navigate = useNavigate();
+  const { remainingMs } = useSessionTimeout();
+
+  const username =
+    localStorage.getItem("username") ?? "";
+
+  const [dialogOpen, setDialogOpen] =
+    useState<boolean>(false);
+
+  const [currentTime, setCurrentTime] = useState(() =>
+    formatDateTime(new Date()),
   );
+
+  const [userMenuAnchor, setUserMenuAnchor] =
+    useState<HTMLElement | null>(null);
+
   const isUserMenuOpen = Boolean(userMenuAnchor);
+
   useEffect(() => {
     const interval = window.setInterval(() => {
       setCurrentTime(formatDateTime(new Date()));
@@ -36,170 +74,361 @@ const Header = () => {
 
     return () => window.clearInterval(interval);
   }, []);
-   const handleUserMenuOpen = (event: React.MouseEvent<HTMLButtonElement>) => {
+
+  const handleUserMenuOpen = (
+    event: MouseEvent<HTMLButtonElement>,
+  ) => {
     setUserMenuAnchor(event.currentTarget);
   };
 
   const handleUserMenuClose = () => {
     setUserMenuAnchor(null);
   };
-return(
-     <Box
+
+  const handleBreakTimeOpen = () => {
+    handleUserMenuClose();
+    setDialogOpen(true);
+  };
+
+  const handleLogout = () => {
+    handleUserMenuClose();
+    auth.logout();
+    navigate("/login");
+  };
+
+  return (
+    <>
+      <Box
+  component="header"
+  sx={{
+    height: HEADER_HEIGHT,
+    display: "flex",
+    alignItems: "stretch",
+    background: "linear-gradient(to bottom,#F58220 0%,#E65318 42%,#C92E27 72%,#98252B 100%)",
+    boxShadow:
+      "0 3px 12px rgba(111, 24, 24, 0.25)",
+    position: "relative",
+    zIndex: 1100,
+    overflow: "hidden",
+  }}
+>
+        {/* LOGO SECTION */}
+         <Box
+    sx={{
+      height: HEADER_HEIGHT,
+      flexShrink: 0,
+      display: "flex",
+      alignItems: "stretch",
+      backgroundColor: "transparent",
+    }}
+  >
+          <Box
+      component="img"
+      src={Logo}
+      alt="ICICI Life Logo"
       sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        backgroundColor: "#fff",
-        boxShadow: 1,
+        height: "100%",
+        width: "200px",
+        display: "block",
+        objectFit: "cover",
       }}
-    >
-        {/* LEFT LOGO SECTION */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Box component="img" sx={{height: 60}} src={Logo} alt="ICICI Life Logo" />
-          <Box component="img" src={AxiomLogo} alt="Axiom Logo" />
-        </Box>
+    />
+  </Box>
 
-        {/* RIGHT SECTION USER DETAILS */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, mr: 2 }}>
-          <Box sx={{ minWidth: 180, textAlign: "right" }}>
-            <Typography sx={{ fontSize: 12, color: "#4b5563" }}>
-              {currentTime}
-            </Typography>
-            <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#9A2529" }}>
-              Session: {formatSessionTime(remainingMs)}
-            </Typography>
-          </Box>
-          <Box>
-            <Button onClick={handleUserMenuOpen}>
-              {/* USER ICON */}
-              <Box
-                sx={{
-                  mr: 1,
-                  p: 0.5,
-                  px: 1,
-                  backgroundColor: "#fff2ed",
-                  borderRadius: "50%",
-                }}
-              >
-              <Box sx={{ color: "#9A2529", mt: 0.5 }}>
-                <UserProfileIcon />
-              </Box>
-            </Box>
-
-            {/* USER INFO */}
+        {/* GRADIENT USER SECTION */}
+        <Box
+    sx={{
+      minWidth: 0,
+      height: HEADER_HEIGHT,
+      px: { xs: 1, sm: 2 },
+      flex: 1,
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "flex-end",
+      color: "#FFFFFF",
+      background: "transparent",
+    }}
+  >
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: { xs: 0.5, sm: 1.5 },
+            }}
+          >
+            {/* DATE AND SESSION */}
             <Box
               sx={{
-                display: "flex",
-                flexDirection: "column",
-                textAlign: "left",
-                mr: 1,
+                minWidth: 175,
+                pr: 1.5,
+                textAlign: "right",
+                borderRight:
+                  "1px solid rgba(255,255,255,0.35)",
+                display: {
+                  xs: "none",
+                  sm: "block",
+                },
               }}
             >
               <Typography
                 sx={{
+                  color: "rgba(255,255,255,0.9)",
                   fontSize: 12,
-                  fontWeight: 700,
-                  color: "#9A2529",
+                  lineHeight: 1.4,
                 }}
               >
-                {username}
+                {currentTime}
               </Typography>
-              {/* <Typography sx={{ color: "#323232", fontSize: 10 }}>
-                UW1234
-              </Typography> */}
+
+              <Typography
+                sx={{
+                  mt: 0.25,
+                  color: "#FFFFFF",
+                  fontSize: 11,
+                  fontWeight: 700,
+                  letterSpacing: 0.2,
+                }}
+              >
+                Session:{" "}
+                {formatSessionTime(remainingMs)}
+              </Typography>
             </Box>
 
-            {/* ARROW */}
-            {isUserMenuOpen ? (
-              <Box sx={{ color: "#9A2529" }}>
-                <KeyUpArrowIcon />
-              </Box>
-            ) : (
-              <Box sx={{ color: "#9A2529" }}>
-                <KeyDownArrowIcon />
-              </Box>
-            )}
-          </Button>
-
-          <Menu
-            id="user-menu"
-            anchorEl={userMenuAnchor}
-            open={isUserMenuOpen}
-            onClose={handleUserMenuClose}
-            slotProps={{
-              paper: {
-                sx: {
-                  borderRadius: 2,
-                  boxShadow: 3,
-                  width: 240,
-                  overflow: "hidden",
-                },
-              },
-            }}
-          >
-            {/* BREAK TIME */}
-            <Box
-              onClick={() => {
-                handleUserMenuClose();
-                setDialogOpen(true);
-              }}
+            {/* USER MENU BUTTON */}
+            <Button
+              onClick={handleUserMenuOpen}
+              aria-controls={
+                isUserMenuOpen
+                  ? "user-menu"
+                  : undefined
+              }
+              aria-haspopup="true"
+              aria-expanded={
+                isUserMenuOpen
+                  ? "true"
+                  : undefined
+              }
+              disableRipple
               sx={{
-                px: 2,
-                py: 1,
-                mt: 1,
-                cursor: "pointer",
-                "&:hover": { backgroundColor: "#f3f4f6" },
+                minWidth: 0,
+                px: { xs: 0.5, sm: 1 },
+                py: 0.5,
+                color: "#FFFFFF",
+                textTransform: "none",
+                borderRadius: 2,
+                "&:hover": {
+                  backgroundColor:
+                    "rgba(255,255,255,0.14)",
+                },
               }}
             >
-              <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-                <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                  <TimerPauseIcon />
-                  <Typography>Breaktime</Typography>
-                </Box>
+              <Box
+                sx={{
+                  mr: 1,
+                  width: 35,
+                  height: 35,
+                  display: "grid",
+                  placeItems: "center",
+                  flexShrink: 0,
+                  color: "#FFFFFF",
+                  backgroundColor:
+                    "rgba(255,255,255,0.2)",
+                  border:
+                    "1px solid rgba(255,255,255,0.45)",
+                  borderRadius: "50%",
+                }}
+              >
+                <UserProfileIcon />
+              </Box>
 
-                <Box sx={{ display: "flex", alignItems: "center" }}>
-                  <Typography
+              <Box
+                sx={{
+                  mr: 1,
+                  minWidth: 80,
+                  display: {
+                    xs: "none",
+                    sm: "flex",
+                  },
+                  flexDirection: "column",
+                  textAlign: "left",
+                }}
+              >
+                <Typography
+                  noWrap
+                  sx={{
+                    maxWidth: 150,
+                    color: "#FFFFFF",
+                    fontSize: 12,
+                    fontWeight: 700,
+                  }}
+                >
+                  {username}
+                </Typography>
+
+                <Typography
+                  sx={{
+                    color:
+                      "rgba(255,255,255,0.78)",
+                    fontSize: 10,
+                  }}
+                >
+                  User profile
+                </Typography>
+              </Box>
+
+              <Box
+                sx={{
+                  height: 20,
+                  display: "flex",
+                  alignItems: "center",
+                  color: "#FFFFFF",
+                }}
+              >
+                {isUserMenuOpen ? (
+                  <KeyUpArrowIcon />
+                ) : (
+                  <KeyDownArrowIcon />
+                )}
+              </Box>
+            </Button>
+
+            <Menu
+              id="user-menu"
+              anchorEl={userMenuAnchor}
+              open={isUserMenuOpen}
+              onClose={handleUserMenuClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "right",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "right",
+              }}
+              slotProps={{
+                paper: {
+                  sx: {
+                    mt: 1,
+                    width: 240,
+                    overflow: "hidden",
+                    border:
+                      "1px solid #F1D7D0",
+                    borderRadius: 2,
+                    boxShadow:
+                      "0 8px 24px rgba(70, 20, 20, 0.18)",
+                  },
+                },
+              }}
+            >
+              {/* BREAK TIME */}
+              <Box
+                onClick={handleBreakTimeOpen}
+                sx={{
+                  px: 2,
+                  py: 1.25,
+                  cursor: "pointer",
+                  color: "#323232",
+                  "&:hover": {
+                    backgroundColor: "#FFF3EE",
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent:
+                      "space-between",
+                  }}
+                >
+                  <Box
                     sx={{
-                      fontWeight: 700,
-                      color: "#063E6F",
-                      fontSize: 12,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 1.5,
+                      color: "#9A2529",
                     }}
                   >
-                    30 mins
-                  </Typography>
-                  <KeyRightArrowIcon />
+                    <TimerPauseIcon />
+
+                    <Typography
+                      sx={{
+                        color: "#323232",
+                        fontSize: 14,
+                      }}
+                    >
+                      Breaktime
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      color: "#9A2529",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        mr: 0.5,
+                        color: "#9A2529",
+                        fontSize: 12,
+                        fontWeight: 700,
+                      }}
+                    >
+                      30 mins
+                    </Typography>
+
+                    <KeyRightArrowIcon />
+                  </Box>
                 </Box>
               </Box>
-            </Box>
 
-            <Divider />
+              <Divider />
 
-            {/* LOGOUT */}
-            <Box
-              sx={{
-                px: 2,
-                py: 1,
-                mt: 1,
-                cursor: "pointer",
-                "&:hover": { backgroundColor: "#f3f4f6" },
-              }}
-              onClick={() => {
-                // logout: preserve remembered credentials so login fields stay prefilled
-                auth.logout();
-                navigate("/login");
-              }}
-            >
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-                <LogoutIcon />
-                <Typography>Logout</Typography>
+              {/* LOGOUT */}
+              <Box
+                onClick={handleLogout}
+                sx={{
+                  px: 2,
+                  py: 1.25,
+                  cursor: "pointer",
+                  "&:hover": {
+                    backgroundColor: "#FFF3EE",
+                  },
+                }}
+              >
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1.5,
+                    color: "#9A2529",
+                  }}
+                >
+                  <LogoutIcon />
+
+                  <Typography
+                    sx={{
+                      color: "#323232",
+                      fontSize: 14,
+                    }}
+                  >
+                    Logout
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-          </Menu>
+            </Menu>
+          </Box>
         </Box>
-        </Box>
+      </Box>
 
-        <BreakTime dialogOpen={dialogOpen} setDialogOpen={setDialogOpen}/>
-    </Box>
-)
-}
+      <BreakTime
+        dialogOpen={dialogOpen}
+        setDialogOpen={setDialogOpen}
+      />
+    </>
+  );
+};
+
 export default Header;

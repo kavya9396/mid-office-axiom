@@ -72,8 +72,8 @@ export default function CustomTable<T extends object>({
             width: "100%",
             tableLayout: "fixed",
             "& th": {
-              backgroundColor: "#E9EEF3",
-              color: "#4A4A4A",
+              backgroundColor: "#E45F14",
+              color: "#FFF",
               fontSize: "10px",
               fontWeight: 600,
               py: 0.5,
@@ -142,7 +142,7 @@ export default function CustomTable<T extends object>({
                         sx={{
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "#4A4A4A",
+                          color: "#FFF",
                         }}
                       >
                         {col.header}

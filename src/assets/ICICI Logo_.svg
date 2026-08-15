@@ -32,10 +32,6 @@
       }
 
       .st7 {
-        display: none;
-      }
-
-      .st8 {
         fill: url(#linear-gradient);
       }
     </style>
@@ -46,8 +42,8 @@
     </linearGradient>
   </defs>
   <g class="st6">
-    <g id="Layer_3" class="st7">
-      <rect class="st8" x="2.83" y="2.47" width="748.73" height="315.66"/>
+    <g id="Layer_3">
+      <rect class="st7" x="2.83" y="2.47" width="748.73" height="315.66"/>
     </g>
     <g id="Layer_2">
       <g>

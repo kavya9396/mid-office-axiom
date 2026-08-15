@@ -490,7 +490,7 @@
                 "document": "Education/Sign",
                 "specialTest": "N",
                 "reason": "Mismatch in information provided",
-                "fupCode": "GCR",
+                "fupCode": "PIV",
                 "requirementId": 10395,
                 "description": "GCR-Upload Graduation Certificate",
                 "status": "PENDING",
