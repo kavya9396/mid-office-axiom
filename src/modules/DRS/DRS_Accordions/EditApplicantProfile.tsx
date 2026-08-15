@@ -17,6 +17,7 @@ import { labelStyles } from "../../../utils/styles";
 import type { ApplicantProfileSubmitRequest } from "../../../types/drs.types";
 import { applicantProfileSubmitThunk } from "../../../store/thunks/applicantProfileSubmitThunk";
 import { useParams } from "react-router-dom";
+import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
 
 type Address = {
   type?: string;
@@ -71,6 +72,19 @@ type MasterOption = {
   value?: string | null;
   isActive?: string;
   hasExpiry?: string;
+};
+
+type ApplicantProfileSubmitResponse = {
+  success: boolean;
+  message: string;
+  updatedDetails?: Record<string, string>;
+};
+
+type ApiError = {
+  message?: string;
+  payload?: {
+    message?: string;
+  };
 };
 
 const getDropdownOptions = (options?: MasterOption[]) =>
@@ -266,6 +280,26 @@ const EditApplicantProfile = ({
   const [errors, setErrors] = useState<FormErrors>({});
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error" | "warning" | "info";
+  }>({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const showSnackbar = (
+    message: string,
+    severity: "success" | "error" | "warning" | "info",
+  ) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -404,6 +438,24 @@ const EditApplicantProfile = ({
     };
   };
 
+  const getErrorMessage = (error: unknown): string => {
+    if (error instanceof Error) {
+      return error.message;
+    }
+
+    if (typeof error === "object" && error !== null) {
+      const apiError = error as ApiError;
+
+      return (
+        apiError.payload?.message ||
+        apiError.message ||
+        "Unable to save applicant details"
+      );
+    }
+
+    return "Unable to save applicant details";
+  };
+
   const handleSave = async () => {
     const nextErrors = validate(values);
 
@@ -414,7 +466,7 @@ const EditApplicantProfile = ({
     }
 
     if (!drsData?.summary?.[memberIndex]) {
-      setApiError("Unable to find applicant details");
+      showSnackbar("Unable to find applicant details", "error");
       return;
     }
 
@@ -422,7 +474,6 @@ const EditApplicantProfile = ({
     setApiError("");
 
     try {
-
       const currentMember = drsData.summary[memberIndex];
 
       const updatedMember = createUpdatedMember(
@@ -433,37 +484,6 @@ const EditApplicantProfile = ({
       const updatedSummary = drsData.summary.map((member, index) =>
         index === memberIndex ? updatedMember : member,
       );
-
-      /*
-       * Payload sent to applicantProfileSubmitThunk:
-       *
-       * {
-       *   applicationNo: "...",
-       *   roleType: "CVT_TASK",
-       *   sections: ["summary"],
-       *   userId: "...",
-       *   data: {
-       *     ...complete DRS data,
-       *     summary: [
-       *       ...existing summary members,
-       *       edited member with updated:
-       *
-       *       proposerSummary.dob
-       *       proposerSummary.gender         -> master code
-       *       proposerSummary.residentStatus -> master code
-       *
-       *       kycDetails.panNumber
-       *       kycDetails.pranNo
-       *       kycDetails.identityProofType   -> master code
-       *       kycDetails.ageProof             -> master code
-       *       kycDetails.addressProof         -> master code
-       *
-       *       address.communication.pinCode
-       *       address.permanent.pinCode
-       *     ]
-       *   }
-       * }
-       */
 
       const payload: ApplicantProfileSubmitRequest = {
         applicationNo: applicationNumber ?? "",
@@ -477,20 +497,35 @@ const EditApplicantProfile = ({
         isAcuity: true,
       };
 
-      console.log("CVT Edit Profile Payload", payload);
+      const response: ApplicantProfileSubmitResponse =
+        await dispatch(
+          applicantProfileSubmitThunk(payload),
+        ).unwrap();
 
-      await dispatch(
-        applicantProfileSubmitThunk(payload),
-      ).unwrap();
+      console.log("Applicant profile save response:", response);
 
-      await onSave?.(values, memberIndex);
-      onClose();
-    } catch (error) {
-      setApiError(
-        error instanceof Error
-          ? error.message
-          : "Unable to save applicant details",
-      );
+      if (response.success) {
+        showSnackbar(
+          response.message || "Applicant profile updated successfully",
+          "success",
+        );
+
+        await onSave?.(values, memberIndex);
+        onClose();
+      } else {
+        showSnackbar(
+          response.message || "Unable to update applicant profile",
+          "error",
+        );
+      }
+    } catch (error: unknown) {
+      const errorMessage = getErrorMessage(error);
+
+      console.error("Applicant profile save error:", error);
+
+      setApiError(errorMessage);
+
+      showSnackbar(errorMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -537,179 +572,184 @@ const EditApplicantProfile = ({
   );
 
   return (
-    <CustomDialog
-      open={open}
-      onClose={onClose}
-      maxWidth="md"
-      title={
-        <Typography
-          sx={{
-            color: "#06447D",
-            fontSize: 14,
-            fontWeight: 700,
-          }}
-        >
-          EDIT APPLICANT PROFILE
-        </Typography>
-      }
-      actionsSx={{ justifyContent: "center", pb: 2 }}
-      actions={
-        <CustomButton
-          onClick={handleSave}
-          disabled={loading || Boolean(apiError)}
-          sx={{
-            px: 4,
-            borderRadius: "50px",
-          }}
-        >
-          {loading ? "Saving..." : "Save"}
-        </CustomButton>
-      }
-    >
-      {loading ? (
-        <Box sx={{ minHeight: 300, display: "grid", placeItems: "center" }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Box
-          sx={{
-            backgroundColor: "#F6F6F6",
-            borderRadius: 2,
-            p: 2,
-          }}
-        >
-          {apiError && (
-            <Typography
-              color="error"
-              sx={{ mb: 2 }}
-            >
-              {apiError}
-            </Typography>
-          )}
+    <>
+      <CustomDialog
+        open={open}
+        onClose={onClose}
+        maxWidth="md"
+        title={
+          <Typography
+            sx={{
+              color: "#9A2529",
+              fontSize: 14,
+              fontWeight: 700,
+            }}
+          >
+            EDIT APPLICANT PROFILE
+          </Typography>
+        }
+        actionsSx={{ justifyContent: "center", pb: 2 }}
+        actions={
+          <CustomButton
+            onClick={handleSave}
+            disabled={loading || Boolean(apiError)}
+            sx={{
+              px: 4,
+              borderRadius: "50px",
+            }}
+          >
+            {loading ? "Saving..." : "Save"}
+          </CustomButton>
+        }
+      >
+        {loading ? (
+          <Box sx={{ minHeight: 300, display: "grid", placeItems: "center" }}>
+            <CircularProgress />
+          </Box>
+        ) : (
+          <Box
+            sx={{
+              backgroundColor: "#F6F6F6",
+              borderRadius: 2,
+              p: 2,
+            }}
+          >
+            <Box>
+              <Typography
+                sx={{
+                  color: "#444",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  mb: 1,
+                }}
+              >
+                Personal &amp; KYC
+              </Typography>
 
-          <Box>
-            <Typography
-              sx={{
-                color: "#444",
-                fontSize: "14px",
-                fontWeight: 700,
-                mb: 1,
-              }}
-            >
-              Personal &amp; KYC
-            </Typography>
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    md: "repeat(3, 1fr)",
+                  },
+                  gap: 1,
+                }}
+              >
+                {field("dob", "DOB", undefined, {
+                  max: new Date().toISOString().split("T")[0],
+                })}
 
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "repeat(3, 1fr)",
-                },
-                gap: 1,
-              }}
-            >
-              {field("dob", "DOB", undefined, {
-                max: new Date().toISOString().split("T")[0],
-              })}
+                {field(
+                  "gender",
+                  "Gender",
+                  getDropdownOptions(masters?.gender),
+                )}
 
-              {field(
-                "gender",
-                "Gender",
-                getDropdownOptions(masters?.gender),
-              )}
+                {field(
+                  "residentialStatus",
+                  "Residential Status",
+                  getDropdownOptions(masters?.resident_status),
+                )}
 
-              {field(
-                "residentialStatus",
-                "Residential Status",
-                getDropdownOptions(masters?.resident_status),
-              )}
+                {field(
+                  "panNumber",
+                  "PAN Number",
+                  undefined,
+                  { maxLength: 10 }
+                )}
 
-              {field(
-                "panNumber",
-                "PAN Number",
-                undefined,
-                { maxLength: 10 }
-              )}
+                {field(
+                  "pranNumber",
+                  "PRAN Number",
+                  undefined,
+                  {
+                    maxLength: 12,
+                    inputMode: "numeric",
+                  }
+                )}
 
-              {field(
-                "pranNumber",
-                "PRAN Number",
-                undefined,
-                {
-                  maxLength: 12,
-                  inputMode: "numeric",
-                }
-              )}
+                {field(
+                  "identityProof",
+                  "Identity Proof",
+                  getDropdownOptions(masters?.idProof),
+                )}
 
-              {field(
-                "identityProof",
-                "Identity Proof",
-                getDropdownOptions(masters?.idProof),
-              )}
+                {field(
+                  "ageProof",
+                  "Age Proof",
+                  getDropdownOptions(masters?.idProof),
+                )}
+              </Box>
+            </Box>
 
-              {field(
-                "ageProof",
-                "Age Proof",
-                getDropdownOptions(masters?.idProof),
-              )}
+            <Divider sx={{ my: 2 }} />
+
+            <Box>
+              <Typography
+                sx={{
+                  color: "#444",
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  mb: 1,
+                }}
+              >
+                Contact &amp; Address
+              </Typography>
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    md: "repeat(3, 1fr)",
+                  },
+                  gap: 2,
+                }}
+              >
+                {field(
+                  "addressProof",
+                  "Address Proof",
+                  getDropdownOptions(masters?.addressProof),
+                )}
+
+                {field(
+                  "communicationPincode",
+                  "Comm. Pincode",
+                  undefined,
+                  {
+                    maxLength: 6,
+                    inputMode: "numeric",
+                  }
+                )}
+
+                {field(
+                  "permanentPincode",
+                  "Perm. Pincode",
+                  undefined,
+                  {
+                    maxLength: 6,
+                    inputMode: "numeric",
+                  }
+                )}
+              </Box>
             </Box>
           </Box>
+        )}
+      </CustomDialog>
 
-          <Divider sx={{ my: 2 }} />
-
-          <Box>
-            <Typography
-              sx={{
-                color: "#444",
-                fontSize: "14px",
-                fontWeight: 700,
-                mb: 1,
-              }}
-            >
-              Contact &amp; Address
-            </Typography>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "repeat(3, 1fr)",
-                },
-                gap: 2,
-              }}
-            >
-              {field(
-                "addressProof",
-                "Address Proof",
-                getDropdownOptions(masters?.addressProof),
-              )}
-
-              {field(
-                "communicationPincode",
-                "Comm. Pincode",
-                undefined,
-                {
-                  maxLength: 6,
-                  inputMode: "numeric",
-                }
-              )}
-
-              {field(
-                "permanentPincode",
-                "Perm. Pincode",
-                undefined,
-                {
-                  maxLength: 6,
-                  inputMode: "numeric",
-                }
-              )}
-            </Box>
-          </Box>
-        </Box>
-      )}
-    </CustomDialog>
+      <CustomSnackbar
+        open={snackbar.open}
+        message={snackbar.message}
+        severity={snackbar.severity}
+        onClose={() =>
+          setSnackbar((current) => ({
+            ...current,
+            open: false,
+          }))
+        }
+      />
+    </>
   );
 };
 

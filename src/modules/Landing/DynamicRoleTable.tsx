@@ -1,12 +1,6 @@
 import {
   Box,
   Button,
-  Checkbox,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  IconButton,
   List,
   ListItem,
   ListItemButton,
@@ -32,6 +26,9 @@ import {
   SettingsIcon,
 } from "../../icons/Icons";
 import CustomButton from "../../components/ui/Button/Button";
+import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
+import CustomDialog from "../../components/ui/Dialog/Dialog";
+import { centerFlex } from "../../utils/styles";
 
 interface DynamicRoleTableProps {
   title: string;
@@ -999,19 +996,19 @@ const DynamicRoleTable = ({
       }),
     );
 
-    try {
-      localStorage.setItem(
-        finalStorageKey,
-        JSON.stringify(
-          updatedColumns,
-        ),
-      );
-    } catch (error) {
-      console.error(
-        "Unable to save column configuration:",
-        error,
-      );
-    }
+    // try {
+    //   localStorage.setItem(
+    //     finalStorageKey,
+    //     JSON.stringify(
+    //       updatedColumns,
+    //     ),
+    //   );
+    // } catch (error) {
+    //   console.error(
+    //     "Unable to save column configuration:",
+    //     error,
+    //   );
+    // }
 
     setSettingsOpen(false);
     setPage(0);
@@ -1650,700 +1647,33 @@ const DynamicRoleTable = ({
           COLUMN SETTINGS DIALOG
           ========================================================
       */}
-
-      <Dialog
+      <CustomDialog
         open={settingsOpen}
         onClose={handleCloseSettings}
         maxWidth="md"
         fullWidth
-        sx={{
-          "& .MuiDialog-paper": {
-            borderRadius: "10px",
-            overflow: "hidden",
-          },
-        }}
-      >
-        {/* ======================================================
-            DIALOG HEADER
-            ======================================================
-        */}
-
-        <DialogTitle
-          sx={{
-            px: 2.5,
-            py: 1.5,
-            backgroundColor:
-              "#0D4C7D",
-            color: "#fff",
-            display: "flex",
-            alignItems:
-              "center",
-            justifyContent:
-              "space-between",
-          }}
-        >
-          <Box>
-            <Typography
-              sx={{
-                fontSize:
-                  "14px",
-                fontWeight:
-                  600,
-              }}
-            >
-              Configure Columns
-            </Typography>
-
-            <Typography
-              sx={{
-                fontSize:
-                  "10.5px",
-                opacity: 0.85,
-                mt: 0.25,
-              }}
-            >
-              Select up to{" "}
-              {
-                MAX_VISIBLE_COLUMNS
-              }{" "}
-              columns
-            </Typography>
-          </Box>
-
-          <IconButton
-            onClick={
-              handleCloseSettings
-            }
+        title={
+          <Typography
             sx={{
-              width: "28px",
-              height: "28px",
-              color: "#fff",
-
-              "&:hover": {
-                backgroundColor:
-                  "rgba(255,255,255,0.1)",
-              },
+              color: "#9A2529",
+              fontSize: 14,
+              fontWeight: 700,
+              textTransform: "uppercase"
             }}
           >
-            <Typography
-              sx={{
-                fontSize:
-                  "18px",
-                lineHeight: 1,
-                color: "#fff",
-              }}
-            >
-              ×
-            </Typography>
-          </IconButton>
-        </DialogTitle>
-
-        {/* ======================================================
-            DIALOG CONTENT
-            ======================================================
-        */}
-
-        <DialogContent
-          sx={{
-            p: 2.5,
-            backgroundColor:
-              "#f7f8fa",
-          }}
-        >
+            Configure Columns
+          </Typography>
+        }
+        actionsSx={{ justifyContent: "center", pb: 2 }}
+        // contentSx={{
+        //   p: 2.5,
+        //   backgroundColor: "#f7f8fa",
+        // }}
+        actions={
           <Box
             sx={{
-              display: "flex",
-              alignItems:
-                "center",
-              gap: 1.5,
-              width: "100%",
-              mt: 2
-            }}
-          >
-            {/* AVAILABLE */}
-
-            <Box
-              sx={{
-                flex: 1,
-                backgroundColor:
-                  "#fff",
-                border:
-                  "1px solid #dfe3e8",
-                borderRadius:
-                  "8px",
-                overflow:
-                  "hidden",
-              }}
-            >
-              <Box
-                sx={{
-                  px: 1.5,
-                  py: 1,
-                  borderBottom:
-                    "1px solid #e5e7eb",
-                  backgroundColor:
-                    "#f3f5f7",
-                }}
-              >
-                <Typography
-                  sx={{
-                    fontSize:
-                      "12px",
-                    fontWeight:
-                      600,
-                    color:
-                      "#333",
-                  }}
-                >
-                  Available Columns
-                </Typography>
-
-                <Typography
-                  sx={{
-                    fontSize:
-                      "10px",
-                    color:
-                      "#777",
-                    mt: 0.2,
-                  }}
-                >
-                  {
-                    tempAvailableColumns.length
-                  }{" "}
-                  columns
-                </Typography>
-              </Box>
-
-              <List
-                dense
-                sx={{
-                  height:
-                    "300px",
-                  overflowY:
-                    "auto",
-                  p: 1,
-                }}
-              >
-                {tempAvailableColumns.map(
-                  (column) => (
-                    <ListItem
-                      key={column}
-                      disablePadding
-                    >
-                      <ListItemButton
-                        // onClick={() =>
-                        //   moveToSelected(
-                        //     column,
-                        //   )
-                        // }
-                        disabled={
-                          tempSelectedColumns.length >=
-                          MAX_VISIBLE_COLUMNS
-                        }
-                        sx={{
-                          minHeight:
-                            "32px",
-                          py: 0,
-                          px: 1,
-                        }}
-                      >
-                        <ListItemIcon
-                          sx={{
-                            minWidth:
-                              "30px",
-                          }}
-                        >
-                          <Checkbox
-                            edge="start"
-                            checked={selectedAvailableColumns.includes(
-                              column,
-                            )}
-                            onChange={() =>
-                              toggleAvailableColumn(column)
-                            }
-                            onClick={(event) =>
-                              event.stopPropagation()
-                            }
-                            tabIndex={-1}
-                            disableRipple
-                            size="small"
-                            sx={{
-                              p: "3px",
-                            }}
-                          />
-
-                        </ListItemIcon>
-
-                        <ListItemText
-                          primary={
-                            <Typography
-                              sx={{
-                                fontSize:
-                                  "11px",
-                                color:
-                                  "#444",
-                              }}
-                            >
-                              {formatColumnName(
-                                column,
-                              )}
-                            </Typography>
-                          }
-                        />
-                      </ListItemButton>
-                    </ListItem>
-                  ),
-                )}
-
-                {tempAvailableColumns.length ===
-                  0 && (
-                    <Box
-                      sx={{
-                        py: 5,
-                        textAlign:
-                          "center",
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontSize:
-                            "11px",
-                          color:
-                            "#999",
-                        }}
-                      >
-                        No available
-                        columns
-                      </Typography>
-                    </Box>
-                  )}
-              </List>
-            </Box>
-
-            {/* TRANSFER BUTTONS */}
-
-            {/* <Box
-              sx={{
-                display:
-                  "flex",
-                flexDirection:
-                  "column",
-                gap: 0.75,
-                alignItems:
-                  "center",
-              }}
-            >
-              <Button
-                onClick={moveSelectedToSelected}
-                disabled={
-                  selectedAvailableColumns.length === 0 ||
-                  tempSelectedColumns.length >=
-                  MAX_VISIBLE_COLUMNS
-                }
-                sx={{
-                  minWidth: "38px",
-                  width: "38px",
-                  height: "32px",
-                  padding: 0,
-                  border: "1px solid #d5dbe0",
-                  backgroundColor: "#fff",
-                  color: "#555",
-                  borderRadius: "6px",
-                  fontSize: "16px",
-                }}
-              >
-                →
-              </Button>
-
-
-              <Button
-                onClick={moveSelectedToAvailable}
-                disabled={
-                  selectedConfiguredColumns.length === 0
-                }
-                sx={{
-                  minWidth: "38px",
-                  width: "38px",
-                  height: "32px",
-                  padding: 0,
-                  border: "1px solid #d5dbe0",
-                  backgroundColor: "#fff",
-                  color: "#555",
-                  borderRadius: "6px",
-                  fontSize: "16px",
-                }}
-              >
-                ←
-              </Button>
-
-            </Box> */}
-
-
-   <Box
-                      sx={{
-                        display:
-                          "flex",
-                        flexDirection:
-                          "column",
-                        alignItems:
-                          "center",
-                        gap: 1,
-                      }}
-                    >
-                      <CustomButton
-                        sx={{
-                          my: 1,
-                        }}
-                        variant="outlined"
-                        size="small"
-                       onClick={moveSelectedToSelected}
-                disabled={
-                  selectedAvailableColumns.length === 0 ||
-                  tempSelectedColumns.length >=
-                  MAX_VISIBLE_COLUMNS
-                }
-                      >
-                        <Box component="span">
-                          ›
-                        </Box>
-                      </CustomButton>
-
-                      <CustomButton
-                        sx={{
-                          my: 1,
-                        }}
-                        variant="outlined"
-                        size="small"
-                        onClick={moveSelectedToAvailable}
-                disabled={
-                  selectedConfiguredColumns.length === 0
-                }
-                      >
-                        <Box component="span">
-                          ‹
-                        </Box>
-                      </CustomButton>
-                    </Box>
-
-            {/* SELECTED */}
-
-            <Box
-              sx={{
-                flex: 1,
-                backgroundColor:
-                  "#fff",
-                border:
-                  "1px solid #dfe3e8",
-                borderRadius:
-                  "8px",
-                overflow:
-                  "hidden",
-              }}
-            >
-              <Box
-                sx={{
-                  px: 1.5,
-                  py: 1,
-                  borderBottom:
-                    "1px solid #e5e7eb",
-                  backgroundColor:
-                    "#f3f5f7",
-                  display:
-                    "flex",
-                  alignItems:
-                    "center",
-                  justifyContent:
-                    "space-between",
-                }}
-              >
-                <Box>
-                  <Typography
-                    sx={{
-                      fontSize:
-                        "12px",
-                      fontWeight:
-                        600,
-                      color:
-                        "#333",
-                    }}
-                  >
-                    Selected Columns
-                  </Typography>
-
-                  <Typography
-                    sx={{
-                      fontSize:
-                        "10px",
-                      color:
-                        tempSelectedColumns.length >=
-                          MAX_VISIBLE_COLUMNS
-                          ? "#9A2529"
-                          : "#777",
-                      mt: 0.2,
-                    }}
-                  >
-                    {
-                      tempSelectedColumns.length
-                    }{" "}
-                    /{" "}
-                    {
-                      MAX_VISIBLE_COLUMNS
-                    }
-                  </Typography>
-                </Box>
-              </Box>
-
-              <List
-                dense
-                sx={{
-                  height:
-                    "300px",
-                  overflowY:
-                    "auto",
-                  p: 1,
-                }}
-              >
-                {tempSelectedColumns.map(
-                  (
-                    column,
-                    index,
-                  ) => (
-                    <ListItem
-                      key={column}
-                      disablePadding
-                    >
-                      <ListItemButton
-                        // onClick={() => {
-                        //   if (!isApplicationNumberColumn(column)) {
-                        //     moveToAvailable(column);
-                        //   }
-                        // }}
-                        sx={{
-                          minHeight: "32px",
-                          py: 0,
-                          px: 1,
-                          pr: 0.5,
-                          cursor: isApplicationNumberColumn(column)
-                            ? "default"
-                            : "pointer",
-                        }}
-                      >
-                        <ListItemIcon
-                          sx={{
-                            minWidth:
-                              "30px",
-                          }}
-                        >
-                          <Checkbox
-                            edge="start"
-                            checked={
-                              isApplicationNumberColumn(column) ||
-                              selectedConfiguredColumns.includes(
-                                column,
-                              )
-                            }
-                            onChange={() =>
-                              toggleSelectedColumn(column)
-                            }
-                            onClick={(event) =>
-                              event.stopPropagation()
-                            }
-                            disabled={isApplicationNumberColumn(column)}
-                            tabIndex={-1}
-                            disableRipple
-                            size="small"
-                            sx={{
-                              p: "3px",
-                            }}
-                          />
-                        </ListItemIcon>
-
-                        <ListItemText
-                          primary={
-                            <Typography
-                              sx={{
-                                fontSize:
-                                  "11px",
-                                color:
-                                  "#333",
-                                fontWeight:
-                                  500,
-                              }}
-                            >
-                              {formatColumnName(
-                                column,
-                              )}
-                            </Typography>
-                          }
-                        />
-                        <Box
-                          sx={{
-                            display:
-                              "flex",
-                            alignItems:
-                              "center",
-                            gap:
-                              0.25,
-                            ml: 1,
-                          }}
-                        >
-                          <Button
-                            onClick={(
-                              event,
-                            ) => {
-                              event.stopPropagation();
-                              moveColumnUp(
-                                index,
-                              );
-                            }}
-                            disabled={
-                              index ===
-                              0
-                            }
-                            sx={{
-                              minWidth:
-                                "24px",
-                              width:
-                                "24px",
-                              height:
-                                "24px",
-                              padding: 0,
-                              border:
-                                "1px solid #e1e4e7",
-                              borderRadius:
-                                "4px",
-                              color:
-                                "#555",
-                              fontSize:
-                                "13px",
-                            }}
-                          >
-                            ↑
-                          </Button>
-
-                          <Button
-                            onClick={(
-                              event,
-                            ) => {
-                              event.stopPropagation();
-                              moveColumnDown(
-                                index,
-                              );
-                            }}
-                            disabled={
-                              index ===
-                              tempSelectedColumns.length -
-                              1
-                            }
-                            sx={{
-                              minWidth:
-                                "24px",
-                              width:
-                                "24px",
-                              height:
-                                "24px",
-                              padding: 0,
-                              border:
-                                "1px solid #e1e4e7",
-                              borderRadius:
-                                "4px",
-                              color:
-                                "#555",
-                              fontSize:
-                                "13px",
-                            }}
-                          >
-                            ↓
-                          </Button>
-                        </Box>
-                      </ListItemButton>
-                    </ListItem>
-                  ),
-                )}
-
-                {tempSelectedColumns.length ===
-                  0 && (
-                    <Box
-                      sx={{
-                        py: 5,
-                        textAlign:
-                          "center",
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontSize:
-                            "11px",
-                          color:
-                            "#999",
-                        }}
-                      >
-                        Select columns
-                        from the left
-                      </Typography>
-                    </Box>
-                  )}
-              </List>
-            </Box>
-          </Box>
-
-          {/* INFORMATION */}
-
-          <Box
-            sx={{
-              mt: 1.5,
-              px: 1.5,
-              py: 1,
-              backgroundColor:
-                "#eef5fa",
-              borderRadius:
-                "6px",
-              border:
-                "1px solid #d8e7f2",
-            }}
-          >
-            <Typography
-              sx={{
-                fontSize:
-                  "10.5px",
-                color:
-                  "#456",
-              }}
-            >
-              <strong>Tip:</strong>{" "}
-              The Selected Columns
-              order determines the
-              table column order. Use
-              ↑ and ↓ to rearrange
-              columns.
-            </Typography>
-          </Box>
-        </DialogContent>
-
-        {/* ======================================================
-            DIALOG FOOTER
-            ======================================================
-        */}
-
-        <DialogActions
-          sx={{
-            px: 2.5,
-            py: 1.25,
-            borderTop:
-              "1px solid #e5e7eb",
-            justifyContent:
-              "space-between",
-          }}
-        >
-
-
-
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
+              ...centerFlex,
               gap: 1,
-              alignItems: "center",
               width: "100%",
             }}
           >
@@ -2374,9 +1704,488 @@ const DynamicRoleTable = ({
               Save
             </CustomButton>
           </Box>
+        }
+      >
+        {/* YOUR EXISTING DIALOG CONTENT GOES HERE */}
+        <Box
+          sx={{
+            display: "flex",
+            alignItems:
+              "center",
+            gap: 1.5,
+            width: "100%",
+            mt: 2
+          }}
+        >
+          {/* AVAILABLE */}
 
-        </DialogActions>
-      </Dialog>
+          <Box
+            sx={{
+              flex: 1,
+              backgroundColor:
+                "#fff",
+              border:
+                "1px solid #dfe3e8",
+              borderRadius:
+                "8px",
+              overflow:
+                "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                px: 1.5,
+                py: 1,
+                borderBottom:
+                  "1px solid #e5e7eb",
+                backgroundColor:
+                  "#f3f5f7",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize:
+                    "12px",
+                  fontWeight:
+                    600,
+                  color:
+                    "#333",
+                }}
+              >
+                Available Columns
+              </Typography>
+
+              <Typography
+                sx={{
+                  fontSize:
+                    "10px",
+                  color:
+                    "#777",
+                  mt: 0.2,
+                }}
+              >
+                {
+                  tempAvailableColumns.length
+                }{" "}
+                columns
+              </Typography>
+            </Box>
+
+            <List
+              dense
+              sx={{
+                height:
+                  "300px",
+                overflowY:
+                  "auto",
+                p: 1,
+              }}
+            >
+              {tempAvailableColumns.map(
+                (column) => (
+                  <ListItem
+                    key={column}
+                    disablePadding
+                  >
+                    <ListItemButton
+                      disabled={
+                        tempSelectedColumns.length >=
+                        MAX_VISIBLE_COLUMNS
+                      }
+                      sx={{
+                        minHeight:
+                          "32px",
+                        py: 0,
+                        px: 1,
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          minWidth:
+                            "30px",
+                        }}
+                      >
+
+                        <CustomCheckbox
+                          edge="start"
+                          checked={selectedAvailableColumns.includes(column)}
+                          onChange={() => toggleAvailableColumn(column)}
+                          onClick={(event) => event.stopPropagation()}
+                          tabIndex={-1}
+                        />
+                      </ListItemIcon>
+
+                      <ListItemText
+                        primary={
+                          <Typography
+                            sx={{
+                              fontSize:
+                                "11px",
+                              color:
+                                "#444",
+                            }}
+                          >
+                            {formatColumnName(
+                              column,
+                            )}
+                          </Typography>
+                        }
+                      />
+                    </ListItemButton>
+                  </ListItem>
+                ),
+              )}
+
+              {tempAvailableColumns.length ===
+                0 && (
+                  <Box
+                    sx={{
+                      py: 5,
+                      textAlign:
+                        "center",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize:
+                          "11px",
+                        color:
+                          "#999",
+                      }}
+                    >
+                      No available
+                      columns
+                    </Typography>
+                  </Box>
+                )}
+            </List>
+          </Box>
+
+          {/* TRANSFER BUTTONS */}
+          <Box
+            sx={{
+              display:
+                "flex",
+              flexDirection:
+                "column",
+              alignItems:
+                "center",
+              gap: 1,
+            }}
+          >
+            <CustomButton
+              sx={{
+                my: 1,
+              }}
+              variant="outlined"
+              size="small"
+              onClick={moveSelectedToSelected}
+              disabled={
+                selectedAvailableColumns.length === 0 ||
+                tempSelectedColumns.length >=
+                MAX_VISIBLE_COLUMNS
+              }
+            >
+              <Box component="span">
+                ›
+              </Box>
+            </CustomButton>
+
+            <CustomButton
+              sx={{
+                my: 1,
+              }}
+              variant="outlined"
+              size="small"
+              onClick={moveSelectedToAvailable}
+              disabled={
+                selectedConfiguredColumns.length === 0
+              }
+            >
+              <Box component="span">
+                ‹
+              </Box>
+            </CustomButton>
+          </Box>
+
+          {/* SELECTED */}
+
+          <Box
+            sx={{
+              flex: 1,
+              backgroundColor:
+                "#fff",
+              border:
+                "1px solid #dfe3e8",
+              borderRadius:
+                "8px",
+              overflow:
+                "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                px: 1.5,
+                py: 1,
+                borderBottom:
+                  "1px solid #e5e7eb",
+                backgroundColor:
+                  "#f3f5f7",
+                display:
+                  "flex",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "space-between",
+              }}
+            >
+              <Box>
+                <Typography
+                  sx={{
+                    fontSize:
+                      "12px",
+                    fontWeight:
+                      600,
+                    color:
+                      "#333",
+                  }}
+                >
+                  Selected Columns
+                </Typography>
+
+                <Typography
+                  sx={{
+                    fontSize:
+                      "10px",
+                    color:
+                      tempSelectedColumns.length >=
+                        MAX_VISIBLE_COLUMNS
+                        ? "#9A2529"
+                        : "#777",
+                    mt: 0.2,
+                  }}
+                >
+                  {
+                    tempSelectedColumns.length
+                  }{" "}
+                  /{" "}
+                  {
+                    MAX_VISIBLE_COLUMNS
+                  }
+                </Typography>
+              </Box>
+            </Box>
+
+            <List
+              dense
+              sx={{
+                height:
+                  "300px",
+                overflowY:
+                  "auto",
+                p: 1,
+              }}
+            >
+              {tempSelectedColumns.map(
+                (
+                  column,
+                  index,
+                ) => (
+                  <ListItem
+                    key={column}
+                    disablePadding
+                  >
+                    <ListItemButton
+                      sx={{
+                        minHeight: "32px",
+                        py: 0,
+                        px: 1,
+                        pr: 0.5,
+                        cursor: isApplicationNumberColumn(column)
+                          ? "default"
+                          : "pointer",
+                      }}
+                    >
+                      <ListItemIcon
+                        sx={{
+                          minWidth:
+                            "30px",
+                        }}
+                      >
+                        <CustomCheckbox
+                          edge="start"
+                          checked={
+                            isApplicationNumberColumn(column) ||
+                            selectedConfiguredColumns.includes(column)
+                          }
+                          onChange={() => toggleSelectedColumn(column)}
+                          onClick={(event) => event.stopPropagation()}
+                          disabled={isApplicationNumberColumn(column)}
+                          tabIndex={-1}
+                        />
+                      </ListItemIcon>
+
+                      <ListItemText
+                        primary={
+                          <Typography
+                            sx={{
+                              fontSize:
+                                "11px",
+                              color:
+                                "#333",
+                              fontWeight:
+                                500,
+                            }}
+                          >
+                            {formatColumnName(
+                              column,
+                            )}
+                          </Typography>
+                        }
+                      />
+                      <Box
+                        sx={{
+                          display:
+                            "flex",
+                          alignItems:
+                            "center",
+                          gap:
+                            0.25,
+                          ml: 1,
+                        }}
+                      >
+                        <Button
+                          onClick={(
+                            event,
+                          ) => {
+                            event.stopPropagation();
+                            moveColumnUp(
+                              index,
+                            );
+                          }}
+                          disabled={
+                            index ===
+                            0
+                          }
+                          sx={{
+                            minWidth:
+                              "24px",
+                            width:
+                              "24px",
+                            height:
+                              "24px",
+                            padding: 0,
+                            border:
+                              "1px solid #e1e4e7",
+                            borderRadius:
+                              "4px",
+                            color:
+                              "#555",
+                            fontSize:
+                              "13px",
+                          }}
+                        >
+                          ↑
+                        </Button>
+
+                        <Button
+                          onClick={(
+                            event,
+                          ) => {
+                            event.stopPropagation();
+                            moveColumnDown(
+                              index,
+                            );
+                          }}
+                          disabled={
+                            index ===
+                            tempSelectedColumns.length -
+                            1
+                          }
+                          sx={{
+                            minWidth:
+                              "24px",
+                            width:
+                              "24px",
+                            height:
+                              "24px",
+                            padding: 0,
+                            border:
+                              "1px solid #e1e4e7",
+                            borderRadius:
+                              "4px",
+                            color:
+                              "#555",
+                            fontSize:
+                              "13px",
+                          }}
+                        >
+                          ↓
+                        </Button>
+                      </Box>
+                    </ListItemButton>
+                  </ListItem>
+                ),
+              )}
+
+              {tempSelectedColumns.length ===
+                0 && (
+                  <Box
+                    sx={{
+                      py: 5,
+                      textAlign:
+                        "center",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize:
+                          "11px",
+                        color:
+                          "#999",
+                      }}
+                    >
+                      Select columns
+                      from the left
+                    </Typography>
+                  </Box>
+                )}
+            </List>
+          </Box>
+        </Box>
+
+        {/* INFORMATION */}
+
+        {/* <Box
+          sx={{
+            mt: 1.5,
+            px: 1.5,
+            py: 1,
+            backgroundColor:
+              "#eef5fa",
+            borderRadius:
+              "6px",
+            border:
+              "1px solid #d8e7f2",
+          }}
+        >
+          <Typography
+            sx={{
+              fontSize:
+                "10.5px",
+              color:
+                "#456",
+            }}
+          >
+            <strong>Tip:</strong>{" "}
+            The Selected Columns
+            order determines the
+            table column order. Use
+            ↑ and ↓ to rearrange
+            columns.
+          </Typography>
+        </Box> */}
+      </CustomDialog>
     </>
   );
 };

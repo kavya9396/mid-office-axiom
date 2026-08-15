@@ -138,25 +138,25 @@ const BreDecision = () => {
    */
   const finalBreDecision = hasBreApiResponse
     ? finalBreDecisionData?.breOutput
-        ?.decisionTypes?.breDecision ?? ""
+      ?.decisionTypes?.breDecision ?? ""
     : latestBreDecisionData?.decision ?? "";
 
   const finalBreRemarks = hasBreApiResponse
     ? finalBreDecisionData?.breOutput
-        ?.breRemarks ?? ""
+      ?.breRemarks ?? ""
     : latestBreDecisionData?.remarks ?? "";
 
   const finalBreDiscrepancy =
     hasBreApiResponse
       ? finalBreDecisionData?.breOutput
-          ?.decisionTypes?.breRequirement ?? ""
+        ?.decisionTypes?.breRequirement ?? ""
       : latestBreDecisionData?.discrepancy ??
-        "";
+      "";
 
   const finalBreTimestamp =
     hasBreApiResponse
       ? finalBreDecisionData?.breOutput
-          ?.systemDecisionDateTime
+        ?.systemDecisionDateTime
       : latestBreDecisionData?.timestamp;
 
   const finalBreStatus = finalBreDecision;
@@ -318,6 +318,10 @@ const BreDecision = () => {
                 width: 24,
                 height: 24,
                 p: 0.5,
+                bgcolor: "#fff",
+                "&:hover": {
+                  bgcolor: "#fff",
+                },
               }}
               onClick={handleRefresh}
             >
@@ -374,7 +378,7 @@ const BreDecision = () => {
   };
 
   return (
-    <Box>
+    <Box sx={{ px: 1 }}>
       <CustomAccordion
         title={title.breDecision}
         chip={

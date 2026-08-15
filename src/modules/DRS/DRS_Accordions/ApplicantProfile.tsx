@@ -1,4 +1,4 @@
-import { Box, Container, Tab, Tabs, Typography } from "@mui/material";
+import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -1627,7 +1627,7 @@ const ApplicantProfile = () => {
   /* ------------------------------------------------------------------------ */
 
   return (
-    <Container disableGutters>
+    <Box sx={{px: 1}}>
       <CustomAccordion
         title={title.applicantDetails}
         defaultExpanded
@@ -1922,7 +1922,7 @@ const ApplicantProfile = () => {
           />
         )}
       </CustomDialog>
-    </Container>
+    </Box>
   );
 };
 

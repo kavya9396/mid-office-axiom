@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Divider, Typography, Link, Snackbar, Alert } from "@mui/material";
 
 import LoginImage from "../../assets/Login-Image.svg";
-import IPRULogo from "../../assets/ICICI Logo.svg";
+import IPRULogo from "../../assets/ICICI Logo_.svg";
 import AxiomLogo from "../../assets/Axiom Logo.svg";
 import IBMLogo from "../../assets/IBM Logo.svg";
 

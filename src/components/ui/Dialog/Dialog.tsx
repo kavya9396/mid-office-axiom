@@ -79,7 +79,7 @@ const CustomDialog = ({
           {title}
 
           {showCloseIcon && (
-            <IconButton onClick={onClose} sx={{ color: "#063E6F" }}>
+            <IconButton onClick={onClose} sx={{ color: "#9A2529" }}>
               <CloseIcon />
             </IconButton>
           )}

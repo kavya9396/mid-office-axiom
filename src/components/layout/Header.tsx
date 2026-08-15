@@ -99,56 +99,56 @@ const Header = () => {
   return (
     <>
       <Box
-  component="header"
-  sx={{
-    height: HEADER_HEIGHT,
-    display: "flex",
-    alignItems: "stretch",
-    background: "linear-gradient(to bottom,#F58220 0%,#E65318 42%,#C92E27 72%,#98252B 100%)",
-    boxShadow:
-      "0 3px 12px rgba(111, 24, 24, 0.25)",
-    position: "relative",
-    zIndex: 1100,
-    overflow: "hidden",
-  }}
->
+        component="header"
+        sx={{
+          height: HEADER_HEIGHT,
+          display: "flex",
+          alignItems: "stretch",
+          background: "linear-gradient(to bottom,#F58220 0%,#E65318 42%,#C92E27 72%,#98252B 100%)",
+          boxShadow:
+            "0 3px 12px rgba(111, 24, 24, 0.25)",
+          position: "relative",
+          zIndex: 1100,
+          overflow: "hidden",
+        }}
+      >
         {/* LOGO SECTION */}
-         <Box
-    sx={{
-      height: HEADER_HEIGHT,
-      flexShrink: 0,
-      display: "flex",
-      alignItems: "stretch",
-      backgroundColor: "transparent",
-    }}
-  >
+        <Box
+          sx={{
+            height: HEADER_HEIGHT,
+            flexShrink: 0,
+            display: "flex",
+            alignItems: "stretch",
+            backgroundColor: "transparent",
+          }}
+        >
           <Box
-      component="img"
-      src={Logo}
-      alt="ICICI Life Logo"
-      sx={{
-        height: "100%",
-        width: "200px",
-        display: "block",
-        objectFit: "cover",
-      }}
-    />
-  </Box>
+            component="img"
+            src={Logo}
+            alt="ICICI Life Logo"
+            sx={{
+              height: "100%",
+              width: "150px",
+              display: "block",
+              objectFit: "cover",
+            }}
+          />
+        </Box>
 
         {/* GRADIENT USER SECTION */}
         <Box
-    sx={{
-      minWidth: 0,
-      height: HEADER_HEIGHT,
-      px: { xs: 1, sm: 2 },
-      flex: 1,
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "flex-end",
-      color: "#FFFFFF",
-      background: "transparent",
-    }}
-  >
+          sx={{
+            minWidth: 0,
+            height: HEADER_HEIGHT,
+            px: { xs: 1, sm: 2 },
+            flex: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "flex-end",
+            color: "#FFFFFF",
+            background: "transparent",
+          }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -263,16 +263,6 @@ const Header = () => {
                   }}
                 >
                   {username}
-                </Typography>
-
-                <Typography
-                  sx={{
-                    color:
-                      "rgba(255,255,255,0.78)",
-                    fontSize: 10,
-                  }}
-                >
-                  User profile
                 </Typography>
               </Box>
 

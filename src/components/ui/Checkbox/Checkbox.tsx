@@ -1,10 +1,9 @@
 import { Checkbox, FormControlLabel, Typography } from "@mui/material";
+import type { CheckboxProps } from "@mui/material";
 
-type CustomCheckboxProps = {
-  label: string;
-  checked?: boolean;
+type CustomCheckboxProps = Omit<CheckboxProps, "onChange"> & {
+  label?: string;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  disabled?: boolean;
 };
 
 export default function CustomCheckbox({
@@ -12,22 +11,33 @@ export default function CustomCheckbox({
   checked,
   onChange,
   disabled,
+  ...checkboxProps
 }: CustomCheckboxProps) {
+  const checkbox = (
+    <Checkbox
+      {...checkboxProps}
+      size="small"
+      checked={checked}
+      onChange={onChange}
+      disabled={disabled}
+      disableRipple
+      sx={{
+        p: "3px",
+        "&.Mui-checked": {
+          color: "#E45F14",
+        },
+        ...checkboxProps.sx,
+      }}
+    />
+  );
+
+  if (!label) {
+    return checkbox;
+  }
+
   return (
     <FormControlLabel
-      control={
-        <Checkbox
-          size="small"
-          checked={checked}
-          onChange={onChange}
-          disabled={disabled}
-          sx={{
-            "&.Mui-checked": {
-              color: "#063E6F",
-            },
-          }}
-        />
-      }
+      control={checkbox}
       label={
         <Typography variant="body2" color="text.secondary">
           {label}

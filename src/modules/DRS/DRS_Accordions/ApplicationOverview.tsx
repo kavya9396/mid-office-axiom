@@ -1,11 +1,10 @@
-import { Box, Container } from "@mui/material";
+import { Box } from "@mui/material";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { GridSection } from "../../../components/layout/GridSection";
 import { useAppSelector } from "../../../store/hooks";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
 import { getRoleWiseConfig } from "../../../config/roleWiseApplicationDetailsConfig1";
 import type { RootState } from "../../../store/store";
-// import { roleWiseConfig } from "../../../config/roleWiseApplicationDetailsConfig";
 
 export type RiderRow = {
   name: string;
@@ -71,7 +70,7 @@ const ApplicationOverview = () => {
         ppt: String((rider as Record<string, unknown>).ppt ?? (rider as Record<string, unknown>).premiumPaymentTerm ?? ""),
       })) ?? [];
   return (
-    <Container disableGutters>
+    <Box sx={{px: 1}}>
       <CustomAccordion title={"Application Overview"} defaultExpanded>
         <Box sx={{ p:1, bgcolor: "#f6f6f6" }}>
           <GridSection columns={8} items={items} />
@@ -84,7 +83,7 @@ const ApplicationOverview = () => {
           )}
         </Box>
       </CustomAccordion>
-    </Container>
+    </Box>
   )
 }
 export default ApplicationOverview;
