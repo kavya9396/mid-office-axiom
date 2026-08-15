@@ -1072,6 +1072,11 @@ const DynamicRoleTable = ({
         sx={{
           mt: 0,
           width: "100%",
+          height: "calc(100dvh - 64px)",
+          maxHeight: "calc(100dvh - 64px)",
+          minHeight: 0,
+          display: "flex",
+          flexDirection: "column",
           border:
             "1px solid #d9dfe4",
           borderRadius: "10px",
@@ -1079,6 +1084,7 @@ const DynamicRoleTable = ({
           backgroundColor: "#fff",
           boxShadow:
             "0 1px 3px rgba(0,0,0,0.04)",
+          boxSizing: "border-box",
         }}
       >
         {/* ======================================================
@@ -1089,14 +1095,17 @@ const DynamicRoleTable = ({
         <Box
           sx={{
             height: "38px",
+            minHeight: "38px",
+            flexShrink: 0,
             px: 1.5,
             display: "flex",
             alignItems: "center",
             justifyContent:
               "space-between",
             backgroundColor:
-              "#0D4C7D",
+              "#E45F14",
             color: "#fff",
+            boxSizing: "border-box",
           }}
         >
           <Typography
@@ -1135,12 +1144,15 @@ const DynamicRoleTable = ({
         <Box
           sx={{
             height: "36px",
+            minHeight: "36px",
+            flexShrink: 0,
             px: 1,
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
             backgroundColor: "#fff",
             borderBottom: "1px solid #e3e6e8",
+            boxSizing: "border-box",
           }}
         >
           {/* ======================================================
@@ -1273,15 +1285,16 @@ const DynamicRoleTable = ({
         <TableContainer
           sx={{
             width: "100%",
-            overflowX: "hidden",
+            flex: 1,
+            minHeight: 0,
+            maxHeight: "none",
+            overflowX: "auto",
             overflowY: "auto",
-
-            // Always occupy the available table area
-            minHeight: "calc(100vh - 175px)",
-            maxHeight: "calc(100vh - 185px)",
+            boxSizing: "border-box",
 
             "&::-webkit-scrollbar": {
               width: "6px",
+              height: "6px",
             },
 
             "&::-webkit-scrollbar-thumb": {
@@ -1586,6 +1599,10 @@ const DynamicRoleTable = ({
           sx={{
             minHeight: "34px",
             height: "34px",
+            maxHeight: "34px",
+            flexShrink: 0,
+            overflow: "hidden",
+            boxSizing: "border-box",
 
             borderTop:
               "1px solid #e3e6e8",
