@@ -17,11 +17,21 @@ import {
   type SelectChangeEvent,
 } from "@mui/material";
 
-import { useMemo, useState, type MouseEvent as ReactMouseEvent } from "react";
+import {
+  useEffect,
+  useCallback,
+  useMemo,
+  useState,
+  type MouseEvent as ReactMouseEvent,
+} from "react";
 
-import { useAppSelector } from "../../../store/hooks";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
-import type { AdditionalRequirementRow } from "../../../types/drs.types";
+import { masterThunk } from "../../../store/thunks/masterThunk";
+import type {
+  AdditionalRequirementRow,
+  MasterRequest,
+} from "../../../types/drs.types";
 import {
   CloseIcon,
   FilterIcon,
@@ -31,6 +41,7 @@ interface RequirementManagementTableProps {
   requirements: AdditionalRequirementRow[];
   onSave?: (rows: AdditionalRequirementRow[]) => void | Promise<void>;
   onAddRequirement?: () => void;
+  addRowSignal?: number;
 }
 
 interface MiscMasterItem {
@@ -63,11 +74,33 @@ interface SnackbarState {
   severity: "success" | "error";
 }
 
+type AddRowField =
+  | "team"
+  | "profile"
+  | "category"
+  | "subCategory"
+  | "document"
+  | "reason"
+  | "fupCode";
+
+const ADD_ROW_FIELD_SEQUENCE: AddRowField[] = [
+  "team",
+  "profile",
+  "category",
+  "subCategory",
+  "document",
+  "reason",
+  "fupCode",
+];
+
+type RowMasterOptions = Partial<Record<AddRowField, string[]>>;
+
 const ROWS_PER_PAGE = 5;
 const COLUMN_HEADINGS = [
   "Actions",
   "Status",
   "OCR Status",
+  "Team",
   "Profile",
   "Category",
   "Sub Category",
@@ -80,7 +113,7 @@ const COLUMN_HEADINGS = [
 ] as const;
 
 const DEFAULT_COLUMN_WIDTHS = [
-  60, 130, 105, 100, 115, 125, 130, 160, 110, 95, 105, 90,
+  60, 125, 95, 85, 95, 105, 115, 120, 145, 100, 85, 95, 85,
 ];
 const MIN_COLUMN_WEIGHT = 30;
 
@@ -114,6 +147,107 @@ const getExtraRemarks = (row: AdditionalRequirementRow): unknown => {
   const requirementRow = row as unknown as Record<string, unknown>;
 
   return requirementRow.extraRemarks ?? requirementRow.extraRemark;
+};
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const getMasterPayload = (value: unknown): Record<string, unknown> => {
+  const root = toRecord(value);
+  const firstData = toRecord(root.data);
+  const secondData = toRecord(firstData.data);
+
+  return Object.keys(secondData).length > 0
+    ? secondData
+    : Object.keys(firstData).length > 0
+      ? firstData
+      : root;
+};
+
+const getMasterItems = (
+  response: unknown,
+  key: "misc" | "requirement_mst",
+): Record<string, unknown>[] => {
+  const payload = getMasterPayload(response);
+  const value = payload[key] ?? payload.requirementMst;
+
+  if (Array.isArray(value)) {
+    return value.map(toRecord);
+  }
+
+  if (key === "requirement_mst") {
+    const requirementMaster = toRecord(value);
+    const normalizedLevel = normalizeText(requirementMaster.level)
+      .replace(/[_\s-]/g, "")
+      .toLowerCase();
+    const levelConfig: Record<
+      string,
+      { arrayKeys: string[]; field: AddRowField }
+    > = {
+      team: { arrayKeys: ["teams"], field: "team" },
+      profile: { arrayKeys: ["profiles"], field: "profile" },
+      category: { arrayKeys: ["categories"], field: "category" },
+      subcategory: {
+        arrayKeys: ["subCategories", "subcategories"],
+        field: "subCategory",
+      },
+      document: { arrayKeys: ["documents"], field: "document" },
+      reason: { arrayKeys: ["reasons"], field: "reason" },
+      fupcode: {
+        arrayKeys: ["fupCodes", "fupcodes", "fup_codes"],
+        field: "fupCode",
+      },
+    };
+    const config = levelConfig[normalizedLevel];
+
+    if (config) {
+      const optionValues = config.arrayKeys
+        .map((arrayKey) => requirementMaster[arrayKey])
+        .find(Array.isArray);
+
+      if (Array.isArray(optionValues)) {
+        return optionValues.map((option) =>
+          option && typeof option === "object"
+            ? toRecord(option)
+            : { [config.field]: option },
+        );
+      }
+    }
+  }
+
+  return [];
+};
+
+const getDefaultTeamByRole = (roleType: string): string => {
+  if (["CVT_TASK", "CPT_DATA_ENTRY_NMR_TASK"].includes(roleType)) {
+    return "COPS";
+  }
+
+  if (roleType === "CUW_TASK") {
+    return "UW";
+  }
+
+  return "SYSTEM REQUIREMENT";
+};
+
+const getOptionText = (item: Record<string, unknown>, field: AddRowField) => {
+  const aliases: Record<AddRowField, string[]> = {
+    team: ["team", "teamCode", "teamName"],
+    profile: ["profile", "code", "value", "description"],
+    category: ["category", "categoryName"],
+    subCategory: ["subCategory", "subcategory", "subCategoryName"],
+    document: ["document", "documentName"],
+    reason: ["reason", "reasonName"],
+    fupCode: ["fupCode", "fup_code", "code"],
+  };
+
+  return (
+    aliases[field]
+      .map((key) => normalizeText(item[key]))
+      .find(Boolean) ?? ""
+  );
 };
 
 const formatStatus = (status: unknown): string => {
@@ -220,8 +354,10 @@ const RequirementManagementTable = ({
   requirements,
   onSave,
   onAddRequirement,
+  addRowSignal = 0,
 }: RequirementManagementTableProps) => {
-  const roleType = localStorage.getItem("roleType") ?? "";
+  const dispatch = useAppDispatch();
+  const [roleType] = useState(() => localStorage.getItem("roleType") ?? "");
   const normalizedRoleType = normalizeText(roleType).toUpperCase();
   const isNonEditable = [
     "AMR_MEDICAL_TASK",
@@ -247,6 +383,15 @@ const RequirementManagementTable = ({
 
   const [previousRequirements, setPreviousRequirements] =
     useState(roleBasedRequirements);
+  const [handledAddRowSignal, setHandledAddRowSignal] = useState(addRowSignal);
+  const [newRowIds, setNewRowIds] = useState<number[]>([]);
+  const [rowMasterOptions, setRowMasterOptions] = useState<
+    Record<number, RowMasterOptions>
+  >({});
+  const [loadingMasterField, setLoadingMasterField] = useState<{
+    rowId: number;
+    field: AddRowField;
+  } | null>(null);
 
   const [page, setPage] = useState(1);
   const [filters, setFilters] = useState(EMPTY_FILTERS);
@@ -275,6 +420,37 @@ const RequirementManagementTable = ({
   if (previousRequirements !== roleBasedRequirements) {
     setPreviousRequirements(roleBasedRequirements);
     setRows(roleBasedRequirements);
+    setPage(1);
+  }
+
+  if (handledAddRowSignal !== addRowSignal) {
+    const temporaryRequirementId = -Math.max(1, addRowSignal);
+    const newRequirement: AdditionalRequirementRow = {
+      requirementId: temporaryRequirementId,
+      team: getDefaultTeamByRole(normalizedRoleType),
+      profile: "",
+      category: "",
+      subCategory: "",
+      document: "",
+      reason: "",
+      fupCode: "",
+      description: "",
+      status: "PENDING",
+     
+      specialTest: "",
+    
+      userId: normalizeText(localStorage.getItem("userId")),
+      remarks: "",
+      udsLink: "",
+      ocrStatus: "",
+     
+    };
+
+    setHandledAddRowSignal(addRowSignal);
+    setRows((currentRows) => [newRequirement, ...currentRows]);
+    setNewRowIds((currentIds) => [...currentIds, temporaryRequirementId]);
+    setFilters({ ...EMPTY_FILTERS });
+    setDraftFilters({ ...EMPTY_FILTERS });
     setPage(1);
   }
 
@@ -310,6 +486,143 @@ const RequirementManagementTable = ({
       ),
     [miscData],
   );
+
+  const loadMasterOptions = useCallback(async (
+    rowId: number,
+    nextField: AddRowField,
+    row: AdditionalRequirementRow,
+  ) => {
+    setLoadingMasterField({ rowId, field: nextField });
+
+    const requestPayload = {
+      type: ["requirement_mst", "misc"],
+      ...(normalizeText(row.team) && { team: normalizeText(row.team) }),
+      ...(normalizeText(row.profile) && { profile: normalizeText(row.profile) }),
+      ...(normalizeText(row.category) && {
+        category: normalizeText(row.category),
+      }),
+      ...(normalizeText(row.subCategory) && {
+        subCategory: normalizeText(row.subCategory),
+      }),
+      ...(normalizeText(row.document) && {
+        document: normalizeText(row.document),
+      }),
+      ...(normalizeText(row.reason) && { reason: normalizeText(row.reason) }),
+      ...(normalizeText(row.fupCode) && {
+        fupCode: normalizeText(row.fupCode),
+      }),
+    } as unknown as MasterRequest;
+
+    try {
+      const response = await dispatch(masterThunk(requestPayload)).unwrap();
+      const requirementItems = getMasterItems(response, "requirement_mst");
+      const miscItems = getMasterItems(response, "misc");
+      const sourceItems =
+        nextField === "profile"
+          ? miscItems.filter(
+              (item) => normalizeText(item.type).toUpperCase() === "PROFILE",
+            )
+          : requirementItems;
+      const options = Array.from(
+        new Set(
+          sourceItems
+            .map((item) => getOptionText(item, nextField))
+            .filter(Boolean),
+        ),
+      );
+
+      if (
+        nextField === "team" &&
+        normalizeText(row.team) &&
+        !options.includes(normalizeText(row.team))
+      ) {
+        options.unshift(normalizeText(row.team));
+      }
+
+      setRowMasterOptions((currentOptions) => ({
+        ...currentOptions,
+        [rowId]: {
+          ...currentOptions[rowId],
+          [nextField]: options,
+        },
+      }));
+
+      if (nextField === "fupCode" && normalizeText(row.fupCode)) {
+        const matchingRequirement = requirementItems.find(
+          (item) =>
+            normalizeText(item.fupCode ?? item.fup_code ?? item.code).toUpperCase() ===
+            normalizeText(row.fupCode).toUpperCase(),
+        );
+        const description = normalizeText(matchingRequirement?.description);
+
+        if (description) {
+          setRows((currentRows) =>
+            currentRows.map((currentRow) =>
+              Number(currentRow.requirementId) === rowId
+                ? { ...currentRow, description }
+                : currentRow,
+            ),
+          );
+        }
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message:
+          error instanceof Error && error.message
+            ? error.message
+            : "Unable to load requirement master data.",
+        severity: "error",
+      });
+    } finally {
+      setLoadingMasterField(null);
+    }
+  }, [
+    dispatch,
+    setLoadingMasterField,
+    setRowMasterOptions,
+    setRows,
+    setSnackbar,
+  ]);
+
+  useEffect(() => {
+    const newestRowId = newRowIds[newRowIds.length - 1];
+
+    if (newestRowId === undefined) {
+      return undefined;
+    }
+
+    const newRow = rows.find(
+      (row) => Number(row.requirementId) === newestRowId,
+    );
+
+    if (!newRow) {
+      return undefined;
+    }
+
+    const currentOptions = rowMasterOptions[newestRowId] ?? {};
+
+    if (!Object.prototype.hasOwnProperty.call(currentOptions, "team")) {
+      const timeoutId = window.setTimeout(() => {
+        void loadMasterOptions(newestRowId, "team", newRow);
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    if (
+      normalizeText(newRow.team) &&
+      !Object.prototype.hasOwnProperty.call(currentOptions, "profile")
+    ) {
+      const timeoutId = window.setTimeout(() => {
+        void loadMasterOptions(newestRowId, "profile", newRow);
+      }, 0);
+
+      return () => window.clearTimeout(timeoutId);
+    }
+
+    return undefined;
+  }, [loadMasterOptions, newRowIds, rowMasterOptions, rows]);
 
   const filterOptions = useMemo(() => {
     const fields = Object.values(FILTERABLE_COLUMNS) as FilterField[];
@@ -452,6 +765,56 @@ const RequirementManagementTable = ({
     setPage(1);
   };
 
+  const handleAddRowFieldChange = (
+    rowId: number,
+    field: AddRowField,
+    selectedValue: string,
+  ) => {
+    const fieldIndex = ADD_ROW_FIELD_SEQUENCE.indexOf(field);
+    const downstreamFields = ADD_ROW_FIELD_SEQUENCE.slice(fieldIndex + 1);
+    const currentRow = rows.find(
+      (row) => Number(row.requirementId) === rowId,
+    );
+
+    if (!currentRow) {
+      return;
+    }
+
+    const updatedRow = {
+      ...currentRow,
+      [field]: selectedValue,
+      ...Object.fromEntries(
+        downstreamFields.map((downstreamField) => [downstreamField, ""]),
+      ),
+      ...(field !== "fupCode" ? { description: "" } : {}),
+    } as AdditionalRequirementRow;
+
+    setRows((currentRows) =>
+      currentRows.map((row) =>
+        Number(row.requirementId) === rowId ? updatedRow : row,
+      ),
+    );
+
+    setRowMasterOptions((currentOptions) => ({
+      ...currentOptions,
+      [rowId]: {
+        ...currentOptions[rowId],
+        ...Object.fromEntries(
+          downstreamFields.map((downstreamField) => [downstreamField, []]),
+        ),
+      },
+    }));
+
+    const nextField =
+      field === "fupCode"
+        ? "fupCode"
+        : ADD_ROW_FIELD_SEQUENCE[fieldIndex + 1];
+
+    if (nextField) {
+      void loadMasterOptions(rowId, nextField, updatedRow);
+    }
+  };
+
   const handleStatusChange = (
     requirementId: unknown,
     event: SelectChangeEvent<string>,
@@ -497,6 +860,16 @@ const RequirementManagementTable = ({
         (row) => normalizeText(row.requirementId) !== targetId,
       ),
     );
+
+    const numericTargetId = Number(requirementId);
+    setNewRowIds((currentIds) =>
+      currentIds.filter((rowId) => rowId !== numericTargetId),
+    );
+    setRowMasterOptions((currentOptions) => {
+      const nextOptions = { ...currentOptions };
+      delete nextOptions[numericTargetId];
+      return nextOptions;
+    });
 
     const remainingRows = rows.length - 1;
     const updatedPageCount = Math.max(
@@ -593,6 +966,61 @@ const RequirementManagementTable = ({
           </span>
         </Tooltip>
       </Box>
+    );
+  };
+
+  const renderAddRowSelect = (
+    row: AdditionalRequirementRow,
+    rowId: number,
+    field: AddRowField,
+  ) => {
+    const options = rowMasterOptions[rowId]?.[field] ?? [];
+    const fieldIndex = ADD_ROW_FIELD_SEQUENCE.indexOf(field);
+    const parentField = ADD_ROW_FIELD_SEQUENCE[fieldIndex - 1];
+    const isLoading =
+      loadingMasterField?.rowId === rowId &&
+      loadingMasterField.field === field;
+    const isDisabled =
+      isLoading ||
+      (Boolean(parentField) && !normalizeText(row[parentField]));
+
+    return (
+      <Select
+        size="small"
+        displayEmpty
+        value={normalizeText(row[field])}
+        disabled={isDisabled}
+        onChange={(event) =>
+          handleAddRowFieldChange(rowId, field, event.target.value)
+        }
+        sx={{
+          width: "100%",
+          minWidth: 0,
+          height: 25,
+          borderRadius: "5px",
+          bgcolor: "#ffffff",
+          fontSize: "10px",
+          "& .MuiSelect-select": {
+            minWidth: "0 !important",
+            px: 0.45,
+            py: 0.25,
+            pr: "17px !important",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+          },
+          "& .MuiSelect-icon": { right: 0, fontSize: 15 },
+        }}
+      >
+        <MenuItem value="" disabled sx={{ fontSize: "11px" }}>
+          {isLoading ? "Loading..." : "Select"}
+        </MenuItem>
+        {options.map((option) => (
+          <MenuItem key={option} value={option} sx={{ fontSize: "11px" }}>
+            {option}
+          </MenuItem>
+        ))}
+      </Select>
     );
   };
 
@@ -796,6 +1224,8 @@ const RequirementManagementTable = ({
             const rowKey =
               normalizeText(row.requirementId) ||
               `${normalizeText(row.fupCode)}-${absoluteIndex}`;
+            const numericRowId = Number(row.requirementId);
+            const isNewRow = newRowIds.includes(numericRowId);
 
             const currentStatus = normalizeText(row.status);
 
@@ -943,19 +1373,35 @@ const RequirementManagementTable = ({
 
                 {renderCompactCell(row.ocrStatus)}
 
-                {renderCompactCell(row.profile)}
+                {isNewRow
+                  ? renderAddRowSelect(row, numericRowId, "team")
+                  : renderCompactCell(row.team)}
 
-                {renderCompactCell(row.category)}
+                {isNewRow
+                  ? renderAddRowSelect(row, numericRowId, "profile")
+                  : renderCompactCell(row.profile)}
 
-                {renderCompactCell(row.subCategory)}
+                {isNewRow
+                  ? renderAddRowSelect(row, numericRowId, "category")
+                  : renderCompactCell(row.category)}
 
-                {renderCompactCell(row.document)}
+                {isNewRow
+                  ? renderAddRowSelect(row, numericRowId, "subCategory")
+                  : renderCompactCell(row.subCategory)}
 
-                {renderCompactCell(row.reason)}
+                {isNewRow
+                  ? renderAddRowSelect(row, numericRowId, "document")
+                  : renderCompactCell(row.document)}
+
+                {isNewRow
+                  ? renderAddRowSelect(row, numericRowId, "reason")
+                  : renderCompactCell(row.reason)}
 
                 {renderCompactCell(row.specialTest)}
 
-                {renderCompactCell(row.fupCode)}
+                {isNewRow
+                  ? renderAddRowSelect(row, numericRowId, "fupCode")
+                  : renderCompactCell(row.fupCode)}
 
                 {renderDetailAction("Extra Remarks", getExtraRemarks(row))}
 
@@ -1042,7 +1488,7 @@ const RequirementManagementTable = ({
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3500}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
         onClose={(_, reason) => {
           if (reason !== "clickaway") {
             setSnackbar((currentSnackbar) => ({
