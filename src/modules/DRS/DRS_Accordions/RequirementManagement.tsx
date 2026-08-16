@@ -61,9 +61,9 @@ const RequirementManagement = ({
 
     const applicationNo = normalizeText(
       drsData.applicationNo ||
-        drsData.applicationNumber ||
-        localStorage.getItem("applicationNumber") ||
-        localStorage.getItem("applicationNo"),
+      drsData.applicationNumber ||
+      localStorage.getItem("applicationNumber") ||
+      localStorage.getItem("applicationNo"),
     );
 
     const userId = normalizeText(
@@ -98,14 +98,7 @@ const RequirementManagement = ({
   };
 
   return (
-    <Box
-      sx={{
-        p: 1,
-        width: "100%",
-        minWidth: 0,
-        boxSizing: "border-box",
-      }}
-    >
+    <Box sx={{ px: 1}}>
       <CustomAccordion
         title={title.requirementManagement}
         defaultExpanded

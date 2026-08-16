@@ -196,6 +196,7 @@ const storageBusiness =
     roleType,
     layout,
     sections,
+    eventName,
   ]);
 
   const visibleAccordions = useMemo(

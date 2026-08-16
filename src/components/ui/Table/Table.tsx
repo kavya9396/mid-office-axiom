@@ -47,7 +47,7 @@ export default function CustomTable<T extends object>({
       {title && (
         <Box
           sx={{
-            backgroundColor: "#004A80",
+            backgroundColor: "#E45F14",
             color: "#FFFFFF",
             px: 3,
             py: 1.2,
@@ -72,8 +72,8 @@ export default function CustomTable<T extends object>({
             width: "100%",
             tableLayout: "fixed",
             "& th": {
-              backgroundColor: "#E45F14",
-              color: "#FFF",
+              backgroundColor: "#FFEAD7",
+              color: "#000",
               fontSize: "10px",
               fontWeight: 600,
               py: 0.5,
@@ -142,7 +142,7 @@ export default function CustomTable<T extends object>({
                         sx={{
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "#FFF",
+                          color: "000",
                         }}
                       >
                         {col.header}
@@ -154,7 +154,7 @@ export default function CustomTable<T extends object>({
                       <CustomButton
                         variant="text"
                         sx={{
-                          color: "#063E6F",
+                          color: "#E45F14",
                           fontSize: "12px",
                           p: 0,
                           textDecoration: "underline",

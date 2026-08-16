@@ -24,8 +24,8 @@ import { validateApplicantTabsVisited } from "../../../validations/drsApplicantT
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 
 const referralRoleMap: Record<string, string> = {
-    "Refer to HoD": "HoD",
-    "Refer to Sr.UW": "SrUW",
+    "Refer to HOD": "HoD",
+    "Refer to Sr Uw": "SrUW",
     "Refer to HO CMO": "HO CMO",
     "Refer to Reinsurer": "Reinsurer",
 };
@@ -196,8 +196,8 @@ const UWDecision = () => {
     ].includes(caseUWDecisionLabel);
 
     const showFirstUWDecision = [
-        "Refer to HoD",
-        "Refer to Sr.UW",
+        "Refer to HOD",
+        "Refer to Sr Uw",
         "Refer to Reinsurer",
         "Refer to HO CMO",
     ].includes(caseUWDecisionLabel);
@@ -209,7 +209,7 @@ const UWDecision = () => {
         "Postpone",
     ]);
 
-    const showDecisionType = caseUWDecisionLabel === "Refer to Sr.UW" || caseUWDecisionLabel === "Refer to HoD";
+    const showDecisionType = caseUWDecisionLabel === "Refer to Sr Uw" || caseUWDecisionLabel === "Refer to HOD";
     const isAcceptDecision = caseUWDecisionLabel === "Accept";
     const isRejectDecision = caseUWDecisionLabel === "Reject";
     const isDeclineDecision = caseUWDecisionLabel === "Decline";
@@ -334,12 +334,12 @@ const UWDecision = () => {
     }, [users, excludedUserIds]);
 
     const referralConfig = {
-        "Refer to HoD": {
+        "Refer to HOD": {
             label: "Name of HoD",
             options: userOptions,
         },
 
-        "Refer to Sr.UW": {
+        "Refer to Sr Uw": {
             label: "Name of Sr.UW",
             options: userOptions,
         },
@@ -380,486 +380,484 @@ const UWDecision = () => {
     }, [caseUWDecisionLabel, dispatch]);
 
     return (
-        // <Container disableGutters>
-            <Box sx={{ p:1 }}>
-                <CustomAccordion title="UW Decision" defaultExpanded>
-                    <Box
+        <Box sx={{ px: 1 }}>
+            <CustomAccordion title="UW Decision" defaultExpanded>
+                <Box
+                    sx={{
+                        mt: 0.75,
+                        p: 1.25,
+                        borderRadius: "6px",
+                        backgroundColor: "#f6f6f6",
+                    }}
+                >
+                    <Typography
                         sx={{
-                            mt: 0.75,
-                            p: 1.25,
-                            borderRadius: "6px",
-                            backgroundColor: "#f6f6f6",
+                            fontSize: "12px",
+                            fontWeight: 400,
+                            color: "#444",
+                            mb: 0.5,
                         }}
                     >
-                        <Typography
-                            sx={{
-                                fontSize: "12px",
-                                fontWeight: 400,
-                                color: "#444",
-                                mb: 0.5,
-                            }}
-                        >
-                            UW Remarks
-                        </Typography>
+                        UW Remarks
+                    </Typography>
 
-                        <CustomTextField
-                            fullWidth
-                            multiline
-                            minRows={2}
-                            placeholder="Enter remarks..."
-                            value={uwDecisionRemarks}
-                            onChange={(e) => {
-                                const value = e.target.value;
-                                if (value.length <= 10000) {
-                                    setUwDecisionRemarks(value);
+                    <CustomTextField
+                        fullWidth
+                        multiline
+                        minRows={2}
+                        placeholder="Enter remarks..."
+                        value={uwDecisionRemarks}
+                        onChange={(e) => {
+                            const value = e.target.value;
+                            if (value.length <= 10000) {
+                                setUwDecisionRemarks(value);
+                            }
+                        }} variant="outlined"
+                        size="small"
+                        sx={{
+                            backgroundColor: "#fff",
+                            borderRadius: "6px",
+                        }}
+                    />
+                    <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
+                        {uwDecisionRemarks.length}/10000
+                    </Typography>
+
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, 1fr)",
+                            gap: 1,
+                        }}
+                    >
+                        <CustomSelect
+                            label="Case UW Decision"
+                            value={effectiveCaseUWDecision}
+                            onChange={(value: string) => {
+                                const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
+                                setCaseUWDecision(value);
+                                setReferralValue("");
+                                setRejectReason("");
+                                setDeclineReasons([]);
+                                setPostponeReason("");
+                                setPostponementPeriod("");
+                                setCounterOfferTable(createCounterOfferTableState());
+                                setSubmitMessage(null);
+                                setSubmitStatus(null);
+
+                                if (!fetchDecisionCodes.has(selectedLabel)) {
+                                    setDecisionCode("");
+                                    setSmokerStatus("");
                                 }
-                            }} variant="outlined"
-                            size="small"
-                            sx={{
-                                backgroundColor: "#fff",
-                                borderRadius: "6px",
+
+                                if (fetchDecisionCodes.has(selectedLabel)) {
+                                    dispatch(
+                                        decisionCodeThunk({
+                                            decision: selectedLabel,
+                                        })
+                                    );
+                                }
+
+                                if (selectedLabel === "Raise Requirement") {
+                                    openRequirementManagement(true);
+                                }
                             }}
+                            options={caseUWDecisionOptions}
                         />
-                        <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
-                            {uwDecisionRemarks.length}/10000
-                        </Typography>
 
-                        <Box
-                            sx={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(3, 1fr)",
-                                gap: 1,
-                            }}
-                        >
-                            <CustomSelect
-                                label="Case UW Decision"
-                                value={effectiveCaseUWDecision}
-                                onChange={(value: string) => {
-                                    const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
-                                    setCaseUWDecision(value);
-                                    setReferralValue("");
-                                    setRejectReason("");
-                                    setDeclineReasons([]);
-                                    setPostponeReason("");
-                                    setPostponementPeriod("");
-                                    setCounterOfferTable(createCounterOfferTableState());
-                                    setSubmitMessage(null);
-                                    setSubmitStatus(null);
-
-                                    if (!fetchDecisionCodes.has(selectedLabel)) {
-                                        setDecisionCode("");
-                                        setSmokerStatus("");
-                                    }
-
-                                    if (fetchDecisionCodes.has(selectedLabel)) {
-                                        dispatch(
-                                            decisionCodeThunk({
-                                                decision: selectedLabel,
-                                            })
-                                        );
-                                    }
-
-                                    if (selectedLabel === "Raise Requirement") {
-                                        openRequirementManagement(true);
-                                    }
-                                }}
-                                options={caseUWDecisionOptions}
-                            />
-
-                            {showDecisionCode && (
-                                (isAcceptDecision || isRejectDecision || isDeclineDecision || isPostponeDecision) ? (
-                                    <Box>
-                                        <Typography
-                                            sx={{
-                                                fontSize: "14px",
-                                                fontWeight: 400,
-                                                color: "#444",
-                                                mb: 1,
-                                            }}
-                                        >
-                                            Decision Code
-                                        </Typography>
-                                        <CustomTextField
-                                            fullWidth
-                                            size="small"
-                                            value={resolvedDecisionCode}
-                                            disabled
-                                            sx={{
-                                                "& .MuiInputBase-root": {
-                                                    borderRadius: "8px",
-                                                },
-                                            }}
-                                        />
-                                    </Box>
-                                ) : (
-                                    <CustomSelect
-                                        label="Decision Code"
-                                        value={resolvedDecisionCode}
-                                        onChange={setDecisionCode}
-                                        options={decisionCodes}
-                                    />
-                                )
-                            )}
-
-                            {isRejectDecision && (
-                                <CustomSelect
-                                    label="Reject Reason"
-                                    value={rejectReason}
-                                    onChange={setRejectReason}
-                                    options={nonMedicalOptions}
-                                />
-                            )}
-
-                            {isDeclineDecision && (
-                                <>
-                                    <CustomSelect
-                                        label="Decline Reason"
-                                        multiple={true}
-                                        maxCount={3}
-                                        value={declineReasons}
-                                        onChange={setDeclineReasons}
-                                        options={allOptions}
-                                        placeholder="Select reasons"
-                                    />
-                                </>
-                            )}
-
-                            {isPostponeDecision && (
-                                <>
-                                    <CustomSelect
-                                        label="Postpone Reason"
-                                        value={postponeReason}
-                                        onChange={setPostponeReason}
-                                        options={allOptions}
-                                    />
-                                    <CustomSelect
-                                        label="Postponement Period"
-                                        value={postponementPeriod}
-                                        onChange={setPostponementPeriod}
-                                        options={postponementPeriodOptions}
-                                    />
-                                </>
-                            )}
-
-                            {isAcceptDecision && (
+                        {showDecisionCode && (
+                            (isAcceptDecision || isRejectDecision || isDeclineDecision || isPostponeDecision) ? (
                                 <Box>
                                     <Typography
                                         sx={{
-                                            fontSize: "12px",
+                                            fontSize: "14px",
                                             fontWeight: 400,
                                             color: "#444",
-                                            mb: 0.5,
+                                            mb: 1,
                                         }}
                                     >
-                                        Smoker Status
+                                        Decision Code
                                     </Typography>
                                     <CustomTextField
                                         fullWidth
                                         size="small"
-                                        value={resolvedSmokerStatus}
+                                        value={resolvedDecisionCode}
                                         disabled
                                         sx={{
                                             "& .MuiInputBase-root": {
-                                                height: 36,
-                                                borderRadius: "6px",
-                                                backgroundColor: "#fff",
+                                                borderRadius: "8px",
                                             },
                                         }}
                                     />
                                 </Box>
-                            )}
-
-                            {selectedReferralConfig && (
+                            ) : (
                                 <CustomSelect
-                                    label={selectedReferralConfig.label}
-                                    value={referralValue}
-                                    onChange={(value: string) => {
-                                        setReferralValue(value);
-
-                                        const selectedUser = users.find(
-                                            (user) => user.userId === value
-                                        );
-
-                                        if ((selectedUser?.ticketsInPool ?? 0) >= 15) {
-                                            setSelectedThresholdUserId(value);
-                                            setThresholdDialogOpen(true);
-                                        }
-                                    }}
-                                    options={selectedReferralConfig.options}
+                                    label="Decision Code"
+                                    value={resolvedDecisionCode}
+                                    onChange={setDecisionCode}
+                                    options={decisionCodes}
                                 />
-                            )}
+                            )
+                        )}
 
-                            {showParallelDecision && (
-                                <CustomSelect
-                                    label="Parallel UW Decision"
-                                    value={parallelDecision}
-                                    onChange={setParallelDecision}
-                                    options={filteredParallelOptions}
-                                />
-                            )}
+                        {isRejectDecision && (
+                            <CustomSelect
+                                label="Reject Reason"
+                                value={rejectReason}
+                                onChange={setRejectReason}
+                                options={nonMedicalOptions}
+                            />
+                        )}
 
-                            {caseUWDecisionLabel === "Hold" && (
-                                <CustomSelect
-                                    label="Hold Reasons"
-                                    value={holdReasons}
-                                    onChange={setHoldReasons}
-                                    options={holdReasonOptions}
-                                />
-                            )}
-
-                            {showFirstUWDecision && (
-                                <CustomSelect
-                                    label="1st UW Decision"
-                                    value={uwDecision}
-                                    onChange={setUwDecision}
-                                    options={firstUWDecisionOptions}
-                                />
-                            )}
-                        </Box>
-
-                        {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
+                        {isDeclineDecision && (
                             <>
-                                <UWReinsurerFields />
+                                <CustomSelect
+                                    label="Decline Reason"
+                                    multiple={true}
+                                    maxCount={3}
+                                    value={declineReasons}
+                                    onChange={setDeclineReasons}
+                                    options={allOptions}
+                                    placeholder="Select reasons"
+                                />
                             </>
                         )}
 
-                        {showDecisionType && (
-                            <Box sx={{ mt: 1 }}>
-                                <CustomRadioGroup
-                                    row
-                                    value={decisionType}
-                                    onChange={(e) => setDecisionType(e.target.value)}
-                                    options={[
-                                        { label: "Counter Sign", value: "counterSign" },
-                                        { label: "Opinion", value: "opinion" },
-                                    ]}
+                        {isPostponeDecision && (
+                            <>
+                                <CustomSelect
+                                    label="Postpone Reason"
+                                    value={postponeReason}
+                                    onChange={setPostponeReason}
+                                    options={allOptions}
+                                />
+                                <CustomSelect
+                                    label="Postponement Period"
+                                    value={postponementPeriod}
+                                    onChange={setPostponementPeriod}
+                                    options={postponementPeriodOptions}
+                                />
+                            </>
+                        )}
+
+                        {isAcceptDecision && (
+                            <Box>
+                                <Typography
+                                    sx={{
+                                        fontSize: "12px",
+                                        fontWeight: 400,
+                                        color: "#444",
+                                        mb: 0.5,
+                                    }}
+                                >
+                                    Smoker Status
+                                </Typography>
+                                <CustomTextField
+                                    fullWidth
+                                    size="small"
+                                    value={resolvedSmokerStatus}
+                                    disabled
+                                    sx={{
+                                        "& .MuiInputBase-root": {
+                                            height: 36,
+                                            borderRadius: "6px",
+                                            backgroundColor: "#fff",
+                                        },
+                                    }}
                                 />
                             </Box>
                         )}
 
-                        {isCounterOfferDecision && (
-                            <Box sx={{ mt: 1.25 }}>
-                                <Typography
-                                    sx={{
-                                        fontSize: "13px",
-                                        fontWeight: 600,
-                                        color: "#1f2937",
-                                        mb: 0.75,
-                                    }}
-                                >
-                                    Counter Offer Details
-                                </Typography>
+                        {selectedReferralConfig && (
+                            <CustomSelect
+                                label={selectedReferralConfig.label}
+                                value={referralValue}
+                                onChange={(value: string) => {
+                                    setReferralValue(value);
 
-                                <TableContainer
-                                    sx={{
-                                        border: "1px solid #d7d7d7",
-                                        borderRadius: "6px",
-                                        overflowX: "auto",
-                                        backgroundColor: "#fff",
-                                    }}
-                                >
-                                    <Table size="small" sx={{ minWidth: 1900 }}>
-                                        <TableHead>
-                                            <TableRow>
-                                                {[
-                                                    "Application No.",
-                                                    "Proposer / Life Assured (auto filled)",
-                                                    "Applied SA (auto filled)",
-                                                    "Changed SA",
-                                                    "PT (auto filled)",
-                                                    "Changed PT",
-                                                    "PPT (auto filled)",
-                                                    "Changed PPT",
-                                                    "Extra Premium / Decision",
-                                                    "Premium Collected (auto filled)",
-                                                    "Revised Premium",
-                                                    "GST",
-                                                    "Reasons",
-                                                ].map((header) => (
-                                                    <TableCell
-                                                        key={header}
-                                                        sx={{
-                                                            backgroundColor: "#f3f7fc",
-                                                            fontSize: "12px",
-                                                            fontWeight: 600,
-                                                            color: "#2b2b2b",
-                                                            whiteSpace: "normal",
-                                                            minWidth: 130,
-                                                            borderRight: "1px solid #e3e3e3",
-                                                        }}
-                                                    >
-                                                        {header}
-                                                    </TableCell>
-                                                ))}
-                                            </TableRow>
-                                        </TableHead>
+                                    const selectedUser = users.find(
+                                        (user) => user.userId === value
+                                    );
 
-                                        <TableBody>
-                                            {[
-                                                { key: "baseSumAssured", label: "Base Sum Assured" },
-                                                { key: "riderSumAssured", label: "Rider Sum Assured" },
-                                            ].map((row) => (
-                                                <TableRow key={row.key}>
-                                                    <TableCell sx={{ minWidth: 160, fontWeight: 600 }}>{row.label}</TableCell>
-                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                    <TableCell>
-                                                        <CustomTextField
-                                                            fullWidth
-                                                            size="small"
-                                                            value={counterOfferTable[row.key as CounterOfferRowKey].changedSA}
-                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedSA", e.target.value)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                    <TableCell>
-                                                        <CustomTextField
-                                                            fullWidth
-                                                            size="small"
-                                                            value={counterOfferTable[row.key as CounterOfferRowKey].changedPT}
-                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPT", e.target.value)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                    <TableCell>
-                                                        <CustomTextField
-                                                            fullWidth
-                                                            size="small"
-                                                            value={counterOfferTable[row.key as CounterOfferRowKey].changedPPT}
-                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPPT", e.target.value)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <CustomTextField
-                                                            fullWidth
-                                                            size="small"
-                                                            value={counterOfferTable[row.key as CounterOfferRowKey].extraPremiumDecision}
-                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "extraPremiumDecision", e.target.value)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                    <TableCell>
-                                                        <CustomTextField
-                                                            fullWidth
-                                                            size="small"
-                                                            value={counterOfferTable[row.key as CounterOfferRowKey].revisedPremium}
-                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "revisedPremium", e.target.value)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <CustomTextField
-                                                            fullWidth
-                                                            size="small"
-                                                            value={counterOfferTable[row.key as CounterOfferRowKey].gst}
-                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "gst", e.target.value)}
-                                                        />
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        <CustomTextField
-                                                            fullWidth
-                                                            size="small"
-                                                            value={counterOfferTable[row.key as CounterOfferRowKey].reasons}
-                                                            onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "reasons", e.target.value)}
-                                                        />
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </TableContainer>
-                            </Box>
+                                    if ((selectedUser?.ticketsInPool ?? 0) >= 15) {
+                                        setSelectedThresholdUserId(value);
+                                        setThresholdDialogOpen(true);
+                                    }
+                                }}
+                                options={selectedReferralConfig.options}
+                            />
                         )}
 
+                        {showParallelDecision && (
+                            <CustomSelect
+                                label="Parallel UW Decision"
+                                value={parallelDecision}
+                                onChange={setParallelDecision}
+                                options={filteredParallelOptions}
+                            />
+                        )}
+
+                        {caseUWDecisionLabel === "Hold" && (
+                            <CustomSelect
+                                label="Hold Reasons"
+                                value={holdReasons}
+                                onChange={setHoldReasons}
+                                options={holdReasonOptions}
+                            />
+                        )}
+
+                        {showFirstUWDecision && (
+                            <CustomSelect
+                                label="1st UW Decision"
+                                value={uwDecision}
+                                onChange={setUwDecision}
+                                options={firstUWDecisionOptions}
+                            />
+                        )}
                     </Box>
-                    {/* Submit Button */}
-                    {caseUWDecision && caseUWDecisionLabel !== "Refer to Reinsurer" && (
-                        <Box
-                            sx={{
-                                display: "flex",
-                                gap: 1,
-                                mt: 1,
-                            }}
-                        >
-                            <CustomButton
-                                variant="contained"
-                                disabled={submitLoading}
-                                onClick={handleSubmitIntent}
-                                sx={{
-                                    minWidth: 150,
-                                    height: 36,
-                                    borderRadius: "50px",
-                                    fontWeight: 600,
-                                    px: 2.5,
-                                    whiteSpace: "nowrap",
-                                }}
-                            >
-                                {submitLoading ? "Submitting..." : "Submit"}
-                            </CustomButton>
+
+                    {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
+                        <>
+                            <UWReinsurerFields />
+                        </>
+                    )}
+
+                    {showDecisionType && (
+                        <Box sx={{ mt: 1 }}>
+                            <CustomRadioGroup
+                                row
+                                value={decisionType}
+                                onChange={(e) => setDecisionType(e.target.value)}
+                                options={[
+                                    { label: "Counter Sign", value: "counterSign" },
+                                    { label: "Opinion", value: "opinion" },
+                                ]}
+                            />
                         </Box>
                     )}
 
-                    {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
-                        <UWReinsurer onOpenConfirmation={handleSubmitIntent} />
+                    {isCounterOfferDecision && (
+                        <Box sx={{ mt: 1.25 }}>
+                            <Typography
+                                sx={{
+                                    fontSize: "13px",
+                                    fontWeight: 600,
+                                    color: "#1f2937",
+                                    mb: 0.75,
+                                }}
+                            >
+                                Counter Offer Details
+                            </Typography>
+
+                            <TableContainer
+                                sx={{
+                                    border: "1px solid #d7d7d7",
+                                    borderRadius: "6px",
+                                    overflowX: "auto",
+                                    backgroundColor: "#fff",
+                                }}
+                            >
+                                <Table size="small" sx={{ minWidth: 1900 }}>
+                                    <TableHead>
+                                        <TableRow>
+                                            {[
+                                                "Application No.",
+                                                "Proposer / Life Assured (auto filled)",
+                                                "Applied SA (auto filled)",
+                                                "Changed SA",
+                                                "PT (auto filled)",
+                                                "Changed PT",
+                                                "PPT (auto filled)",
+                                                "Changed PPT",
+                                                "Extra Premium / Decision",
+                                                "Premium Collected (auto filled)",
+                                                "Revised Premium",
+                                                "GST",
+                                                "Reasons",
+                                            ].map((header) => (
+                                                <TableCell
+                                                    key={header}
+                                                    sx={{
+                                                        backgroundColor: "#f3f7fc",
+                                                        fontSize: "12px",
+                                                        fontWeight: 600,
+                                                        color: "#2b2b2b",
+                                                        whiteSpace: "normal",
+                                                        minWidth: 130,
+                                                        borderRight: "1px solid #e3e3e3",
+                                                    }}
+                                                >
+                                                    {header}
+                                                </TableCell>
+                                            ))}
+                                        </TableRow>
+                                    </TableHead>
+
+                                    <TableBody>
+                                        {[
+                                            { key: "baseSumAssured", label: "Base Sum Assured" },
+                                            { key: "riderSumAssured", label: "Rider Sum Assured" },
+                                        ].map((row) => (
+                                            <TableRow key={row.key}>
+                                                <TableCell sx={{ minWidth: 160, fontWeight: 600 }}>{row.label}</TableCell>
+                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                <TableCell>
+                                                    <CustomTextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={counterOfferTable[row.key as CounterOfferRowKey].changedSA}
+                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedSA", e.target.value)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                <TableCell>
+                                                    <CustomTextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={counterOfferTable[row.key as CounterOfferRowKey].changedPT}
+                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPT", e.target.value)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                <TableCell>
+                                                    <CustomTextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={counterOfferTable[row.key as CounterOfferRowKey].changedPPT}
+                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPPT", e.target.value)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <CustomTextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={counterOfferTable[row.key as CounterOfferRowKey].extraPremiumDecision}
+                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "extraPremiumDecision", e.target.value)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                                                <TableCell>
+                                                    <CustomTextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={counterOfferTable[row.key as CounterOfferRowKey].revisedPremium}
+                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "revisedPremium", e.target.value)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <CustomTextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={counterOfferTable[row.key as CounterOfferRowKey].gst}
+                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "gst", e.target.value)}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>
+                                                    <CustomTextField
+                                                        fullWidth
+                                                        size="small"
+                                                        value={counterOfferTable[row.key as CounterOfferRowKey].reasons}
+                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "reasons", e.target.value)}
+                                                    />
+                                                </TableCell>
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                            </TableContainer>
+                        </Box>
                     )}
-                </CustomAccordion>
 
-                {/* Confirmation Dialog */}
-                <ConfirmationDialog
-                    open={confirmationDialogOpen}
-                    message={
-                        caseUWDecisionLabel === "Refer to Risk"
-                            ? riskMessage
-                            : dialogMessage
-                    }
-                    onClose={() => setConfirmationDialogOpen(false)}
-                    onConfirm={() => {
-                        setConfirmationDialogOpen(false);
-                        void handleSubmit();
-                    }}
-                />
+                </Box>
+                {/* Submit Button */}
+                {caseUWDecision && caseUWDecisionLabel !== "Refer to Reinsurer" && (
+                    <Box
+                        sx={{
+                            display: "flex",
+                            gap: 1,
+                            mt: 1,
+                        }}
+                    >
+                        <CustomButton
+                            variant="contained"
+                            disabled={submitLoading}
+                            onClick={handleSubmitIntent}
+                            sx={{
+                                minWidth: 150,
+                                height: 36,
+                                borderRadius: "50px",
+                                fontWeight: 600,
+                                px: 2.5,
+                                whiteSpace: "nowrap",
+                            }}
+                        >
+                            {submitLoading ? "Submitting..." : "Submit"}
+                        </CustomButton>
+                    </Box>
+                )}
 
-                <Snackbar
-                    open={Boolean(submitMessage) && submitStatus === "failure"}
-                    autoHideDuration={3000}
+                {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
+                    <UWReinsurer onOpenConfirmation={handleSubmitIntent} />
+                )}
+            </CustomAccordion>
+
+            {/* Confirmation Dialog */}
+            <ConfirmationDialog
+                open={confirmationDialogOpen}
+                message={
+                    caseUWDecisionLabel === "Refer to Risk"
+                        ? riskMessage
+                        : dialogMessage
+                }
+                onClose={() => setConfirmationDialogOpen(false)}
+                onConfirm={() => {
+                    setConfirmationDialogOpen(false);
+                    void handleSubmit();
+                }}
+            />
+
+            <Snackbar
+                open={Boolean(submitMessage) && submitStatus === "failure"}
+                autoHideDuration={3000}
+                onClose={() => {
+                    setSubmitMessage(null);
+                    setSubmitStatus(null);
+                }}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            >
+                <Alert
                     onClose={() => {
                         setSubmitMessage(null);
                         setSubmitStatus(null);
                     }}
-                    anchorOrigin={{ vertical: "top", horizontal: "center" }}
+                    severity="error"
+                    variant="filled"
+                    sx={{ width: "100%" }}
                 >
-                    <Alert
-                        onClose={() => {
-                            setSubmitMessage(null);
-                            setSubmitStatus(null);
-                        }}
-                        severity="error"
-                        variant="filled"
-                        sx={{ width: "100%" }}
-                    >
-                        {submitMessage}
-                    </Alert>
-                </Snackbar>
+                    {submitMessage}
+                </Alert>
+            </Snackbar>
 
-                {/* Threshold Dialog */}
-                <ConfirmationDialog
-                    open={thresholdDialogOpen}
-                    title="Threshold Limit"
-                    buttonText="Ok"
-                    message={thresholdMessage}
-                    onClose={() => {
-                        if (selectedThresholdUserId) {
-                            setExcludedUserIds(prev => [
-                                ...prev,
-                                selectedThresholdUserId,
-                            ]);
-                        }
-                        setReferralValue("");
-                        setSelectedThresholdUserId("");
-                        setThresholdDialogOpen(false);
-                    }}
-                />
-            </Box>
-        // </Container>
+            {/* Threshold Dialog */}
+            <ConfirmationDialog
+                open={thresholdDialogOpen}
+                title="Threshold Limit"
+                buttonText="Ok"
+                message={thresholdMessage}
+                onClose={() => {
+                    if (selectedThresholdUserId) {
+                        setExcludedUserIds(prev => [
+                            ...prev,
+                            selectedThresholdUserId,
+                        ]);
+                    }
+                    setReferralValue("");
+                    setSelectedThresholdUserId("");
+                    setThresholdDialogOpen(false);
+                }}
+            />
+        </Box>
     )
 }
 
