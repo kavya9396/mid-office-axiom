@@ -6,7 +6,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Paper,
   Table,
   TableBody,
   TableCell,
@@ -22,13 +21,15 @@ import { useMemo, useState } from "react";
 
 import {
   FilterIcon,
+  KeyLeftArrowIcon,
+  KeyRightArrowIcon,
   SearchIcon,
   SettingsIcon,
 } from "../../icons/Icons";
 import CustomButton from "../../components/ui/Button/Button";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
-import { centerFlex } from "../../utils/styles";
+import { centerFlex, columnFlex } from "../../utils/styles";
 
 interface DynamicRoleTableProps {
   title: string;
@@ -1064,7 +1065,7 @@ const DynamicRoleTable = ({
 
   return (
     <>
-      <Paper
+      {/* <Paper
         elevation={0}
         sx={{
           mt: 0,
@@ -1082,6 +1083,14 @@ const DynamicRoleTable = ({
           boxShadow:
             "0 1px 3px rgba(0,0,0,0.04)",
           boxSizing: "border-box",
+        }}
+      > */}
+      <Box
+        sx={{
+          ...columnFlex,
+          margin: 2,
+          maxHeight: "calc(100vh - 100px)",
+
         }}
       >
         {/* ======================================================
@@ -1103,6 +1112,7 @@ const DynamicRoleTable = ({
               "#E45F14",
             color: "#fff",
             boxSizing: "border-box",
+            borderRadius: "10px 10px 0 0",
           }}
         >
           <Typography
@@ -1283,10 +1293,11 @@ const DynamicRoleTable = ({
           sx={{
             width: "100%",
             flex: 1,
-            minHeight: 0,
-            maxHeight: "none",
-            overflowX: "auto",
-            overflowY: "auto",
+            height: "calc(100vh - 180px)",
+            // minHeight: 0,
+            // maxHeight: "none",
+            // overflowX: "auto",
+            // overflowY: "auto",
             boxSizing: "border-box",
 
             "&::-webkit-scrollbar": {
@@ -1600,9 +1611,11 @@ const DynamicRoleTable = ({
             flexShrink: 0,
             overflow: "hidden",
             boxSizing: "border-box",
-
+            backgroundColor: "#fff",
             borderTop:
               "1px solid #e3e6e8",
+            borderRadius: "0 0 10px 10px",
+
 
             "& .MuiTablePagination-toolbar":
             {
@@ -1641,7 +1654,8 @@ const DynamicRoleTable = ({
             },
           }}
         />
-      </Paper>
+      </Box>
+      {/* </Paper> */}
 
       {/* ========================================================
           COLUMN SETTINGS DIALOG
@@ -1886,9 +1900,7 @@ const DynamicRoleTable = ({
                 MAX_VISIBLE_COLUMNS
               }
             >
-              <Box component="span">
-                ›
-              </Box>
+              <KeyRightArrowIcon />
             </CustomButton>
 
             <CustomButton
@@ -1902,9 +1914,7 @@ const DynamicRoleTable = ({
                 selectedConfiguredColumns.length === 0
               }
             >
-              <Box component="span">
-                ‹
-              </Box>
+              <KeyLeftArrowIcon />
             </CustomButton>
           </Box>
 

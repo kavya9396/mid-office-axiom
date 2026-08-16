@@ -212,12 +212,12 @@ const LeftTask = ({
    <Box
   sx={{
     width: isCollapsed ? "60px" : "220px",
-    flexShrink: 0,
+    // flexShrink: 0,
 
     // Remaining viewport height after the 64px header
-    height: "calc(100dvh - 64px)",
-    maxHeight: "calc(100dvh - 64px)",
-    minHeight: 0,
+    height: "calc(100dvh - 57px)",
+    // maxHeight: "calc(100dvh - 64px)",
+    // minHeight: 0,
 
     transition: "width 0.25s ease",
     overflow: "hidden",
@@ -227,15 +227,19 @@ const LeftTask = ({
      <Paper
   elevation={0}
   sx={{
-    height: "100%",
-    minHeight: 0,
-    display: "flex",
-    flexDirection: "column",
-    overflow: "hidden",
-    borderRight: "1px solid #e5e7eb",
-    borderRadius: 0,
-    backgroundColor: "#ffffff",
-    boxSizing: "border-box",
+    // height: "100%",
+    // minHeight: 0,
+    // display: "flex",
+    // flexDirection: "column",
+    // overflow: "hidden",
+    // borderRight: "1px solid #e5e7eb",
+    // borderRadius: 0,
+    // backgroundColor: "#ffffff",
+    // boxSizing: "border-box",
+
+     height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
   }}
 >
         {/* =====================================================
@@ -575,12 +579,11 @@ const LeftTask = ({
           <Box
             sx={{
               flexShrink: 0,
-
               px: 1,
-
               py: 1,
-
               borderTop: "1px solid #eeeeee",
+              backgroundColor: "#FFEAD7",
+              
             }}
           >
             <LastLogin lastLogin={lastLoginAt} />

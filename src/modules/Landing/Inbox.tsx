@@ -422,19 +422,20 @@ const Inbox1 = () => {
 
   return (
     <Box
-      sx={{
-        width: "100%",
-        height: "100%",
-      }}
+    // sx={{
+    //   width: "100%",
+    //   height: "100%",
+    // }}
     >
-      <Grid
+      {/* <Grid
         container
         sx={{
           flexWrap: "nowrap",
           height: "91vh",
           minHeight: 0,
         }}
-      >
+      > */}
+      <Grid container sx={{ flexWrap: "nowrap" }}>
         {/* ================================================== */}
         {/* LEFT SIDE */}
         {/* ================================================== */}
@@ -476,6 +477,7 @@ const Inbox1 = () => {
             backgroundColor: "#f5f7fa",
           }}
         > */}
+        <Box sx={{ flex: 1 }}>
           <RightSideTable
             selectedRole={activeRole}
             selectedTask={activeTask}
@@ -484,6 +486,7 @@ const Inbox1 = () => {
             onApplicationClick={handleApplicationClick}
             onApplicationBack={handleApplicationBack}
           />
+        </Box>
         {/* </Box> */}
       </Grid>
     </Box>
