@@ -138,10 +138,11 @@ const DRS = () => {
     [layoutAccordions],
   );
   const storageBusiness =
-    application?.businessType || localStorage.getItem("businessType");
+    (application?.businessType)?.toLocaleLowerCase() || localStorage.getItem("businessType");
 
   const eventName =
     storageBusiness === "retail" ? "BRE-RETAIL" : "BRE-GROUP";
+    console.log('eventName',application,eventName)
   useEffect(() => {
     const applicationNo =
       application?.applicationNo?.trim();

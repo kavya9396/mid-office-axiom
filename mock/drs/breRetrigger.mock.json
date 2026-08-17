@@ -1,26 +1,149 @@
+
 {
-  "data": {
-    "breOutput": {
-      "systemDecision": "Non-STP",
-      "decisionTypes": {
-        "breDecision": "ST",
-        "breAction": "Regular Medical required",
-        "breRequirement": "IDM ADP KYP AGE ABC UAC PAN PAL ACR OCD ACY MER ECG RUA HV1 H1C AUS COT S13 EIS"
-      },
-      "requirements": [
-        {
-          "requirementType": "IDM",
-          "requirementValue": "IDM",
-          "ruleId": "",
-          "ruleName": "AML_Compliance-Rule1",
-          "isSTP": false,
-          "metaphorName": "AML_Compliance"
+
+    "data": {
+
+        "breOutput": {
+
+            "systemDecision": "Non-STP",
+
+            "decisionTypes": {
+
+                "breDecision": "DC",
+
+                "breAction": "Decline",
+
+                "breRequirement": "ACR#OCD#PAN#KYP#AGE#IDM#ADP"
+
+            },
+
+            "requirements": [
+
+                {
+
+                    "requirementType": "ACR",
+
+                    "requirementValue": "ACR",
+
+                    "ruleId": "",
+
+                    "ruleName": "ProductEligibilitySubFlow-ProductEligible_False_Entering",
+
+                    "isSTP": false,
+
+                    "metaphorName": "ProductEligibilitySubFlow"
+
+                },
+
+                {
+
+                    "requirementType": "OCD",
+
+                    "requirementValue": "OCD",
+
+                    "ruleId": "",
+
+                    "ruleName": "ProductEligibilitySubFlow-ProductEligible_False_Entering",
+
+                    "isSTP": false,
+
+                    "metaphorName": "ProductEligibilitySubFlow"
+
+                },
+
+                {
+
+                    "requirementType": "PAN",
+
+                    "requirementValue": "PAN",
+
+                    "ruleId": "",
+
+                    "ruleName": "ProductEligibilitySubFlow-ProductEligible_False_Entering",
+
+                    "isSTP": false,
+
+                    "metaphorName": "ProductEligibilitySubFlow"
+
+                },
+
+                {
+
+                    "requirementType": "KYP",
+
+                    "requirementValue": "KYP",
+
+                    "ruleId": "",
+
+                    "ruleName": "ProductEligibilitySubFlow-ProductEligible_False_Entering",
+
+                    "isSTP": false,
+
+                    "metaphorName": "ProductEligibilitySubFlow"
+
+                },
+
+                {
+
+                    "requirementType": "AGE",
+
+                    "requirementValue": "AGE",
+
+                    "ruleId": "",
+
+                    "ruleName": "ProductEligibilitySubFlow-ProductEligible_False_Entering",
+
+                    "isSTP": false,
+
+                    "metaphorName": "ProductEligibilitySubFlow"
+
+                },
+
+                {
+
+                    "requirementType": "IDM",
+
+                    "requirementValue": "IDM",
+
+                    "ruleId": "",
+
+                    "ruleName": "ProductEligibilitySubFlow-ProductEligible_False_Entering",
+
+                    "isSTP": false,
+
+                    "metaphorName": "ProductEligibilitySubFlow"
+
+                },
+
+                {
+
+                    "requirementType": "ADP",
+
+                    "requirementValue": "ADP",
+
+                    "ruleId": "",
+
+                    "ruleName": "ProductEligibilitySubFlow-ProductEligible_False_Entering",
+
+                    "isSTP": false,
+
+                    "metaphorName": "ProductEligibilitySubFlow"
+
+                }
+
+            ],
+
+            "systemDecisionDateTime": "2026-08-17T08:17:27Z",
+
+            "reTriggerCount": 0,
+
+            "errorResp": "",
+
+            "breRemarks": "Product Non Eligible"
+
         }
-      ],
-      "systemDecisionDateTime": "2026-04-10 10:15 AM",
-      "reTriggerCount": 4,
-      "errorResp": "",
-      "breRemarks": "#Check#Basic#KYC#Document Attestations#Female life#Questions Answered In Positive#Standard Age Proof Required#Health Question any list"
+
     }
-  }
+
 }
+ 
