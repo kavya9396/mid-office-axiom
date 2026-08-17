@@ -17,7 +17,7 @@ import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
-import BreDecision from "../DRS_Accordions/BreDecision_";
+// import BreDecision from "../DRS_Accordions/BreDecision_";
 import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
 import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
@@ -406,7 +406,7 @@ const ViewMedical = () => {
             applicationNo: safeApplicationId,
             userId,
             roleType,
-            sections: ["summary", "breDecision"],
+            sections: ["summary"],
           })
         ).unwrap();
       } catch (error) {
@@ -1059,7 +1059,7 @@ const ViewMedical = () => {
         />
       </Box>
 
-      <BreDecision />
+      {/* <BreDecision /> */}
 
       {(drsContextLoading || loading) && (
         <Typography sx={{ color: "#6B7280", mb: 2 }}>

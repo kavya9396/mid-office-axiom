@@ -7,7 +7,7 @@ import PIVVSection from "./DRS_Accordions/PIVVSection";
 import PIVVDecision from "./DRS_Accordions/PIVVDecision";
 import PreIssuanceRequestChange from "./DRS_Accordions/PreIssuanceRequestChange";
 import RequirementManagement from "./DRS_Accordions/RequirementManagement";
-import Summary from "./DRS_Accordions/Summary";
+// import Summary from "./DRS_Accordions/Summary";
 //import SupportingDocuments from "./DRS_Accordions/SupportingDocuments";
 import UACChecklist from "./DRS_Accordions/UACChecklist";
 import UWChecklist from "./DRS_Accordions/UWChecklist";
@@ -48,7 +48,7 @@ export const accordionRegistry = {
   exceptionDecision: ExceptionDecision,
   openOtherTasks: OpenOtherTasksAccordion,
   preIssuanceRequestChange: PreIssuanceRequestChange,
-  summary: Summary,
+  summary: ApplicantProfile,
   quickLinks: QuickLinks,
   uwToolkit: UWToolkit,
   dvtDecision: DVTDecision,
@@ -70,7 +70,7 @@ export const accordionRegistry = {
   documentRequired: DocumentRequired,
   preLogin: PreLogin,
   decision:Decision,
-  applicantProfile:ApplicantProfile
+  // applicantProfile:ApplicantProfile
 } as const;
  
 type AccordionKey = keyof typeof accordionRegistry;
@@ -144,8 +144,8 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks"
   ],CVT_TASK: [
     "breDecision",
-    "applicantProfile",
-    // "summary",
+    // "applicantProfile",
+    "summary",
     "applicationOverview",
     "pivvSection",
     "requirementManagement",

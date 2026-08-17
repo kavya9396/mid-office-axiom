@@ -327,7 +327,7 @@ export interface DRSBreOutput {
   errorResp: string;
   breRemarks: string;
   reTriggerCount?: number;
-  retriggerCount?: number;
+  // retriggerCount?: number;
 }
 
 export interface DRSRequirement {
