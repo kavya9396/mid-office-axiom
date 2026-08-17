@@ -39,6 +39,19 @@ interface LocationState {
   application?: ApplicationRow;
 }
 
+interface RequirementManagementRow {
+  status?: string;
+  fupCode?: string;
+}
+
+interface DrsData {
+  requirementManagement?: RequirementManagementRow[];
+}
+
+interface DrsStateWithRequirementSaveStatus {
+  data?: DrsData;
+}
+
 const Decision = () => {
   const dispatch = useDispatch<AppDispatch>();
 
@@ -119,6 +132,10 @@ const Decision = () => {
     (state) => state.bre,
   );
 
+  const drsState = useAppSelector(
+    (state) => state.drs,
+  ) as DrsStateWithRequirementSaveStatus;
+
   // ================= BRE STATUS =================
 
   const finalBreStatus =
@@ -148,6 +165,24 @@ const Decision = () => {
     ? decisionCodeMap[roleType] ?? ""
     : "";
 
+  const hasPendingRequirements =
+    roleType === "CVT_TASK" &&
+    (drsState.data?.requirementManagement ?? []).some(
+      (row) =>
+        String(row.status ?? "")
+          .trim()
+          .toUpperCase() === "PENDING",
+    );
+
+  const hasPivRequirement =
+    roleType === "CVT_TASK" &&
+    (drsState.data?.requirementManagement ?? []).some(
+      (row) =>
+        String(row.fupCode ?? "")
+          .trim()
+          .toUpperCase() === "PIV",
+    );
+
   // ================= MASTER DATA =================
 
   const miscData =
@@ -167,8 +202,25 @@ const Decision = () => {
           item.isActive === "Y",
       )
       ?.filter((item) => {
-        const decisionValue =
-          item.value?.toLowerCase();
+        const decisionValue = String(item.value ?? "")
+          .trim()
+          .toLowerCase();
+
+        const normalizedDecisionValue = decisionValue.replace(
+          /[\s_-]+/g,
+          "",
+        );
+
+        if (hasPendingRequirements) {
+          return normalizedDecisionValue === "raiserequirement";
+        }
+
+        if (
+          hasPivRequirement &&
+          normalizedDecisionValue === "reraisepivv"
+        ) {
+          return false;
+        }
 
         if (
           finalBreStatus === "ST" ||
@@ -219,6 +271,19 @@ const Decision = () => {
     // =====================================================
     // VALIDATION
     // =====================================================
+
+    const requirementSaveStorageKey = `requirementManagementSaved:${applicationNumber}:${roleType}`;
+    const hasSavedRequirements =
+      sessionStorage.getItem(requirementSaveStorageKey) === "true";
+
+    if (roleType === "CVT_TASK" && !hasSavedRequirements) {
+      showSnackbar(
+        "Please click Save in Requirement Management before submitting the decision.",
+        "warning",
+      );
+
+      return;
+    }
 
     const validationResult = validateDecision({
       remarks,

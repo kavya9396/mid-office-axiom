@@ -116,6 +116,7 @@ type RowMasterOptions = Partial<Record<AddRowField, string[]>>;
 
 interface RequirementTableRow extends AdditionalRequirementRow {
   __clientRowId: string;
+  __isInitiallyAccepted: boolean;
 }
 
 const createTableRows = (
@@ -128,6 +129,9 @@ const createTableRows = (
     return {
       ...(apiRow as AdditionalRequirementRow),
       __clientRowId: `existing-${index}`,
+      __isInitiallyAccepted: ["ACCEPT", "ACCEPTED"].includes(
+        getStatusComparableValue(row.status),
+      ),
     };
   });
 
@@ -137,6 +141,7 @@ const createRequestRows = (
   tableRows.map((row) => {
     const requestRow = { ...row } as Record<string, unknown>;
     delete requestRow.__clientRowId;
+    delete requestRow.__isInitiallyAccepted;
     delete requestRow.requirementId;
 
     return requestRow as AdditionalRequirementRow;
@@ -510,9 +515,14 @@ const RequirementManagementTable = ({
 }: RequirementManagementTableProps) => {
   const dispatch = useAppDispatch();
   const { applicationNumber } = useParams<{ applicationNumber: string }>();
-  const roleType = localStorage.getItem("roleType") ?? "";
+  const [roleType] = useState(
+    () => localStorage.getItem("roleType") ?? "",
+  );
   const userId = localStorage.getItem("username") ?? "";
   const normalizedRoleType = normalizeText(roleType).toUpperCase();
+  const requirementSaveStorageKey = `requirementManagementSaved:${
+    applicationNumber ?? ""
+  }:${normalizedRoleType}`;
   const isNonEditable = [
     "AMR_MEDICAL_TASK",
     "AMR_NON_MEDICAL_TASK",
@@ -591,6 +601,24 @@ const RequirementManagementTable = ({
     severity: "success",
   });
 
+  const markRequirementsAsUnsaved = () => {
+    if (normalizedRoleType === "CVT_TASK") {
+      sessionStorage.setItem(requirementSaveStorageKey, "false");
+    }
+  };
+
+  useEffect(() => {
+    const currentRoleType = normalizeText(roleType).toUpperCase();
+
+    if (currentRoleType === "CVT_TASK") {
+      const storageKey = `requirementManagementSaved:${
+        applicationNumber ?? ""
+      }:${currentRoleType}`;
+
+      sessionStorage.setItem(storageKey, "false");
+    }
+  }, [addRowSignal, applicationNumber, roleType]);
+
   /*
    * Reset local edits when a new requirements array is received.
    * This guarded render update avoids synchronously setting state
@@ -599,7 +627,26 @@ const RequirementManagementTable = ({
    */
   if (previousRequirements !== requirements) {
     setPreviousRequirements(requirements);
-    setRows(createTableRows(roleBasedRequirements));
+    setRows((currentRows) =>
+      createTableRows(roleBasedRequirements).map((nextRow) => {
+        const currentRow = currentRows.find(
+          (row) => row.__clientRowId === nextRow.__clientRowId,
+        );
+
+        return {
+          ...nextRow,
+          /*
+           * Do not lock a dropdown merely because Save returned an updated
+           * Accept status during the current screen session. The lock state
+           * is recalculated from the API only after a full page refresh,
+           * when this component mounts again.
+           */
+          __isInitiallyAccepted:
+            currentRow?.__isInitiallyAccepted ??
+            nextRow.__isInitiallyAccepted,
+        };
+      }),
+    );
     setPage(1);
   }
 
@@ -607,6 +654,7 @@ const RequirementManagementTable = ({
     const clientRowId = `new-${Math.max(1, addRowSignal)}`;
     const newRequirement: RequirementTableRow = {
       __clientRowId: clientRowId,
+      __isInitiallyAccepted: false,
       team: getDefaultTeamByRole(normalizedRoleType),
       profile: "",
       category: "",
@@ -991,6 +1039,8 @@ const RequirementManagementTable = ({
       return;
     }
 
+    markRequirementsAsUnsaved();
+
     const updatedRow = {
       ...currentRow,
       [field]: selectedValue,
@@ -1035,6 +1085,8 @@ const RequirementManagementTable = ({
   ) => {
     const selectedStatus = event.target.value;
 
+    markRequirementsAsUnsaved();
+
     setRows((currentRows) =>
       currentRows.map((row) =>
         row.__clientRowId === rowId
@@ -1048,6 +1100,8 @@ const RequirementManagementTable = ({
   };
 
   const handleRemove = (rowId: string) => {
+    markRequirementsAsUnsaved();
+
     setRows((currentRows) =>
       currentRows.filter((row) => row.__clientRowId !== rowId),
     );
@@ -1144,6 +1198,11 @@ const RequirementManagementTable = ({
           payload
         ),
       ).unwrap();
+
+      if (normalizedRoleType === "CVT_TASK") {
+        sessionStorage.setItem(requirementSaveStorageKey, "true");
+      }
+
       setNewRowIds([]);
       setRowMasterOptions({});
       setSnackbar({
@@ -1564,9 +1623,8 @@ const RequirementManagementTable = ({
                   value={selectedStatus}
                   disabled={
                     isNonEditable ||
-                    ["ACCEPT", "ACCEPTED"].includes(
-                      getStatusComparableValue(currentStatus),
-                    )
+                    isNewRow ||
+                    row.__isInitiallyAccepted
                   }
                   onChange={(event) =>
                     handleStatusChange(rowKey, event)

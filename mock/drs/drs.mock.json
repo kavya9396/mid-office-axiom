@@ -1,1195 +1,873 @@
 {
-
     "success": true,
-
     "data": {
-
         "breDecision": {
-
             "decision": "DC",
-
             "initialDecision": "Non-STP",
-
             "isInitial": "Y",
-
             "isLatest": "N",
-
             "remarks": "Product Non Eligible",
-
             "discrepancy": "ACR#OCD#PAN#ADP#AGE#IDM#KYP",
-
             "timestamp": "14/08/2026, 1108hrs",
-
             "action": "Decline",
-
-            "reTriggerCount": 34
-
+            "reTriggerCount": 39
         },
-
-        "applicationOverview": {
-
-            "sourcingDetail": {
-
-                "agentCode": "00004004",
-
-                "bankCode": "0FB",
-
-                "corporateAgent": "",
-
-                "negativeAdvisor": "",
-
-                "agencyType": "AG",
-
-                "areaCode": "",
-
-                "partnerType": "",
-
-                "lanNumber": "",
-
-                "partnerBank": "",
-
-                "salesChannel": "Agency",
-
-                "fscfsm": "",
-
-                "cafosCode": "",
-
-                "companyCode": "NCOMBO",
-
-                "spCode": "",
-
-                "csrlim": "",
-
-                "bank": "",
-
-                "branch": "",
-
-                "channelCode": "Agency",
-
-                "drcChannelCode": "Agency",
-
-                "subChannelCode": "",
-
-                "agentName": "Santosh, Nayak",
-
-                "trsa": 0.0,
-
-                "tfsa": "Infinity"
-
-            },
-
-            "groupDetails": {
-
-                "coverageOption": "",
-
-                "coverageStatus": "",
-
-                "moratorium": "",
-
-                "loanType": "",
-
-                "bankType": "",
-
-                "loanTerm": null,
-
-                "loanAmount": null,
-
-                "typeOfLoan": "",
-
-                "dateOfLoanDisbursement": "",
-
-                "shareOfLoan": null,
-
-                "applicantStatus": "",
-
-                "shareOfLoanJl": null,
-
-                "applicantStatusJl": "",
-
-                "masterPolicyHolder": ""
-
-            },
-
-            "productDetail": [
-
-                {
-
-                    "type": "base",
-
-                    "code": "E36",
-
-                    "name": "ICICI Pru GIFT Pro",
-
-                    "faceValue": "1068000",
-
-                    "coverageOption": "",
-
-                    "term": "",
-
-                    "premiumMode": "",
-
-                    "renewalPremiumMode": "",
-
-                    "premiumFrequency": "",
-
-                    "annualPremium": 100000,
-
-                    "installmentPremium": "0",
-
-                    "installmentPremiumWithTax": null,
-
-                    "ratingFactor": "",
-
-                    "isEligible": "",
-
-                    "riskCessationTerm": 11,
-
-                    "premiumCessationTerm": 10,
-
-                    "paymentAmount": null,
-
-                    "premiumModeFpd": "",
-
-                    "baseAnnualPremium": null,
-
-                    "premium": 0,
-
-                    "sumAssured": 1068000,
-
-                    "loanLimit": null,
-
-                    "deathBenefitPayoutOption": "",
-
-                    "benefitOption": "",
-
-                    "statCode": "",
-
-                    "incomeBenefitFlag": "",
-
-                    "lifeStageBenefitFlag": "",
-
-                    "statCodeD": "",
-
-                    "statCodeE": "",
-
-                    "initialSumAssured": "",
-
-                    "modalPremium": 0,
-
-                    "productType": "",
-
-                    "customerType": "SHNI",
-
-                    "policyType": "Retail New Business",
-
-                    "policyTerm": null,
-
-                    "premiumPaymentTerm": 10
-
-                }
-
-            ],
-"summary": [
+        "summary": [
             {
-                "memberType": "lifeassured1"
-            },{
-                "memberType": "proposer"
-            }],
-            "riderDetails": [],
-
-            "customer": {
-
+                "memberType": "lifeassured1",
+                "lifeType": "LA",
                 "customerType": "SHNI",
-
-                "policyType": "Retail New Business"
-
-            },
-
-            "policyDetails": {
-
-                "proposerName": "",
-
-                "lifeAssuredName": "SOHEL FDSDFS",
-
-                "modalPremium": 0,
-
-                "policyTerm": null,
-
-                "premiumPaymentTerm": 10,
-
-                "paymentMode": ""
-
+                "partyId": "502a6119-6d1b-455a-9e59-7100f4c92967",
+                "jontFlag": false,
+                "lifeNumber": "",
+                "clientId": "NA",
+                "proposerLaRelation": "Self",
+                "jointLARelation": "",
+                "jointPRRelation": "",
+                "nriFlag": false,
+                "fatfFlag": false,
+                "faceMatchDetails": {
+                    "document": "",
+                    "faceMatchScore": null,
+                    "imageQuality": null,
+                    "remarks": ""
+                },
+                "proposerSummary": {
+                    "title": "",
+                    "firstName": "SOHEL",
+                    "middleName": "",
+                    "lastName": "FDSDFS",
+                    "gender": "Male",
+                    "maritalStatus": "",
+                    "dob": "1988-08-09T00:00",
+                    "age": {
+                        "years": 38,
+                        "days": 8
+                    },
+                    "profileImage": "",
+                    "caseStatus": "DRAFT",
+                    "nationality": "India",
+                    "countryOfResidence": "India",
+                    "residentStatus": "IND",
+                    "education": "Graduate",
+                    "pioStatus": "0",
+                    "highestQualification": "Graduate",
+                    "graduationFlag": "",
+                    "orgName": "3I INFOTECH",
+                    "yearsInServiceOrBusiness": null,
+                    "industryType": "",
+                    "birthCountry": "",
+                    "occupationType": "SPVT",
+                    "netIncomeAmt": null,
+                    "immigrationStatus": "Indian Resident",
+                    "orgType": "PVT",
+                    "latestIncYear": 2026,
+                    "isPEP": false,
+                    "panNo": "",
+                    "remarks": "",
+                    "ckycNumber": "",
+                    "criminalProceeding": "No",
+                    "incomeProof": "Aadhaar",
+                    "designation": "Manager",
+                    "disabled": "",
+                    "percentageOfImpairment": "",
+                    "typeOfImpairment": "",
+                    "udidNumber": "UDID-98765"
+                },
+                "applicantDetails": {
+                    "dateOfBirth": "1988-08-09",
+                    "gender": "Male",
+                    "maritalStatus": "",
+                    "nationality": "India",
+                    "countryOfResidence": "India",
+                    "education": "Graduate",
+                    "designation": "Manager",
+                    "disabled": "",
+                    "percentageOfImpairment": "",
+                    "typeOfImpairment": ""
+                },
+                "financialDetails": {
+                    "annualIncome": 5000000,
+                    "appliedSumAssured": 1068000,
+                    "trsa": 0.0,
+                    "tfsa": "Infinity"
+                },
+                "policyDetails": {
+                    "proposerName": "",
+                    "lifeAssuredName": "SOHEL FDSDFS",
+                    "productName": "ICICI Pru GIFT Pro",
+                    "modalPremium": 0,
+                    "paymentMode": "",
+                    "channel": "Agency"
+                },
+                "underwriting": {
+                    "remarks": "Product Non Eligible",
+                    "breDecision": {
+                        "status": "DC",
+                        "category": "Decline",
+                        "coverage": "Product Non Eligible"
+                    }
+                },
+                "kycDetails": {
+                    "panNumber": "",
+                    "identityProofType": "Aadhaar",
+                    "identityProofNumber": "AAAAA1111A",
+                    "addressProof": "Aadhaar",
+                    "incomeProof": "Aadhaar",
+                    "ageProof": "Aadhaar",
+                    "existingCkycNumber": "NA",
+                    "pep": "No",
+                    "criminalProceedings": "No",
+                    "panFlag": "Verified",
+                    "panAadharSeedingStatus": "Y",
+                    "identityProofExpiryDate": "2099-12-31T00:00",
+                    "pranNo": "123456789012",
+                    "pranNoVerification": "Verified",
+                    "udsLink": ""
+                },
+                "address": [
+                    {
+                        "type": "communication",
+                        "addressLine1": "",
+                        "addressLine2": "",
+                        "addressLine3": "",
+                        "landmark": "",
+                        "city": "",
+                        "state": "",
+                        "pinCode": "",
+                        "residingCountry": "",
+                        "topCity": "",
+                        "negativePinCode": ""
+                    },
+                    {
+                        "type": "permanent",
+                        "addressLine1": "RFRF",
+                        "addressLine2": "FGHJK",
+                        "addressLine3": "FGHJKL",
+                        "landmark": "",
+                        "city": "THANE",
+                        "state": "Maharashtra",
+                        "pinCode": "400709",
+                        "residingCountry": "India",
+                        "topCity": "N",
+                        "negativePinCode": "N"
+                    }
+                ],
+                "communicationAddressDetails": {
+                    "addressLine1": "",
+                    "addressLine2": "",
+                    "addressLine3": "",
+                    "landmark": "",
+                    "city": "",
+                    "state": "",
+                    "country": "",
+                    "pincode": "",
+                    "topCity": "",
+                    "negativePinCode": ""
+                },
+                "permanentAddressDetails": {
+                    "addressLine1": "RFRF",
+                    "addressLine2": "FGHJK",
+                    "addressLine3": "FGHJKL",
+                    "landmark": "",
+                    "city": "THANE",
+                    "state": "Maharashtra",
+                    "country": "India",
+                    "pincode": "400709",
+                    "topCity": "N",
+                    "negativePinCode": "N"
+                },
+                "contactDetails": {
+                    "mobileNo": "9878716726",
+                    "alternateMobileNo": "",
+                    "alternateMobile": "",
+                    "std": "",
+                    "landlineNo": "",
+                    "landlineNumber": "",
+                    "emailId": "TRSTR@GMAIL.COM",
+                    "emailPref": "Y",
+                    "smsPref": "Y"
+                },
+                "applicantFinancialDetails": {
+                    "occupation": "SPVT",
+                    "annualIncome": 5000000,
+                    "gstin": "",
+                    "lastIncomeYear": 2026,
+                    "organisationType": "PVT",
+                    "organisationName": "3I INFOTECH"
+                },
+                "healthDetail": {
+                    "height": "165.1",
+                    "weight": "67",
+                    "bmi": "25.0",
+                    "avgSystolic": "",
+                    "avgDiastolic": "",
+                    "heightFeet": "",
+                    "heightInches": "0",
+                    "hazardousOccupation": "",
+                    "isDisabled": "",
+                    "percentageOfImpairment": "",
+                    "typeOfImpairment": "",
+                    "illnessOrImpairment": [],
+                    "substanceConsumption": [
+                        {
+                            "substance": "",
+                            "consumedAs": "",
+                            "quantity": {
+                                "amount": "",
+                                "unit": "day/week"
+                            },
+                            "noOfYears": null,
+                            "advisedByDoctorForAbstinence": ""
+                        }
+                    ],
+                    "medicalQuestionnaire": [
+                        {
+                            "qtid": "ILLIMPAIRMENT",
+                            "value": "no",
+                            "remar": "",
+                            "subQts": []
+                        }
+                    ]
+                },
+                "nominee": [
+                    {
+                        "relationWithLA": "",
+                        "relationship": "",
+                        "firstName": "TRSTR",
+                        "lastName": "FDSDFS",
+                        "dob": "1991-03-12T00:00",
+                        "gender": "Female",
+                        "percentage": 0,
+                        "proposerNomineeRelation": "",
+                        "accountNumber": "",
+                        "ifsc": ""
+                    }
+                ],
+                "appointee": [],
+                "genericDetails": {
+                    "existingPolicyNumber": "NA",
+                    "clientId": "NA",
+                    "selfProposed": "Yes",
+                    "typeOfProposer": "Individual",
+                    "relationshipWithLifeAssured": "Self",
+                    "typeOfProposal": "Retail New Business"
+                },
+                "eiaDetails": {
+                    "openEIA": "No",
+                    "existingEIANumber": "NA",
+                    "preferredRepository": "",
+                    "convertPolicies": "No"
+                },
+                "fundDetails": {
+                    "allocationStrategy": "",
+                    "totalAllocation": "",
+                    "atpOpted": "",
+                    "fundDetail": []
+                },
+                "paymentDetails": {},
+                "payoutDetails": {},
+                "advisorDetails": {
+                    "relationWithAdvisor": "others",
+                    "acquaintanceDuration": 0,
+                    "fileSentToCopsDate": "",
+                    "branchUWDate": "",
+                    "decalarationDate": "",
+                    "declarationPlace": ""
+                },
+                "questions": [
+                    {
+                        "quesCode": "ILLIMPAIRMENT",
+                        "quesFor": "LA",
+                        "quesType": "HEALTH",
+                        "quesAns": "no"
+                    }
+                ],
+                "producerDetails": {
+                    "perfiosBank": "No",
+                    "premiumPaymentOption": "",
+                    "isecExperianCategory": "",
+                    "gstInNumber": "",
+                    "pasaSegmentCitiesFlag": "",
+                    "productSource": "standalone",
+                    "imputedMarker": "",
+                    "imputedIncome": "0",
+                    "prePopulatedValueEdited": "NA",
+                    "fnaSumAssured": "0",
+                    "componentCode": "",
+                    "cdfWaiverFlag": "No",
+                    "youthExpressFlag": "N",
+                    "atsSource": "",
+                    "ipsDiscountFlag": "FALSE",
+                    "lumpSumPercentage": "0",
+                    "accuityRiskIndicator": "",
+                    "primaryLASumAssured": ""
+                },
+                "documentDetails": [
+                    {
+                        "documentType": "AGE_PROOF",
+                        "documentName": "Aadhaar",
+                        "documentId": "AAAAA1111A",
+                        "validityDate": "2099-12-31T00:00"
+                    }
+                ],
+                "bureauDetails": {
+                    "cibilScore": "",
+                    "cibilIncomeSegment": "",
+                    "cibilEligibilityStatus": "N",
+                    "cibilServiceStatus": "N",
+                    "experianScore": "",
+                    "experianIncomeSegment": "",
+                    "experianEligibilityStatus": "N",
+                    "experianServiceStatus": "N",
+                    "payuScore": "",
+                    "payuIncomeSegment": "",
+                    "payuEligibilityStatus": "N",
+                    "payuServiceStatus": "N"
+                }
             }
-
-        },
-
-        "pivvSection": {
-
-            "pivvPoolRemarks": "",
-
-            "remarkDate": "",
-
-            "pivvPoolDecision": "",
-
-            "reason": "",
-
-            "userId": ""
-
-        },
-
-        "requirementManagement": [
-
-            {
-
-                "team": "UW",
-
-                "profile": "",
-
-                "category": "Internal",
-
-                "subCategory": "Report",
-
-                "document": "Agent report",
-
-                "specialTest": "N",
-
-                "reason": "Document not uploaded",
-
-                "fupCode": "ACR",
-
-                "requirementId": 11234,
-
-                "description": "ACR -Agent confidential report not uploaded",
-
-                "status": "Accept",
-
-                "isActive": "Y",
-
-                "raisedDate": "2026-08-14",
-
-                "raisedBy": "BRE_URMS",
-
-                "receivedDate": "2026-08-14",
-
-                "receivedBy": "icic-bre-urms-service",
-
-                "validity": "",
-
-                "userId": "",
-
-                "remarks": "",
-
-                "udsLink": "",
-
-                "ocrStatus": "",
-
-                "ocrDoc": ""
-
-            },
-
-            {
-
-                "team": "UW",
-
-                "profile": "",
-
-                "category": "Consent",
-
-                "subCategory": "Customer declaration form",
-
-                "document": "Annuity",
-
-                "specialTest": "N",
-
-                "reason": "Document not uplaoded",
-
-                "fupCode": "OCD",
-
-                "requirementId": 11235,
-
-                "description": "OCD-Submit digital confirmation via Consent Code",
-
-                "status": "PENDING",
-
-                "isActive": "Y",
-
-                "raisedDate": "2026-08-14",
-
-                "raisedBy": "BRE_URMS",
-
-                "receivedDate": "2026-08-14",
-
-                "receivedBy": "icic-bre-urms-service",
-
-                "validity": "",
-
-                "userId": "",
-
-                "remarks": "",
-
-                "udsLink": "",
-
-                "ocrStatus": "",
-
-                "ocrDoc": ""
-
-            },
-
-            {
-
-                "team": "COPS",
-
-                "profile": "",
-
-                "category": "KYC",
-
-                "subCategory": "PAN Card",
-
-                "document": "PAN /Form 60",
-
-                "specialTest": "N",
-
-                "reason": "Documents not submitted",
-
-                "fupCode": "PAN",
-
-                "requirementId": 11236,
-
-                "description": "Upload signed (attested) copy of PAN Card or Form 60/61 or Form 97 of person purchasing this policy (Proposer)",
-
-                "status": "PENDING",
-
-                "isActive": "Y",
-
-                "raisedDate": "2026-08-14",
-
-                "raisedBy": "BRE_URMS",
-
-                "receivedDate": "2026-08-14",
-
-                "receivedBy": "icic-bre-urms-service",
-
-                "validity": "",
-
-                "userId": "",
-
-                "remarks": "",
-
-                "udsLink": "",
-
-                "ocrStatus": "",
-
-                "ocrDoc": ""
-
-            },
-
-            {
-
-                "team": "COPS",
-
-                "profile": "",
-
-                "category": "KYC",
-
-                "subCategory": "Address Proof",
-
-                "document": "Driving License",
-
-                "specialTest": "N",
-
-                "reason": "Documents not submitted",
-
-                "fupCode": "ADP",
-
-                "requirementId": 11240,
-
-                "description": "ADP-Address proof of the proposer matching with application form (Passport - front & back or Aadhaar - front & back or Driving License or Voter id)",
-
-                "status": "PENDING",
-
-                "isActive": "Y",
-
-                "raisedDate": "2026-08-14",
-
-                "raisedBy": "BRE_URMS",
-
-                "receivedDate": "2026-08-14",
-
-                "receivedBy": "icic-bre-urms-service",
-
-                "validity": "",
-
-                "userId": "",
-
-                "remarks": "",
-
-                "udsLink": "",
-
-                "ocrStatus": "",
-
-                "ocrDoc": ""
-
-            },
-
-            {
-
-                "team": "COPS",
-
-                "profile": "",
-
-                "category": "KYC",
-
-                "subCategory": "Ageproof",
-
-                "document": "PAN Card",
-
-                "specialTest": "N",
-
-                "reason": "Documents not submitted",
-
-                "fupCode": "AGE",
-
-                "requirementId": 11238,
-
-                "description": "AGE-Age proof of life assured (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
-
-                "status": "PENDING",
-
-                "isActive": "Y",
-
-                "raisedDate": "2026-08-14",
-
-                "raisedBy": "BRE_URMS",
-
-                "receivedDate": "2026-08-14",
-
-                "receivedBy": "icic-bre-urms-service",
-
-                "validity": "",
-
-                "userId": "",
-
-                "remarks": "",
-
-                "udsLink": "",
-
-                "ocrStatus": "",
-
-                "ocrDoc": ""
-
-            },
-
-            {
-
-                "team": "COPS",
-
-                "profile": "",
-
-                "category": "KYC",
-
-                "subCategory": "ID proof",
-
-                "document": "Drving License",
-
-                "specialTest": "N",
-
-                "reason": "Documents not submitted",
-
-                "fupCode": "IDM",
-
-                "requirementId": 11239,
-
-                "description": "IDM- Upload valid ID proof of proposer (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
-
-                "status": "PENDING",
-
-                "isActive": "Y",
-
-                "raisedDate": "2026-08-14",
-
-                "raisedBy": "BRE_URMS",
-
-                "receivedDate": "2026-08-14",
-
-                "receivedBy": "icic-bre-urms-service",
-
-                "validity": "",
-
-                "userId": "",
-
-                "remarks": "",
-
-                "udsLink": "",
-
-                "ocrStatus": "",
-
-                "ocrDoc": ""
-
-            },
-
-            {
-
-                "team": "COPS",
-
-                "profile": "",
-
-                "category": "KYC",
-
-                "subCategory": "PAN Card",
-
-                "document": "Photo",
-
-                "specialTest": "N",
-
-                "reason": "Documents not submitted",
-
-                "fupCode": "KYP",
-
-                "requirementId": 11237,
-
-                "description": "KYP- Upload recent photograph of proposer",
-
-                "status": "PENDING",
-
-                "isActive": "Y",
-
-                "raisedDate": "2026-08-14",
-
-                "raisedBy": "BRE_URMS",
-
-                "receivedDate": "2026-08-14",
-
-                "receivedBy": "icic-bre-urms-service",
-
-                "validity": "",
-
-                "userId": "",
-
-                "remarks": "",
-
-                "udsLink": "",
-
-                "ocrStatus": "",
-
-                "ocrDoc": ""
-
-            }
-
         ],
-
-        "quickLinks": {
-
-            "proposerForm": "",
-
-            "previousPolicies": [
-
+        "applicationOverview": {
+            "sourcingDetail": {
+                "agentCode": "00004004",
+                "bankCode": "0FB",
+                "corporateAgent": "",
+                "negativeAdvisor": "",
+                "agencyType": "AG",
+                "areaCode": "",
+                "partnerType": "",
+                "lanNumber": "",
+                "partnerBank": "",
+                "salesChannel": "Agency",
+                "fscfsm": "",
+                "cafosCode": "",
+                "companyCode": "NCOMBO",
+                "spCode": "",
+                "csrlim": "",
+                "bank": "",
+                "branch": "",
+                "channelCode": "Agency",
+                "drcChannelCode": "Agency",
+                "subChannelCode": "",
+                "agentName": "Sneh, Aggarwal",
+                "trsa": 0.0,
+                "tfsa": "Infinity"
+            },
+            "groupDetails": {
+                "coverageOption": "",
+                "coverageStatus": "",
+                "moratorium": "",
+                "loanType": "",
+                "bankType": "",
+                "loanTerm": null,
+                "loanAmount": null,
+                "typeOfLoan": "",
+                "dateOfLoanDisbursement": "",
+                "shareOfLoan": null,
+                "applicantStatus": "",
+                "shareOfLoanJl": null,
+                "applicantStatusJl": "",
+                "masterPolicyHolder": ""
+            },
+            "productDetail": [
                 {
-
-                    "policyNumber": "OS94545341",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
+                    "type": "base",
+                    "code": "E36",
+                    "name": "ICICI Pru GIFT Pro",
+                    "faceValue": "1068000",
+                    "coverageOption": "",
+                    "term": "",
+                    "premiumMode": "",
+                    "renewalPremiumMode": "",
+                    "premiumFrequency": "",
+                    "annualPremium": 100000,
+                    "installmentPremium": "0",
+                    "installmentPremiumWithTax": null,
+                    "ratingFactor": "",
+                    "isEligible": "",
+                    "riskCessationTerm": 11,
+                    "premiumCessationTerm": 10,
+                    "paymentAmount": null,
+                    "premiumModeFpd": "",
+                    "baseAnnualPremium": null,
+                    "premium": 0,
                     "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545321",
-
-                    "productName": "",
-
+                    "loanLimit": null,
+                    "deathBenefitPayoutOption": "",
+                    "benefitOption": "",
+                    "statCode": "",
+                    "incomeBenefitFlag": "",
+                    "lifeStageBenefitFlag": "",
+                    "statCodeD": "",
+                    "statCodeE": "",
+                    "initialSumAssured": "",
+                    "modalPremium": 0,
                     "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545230",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545382",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90377200",
-
-                    "productName": "ICICI Pru GIFT Pro",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90377181",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90877180",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90377200",
-
-                    "productName": "ICICI Pru GIFT Pro",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90377181",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545382",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90877180",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545321",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545230",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545341",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545321",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545230",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90877180",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS94545341",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90377181",
-
-                    "productName": "",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
-                },
-
-                {
-
-                    "policyNumber": "OS90377200",
-
-                    "productName": "ICICI Pru GIFT Pro",
-
-                    "productType": "",
-
-                    "dateOfIssuance": "",
-
-                    "decision": "",
-
-                    "sumAssured": 1068000,
-
-                    "medicalReceivedDate": "",
-
-                    "medicalValidity": "",
-
-                    "financialReceivedDate": "",
-
-                    "financialValidity": ""
-
+                    "customerType": "SHNI",
+                    "policyType": "Retail New Business",
+                    "policyTerm": null,
+                    "premiumPaymentTerm": 10
                 }
-
             ],
-
-            "openOtherTasks": [],
-
-            "riskDetails": [],
-
-            "auditTrail": [
-
-                {
-
-                    "dateTime": "2026-08-14T08:31:43.545873",
-
-                    "fromPool": "",
-
-                    "fromPoolUser": "MS-breUrms",
-
-                    "toPool": "",
-
-                    "toPoolUser": "",
-
-                    "subPool": "PIPELINE",
-
-                    "userId": "MS-breUrms",
-
-                    "uwDecision": "",
-
-                    "breDecision": "BRE_URMS_EVALUATE"
-
-                },
-
-                {
-
-                    "dateTime": "2026-08-14T08:31:42.010163",
-
-                    "fromPool": "",
-
-                    "fromPoolUser": "MS-dedupe",
-
-                    "toPool": "",
-
-                    "toPoolUser": "",
-
-                    "subPool": "PIPELINE",
-
-                    "userId": "MS-dedupe",
-
-                    "uwDecision": "",
-
-                    "breDecision": "DEDUPE_POSIDEX_INVOKE"
-
-                },
-
-                {
-
-                    "dateTime": "2026-08-14T08:31:41.420739",
-
-                    "fromPool": "",
-
-                    "fromPoolUser": "MS-dedupe",
-
-                    "toPool": "",
-
-                    "toPoolUser": "",
-
-                    "subPool": "PIPELINE",
-
-                    "userId": "MS-dedupe",
-
-                    "uwDecision": "",
-
-                    "breDecision": "CLIENT_ENQUIRY_STARTED"
-
-                },
-
-                {
-
-                    "dateTime": "2026-08-14T08:31:35.798594",
-
-                    "fromPool": "",
-
-                    "fromPoolUser": "MS-dedupe",
-
-                    "toPool": "",
-
-                    "toPoolUser": "",
-
-                    "subPool": "PIPELINE",
-
-                    "userId": "MS-dedupe",
-
-                    "uwDecision": "",
-
-                    "breDecision": "DEDUPE_POSIDEX_INVOKE"
-
-                },
-
-                {
-
-                    "dateTime": "2026-08-14T08:31:35.197784",
-
-                    "fromPool": "",
-
-                    "fromPoolUser": "MS-dedupe",
-
-                    "toPool": "",
-
-                    "toPoolUser": "",
-
-                    "subPool": "PIPELINE",
-
-                    "userId": "MS-dedupe",
-
-                    "uwDecision": "",
-
-                    "breDecision": "CLIENT_ENQUIRY_STARTED"
-
-                }
-
-            ]
-
+            "riderDetails": [],
+            "customer": {
+                "customerType": "SHNI",
+                "policyType": "Retail New Business"
+            },
+            "policyDetails": {
+                "proposerName": "",
+                "lifeAssuredName": "SOHEL FDSDFS",
+                "modalPremium": 0,
+                "policyTerm": null,
+                "premiumPaymentTerm": 10,
+                "paymentMode": ""
+            }
         },
-
+        "pivvSection": {
+            "pivvPoolRemarks": "",
+            "remarkDate": "",
+            "pivvPoolDecision": "",
+            "reason": "",
+            "userId": ""
+        },
+        
+        "requirementManagement":[  {
+                "team": "UW",
+                "profile": "",
+                "category": "Internal",
+                "subCategory": "Report",
+                "document": "Agent report",
+                "specialTest": "N",
+                "reason": "Document not uploaded",
+                "fupCode": "PIV",
+                "requirementId": 11234,
+                "description": "ACR -Agent confidential report not uploaded",
+                "status": "Accept",
+                "isActive": "Y",
+                "raisedDate": "2026-08-14",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-08-14",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": "",
+                "ocrStatus": "",
+                "ocrDoc": ""
+            },
+            {
+                "team": "UW",
+                "profile": "",
+                "category": "Consent",
+                "subCategory": "Customer declaration form",
+                "document": "Annuity",
+                "specialTest": "N",
+                "reason": "Document not uplaoded",
+                "fupCode": "OCD",
+                "requirementId": 11235,
+                "description": "OCD-Submit digital confirmation via Consent Code",
+                "status": "Pending",
+                "isActive": "Y",
+                "raisedDate": "2026-08-14",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-08-14",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": "",
+                "ocrStatus": "",
+                "ocrDoc": ""
+            },
+            {
+                "team": "COPS",
+                "profile": "",
+                "category": "KYC",
+                "subCategory": "PAN Card",
+                "document": "PAN /Form 60",
+                "specialTest": "N",
+                "reason": "Documents not submitted",
+                "fupCode": "PAN",
+                "requirementId": 11236,
+                "description": "Upload signed (attested) copy of PAN Card or Form 60/61 or Form 97 of person purchasing this policy (Proposer)",
+                "status": "Accept",
+                "isActive": "Y",
+                "raisedDate": "2026-08-14",
+                "raisedBy": "BRE_URMS",
+                "receivedDate": "2026-08-14",
+                "receivedBy": "icic-bre-urms-service",
+                "validity": "",
+                "userId": "",
+                "remarks": "",
+                "udsLink": "",
+                "ocrStatus": "",
+                "ocrDoc": ""
+            }],
+        "quickLinks": {
+            "proposerForm": "",
+            "previousPolicies": [
+                {
+                    "policyNumber": "OS94545382",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545341",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545321",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545230",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545384",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377200",
+                    "productName": "ICICI Pru GIFT Pro",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377181",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377143",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90877180",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545341",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545321",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545230",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545382",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377200",
+                    "productName": "ICICI Pru GIFT Pro",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377181",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377200",
+                    "productName": "ICICI Pru GIFT Pro",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377181",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545382",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90877180",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545321",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545230",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545341",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90877180",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS94545341",
+                    "productName": "",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                },
+                {
+                    "policyNumber": "OS90377200",
+                    "productName": "ICICI Pru GIFT Pro",
+                    "productType": "",
+                    "dateOfIssuance": "",
+                    "decision": "",
+                    "sumAssured": 1068000,
+                    "medicalReceivedDate": "",
+                    "medicalValidity": "",
+                    "financialReceivedDate": "",
+                    "financialValidity": ""
+                }
+            ],
+            "openOtherTasks": [],
+            "riskDetails": [],
+            "auditTrail": [
+                {
+                    "dateTime": "2026-08-17T10:54:39.116432",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-breUrms",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-breUrms",
+                    "uwDecision": "",
+                    "breDecision": "BRE_URMS_EVALUATE"
+                },
+                {
+                    "dateTime": "2026-08-17T10:54:36.786035",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-dedupe",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-dedupe",
+                    "uwDecision": "",
+                    "breDecision": "DEDUPE_POSIDEX_INVOKE"
+                },
+                {
+                    "dateTime": "2026-08-17T10:54:36.273980",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-dedupe",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-dedupe",
+                    "uwDecision": "",
+                    "breDecision": "DEDUPE_POSIDEX_INVOKE"
+                },
+                {
+                    "dateTime": "2026-08-17T10:54:36.114573",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-dedupe",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-dedupe",
+                    "uwDecision": "",
+                    "breDecision": "CLIENT_ENQUIRY_STARTED"
+                },
+                {
+                    "dateTime": "2026-08-17T10:54:35.602374",
+                    "fromPool": "",
+                    "fromPoolUser": "MS-dedupe",
+                    "toPool": "",
+                    "toPoolUser": "",
+                    "subPool": "PIPELINE",
+                    "userId": "MS-dedupe",
+                    "uwDecision": "",
+                    "breDecision": "CLIENT_ENQUIRY_STARTED"
+                }
+            ]
+        },
         "roleType": "CVT_TASK",
-
         "userId": "ipru75031"
-
     }
-
 }
- 
