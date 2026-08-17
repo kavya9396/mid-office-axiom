@@ -13,8 +13,9 @@ import CustomTable from "../../../components/ui/Table/Table";
 import { centerFlex } from "../../../utils/styles";
 import KeyValueTable from "../../../components/ui/KeyValueTable/KeyValueTable";
 import { drsThunk } from "../../../store/thunks/drsThunk";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import CustomButton from "../../../components/ui/Button/Button";
+import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 
 /* -------------------------------------------------------------------------- */
 /*                                   TYPES                                    */
@@ -534,7 +535,8 @@ const DetailsCard = ({
 
 const ApplicantProfile = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const { applicationNumber } = useParams<{ applicationNumber: string }>();
+  const navigate = useNavigate();
+  const { businessType, applicationNumber } = useParams<{ businessType: string, applicationNumber: string }>();
   const drsData = useSelector((state: RootState) => state.drs.data);
   const drsRecord = (drsData ?? {}) as Record<string, unknown>;
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
@@ -1621,28 +1623,35 @@ const ApplicantProfile = () => {
     }
   };
 
+  const canOpenMedicalFinancialViews = ![
+    "CVT_TASK",
+    "CPT_TASK",
+    "DVT_TASK",
+    "DVT_FORMAL_TASK",
+    "GUW_FORMAL_TASK",
+  ].includes(roleType);
 
   /* ------------------------------------------------------------------------ */
   /*                                   UI                                     */
   /* ------------------------------------------------------------------------ */
 
   return (
-    <Box sx={{px: 1}}>
+    <Box sx={{ px: 1 }}>
       <CustomAccordion
         title={title.applicantDetails}
         defaultExpanded
         headerActions={
           roleType === "CVT_TASK" ? (
-              <CustomButton
-                variant="outlined"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setEditProfileOpen(true);
-                }}
-                sx={{ borderRadius: "50px", paddingX: "24px" }}
-              >
-                Edit
-              </CustomButton>
+            <CustomButton
+              variant="outlined"
+              onClick={(event) => {
+                event.stopPropagation();
+                setEditProfileOpen(true);
+              }}
+              sx={{ borderRadius: "50px", paddingX: "24px" }}
+            >
+              Edit
+            </CustomButton>
           ) : null
         }
       >
@@ -1856,6 +1865,46 @@ const ApplicantProfile = () => {
               {/* ============================================================= */}
 
               <Box sx={{ mt: 1 }}>{renderDetailContent()}</Box>
+            </Box>
+          )}
+
+
+          {/* ================================================================= */}
+          {/*                     VIEW MEDICAL AND FINANCIAL                    */}
+          {/* ================================================================= */}
+
+          {canOpenMedicalFinancialViews && (
+            <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+              <CustomButton
+                variant="outlined"
+                sx={{
+                  borderRadius: "50px",
+                  px: 3,
+                  py: 0.5,
+                  minWidth: "150px",
+                  fontSize: "12px",
+                  lineHeight: "16px",
+                  fontWeight: 700,
+                }}
+                onClick={() => navigate(getMedicalPath(businessType!, applicationNumber!))}
+              >
+                View Medicals
+              </CustomButton>
+              <CustomButton
+                variant="outlined"
+                sx={{
+                  borderRadius: "50px",
+                  px: 3,
+                  py: 0.5,
+                  minWidth: "150px",
+                  fontSize: "12px",
+                  lineHeight: "16px",
+                  fontWeight: 700,
+                }}
+                onClick={() => navigate(getFinancialPath(businessType!, applicationNumber!))}
+              >
+                View Financials
+              </CustomButton>
             </Box>
           )}
 

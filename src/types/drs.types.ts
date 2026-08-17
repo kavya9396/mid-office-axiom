@@ -777,7 +777,8 @@ export type MasterKey =
   | "app_status"
   | "misc"
   |"decision_master"
-  | "requirement_status_master";
+  | "requirement_status_master"
+  | "reason_master";
 
 export type MastersData = Partial<
   Record<Exclude<MasterKey, "requirementManagement">, MasterOption[]>

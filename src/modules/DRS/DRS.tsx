@@ -82,8 +82,27 @@ const DRS = () => {
     (state: RootState) => state.drs.data,
   );
 
-  const roleType = application?.roleType?.trim() ?? "";
-  localStorage.setItem("roleType", roleType);
+  // const roleType = application?.roleType?.trim() ?? "";
+  // localStorage.setItem("roleType", roleType);
+
+  const storedRoleType =
+    localStorage.getItem("roleType")?.trim() ?? "";
+
+  const roleType =
+    application?.roleType?.trim() ||
+    storedRoleType;
+
+  useEffect(() => {
+    const applicationRoleType =
+      application?.roleType?.trim();
+
+    if (applicationRoleType) {
+      localStorage.setItem(
+        "roleType",
+        applicationRoleType,
+      );
+    }
+  }, [application?.roleType]);
 
   // --------------------------------------------------
   // ROLE TYPE -> POOL / LAYOUT
@@ -118,7 +137,7 @@ const DRS = () => {
       ),
     [layoutAccordions],
   );
-const storageBusiness =
+  const storageBusiness =
     application?.businessType || localStorage.getItem("businessType");
 
   const eventName =
@@ -133,9 +152,9 @@ const storageBusiness =
 
     const userId = String(
       application?.userId ??
-        localStorage.getItem("userId") ??
-        localStorage.getItem("username") ??
-        "",
+      localStorage.getItem("userId") ??
+      localStorage.getItem("username") ??
+      "",
     ).trim();
 
     if (!userId) {
