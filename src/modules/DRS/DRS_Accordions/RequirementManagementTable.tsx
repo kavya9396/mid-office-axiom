@@ -85,7 +85,6 @@ type AddRowField =
 
 const ADD_ROW_FIELD_SEQUENCE: AddRowField[] = [
   "team",
-  "profile",
   "category",
   "subCategory",
   "document",
@@ -187,16 +186,29 @@ const getMasterItems = (
       { arrayKeys: string[]; field: AddRowField }
     > = {
       team: { arrayKeys: ["teams"], field: "team" },
-      profile: { arrayKeys: ["profiles"], field: "profile" },
-      category: { arrayKeys: ["categories"], field: "category" },
+      teams: { arrayKeys: ["teams"], field: "team" },
+      profile: { arrayKeys: ["profiles", "teams"], field: "profile" },
+      profiles: { arrayKeys: ["profiles", "teams"], field: "profile" },
+      category: { arrayKeys: ["categories", "teams"], field: "category" },
+      categories: { arrayKeys: ["categories", "teams"], field: "category" },
       subcategory: {
-        arrayKeys: ["subCategories", "subcategories"],
+        arrayKeys: ["subCategories", "subcategories", "teams"],
         field: "subCategory",
       },
-      document: { arrayKeys: ["documents"], field: "document" },
-      reason: { arrayKeys: ["reasons"], field: "reason" },
+      subcategories: {
+        arrayKeys: ["subCategories", "subcategories", "teams"],
+        field: "subCategory",
+      },
+      document: { arrayKeys: ["documents", "teams"], field: "document" },
+      documents: { arrayKeys: ["documents", "teams"], field: "document" },
+      reason: { arrayKeys: ["reasons", "teams"], field: "reason" },
+      reasons: { arrayKeys: ["reasons", "teams"], field: "reason" },
       fupcode: {
-        arrayKeys: ["fupCodes", "fupcodes", "fup_codes"],
+        arrayKeys: ["fupCodes", "fupcodes", "fup_codes", "teams"],
+        field: "fupCode",
+      },
+      fupcodes: {
+        arrayKeys: ["fupCodes", "fupcodes", "fup_codes", "teams"],
         field: "fupCode",
       },
     };
@@ -490,42 +502,49 @@ const RequirementManagementTable = ({
   const loadMasterOptions = useCallback(async (
     rowId: number,
     nextField: AddRowField,
-    row: AdditionalRequirementRow,
+    row?: AdditionalRequirementRow,
   ) => {
     setLoadingMasterField({ rowId, field: nextField });
 
+    const requirementMst = row
+      ? {
+          ...(normalizeText(row.team) && {
+            team: normalizeText(row.team),
+          }),
+          ...(normalizeText(row.profile) && {
+            profile: normalizeText(row.profile),
+          }),
+          ...(normalizeText(row.category) && {
+            category: normalizeText(row.category),
+          }),
+          ...(normalizeText(row.subCategory) && {
+            subCategory: normalizeText(row.subCategory),
+          }),
+          ...(normalizeText(row.document) && {
+            document: normalizeText(row.document),
+          }),
+          ...(normalizeText(row.reason) && {
+            reason: normalizeText(row.reason),
+          }),
+          ...(normalizeText(row.fupCode) && {
+            fupCode: normalizeText(row.fupCode),
+          }),
+        }
+      : undefined;
+
     const requestPayload = {
-      type: ["requirement_mst", "misc"],
-      ...(normalizeText(row.team) && { team: normalizeText(row.team) }),
-      ...(normalizeText(row.profile) && { profile: normalizeText(row.profile) }),
-      ...(normalizeText(row.category) && {
-        category: normalizeText(row.category),
-      }),
-      ...(normalizeText(row.subCategory) && {
-        subCategory: normalizeText(row.subCategory),
-      }),
-      ...(normalizeText(row.document) && {
-        document: normalizeText(row.document),
-      }),
-      ...(normalizeText(row.reason) && { reason: normalizeText(row.reason) }),
-      ...(normalizeText(row.fupCode) && {
-        fupCode: normalizeText(row.fupCode),
-      }),
+      types: ["requirement_mst"],
+      ...(requirementMst && Object.keys(requirementMst).length > 0
+        ? { requirementMst }
+        : {}),
     } as unknown as MasterRequest;
 
     try {
       const response = await dispatch(masterThunk(requestPayload)).unwrap();
       const requirementItems = getMasterItems(response, "requirement_mst");
-      const miscItems = getMasterItems(response, "misc");
-      const sourceItems =
-        nextField === "profile"
-          ? miscItems.filter(
-              (item) => normalizeText(item.type).toUpperCase() === "PROFILE",
-            )
-          : requirementItems;
       const options = Array.from(
         new Set(
-          sourceItems
+          requirementItems
             .map((item) => getOptionText(item, nextField))
             .filter(Boolean),
         ),
@@ -533,10 +552,10 @@ const RequirementManagementTable = ({
 
       if (
         nextField === "team" &&
-        normalizeText(row.team) &&
-        !options.includes(normalizeText(row.team))
+        normalizeText(row?.team) &&
+        !options.includes(normalizeText(row?.team))
       ) {
-        options.unshift(normalizeText(row.team));
+        options.unshift(normalizeText(row?.team));
       }
 
       setRowMasterOptions((currentOptions) => ({
@@ -547,13 +566,19 @@ const RequirementManagementTable = ({
         },
       }));
 
-      if (nextField === "fupCode" && normalizeText(row.fupCode)) {
+      if (nextField === "fupCode" && normalizeText(row?.fupCode)) {
+        const requirementMaster = toRecord(
+          getMasterPayload(response).requirement_mst ??
+            getMasterPayload(response).requirementMst,
+        );
         const matchingRequirement = requirementItems.find(
           (item) =>
             normalizeText(item.fupCode ?? item.fup_code ?? item.code).toUpperCase() ===
-            normalizeText(row.fupCode).toUpperCase(),
+            normalizeText(row?.fupCode).toUpperCase(),
         );
-        const description = normalizeText(matchingRequirement?.description);
+        const description = normalizeText(
+          matchingRequirement?.description ?? requirementMaster.description,
+        );
 
         if (description) {
           setRows((currentRows) =>
@@ -604,18 +629,23 @@ const RequirementManagementTable = ({
 
     if (!Object.prototype.hasOwnProperty.call(currentOptions, "team")) {
       const timeoutId = window.setTimeout(() => {
-        void loadMasterOptions(newestRowId, "team", newRow);
+        void loadMasterOptions(newestRowId, "team");
       }, 0);
 
       return () => window.clearTimeout(timeoutId);
     }
 
+    /*
+     * A role-based team is already selected on a newly added row.
+     * Once the Team list is available, load Category for that default.
+     * Changing Team later repeats this call with the newly selected value.
+     */
     if (
       normalizeText(newRow.team) &&
-      !Object.prototype.hasOwnProperty.call(currentOptions, "profile")
+      !Object.prototype.hasOwnProperty.call(currentOptions, "category")
     ) {
       const timeoutId = window.setTimeout(() => {
-        void loadMasterOptions(newestRowId, "profile", newRow);
+        void loadMasterOptions(newestRowId, "category", newRow);
       }, 0);
 
       return () => window.clearTimeout(timeoutId);
@@ -982,6 +1012,8 @@ const RequirementManagementTable = ({
       loadingMasterField.field === field;
     const isDisabled =
       isLoading ||
+      field === "profile" ||
+      options.length === 0 ||
       (Boolean(parentField) && !normalizeText(row[parentField]));
 
     return (

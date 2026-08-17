@@ -3,7 +3,8 @@ import { useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { title } from "../../../utils/constant";
-import type { AppDispatch, RootState } from "../../../store/store"; import EditApplicantProfile from "./EditApplicantProfile";
+import type { AppDispatch, RootState } from "../../../store/store";
+import EditApplicantProfile from "./EditApplicantProfile";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import { GridSection } from "../../../components/layout/GridSection";
 import { buildTripleFields, formatCurrencyINR, formatDOB, maskString, toDisplayValue } from "../../../utils/helpers";
@@ -572,7 +573,6 @@ const ApplicantProfile = () => {
   const [editProfileOpen, setEditProfileOpen] = useState(false);
 
   const handleEditProfileSave = async () => {
-    setEditProfileOpen(false);
     await refreshApplicantSummary();
   };
 
@@ -1610,10 +1610,15 @@ const ApplicantProfile = () => {
 
   const refreshApplicantSummary = async () => {
     try {
+      const currentUserId =
+        localStorage.getItem("userId") ??
+        localStorage.getItem("username") ??
+        "";
+
       await dispatch(
         drsThunk({
           applicationNo: applicationNumber ?? "",
-          userId: localStorage.getItem("userId") ?? "",
+          userId: currentUserId,
           roleType: localStorage.getItem("roleType") ?? "CVT_TASK",
           sections: ["summary"],
         }),

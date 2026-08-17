@@ -2325,7 +2325,7 @@
       }
     ],
     "requirement_mst": {
-      "level": "category",
+      "level": "team",
       "teams": ["COPS", "UW"]
     }
   },

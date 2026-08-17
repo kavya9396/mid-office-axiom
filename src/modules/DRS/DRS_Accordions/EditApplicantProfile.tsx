@@ -79,6 +79,47 @@ type ApplicantProfileMasters = {
   id_proof_type?: MasterOption[];
 };
 
+type ApplicantProfileMasterState = ApplicantProfileMasters & {
+  payload?: unknown;
+  result?: unknown;
+  data?: ApplicantProfileMasters & {
+    data?: ApplicantProfileMasters & {
+      data?: ApplicantProfileMasters;
+    };
+  };
+};
+
+const EMPTY_APPLICANT_MASTERS: ApplicantProfileMasters = {};
+
+const getApplicantProfileMasters = (
+  value: unknown,
+): ApplicantProfileMasters => {
+  let current: unknown = value;
+
+  // Different thunk/helper implementations keep the API response under
+  // data, payload or result. Unwrap those containers until the master keys
+  // from the API response are found.
+  for (let depth = 0; depth < 5; depth += 1) {
+    if (!current || typeof current !== "object" || Array.isArray(current)) {
+      break;
+    }
+
+    const candidate = current as ApplicantProfileMasterState;
+
+    if (
+      Array.isArray(candidate.gender) ||
+      Array.isArray(candidate.resident_status) ||
+      Array.isArray(candidate.id_proof_type)
+    ) {
+      return candidate;
+    }
+
+    current = candidate.data ?? candidate.payload ?? candidate.result;
+  }
+
+  return EMPTY_APPLICANT_MASTERS;
+};
+
 type ApplicantProfileSubmitResponse = {
   success: boolean;
   message: string;
@@ -155,10 +196,26 @@ const EMPTY_FORM: FormValues = {
 const text = (value: unknown) =>
   value === null || value === undefined ? "" : String(value);
 
-const dateOnly = (value?: string) => (value ? value.split("T")[0] : "");
+const dateOnly = (value?: string) => {
+  const rawValue = value?.trim();
+
+  if (!rawValue) return "";
+
+  const isoMatch = rawValue.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) return `${isoMatch[1]}-${isoMatch[2]}-${isoMatch[3]}`;
+
+  const indianDateMatch = rawValue.match(/^(\d{2})[/-](\d{2})[/-](\d{4})$/);
+  if (indianDateMatch) {
+    return `${indianDateMatch[3]}-${indianDateMatch[2]}-${indianDateMatch[1]}`;
+  }
+
+  return "";
+};
 
 const findAddress = (addresses: Address[] = [], type: string) =>
-  addresses.find((address) => address.type?.trim().toLowerCase() === type);
+  addresses.find((address) =>
+    address.type?.trim().toLowerCase().includes(type),
+  );
 
 const mapMemberToForm = (
   member: EditableMember | undefined,
@@ -356,13 +413,14 @@ const EditApplicantProfile = ({
   const { applicationNumber } = useParams<{ applicationNumber: string }>();
   const roleType = localStorage.getItem("roleType") ?? "CVT_TASK";
   const userId = localStorage.getItem("username") ?? "";
- const masters = useSelector(
-  (state: RootState) =>
-    state.drs.masters as
-      | ApplicantProfileMasters
-      | undefined,
-);
-console.log('masters=========',masters)
+  /*
+   * MasterDataRoute reloads this shared slice after a browser refresh.
+   * Do not read state.drs.masters here because that is not the slice
+   * populated by the application-level master-data initializer.
+   */
+  const masters = useSelector((state: RootState) =>
+    getApplicantProfileMasters(state.masterData),
+  );
   const drsData = useSelector((state: RootState) => state.drs.data);
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -800,13 +858,13 @@ const field = (
                 {field(
   "gender",
   "Gender",
-  masters?.gender,
+  masters.gender ?? [],
 )}
 
                 {field(
   "residentialStatus",
   "Residential Status",
-  masters?.resident_status,
+  masters.resident_status ?? [],
 )}
 
                 {field(
@@ -829,13 +887,13 @@ const field = (
                {field(
   "identityProof",
   "Identity Proof",
-  masters?.id_proof_type,
+  masters.id_proof_type ?? [],
 )}
 
                {field(
   "ageProof",
   "Age Proof",
-  masters?.id_proof_type,
+  masters.id_proof_type ?? [],
 )}
               </Box>
             </Box>
@@ -867,7 +925,7 @@ const field = (
                 {field(
   "addressProof",
   "Address Proof",
-  masters?.id_proof_type,
+  masters.id_proof_type ?? [],
 )}
 
                 {field(
