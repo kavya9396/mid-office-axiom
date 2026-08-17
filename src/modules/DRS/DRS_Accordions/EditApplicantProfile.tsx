@@ -421,6 +421,7 @@ const EditApplicantProfile = ({
   const masters = useSelector((state: RootState) =>
     getApplicantProfileMasters(state.masterData),
   );
+  console.log('masters',masters)
   const drsData = useSelector((state: RootState) => state.drs.data);
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
