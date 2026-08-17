@@ -1,1393 +1,1195 @@
 {
+
     "success": true,
+
     "data": {
+
         "breDecision": {
-            "decision": "NSTP",
-            "initialDecision": "NSTP",
-            "isInitial": "N",
+
+            "decision": "DC",
+
+            "initialDecision": "Non-STP",
+
+            "isInitial": "Y",
+
             "isLatest": "N",
-            "remarks": "Check Basic KYC Document Attestations#NRI: Passport Is Required as Age Proof#NRI Questionnaire Required#Financially not eligible#Financially not eligible#Standard Age Proof Required#QSTN/Document Attached#Minor Life Cannot be Proposer#UW Control#VMR not allowed for other than Standard country#LA Minor Life Occupation Other Than STDN Not Allowed#Videography Medical Examination Report eligible case#Non Standard Extra Is NOT To Be Charged#LA age < 21 and education >= Grad, GCR required#Height Weight Not In Range#Previous Policy Decision XX#Previous Policy Decision Substandard#DRC_Failed#Income Proof Required for Protection#Revised Income Document",
-            "discrepancy": "IDM#GCR#KYP#PST#AGE#UAC#RUA#H1C#MER#ACR#OCD#IIN#QNR#ECG#HV1#COT#S13#PAL#ADP#AUS#PAN",
-            "medicalBreDecision": "NonSTP",
-            "viewMedicalBreDecision": "NonSTP",
-            "medicalBre": "NonSTP",
-            "medicalBreRemarks": "",
-            "timestamp": "14/08/2026, 1138hrs",
+
+            "remarks": "Product Non Eligible",
+
+            "discrepancy": "ACR#OCD#PAN#ADP#AGE#IDM#KYP",
+
+            "timestamp": "14/08/2026, 1108hrs",
+
             "action": "Decline",
-            "reTriggerCount": 47
+
+            "reTriggerCount": 34
+
         },
-        "summary": [
-            {
-                "memberType": "lifeassured1",
-                "lifeType": "LA",
-                "customerType": "SHNI",
-                "partyId": "2dff8e59-2d3d-4b06-9477-174c9e87d3db",
-                "jontFlag": false,
-                "lifeNumber": "",
-                "clientId": "NA",
-                "proposerLaRelation": "Self",
-                "jointLARelation": "",
-                "jointPRRelation": "",
-                "nriFlag": false,
-                "fatfFlag": false,
-                "faceMatchDetails": {
-                    "document": "string",
-                    "faceMatchScore": 0,
-                    "imageQuality": "good",
-                    "remarks": "no"
-                },
-                "proposerSummary": {
-                    "title": "",
-                    "firstName": "TRSTR",
-                    "middleName": "",
-                    "lastName": "HGDS",
-                    "gender": "Female",
-                    "maritalStatus": "Married",
-                    "dob": "2026-03-09T00:00",
-                    "age": {
-                        "years": 0,
-                        "days": 158
-                    },
-                    "profileImage": "https://images.unsplash.com/photo-1740252117013-4fb21771e7ca?q=80&w=880&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-                    "caseStatus": "DRAFT",
-                    "nationality": "India",
-                    "countryOfResidence": "India",
-                    "residentStatus": "Indian Resident",
-                    "education": "GRAD",
-                    "pioStatus": "0",
-                    "highestQualification": "GRAD",
-                    "graduationFlag": "",
-                    "orgName": "3I INFOTECH",
-                    "yearsInServiceOrBusiness": null,
-                    "industryType": "",
-                    "birthCountry": "",
-                    "occupationType": "SPVT",
-                    "netIncomeAmt": null,
-                    "immigrationStatus": "Indian Resident",
-                    "orgType": "PVT",
-                    "latestIncYear": 2026,
-                    "isPEP": false,
-                    "panNo": "BDRLW0302A",
-                    "remarks": "",
-                    "ckycNumber": "NA",
-                    "criminalProceeding": "No",
-                    "incomeProof": "Adhr",
-                    "designation": "",
-                    "disabled": "",
-                    "percentageOfImpairment": "",
-                    "typeOfImpairment": "",
-                    "udidNumber": ""
-                },
-                "applicantDetails": {
-                    "dateOfBirth": "2026-03-09",
-                    "gender": "Male",
-                    "maritalStatus": "M",
-                    "nationality": "India",
-                    "countryOfResidence": "India",
-                    "education": "GRAD",
-                    "designation": "",
-                    "disabled": "",
-                    "percentageOfImpairment": "",
-                    "typeOfImpairment": "",
-                    "udidNumber": "",
-                    "uidNumber": "",
-                    "uidiNumber": ""
-                },
-                "financialDetails": {
-                    "annualIncome": 5000000,
-                    "appliedSumAssured": 5000000,
-                    "trsa": 11036.0,
-                    "tfsa": "Infinity"
-                },
-                "policyDetails": {
-                    "proposerName": "",
-                    "lifeAssuredName": "TRSTR HGDS",
-                    "productName": "ICICI Pru iProtect Smart Plus",
-                    "modalPremium": 0,
-                    "paymentMode": "Monthly",
-                    "channel": "Agency"
-                },
-                "underwriting": {
-                    "remarks": "Check Basic KYC Document Attestations#NRI: Passport Is Required as Age Proof#NRI Questionnaire Required#Financially not eligible#Financially not eligible#Standard Age Proof Required#QSTN/Document Attached#Minor Life Cannot be Proposer#UW Control#VMR not allowed for other than Standard country#LA Minor Life Occupation Other Than STDN Not Allowed#Videography Medical Examination Report eligible case#Non Standard Extra Is NOT To Be Charged#LA age < 21 and education >= Grad, GCR required#Height Weight Not In Range#Previous Policy Decision XX#Previous Policy Decision Substandard#DRC_Failed#Income Proof Required for Protection#Revised Income Document",
-                    "breDecision": {
-                        "status": "",
-                        "category": "Decline",
-                        "coverage": "Check Basic KYC Document Attestations#NRI: Passport Is Required as Age Proof#NRI Questionnaire Required#Financially not eligible#Financially not eligible#Standard Age Proof Required#QSTN/Document Attached#Minor Life Cannot be Proposer#UW Control#VMR not allowed for other than Standard country#LA Minor Life Occupation Other Than STDN Not Allowed#Videography Medical Examination Report eligible case#Non Standard Extra Is NOT To Be Charged#LA age < 21 and education >= Grad, GCR required#Height Weight Not In Range#Previous Policy Decision XX#Previous Policy Decision Substandard#DRC_Failed#Income Proof Required for Protection#Revised Income Document"
-                    }
-                },
-                "kycDetails": {
-                    "panNumber": "BDRLW0302A",
-                    "identityProofType": "Aadhaar",
-                    "identityProofNumber": "AAAAA1111A",
-                    "addressProof": "Aadhaar",
-                    "incomeProof": "Aadhaar",
-                    "ageProof": "Aadhaar",
-                    "existingCkycNumber": "NA",
-                    "pep": "No",
-                    "criminalProceedings": "No",
-                    "panFlag": "Y",
-                    "panAadharSeedingStatus": "",
-                    "identityProofExpiryDate": "",
-                    "pranNo": "123456789777",
-                    "pranNoVerifivation": "",
-                    "pranNoVerification": "",
-                    "udsLink": ""
-                },
-                "address": [
-                    {
-                        "type": "communication",
-                        "addressLine1": "testing address shriji atlatntis longer than 30 length abcdssad ddfdf",
-                        "addressLine2": "RAM",
-                        "addressLine3": "RAM",
-                        "landmark": "Near City Mall",
-                        "city": "mumbai1",
-                        "state": "MH",
-                        "pinCode": "123123",
-                        "residingCountry": "India",
-                        "topCity": "",
-                        "negativePinCode": ""
-                    },
-                    {
-                        "type": "permanent",
-                        "addressLine1": "MUMBAI",
-                        "addressLine2": "dc",
-                        "addressLine3": "sf",
-                        "landmark": "Opposite Bandra Station",
-                        "city": "mumbai1",
-                        "state": "KA",
-                        "pinCode": "456456",
-                        "residingCountry": "India",
-                        "topCity": "",
-                        "negativePinCode": ""
-                    }
-                ],
-                "communicationAddressDetails": {
-                    "addressLine1": "RAM",
-                    "addressLine2": "RAM",
-                    "addressLine3": "RAM",
-                    "landmark": "Near City Mall",
-                    "city": "mumbai1",
-                    "state": "MH",
-                    "country": "India",
-                    "pincode": "123123"
-                },
-                "permanentAddressDetails": {
-                    "addressLine1": "MUMBAI",
-                    "addressLine2": "dc",
-                    "addressLine3": "sf",
-                    "landmark": "Opposite Bandra Station",
-                    "city": "mumbai1",
-                    "state": "KA",
-                    "country": "India",
-                    "pincode": "456456"
-                },
-                "contactDetails": {
-                    "mobileNo": "9878761725",
-                    "alternateMobileNo": "9876543210",
-                    "alternateMobile": "9876543210",
-                    "std": "",
-                    "landlineNo": "",
-                    "landlineNumber": "",
-                    "emailId": "TRESTR@GMAIL.COM",
-                    "emailPref": "Y",
-                    "smsPref": "Y"
-                },
-                "applicantFinancialDetails": {
-                    "occupation": "SPVT",
-                    "annualIncome": 5000000,
-                    "gstin": "",
-                    "lastIncomeYear": 2026,
-                    "organisationType": "PVT",
-                    "organisationName": "3I INFOTECH"
-                },
-                "healthDetail": {
-                    "height": "165.1",
-                    "weight": "",
-                    "bmi": "0.0",
-                    "avgSystolic": "",
-                    "avgDiastolic": "",
-                    "heightFeet": "",
-                    "heightInches": "0",
-                    "hazardousOccupation": "",
-                    "illnessOrImpairment": [],
-                    "substanceConsumption": [
-                        {
-                            "substance": "",
-                            "consumedAs": "",
-                            "quantity": {
-                                "amount": "",
-                                "unit": "day/week"
-                            },
-                            "noOfYears": null,
-                            "advisedByDoctorForAbstinence": ""
-                        }
-                    ],
-                    "medicalQuestionnaire": [
-                        {
-                            "qtid": "ILLIMPAIRMENT",
-                            "value": "no",
-                            "remar": "",
-                            "subQts": []
-                        }
-                    ]
-                },
-                "nominee": [
-                    {
-                        "relationWithLA": "",
-                        "relationship": "",
-                        "firstName": "TRSTR",
-                        "lastName": "HGDS",
-                        "dob": "1991-03-12T00:00",
-                        "gender": "Female",
-                        "percentage": 0,
-                        "proposerNomineeRelation": "",
-                        "accountNumber": "",
-                        "ifsc": ""
-                    }
-                ],
-                "appointee": [],
-                "genericDetails": {
-                    "existingPolicyNumber": "NA",
-                    "clientId": "NA",
-                    "selfProposed": "Yes",
-                    "typeOfProposer": "Individual",
-                    "relationshipWithLifeAssured": "Self",
-                    "typeOfProposal": "Retail New Business"
-                },
-                "eiaDetails": {
-                    "openEIA": "No",
-                    "existingEIANumber": "NA",
-                    "preferredRepository": "",
-                    "convertPolicies": "No"
-                },
-                "fundDetails": {
-                    "allocationStrategy": "",
-                    "totalAllocation": "",
-                    "atpOpted": "",
-                    "fundDetail": []
-                },
-                "paymentDetails": {},
-                "payoutDetails": {
-                    "accountType": "Savings",
-                    "bankType": "ICICI Bank Ltd",
-                    "branch": "",
-                    "micrCode": "500229012",
-                    "ifscCode": "ICIC0000123",
-                    "accountNumber": "012345678901",
-                    "paymentOptions": "Savings"
-                },
-                "advisorDetails": {
-                    "relationWithAdvisor": "others",
-                    "acquaintanceDuration": 0,
-                    "fileSentToCopsDate": "",
-                    "branchUWDate": "",
-                    "decalarationDate": "",
-                    "declarationPlace": ""
-                },
-                "questions": [
-                    {
-                        "quesCode": "ILLIMPAIRMENT",
-                        "quesFor": "LA",
-                        "quesType": "HEALTH",
-                        "quesAns": "no"
-                    }
-                ],
-                "producerDetails": {
-                    "perfiosBank": "No",
-                    "premiumPaymentOption": "RP0",
-                    "isecExperianCategory": "",
-                    "gstInNumber": "",
-                    "pasaSegmentCitiesFlag": "",
-                    "productSource": "standalone",
-                    "imputedMarker": "",
-                    "imputedIncome": "0",
-                    "prePopulatedValueEdited": "NA",
-                    "fnaSumAssured": "0",
-                    "componentCode": "PSPL",
-                    "cdfWaiverFlag": "No",
-                    "youthExpressFlag": "N",
-                    "atsSource": "",
-                    "ipsDiscountFlag": "FALSE",
-                    "lumpSumPercentage": "0",
-                    "accuityRiskIndicator": "",
-                    "primaryLASumAssured": ""
-                },
-                "documentDetails": [
-                    {
-                        "documentType": "ADDR",
-                        "documentName": "Aadhaar",
-                        "documentId": "",
-                        "validityDate": ""
-                    },
-                    {
-                        "documentType": "INCOME",
-                        "documentName": "Adhr",
-                        "documentId": "",
-                        "validityDate": ""
-                    },
-                    {
-                        "documentType": "AGE_PROOF",
-                        "documentName": "Aadhaar",
-                        "documentId": "",
-                        "validityDate": ""
-                    },
-                    {
-                        "documentType": "ID",
-                        "documentName": "Adhr",
-                        "documentId": "AAAAA1111A",
-                        "validityDate": ""
-                    }
-                ],
-                "bureauDetails": {
-                    "cibilScore": "",
-                    "cibilIncomeSegment": "",
-                    "cibilEligibilityStatus": "N",
-                    "cibilServiceStatus": "N",
-                    "experianScore": "",
-                    "experianIncomeSegment": "",
-                    "experianEligibilityStatus": "N",
-                    "experianServiceStatus": "N",
-                    "payuScore": "",
-                    "payuIncomeSegment": "",
-                    "payuEligibilityStatus": "N",
-                    "payuServiceStatus": "N"
-                }
-            }
-        ],
+
         "applicationOverview": {
+
             "sourcingDetail": {
+
                 "agentCode": "00004004",
+
                 "bankCode": "0FB",
+
                 "corporateAgent": "",
+
                 "negativeAdvisor": "",
+
                 "agencyType": "AG",
+
                 "areaCode": "",
+
                 "partnerType": "",
+
                 "lanNumber": "",
+
                 "partnerBank": "",
+
                 "salesChannel": "Agency",
+
                 "fscfsm": "",
+
                 "cafosCode": "",
+
                 "companyCode": "NCOMBO",
+
                 "spCode": "",
+
                 "csrlim": "",
+
                 "bank": "",
+
                 "branch": "",
+
                 "channelCode": "Agency",
+
                 "drcChannelCode": "Agency",
+
                 "subChannelCode": "",
-                "agentName": "ICICI PRUDENTIAL, LIFE INSURANCE",
-                "trsa": 11036.0,
+
+                "agentName": "Santosh, Nayak",
+
+                "trsa": 0.0,
+
                 "tfsa": "Infinity"
+
             },
+
             "groupDetails": {
+
                 "coverageOption": "",
+
                 "coverageStatus": "",
+
                 "moratorium": "",
+
                 "loanType": "",
+
                 "bankType": "",
+
                 "loanTerm": null,
+
                 "loanAmount": null,
+
                 "typeOfLoan": "",
+
                 "dateOfLoanDisbursement": "",
+
                 "shareOfLoan": null,
+
                 "applicantStatus": "",
+
                 "shareOfLoanJl": null,
+
                 "applicantStatusJl": "",
+
                 "masterPolicyHolder": ""
+
             },
+
             "productDetail": [
+
                 {
+
                     "type": "base",
-                    "code": "T74",
-                    "name": "ICICI Pru iProtect Smart Plus",
-                    "productType": "",
-                    "faceValue": "5000000",
+
+                    "code": "E36",
+
+                    "name": "ICICI Pru GIFT Pro",
+
+                    "faceValue": "1068000",
+
                     "coverageOption": "",
+
                     "term": "",
-                    "premiumMode": "Monthly",
+
+                    "premiumMode": "",
+
                     "renewalPremiumMode": "",
+
                     "premiumFrequency": "",
-                    "annualPremium": null,
+
+                    "annualPremium": 100000,
+
                     "installmentPremium": "0",
+
                     "installmentPremiumWithTax": null,
+
                     "ratingFactor": "",
+
                     "isEligible": "",
-                    "riskCessationTerm": null,
-                    "premiumCessationTerm": null,
+
+                    "riskCessationTerm": 11,
+
+                    "premiumCessationTerm": 10,
+
                     "paymentAmount": null,
+
                     "premiumModeFpd": "",
+
                     "baseAnnualPremium": null,
+
                     "premium": 0,
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "loanLimit": null,
+
                     "deathBenefitPayoutOption": "",
+
                     "benefitOption": "",
-                    "statCode": "L0Y",
+
+                    "statCode": "",
+
                     "incomeBenefitFlag": "",
+
                     "lifeStageBenefitFlag": "",
-                    "statCodeD": "RP0",
-                    "statCodeE": "LS",
+
+                    "statCodeD": "",
+
+                    "statCodeE": "",
+
                     "initialSumAssured": "",
-                    "customerType": "SHNI",
-                    "policyType": "Retail New Business",
+
                     "modalPremium": 0,
+
+                    "productType": "",
+
+                    "customerType": "SHNI",
+
+                    "policyType": "Retail New Business",
+
                     "policyTerm": null,
-                    "premiumPaymentTerm": 40
+
+                    "premiumPaymentTerm": 10
+
                 }
+
             ],
+"summary": [
+            {
+                "memberType": "lifeassured1"
+            },{
+                "memberType": "proposer"
+            }],
             "riderDetails": [],
+
             "customer": {
+
                 "customerType": "SHNI",
+
                 "policyType": "Retail New Business"
+
             },
+
             "policyDetails": {
+
                 "proposerName": "",
-                "lifeAssuredName": "TRSTR HGDS",
+
+                "lifeAssuredName": "SOHEL FDSDFS",
+
                 "modalPremium": 0,
+
                 "policyTerm": null,
-                "premiumPaymentTerm": 40,
-                "paymentMode": "Monthly"
+
+                "premiumPaymentTerm": 10,
+
+                "paymentMode": ""
+
             }
+
         },
+
         "pivvSection": {
-            "pivvPoolRemarks": "BRE_URMS_EVALUATE",
-            "remarkDate": "2026-08-14T06:08:15.728382",
+
+            "pivvPoolRemarks": "",
+
+            "remarkDate": "",
+
             "pivvPoolDecision": "",
+
             "reason": "",
-            "userId": "MS-breUrms"
+
+            "userId": ""
+
         },
+
         "requirementManagement": [
+
             {
-                "team": "COPS",
-                "profile": "",
-                "category": "KYC",
-                "subCategory": "ID proof",
-                "document": "Drving License",
-                "specialTest": "N",
-                "reason": "Documents not submitted",
-                "fupCode": "IDM",
-                "requirementId": 10348,
-                "description": "IDM- Upload valid ID proof of proposer (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
+
                 "team": "UW",
+
                 "profile": "",
-                "category": "Application",
-                "subCategory": "Nominee/PEP/EBI/Personal details",
-                "document": "Education/Sign",
-                "specialTest": "N",
-                "reason": "Mismatch in information provided",
-                "fupCode": "PIV",
-                "requirementId": 10395,
-                "description": "GCR-Upload Graduation Certificate",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-04",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-04",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "COPS",
-                "profile": "",
-                "category": "KYC",
-                "subCategory": "PAN Card",
-                "document": "Photo",
-                "specialTest": "N",
-                "reason": "Documents not submitted",
-                "fupCode": "KYP",
-                "requirementId": 10350,
-                "description": "KYP- Upload recent photograph of proposer",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "NRI-OCI",
-                "subCategory": "NRI",
-                "document": "Passport",
-                "specialTest": "N",
-                "reason": "Document not submitted",
-                "fupCode": "PST",
-                "requirementId": 10351,
-                "description": "PST-Upload proposer passport (front & back)",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "COPS",
-                "profile": "",
-                "category": "KYC",
-                "subCategory": "Ageproof",
-                "document": "PAN Card",
-                "specialTest": "N",
-                "reason": "Documents not submitted",
-                "fupCode": "AGE",
-                "requirementId": 10353,
-                "description": "AGE-Age proof of life assured (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
+
                 "category": "Internal",
-                "subCategory": "UAC",
-                "document": "Renewal Pending",
-                "specialTest": "N",
-                "reason": "Audit Confirmation",
-                "fupCode": "UAC",
-                "requirementId": 10354,
-                "description": "UAC-UW Audit Confirmation Pending",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medicals",
-                "subCategory": "Grid Medicals",
-                "document": "Blood test",
-                "specialTest": "N",
-                "reason": "Mandatory medicals not done",
-                "fupCode": "RUA",
-                "requirementId": 10356,
-                "description": "RUA-Need to go for Urine test",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medicals",
-                "subCategory": "Grid Medicals",
-                "document": "Blood test",
-                "specialTest": "N",
-                "reason": "Mandatory medicals not done",
-                "fupCode": "H1C",
-                "requirementId": 10359,
-                "description": "H1C-Need to go for Blood test",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medicals",
-                "subCategory": "Grid Medicals",
-                "document": "MER/VMER/TU",
-                "specialTest": "N",
-                "reason": "Mandatory medicals not done",
-                "fupCode": "MER",
-                "requirementId": 10361,
-                "description": "MER-Physical Examination required",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Internal",
+
                 "subCategory": "Report",
+
                 "document": "Agent report",
+
                 "specialTest": "N",
+
                 "reason": "Document not uploaded",
+
                 "fupCode": "ACR",
-                "requirementId": 10363,
+
+                "requirementId": 11234,
+
                 "description": "ACR -Agent confidential report not uploaded",
-                "status": "PENDING",
+
+                "status": "Accept",
+
                 "isActive": "Y",
-                "raisedDate": "2026-08-03",
+
+                "raisedDate": "2026-08-14",
+
                 "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
+
+                "receivedDate": "2026-08-14",
+
                 "receivedBy": "icic-bre-urms-service",
+
                 "validity": "",
+
                 "userId": "",
+
                 "remarks": "",
+
                 "udsLink": "",
+
                 "ocrStatus": "",
+
                 "ocrDoc": ""
+
             },
+
             {
+
                 "team": "UW",
+
                 "profile": "",
+
                 "category": "Consent",
+
                 "subCategory": "Customer declaration form",
+
                 "document": "Annuity",
+
                 "specialTest": "N",
+
                 "reason": "Document not uplaoded",
+
                 "fupCode": "OCD",
-                "requirementId": 10364,
+
+                "requirementId": 11235,
+
                 "description": "OCD-Submit digital confirmation via Consent Code",
+
                 "status": "PENDING",
+
                 "isActive": "Y",
-                "raisedDate": "2026-08-03",
+
+                "raisedDate": "2026-08-14",
+
                 "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
+
+                "receivedDate": "2026-08-14",
+
                 "receivedBy": "icic-bre-urms-service",
+
                 "validity": "",
+
                 "userId": "",
+
                 "remarks": "",
+
                 "udsLink": "",
+
                 "ocrStatus": "",
+
                 "ocrDoc": ""
+
             },
+
             {
-                "team": "UW",
-                "profile": "",
-                "category": "Financial",
-                "subCategory": "EDD",
-                "document": "premium payment",
-                "specialTest": "N",
-                "reason": "Income proof not given",
-                "fupCode": "IIN",
-                "requirementId": 10366,
-                "description": "IIN-Income proof of life assured matching with income declared in application",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Questionnaire",
-                "subCategory": "Non medical",
-                "document": "NRI",
-                "specialTest": "N",
-                "reason": "Non medical Questionnaire not submitted",
-                "fupCode": "QNR",
-                "requirementId": 10352,
-                "description": "QNR -NRI Questionnaire required",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medicals",
-                "subCategory": "Grid Medicals",
-                "document": "Cardiac",
-                "specialTest": "Y",
-                "reason": "Mandatory medicals not done",
-                "fupCode": "ECG",
-                "requirementId": 10355,
-                "description": "ECG-Need to go for ECG test",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medicals",
-                "subCategory": "Grid Medicals",
-                "document": "Blood test",
-                "specialTest": "N",
-                "reason": "Mandatory medicals not done",
-                "fupCode": "HV1",
-                "requirementId": 10357,
-                "description": "HV1-Need to go for Blood test",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medicals",
-                "subCategory": "Grid Medicals",
-                "document": "Blood test",
-                "specialTest": "N",
-                "reason": "Mandatory medicals not done",
-                "fupCode": "COT",
-                "requirementId": 10360,
-                "description": "COT-Need to go for Urine test",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medicals",
-                "subCategory": "Grid Medicals",
-                "document": "Blood test",
-                "specialTest": "N",
-                "reason": "Mandatory medicals not done",
-                "fupCode": "S13",
-                "requirementId": 10362,
-                "description": "S13-Need to go for Blood test (Fasting not required)",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
+
                 "team": "COPS",
+
                 "profile": "",
+
                 "category": "KYC",
+
                 "subCategory": "PAN Card",
+
                 "document": "PAN /Form 60",
+
                 "specialTest": "N",
+
                 "reason": "Documents not submitted",
-                "fupCode": "PAL",
-                "requirementId": 10365,
-                "description": "PAL- Please submit PAN Card copy linked with your Aadhaar",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "COPS",
-                "profile": "",
-                "category": "KYC",
-                "subCategory": "Address Proof",
-                "document": "Driving License",
-                "specialTest": "N",
-                "reason": "Documents not submitted",
-                "fupCode": "ADP",
-                "requirementId": 10349,
-                "description": "ADP-Address proof of the proposer matching with application form (Passport - front & back or Aadhaar - front & back or Driving License or Voter id)",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "UW",
-                "profile": "",
-                "category": "Medicals",
-                "subCategory": "Grid Medicals",
-                "document": "Blood test",
-                "specialTest": "N",
-                "reason": "Mandatory medicals not done",
-                "fupCode": "AUS",
-                "requirementId": 10358,
-                "description": "AUS-Blood Test",
-                "status": "PENDING",
-                "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_URMS",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-urms-service",
-                "validity": "",
-                "userId": "",
-                "remarks": "",
-                "udsLink": "",
-                "ocrStatus": "",
-                "ocrDoc": ""
-            },
-            {
-                "team": "COPS",
-                "profile": "",
-                "category": "KYC",
-                "subCategory": "PAN Card",
-                "document": "PAN /Form 60",
-                "specialTest": "N",
-                "reason": "Documents not submitted",
+
                 "fupCode": "PAN",
-                "requirementId": 10374,
+
+                "requirementId": 11236,
+
                 "description": "Upload signed (attested) copy of PAN Card or Form 60/61 or Form 97 of person purchasing this policy (Proposer)",
-                "status": "RAISED",
+
+                "status": "PENDING",
+
                 "isActive": "Y",
-                "raisedDate": "2026-08-03",
-                "raisedBy": "BRE_WRAP",
-                "receivedDate": "2026-08-03",
-                "receivedBy": "icic-bre-wrapper-orchestrator",
+
+                "raisedDate": "2026-08-14",
+
+                "raisedBy": "BRE_URMS",
+
+                "receivedDate": "2026-08-14",
+
+                "receivedBy": "icic-bre-urms-service",
+
                 "validity": "",
+
                 "userId": "",
+
                 "remarks": "",
+
                 "udsLink": "",
+
                 "ocrStatus": "",
+
                 "ocrDoc": ""
+
+            },
+
+            {
+
+                "team": "COPS",
+
+                "profile": "",
+
+                "category": "KYC",
+
+                "subCategory": "Address Proof",
+
+                "document": "Driving License",
+
+                "specialTest": "N",
+
+                "reason": "Documents not submitted",
+
+                "fupCode": "ADP",
+
+                "requirementId": 11240,
+
+                "description": "ADP-Address proof of the proposer matching with application form (Passport - front & back or Aadhaar - front & back or Driving License or Voter id)",
+
+                "status": "PENDING",
+
+                "isActive": "Y",
+
+                "raisedDate": "2026-08-14",
+
+                "raisedBy": "BRE_URMS",
+
+                "receivedDate": "2026-08-14",
+
+                "receivedBy": "icic-bre-urms-service",
+
+                "validity": "",
+
+                "userId": "",
+
+                "remarks": "",
+
+                "udsLink": "",
+
+                "ocrStatus": "",
+
+                "ocrDoc": ""
+
+            },
+
+            {
+
+                "team": "COPS",
+
+                "profile": "",
+
+                "category": "KYC",
+
+                "subCategory": "Ageproof",
+
+                "document": "PAN Card",
+
+                "specialTest": "N",
+
+                "reason": "Documents not submitted",
+
+                "fupCode": "AGE",
+
+                "requirementId": 11238,
+
+                "description": "AGE-Age proof of life assured (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
+
+                "status": "PENDING",
+
+                "isActive": "Y",
+
+                "raisedDate": "2026-08-14",
+
+                "raisedBy": "BRE_URMS",
+
+                "receivedDate": "2026-08-14",
+
+                "receivedBy": "icic-bre-urms-service",
+
+                "validity": "",
+
+                "userId": "",
+
+                "remarks": "",
+
+                "udsLink": "",
+
+                "ocrStatus": "",
+
+                "ocrDoc": ""
+
+            },
+
+            {
+
+                "team": "COPS",
+
+                "profile": "",
+
+                "category": "KYC",
+
+                "subCategory": "ID proof",
+
+                "document": "Drving License",
+
+                "specialTest": "N",
+
+                "reason": "Documents not submitted",
+
+                "fupCode": "IDM",
+
+                "requirementId": 11239,
+
+                "description": "IDM- Upload valid ID proof of proposer (Passport - front & back or Driving License or Pan Card or Aadhaar - front & back)",
+
+                "status": "PENDING",
+
+                "isActive": "Y",
+
+                "raisedDate": "2026-08-14",
+
+                "raisedBy": "BRE_URMS",
+
+                "receivedDate": "2026-08-14",
+
+                "receivedBy": "icic-bre-urms-service",
+
+                "validity": "",
+
+                "userId": "",
+
+                "remarks": "",
+
+                "udsLink": "",
+
+                "ocrStatus": "",
+
+                "ocrDoc": ""
+
+            },
+
+            {
+
+                "team": "COPS",
+
+                "profile": "",
+
+                "category": "KYC",
+
+                "subCategory": "PAN Card",
+
+                "document": "Photo",
+
+                "specialTest": "N",
+
+                "reason": "Documents not submitted",
+
+                "fupCode": "KYP",
+
+                "requirementId": 11237,
+
+                "description": "KYP- Upload recent photograph of proposer",
+
+                "status": "PENDING",
+
+                "isActive": "Y",
+
+                "raisedDate": "2026-08-14",
+
+                "raisedBy": "BRE_URMS",
+
+                "receivedDate": "2026-08-14",
+
+                "receivedBy": "icic-bre-urms-service",
+
+                "validity": "",
+
+                "userId": "",
+
+                "remarks": "",
+
+                "udsLink": "",
+
+                "ocrStatus": "",
+
+                "ocrDoc": ""
+
             }
+
         ],
+
         "quickLinks": {
-            "proposerForm": "https://udsviewer-uat.iprulifeinsurance.com/App/UdsViewer/document-listing/split?roleid=VkhjeVE3M0dzd1ZmSFg2TW0xTXhLUT09&_uidtype=R1NoN0FWdloxTzhQeU9IbnhRM3ZkZz09&_uidvalue=RzZVN1pSaThyOTh6V0wyRlFSQlh1Zz09&ntid=UDSMIDOFFICE&token=eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJzdWIiOiJVMDRMRHBkTlk3QVpMR2FRTlNvQW4zTTN0bFpOcUlaZXp5TUdvYkJxVzVLbkVOSHQiLCJhdWQiOiJ1cm46Ly9jNjA1MTFjMC0xMmEyLTQ3M2MtODBmZC00MjUyOGViNjVhNmEiLCJudElkIjoiVURTTUlET0ZGSUNFIiwiYXV0aCI6ImJObEY1c2tHaTV3dW40UElQUHd0eEw5THhUdnYiLCJpc3MiOiJ1cm46Ly9hcGlnZWUtZWRnZS1KV1QtcG9saWN5LXRlc3QiLCJleHAiOjE3ODY2ODk0OTgsImlhdCI6MTc4NjY4NzY5OCwianRpIjoiZDVjZDRmMTAtNzAzZC00ZGQ5LTllZGQtYjI0OWJhMGQ0YmJjIn0.GXg1OW6A1ZJfW1l2jDuVPqJDed78a0PHOsB6GNcRY-Jilm_mydgqrIl8b1oNksWNLJFzD-RDgeQt1u21ZiMtNn2F1EIBbuCz5JKgOmZ72UaSF8xBjbx3rG9W7IkVbL8y0pNQBvhJPr7yzX5NiGAkTTHgPDmVYVLXChxebOERoVGNvsOVusWvTZ2gQ9o_WRNmiC1Gp9AXEENhGqIyU1wct1chIcGFICymcxd_S--N_QlLzowQmDLlJMY65rTtzARMB1z_eue_H3Mj_LAfNsyZ_-XulCOAnC_iEgoQAsAt-H2hxY8DGWT8TlvLUisxsvT5xQQdtu0vbe1c_wAiAvLjycPa10RlNssxioNmGAJvp_DRYSfKoCUn1IoJRym19utQVwr0m4RDSSUrEhDuXDseLiCtys4_jCGdko4MjMmeWMl1kdKS0ZQk3ilzhqojf1cALiumNjUqQ0j9vz9CxrAJi1PZY9wRfBOz6KNY0HeBUdOoKfTYH6dICzjD40z1IEV-9dA-rXIHRSQ-ollO_fIIFxTzRapbXzWGycK3H98SjRNM1yM5VFB5KG_gcCBrJkbk7gnvWss2oxiiQ-EetdDYjodq4k73qKwAWPCPjDXHscvZVRBTT0WzyegXzzNrEoQ41vcLmmsu52J4lyXv2pba8OzMa9RtFeA1Ybix3QN91xI",
+
+            "proposerForm": "",
+
             "previousPolicies": [
+
                 {
-                    "policyNumber": "OS90383470",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545341",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377382",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545321",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377381",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545230",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377380",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545382",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377383",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS90377200",
+
+                    "productName": "ICICI Pru GIFT Pro",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377381",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS90377181",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377382",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS90877180",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377383",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS90377200",
+
+                    "productName": "ICICI Pru GIFT Pro",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "01112984",
-                    "productName": "IPRU iProtect Care RP/LP",
+
+                    "policyNumber": "OS90377181",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
-                    "decision": "J2",
-                    "sumAssured": 10000000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "01112989",
-                    "productName": "ICICI Pru Smart Goal Assure",
-                    "productType": "",
-                    "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 1000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "01198580",
-                    "productName": "Group Loan Secure SP",
+
+                    "policyNumber": "OS94545382",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
-                    "decision": "ST",
-                    "sumAssured": 5000000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "01198720",
-                    "productName": "ICICI Pru Super Protect Credit",
-                    "productType": "",
-                    "dateOfIssuance": "",
-                    "decision": "J2",
-                    "sumAssured": 600000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "01203756",
-                    "productName": "Guaranteed Income For Tomorrow",
-                    "productType": "",
-                    "dateOfIssuance": "2029-05-28",
-                    "decision": "TXP",
-                    "sumAssured": 6000000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "01234450",
-                    "productName": "ICICI Pru iProtect Super",
-                    "productType": "",
-                    "dateOfIssuance": "2026-07-22",
-                    "decision": "XX",
-                    "sumAssured": 11200000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "01131662",
-                    "productName": "ICICI Pru Signature Assure",
-                    "productType": "",
-                    "dateOfIssuance": "2026-04-10",
-                    "decision": "J2",
-                    "sumAssured": 2500000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "OS90377380",
-                    "productName": "ICICI Pru iProtect Smart Plus",
-                    "productType": "",
-                    "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90383470",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS90877180",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "01234519",
-                    "productName": "Guaranteed Income For Tomorrow",
+
+                    "policyNumber": "OS94545321",
+
+                    "productName": "",
+
                     "productType": "",
-                    "dateOfIssuance": "2026-07-23",
-                    "decision": "XX",
-                    "sumAssured": 1500000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "OS90377381",
-                    "productName": "ICICI Pru iProtect Smart Plus",
-                    "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90383470",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545230",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377380",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545341",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377385",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545321",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377382",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545230",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377382",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS90877180",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377383",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS94545341",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377380",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS90377181",
+
+                    "productName": "",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
+
                 },
+
                 {
-                    "policyNumber": "OS90377381",
-                    "productName": "ICICI Pru iProtect Smart Plus",
+
+                    "policyNumber": "OS90377200",
+
+                    "productName": "ICICI Pru GIFT Pro",
+
                     "productType": "",
+
                     "dateOfIssuance": "",
+
                     "decision": "",
-                    "sumAssured": 5000000,
+
+                    "sumAssured": 1068000,
+
                     "medicalReceivedDate": "",
+
                     "medicalValidity": "",
+
                     "financialReceivedDate": "",
+
                     "financialValidity": ""
-                },
-                {
-                    "policyNumber": "OS90383470",
-                    "productName": "ICICI Pru iProtect Smart Plus",
-                    "productType": "",
-                    "dateOfIssuance": "",
-                    "decision": "",
-                    "sumAssured": 5000000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "OS90377383",
-                    "productName": "ICICI Pru iProtect Smart Plus",
-                    "productType": "",
-                    "dateOfIssuance": "",
-                    "decision": "",
-                    "sumAssured": 5000000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
-                },
-                {
-                    "policyNumber": "OS90377385",
-                    "productName": "ICICI Pru iProtect Smart Plus",
-                    "productType": "",
-                    "dateOfIssuance": "",
-                    "decision": "",
-                    "sumAssured": 5000000,
-                    "medicalReceivedDate": "",
-                    "medicalValidity": "",
-                    "financialReceivedDate": "",
-                    "financialValidity": ""
+
                 }
+
             ],
+
             "openOtherTasks": [],
+
             "riskDetails": [],
+
             "auditTrail": [
+
                 {
-                    "dateTime": "2026-08-14T06:08:15.728382",
+
+                    "dateTime": "2026-08-14T08:31:43.545873",
+
                     "fromPool": "",
+
                     "fromPoolUser": "MS-breUrms",
+
                     "toPool": "",
+
                     "toPoolUser": "",
+
                     "subPool": "PIPELINE",
+
                     "userId": "MS-breUrms",
+
                     "uwDecision": "",
+
                     "breDecision": "BRE_URMS_EVALUATE"
+
                 },
+
                 {
-                    "dateTime": "2026-08-14T06:08:15.446557",
+
+                    "dateTime": "2026-08-14T08:31:42.010163",
+
                     "fromPool": "",
+
                     "fromPoolUser": "MS-dedupe",
+
                     "toPool": "",
+
                     "toPoolUser": "",
+
                     "subPool": "PIPELINE",
+
                     "userId": "MS-dedupe",
+
                     "uwDecision": "",
+
                     "breDecision": "DEDUPE_POSIDEX_INVOKE"
+
                 },
+
                 {
-                    "dateTime": "2026-08-14T06:08:14.862741",
+
+                    "dateTime": "2026-08-14T08:31:41.420739",
+
                     "fromPool": "",
+
                     "fromPoolUser": "MS-dedupe",
+
                     "toPool": "",
+
                     "toPoolUser": "",
+
                     "subPool": "PIPELINE",
+
                     "userId": "MS-dedupe",
+
                     "uwDecision": "",
+
                     "breDecision": "CLIENT_ENQUIRY_STARTED"
+
                 },
+
                 {
-                    "dateTime": "2026-08-14T06:08:10.640912",
+
+                    "dateTime": "2026-08-14T08:31:35.798594",
+
                     "fromPool": "",
+
                     "fromPoolUser": "MS-dedupe",
+
                     "toPool": "",
+
                     "toPoolUser": "",
+
                     "subPool": "PIPELINE",
+
                     "userId": "MS-dedupe",
+
                     "uwDecision": "",
+
                     "breDecision": "DEDUPE_POSIDEX_INVOKE"
+
                 },
+
                 {
-                    "dateTime": "2026-08-14T06:08:10.047435",
+
+                    "dateTime": "2026-08-14T08:31:35.197784",
+
                     "fromPool": "",
+
                     "fromPoolUser": "MS-dedupe",
+
                     "toPool": "",
+
                     "toPoolUser": "",
+
                     "subPool": "PIPELINE",
+
                     "userId": "MS-dedupe",
+
                     "uwDecision": "",
+
                     "breDecision": "CLIENT_ENQUIRY_STARTED"
+
                 }
+
             ]
+
         },
+
         "roleType": "CVT_TASK",
+
         "userId": "ipru75031"
+
     }
+
 }
+ 

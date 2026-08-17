@@ -1,4 +1,54 @@
 {
-  "success": true,
-  "message": "Task claimed successfully"
+
+    "id": "2078.24167",
+
+    "name": "CVT Task",
+
+    "display_name": "CVT Task",
+
+    "model": "Retail New Business Process",
+
+    "process_id": "2072.5876",
+
+    "process_name": "Retail New Buisness Process: OS94545381",
+
+    "state": "claimed",
+
+    "due_date": "2026-08-17T06:42:54Z",
+
+    "start_time": "2026-08-14T07:42:54Z",
+
+    "at_risk_time": "2026-08-17T00:30:06Z",
+
+    "owner": "IPRU75031",
+
+    "assignments": {
+
+        "potential_owners": {
+
+            "team": {
+
+                "model_id": "24.5972dad0-8f4c-4a32-b725-4b81d64f0c58",
+
+                "id": "2075.1567",
+
+                "name": "CVT Team"
+
+            },
+
+            "manager_team": {
+
+                "id": "2075.1902",
+
+                "name": "Process Performance Team"
+
+            }
+
+        }
+
+    },
+
+    "priority": "30"
+
 }
+ 

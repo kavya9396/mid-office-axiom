@@ -13,6 +13,7 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  TableSortLabel,
   TextField,
   Typography,
 } from "@mui/material";
@@ -20,11 +21,13 @@ import {
 import { useMemo, useState } from "react";
 
 import {
+  DangerIcon,
   FilterIcon,
   KeyLeftArrowIcon,
   KeyRightArrowIcon,
   SearchIcon,
   SettingsIcon,
+  
 } from "../../icons/Icons";
 import CustomButton from "../../components/ui/Button/Button";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
@@ -330,17 +333,23 @@ const getSavedColumns = (
 };
 
 
-const getRowHighlightColor = (
+type TimingStatus = "overdue" | "atRisk" | null;
+
+const getRowTimingStatus = (
   row: Record<string, unknown>,
-): string => {
+): TimingStatus => {
   const now = Date.now();
 
-  const dueDate = row.dueDate
-    ? new Date(String(row.dueDate)).getTime()
+  const dueDateValue = row.dueDate ?? row.due_date;
+  const atRiskTimeValue =
+    row.atRiskTime ?? row.at_risk_time;
+
+  const dueDate = dueDateValue
+    ? new Date(String(dueDateValue)).getTime()
     : null;
 
-  const atRiskTime = row.atRiskTime
-    ? new Date(String(row.atRiskTime)).getTime()
+  const atRiskTime = atRiskTimeValue
+    ? new Date(String(atRiskTimeValue)).getTime()
     : null;
 
   // Due date has highest priority
@@ -349,7 +358,7 @@ const getRowHighlightColor = (
     !Number.isNaN(dueDate) &&
     now > dueDate
   ) {
-    return "#F8D7DA"; // red
+    return "overdue";
   }
 
   // At-risk time
@@ -358,10 +367,10 @@ const getRowHighlightColor = (
     !Number.isNaN(atRiskTime) &&
     now > atRiskTime
   ) {
-    return "#FFE5B4"; // orange
+    return "atRisk";
   }
 
-  return "transparent";
+  return null;
 };
 
 /* ============================================================
@@ -1360,13 +1369,39 @@ const DynamicRoleTable = ({
                         },
                       }}
                     >
-                      <Box
+                      <TableSortLabel
+                        active={isSorted}
+                        direction={
+                          isSorted
+                            ? sortDirection
+                            : "asc"
+                        }
+                        hideSortIcon={false}
                         sx={{
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "3px",
                           maxWidth: "100%",
                           minWidth: 0,
+                          color: "#20252a",
+
+                          "&:hover": {
+                            color: "#20252a",
+                          },
+
+                          "&.Mui-active": {
+                            color: "#0D4C7D",
+                          },
+
+                          "& .MuiTableSortLabel-icon": {
+                            width: "14px",
+                            height: "14px",
+                            marginLeft: "3px",
+                            color: "#8a8f94 !important",
+                            opacity: 0.65,
+                          },
+
+                          "&.Mui-active .MuiTableSortLabel-icon": {
+                            color: "#0D4C7D !important",
+                            opacity: 1,
+                          },
                         }}
                       >
                         <Typography
@@ -1382,26 +1417,7 @@ const DynamicRoleTable = ({
                         >
                           {formatColumnName(column)}
                         </Typography>
-
-                        <Typography
-                          component="span"
-                          sx={{
-                            flexShrink: 0,
-                            fontSize: "10px",
-                            lineHeight: 1,
-                            fontWeight: isSorted ? 700 : 400,
-                            color: isSorted
-                              ? "#0D4C7D"
-                              : "#8a8f94",
-                          }}
-                        >
-                          {isSorted
-                            ? sortDirection === "asc"
-                              ? "▲"
-                              : "▼"
-                            : "↕"}
-                        </Typography>
-                      </Box>
+                      </TableSortLabel>
                     </TableCell>
                   );
                 })}
@@ -1429,21 +1445,12 @@ const DynamicRoleTable = ({
                       sx={{
                         height: "30px",
 
-                        backgroundColor:
-                          getRowHighlightColor(row),
-
                         "&:nth-of-type(even)": {
-                          backgroundColor:
-                            getRowHighlightColor(row) !== "transparent"
-                              ? getRowHighlightColor(row)
-                              : "#fafafa",
+                          backgroundColor: "#fafafa",
                         },
 
                         "&:hover": {
-                          backgroundColor:
-                            getRowHighlightColor(row) === "transparent"
-                              ? "#f3f7fa"
-                              : getRowHighlightColor(row),
+                          backgroundColor: "#f3f7fa",
                         },
 
                         "&:last-child td": {
@@ -1460,6 +1467,19 @@ const DynamicRoleTable = ({
                             isApplicationNumberColumn(
                               column,
                             );
+
+                          const timingStatus =
+                            getRowTimingStatus(row);
+
+                          const hasTimingWarning =
+                            timingStatus !== null;
+
+                          const timingWarningColor =
+                            timingStatus === "overdue"
+                              ? "#D32F2F"
+                              : timingStatus === "atRisk"
+                                ? "#C05600"
+                                : "#155a87";
 
                           const cellValue =
                             formatCellValue(
@@ -1487,7 +1507,9 @@ const DynamicRoleTable = ({
                                   1.1,
                                 color:
                                   isApplicationNumber
-                                    ? "#155a87"
+                                    ? hasTimingWarning
+                                      ? timingWarningColor
+                                      : "#155a87"
                                     : "#4b5055",
                                 whiteSpace:
                                   "nowrap",
@@ -1510,8 +1532,15 @@ const DynamicRoleTable = ({
                                   sx={{
                                     cursor:
                                       "pointer",
+                                    display:
+                                      "inline-flex",
+                                    alignItems:
+                                      "center",
+                                    gap: "4px",
                                     color:
-                                      "#155a87",
+                                      hasTimingWarning
+                                        ? timingWarningColor
+                                        : "#155a87",
                                     fontWeight:
                                       500,
                                     textDecoration:
@@ -1522,10 +1551,32 @@ const DynamicRoleTable = ({
                                     "&:hover":
                                     {
                                       color:
-                                        "#9A2529",
+                                        hasTimingWarning
+                                          ? timingWarningColor
+                                          : "#9A2529",
                                     },
                                   }}
                                 >
+                                  {hasTimingWarning && (
+                                    <DangerIcon
+                                      aria-label={
+                                        timingStatus === "overdue"
+                                          ? "Due date crossed"
+                                          : "At-risk time crossed"
+                                      }
+                                      titleAccess={
+                                        timingStatus === "overdue"
+                                          ? "Due date crossed"
+                                          : "At-risk time crossed"
+                                      }
+                                      sx={{
+                                        flexShrink: 0,
+                                        width: "14px",
+                                        height: "14px",
+                                        color: timingWarningColor,
+                                      }}
+                                    />
+                                  )}
                                   {
                                     cellValue
                                   }
@@ -2095,7 +2146,7 @@ const DynamicRoleTable = ({
                               "13px",
                           }}
                         >
-                          ↑
+                          â†‘
                         </Button>
 
                         <Button
@@ -2130,7 +2181,7 @@ const DynamicRoleTable = ({
                               "13px",
                           }}
                         >
-                          ↓
+                          â†“
                         </Button>
                       </Box>
                     </ListItemButton>
@@ -2191,7 +2242,7 @@ const DynamicRoleTable = ({
             The Selected Columns
             order determines the
             table column order. Use
-            ↑ and ↓ to rearrange
+            â†‘ and â†“ to rearrange
             columns.
           </Typography>
         </Box> */}
