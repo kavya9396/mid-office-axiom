@@ -21,6 +21,12 @@ import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
 
 type Address = {
   type?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  addressLine3?: string;
+  state?: string;
+  city?: string;
+  country?: string;
   pinCode?: string;
 };
 
@@ -421,7 +427,7 @@ const EditApplicantProfile = ({
   const masters = useSelector((state: RootState) =>
     getApplicantProfileMasters(state.masterData),
   );
-  console.log('masters',masters)
+  console.log('masters', masters)
   const drsData = useSelector((state: RootState) => state.drs.data);
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -464,17 +470,25 @@ const EditApplicantProfile = ({
             applicationNo: applicationNumber ?? "",
             userId,
             roleType,
-            sections: ["summary"],
+            sections: [
+              "breDecision",
+              "summary",
+              "applicationOverview",
+              "pivvSection",
+              "requirementManagement",
+              "decision",
+              "quickLinks"
+            ],
           }),
         ).unwrap();
         if (active) {
-  const member =
-    extractSummary(response)[memberIndex];
+          const member =
+            extractSummary(response)[memberIndex];
 
-  setValues(
-    mapMemberToForm(member, masters),
-  );
-}
+          setValues(
+            mapMemberToForm(member, masters),
+          );
+        }
       } catch (error) {
         if (active) {
           setApiError(
@@ -490,13 +504,13 @@ const EditApplicantProfile = ({
     return () => {
       active = false;
     };
- }, [
-  applicationNumber,
-  dispatch,
-  memberIndex,
-  open,
-  masters,
-]);
+  }, [
+    applicationNumber,
+    dispatch,
+    memberIndex,
+    open,
+    masters,
+  ]);
   const update = (field: keyof FormValues, value: string) => {
     let nextValue = value;
 
@@ -540,104 +554,85 @@ const EditApplicantProfile = ({
     });
   };
 
- const createUpdatedMember = (
+const createUpdatedMember = (
   member: EditableMember,
+
   formValues: FormValues,
+
 ): EditableMember => {
-  const existingAddresses =
-    member.address ?? [];
 
-  const hasCommunication =
-    existingAddresses.some(
-      (address) =>
-        address.type
-          ?.trim()
-          .toLowerCase() ===
-        "communication",
-    );
+  const existingAddresses = member.address ?? [];
+ 
+  const updatedAddresses = existingAddresses.map((address) => {
 
-  const hasPermanent =
-    existingAddresses.some(
-      (address) =>
-        address.type
-          ?.trim()
-          .toLowerCase() ===
-        "permanent",
-    );
+    const addressType = address.type?.trim().toLowerCase();
+ 
+    if (addressType === "communication") {
 
-  const updatedAddresses =
-    existingAddresses.map((address) => {
-      const addressType = address.type
-        ?.trim()
-        .toLowerCase();
+      return {
 
-      if (addressType === "communication") {
-        return {
-          ...address,
-          pinCode:
-            formValues.communicationPincode.trim(),
-        };
-      }
+        ...address,
 
-      if (addressType === "permanent") {
-        return {
-          ...address,
-          pinCode:
-            formValues.permanentPincode.trim(),
-        };
-      }
+        pinCode: formValues.communicationPincode.trim(),
 
-      return address;
-    });
+      };
 
-  if (!hasCommunication) {
-    updatedAddresses.push({
-      type: "communication",
-      pinCode:
-        formValues.communicationPincode.trim(),
-    });
-  }
+    }
+ 
+    if (addressType === "permanent") {
 
-  if (!hasPermanent) {
-    updatedAddresses.push({
-      type: "permanent",
-      pinCode:
-        formValues.permanentPincode.trim(),
-    });
-  }
+      return {
 
+        ...address,
+
+        pinCode: formValues.permanentPincode.trim(),
+
+      };
+
+    }
+ 
+    return address;
+
+  });
+ 
   return {
+
     ...member,
-
+ 
     proposerSummary: {
+
       ...member.proposerSummary,
+
       dob: formValues.dob,
+
       gender: formValues.gender,
-      residentStatus:
-        formValues.residentialStatus,
+
+      residentStatus: formValues.residentialStatus,
+
     },
-
+ 
     kycDetails: {
+
       ...member.kycDetails,
-      panNumber: formValues.panNumber
-        .trim()
-        .toUpperCase(),
 
-      pranNo:
-        formValues.pranNumber.trim(),
+      panNumber: formValues.panNumber.trim().toUpperCase(),
 
-      identityProofType:
-        formValues.identityProof,
+      pranNo: formValues.pranNumber.trim(),
+
+      identityProofType: formValues.identityProof,
 
       ageProof: formValues.ageProof,
 
-      addressProof:
-        formValues.addressProof,
-    },
+      addressProof: formValues.addressProof,
 
+    },
+ 
     address: updatedAddresses,
+
   };
+
 };
+ 
 
   const getErrorMessage = (error: unknown): string => {
     if (error instanceof Error) {
@@ -697,7 +692,7 @@ const EditApplicantProfile = ({
         },
         isAcuity: true,
       };
-console.log('payload--------',payload)
+      console.log('payload--------', payload)
       const response: ApplicantProfileSubmitResponse =
         await dispatch(
           applicantProfileSubmitThunk(payload),
@@ -732,60 +727,60 @@ console.log('payload--------',payload)
     }
   };
 
-const field = (
-  name: keyof FormValues,
-  label: string,
-  options?: MasterOption[],
-  htmlInputProps?: React.InputHTMLAttributes<HTMLInputElement>,
-) => {
-  const activeOptions =
-    getActiveOptions(options);
+  const field = (
+    name: keyof FormValues,
+    label: string,
+    options?: MasterOption[],
+    htmlInputProps?: React.InputHTMLAttributes<HTMLInputElement>,
+  ) => {
+    const activeOptions =
+      getActiveOptions(options);
 
-  const isDropdown =
-    options !== undefined;
+    const isDropdown =
+      options !== undefined;
 
-  return (
-    <Box>
-      <Typography sx={labelStyles}>
-        {label}
-      </Typography>
-
-      <CustomTextField
-        select={isDropdown}
-        type={name === "dob" ? "date" : "text"}
-        value={values[name]}
-        onChange={(event) =>
-          update(name, event.target.value)
-        }
-        error={Boolean(errors[name])}
-        htmlInputProps={htmlInputProps}
-        fullWidth
-        size="small"
-      >
-        {activeOptions.map((option) => (
-          <MenuItem
-            key={option.code}
-            value={option.code}
-          >
-            {option.description}
-          </MenuItem>
-        ))}
-      </CustomTextField>
-
-      {errors[name] && (
-        <Typography
-          sx={{
-            color: "#d32f2f",
-            fontSize: "12px",
-            mt: 0.5,
-          }}
-        >
-          {errors[name]}
+    return (
+      <Box>
+        <Typography sx={labelStyles}>
+          {label}
         </Typography>
-      )}
-    </Box>
-  );
-};
+
+        <CustomTextField
+          select={isDropdown}
+          type={name === "dob" ? "date" : "text"}
+          value={values[name]}
+          onChange={(event) =>
+            update(name, event.target.value)
+          }
+          error={Boolean(errors[name])}
+          htmlInputProps={htmlInputProps}
+          fullWidth
+          size="small"
+        >
+          {activeOptions.map((option) => (
+            <MenuItem
+              key={option.code}
+              value={option.code}
+            >
+              {option.description}
+            </MenuItem>
+          ))}
+        </CustomTextField>
+
+        {errors[name] && (
+          <Typography
+            sx={{
+              color: "#d32f2f",
+              fontSize: "12px",
+              mt: 0.5,
+            }}
+          >
+            {errors[name]}
+          </Typography>
+        )}
+      </Box>
+    );
+  };
 
   return (
     <>
@@ -857,16 +852,16 @@ const field = (
                 })}
 
                 {field(
-  "gender",
-  "Gender",
-  masters.gender ?? [],
-)}
+                  "gender",
+                  "Gender",
+                  masters.gender ?? [],
+                )}
 
                 {field(
-  "residentialStatus",
-  "Residential Status",
-  masters.resident_status ?? [],
-)}
+                  "residentialStatus",
+                  "Residential Status",
+                  masters.resident_status ?? [],
+                )}
 
                 {field(
                   "panNumber",
@@ -885,17 +880,17 @@ const field = (
                   }
                 )}
 
-               {field(
-  "identityProof",
-  "Identity Proof",
-  masters.id_proof_type ?? [],
-)}
+                {field(
+                  "identityProof",
+                  "Identity Proof",
+                  masters.id_proof_type ?? [],
+                )}
 
-               {field(
-  "ageProof",
-  "Age Proof",
-  masters.id_proof_type ?? [],
-)}
+                {field(
+                  "ageProof",
+                  "Age Proof",
+                  masters.id_proof_type ?? [],
+                )}
               </Box>
             </Box>
 
@@ -924,10 +919,10 @@ const field = (
                 }}
               >
                 {field(
-  "addressProof",
-  "Address Proof",
-  masters.id_proof_type ?? [],
-)}
+                  "addressProof",
+                  "Address Proof",
+                  masters.id_proof_type ?? [],
+                )}
 
                 {field(
                   "communicationPincode",

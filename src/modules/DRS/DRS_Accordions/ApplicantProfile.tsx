@@ -1620,7 +1620,15 @@ const ApplicantProfile = () => {
           applicationNo: applicationNumber ?? "",
           userId: currentUserId,
           roleType: localStorage.getItem("roleType") ?? "CVT_TASK",
-          sections: ["summary"],
+          sections: [
+            "breDecision",
+            "summary",
+            "applicationOverview",
+            "pivvSection",
+            "requirementManagement",
+            "decision",
+            "quickLinks"
+          ],
         }),
       ).unwrap();
     } catch (error) {
