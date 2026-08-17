@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 
 import DynamicRoleTable from "./DynamicRoleTable";
-import UserManagementForm from "./UserManagement";
+// import UserManagementForm from "./UserManagement";
 import LeaveManagement from "./LeaveManagement";
 import AllocationManagement from "./AllocationManagement";
 
@@ -170,19 +170,19 @@ const RightSideTable = ({
       normalizeRoleKey(selectedRole);
 
     // USER MANAGEMENT
-    if (role === "USERMANAGEMENT") {
-      return (
-        <Box
-          sx={{
-            width: "100%",
-            height: "100%",
-            overflow: "auto",
-          }}
-        >
-          <UserManagementForm />
-        </Box>
-      );
-    }
+    // if (role === "USERMANAGEMENT") {
+    //   return (
+    //     <Box
+    //       sx={{
+    //         width: "100%",
+    //         height: "100%",
+    //         overflow: "auto",
+    //       }}
+    //     >
+    //       <UserManagementForm />
+    //     </Box>
+    //   );
+    // }
 
     // LEAVE MANAGEMENT
     if (role === "LEAVEMANAGEMENT") {
