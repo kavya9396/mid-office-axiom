@@ -1,175 +1,269 @@
 import React from "react";
-import { Box, Divider, Typography, Link, Snackbar, Alert } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Divider,
+  Link,
+  Snackbar,
+  Typography,
+} from "@mui/material";
+import { Controller, useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
 import LoginImage from "../../assets/Login-Image.svg";
 import IPRULogo from "../../assets/ICICI Logo_.svg";
-import AxiomLogo from "../../assets/Axiom Logo.svg";
+//import AxiomLogo from "../../assets/Axiom Logo.svg";
 import IBMLogo from "../../assets/IBM Logo.svg";
-
-import { centerFlex, columnFlex } from "../../utils/styles";
 
 import CustomTextField from "../../components/ui/TextField/TextField";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 import CustomButton from "../../components/ui/Button/Button";
 
-import { VALIDATIONS } from "../../validations/validation";
-import { Controller, useForm } from "react-hook-form";
-import { useNavigate } from "react-router-dom";
-import { loginThunk } from "../../store/thunks/authThunk";
 import { useAppDispatch } from "../../store/hooks";
-import { getInboxPath } from "../../routes/routes";
-import { loadMasterData } from "../Helper/MasterHelper";
-import { DRS_MASTER_KEYS } from "../DRS/drsMasters";
-import { decryptString, encryptString } from "../../utils/crypto";
+import { loginThunk } from "../../store/thunks/authThunk";
 import { setCredentials } from "../../store/slices/apiSlice";
+
+import { getInboxPath } from "../../routes/routes";
+import { VALIDATIONS } from "../../validations/validation";
+import { centerFlex, columnFlex } from "../../utils/styles";
+import {
+  decryptString,
+  encryptString,
+} from "../../utils/crypto";
 
 type LoginForm = {
   username: string;
   password: string;
 };
+
 const Login = () => {
-  const { control, handleSubmit, reset } = useForm<LoginForm>();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const [status, setStatus] = React.useState<"idle" | "loading">("idle");
-  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
-  const [snackbarMessage, setSnackbarMessage] = React.useState("");
-  const [remember, setRemember] = React.useState(false);
+
+  const {
+    control,
+    handleSubmit,
+    reset,
+  } = useForm<LoginForm>({
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+  });
+
+  const [status, setStatus] = React.useState<
+    "idle" | "loading"
+  >("idle");
+
+  const [snackbarOpen, setSnackbarOpen] =
+    React.useState(false);
+
+  const [snackbarMessage, setSnackbarMessage] =
+    React.useState("");
+
+  const [remember, setRemember] =
+    React.useState(false);
 
   const openErrorSnackbar = (message: string) => {
     setSnackbarMessage(message);
     setSnackbarOpen(true);
   };
 
-  const onSubmit = async (data: LoginForm) => {
-    setStatus("loading");
+  const storeRememberedCredentials = async (
+    data: LoginForm,
+  ) => {
+    if (!remember) {
+      localStorage.removeItem("remember_data");
+      localStorage.removeItem("remember_me");
+      return;
+    }
 
     try {
-      const res = await dispatch(
-        loginThunk({
-          username: btoa(data.username),
-          password: btoa(data.password),
-        }),
-      ).unwrap();
+      const payload = JSON.stringify({
+        username: data.username,
+        password: data.password,
+      });
 
-      // Check for success: response_code 200 and error false
-      if (res.response_code === 200 && !res.error && res.data) {
+      const encrypted = await encryptString(payload);
 
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("username", res.data.username || data.username);
-        localStorage.setItem("password", data.password);
-        const lastLoginAt = res.data.lastLoginAt;
+      localStorage.setItem(
+        "remember_data",
+        encrypted,
+      );
 
-if (lastLoginAt) {
-  localStorage.setItem("lastLoginAt", lastLoginAt);
-}
-         localStorage.setItem(
-    "roles",
-    JSON.stringify(res.data.roles ?? [])
-  );
-
-dispatch(
-  setCredentials({
-    username: res.data.username || data.username,
-    password: data.password,
-    token: res.data.token,
-    refreshToken: res.data.refreshToken,
-    roles: res.data.roles ?? [],
-  })
-);
-
-        // Store credentials encrypted only when user opted to remember
-        if (remember) {
-          try {
-            const payload = JSON.stringify({ username: data.username, password: data.password });
-            const encrypted = await encryptString(payload);
-            localStorage.setItem("remember_data", encrypted);
-            localStorage.setItem("remember_me", "true");
-          } catch (e) {
-            console.error("Failed to save remembered credentials", e);
-          }
-        } else {
-          localStorage.removeItem("remember_data");
-          localStorage.removeItem("remember_me");
-        }
-
-        try {
-          await loadMasterData(dispatch, {types:DRS_MASTER_KEYS});
-        } catch (error) {
-          console.error("Failed to load master data", error);
-        }
-
-        navigate(getInboxPath());
-        return;
-      }
-
-      // Handle error response from API
-      openErrorSnackbar(res.message || "Login failed");
-    } catch (err) {
-      console.error("Login failed", err);
-      const errorMessage =
-        typeof err === "string"
-          ? err
-          : err instanceof Error
-            ? err.message
-            : "Login failed";
-      openErrorSnackbar(errorMessage);
-    } finally {
-      setStatus("idle");
+      localStorage.setItem(
+        "remember_me",
+        "true",
+      );
+    } catch (error) {
+      console.error(
+        "Failed to save remembered credentials",
+        error,
+      );
     }
   };
 
+ const onSubmit = async (data: LoginForm) => {
+  setStatus("loading");
+
+  try {
+    const response = await dispatch(
+      loginThunk({
+        username: btoa(data.username),
+        password: btoa(data.password),
+      }),
+    ).unwrap();
+
+    // Direct guard allows TypeScript to narrow response.data.
+    if (
+      response.response_code !== 200 ||
+      response.error ||
+      !response.data
+    ) {
+      openErrorSnackbar(
+        response.message || "Login failed",
+      );
+      return;
+    }
+
+    // TypeScript now knows loginData is not null.
+    const loginData = response.data;
+    const username =
+      loginData.username || data.username;
+
+    localStorage.setItem(
+      "token",
+      loginData.token,
+    );
+
+    localStorage.setItem(
+      "username",
+      username,
+    );
+
+    localStorage.setItem(
+      "password",
+      data.password,
+    );
+
+    localStorage.setItem(
+      "roles",
+      JSON.stringify(loginData.roles ?? []),
+    );
+
+    if (loginData.lastLoginAt) {
+      localStorage.setItem(
+        "lastLoginAt",
+        loginData.lastLoginAt,
+      );
+    } else {
+      localStorage.removeItem("lastLoginAt");
+    }
+
+    dispatch(
+      setCredentials({
+        username,
+        password: data.password,
+        token: loginData.token,
+        refreshToken: loginData.refreshToken,
+        roles: loginData.roles ?? [],
+      }),
+    );
+
+    await storeRememberedCredentials(data);
+
+    navigate(getInboxPath(), {
+      replace: true,
+    });
+  } catch (error) {
+    console.error("Login failed", error);
+
+    const errorMessage =
+      typeof error === "string"
+        ? error
+        : error instanceof Error
+          ? error.message
+          : "Login failed";
+
+    openErrorSnackbar(errorMessage);
+  } finally {
+    setStatus("idle");
+  }
+};
   React.useEffect(() => {
-    (async () => {
+    const loadRememberedCredentials = async () => {
       try {
-        const stored = localStorage.getItem("remember_data");
-        const wasRemember = localStorage.getItem("remember_me") === "true";
-        if (stored && wasRemember) {
-          const decrypted = await decryptString(stored);
-          if (decrypted) {
-            const parsed = JSON.parse(decrypted) as { username?: string; password?: string };
-            reset({ username: parsed.username ?? "", password: parsed.password ?? "" });
-            setRemember(true);
-          }
+        const encryptedData =
+          localStorage.getItem("remember_data");
+
+        const rememberMe =
+          localStorage.getItem("remember_me") ===
+          "true";
+
+        if (!encryptedData || !rememberMe) {
+          return;
         }
-      } catch (e) {
-        console.error("Failed to load remembered credentials", e);
+
+        const decryptedData =
+          await decryptString(encryptedData);
+
+        if (!decryptedData) {
+          return;
+        }
+
+        const parsedData = JSON.parse(
+          decryptedData,
+        ) as Partial<LoginForm>;
+
+        reset({
+          username: parsedData.username ?? "",
+          password: parsedData.password ?? "",
+        });
+
+        setRemember(true);
+      } catch (error) {
+        console.error(
+          "Failed to load remembered credentials",
+          error,
+        );
+
+        localStorage.removeItem("remember_data");
+        localStorage.removeItem("remember_me");
       }
-    })();
+    };
+
+    void loadRememberedCredentials();
   }, [reset]);
 
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   return (
-    <Box sx={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <Box
+      sx={{
+        display: "flex",
+        height: "100vh",
+        overflow: "hidden",
+      }}
+    >
       {/* Left Section */}
-      <Box sx={{ width: "50%", position: "relative" }}>
+      <Box
+        sx={{
+          width: "50%",
+          position: "relative",
+        }}
+      >
         <Box
           component="img"
           src={LoginImage}
-          alt="Underwriter reviewing and filling out an insurance form"
+          alt="Underwriter reviewing an insurance form"
           sx={{
             width: "100%",
             height: "100%",
             objectFit: "cover",
           }}
         />
-
-        {/* <Box
-          sx={{
-            position: "absolute",
-            bottom: "8.33%",
-            color: "#fff",
-            px: 4,
-          }}
-        >
-          <Typography sx={{ fontSize: "36px", fontWeight: "bold" }}>
-            Secure Underwriting Solutions
-          </Typography>
-
-          <Typography sx={{ fontSize: "1.125rem", fontWeight: 500 }}>
-            Streamline your insurance underwriting process with our
-            comprehensive platform designed for efficiency and accuracy.
-          </Typography>
-        </Box> */}
       </Box>
 
       {/* Right Section */}
@@ -190,7 +284,7 @@ dispatch(
             ...columnFlex,
           }}
         >
-          {/* Logo */}
+          {/* ICICI Logo */}
           <Box>
             <Box
               component="img"
@@ -198,17 +292,31 @@ dispatch(
               alt="ICICI Life Logo"
               sx={{ height: 60 }}
             />
-          </Box>
-
-          {/* Header */}
-          <Box>
-            <Box component="img" src={AxiomLogo} alt="Axiom Logo" />
-            <Typography variant="body1" color="text.secondary">
+             <Typography
+              variant="body1"
+              color="text.secondary"
+            >
               Log in to access your account
             </Typography>
           </Box>
 
-          {/* Form */}
+          {/* Header */}
+          {/* <Box>
+            <Box
+              component="img"
+              src={AxiomLogo}
+              alt="Axiom Logo"
+            />
+
+            <Typography
+              variant="body1"
+              color="text.secondary"
+            >
+              Log in to access your account
+            </Typography>
+          </Box> */}
+
+          {/* Login Form */}
           <Box
             component="form"
             onSubmit={handleSubmit(onSubmit)}
@@ -219,7 +327,10 @@ dispatch(
           >
             {/* Username */}
             <Box>
-              <Typography variant="body2" sx={{ mb: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{ mb: 1 }}
+              >
                 User ID*
               </Typography>
 
@@ -227,14 +338,21 @@ dispatch(
                 name="username"
                 control={control}
                 rules={VALIDATIONS.username}
-                render={({ field, fieldState }) => (
+                render={({
+                  field,
+                  fieldState,
+                }) => (
                   <CustomTextField
                     {...field}
                     fullWidth
-                    placeholder="enter your User ID"
+                    placeholder="Enter your User ID"
                     autoComplete="username"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
+                    error={Boolean(
+                      fieldState.error,
+                    )}
+                    helperText={
+                      fieldState.error?.message
+                    }
                   />
                 )}
               />
@@ -242,7 +360,10 @@ dispatch(
 
             {/* Password */}
             <Box>
-              <Typography variant="body2" sx={{ mb: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{ mb: 1 }}
+              >
                 Password*
               </Typography>
 
@@ -250,15 +371,22 @@ dispatch(
                 name="password"
                 control={control}
                 rules={VALIDATIONS.password}
-                render={({ field, fieldState }) => (
+                render={({
+                  field,
+                  fieldState,
+                }) => (
                   <CustomTextField
                     {...field}
                     fullWidth
                     type="password"
-                    placeholder="enter your Password"
+                    placeholder="Enter your Password"
                     autoComplete="current-password"
-                    error={!!fieldState.error}
-                    helperText={fieldState.error?.message}
+                    error={Boolean(
+                      fieldState.error,
+                    )}
+                    helperText={
+                      fieldState.error?.message
+                    }
                   />
                 )}
               />
@@ -266,24 +394,34 @@ dispatch(
               <Typography
                 variant="caption"
                 color="text.secondary"
-                sx={{ mt: 1, fontSize: "11px" }}
+                sx={{
+                  mt: 1,
+                  fontSize: "11px",
+                }}
               >
-                It must be at least 8 characters long and include letters and numbers.
+                It must be at least 8 characters
+                long and include letters and
+                numbers.
               </Typography>
             </Box>
 
-            {/* Remember */}
+            {/* Remember Me */}
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent:
+                  "space-between",
               }}
             >
               <CustomCheckbox
                 label="Remember me"
                 checked={remember}
-                onChange={(e) => setRemember(e.target.checked)}
+                onChange={(event) =>
+                  setRemember(
+                    event.target.checked,
+                  )
+                }
               />
             </Box>
 
@@ -295,19 +433,23 @@ dispatch(
               type="submit"
               disabled={status === "loading"}
             >
-              {status === "loading" ? "Signing in..." : "Log In"}
+              {status === "loading"
+                ? "Signing in..."
+                : "Log In"}
             </CustomButton>
           </Box>
 
           {/* Footer */}
           <Box sx={{ textAlign: "center" }}>
             <Divider sx={{ mb: 1 }} />
+
             <Typography
               variant="caption"
               color="text.secondary"
               sx={{ fontSize: "11px" }}
             >
-              © 2026 ICICI Prudential Insurance,&nbsp;
+              © 2026 ICICI Prudential
+              Insurance,&nbsp;
               <Link href="#" underline="hover">
                 Privacy Policy
               </Link>
@@ -329,19 +471,29 @@ dispatch(
             gap: 1,
           }}
         >
-          <Typography variant="body2">Powered by</Typography>
-          <Box component="img" src={IBMLogo} alt="IBM Logo" />
+          <Typography variant="body2">
+            Powered by
+          </Typography>
+
+          <Box
+            component="img"
+            src={IBMLogo}
+            alt="IBM Logo"
+          />
         </Box>
       </Box>
 
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "center",
+        }}
       >
         <Alert
-          onClose={() => setSnackbarOpen(false)}
+          onClose={handleSnackbarClose}
           severity="error"
           variant="filled"
           sx={{ width: "100%" }}

@@ -1365,7 +1365,7 @@ const RequirementManagementTable = ({
                         }
                         value={optionValue}
                       >
-                        {option.description || option.value || option.code}
+                        {option.description}
                       </MenuItem>
                     );
                   })}

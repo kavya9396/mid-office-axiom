@@ -67,11 +67,16 @@ interface EditApplicantProfileProps {
 }
 
 type MasterOption = {
-  code?: string;
-  description?: string;
+  code: string;
+  description: string;
   value?: string | null;
   isActive?: string;
   hasExpiry?: string;
+};
+type ApplicantProfileMasters = {
+  gender?: MasterOption[];
+  resident_status?: MasterOption[];
+  id_proof_type?: MasterOption[];
 };
 
 type ApplicantProfileSubmitResponse = {
@@ -87,21 +92,52 @@ type ApiError = {
   };
 };
 
-const getDropdownOptions = (options?: MasterOption[]) =>
-  options
-    ?.filter((item) => item.isActive === "Y")
-    .map((item) => item.description)
-    .filter((description): description is string => Boolean(description)) ?? [];
+const getActiveOptions = (
+  options?: MasterOption[],
+): MasterOption[] =>
+  options?.filter(
+    (option) =>
+      option.isActive !== "N" &&
+      Boolean(option.code) &&
+      Boolean(option.description),
+  ) ?? [];
 
-const getOptionCode = (
-  options: MasterOption[] | undefined,
-  description: string,
-) =>
-  options?.find(
-    (item) =>
-      item.description?.trim().toLowerCase() ===
-      description.trim().toLowerCase(),
-  )?.code ?? "";
+const normalizeMasterValue = (
+  value: unknown,
+  options?: MasterOption[],
+): string => {
+  const normalizedValue = String(value ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (!normalizedValue) {
+    return "";
+  }
+
+  const matchedOption = options?.find((option) => {
+    const code = option.code
+      .trim()
+      .toLowerCase();
+
+    const description = option.description
+      .trim()
+      .toLowerCase();
+
+    const masterValue = String(
+      option.value ?? "",
+    )
+      .trim()
+      .toLowerCase();
+
+    return (
+      code === normalizedValue ||
+      description === normalizedValue ||
+      masterValue === normalizedValue
+    );
+  });
+
+  return matchedOption?.code ?? String(value ?? "");
+};
 
 const EMPTY_FORM: FormValues = {
   dob: "",
@@ -124,23 +160,69 @@ const dateOnly = (value?: string) => (value ? value.split("T")[0] : "");
 const findAddress = (addresses: Address[] = [], type: string) =>
   addresses.find((address) => address.type?.trim().toLowerCase() === type);
 
-const mapMemberToForm = (member?: EditableMember): FormValues => {
-  if (!member) return EMPTY_FORM;
+const mapMemberToForm = (
+  member: EditableMember | undefined,
+  masters: ApplicantProfileMasters | undefined,
+): FormValues => {
+  if (!member) {
+    return { ...EMPTY_FORM };
+  }
 
-  const communication = findAddress(member.address, "communication");
-  const permanent = findAddress(member.address, "permanent");
+  const communication = findAddress(
+    member.address,
+    "communication",
+  );
+
+  const permanent = findAddress(
+    member.address,
+    "permanent",
+  );
 
   return {
-    dob: dateOnly(member.proposerSummary?.dob),
-    gender: text(member.proposerSummary?.gender),
-    residentialStatus: text(member.proposerSummary?.residentStatus),
-    panNumber: text(member.kycDetails?.panNumber).toUpperCase(),
-    pranNumber: text(member.kycDetails?.pranNo),
-    identityProof: text(member.kycDetails?.identityProofType),
-    ageProof: text(member.kycDetails?.ageProof),
-    addressProof: text(member.kycDetails?.addressProof),
-    communicationPincode: text(communication?.pinCode),
-    permanentPincode: text(permanent?.pinCode),
+    dob: dateOnly(
+      member.proposerSummary?.dob,
+    ),
+
+    gender: normalizeMasterValue(
+      member.proposerSummary?.gender,
+      masters?.gender,
+    ),
+
+    residentialStatus: normalizeMasterValue(
+      member.proposerSummary?.residentStatus,
+      masters?.resident_status,
+    ),
+
+    panNumber: text(
+      member.kycDetails?.panNumber,
+    ).toUpperCase(),
+
+    pranNumber: text(
+      member.kycDetails?.pranNo,
+    ),
+
+    identityProof: normalizeMasterValue(
+      member.kycDetails?.identityProofType,
+      masters?.id_proof_type,
+    ),
+
+    ageProof: normalizeMasterValue(
+      member.kycDetails?.ageProof,
+      masters?.id_proof_type,
+    ),
+
+    addressProof: normalizeMasterValue(
+      member.kycDetails?.addressProof,
+      masters?.id_proof_type,
+    ),
+
+    communicationPincode: text(
+      communication?.pinCode,
+    ),
+
+    permanentPincode: text(
+      permanent?.pinCode,
+    ),
   };
 };
 
@@ -274,7 +356,13 @@ const EditApplicantProfile = ({
   const { applicationNumber } = useParams<{ applicationNumber: string }>();
   const roleType = localStorage.getItem("roleType") ?? "CVT_TASK";
   const userId = localStorage.getItem("username") ?? "";
-  const masters = useSelector((state: RootState) => state.drs.masters);
+ const masters = useSelector(
+  (state: RootState) =>
+    state.drs.masters as
+      | ApplicantProfileMasters
+      | undefined,
+);
+console.log('masters=========',masters)
   const drsData = useSelector((state: RootState) => state.drs.data);
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -320,7 +408,14 @@ const EditApplicantProfile = ({
             sections: ["summary"],
           }),
         ).unwrap();
-        if (active) setValues(mapMemberToForm(extractSummary(response)[memberIndex]));
+        if (active) {
+  const member =
+    extractSummary(response)[memberIndex];
+
+  setValues(
+    mapMemberToForm(member, masters),
+  );
+}
       } catch (error) {
         if (active) {
           setApiError(
@@ -336,8 +431,13 @@ const EditApplicantProfile = ({
     return () => {
       active = false;
     };
-  }, [applicationNumber, dispatch, memberIndex, open]);
-
+ }, [
+  applicationNumber,
+  dispatch,
+  memberIndex,
+  open,
+  masters,
+]);
   const update = (field: keyof FormValues, value: string) => {
     let nextValue = value;
 
@@ -381,62 +481,104 @@ const EditApplicantProfile = ({
     });
   };
 
-  const createUpdatedMember = (
-    member: EditableMember,
-    formValues: FormValues,
-  ): EditableMember => {
-    return {
-      ...member,
+ const createUpdatedMember = (
+  member: EditableMember,
+  formValues: FormValues,
+): EditableMember => {
+  const existingAddresses =
+    member.address ?? [];
 
-      proposerSummary: {
-        ...member.proposerSummary,
-        dob: formValues.dob,
-        gender: getOptionCode(masters?.gender, formValues.gender),
-        residentStatus: getOptionCode(
-          masters?.resident_status,
-          formValues.residentialStatus,
-        ),
-      },
+  const hasCommunication =
+    existingAddresses.some(
+      (address) =>
+        address.type
+          ?.trim()
+          .toLowerCase() ===
+        "communication",
+    );
 
-      kycDetails: {
-        ...member.kycDetails,
-        panNumber: formValues.panNumber.trim().toUpperCase(),
-        pranNo: formValues.pranNumber.trim(),
-        identityProofType: getOptionCode(
-          masters?.idProof,
-          formValues.identityProof,
-        ),
-        ageProof: getOptionCode(
-          masters?.idProof,
-          formValues.ageProof,
-        ),
-        addressProof: getOptionCode(
-          masters?.addressProof,
-          formValues.addressProof,
-        ),
-      },
+  const hasPermanent =
+    existingAddresses.some(
+      (address) =>
+        address.type
+          ?.trim()
+          .toLowerCase() ===
+        "permanent",
+    );
 
-      address: member.address?.map((address) => {
-        const type = address.type?.trim().toLowerCase();
+  const updatedAddresses =
+    existingAddresses.map((address) => {
+      const addressType = address.type
+        ?.trim()
+        .toLowerCase();
 
-        if (type === "communication") {
-          return {
-            ...address,
-            pinCode: formValues.communicationPincode.trim(),
-          };
-        }
+      if (addressType === "communication") {
+        return {
+          ...address,
+          pinCode:
+            formValues.communicationPincode.trim(),
+        };
+      }
 
-        if (type === "permanent") {
-          return {
-            ...address,
-            pinCode: formValues.permanentPincode.trim(),
-          };
-        }
+      if (addressType === "permanent") {
+        return {
+          ...address,
+          pinCode:
+            formValues.permanentPincode.trim(),
+        };
+      }
 
-        return address;
-      }),
-    };
+      return address;
+    });
+
+  if (!hasCommunication) {
+    updatedAddresses.push({
+      type: "communication",
+      pinCode:
+        formValues.communicationPincode.trim(),
+    });
+  }
+
+  if (!hasPermanent) {
+    updatedAddresses.push({
+      type: "permanent",
+      pinCode:
+        formValues.permanentPincode.trim(),
+    });
+  }
+
+  return {
+    ...member,
+
+    proposerSummary: {
+      ...member.proposerSummary,
+      dob: formValues.dob,
+      gender: formValues.gender,
+      residentStatus:
+        formValues.residentialStatus,
+    },
+
+    kycDetails: {
+      ...member.kycDetails,
+      panNumber: formValues.panNumber
+        .trim()
+        .toUpperCase(),
+
+      pranNo:
+        formValues.pranNumber.trim(),
+
+      identityProofType:
+        formValues.identityProof,
+
+      ageProof: formValues.ageProof,
+
+      addressProof:
+        formValues.addressProof,
+    },
+
+    address: updatedAddresses,
   };
+};
 
   const getErrorMessage = (error: unknown): string => {
     if (error instanceof Error) {
@@ -496,7 +638,7 @@ const EditApplicantProfile = ({
         },
         isAcuity: true,
       };
-
+console.log('payload--------',payload)
       const response: ApplicantProfileSubmitResponse =
         await dispatch(
           applicantProfileSubmitThunk(payload),
@@ -531,28 +673,42 @@ const EditApplicantProfile = ({
     }
   };
 
-  const field = (
-    name: keyof FormValues,
-    label: string,
-    options?: string[],
-    htmlInputProps?: React.InputHTMLAttributes<HTMLInputElement>,
-  ) => (
+const field = (
+  name: keyof FormValues,
+  label: string,
+  options?: MasterOption[],
+  htmlInputProps?: React.InputHTMLAttributes<HTMLInputElement>,
+) => {
+  const activeOptions =
+    getActiveOptions(options);
+
+  const isDropdown =
+    options !== undefined;
+
+  return (
     <Box>
-      <Typography sx={labelStyles}>{label}</Typography>
+      <Typography sx={labelStyles}>
+        {label}
+      </Typography>
 
       <CustomTextField
-        select={Boolean(options)}
+        select={isDropdown}
         type={name === "dob" ? "date" : "text"}
         value={values[name]}
-        onChange={(event) => update(name, event.target.value)}
+        onChange={(event) =>
+          update(name, event.target.value)
+        }
         error={Boolean(errors[name])}
         htmlInputProps={htmlInputProps}
         fullWidth
         size="small"
       >
-        {options?.map((option) => (
-          <MenuItem key={option} value={option}>
-            {option}
+        {activeOptions.map((option) => (
+          <MenuItem
+            key={option.code}
+            value={option.code}
+          >
+            {option.description}
           </MenuItem>
         ))}
       </CustomTextField>
@@ -570,6 +726,7 @@ const EditApplicantProfile = ({
       )}
     </Box>
   );
+};
 
   return (
     <>
@@ -641,16 +798,16 @@ const EditApplicantProfile = ({
                 })}
 
                 {field(
-                  "gender",
-                  "Gender",
-                  getDropdownOptions(masters?.gender),
-                )}
+  "gender",
+  "Gender",
+  masters?.gender,
+)}
 
                 {field(
-                  "residentialStatus",
-                  "Residential Status",
-                  getDropdownOptions(masters?.resident_status),
-                )}
+  "residentialStatus",
+  "Residential Status",
+  masters?.resident_status,
+)}
 
                 {field(
                   "panNumber",
@@ -669,17 +826,17 @@ const EditApplicantProfile = ({
                   }
                 )}
 
-                {field(
-                  "identityProof",
-                  "Identity Proof",
-                  getDropdownOptions(masters?.idProof),
-                )}
+               {field(
+  "identityProof",
+  "Identity Proof",
+  masters?.id_proof_type,
+)}
 
-                {field(
-                  "ageProof",
-                  "Age Proof",
-                  getDropdownOptions(masters?.idProof),
-                )}
+               {field(
+  "ageProof",
+  "Age Proof",
+  masters?.id_proof_type,
+)}
               </Box>
             </Box>
 
@@ -708,10 +865,10 @@ const EditApplicantProfile = ({
                 }}
               >
                 {field(
-                  "addressProof",
-                  "Address Proof",
-                  getDropdownOptions(masters?.addressProof),
-                )}
+  "addressProof",
+  "Address Proof",
+  masters?.id_proof_type,
+)}
 
                 {field(
                   "communicationPincode",
