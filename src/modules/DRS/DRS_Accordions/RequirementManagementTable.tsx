@@ -28,14 +28,17 @@ import {
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
 import { masterThunk } from "../../../store/thunks/masterThunk";
+import { applicantProfileSubmitThunk } from "../../../store/thunks/applicantProfileSubmitThunk";
 import type {
   AdditionalRequirementRow,
+  ApplicantProfileSubmitRequest,
   MasterRequest,
 } from "../../../types/drs.types";
 import {
   CloseIcon,
   FilterIcon,
 } from "../../../icons/Icons";
+import { useParams } from "react-router-dom";
 
 interface RequirementManagementTableProps {
   requirements: AdditionalRequirementRow[];
@@ -61,6 +64,10 @@ interface MasterDataResponse {
       misc?: MiscMasterItem[];
     };
   };
+}
+
+interface DrsSummaryItem {
+  memberType?: unknown;
 }
 
 interface SaveValidationResult {
@@ -92,7 +99,48 @@ const ADD_ROW_FIELD_SEQUENCE: AddRowField[] = [
   "fupCode",
 ];
 
+const REQUIRED_NEW_ROW_FIELDS: Array<{
+  field: AddRowField;
+  label: string;
+}> = [
+  { field: "team", label: "Team" },
+  { field: "profile", label: "Profile" },
+  { field: "category", label: "Category" },
+  { field: "subCategory", label: "Sub Category" },
+  { field: "document", label: "Document" },
+  { field: "reason", label: "Reason" },
+  { field: "fupCode", label: "FUP Code" },
+];
+
 type RowMasterOptions = Partial<Record<AddRowField, string[]>>;
+
+interface RequirementTableRow extends AdditionalRequirementRow {
+  __clientRowId: string;
+}
+
+const createTableRows = (
+  requirementRows: AdditionalRequirementRow[],
+): RequirementTableRow[] =>
+  requirementRows.map((row, index) => {
+    const apiRow = { ...row } as Record<string, unknown>;
+    delete apiRow.requirementId;
+
+    return {
+      ...(apiRow as AdditionalRequirementRow),
+      __clientRowId: `existing-${index}`,
+    };
+  });
+
+const createRequestRows = (
+  tableRows: RequirementTableRow[],
+): AdditionalRequirementRow[] =>
+  tableRows.map((row) => {
+    const requestRow = { ...row } as Record<string, unknown>;
+    delete requestRow.__clientRowId;
+    delete requestRow.requirementId;
+
+    return requestRow as AdditionalRequirementRow;
+  });
 
 const ROWS_PER_PAGE = 5;
 const COLUMN_HEADINGS = [
@@ -152,6 +200,30 @@ const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
+
+const getDrsPayload = (value: unknown): Record<string, unknown> => {
+  const root = toRecord(value);
+  let currentPayload = root;
+
+  for (let depth = 0; depth < 5; depth += 1) {
+    if (
+      Array.isArray(currentPayload.summary) ||
+      Array.isArray(currentPayload.requirementManagement)
+    ) {
+      return currentPayload;
+    }
+
+    const nestedData = toRecord(currentPayload.data);
+
+    if (Object.keys(nestedData).length === 0) {
+      break;
+    }
+
+    currentPayload = nestedData;
+  }
+
+  return currentPayload;
+};
 
 const getMasterPayload = (value: unknown): Record<string, unknown> => {
   const root = toRecord(value);
@@ -262,6 +334,75 @@ const getOptionText = (item: Record<string, unknown>, field: AddRowField) => {
   );
 };
 
+const MASTER_OPTION_KEYS: Record<AddRowField, string[]> = {
+  team: ["teams"],
+  profile: ["profiles"],
+  category: ["categories"],
+  subCategory: ["subCategories", "subcategories"],
+  document: ["documents"],
+  reason: ["reasons"],
+  fupCode: ["fupCodes", "fupcodes", "fup_codes", "fupCode"],
+};
+
+const getRequirementMaster = (response: unknown): Record<string, unknown> => {
+  const payload = getMasterPayload(response);
+
+  return toRecord(payload.requirement_mst ?? payload.requirementMst);
+};
+
+const getRequirementOptions = (
+  requirementMaster: Record<string, unknown>,
+  field: AddRowField,
+): string[] => {
+  const rawOptions = MASTER_OPTION_KEYS[field]
+    .map((key) => requirementMaster[key])
+    .find(Array.isArray);
+
+  if (!Array.isArray(rawOptions)) {
+    return [];
+  }
+
+  return Array.from(
+    new Set(
+      rawOptions
+        .map((option) =>
+          option && typeof option === "object"
+            ? getOptionText(toRecord(option), field)
+            : normalizeText(option),
+        )
+        .filter(Boolean),
+    ),
+  );
+};
+
+const getFupDescription = (
+  requirementMaster: Record<string, unknown>,
+  requirementItems: Record<string, unknown>[],
+  selectedFupCode: unknown,
+): string => {
+  const selectedCode = normalizeText(selectedFupCode).toUpperCase();
+  const nestedItems = [
+    ...MASTER_OPTION_KEYS.fupCode,
+    "descriptions",
+    "requirements",
+  ].flatMap((key) => {
+    const value = requirementMaster[key];
+    return Array.isArray(value) ? value.map(toRecord) : [];
+  });
+  const matchingItem = [...requirementItems, ...nestedItems].find((item) =>
+    [item.fupCode, item.fup_code, item.code]
+      .map((value) => normalizeText(value).toUpperCase())
+      .includes(selectedCode),
+  );
+
+  return normalizeText(
+    matchingItem?.description ??
+      matchingItem?.desc ??
+      requirementMaster.description ??
+      requirementMaster.desc,
+  );
+};
+
 const formatStatus = (status: unknown): string => {
   const value = normalizeText(status);
 
@@ -364,12 +505,13 @@ const filterRequirementsByRole = (
 
 const RequirementManagementTable = ({
   requirements,
-  onSave,
   onAddRequirement,
   addRowSignal = 0,
 }: RequirementManagementTableProps) => {
   const dispatch = useAppDispatch();
-  const [roleType] = useState(() => localStorage.getItem("roleType") ?? "");
+  const { applicationNumber } = useParams<{ applicationNumber: string }>();
+  const roleType = localStorage.getItem("roleType") ?? "";
+  const userId = localStorage.getItem("username") ?? "";
   const normalizedRoleType = normalizeText(roleType).toUpperCase();
   const isNonEditable = [
     "AMR_MEDICAL_TASK",
@@ -380,28 +522,54 @@ const RequirementManagementTable = ({
     Boolean(onAddRequirement) && !isNonEditable;
   const isSaveButtonVisible = normalizedRoleType !== "AMR_MEDICAL_TASK";
 
-  const roleBasedRequirements = useMemo(
-    () => filterRequirementsByRole(requirements, roleType),
-    [requirements, roleType],
+  const roleBasedRequirements = filterRequirementsByRole(
+    requirements,
+    roleType,
   );
 
   const masterData = useAppSelector(
     (state: RootState) => state.masterData,
   ) as MasterDataResponse;
 
-  const [rows, setRows] = useState<AdditionalRequirementRow[]>(
-    roleBasedRequirements,
+  const drsStateData = useAppSelector(
+    (state: RootState) => state.drs.data,
+  ) as unknown;
+  const drsPayload = getDrsPayload(drsStateData);
+  const applicationOverview = toRecord(drsPayload.applicationOverview);
+  const summarySource = Array.isArray(applicationOverview.summary)
+    ? applicationOverview.summary
+    : drsPayload.summary;
+  const drsSummary = Array.isArray(summarySource)
+    ? (summarySource as DrsSummaryItem[])
+    : [];
+
+  const profileOptions = Array.from(
+    new Set(
+      drsSummary
+        .map((summaryItem) => {
+          const item = toRecord(summaryItem);
+
+          return normalizeText(
+            item.memberType ?? item.membertype ?? item.member_type,
+          );
+        })
+        .filter(Boolean),
+    ),
+  );
+
+  const [rows, setRows] = useState<RequirementTableRow[]>(() =>
+    createTableRows(filterRequirementsByRole(requirements, roleType)),
   );
 
   const [previousRequirements, setPreviousRequirements] =
-    useState(roleBasedRequirements);
+    useState(requirements);
   const [handledAddRowSignal, setHandledAddRowSignal] = useState(addRowSignal);
-  const [newRowIds, setNewRowIds] = useState<number[]>([]);
+  const [newRowIds, setNewRowIds] = useState<string[]>([]);
   const [rowMasterOptions, setRowMasterOptions] = useState<
-    Record<number, RowMasterOptions>
+    Record<string, RowMasterOptions>
   >({});
   const [loadingMasterField, setLoadingMasterField] = useState<{
-    rowId: number;
+    rowId: string;
     field: AddRowField;
   } | null>(null);
 
@@ -429,16 +597,16 @@ const RequirementManagementTable = ({
    * inside an effect and React completes the rerender before children
    * are committed.
    */
-  if (previousRequirements !== roleBasedRequirements) {
-    setPreviousRequirements(roleBasedRequirements);
-    setRows(roleBasedRequirements);
+  if (previousRequirements !== requirements) {
+    setPreviousRequirements(requirements);
+    setRows(createTableRows(roleBasedRequirements));
     setPage(1);
   }
 
   if (handledAddRowSignal !== addRowSignal) {
-    const temporaryRequirementId = -Math.max(1, addRowSignal);
-    const newRequirement: AdditionalRequirementRow = {
-      requirementId: temporaryRequirementId,
+    const clientRowId = `new-${Math.max(1, addRowSignal)}`;
+    const newRequirement: RequirementTableRow = {
+      __clientRowId: clientRowId,
       team: getDefaultTeamByRole(normalizedRoleType),
       profile: "",
       category: "",
@@ -460,7 +628,7 @@ const RequirementManagementTable = ({
 
     setHandledAddRowSignal(addRowSignal);
     setRows((currentRows) => [newRequirement, ...currentRows]);
-    setNewRowIds((currentIds) => [...currentIds, temporaryRequirementId]);
+    setNewRowIds((currentIds) => [...currentIds, clientRowId]);
     setFilters({ ...EMPTY_FILTERS });
     setDraftFilters({ ...EMPTY_FILTERS });
     setPage(1);
@@ -500,7 +668,7 @@ const RequirementManagementTable = ({
   );
 
   const loadMasterOptions = useCallback(async (
-    rowId: number,
+    rowId: string,
     nextField: AddRowField,
     row?: AdditionalRequirementRow,
   ) => {
@@ -541,14 +709,17 @@ const RequirementManagementTable = ({
 
     try {
       const response = await dispatch(masterThunk(requestPayload)).unwrap();
+      const requirementMaster = getRequirementMaster(response);
       const requirementItems = getMasterItems(response, "requirement_mst");
-      const options = Array.from(
+      const directOptions = getRequirementOptions(requirementMaster, nextField);
+      const fallbackOptions = Array.from(
         new Set(
           requirementItems
             .map((item) => getOptionText(item, nextField))
             .filter(Boolean),
         ),
       );
+      const options = directOptions.length > 0 ? directOptions : fallbackOptions;
 
       if (
         nextField === "team" &&
@@ -558,32 +729,39 @@ const RequirementManagementTable = ({
         options.unshift(normalizeText(row?.team));
       }
 
+      const returnedOptions = ADD_ROW_FIELD_SEQUENCE.reduce<RowMasterOptions>(
+        (allOptions, field) => {
+          const fieldOptions = getRequirementOptions(requirementMaster, field);
+
+          if (fieldOptions.length > 0) {
+            allOptions[field] = fieldOptions;
+          }
+
+          return allOptions;
+        },
+        {},
+      );
+
       setRowMasterOptions((currentOptions) => ({
         ...currentOptions,
         [rowId]: {
           ...currentOptions[rowId],
+          ...returnedOptions,
           [nextField]: options,
         },
       }));
 
       if (nextField === "fupCode" && normalizeText(row?.fupCode)) {
-        const requirementMaster = toRecord(
-          getMasterPayload(response).requirement_mst ??
-            getMasterPayload(response).requirementMst,
-        );
-        const matchingRequirement = requirementItems.find(
-          (item) =>
-            normalizeText(item.fupCode ?? item.fup_code ?? item.code).toUpperCase() ===
-            normalizeText(row?.fupCode).toUpperCase(),
-        );
-        const description = normalizeText(
-          matchingRequirement?.description ?? requirementMaster.description,
+        const description = getFupDescription(
+          requirementMaster,
+          requirementItems,
+          row?.fupCode,
         );
 
         if (description) {
           setRows((currentRows) =>
             currentRows.map((currentRow) =>
-              Number(currentRow.requirementId) === rowId
+              currentRow.__clientRowId === rowId
                 ? { ...currentRow, description }
                 : currentRow,
             ),
@@ -618,7 +796,7 @@ const RequirementManagementTable = ({
     }
 
     const newRow = rows.find(
-      (row) => Number(row.requirementId) === newestRowId,
+      (row) => row.__clientRowId === newestRowId,
     );
 
     if (!newRow) {
@@ -796,14 +974,17 @@ const RequirementManagementTable = ({
   };
 
   const handleAddRowFieldChange = (
-    rowId: number,
+    rowId: string,
     field: AddRowField,
     selectedValue: string,
   ) => {
     const fieldIndex = ADD_ROW_FIELD_SEQUENCE.indexOf(field);
-    const downstreamFields = ADD_ROW_FIELD_SEQUENCE.slice(fieldIndex + 1);
+    const downstreamFields =
+      field === "profile"
+        ? []
+        : ADD_ROW_FIELD_SEQUENCE.slice(fieldIndex + 1);
     const currentRow = rows.find(
-      (row) => Number(row.requirementId) === rowId,
+      (row) => row.__clientRowId === rowId,
     );
 
     if (!currentRow) {
@@ -816,12 +997,14 @@ const RequirementManagementTable = ({
       ...Object.fromEntries(
         downstreamFields.map((downstreamField) => [downstreamField, ""]),
       ),
-      ...(field !== "fupCode" ? { description: "" } : {}),
-    } as AdditionalRequirementRow;
+      ...(!["profile", "fupCode"].includes(field)
+        ? { description: "" }
+        : {}),
+    } as RequirementTableRow;
 
     setRows((currentRows) =>
       currentRows.map((row) =>
-        Number(row.requirementId) === rowId ? updatedRow : row,
+        row.__clientRowId === rowId ? updatedRow : row,
       ),
     );
 
@@ -835,8 +1018,9 @@ const RequirementManagementTable = ({
       },
     }));
 
-    const nextField =
-      field === "fupCode"
+    const nextField = field === "profile"
+      ? undefined
+      : field === "fupCode"
         ? "fupCode"
         : ADD_ROW_FIELD_SEQUENCE[fieldIndex + 1];
 
@@ -846,58 +1030,34 @@ const RequirementManagementTable = ({
   };
 
   const handleStatusChange = (
-    requirementId: unknown,
+    rowId: string,
     event: SelectChangeEvent<string>,
   ) => {
     const selectedStatus = event.target.value;
 
     setRows((currentRows) =>
-      currentRows.map((row, rowIndex) => {
-        const currentId = normalizeText(row.requirementId);
-
-        const targetId = normalizeText(requirementId);
-
-        /*
-         * requirementId should be the unique identifier.
-         * Index fallback prevents rows without an ID from
-         * all being updated together.
-         */
-        const isMatchingRow = targetId
-          ? currentId === targetId
-          : rowIndex ===
-            (page - 1) * ROWS_PER_PAGE +
-              visibleRows.findIndex((visibleRow) => visibleRow === row);
-
-        return isMatchingRow
+      currentRows.map((row) =>
+        row.__clientRowId === rowId
           ? {
               ...row,
               status: selectedStatus,
             }
-          : row;
-      }),
+          : row,
+      ),
     );
   };
 
-  const handleRemove = (requirementId: unknown) => {
-    const targetId = normalizeText(requirementId);
-
-    if (!targetId) {
-      return;
-    }
-
+  const handleRemove = (rowId: string) => {
     setRows((currentRows) =>
-      currentRows.filter(
-        (row) => normalizeText(row.requirementId) !== targetId,
-      ),
+      currentRows.filter((row) => row.__clientRowId !== rowId),
     );
 
-    const numericTargetId = Number(requirementId);
     setNewRowIds((currentIds) =>
-      currentIds.filter((rowId) => rowId !== numericTargetId),
+      currentIds.filter((currentRowId) => currentRowId !== rowId),
     );
     setRowMasterOptions((currentOptions) => {
       const nextOptions = { ...currentOptions };
-      delete nextOptions[numericTargetId];
+      delete nextOptions[rowId];
       return nextOptions;
     });
 
@@ -913,6 +1073,26 @@ const RequirementManagementTable = ({
   };
 
   const handleSave = async () => {
+    const incompleteNewRow = rows.find((row) =>
+      newRowIds.includes(row.__clientRowId) &&
+      REQUIRED_NEW_ROW_FIELDS.some(
+        ({ field }) => !normalizeText(row[field]),
+      ),
+    );
+
+    if (incompleteNewRow) {
+      const missingFields = REQUIRED_NEW_ROW_FIELDS
+        .filter(({ field }) => !normalizeText(incompleteNewRow[field]))
+        .map(({ label }) => label);
+
+      setSnackbar({
+        open: true,
+        message: `Please fill all mandatory fields: ${missingFields.join(", ")}.`,
+        severity: "error",
+      });
+      return;
+    }
+
     const validation = validateRequirementsForSave(rows, normalizedRoleType);
 
     if (!validation.isValid) {
@@ -925,7 +1105,47 @@ const RequirementManagementTable = ({
     }
 
     try {
-      await onSave?.(rows);
+      // const selectedCaseContext = toRecord(
+      //   (() => {
+      //     try {
+      //       return JSON.parse(
+      //         localStorage.getItem("selectedCaseContext") ?? "{}",
+      //       ) as unknown;
+      //     } catch {
+      //       return {};
+      //     }
+      //   })(),
+      // );
+     
+
+      if (!applicationNumber || !normalizedRoleType || !userId) {
+        setSnackbar({
+          open: true,
+          message:
+            "Application number, role type, and user ID are required to save requirements.",
+          severity: "error",
+        });
+        return;
+      }
+
+      const updatedDrsData = {
+        ...drsPayload,
+        requirementManagement: createRequestRows(rows),
+      } as unknown as ApplicantProfileSubmitRequest["data"];
+      const payload = {applicationNo:applicationNumber,
+          roleType: roleType,
+          sections: ["requirementManagement"],
+          userId,
+          data: updatedDrsData}
+          console.log('payload----------',payload)
+
+      await dispatch(
+        applicantProfileSubmitThunk(
+          payload
+        ),
+      ).unwrap();
+      setNewRowIds([]);
+      setRowMasterOptions({});
       setSnackbar({
         open: true,
         message: "Requirements saved successfully.",
@@ -1001,20 +1221,24 @@ const RequirementManagementTable = ({
 
   const renderAddRowSelect = (
     row: AdditionalRequirementRow,
-    rowId: number,
+    rowId: string,
     field: AddRowField,
   ) => {
-    const options = rowMasterOptions[rowId]?.[field] ?? [];
+    const options =
+      field === "profile"
+        ? profileOptions
+        : rowMasterOptions[rowId]?.[field] ?? [];
     const fieldIndex = ADD_ROW_FIELD_SEQUENCE.indexOf(field);
     const parentField = ADD_ROW_FIELD_SEQUENCE[fieldIndex - 1];
     const isLoading =
       loadingMasterField?.rowId === rowId &&
       loadingMasterField.field === field;
     const isDisabled =
-      isLoading ||
-      field === "profile" ||
-      options.length === 0 ||
-      (Boolean(parentField) && !normalizeText(row[parentField]));
+      field === "profile"
+        ? false
+        : isLoading ||
+          options.length === 0 ||
+          (Boolean(parentField) && !normalizeText(row[parentField]));
 
     return (
       <Select
@@ -1253,11 +1477,8 @@ const RequirementManagementTable = ({
           visibleRows.map((row, visibleIndex) => {
             const absoluteIndex = (page - 1) * ROWS_PER_PAGE + visibleIndex;
 
-            const rowKey =
-              normalizeText(row.requirementId) ||
-              `${normalizeText(row.fupCode)}-${absoluteIndex}`;
-            const numericRowId = Number(row.requirementId);
-            const isNewRow = newRowIds.includes(numericRowId);
+            const rowKey = row.__clientRowId;
+            const isNewRow = newRowIds.includes(rowKey);
 
             const currentStatus = normalizeText(row.status);
 
@@ -1313,27 +1534,29 @@ const RequirementManagementTable = ({
                     justifyContent: "center",
                   }}
                 >
-                  <Tooltip title="Remove requirement">
-                    <IconButton
-                      size="small"
-                      onClick={() => handleRemove(row.requirementId)}
-                      sx={{
-                        width: 24,
-                        height: 24,
-                        p: 0,
-                        border: "1px solid #d9e2ea",
-                        color: "#78909c",
-                        fontSize: "16px",
-                        "&:hover": {
-                          borderColor: "#d32f2f",
-                          color: "#d32f2f",
-                          bgcolor: "#fff5f5",
-                        },
-                      }}
-                    >
-                      <CloseIcon/>
-                    </IconButton>
-                  </Tooltip>
+                  {isNewRow && (
+                    <Tooltip title="Remove requirement">
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemove(rowKey)}
+                        sx={{
+                          width: 24,
+                          height: 24,
+                          p: 0,
+                          border: "1px solid #d9e2ea",
+                          color: "#78909c",
+                          fontSize: "16px",
+                          "&:hover": {
+                            borderColor: "#d32f2f",
+                            color: "#d32f2f",
+                            bgcolor: "#fff5f5",
+                          },
+                        }}
+                      >
+                        <CloseIcon />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </Box>
 
                 <Select
@@ -1346,7 +1569,7 @@ const RequirementManagementTable = ({
                     )
                   }
                   onChange={(event) =>
-                    handleStatusChange(row.requirementId, event)
+                    handleStatusChange(rowKey, event)
                   }
                   displayEmpty
                   sx={{
@@ -1406,33 +1629,33 @@ const RequirementManagementTable = ({
                 {renderCompactCell(row.ocrStatus)}
 
                 {isNewRow
-                  ? renderAddRowSelect(row, numericRowId, "team")
+                  ? renderAddRowSelect(row, rowKey, "team")
                   : renderCompactCell(row.team)}
 
                 {isNewRow
-                  ? renderAddRowSelect(row, numericRowId, "profile")
+                  ? renderAddRowSelect(row, rowKey, "profile")
                   : renderCompactCell(row.profile)}
 
                 {isNewRow
-                  ? renderAddRowSelect(row, numericRowId, "category")
+                  ? renderAddRowSelect(row, rowKey, "category")
                   : renderCompactCell(row.category)}
 
                 {isNewRow
-                  ? renderAddRowSelect(row, numericRowId, "subCategory")
+                  ? renderAddRowSelect(row, rowKey, "subCategory")
                   : renderCompactCell(row.subCategory)}
 
                 {isNewRow
-                  ? renderAddRowSelect(row, numericRowId, "document")
+                  ? renderAddRowSelect(row, rowKey, "document")
                   : renderCompactCell(row.document)}
 
                 {isNewRow
-                  ? renderAddRowSelect(row, numericRowId, "reason")
+                  ? renderAddRowSelect(row, rowKey, "reason")
                   : renderCompactCell(row.reason)}
 
                 {renderCompactCell(row.specialTest)}
 
                 {isNewRow
-                  ? renderAddRowSelect(row, numericRowId, "fupCode")
+                  ? renderAddRowSelect(row, rowKey, "fupCode")
                   : renderCompactCell(row.fupCode)}
 
                 {renderDetailAction("Extra Remarks", getExtraRemarks(row))}
@@ -1520,7 +1743,7 @@ const RequirementManagementTable = ({
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3500}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
         onClose={(_, reason) => {
           if (reason !== "clickaway") {
             setSnackbar((currentSnackbar) => ({

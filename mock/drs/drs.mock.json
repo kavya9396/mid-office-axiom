@@ -189,7 +189,12 @@
                 }
 
             ],
-
+"summary": [
+            {
+                "memberType": "lifeassured1"
+            },{
+                "memberType": "proposer"
+            }],
             "riderDetails": [],
 
             "customer": {
@@ -256,7 +261,7 @@
 
                 "description": "ACR -Agent confidential report not uploaded",
 
-                "status": "PENDING",
+                "status": "Accept",
 
                 "isActive": "Y",
 

@@ -2325,11 +2325,38 @@
             }
         ],
         "requirement_mst": {
-            "level": "team",
-            "teams": [
-                "COPS",
-                "UW"
-            ]
+            "level": "documentReason",
+            "teams":["COPS","UW"],
+            "categories":["Application","Medical"],
+            "subCategories":["Application"],
+            "profiles": [
+                "Life  Assured",
+                "Payer",
+                "Proposer"
+            ],
+            "documents": [
+                "DOB Declaration",
+                "DOB Mismatch Declaration",
+                "Declaration",
+                "Employment Mismatch Declaration",
+                "Female Health Declaration",
+                "Gender mismatch Declaration",
+                "Income Declaration",
+                "Name Mismatch Declaration",
+                "Occupation Mismatch Declaration",
+                "PEP Declaration",
+                "Parent Income Declaration",
+                "Personal health Declaration",
+                "Residential declaration",
+                "Vernacular Declaration"
+            ],
+            "reasons": [
+                "Declaration Required",
+                "Documents not submitted",
+                "Mismatch in documents submitted with apllication form",
+                "Resubmit documents as Documents submitted not clear"
+            ],
+            "fupCodes":["PIV","KY","AG"]
         }
     },
     "unknownTypes": [

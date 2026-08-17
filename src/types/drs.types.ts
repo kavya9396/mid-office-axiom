@@ -132,28 +132,36 @@ export type DRSResponse = {
 };
 
 export interface DRSData {
-  applicationNumber: string;
-  breDecision:BreDecisionResponse;
-  latestBreDecision:BreDecisionResponse;
-  submitDate: string;
-  totalPremium: number;
-  sourceSystem: string;
-  applicationOverview:DRSApplicationInfo;
-  applicationInfo: DRSApplicationInfo;
+  applicationNumber?: string;
+  applicationNo?: string;
+  breDecision?: BreDecisionResponse;
+  latestBreDecision?: BreDecisionResponse;
+  submitDate?: string;
+  totalPremium?: number;
+  sourceSystem?: string;
+  applicationOverview?: DRSApplicationInfo;
+  applicationInfo?: DRSApplicationInfo;
   riderDetails?: DRSRiderDetail[];
-  sourcingDetail: DRSSourcingDetail;
-  groupDetails: DRSGroupDetails;
-  productDetail: DRSProductDetail[];
-  customerDetails: DRSCustomerDetail[];
-  producerDetails: Record<string, string>;
-  nominee: DRSNominee[];
-  appointee: DRSAppointee[];
-  fundDetails: DRSFundDetails;
-  payoutDetails: Record<string, string>;
-  advisorDetails: Record<string, string>;
-  questions: DRSQuestion[];
-  externalAPIs: DRSExternalAPIs;
-  summary: EditableMember[];
+  sourcingDetail?: DRSSourcingDetail;
+  groupDetails?: DRSGroupDetails;
+  productDetail?: DRSProductDetail[];
+  customerDetails?: DRSCustomerDetail[];
+  producerDetails?: Record<string, string>;
+  nominee?: DRSNominee[];
+  appointee?: DRSAppointee[];
+  fundDetails?: DRSFundDetails;
+  payoutDetails?: Record<string, string>;
+  advisorDetails?: Record<string, string>;
+  questions?: DRSQuestion[];
+  externalAPIs?: DRSExternalAPIs;
+  summary?: EditableMember[];
+  requirementManagement?: AdditionalRequirementRow[];
+  requirements?: AdditionalRequirementRow[];
+  pivvSection?: PivvSection | Record<string, unknown>;
+  quickLinks?: Record<string, unknown>;
+  roleType?: string;
+  userId?: string;
+  [key: string]: unknown;
 }
 
 export type EditableMember = {
@@ -657,7 +665,7 @@ export type AdditionalRequirementRow = {
   fupCode: string;
   description: string;
   status: string;
-  
+
 
   userId: string;
   remarks: string;
