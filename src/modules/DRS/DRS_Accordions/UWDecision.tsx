@@ -170,16 +170,206 @@ const UWDecision = () => {
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
-    const firstUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "firstUWDecision", true, true), [masters]);
-    const parallelUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "parallelUWDecision", true, true), [masters]);
+    // const firstUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "firstUWDecision", true, true), [masters]);
+    // const parallelUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "parallelUWDecision", true, true), [masters]);
     const postponementPeriodOptions = useMemo(() => normalizeDecisionOptions(masters, "postponementPeriod", true, true), [masters]);
-    const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason", true, true), [masters]);
-    const reinsurerReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerReferralReason", true, true), [masters]);
-    const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason", true, true), [masters]);
+    // const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason", true, true), [masters]);
+    // const reinsurerReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerReferralReason", true, true), [masters]);
+    // const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason", true, true), [masters]);
     const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
 
     const nonMedicalOptions = getNonMedicalReasonRemarks(masters.reasonRemarks);
     const allOptions = getAllReasonRemarks(masters.reasonRemarks);
+
+    const parallelUWDecisionOptions = useMemo(() => {
+        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+        if (!Array.isArray(misc)) {
+            return [];
+        }
+
+        return misc
+            .filter((option) => {
+                const item = option as Record<string, unknown>;
+
+                return (
+                    String(item.type ?? "").trim().toUpperCase() === "PARA" &&
+                    String(item.isActive ?? "").trim().toUpperCase() === "Y"
+                );
+            })
+            .map((option) => {
+                const item = option as Record<string, unknown>;
+
+                return {
+                    label: String(
+                        item.description ??
+                        item.label ??
+                        item.value ??
+                        ""
+                    ).trim(),
+
+                    value: String(
+                        item.code ??
+                        item.value ??
+                        item.key ??
+                        ""
+                    ).trim(),
+                };
+            })
+            .filter((option) => option.label && option.value);
+    }, [masters]);
+
+    const firstUWDecisionOptions = useMemo(() => {
+        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+        if (!Array.isArray(misc)) {
+            return [];
+        }
+
+        return misc
+            .filter((option) => {
+                const item = option as Record<string, unknown>;
+
+                return (
+                    String(item.type ?? "").trim().toUpperCase() === "UW_DECISION" &&
+                    String(item.isActive ?? "").trim().toUpperCase() === "Y"
+                );
+            })
+            .map((option) => {
+                const item = option as Record<string, unknown>;
+
+                return {
+                    label: String(
+                        item.description ??
+                        item.label ??
+                        item.value ??
+                        ""
+                    ).trim(),
+
+                    value: String(
+                        item.code ??
+                        item.value ??
+                        item.key ??
+                        ""
+                    ).trim(),
+                };
+            })
+            .filter((option) => option.label && option.value);
+    }, [masters]);
+
+    const riskReferralReasonOptions = useMemo(() => {
+        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+        if (!Array.isArray(misc)) {
+            return [];
+        }
+
+        return misc
+            .filter((option) => {
+                const item = option as Record<string, unknown>;
+
+                return (
+                    String(item.type ?? "").trim().toUpperCase() === "RISK" &&
+                    String(item.isActive ?? "").trim().toUpperCase() === "Y"
+                );
+            })
+            .map((option) => {
+                const item = option as Record<string, unknown>;
+
+                return {
+                    label: String(
+                        item.description ??
+                        item.label ??
+                        item.value ??
+                        ""
+                    ).trim(),
+
+                    value: String(
+                        item.code ??
+                        item.value ??
+                        item.key ??
+                        ""
+                    ).trim(),
+                };
+            })
+            .filter((option) => option.label && option.value);
+    }, [masters]);
+
+    const reinsurerReferralReasonOptions = useMemo(() => {
+        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+        if (!Array.isArray(misc)) {
+            return [];
+        }
+
+        return misc
+            .filter((option) => {
+                const item = option as Record<string, unknown>;
+
+                return (
+                    String(item.type ?? "").trim().toUpperCase() === "REINSURER" &&
+                    String(item.isActive ?? "").trim().toUpperCase() === "Y"
+                );
+            })
+            .map((option) => {
+                const item = option as Record<string, unknown>;
+
+                return {
+                    label: String(
+                        item.description ??
+                        item.label ??
+                        item.value ??
+                        ""
+                    ).trim(),
+
+                    value: String(
+                        item.code ??
+                        item.value ??
+                        item.key ??
+                        ""
+                    ).trim(),
+                };
+            })
+            .filter((option) => option.label && option.value);
+    }, [masters]);
+
+    const holdReasonOptions = useMemo(() => {
+        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+        if (!Array.isArray(misc)) {
+            return [];
+        }
+
+        return misc
+            .filter((option) => {
+                const item = option as Record<string, unknown>;
+
+                return (
+                    String(item.type ?? "").trim().toUpperCase() === "HOLD" &&
+                    String(item.isActive ?? "").trim().toUpperCase() === "Y"
+                );
+            })
+            .map((option) => {
+                const item = option as Record<string, unknown>;
+
+                return {
+                    label: String(
+                        item.description ??
+                        item.label ??
+                        item.value ??
+                        ""
+                    ).trim(),
+
+                    value: String(
+                        item.code ??
+                        item.value ??
+                        item.key ??
+                        ""
+                    ).trim(),
+                };
+            })
+            .filter((option) => option.label && option.value);
+    }, [masters]);
 
     const showDecisionCode = [
         "Accept",

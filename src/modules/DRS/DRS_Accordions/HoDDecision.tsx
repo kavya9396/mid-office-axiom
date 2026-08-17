@@ -12,7 +12,7 @@ import { getInboxPath, normalizeBusinessType } from "../../../routes/routes";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
-import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { toMasterLabel } from "../../../utils/masterOptions";
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -59,10 +59,52 @@ const HoDDecision = () => {
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
   const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
+  // const masters = useSelector((state: RootState) => state.drs.masters);
+
+  // const hodDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "hodDecision", true, true), [masters]);
+
   const masters = useSelector((state: RootState) => state.drs.masters);
 
-  const hodDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "hodDecision", true, true), [masters]);
+const hodDecisionOptions = useMemo(() => {
+  const misc = (masters as Record<string, unknown> | undefined)?.misc;
 
+  if (!Array.isArray(misc)) {
+    return [];
+  }
+
+  return misc
+    .filter((option) => {
+      const item = option as Record<string, unknown>;
+
+      return (
+        String(item.type ?? "").trim().toUpperCase() === "UW_DECISION" &&
+        String(item.isActive ?? "").trim().toUpperCase() === "Y"
+      );
+    })
+    .map((option) => {
+      const item = option as Record<string, unknown>;
+
+      return {
+        label: String(
+          item.description ??
+          item.label ??
+          item.value ??
+          ""
+        ).trim(),
+
+        value: String(
+          item.code ??
+          item.value ??
+          item.key ??
+          ""
+        ).trim(),
+      };
+    })
+    .filter((option) => option.label && option.value);
+}, [masters]);
+
+// const decisionLabel = toMasterLabel(decision, hodDecisionOptions);
+  
   const lastUwUser = useSelector((state: RootState) => {
     const drsData = state.drs.data as unknown as Record<string, unknown> | null;
     if (!drsData) return "";
@@ -124,7 +166,7 @@ const HoDDecision = () => {
     }
 
     return `Kindly reconfirm if you want to proceed with the case as "${label}"`;
-  }, [decision, lastUwUser]);
+  }, [decision, lastUwUser, hodDecisionOptions]);
 
   const isSubmitDisabled = !decision || remarks.trim() === "";
 
@@ -146,7 +188,7 @@ const HoDDecision = () => {
 
   return (
     // <Container disableGutters>
-      <Box sx={{ p:1 }}>
+      <Box sx={{ px:1 }}>
         <CustomAccordion title="HoD Decision" defaultExpanded>
           <Box
             sx={{
@@ -159,7 +201,7 @@ const HoDDecision = () => {
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: "repeat(2, minmax(220px, 1fr))",
+                gridTemplateColumns: "repeat(3, 1fr)",
                 gap: 2,
               }}
             >
