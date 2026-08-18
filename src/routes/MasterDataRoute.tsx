@@ -1,10 +1,10 @@
 import { Box, CircularProgress } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 import { Outlet } from "react-router-dom";
+import { useAppDispatch } from "../store/hooks";
+import { loadMasterData } from "../modules/Helper/MasterHelper";
+import { DRS_MASTER_KEYS } from "../modules/DRS/drsMasters";
 
-import { DRS_MASTER_KEYS } from "./modules/DRS/drsMasters";
-import { loadMasterData } from "./modules/Helper/MasterHelper";
-import { useAppDispatch } from "./store/hooks";
 
 const MasterDataRoute = () => {
   const dispatch = useAppDispatch();

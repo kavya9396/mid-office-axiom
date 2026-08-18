@@ -18,7 +18,7 @@ import OpenTasksPage from "../modules/QuickLinks/OpenTasksPage";
 import UserManagement from "../modules/DRS/UserManagement";
 // import SearchApplication from "../modules/Landing/SearchApplication";
 import Inbox from "../modules/Landing/Inbox";
-import MasterDataRoute from "../masterDataRoute";
+import MasterDataRoute from "./MasterDataRoute";
 
 function BusinessTypeRedirect() {
   return <Navigate to={PATHS.INBOX} replace />;
