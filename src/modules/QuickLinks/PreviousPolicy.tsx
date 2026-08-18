@@ -2,9 +2,8 @@ import { useEffect, useMemo, useState } from "react";
 import {
   Box,
   Container,
-  MenuItem,
+  Pagination,
   Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -16,29 +15,28 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import BackButton from "../../components/layout/BackButton";
-import { KeyLeftArrowIcon, KeyRightArrowIcon } from "../../icons/Icons";
 import { useAppContext } from "../../hooks/useAppContext";
 import { getDRSPath } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import type { PreviousPolicyItem } from "../../types/drs.types";
-import CustomButton from "../../components/ui/Button/Button";
 import type { RootState } from "../../store/store";
 
-const defaultRowsPerPage = 25;
+const defaultRowsPerPage = 5;
 
 const tableHeaderCellSx = {
-  backgroundColor: "#E9EEF3",
-  borderColor: "#D8E0E8",
-  color: "#173B5F",
+  backgroundColor: "#E85D04",
+  borderColor: "rgba(255, 255, 255, 0.35)",
+  color: "#FFFFFF",
   fontSize: 12,
   fontWeight: 600,
   lineHeight: 1.25,
   px: 1,
-  py: 1,
-  verticalAlign: "top",
-  whiteSpace: "normal",
-  wordBreak: "break-word",
+  py: 1.15,
+  verticalAlign: "middle",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
 };
 
 const tableBodyCellSx = {
@@ -47,11 +45,28 @@ const tableBodyCellSx = {
   fontSize: 12,
   lineHeight: 1.35,
   px: 1,
-  py: 0.85,
-  verticalAlign: "top",
-  whiteSpace: "normal",
-  overflowWrap: "anywhere",
-  wordBreak: "break-word",
+  py: 1.1,
+  verticalAlign: "middle",
+  whiteSpace: "nowrap",
+  overflow: "hidden",
+  textOverflow: "ellipsis",
+};
+
+type TableKey = "ipru" | "iibNonIpru" | "negativeMatch" | "applicationForm";
+
+type PaginationState = Record<
+  TableKey,
+  {
+    page: number;
+    rowsPerPage: number;
+  }
+>;
+
+const initialPagination: PaginationState = {
+  ipru: { page: 0, rowsPerPage: defaultRowsPerPage },
+  iibNonIpru: { page: 0, rowsPerPage: defaultRowsPerPage },
+  negativeMatch: { page: 0, rowsPerPage: defaultRowsPerPage },
+  applicationForm: { page: 0, rowsPerPage: defaultRowsPerPage },
 };
 
 type ColumnSpec = {
@@ -181,8 +196,8 @@ const PreviousPolicy = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
-  const [rowsPerPage, setRowsPerPage] = useState(defaultRowsPerPage);
-  const [page, setPage] = useState(0);
+  const [pagination, setPagination] =
+    useState<PaginationState>(initialPagination);
 
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? "";
@@ -275,95 +290,133 @@ const PreviousPolicy = () => {
     [effectiveQuickLinksData]
   );
 
-  const totalCount = ipruRows.length;
-  const totalPages = rowsPerPage === -1 ? 1 : Math.max(1, Math.ceil(totalCount / rowsPerPage));
-
-  const startRecord = totalCount === 0 ? 0 : rowsPerPage === -1 ? 1 : page * rowsPerPage + 1;
-  const endRecord =
-    totalCount === 0
-      ? 0
-      : rowsPerPage === -1
-        ? totalCount
-        : Math.min((page + 1) * rowsPerPage, totalCount);
-
   const renderPolicyTable = (
+    tableKey: TableKey,
     columns: ColumnSpec[],
     rows: PreviousPolicyItem[],
-    emptyState: string
   ) => {
+    const { page, rowsPerPage } = pagination[tableKey];
+    const totalCount = rows.length;
+    const totalPages =
+      rowsPerPage === -1
+        ? 1
+        : Math.max(1, Math.ceil(totalCount / rowsPerPage));
+    const safePage = Math.min(page, totalPages - 1);
     const paginatedRows =
       rowsPerPage === -1
         ? rows
-        : rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
+        : rows.slice(
+            safePage * rowsPerPage,
+            safePage * rowsPerPage + rowsPerPage,
+          );
+    const updatePagination = (
+      updates: Partial<PaginationState[TableKey]>,
+    ) => {
+      setPagination((current) => ({
+        ...current,
+        [tableKey]: {
+          ...current[tableKey],
+          ...updates,
+        },
+      }));
+    };
 
     return (
-      <TableContainer
+      <Box
         sx={{
-          border: "1px solid #D8D8D8",
-          borderRadius: "8px",
-          maxHeight: rowsPerPage === -1 ? 520 : 420,
-          overflowX: { xs: "auto", lg: "hidden" },
-          overflowY: "auto",
           width: "100%",
         }}
       >
-        <Table
-          size="small"
-          stickyHeader
+        <TableContainer
           sx={{
-            tableLayout: "fixed",
+            border: "1px solid #D8E0E8",
+            borderRadius: 2,
+            maxHeight: 420,
+            overflow: "hidden",
+            overflowX: "hidden",
+            overflowY: "auto",
             width: "100%",
-            minWidth: { xs: columns.length > 8 ? 960 : 680, lg: "100%" },
-            "& tbody tr:nth-of-type(even)": {
-              backgroundColor: "#FAFBFC",
-            },
           }}
         >
-          <TableHead>
-            <TableRow>
-              {columns.map((column, columnIndex) => (
-                <TableCell
-                  key={`${column.header}-${columnIndex}`}
-                  sx={tableHeaderCellSx}
-                >
-                  {column.header}
-                </TableCell>
-              ))}
-            </TableRow>
-          </TableHead>
-
-          <TableBody>
-            {loading ? (
+          <Table
+            size="small"
+            stickyHeader
+            sx={{
+              tableLayout: "fixed",
+              width: "100%",
+              "& tbody tr:nth-of-type(even)": {
+                backgroundColor: "#FAFBFC",
+              },
+            }}
+          >
+            <TableHead>
               <TableRow>
-                <TableCell colSpan={columns.length} sx={{ ...tableBodyCellSx, py: 2.5 }}>
-                  <Typography sx={{ color: "#6B7280" }}>Loading previous policies...</Typography>
-                </TableCell>
+                {columns.map((column, columnIndex) => (
+                  <TableCell
+                    key={`${column.header}-${columnIndex}`}
+                    title={column.header}
+                    sx={tableHeaderCellSx}
+                  >
+                    {column.header}
+                  </TableCell>
+                ))}
               </TableRow>
-            ) : paginatedRows.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={columns.length} sx={{ ...tableBodyCellSx, py: 2.5 }}>
-                  <Typography sx={{ color: "#6B7280" }}>{emptyState}</Typography>
-                </TableCell>
-              </TableRow>
-            ) : (
-              paginatedRows.map((policy, rowIndex) => (
-                <TableRow key={`policy-row-${rowIndex}`}>
-                  {columns.map((column, columnIndex) => {
-                    const rawValue = getValueFromKeys(policy, column.keys);
-                    const display = column.formatter ? column.formatter(rawValue) : toDisplayValue(rawValue);
+            </TableHead>
 
-                    return (
-                      <TableCell key={`${column.header}-${columnIndex}-${rowIndex}`} sx={tableBodyCellSx}>
-                        {display}
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
+            <TableBody>
+              {paginatedRows.map((policy, rowIndex) => (
+                  <TableRow key={`${tableKey}-policy-row-${safePage}-${rowIndex}`}>
+                    {columns.map((column, columnIndex) => {
+                      const rawValue = getValueFromKeys(policy, column.keys);
+                      const display = column.formatter
+                        ? column.formatter(rawValue)
+                        : toDisplayValue(rawValue);
+
+                      return (
+                        <TableCell
+                          key={`${column.header}-${columnIndex}-${rowIndex}`}
+                          title={display}
+                          sx={tableBodyCellSx}
+                        >
+                          {display}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        {totalPages > 1 && (
+          <Box sx={{ display: "flex", justifyContent: "center", pt: 1.5 }}>
+            <Pagination
+              count={totalPages}
+              page={safePage + 1}
+              onChange={(_, nextPage) =>
+                updatePagination({ page: nextPage - 1 })
+              }
+              shape="rounded"
+              siblingCount={1}
+              boundaryCount={1}
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  minWidth: 38,
+                  height: 40,
+                  borderRadius: "7px",
+                  fontSize: 16,
+                  color: "#374151",
+                },
+                "& .MuiPaginationItem-root.Mui-selected": {
+                  bgcolor: "#E85D04",
+                  color: "#FFFFFF",
+                  "&:hover": { bgcolor: "#D95400" },
+                },
+              }}
+            />
+          </Box>
+        )}
+      </Box>
     );
   };
 
@@ -401,7 +454,7 @@ const PreviousPolicy = () => {
             alignItems: "center",
             p: 1,
             pl: 2,
-            backgroundColor: "#004A80",
+            backgroundColor: "#E45F14",
             color: "#FFFFFF",
             minHeight: 46,
           }}
@@ -412,81 +465,53 @@ const PreviousPolicy = () => {
         </Box>
 
         <Box sx={{ p: { xs: 1.25, md: 2 }, overflow: "hidden" }}>
-          <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 1.25, color: "#0E3762" }}>
-            IPRU
-          </Typography>
-          {renderPolicyTable(IPRU_COLUMNS, ipruRows, "No IPRU previous policy data found.")}
+          {loading && (
+            <Typography sx={{ color: "#6B7280", py: 2 }}>
+              Loading previous policies...
+            </Typography>
+          )}
 
-          <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
-            IIB/ Non IPRU
-          </Typography>
-          {renderPolicyTable(IIB_NON_IPRU_COLUMNS, iibNonIpruRows, "No IIB/Non IPRU policy data found.")}
+          {ipruRows.length > 0 && (
+            <>
+              <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 1.25, color: "#0E3762" }}>
+                IPRU
+              </Typography>
+              {renderPolicyTable("ipru", IPRU_COLUMNS, ipruRows)}
+            </>
+          )}
+
+          {iibNonIpruRows.length > 0 && (
+            <>
+              <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
+                IIB/ Non IPRU
+              </Typography>
+              {renderPolicyTable("iibNonIpru", IIB_NON_IPRU_COLUMNS, iibNonIpruRows)}
+            </>
+          )}
 
           {roleType !== "DVT_FORMAL_TASK" && (
             <>
-              <Box sx={{ mt: 2 }}>
-                {renderPolicyTable(NEGATIVE_MATCH_COLUMNS, negativeMatchRows, "No negative match data found.")}
-              </Box>
+              {negativeMatchRows.length > 0 && (
+                <>
+                  <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
+                    Negative match details
+                  </Typography>
+                  {renderPolicyTable("negativeMatch", NEGATIVE_MATCH_COLUMNS, negativeMatchRows)}
+                </>
+              )}
 
-              <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
-                Application form details
-              </Typography>
-              {renderPolicyTable(APP_FORM_DETAILS_COLUMNS, appFormRows, "No application form policy details found.")}
+              {appFormRows.length > 0 && (
+                <>
+                  <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
+                    Application form details
+                  </Typography>
+                  {renderPolicyTable("applicationForm", APP_FORM_DETAILS_COLUMNS, appFormRows)}
+                </>
+              )}
             </>
           )}
         </Box>
 
-        <Box sx={{ borderTop: "1px solid #E0E0E0", px: 2, py: 1.5 }}>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              flexWrap: "wrap",
-              gap: 2,
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography sx={{ fontSize: 14, color: "#444444" }}>Show</Typography>
-              <Select
-                value={rowsPerPage}
-                size="small"
-                onChange={(event) => {
-                  setRowsPerPage(Number(event.target.value));
-                  setPage(0);
-                }}
-                sx={{ minWidth: 80, height: 34, fontSize: 14 }}
-              >
-                <MenuItem value={10}>10</MenuItem>
-                <MenuItem value={25}>25</MenuItem>
-                <MenuItem value={50}>50</MenuItem>
-                <MenuItem value={100}>100</MenuItem>
-                <MenuItem value={-1}>All</MenuItem>
-              </Select>
-            </Box>
-
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <CustomButton onClick={() => setPage(Math.max(0, page - 1))} disabled={page === 0}>
-                <KeyLeftArrowIcon />
-                Previous
-              </CustomButton>
-
-              <Typography sx={{ px: 1, color: "#444444" }}>{page + 1}</Typography>
-
-              <CustomButton
-                onClick={() => setPage(Math.min(totalPages - 1, page + 1))}
-                disabled={page >= totalPages - 1}
-              >
-                Next
-                <KeyRightArrowIcon />
-              </CustomButton>
-            </Box>
-
-            <Typography sx={{ fontSize: 14, color: "#444444" }}>
-              Showing {startRecord}-{endRecord} of {totalCount}
-            </Typography>
-          </Box>
-        </Box>
       </Paper>
     </Container>
   );

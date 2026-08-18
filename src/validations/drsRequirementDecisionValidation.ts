@@ -46,36 +46,54 @@ export const saveLocalRequirementRows = (
   rows: RequirementStatusRow[],
   hasUnsavedChanges = false,
 ): void => {
-  localStorage.setItem(getRequirementStorageKey(drsData), JSON.stringify(rows));
-  localStorage.setItem(getRequirementUnsavedStorageKey(drsData), JSON.stringify(hasUnsavedChanges));
+  localStorage.setItem(
+    getRequirementStorageKey(drsData),
+    JSON.stringify(rows),
+  );
+  localStorage.setItem(
+    getRequirementUnsavedStorageKey(drsData),
+    JSON.stringify(hasUnsavedChanges),
+  );
 };
 
-const getStoredRequirementRows = (drsData: unknown): RequirementStatusRow[] | null => {
+export const markLocalRequirementRowsUnsaved = (drsData: unknown): void => {
+  localStorage.setItem(getRequirementUnsavedStorageKey(drsData), "true");
+};
+
+const getStoredRequirementRows = (
+  drsData: unknown,
+): RequirementStatusRow[] | null => {
   try {
     const raw = localStorage.getItem(getRequirementStorageKey(drsData));
-    if (raw === null) {
-      return null;
-    }
+    if (raw === null) return null;
 
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.map((row) => ({ status: toText(toRecord(row).status) })) : [];
+    return Array.isArray(parsed)
+      ? parsed.map((row) => ({ status: toText(toRecord(row).status) }))
+      : [];
   } catch {
     return null;
   }
 };
 
-export const getRequirementRows = (drsData: unknown): RequirementStatusRow[] => {
+export const getRequirementRows = (
+  drsData: unknown,
+): RequirementStatusRow[] => {
   const root = toRecord(drsData);
-  const directRequirements = Array.isArray(root.requirements) ? root.requirements : [];
-  const requirementManagement = Array.isArray(root.requirementManagement) ? root.requirementManagement : [];
+  const directRequirements = Array.isArray(root.requirements)
+    ? root.requirements
+    : [];
+  const requirementManagement = Array.isArray(root.requirementManagement)
+    ? root.requirementManagement
+    : [];
   const externalApis = toRecord(root.externalAPIs);
   const breOutput = toRecord(externalApis.breOutput);
-  const breRequirements = Array.isArray(breOutput.requirements) ? breOutput.requirements : [];
+  const breRequirements = Array.isArray(breOutput.requirements)
+    ? breOutput.requirements
+    : [];
   const storedRows = getStoredRequirementRows(drsData);
 
-  if (storedRows !== null) {
-    return storedRows;
-  }
+  if (storedRows !== null) return storedRows;
 
   return [
     ...directRequirements,
@@ -86,11 +104,19 @@ export const getRequirementRows = (drsData: unknown): RequirementStatusRow[] => 
 
 export const hasUnsavedRequirementRows = (drsData: unknown): boolean => {
   try {
-    return JSON.parse(localStorage.getItem(getRequirementUnsavedStorageKey(drsData)) ?? "false") === true;
+    return (
+      JSON.parse(
+        localStorage.getItem(getRequirementUnsavedStorageKey(drsData)) ??
+          "false",
+      ) === true
+    );
   } catch {
     return false;
   }
 };
+
+const hasSavedRequirementRows = (drsData: unknown): boolean =>
+  getStoredRequirementRows(drsData) !== null;
 
 const isPendingRequirement = (status: string): boolean => {
   const normalized = status.trim().toLowerCase();
@@ -98,13 +124,14 @@ const isPendingRequirement = (status: string): boolean => {
 };
 
 export const hasPendingRequirementRows = (drsData: unknown): boolean =>
-  getRequirementRows(drsData).some((row) => isPendingRequirement(toText(row.status)));
+  getRequirementRows(drsData).some((row) =>
+    isPendingRequirement(toText(row.status)),
+  );
 
 export const validateRequirementDecision = (
   drsData: unknown,
   decisionLabel: string,
 ): { isValid: boolean; message: string } => {
-  // If there are unsaved local changes, always block submission
   if (hasUnsavedRequirementRows(drsData)) {
     return {
       isValid: false,
@@ -112,11 +139,15 @@ export const validateRequirementDecision = (
     };
   }
 
-  // If there are pending requirement rows, allow submission only when the
-  // selected decision implies raising requirements (e.g., label contains "raise").
   if (hasPendingRequirementRows(drsData)) {
-    const normalized = String(decisionLabel ?? "").trim().toLowerCase();
-    if (normalized.includes("raise")) {
+    // A successful requirement Save records the latest rows locally. Pending
+    // is a valid saved status, so it must not block the user's next action.
+    if (hasSavedRequirementRows(drsData)) {
+      return { isValid: true, message: "" };
+    }
+
+    const normalizedDecision = toText(decisionLabel).toLowerCase();
+    if (normalizedDecision.includes("raise")) {
       return { isValid: true, message: "" };
     }
 

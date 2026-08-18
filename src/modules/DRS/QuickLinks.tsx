@@ -167,7 +167,7 @@ const QuickLinks = () => {
         }
     };
 
-    const NEW_TAB_LABELS = new Set(["Proposal Form & Documents", "Previous Policies", "Document link"]);
+    const NEW_TAB_LABELS = new Set(["Proposal Form & Documents", "Document link"]);
 
     const handleNavigate = useCallback(
         (label: string, path: string) => {
@@ -324,8 +324,8 @@ const QuickLinks = () => {
 
             <CustomDialog
                 open={openReferToItDialog}
-                showCloseIcon={false}
-                onClose={() => setOpenReferToItDialog(true)}
+                showCloseIcon={true}
+                onClose={() => setOpenReferToItDialog(false)}
                 title={
                     <Typography
                         sx={{

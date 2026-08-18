@@ -38,7 +38,12 @@ import {
   CloseIcon,
   FilterIcon,
 } from "../../../icons/Icons";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  markLocalRequirementRowsUnsaved,
+  saveLocalRequirementRows,
+} from "../../../validations/drsRequirementDecisionValidation";
+import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 
 interface RequirementManagementTableProps {
   requirements: AdditionalRequirementRow[];
@@ -310,7 +315,7 @@ const getMasterItems = (
 };
 
 const getDefaultTeamByRole = (roleType: string): string => {
-  if (["CVT_TASK", "CPT_DATA_ENTRY_NMR_TASK"].includes(roleType)) {
+  if (["CVT_TASK", "CPT_DATA_ENTRY_NMR_TASK","CPT_DATA_ENTRY_MR_TASK"].includes(roleType)) {
     return "COPS";
   }
 
@@ -507,17 +512,49 @@ const filterRequirementsByRole = (
 
   return requirements;
 };
+interface ApplicationRow {
+  applicationNo?: string;
+  businessType?: string;
+  roleType?: string;
+  userId?: string;
+  [key: string]: unknown;
+}
+const actionButtonSx = {
+  minWidth: 170,
+  borderRadius: "28px",
+  bgcolor: "#ad252a",
+  py: 0.65,
+  textTransform: "none",
+  fontSize: "13px",
+  fontWeight: 600,
+  boxShadow: "none",
+  "&:hover": {
+    bgcolor: "#941f24",
+    boxShadow: "none",
+  },
+};
 
 const RequirementManagementTable = ({
   requirements,
   onAddRequirement,
   addRowSignal = 0,
 }: RequirementManagementTableProps) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { applicationNumber } = useParams<{ applicationNumber: string }>();
   const [roleType] = useState(
     () => localStorage.getItem("roleType") ?? "",
   );
+  const application = location.state?.application as ApplicationRow | undefined;
+  const businessType = (
+    application?.businessType ??
+    localStorage.getItem("businessType") ??
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
   const userId = localStorage.getItem("username") ?? "";
   const normalizedRoleType = normalizeText(roleType).toUpperCase();
   const requirementSaveStorageKey = `requirementManagementSaved:${
@@ -545,6 +582,8 @@ const RequirementManagementTable = ({
     (state: RootState) => state.drs.data,
   ) as unknown;
   const drsPayload = getDrsPayload(drsStateData);
+  const quickLinks = toRecord(drsPayload.quickLinks);
+  const proposerFormUrl = normalizeText(quickLinks.proposerForm);
   const applicationOverview = toRecord(drsPayload.applicationOverview);
   const summarySource = Array.isArray(applicationOverview.summary)
     ? applicationOverview.summary
@@ -601,7 +640,22 @@ const RequirementManagementTable = ({
     severity: "success",
   });
 
+  const handleViewDocuments = () => {
+    if (!proposerFormUrl) {
+      setSnackbar({
+        open: true,
+        message: "Proposer form is not available.",
+        severity: "error",
+      });
+      return;
+    }
+
+    window.open(proposerFormUrl, "_blank", "noopener,noreferrer");
+  };
+
   const markRequirementsAsUnsaved = () => {
+    markLocalRequirementRowsUnsaved(drsPayload);
+
     if (normalizedRoleType === "CVT_TASK") {
       sessionStorage.setItem(requirementSaveStorageKey, "false");
     }
@@ -1199,6 +1253,12 @@ const RequirementManagementTable = ({
         ),
       ).unwrap();
 
+      saveLocalRequirementRows(
+        drsPayload,
+        createRequestRows(rows),
+        false,
+      );
+
       if (normalizedRoleType === "CVT_TASK") {
         sessionStorage.setItem(requirementSaveStorageKey, "true");
       }
@@ -1360,8 +1420,8 @@ const RequirementManagementTable = ({
             variant="outlined"
             onClick={onAddRequirement}
             sx={{
-              borderColor: "#0a5285",
-              color: "#0a5285",
+              borderColor: "#E45F14",
+              color: "#E45F14",
               bgcolor: "#ffffff",
               minHeight: 30,
               borderRadius: "6px",
@@ -1371,7 +1431,7 @@ const RequirementManagementTable = ({
               textTransform: "none",
               fontWeight: 600,
               "&:hover": {
-                borderColor: "#073f68",
+                borderColor: "#E45F14",
                 bgcolor: "#f4f8fb",
               },
             }}
@@ -1772,31 +1832,81 @@ const RequirementManagementTable = ({
         </Box>
       )}
 
-      {isSaveButtonVisible && (
-        <Box sx={{ mt: 1, mb: 0.5, textAlign: "center" }}>
+      <Box
+        sx={{
+          mt: 1,
+          mb: 0.5,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        {isSaveButtonVisible && (
           <Button
             variant="contained"
             onClick={handleSave}
             disabled={rows.length === 0}
-            sx={{
-              minWidth: 170,
-              borderRadius: "28px",
-              bgcolor: "#ad252a",
-              py: 0.65,
-              textTransform: "none",
-              fontSize: "13px",
-              fontWeight: 600,
-              boxShadow: "none",
-              "&:hover": {
-                bgcolor: "#941f24",
-                boxShadow: "none",
-              },
-            }}
+            sx={actionButtonSx}
           >
             Save
           </Button>
-        </Box>
-      )}
+        )}
+
+        {normalizedRoleType === "CPT_DATA_ENTRY_NMR_TASK" && (
+          <>
+            <Button
+              variant="contained"
+              onClick={() =>
+                navigate(
+                  getFinancialPath(
+                    businessType,
+                    applicationNumber ?? "",
+                  ),
+                )
+              }
+              sx={actionButtonSx}
+            >
+              View Financials
+            </Button>
+
+            <Button
+              variant="contained"
+              onClick={handleViewDocuments}
+              sx={actionButtonSx}
+            >
+              View Documents
+            </Button>
+          </>
+        )}
+
+        {normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK" && (
+          <>
+          <Button
+            variant="contained"
+            onClick={() =>
+              navigate(
+                getMedicalPath(
+                  businessType,
+                  applicationNumber ?? "",
+                ),
+              )
+            }
+            sx={actionButtonSx}
+          >
+            View Medicals
+          </Button>
+          <Button
+              variant="contained"
+              onClick={handleViewDocuments}
+              sx={actionButtonSx}
+            >
+              View Documents
+            </Button>
+            </>
+        )}
+      </Box>
 
       <Snackbar
         open={snackbar.open}

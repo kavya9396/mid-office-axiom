@@ -1650,7 +1650,8 @@ const ApplicantProfile = () => {
 
   const canShowApplicantActions = ![
     "CVT_TASK",
-    "CPT_TASK",
+    "CPT_DATA_ENTRY_NMR_TASK",
+    "CPT_DATA_ENTRY_MR_TASK",
     "DVT_TASK",
     "DVT_FORMAL_TASK",
     "GUW_FORMAL_TASK",
@@ -1905,19 +1906,33 @@ const ApplicantProfile = () => {
           {/* ================================================================= */}
 
           {canShowApplicantActions && (
-            <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+            <Box
+              sx={{
+                mt: 1.5,
+                pt: 1.5,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 1.25,
+                flexWrap: "wrap",
+                borderTop: "1px solid #EEEEEE",
+              }}
+            >
               <CustomButton
                 variant="outlined"
                 sx={{
                   borderRadius: "50px",
                   px: 3,
-                  py: 0.5,
-                  minWidth: "150px",
+                  py: 0.75,
+                  width: { xs: "100%", sm: "180px" },
+                  maxWidth: { xs: "280px", sm: "none" },
                   fontSize: "12px",
                   lineHeight: "16px",
                   fontWeight: 700,
                 }}
-                onClick={() => navigate(getMedicalPath(businessType!, applicationNumber!))}
+                onClick={() =>
+                  navigate(getMedicalPath(businessType!, applicationNumber!))
+                }
               >
                 View Medicals
               </CustomButton>
@@ -1926,13 +1941,16 @@ const ApplicantProfile = () => {
                 sx={{
                   borderRadius: "50px",
                   px: 3,
-                  py: 0.5,
-                  minWidth: "150px",
+                  py: 0.75,
+                  width: { xs: "100%", sm: "180px" },
+                  maxWidth: { xs: "280px", sm: "none" },
                   fontSize: "12px",
                   lineHeight: "16px",
                   fontWeight: 700,
                 }}
-                onClick={() => navigate(getFinancialPath(businessType!, applicationNumber!))}
+                onClick={() =>
+                  navigate(getFinancialPath(businessType!, applicationNumber!))
+                }
               >
                 View Financials
               </CustomButton>

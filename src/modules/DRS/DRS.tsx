@@ -1,7 +1,24 @@
-import { useEffect, useMemo, useRef, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import { Box, CircularProgress, Typography } from "@mui/material";
+import {
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import {
+  useDispatch,
+  useSelector,
+} from "react-redux";
+import {
+  Alert,
+  Box,
+  CircularProgress,
+  Snackbar,
+  Typography,
+} from "@mui/material";
 
 import {
   accordionRegistry,
@@ -11,8 +28,13 @@ import {
 
 import { drsThunk } from "../../store/thunks/drsThunk";
 import { breThunk } from "../../store/thunks/breThunk";
-import type { AppDispatch, RootState } from "../../store/store";
+import { completeTaskThunk } from "../../store/thunks/completeTaskThunk";
+import type {
+  AppDispatch,
+  RootState,
+} from "../../store/store";
 import BackButton from "../../components/layout/BackButton";
+import CustomButton from "../../components/ui/Button/Button";
 import { title } from "../../utils/constant";
 import { getInboxPath } from "../../routes/routes";
 
@@ -21,7 +43,27 @@ interface ApplicationRow {
   businessType?: string;
   roleType?: string;
   userId?: string;
+  taskId?: string;
+  instanceId?: string;
+  decision?: string;
+  remarks?: string;
   [key: string]: unknown;
+}
+
+interface SelectedCaseContext {
+  applicationNo?: string;
+  userId?: string;
+  businessType?: string;
+  roleType?: string;
+  taskId?: string;
+  instanceId?: string;
+  taskCompositeId?: string;
+}
+
+interface SnackbarState {
+  open: boolean;
+  message: string;
+  severity: "success" | "error" | "warning" | "info";
 }
 
 const mapper = {
@@ -32,10 +74,12 @@ const mapper = {
   HOD_TASK: "RETAIL_HOD_POOL",
   SR_UW_TASK: "RETAIL_SR_UW_POOL",
   READY_FOR_ISSUANCE_TASK: "RETAIL_READY_FOR_ISSUANCE_POOL",
-  SYSTEM_WAIT_POOL_AMR_NON_MEDICAL: "RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
+  SYSTEM_WAIT_POOL_AMR_NON_MEDICAL:
+    "RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
   AMR_NON_MEDICAL_TASK: "RETAIL_AMR_NON_MEDICAL",
   RECONSIDERATION_TASK: "RETAIL_RECONSIDERATION_POOL",
-  PRE_ISSUANCE_SERVICING_TASK: "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
+  PRE_ISSUANCE_SERVICING_TASK:
+    "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
   POST_ISSUANCE_TASK: "POST_ISSUANCE_TASK",
   EXCEPTIONAL_TASK: "RETAIL_EXCEPTIONAL_POOL",
   PIVV_TASK: "PIVV_TASK",
@@ -46,7 +90,8 @@ const mapper = {
   VENDOR_CMO_TASK: "RETAIL_VENDOR_CMO_POOL",
   COPS_TASK: "RETAIL_COPS_POOL",
   IT_TASK: "RETAIL_IT_POOL",
-  SYSTEM_WAIT_POOL_AMR_MEDICAL: "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
+  SYSTEM_WAIT_POOL_AMR_MEDICAL:
+    "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
   RI_TASK: "RETAIL_REINSURER_POOL",
   REQUIREMENT_POOL: "RETAIL_REQUIREMENT_REVIEW_POOL",
   CUW_CLAIM_AUDIT_TASK: "RETAIL_CUW_CLAIM_AUDIT",
@@ -66,42 +111,97 @@ const mapper = {
   CPT_DATA_ENTRY_NMR_TASK: "CPT_DATA_ENTRY_NMR_TASK",
 } as const;
 
+const getSelectedCaseContext = (): SelectedCaseContext => {
+  try {
+    const value = localStorage.getItem("selectedCaseContext");
+
+    return value
+      ? (JSON.parse(value) as SelectedCaseContext)
+      : {};
+  } catch {
+    return {};
+  }
+};
+
+const normalizeTaskId = (value: string): string => {
+  const normalizedValue = value.trim();
+
+  if (!normalizedValue) {
+    return "";
+  }
+
+  const parts = normalizedValue.split(".");
+  return parts.at(-1)?.trim() ?? normalizedValue;
+};
+
+const normalizeAccordionId = (value: string): string =>
+  value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+
+const isUwToolkitAccordion = (accordionId: string): boolean =>
+  normalizeAccordionId(accordionId) === "uwtoolkit";
+
 const DRS = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  const application = location.state?.application as ApplicationRow | undefined;
+  const application = location.state?.application as
+    | ApplicationRow
+    | undefined;
 
-  const drsData = useSelector((state: RootState) => state.drs.data);
+  const drsData = useSelector(
+    (state: RootState) => state.drs.data,
+  );
 
   const [isPageLoading, setIsPageLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  /*
-   * Prevents duplicate API calls caused by
-   * React Strict Mode in development.
-   */
+  const [snackbar, setSnackbar] = useState<SnackbarState>({
+    open: false,
+    message: "",
+    severity: "info",
+  });
+
   const lastRequestKeyRef = useRef<string | null>(null);
 
-  const storedRoleType = localStorage.getItem("roleType")?.trim() ?? "";
+  const selectedCaseContext = useMemo(
+    () => getSelectedCaseContext(),
+    [],
+  );
 
-  const roleType = application?.roleType?.trim() || storedRoleType;
+  const storedRoleType =
+    localStorage.getItem("roleType")?.trim() ?? "";
+
+  const roleType =
+    application?.roleType?.trim() ||
+    selectedCaseContext.roleType?.trim() ||
+    storedRoleType;
 
   const layout = mapper[roleType as keyof typeof mapper];
 
-  /*
-   * Store the role received from Inbox.
-   */
   useEffect(() => {
-    const applicationRoleType = application?.roleType?.trim();
-
-    if (applicationRoleType) {
-      localStorage.setItem("roleType", applicationRoleType);
+    if (!application) {
+      return;
     }
-  }, [application?.roleType]);
+
+    const valuesToPersist = {
+      applicationNo: application.applicationNo,
+      userId: application.userId,
+      businessType: application.businessType,
+      roleType: application.roleType,
+    };
+
+    Object.entries(valuesToPersist).forEach(([key, value]) => {
+      const normalizedValue = value?.trim();
+
+      if (normalizedValue) {
+        localStorage.setItem(key, normalizedValue);
+      }
+    });
+  }, [application]);
 
   const layoutAccordions = useMemo(
-    () => (layout ? (DRS_LAYOUTS[layout] ?? []) : []),
+    () => (layout ? DRS_LAYOUTS[layout] ?? [] : []),
     [layout],
   );
 
@@ -109,36 +209,49 @@ const DRS = () => {
     () =>
       Array.from(
         new Set([
-          ...layoutAccordions.map((accordion) => String(accordion)),
+          ...layoutAccordions.map(String),
           "requirementCategoryInfo",
+          "latestBreDecision",
         ]),
       ),
     [layoutAccordions],
   );
-  const businessType = (
+
+  const applicationNo = String(
+    application?.applicationNo ??
+      selectedCaseContext.applicationNo ??
+      localStorage.getItem("applicationNo") ??
+      "",
+  ).trim();
+
+  const userId = String(
+    application?.userId ??
+      selectedCaseContext.userId ??
+      localStorage.getItem("userId") ??
+      localStorage.getItem("username") ??
+      "",
+  ).trim();
+
+  const businessType = String(
     application?.businessType ??
-    localStorage.getItem("businessType") ??
-    ""
+      selectedCaseContext.businessType ??
+      localStorage.getItem("businessType") ??
+      "",
   )
     .trim()
     .toLowerCase();
 
-  const eventName = businessType === "retail" ? "BRE-RETAIL" : "BRE-GROUP";
+  const eventName =
+    businessType === "retail"
+      ? "BRE-RETAIL"
+      : "BRE-GROUP";
 
-  /*
-   * Load DRS and BRE data.
-   */
   useEffect(() => {
-    const applicationNo = application?.applicationNo?.trim();
-
-    const userId = String(
-      application?.userId ??
-        localStorage.getItem("userId") ??
-        localStorage.getItem("username") ??
-        "",
-    ).trim();
-
-    if (!applicationNo || !userId || !roleType || !layout) {
+    if (
+      !applicationNo ||
+      !userId ||
+      !roleType
+    ) {
       void Promise.resolve().then(() => {
         setIsPageLoading(false);
       });
@@ -146,96 +259,222 @@ const DRS = () => {
       return;
     }
 
-    /*
-     * A request is unique based on the
-     * application, user, role, layout,
-     * BRE event and requested sections.
-     */
     const requestKey = [
       applicationNo,
       userId,
       roleType,
-      layout,
       eventName,
       sections.join(","),
     ].join("|");
 
-    /*
-     * React Strict Mode can execute an
-     * effect twice during development.
-     */
     if (lastRequestKeyRef.current === requestKey) {
       return;
     }
 
     lastRequestKeyRef.current = requestKey;
-    console.log("sections", sections);
-   const loadPageData = async () => {
-  setIsPageLoading(true);
 
-  // BRE runs independently and does not control the page loader.
-  void dispatch(
-    breThunk({
-      eventName,
-      applicationNumber: applicationNo,
-    }),
-  )
-    .unwrap()
-    .then((response) => {
-      console.log("BRE API RESPONSE:", response);
-    })
-    .catch((error) => {
-      console.error("Failed to load BRE:", error);
-    });
+    const loadPageData = async () => {
+      setIsPageLoading(true);
 
-  try {
-    const drsResponse = await dispatch(
-      drsThunk({
-        applicationNo,
-        userId,
-        roleType,
-        sections,
-      }),
-    ).unwrap();
+      void dispatch(
+        breThunk({
+          eventName,
+          applicationNumber: applicationNo,
+        }),
+      )
+        .unwrap()
+        .catch((error: unknown) => {
+          console.error("Failed to load BRE:", error);
+        });
 
-    console.log("DRS API RESPONSE:", drsResponse);
-  } catch (error) {
-    console.error("Failed to load DRS:", error);
-  } finally {
-    /*
-     * Hide the loader as soon as the latest
-     * DRS request completes. BRE may still
-     * be running in the background.
-     */
-    if (lastRequestKeyRef.current === requestKey) {
-      setIsPageLoading(false);
-    }
-  }
-};
-    /*
-     * Run asynchronously to avoid
-     * synchronous setState inside effect.
-     */
+      try {
+        await dispatch(
+          drsThunk({
+            applicationNo,
+            userId,
+            roleType,
+            sections,
+          }),
+        ).unwrap();
+      } catch (error) {
+        console.error("Failed to load DRS:", error);
+      } finally {
+        if (
+          lastRequestKeyRef.current === requestKey
+        ) {
+          setIsPageLoading(false);
+        }
+      }
+    };
+
     void Promise.resolve().then(loadPageData);
   }, [
     dispatch,
-    application?.applicationNo,
-    application?.userId,
+    applicationNo,
+    userId,
     roleType,
-    layout,
     sections,
     eventName,
   ]);
 
   const visibleAccordions = useMemo(
-    () => getPoolWiseAvailableAccordions(layout, drsData),
+    () =>
+      getPoolWiseAvailableAccordions(
+        layout,
+        drsData,
+      ),
     [layout, drsData],
   );
 
+  const handleSubmit = async () => {
+  if (isSubmitting) {
+    return;
+  }
+
+  const rawTaskId = String(
+    application?.taskId ??
+      selectedCaseContext.taskId ??
+      selectedCaseContext.taskCompositeId ??
+      localStorage.getItem("taskId") ??
+      localStorage.getItem("taskCompositeId") ??
+      "",
+  ).trim();
+
+  const taskId = normalizeTaskId(rawTaskId);
+
+  const instanceId = String(
+    application?.instanceId ??
+      selectedCaseContext.instanceId ??
+      localStorage.getItem("instanceId") ??
+      "",
+  ).trim();
+
+  if (!applicationNo || !userId) {
+    setSnackbar({
+      open: true,
+      message: "Application number or user ID is missing.",
+      severity: "error",
+    });
+    return;
+  }
+
+  if (!taskId || !instanceId) {
+    setSnackbar({
+      open: true,
+      message: "Task ID or instance ID is missing.",
+      severity: "error",
+    });
+    return;
+  }
+
   /*
-   * Full-page loader remains visible
-   * until DRS and BRE APIs settle.
+   * These values are now guaranteed to be strings
+   * because the missing-value checks have completed.
    */
+  const payload = {
+    requestContext: {
+      taskId,
+      userId,
+      appNo: applicationNo,
+      instanceId,
+      remarks: "",
+      decision: "AMR",
+    },
+  };
+
+  setIsSubmitting(true);
+
+  try {
+    // Complete-task is called only after BRE succeeds.
+    await dispatch(
+      breThunk({
+        eventName,
+        applicationNumber: applicationNo,
+      }),
+    ).unwrap();
+
+    await dispatch(
+      completeTaskThunk(payload),
+    ).unwrap();
+
+    setSnackbar({
+      open: true,
+      message: "Application submitted successfully.",
+      severity: "success",
+    });
+
+    window.setTimeout(() => {
+      navigate(getInboxPath());
+    }, 800);
+  } catch (error) {
+    console.error(
+      "Failed to submit application:",
+      error,
+    );
+
+    setSnackbar({
+      open: true,
+      message:
+        typeof error === "string"
+          ? error
+          : "Unable to submit the application. Please try again.",
+      severity: "error",
+    });
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  const renderSubmitButton = () => (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        mt: 0.75,
+        mb: 0.75,
+      }}
+    >
+      <CustomButton
+        onClick={handleSubmit}
+        disabled={isSubmitting}
+        sx={{minWidth: 170,
+  borderRadius: "28px",
+  bgcolor: "#ad252a",
+  py: 0.65,
+  textTransform: "none",
+  fontSize: "13px",
+  fontWeight: 600,
+  boxShadow: "none",
+  "&:hover": {
+    bgcolor: "#941f24",
+    boxShadow: "none",
+  }}}
+      >
+        <Box
+          component="span"
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1,
+            minWidth: 110,
+          }}
+        >
+          {isSubmitting && (
+            <CircularProgress
+              size={17}
+              thickness={5}
+              sx={{ color: "inherit" }}
+            />
+          )}
+
+          {isSubmitting ? "Submitting..." : "Submit"}
+        </Box>
+      </CustomButton>
+    </Box>
+  );
+
   if (isPageLoading) {
     return (
       <Box
@@ -253,9 +492,7 @@ const DRS = () => {
         <CircularProgress
           size={42}
           thickness={4}
-          sx={{
-            color: "#f58220",
-          }}
+          sx={{ color: "#f58220" }}
         />
 
         <Typography
@@ -271,6 +508,13 @@ const DRS = () => {
     );
   }
 
+  const hasUwToolkit = visibleAccordions.some(
+    (accordionId) =>
+      isUwToolkitAccordion(String(accordionId)),
+  );
+const shouldShowSubmitButton =
+  roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
+  roleType === "CPT_DATA_ENTRY_MR_TASK";
   return (
     <>
       <BackButton
@@ -286,19 +530,60 @@ const DRS = () => {
         }}
       >
         {visibleAccordions.map((accordionId) => {
-          const AccordionComponent = accordionRegistry[accordionId];
+          const AccordionComponent =
+            accordionRegistry[accordionId];
 
           if (!AccordionComponent) {
             return null;
           }
 
+          const showSubmitBeforeAccordion =
+            isUwToolkitAccordion(
+              String(accordionId),
+            );
+
           return (
             <Box key={accordionId}>
+              {(showSubmitBeforeAccordion && roleType == 'CPT_DATA_ENTRY_NMR_TASK') &&
+                renderSubmitButton()}
+
               <AccordionComponent />
             </Box>
           );
         })}
+
+        {!hasUwToolkit && renderSubmitButton()}
       </Box>
+{shouldShowSubmitButton &&
+  !hasUwToolkit &&
+  renderSubmitButton()}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        anchorOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+        onClose={() =>
+          setSnackbar((current) => ({
+            ...current,
+            open: false,
+          }))
+        }
+      >
+        <Alert
+          severity={snackbar.severity}
+          variant="filled"
+          onClose={() =>
+            setSnackbar((current) => ({
+              ...current,
+              open: false,
+            }))
+          }
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };

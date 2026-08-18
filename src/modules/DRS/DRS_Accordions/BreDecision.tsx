@@ -1,4 +1,8 @@
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  CircularProgress,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -70,6 +74,9 @@ const BreDecision = () => {
   const [bredialogOpen, setBreDialogOpen] =
     useState(false);
 
+  const [isBreRetriggering, setIsBreRetriggering] =
+    useState(false);
+
   /*
    * Response priority:
    *
@@ -97,6 +104,10 @@ const BreDecision = () => {
       : "BRE-GROUP";
 
   const handleRefresh = async () => {
+    if (isBreRetriggering) {
+      return;
+    }
+
     const reTriggerCount =
       latestBreDecisionData?.reTriggerCount ?? 0;
 
@@ -112,6 +123,8 @@ const BreDecision = () => {
       return;
     }
 
+    setIsBreRetriggering(true);
+
     try {
       const response = await dispatch(
         breThunk({
@@ -126,6 +139,8 @@ const BreDecision = () => {
         "BRE API failed:",
         error,
       );
+    } finally {
+      setIsBreRetriggering(false);
     }
   };
 
@@ -324,8 +339,18 @@ const BreDecision = () => {
                 },
               }}
               onClick={handleRefresh}
+              disabled={isBreRetriggering}
+              aria-label="Retrigger BRE"
             >
-              <RefreshIcon />
+              {isBreRetriggering ? (
+                <CircularProgress
+                  size={15}
+                  thickness={5}
+                  sx={{ color: "#f58220" }}
+                />
+              ) : (
+                <RefreshIcon />
+              )}
             </CustomButton>
           )}
         </Box>

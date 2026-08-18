@@ -1,4 +1,9 @@
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useLocation } from "react-router-dom";
@@ -17,6 +22,7 @@ import { validateDecision } from "../../../validations/decisionValidations";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
 import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
+import { formatDate } from "../../../utils/dataFormat";
 
 interface MiscItem {
   type: string;
@@ -98,11 +104,26 @@ const Decision = () => {
       "",
   ).trim();
 
+  const [decisionTimestamp] = useState(() =>
+    new Intl.DateTimeFormat("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Kolkata",
+    }).format(new Date()),
+  );
+
   // ================= STATE =================
 
- const [selectedDecision, setSelectedDecision] = useState("");
+  const [selectedDecision, setSelectedDecision] = useState("");
 
   const [remarks, setRemarks] = useState("");
+
+  const [doNotPayToTpa, setDoNotPayToTpa] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -151,6 +172,16 @@ const Decision = () => {
       localStorage.getItem("roleType") ??
       "",
   ).trim();
+
+  const showDecisionAuditFields =
+    roleType === "HOD_TASK" ||
+    roleType === "SR_UW_TASK" ||
+    roleType === "CMO_TASK" ||
+    roleType === "VENDOR_CMO_TASK" ||
+    roleType === "HO_CMO_TASK";
+
+  const showDoNotPayToTpa =
+    roleType === "CMO_TASK" || roleType === "HO_CMO_TASK" || roleType === "VENDOR_CMO_TASK";
 
   const decisionCodeMap: Record<string, string> = {
     CVT_TASK: "CVT",
@@ -391,6 +422,9 @@ const Decision = () => {
           instanceId,
           remarks: remarks.trim(),
           decision: selectedDecision,
+          ...(showDoNotPayToTpa && {
+            doNotPayToTPA: doNotPayToTpa,
+          }),
         },
       };
 
@@ -551,13 +585,19 @@ const Decision = () => {
                 CASE DECISION
             ===================================================== */}
 
- <Box
-                            sx={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(3, 1fr)",
-                                gap: 1,
-                            }}
-                        >
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md: showDecisionAuditFields
+                  ? "repeat(3, minmax(0, 1fr))"
+                  : "minmax(280px, 360px)",
+              },
+              gap: 1,
+              width: "100%",
+            }}
+          >
 
             <Box
               sx={{
@@ -603,8 +643,77 @@ const Decision = () => {
               </Box>
             </Box>
 
-            
-</Box>
+            {showDecisionAuditFields && (
+              <>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      color: "#444",
+                      mb: 0.5,
+                    }}
+                  >
+                    User ID
+                  </Typography>
+
+                  <CustomTextField
+                    fullWidth
+                    value={userId}
+                    disabled
+                    variant="outlined"
+                    size="small"
+                    sx={{ backgroundColor: "#fff" }}
+                  />
+                </Box>
+
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      color: "#444",
+                      mb: 0.5,
+                    }}
+                  >
+                    Date & Timestamp
+                  </Typography>
+                  <CustomTextField
+                    fullWidth
+                    value={formatDate(decisionTimestamp)}
+                    disabled
+                    variant="outlined"
+                    size="small"
+                    sx={{ backgroundColor: "#fff" }}
+                  />
+                </Box>
+              </>
+            )}
+          </Box>
+
+          {showDoNotPayToTpa && (
+            <FormControlLabel
+              sx={{
+                mt: 0.75,
+                ml: 0,
+                "& .MuiFormControlLabel-label": {
+                  fontSize: "12px",
+                  color: "#444",
+                },
+              }}
+              control={
+                <Checkbox
+                  checked={doNotPayToTpa}
+                  onChange={(event) =>
+                    setDoNotPayToTpa(event.target.checked)
+                  }
+                  size="small"
+                  sx={{ p: 0.5, mr: 0.5 }}
+                />
+              }
+              label="Do not pay to TPA"
+            />
+          )}
           {/* =====================================================
               SUBMIT
           ===================================================== */}
