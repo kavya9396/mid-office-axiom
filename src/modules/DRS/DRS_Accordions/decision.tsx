@@ -160,6 +160,10 @@ const Decision = () => {
     RECONSIDERATION_TASK: "RECONS",
     REJECT_TASK: "RECONS",
     DVT_FORMAL_TASK: "DVT_FOR",
+    HOD_TASK:"HOD",
+    SR_UW_TASK:"SUW",
+    CMO_TASK:"CMO",
+    HO_CMO_TASK:"CMO"
   };
 
   const decisionCode = roleType

@@ -77,7 +77,7 @@ const hodDecisionOptions = useMemo(() => {
       const item = option as Record<string, unknown>;
 
       return (
-        String(item.type ?? "").trim().toUpperCase() === "UW_DECISION" &&
+        String(item.type ?? "").trim().toUpperCase() === "HOD" &&
         String(item.isActive ?? "").trim().toUpperCase() === "Y"
       );
     })
