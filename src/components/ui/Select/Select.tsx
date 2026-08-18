@@ -59,14 +59,14 @@ export default function CustomSelect(props: CustomSelectProps) {
 
   const maxCount = multiple ? props.maxCount : undefined;
 
- const toTitleCase = (text: string) =>
-  text
-    .toLowerCase()
-    .split(" ")
-    .map(
-      (word) => word.charAt(0).toUpperCase() + word.slice(1)
-    )
-    .join(" ");
+//  const toTitleCase = (text: string) =>
+//   text
+//     .toLowerCase()
+//     .split(" ")
+//     .map(
+//       (word) => word.charAt(0).toUpperCase() + word.slice(1)
+//     )
+//     .join(" ");
 
   const handleChange = (
     e: SelectChangeEvent<string | string[]>
@@ -108,7 +108,7 @@ export default function CustomSelect(props: CustomSelectProps) {
       const label =
         options.find((opt) => opt.value === val)?.label ?? val;
 
-      return toTitleCase(label);
+      return label;
     };
 
     if (Array.isArray(selected)) {
@@ -201,7 +201,7 @@ export default function CustomSelect(props: CustomSelectProps) {
                 value={option.value}
                 disabled={isDisabled}
               >
-                {toTitleCase(option.label)}
+                {option.label}
               </MenuItem>
             );
           })}

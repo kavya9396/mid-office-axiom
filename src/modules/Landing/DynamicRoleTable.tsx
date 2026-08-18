@@ -1126,7 +1126,8 @@ console.log('poolkey',poolKey)
           ...columnFlex,
           margin: 2,
           maxHeight: "calc(100vh - 100px)",
-
+          boxShadow: 5,
+          borderRadius: "10px"
         }}
       >
         {/* ======================================================

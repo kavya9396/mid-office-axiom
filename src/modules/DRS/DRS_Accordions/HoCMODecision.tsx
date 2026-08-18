@@ -12,7 +12,7 @@ import { useSelector } from "react-redux";
 import type { RootState } from "../../../store/store";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
-import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { toMasterLabel } from "../../../utils/masterOptions";
 
 const HoCMODecision = () => {
   const navigate = useNavigate();
@@ -32,9 +32,47 @@ const HoCMODecision = () => {
   const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useSelector((state: RootState) => state.drs.masters);
 
+  // const hoCmoDecisionOptions = useMemo(() => {
+  //   return normalizeDecisionOptions(masters, "hoCmoDecision", true, true);
+  // }, [masters]);
+
   const hoCmoDecisionOptions = useMemo(() => {
-    return normalizeDecisionOptions(masters, "hoCmoDecision", true, true);
-  }, [masters]);
+  const misc = (masters as Record<string, unknown> | undefined)?.misc;
+
+  if (!Array.isArray(misc)) {
+    return [];
+  }
+
+  return misc
+    .filter((option) => {
+      const item = option as Record<string, unknown>;
+
+      return (
+        String(item.type ?? "").trim().toUpperCase() === "UW_DECISION" &&
+        String(item.isActive ?? "").trim().toUpperCase() === "Y"
+      );
+    })
+    .map((option) => {
+      const item = option as Record<string, unknown>;
+
+      return {
+        label: String(
+          item.description ??
+          item.label ??
+          item.value ??
+          ""
+        ).trim(),
+
+        value: String(
+          item.code ??
+          item.value ??
+          item.key ??
+          ""
+        ).trim(),
+      };
+    })
+    .filter((option) => option.label && option.value);
+}, [masters]);
 
   const decisionLabel = toMasterLabel(decision, hoCmoDecisionOptions);
   const dialogMessage = `Kindly reconfirm if you want to proceed with the HO CMO decision as "${decisionLabel}"`;
@@ -59,7 +97,7 @@ const HoCMODecision = () => {
 
   return (
     // <Container disableGutters>
-      <Box sx={{ p:1 }}>
+      <Box sx={{ px:1 }}>
         <CustomAccordion title="HO CMO Decision" defaultExpanded>
           <Box
             sx={{
@@ -115,7 +153,7 @@ const HoCMODecision = () => {
             <Box
               sx={{
                 display: "grid",
-                gridTemplateColumns: "1fr",
+                gridTemplateColumns: "repeat(3, 1fr)",
                 gap: 1,
               }}
             >
