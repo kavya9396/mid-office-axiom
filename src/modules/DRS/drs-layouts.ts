@@ -231,7 +231,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   ISSUANCE_TASK: ["breDecision","applicationOverview","requirementManagement","quickLinks"],
   RETAIL_REJECT_POOL: ["applicationOverview","requirementManagement","reconsiderationDecision","quickLinks"],
   RETAIL_SUW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
-  RETAIL_CUW_POOL: ["breDecision","applicationOverview","applicantProfile", "requirementManagement","uwDecision","decisionHistory","uwToolkit","quickLinks"],
+  RETAIL_CUW_POOL: ["breDecision","applicationOverview","summary", "requirementManagement","uwDecision","decisionHistory","uwToolkit","quickLinks"],
   // RETAIL_SWISS_RE_POOL: ["applicationOverview","quickLinks"],
   // RETAIL_RGA_POOL: ["quickLinks"],
   // RETAIL_MUNICH_RE_POOL: ["quickLinks"],
