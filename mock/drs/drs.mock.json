@@ -36,7 +36,7 @@
               "breTeleVideoMerRemark": "",
               "munichReMedicalDecision": "",
               "munichReRating": "",
-              "biuMedicalStatus": "N"
+              "biuMedicalStatus": ""
             },
             "financialRisk": {
               "isFinancial": true,
@@ -46,7 +46,7 @@
               "derivedIncome": "1600000.0",
               "counterOfferValue": "5000000.0",
               "additionalSA": "0.0",
-              "biuFinancialStatus": "false"
+              "biuFinancialStatus": ""
             },
             "otherRisk": {
               "isOthers": true,
