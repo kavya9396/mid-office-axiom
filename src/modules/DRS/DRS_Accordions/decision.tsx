@@ -15,6 +15,7 @@ import type { AppDispatch } from "../../../store/store";
 import { title } from "../../../utils/constant";
 import { validateDecision } from "../../../validations/decisionValidations";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
+import { breThunk } from "../../../store/thunks/breThunk";
 import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
 
 interface MiscItem {
@@ -159,6 +160,10 @@ const Decision = () => {
     RECONSIDERATION_TASK: "RECONS",
     REJECT_TASK: "RECONS",
     DVT_FORMAL_TASK: "DVT_FOR",
+    HOD_TASK:"HOD",
+    SR_UW_TASK:"SUW",
+    CMO_TASK:"CMO",
+    HO_CMO_TASK:"CMO"
   };
 
   const decisionCode = roleType
@@ -353,6 +358,8 @@ const Decision = () => {
   // =====================================================
 
   const handleConfirmSubmit = async () => {
+    let breSucceeded = false;
+
     try {
       setIsSubmitting(true);
 
@@ -360,7 +367,20 @@ const Decision = () => {
       setIsConfirmDialogOpen(false);
 
       // =====================================================
-      // API CALL
+      // CALL BRE FIRST
+      // =====================================================
+
+      await dispatch(
+        breThunk({
+          eventName: "BRE-RETAIL",
+          applicationNumber,
+        }),
+      ).unwrap();
+
+      breSucceeded = true;
+
+      // =====================================================
+      // CALL COMPLETE TASK ONLY AFTER BRE SUCCESS
       // =====================================================
 
       const payload = {
@@ -404,12 +424,16 @@ const Decision = () => {
       // =====================================================
 
       console.error(
-        "Decision API failed:",
+        breSucceeded
+          ? "Complete Task API failed:"
+          : "BRE API failed:",
         error,
       );
 
       showSnackbar(
-        "Unable to submit decision. Please try again.",
+        breSucceeded
+          ? "BRE completed, but the decision could not be submitted. Please try again."
+          : "BRE failed. The decision was not submitted. Please try again.",
         "error",
       );
     } finally {
