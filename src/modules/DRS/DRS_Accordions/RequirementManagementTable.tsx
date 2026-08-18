@@ -29,6 +29,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
 import { masterThunk } from "../../../store/thunks/masterThunk";
 import { applicantProfileSubmitThunk } from "../../../store/thunks/applicantProfileSubmitThunk";
+import { drsThunk } from "../../../store/thunks/drsThunk";
 import type {
   AdditionalRequirementRow,
   ApplicantProfileSubmitRequest,
@@ -542,11 +543,18 @@ const RequirementManagementTable = ({
   const location = useLocation();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { applicationNumber } = useParams<{ applicationNumber: string }>();
+  const { applicationNumber: routeApplicationNumber } = useParams<{
+    applicationNumber: string;
+  }>();
   const [roleType] = useState(
     () => localStorage.getItem("roleType") ?? "",
   );
   const application = location.state?.application as ApplicationRow | undefined;
+  const applicationNumber = normalizeText(
+    routeApplicationNumber ??
+      application?.applicationNo ??
+      localStorage.getItem("applicationNo"),
+  );
   const businessType = (
     application?.businessType ??
     localStorage.getItem("businessType") ??
@@ -656,21 +664,14 @@ const RequirementManagementTable = ({
   const markRequirementsAsUnsaved = () => {
     markLocalRequirementRowsUnsaved(drsPayload);
 
-    if (normalizedRoleType === "CVT_TASK") {
-      sessionStorage.setItem(requirementSaveStorageKey, "false");
-    }
+    sessionStorage.setItem(requirementSaveStorageKey, "false");
   };
 
   useEffect(() => {
     const currentRoleType = normalizeText(roleType).toUpperCase();
 
-    if (currentRoleType === "CVT_TASK") {
-      const storageKey = `requirementManagementSaved:${
-        applicationNumber ?? ""
-      }:${currentRoleType}`;
-
-      sessionStorage.setItem(storageKey, "false");
-    }
+    const storageKey = `requirementManagementSaved:${applicationNumber}:${currentRoleType}`;
+    sessionStorage.setItem(storageKey, "false");
   }, [addRowSignal, applicationNumber, roleType]);
 
   /*
@@ -1253,15 +1254,24 @@ const RequirementManagementTable = ({
         ),
       ).unwrap();
 
+      // Reload Requirement Management from the server after the PUT succeeds.
+      // The decision dropdown must always use this refreshed API response.
+      await dispatch(
+        drsThunk({
+          applicationNo: applicationNumber,
+          roleType,
+          sections: ["requirementManagement", "requirementCategoryInfo"],
+          userId,
+        }),
+      ).unwrap();
+
       saveLocalRequirementRows(
         drsPayload,
         createRequestRows(rows),
         false,
       );
 
-      if (normalizedRoleType === "CVT_TASK") {
-        sessionStorage.setItem(requirementSaveStorageKey, "true");
-      }
+      sessionStorage.setItem(requirementSaveStorageKey, "true");
 
       setNewRowIds([]);
       setRowMasterOptions({});

@@ -627,7 +627,7 @@
         "fupCode": "OCD",
         "requirementId": 11235,
         "description": "OCD-Submit digital confirmation via Consent Code",
-        "status": "Pending",
+        "status": "Accept",
         "isActive": "Y",
         "raisedDate": "2026-08-14",
         "raisedBy": "BRE_URMS",

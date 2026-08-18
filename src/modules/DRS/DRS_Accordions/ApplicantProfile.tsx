@@ -1657,6 +1657,16 @@ const ApplicantProfile = () => {
     "GUW_FORMAL_TASK",
   ].includes(roleType);
 
+  const canShowRiskAnalytics = ![
+    "CVT_TASK",
+    "PIVV_TASK",
+    "CPT_DATA_ENTRY_NMR_TASK",
+    "CPT_DATA_ENTRY_MR_TASK",
+    "RECONSIDERATION_TASK",
+    "AMR_NON_MEDICAL_TASK",
+    "AMR_MEDICAL_TASK",
+  ].includes(roleType);
+
   /* ------------------------------------------------------------------------ */
   /*                                   UI                                     */
   /* ------------------------------------------------------------------------ */
@@ -1684,7 +1694,7 @@ const ApplicantProfile = () => {
 
         {/* ==================== RISK ANALYTICS ==================== */}
 
-           <RiskAnalytics />
+        {canShowRiskAnalytics && <RiskAnalytics />}
         
 
         <Box sx={{ width: "100%" }}>

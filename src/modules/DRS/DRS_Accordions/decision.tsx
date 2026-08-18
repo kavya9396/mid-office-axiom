@@ -95,7 +95,9 @@ const Decision = () => {
   ).trim();
 
   const applicationNumber = String(
-    application?.applicationNo ?? "",
+    application?.applicationNo ??
+      localStorage.getItem("applicationNo") ??
+      "",
   ).trim();
 
   const userId = String(
@@ -201,13 +203,15 @@ const Decision = () => {
     ? decisionCodeMap[roleType] ?? ""
     : "";
 
-  const hasPendingRequirements =
+  const hasOutstandingRequirements =
     roleType === "CVT_TASK" &&
     (drsState.data?.requirementManagement ?? []).some(
       (row) =>
-        String(row.status ?? "")
-          .trim()
-          .toUpperCase() === "PENDING",
+        !["ACCEPT", "ACCEPTED"].includes(
+          String(row.status ?? "")
+            .trim()
+            .toUpperCase(),
+        ),
     );
 
   const hasPivRequirement =
@@ -247,8 +251,16 @@ const Decision = () => {
           "",
         );
 
-        if (hasPendingRequirements) {
+        if (roleType === "CVT_TASK" && hasOutstandingRequirements) {
           return normalizedDecisionValue === "raiserequirement";
+        }
+
+        if (
+          roleType === "CVT_TASK" &&
+          !hasOutstandingRequirements &&
+          normalizedDecisionValue === "raiserequirement"
+        ) {
+          return false;
         }
 
         if (
@@ -312,9 +324,9 @@ const Decision = () => {
     const hasSavedRequirements =
       sessionStorage.getItem(requirementSaveStorageKey) === "true";
 
-    if (roleType === "CVT_TASK" && !hasSavedRequirements) {
+    if (!hasSavedRequirements) {
       showSnackbar(
-        "Please click Save in Requirement Management before submitting the decision.",
+        "Save button is mandatory in Requirement Management before proceeding.",
         "warning",
       );
 

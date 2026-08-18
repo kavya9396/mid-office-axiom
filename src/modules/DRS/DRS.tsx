@@ -512,9 +512,9 @@ const DRS = () => {
     (accordionId) =>
       isUwToolkitAccordion(String(accordionId)),
   );
-const shouldShowSubmitButton =
-  roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
-  roleType === "CPT_DATA_ENTRY_MR_TASK";
+  const shouldShowSubmitButton =
+    roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
+    roleType === "CPT_DATA_ENTRY_MR_TASK";
   return (
     <>
       <BackButton
@@ -544,7 +544,7 @@ const shouldShowSubmitButton =
 
           return (
             <Box key={accordionId}>
-              {(showSubmitBeforeAccordion && roleType == 'CPT_DATA_ENTRY_NMR_TASK') &&
+              {shouldShowSubmitButton && showSubmitBeforeAccordion &&
                 renderSubmitButton()}
 
               <AccordionComponent />
@@ -552,11 +552,8 @@ const shouldShowSubmitButton =
           );
         })}
 
-        {!hasUwToolkit && renderSubmitButton()}
+        {shouldShowSubmitButton && !hasUwToolkit && renderSubmitButton()}
       </Box>
-{shouldShowSubmitButton &&
-  !hasUwToolkit &&
-  renderSubmitButton()}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
