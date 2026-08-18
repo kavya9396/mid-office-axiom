@@ -27,6 +27,8 @@ import OtherMedicalsForm, { type OtherMedicalsFormHandle } from "./Other Medical
 import { getOtherMedicalsConfig } from "./Other Medicals/otherMedicalsConfig";
 import SpecialMedicalForm, { type SpecialMedicalFormHandle } from "./Special Medical/SpecialMedicalForm";
 import { getSpecialMedicalConfig } from "./Special Medical/specialMedicalConfig";
+import { saveMerThunk, type MerSaveResponse } from "../../../store/thunks/medicalMerSaveThunk";
+import { buildMerRequest } from "./MER/merPayloadMapper";
 
 const getStoredApplicantTab = () =>
   (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
@@ -40,20 +42,6 @@ type MedicalSectionGroup = {
   label: string;
   subSections: string[];
   fields: { id: string | number; section: string; field: string }[];
-};
-
-type SaveMedicalPayload = {
-  applicationNumber: string;
-  partyId: string;
-  createdBy: string;
-  sections: {
-    mer: Record<string, unknown>;
-    habit_and_addictions: { habits: Array<Record<string, unknown>> };
-    measurement: Record<string, unknown>;
-    family_history: { members: Array<Record<string, unknown>> };
-    blood_pressure_and_pulse: Record<string, unknown>;
-    question_table: { answers: Array<Record<string, unknown>> };
-  };
 };
 
 type MedicalFetchRequest = {
@@ -100,6 +88,8 @@ type MedicalFetchResponse = {
         waistCm?: number | null;
         hipsCm?: number | null;
         bmiCalculated?: number | string | null;
+        heightFtsCalculated?: number | string | null;
+        heightInchCalculated?: number | string | null;
       };
       family_history?: {
         members?: Array<{
@@ -118,29 +108,6 @@ type MedicalFetchResponse = {
         }>;
         avgSystolicCalculated?: number | string | null;
         avgDiastolicCalculated?: number | string | null;
-      };
-      question_table?: {
-        answers?: Array<{
-          questionId?: string;
-          questionValue?: string;
-        }>;
-      };
-    };
-  };
-};
-
-type SaveMedicalResponse = {
-  response_code?: number;
-  error?: boolean;
-  message?: string;
-  data?: {
-    sections?: {
-      measurement?: {
-        bmiCalculated?: string | number | null;
-      };
-      blood_pressure_and_pulse?: {
-        avgSystolicCalculated?: string | number | null;
-        avgDiastolicCalculated?: string | number | null;
       };
       question_table?: {
         answers?: Array<{
@@ -172,15 +139,6 @@ const getStoredDrsNewTabContext = (): DrsNewTabContext => {
   } catch {
     return {};
   }
-};
-
-const toYesNoCode = (value: string) => {
-  const normalized = value.trim().toLowerCase();
-  if (normalized === "yes" || normalized === "y") {
-    return "Y";
-  }
-
-  return "N";
 };
 
 const toYesNoLabel = (value?: string | null) => {
@@ -226,17 +184,6 @@ const fromExamPlaceCode = (value?: string | null) => {
   }
 
   return "";
-};
-
-const getValue = (values: Record<string, string>, key: string) => (values[key] ?? "").trim();
-
-const parseNumber = (value: string) => {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
 };
 
 const findSectionIdByTitle = (
@@ -312,7 +259,7 @@ const ViewMedical = () => {
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
-  const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+  const userId = "user-id";
   const roleType = getRoleType();
   const isFormalRole = isFormalTaskRole(roleType);
   const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
@@ -322,17 +269,19 @@ const ViewMedical = () => {
     getStoredApplicantTab();
 
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  // const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  // const [saveError, setSaveError] = useState<string | null>(null);
   const [drsContextLoading, setDrsContextLoading] = useState(false);
   const [drsContextError, setDrsContextError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [medicalFetchData, setMedicalFetchData] = useState<MedicalFetchResponse["data"] | null>(null);
   const [hasHydratedFromFetch, setHasHydratedFromFetch] = useState(false);
-  const [submitLoading, setSubmitLoading] = useState(false);
+  // const [submitLoading, setSubmitLoading] = useState(false);
   const [editingSubSectionId, setEditingSubSectionId] = useState<string | null>(null);
   const merFormRefs = useRef<Record<string, MerFormHandle | null>>({});
+  // const merFormRefs = useRef<MerFormHandle>(null);
+
   const specialMedicalFormRefs = useRef<Record<string, SpecialMedicalFormHandle | null>>({});
   const otherMedicalsFormRefs = useRef<Record<string, OtherMedicalsFormHandle | null>>({});
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -387,8 +336,8 @@ const ViewMedical = () => {
 
   const medicalFetchPayloadError =
     !drsContextLoading &&
-    !drsContextError &&
-    (!safeApplicationId || !partyId)
+      !drsContextError &&
+      (!safeApplicationId || !partyId)
       ? "Application number or party ID is unavailable for medical fetch."
       : null;
 
@@ -539,16 +488,6 @@ const ViewMedical = () => {
     [activeSubSectionId, flattenedSubSections]
   );
 
-  const selectedSubSection = useMemo(
-    () => flattenedSubSections.find((subSection) => subSection.id === resolvedActiveSubSectionId),
-    [flattenedSubSections, resolvedActiveSubSectionId]
-  );
-
-  const selectedGroup = useMemo(
-    () => medicalSectionGroups.find((group) => group.label === selectedSubSection?.groupLabel),
-    [medicalSectionGroups, selectedSubSection]
-  );
-
   useEffect(() => {
     if (!medicalFetchData?.sections || hasHydratedFromFetch) {
       return;
@@ -626,6 +565,8 @@ const ViewMedical = () => {
         waistCms: measurement.waistCm == null ? "" : String(measurement.waistCm),
         hipsCms: measurement.hipsCm == null ? "" : String(measurement.hipsCm),
         bmi: measurement.bmiCalculated == null ? "" : String(measurement.bmiCalculated),
+        heightFts: measurement.heightFtsCalculated == null ? "" : String(measurement.heightFtsCalculated),
+        inches: measurement.heightInchCalculated == null ? "" : String(measurement.heightInchCalculated),
       });
     }
 
@@ -780,16 +721,165 @@ const ViewMedical = () => {
   const handleSubSectionEdit = (subSectionId: string) => {
     getSubSectionEditHandle(subSectionId)?.beginEdit();
     setEditingSubSectionId(subSectionId);
-    setSaveMessage(null);
-    setSaveError(null);
   };
 
   const handleSubSectionSave = async () => {
-    // TODO: Implement save logic for individual subsection
-    if (editingSubSectionId) {
-      getSubSectionEditHandle(editingSubSectionId)?.commitEdit();
+    if (!editingSubSectionId) {
+      return;
     }
-    setSaveMessage("Subsection saved successfully.");
+
+    const subSection = flattenedSubSections.find(
+      (item) => item.id === editingSubSectionId
+    );
+
+    if (!subSection) {
+      return;
+    }
+
+    const formRef = getSubSectionEditHandle(editingSubSectionId);
+
+    if (!formRef) {
+      return;
+    }
+
+    // MER save API
+    // if (subSection.groupLabel === "MER") {
+    //   const merFormRef = merFormRefs.current[editingSubSectionId];
+
+    //   if (!merFormRef) {
+    //     return;
+    //   }
+
+    //   const isValid = merFormRef.validateForm();
+
+    //   if (!isValid) {
+    //     return;
+    //   }
+
+    //   const values = merFormRef.getFormValues();
+
+    //   const request = buildMerRequest({
+    //     applicationNumber: safeApplicationId,
+    //     partyId,
+    //     createdBy: "user-id",
+    //     selectedSubSection: subSection.title,
+    //     values,
+    //   });
+
+    //   console.log("MER Request", request);
+
+    //   try {
+    //     const response = await dispatch(saveMerThunk(request)).unwrap();
+
+    //     merFormRef.commitEdit();
+    //     setEditingSubSectionId(null);
+    //   } catch (error) {
+    //     console.error("MER save failed:", error);
+    //   }
+
+    //   return;
+    // }
+
+    if (subSection.groupLabel === "MER") {
+      const merFormRef = merFormRefs.current[editingSubSectionId];
+
+      if (!merFormRef) {
+        return;
+      }
+
+      const isValid = merFormRef.validateForm();
+
+      if (!isValid) {
+        return;
+      }
+
+      const values = merFormRef.getFormValues();
+
+      const request = buildMerRequest({
+        applicationNumber: safeApplicationId,
+        partyId,
+        createdBy: userId,
+        selectedSubSection: subSection.title,
+        values,
+      });
+
+      // try {
+      //   const response = await dispatch(
+      //     saveMerThunk(request)
+      //   ).unwrap();
+
+      //   const savedSection =
+      //     response.data?.sections;
+
+      //   // Update calculated values returned by API
+      //   if (savedSection?.measurement) {
+      //     merFormRef.setFormValues({
+      //       bmi:
+      //         savedSection.measurement.bmiCalculated == null
+      //           ? ""
+      //           : String(savedSection.measurement.bmiCalculated),
+
+      //       heightFts:
+      //         savedSection.measurement.heightFtsCalculated == null
+      //           ? ""
+      //           : String(savedSection.measurement.heightFtsCalculated),
+
+      //       heightInch:
+      //         savedSection.measurement.heightInchCalculated == null
+      //           ? ""
+      //           : String(savedSection.measurement.heightInchCalculated),
+      //     });
+      //   }
+
+      //   if (savedSection?.blood_pressure_and_pulse) {
+      //     merFormRef.setFormValues({
+      //       avgSystolic:
+      //         savedSection.blood_pressure_and_pulse
+      //           .avgSystolicCalculated == null
+      //           ? ""
+      //           : String(
+      //             savedSection.blood_pressure_and_pulse
+      //               .avgSystolicCalculated
+      //           ),
+
+      //       avgDiastolic:
+      //         savedSection.blood_pressure_and_pulse
+      //           .avgDiastolicCalculated == null
+      //           ? ""
+      //           : String(
+      //             savedSection.blood_pressure_and_pulse
+      //               .avgDiastolicCalculated
+      //           ),
+      //     });
+      //   }
+
+      //   merFormRef.commitEdit();
+      //   setEditingSubSectionId(null);
+      // } catch (error) {
+      //   console.error("MER save failed:", error);
+      // }
+
+      try {
+        const response = await dispatch(
+          saveMerThunk(request)
+        ).unwrap();
+
+        if (response.data?.sections) {
+          applyMerCalculatedValues(
+            response.data.sections
+          );
+        }
+
+        merFormRef.commitEdit();
+        setEditingSubSectionId(null);
+      } catch (error) {
+        console.error("MER save failed:", error);
+      }
+      return;
+    }
+
+    // Existing behavior for Special Medical / Other Medicals
+    formRef.commitEdit();
     setEditingSubSectionId(null);
   };
 
@@ -798,227 +888,6 @@ const ViewMedical = () => {
       getSubSectionEditHandle(editingSubSectionId)?.resetEdit();
     }
     setEditingSubSectionId(null);
-    setSaveMessage(null);
-    setSaveError(null);
-  };
-
-  const handleMedicalSave = async () => {
-    setSaveMessage(null);
-    setSaveError(null);
-
-    if (selectedGroup?.key === "mer") {
-      const merSubSectionIds = flattenedSubSections
-        .filter((subSection) => subSection.groupLabel === "MER")
-        .map((subSection) => subSection.id);
-
-      const validationResults: boolean[] = merSubSectionIds.map((subSectionId) => {
-        const merFormRef = merFormRefs.current[subSectionId];
-
-        if (!merFormRef) {
-          return true;
-        }
-
-        return merFormRef.validateForm();
-      });
-
-      const hasAnyInvalidMerForm = validationResults.some((isValid) => !isValid);
-
-      if (hasAnyInvalidMerForm) {
-        setSaveError("Please correct highlighted fields before saving.");
-        return;
-      }
-
-      if (!partyId) {
-        setSaveError("Party ID is unavailable for medical save.");
-        return;
-      }
-
-      const merSectionId = findSectionIdByTitle(flattenedSubSections, "MER");
-      const habitsSectionId = findSectionIdByTitle(flattenedSubSections, "Habit and Addictions");
-      const measurementSectionId = findSectionIdByTitle(flattenedSubSections, "Measurement");
-      const familySectionId = findSectionIdByTitle(flattenedSubSections, "Family history and health status");
-      const bloodPressureSectionId = findSectionIdByTitle(flattenedSubSections, "Blood pressure and Pulse details");
-      const questionTableSectionId = findSectionIdByTitle(flattenedSubSections, "Question Table");
-
-      const merValues = merFormRefs.current[merSectionId]?.getFormValues() ?? {};
-      const habitsValues = merFormRefs.current[habitsSectionId]?.getFormValues() ?? {};
-      const measurementValues = merFormRefs.current[measurementSectionId]?.getFormValues() ?? {};
-      const familyValues = merFormRefs.current[familySectionId]?.getFormValues() ?? {};
-      const bloodPressureValues = merFormRefs.current[bloodPressureSectionId]?.getFormValues() ?? {};
-      const questionValues = merFormRefs.current[questionTableSectionId]?.getFormValues() ?? {};
-
-      const requestPayload: SaveMedicalPayload = {
-        applicationNumber: safeApplicationId,
-        partyId,
-        createdBy: "ui-user",
-        sections: {
-          mer: {
-            firstName: getValue(merValues, "firstName"),
-            lastName: getValue(merValues, "lastName"),
-            genderCode: getValue(merValues, "gender").slice(0, 1).toUpperCase(),
-            educationCode: getValue(merValues, "examineeEducationSd"),
-            occupationCode: getValue(merValues, "examineeOccupationSd"),
-            incomeCode: getValue(merValues, "examineeIncomeSd"),
-            dateOfBirth: getValue(merValues, "examineeDob"),
-            anyDeclPostPolicy: toYesNoCode(getValue(merValues, "anyPreviousLifeInsurancePolicyDeclinePostponeOrIssuedOnRevisedTermSd")),
-            examinerName: getValue(merValues, "nameOfMe"),
-            meCode: getValue(merValues, "meCode"),
-            examDate: getValue(merValues, "dateOfExamination"),
-            examTime: "",
-            examPlace: getValue(merValues, "placeOfExamination"),
-            centreName: getValue(merValues, "diagnosticCentreName"),
-            centreAddress: getValue(merValues, "diagnosticCentreAddress"),
-            pincode: getValue(merValues, "diagnosticCentrePincode"),
-          },
-          habit_and_addictions: {
-            habits: [
-              {
-                substanceCode: "TOBACCO",
-                indicator: toYesNoCode(getValue(habitsValues, "cigarettesBeedisCigar")),
-                quantity: getValue(habitsValues, "cigarettesBeedisCigarQuant"),
-                startYear: parseNumber(getValue(habitsValues, "cigarettesBeedisCigarYear")),
-              },
-              {
-                substanceCode: "GUTKA",
-                indicator: toYesNoCode(getValue(habitsValues, "gutkaSnuffPaan")),
-                quantity: getValue(habitsValues, "gutkaSnuffPaanQuant"),
-                startYear: parseNumber(getValue(habitsValues, "gutkaSnuffPaanYear")),
-              },
-              {
-                substanceCode: "NARCOTICS",
-                indicator: toYesNoCode(getValue(habitsValues, "narcoticConsumption")),
-                quantity: getValue(habitsValues, "narcoticConsumptionQuant"),
-                startYear: parseNumber(getValue(habitsValues, "narcoticConsumptionYear")),
-              },
-              {
-                substanceCode: "ALCOHOL",
-                indicator: toYesNoCode(getValue(habitsValues, "beerWineHardLiquor")),
-                quantity: getValue(habitsValues, "beerWineHardLiquorQuant"),
-                startYear: parseNumber(getValue(habitsValues, "beerWineHardLiquorYear")),
-              },
-            ],
-          },
-          measurement: {
-            heightCm: parseNumber(getValue(measurementValues, "heightCms")),
-            weightKg: parseNumber(getValue(measurementValues, "weightKgs")),
-            waistCm: parseNumber(getValue(measurementValues, "waistCms")),
-            hipsCm: parseNumber(getValue(measurementValues, "hipsCms")),
-          },
-          family_history: {
-            members: [
-              {
-                relationType: "FATHER",
-                memberAge: parseNumber(getValue(familyValues, "age")),
-                healthStatusDesc: getValue(familyValues, "healthStatus"),
-                aliveStatus: getValue(familyValues, "deadOrAlive").toUpperCase().includes("DEAD") ? "DEAD" : "ALIVE",
-              },
-            ],
-          },
-          blood_pressure_and_pulse: {
-            pulseRate: parseNumber(getValue(bloodPressureValues, "pulseRate")),
-            pulseRemark: getValue(bloodPressureValues, "pulseRemarks"),
-            readings: [
-              {
-                readingSeq: 1,
-                bpSystolic: parseNumber(getValue(bloodPressureValues, "systolic1")),
-                bpDiastolic: parseNumber(getValue(bloodPressureValues, "diastolic1")),
-                readingTime: "",
-              },
-              {
-                readingSeq: 2,
-                bpSystolic: parseNumber(getValue(bloodPressureValues, "systolic2")),
-                bpDiastolic: parseNumber(getValue(bloodPressureValues, "diastolic2")),
-                readingTime: "",
-              },
-              {
-                readingSeq: 3,
-                bpSystolic: parseNumber(getValue(bloodPressureValues, "systolic3")),
-                bpDiastolic: parseNumber(getValue(bloodPressureValues, "diastolic3")),
-                readingTime: "",
-              },
-            ],
-          },
-          question_table: {
-            answers: Object.entries(questionValues)
-              .filter(([key]) => key.includes("."))
-              .map(([questionId, questionValue]) => ({
-                questionId,
-                questionValue: toYesNoCode(String(questionValue)),
-                remark: "",
-              })),
-          },
-        },
-      };
-
-      console.log("Payload", requestPayload);
-
-      try {
-        setSubmitLoading(true);
-        setSaveError(null);
-
-        const response = await apiRequest<SaveMedicalResponse, SaveMedicalPayload>({
-          url: url("medicalSaveAndCalculate" as ApiKey),
-          method: "POST",
-          body: requestPayload,
-        });
-
-        const responseSections = response.data?.sections;
-
-        if (measurementSectionId && responseSections?.measurement?.bmiCalculated != null) {
-          merFormRefs.current[measurementSectionId]?.setFormValues({
-            bmi: String(responseSections.measurement.bmiCalculated),
-          });
-        }
-
-        if (bloodPressureSectionId) {
-          const nextValues: Record<string, string> = {};
-          if (responseSections?.blood_pressure_and_pulse?.avgSystolicCalculated != null) {
-            nextValues.avgSystolic = String(responseSections.blood_pressure_and_pulse.avgSystolicCalculated);
-          }
-          if (responseSections?.blood_pressure_and_pulse?.avgDiastolicCalculated != null) {
-            nextValues.avgDiastolic = String(responseSections.blood_pressure_and_pulse.avgDiastolicCalculated);
-          }
-          if (Object.keys(nextValues).length > 0) {
-            merFormRefs.current[bloodPressureSectionId]?.setFormValues(nextValues);
-          }
-        }
-
-        if (questionTableSectionId && responseSections?.question_table?.answers) {
-          const answerMap = responseSections.question_table.answers.reduce<Record<string, string>>((acc, answer) => {
-            const questionId = (answer.questionId ?? "").trim();
-            if (!questionId) {
-              return acc;
-            }
-
-            acc[questionId] = toYesNoLabel(answer.questionValue);
-            return acc;
-          }, {});
-
-          if (Object.keys(answerMap).length > 0) {
-            merFormRefs.current[questionTableSectionId]?.setFormValues(answerMap);
-          }
-        }
-
-        setSaveMessage(response.message ?? "Medical details calculated and saved successfully.");
-      } catch (error) {
-        setSaveError(error instanceof Error ? error.message : "Failed to calculate and submit medical details.");
-      } finally {
-        setSubmitLoading(false);
-      }
-      return;
-    }
-
-    if (selectedGroup?.key === "specialMedical" || selectedGroup?.key === "otherMedicals") {
-      setSaveError("Save validation is currently implemented for MER section only.");
-      return;
-    }
-
-    if (!selectedGroup) {
-      setSaveError("Please correct highlighted fields before saving.");
-      return;
-    }
-
-    setSaveMessage("Validation passed. Ready to save.");
   };
 
   const handleDRSViewTabChange = (value: DRSViewTab) => {
@@ -1036,6 +905,72 @@ const ViewMedical = () => {
     navigate(getFinancialPath(safeBusinessType, safeApplicationId), {
       state: { selectedApplicantTab: currentApplicantTab },
     });
+  };
+
+  const applyMerCalculatedValues = (
+    sections: NonNullable<
+      NonNullable<MerSaveResponse["data"]>["sections"]
+    >
+  ) => {
+    const measurementSectionId = findSectionIdByTitle(
+      flattenedSubSections,
+      "Measurement"
+    );
+
+    const bloodPressureSectionId = findSectionIdByTitle(
+      flattenedSubSections,
+      "Blood pressure and Pulse details"
+    );
+
+    const measurementRef =
+      merFormRefs.current[measurementSectionId];
+
+    const bloodPressureRef =
+      merFormRefs.current[bloodPressureSectionId];
+
+    if (measurementRef && sections.measurement) {
+      measurementRef.setFormValues({
+        bmi:
+          sections.measurement.bmiCalculated == null
+            ? ""
+            : String(sections.measurement.bmiCalculated),
+
+        heightFts:
+          sections.measurement.heightFtsCalculated == null
+            ? ""
+            : String(sections.measurement.heightFtsCalculated),
+
+        inches:
+          sections.measurement.heightInchCalculated == null
+            ? ""
+            : String(sections.measurement.heightInchCalculated),
+      });
+    }
+
+    if (
+      bloodPressureRef &&
+      sections.blood_pressure_and_pulse
+    ) {
+      bloodPressureRef.setFormValues({
+        avgSystolic:
+          sections.blood_pressure_and_pulse
+            .avgSystolicCalculated == null
+            ? ""
+            : String(
+              sections.blood_pressure_and_pulse
+                .avgSystolicCalculated
+            ),
+
+        avgDiastolic:
+          sections.blood_pressure_and_pulse
+            .avgDiastolicCalculated == null
+            ? ""
+            : String(
+              sections.blood_pressure_and_pulse
+                .avgDiastolicCalculated
+            ),
+      });
+    }
   };
 
   return (
@@ -1244,14 +1179,17 @@ const ViewMedical = () => {
                             <>
                               <CustomButton
                                 sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                                disabled={submitLoading || !safeApplicationId}
+                                disabled={
+                                  // submitLoading ||
+                                  !safeApplicationId}
                                 onClick={handleSubSectionSave}
                               >
-                                {submitLoading ? "Saving..." : "Save"}
+                                {/* {submitLoading ? "Saving..." : "Save"} */}
+                                Save
                               </CustomButton>
                               <CustomButton
                                 sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                                disabled={submitLoading}
+                                // disabled={submitLoading}
                                 onClick={() => handleSubSectionReset()}
                               >
                                 Reset
@@ -1265,14 +1203,31 @@ const ViewMedical = () => {
 
                   <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
                     {group?.key === "mer" && (
+                      // <MerForm
+                      //   ref={(node) => {
+                      //     merFormRefs.current[subSection.id] = node;
+                      //   }}
+                      //   selectedSubSection={subSection.title}
+                      //   fields={group.fields}
+                      //   applicationNo={safeApplicationId}
+                      //   isEditing={editingSubSectionId === subSection.id}
+                      // />
                       <MerForm
                         ref={(node) => {
-                          merFormRefs.current[subSection.id] = node;
+                          merFormRefs.current[subSection.id] =
+                            node;
                         }}
-                        selectedSubSection={subSection.title}
+                        selectedSubSection={
+                          subSection.title
+                        }
                         fields={group.fields}
-                        applicationNo={safeApplicationId}
-                        isEditing={editingSubSectionId === subSection.id}
+                        applicationNo={
+                          safeApplicationId
+                        }
+                        isEditing={
+                          editingSubSectionId ===
+                          subSection.id
+                        }
                       />
                     )}
                     {group?.key === "specialMedical" && (
@@ -1300,20 +1255,6 @@ const ViewMedical = () => {
               );
             })}
           </Box>
-        </Box>
-      </Box>
-
-      <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
-        {(saveMessage || saveError) && (
-          <Typography sx={{ mb: 1.5, color: saveError ? "#DE2C3B" : "#067647", fontSize: 13 }}>
-            {saveError ?? saveMessage}
-          </Typography>
-        )}
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
-          <CustomButton onClick={() => void handleMedicalSave()} disabled={!safeApplicationId || submitLoading} sx={{ minWidth: 120 }}>
-            Save
-          </CustomButton>
         </Box>
       </Box>
     </Container>
