@@ -33,7 +33,7 @@ const apiUrls = {
     mock: "/mock/drs/drs.mock.json",
   },
   columnConfigSave: {
-    real: "/api/inbox/column-config",
+    real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns/save",
     mock: "/mock/inbox/columnConfigSave.json",
   },
  

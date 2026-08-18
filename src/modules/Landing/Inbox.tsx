@@ -1,6 +1,8 @@
 import {
   Box,
+  CircularProgress,
   Grid,
+  Typography,
 } from "@mui/material";
 
 import {
@@ -140,6 +142,11 @@ const Inbox1 = () => {
     unknown
   > | null>(null);
 
+  const [
+    isPageLoading,
+    setIsPageLoading,
+  ] = useState(true);
+
   // ============================================================
   // LOGIN
   // ============================================================
@@ -169,7 +176,7 @@ const Inbox1 = () => {
         )
         .map((key) => ({
           label: key,
-          icon: "📂",
+          icon: "ðŸ“‚",
         })),
     [poolData],
   );
@@ -282,19 +289,47 @@ const Inbox1 = () => {
   // ============================================================
 
   useEffect(() => {
-    if (
-      !effectiveUsername ||
-      !effectivePassword
-    ) {
-      return;
-    }
+    let isActive = true;
 
-    dispatch(
-      fetchInboxThunk({
-        username: effectiveUsername,
-        password: effectivePassword,
-      }),
-    );
+    const fetchInbox = async () => {
+      if (
+        !effectiveUsername ||
+        !effectivePassword
+      ) {
+        if (isActive) {
+          setIsPageLoading(false);
+        }
+        return;
+      }
+
+      setIsPageLoading(true);
+
+      try {
+        await dispatch(
+          fetchInboxThunk({
+            username: effectiveUsername,
+            password: effectivePassword,
+          }),
+        ).unwrap();
+      } catch (error) {
+        console.error(
+          "Failed to fetch inbox:",
+          error,
+        );
+      } finally {
+        if (isActive) {
+          setIsPageLoading(false);
+        }
+      }
+    };
+
+    // Start asynchronously so state is not updated synchronously
+    // inside the effect body.
+    void Promise.resolve().then(fetchInbox);
+
+    return () => {
+      isActive = false;
+    };
   }, [
     dispatch,
     effectiveUsername,
@@ -390,6 +425,38 @@ const Inbox1 = () => {
   // ============================================================
   // APPLICATION WORKSPACE
   // ============================================================
+
+  if (isPageLoading) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "91vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 1.5,
+          backgroundColor: "#f5f7fa",
+        }}
+      >
+        <CircularProgress
+          size={42}
+          thickness={4}
+          sx={{ color: "#f58220" }}
+        />
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            fontWeight: 500,
+          }}
+        >
+          Loading inbox...
+        </Typography>
+      </Box>
+    );
+  }
 
   if (selectedApplication) {
     return (

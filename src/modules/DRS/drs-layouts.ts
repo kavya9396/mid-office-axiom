@@ -216,7 +216,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "suwDecision",
     "quickLinks",
   ],
-  RETAIL_POST_ISSUANCE_SUW: [
+  POST_ISSUANCE_TASK: [
     "applicationOverview",
     "postIssuanceServicing",
     "pdrSection",

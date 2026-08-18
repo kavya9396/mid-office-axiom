@@ -338,10 +338,10 @@ const BreDecision = () => {
       bre: "BRE Status",
       initialBre: isInitialBreSuccess
         ? "Success"
-        : "Failure",
+        : "-",
       finalBre: isFinalBreSuccess
         ? "Success"
-        : "Failure",
+        : "-",
     },
     {
       bre: "BRE Decision",

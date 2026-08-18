@@ -530,7 +530,7 @@ const RequirementManagementTable = ({
   ].includes(normalizedRoleType);
   const isAddRequirementEnabled =
     Boolean(onAddRequirement) && !isNonEditable;
-  const isSaveButtonVisible = normalizedRoleType !== "AMR_MEDICAL_TASK";
+  const isSaveButtonVisible = normalizedRoleType !== "AMR_MEDICAL_TASK" && normalizedRoleType !== "AMR_NON_MEDICAL_TASK" && normalizedRoleType !== "RECONSIDERATION_TASK";
 
   const roleBasedRequirements = filterRequirementsByRole(
     requirements,

@@ -33,10 +33,13 @@ import CustomButton from "../../components/ui/Button/Button";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import { centerFlex, columnFlex } from "../../utils/styles";
+import { useAppDispatch } from "../../store/hooks";
+import { columnConfigSaveThunk } from "../../store/thunks/columnConfigSaveThunk";
 
 interface DynamicRoleTableProps {
   title: string;
   data: Record<string, unknown>[];
+  poolKey?: string;
 
   onApplicationClick?: (
     application: Record<string, unknown>,
@@ -381,10 +384,16 @@ const getRowTimingStatus = (
 const DynamicRoleTable = ({
   title,
   data,
+  poolKey = "",
   onApplicationClick,
   storageKey,
   showAddButton = false,
 }: DynamicRoleTableProps) => {
+  const dispatch = useAppDispatch();
+
+  const [isSavingColumns, setIsSavingColumns] =
+    useState(false);
+
   /* ============================================================
    * BASIC TABLE STATE
    * ============================================================
@@ -985,9 +994,10 @@ const DynamicRoleTable = ({
    * ============================================================
    */
 
-  const handleSaveSettings = () => {
+  const handleSaveSettings = async () => {
     if (
-      tempSelectedColumns.length === 0
+      tempSelectedColumns.length === 0 ||
+      isSavingColumns
     ) {
       return;
     }
@@ -998,30 +1008,47 @@ const DynamicRoleTable = ({
         MAX_VISIBLE_COLUMNS,
       );
 
-    setColumnConfig(
-      (previous) => ({
+    const username =
+      localStorage.getItem("username") ?? "";
+console.log('poolkey',poolKey)
+    if (!username || !poolKey) {
+      console.error(
+        "Username or poolKey is unavailable.",
+      );
+      return;
+    }
+
+    try {
+      setIsSavingColumns(true);
+
+      await dispatch(
+        columnConfigSaveThunk({
+          username,
+          poolKey,
+          selectedFields: updatedColumns,
+        }),
+      ).unwrap();
+
+      setColumnConfig((previous) => ({
         ...previous,
-        [finalStorageKey]:
-          updatedColumns,
-      }),
-    );
+        [finalStorageKey]: updatedColumns,
+      }));
 
-    // try {
-    //   localStorage.setItem(
-    //     finalStorageKey,
-    //     JSON.stringify(
-    //       updatedColumns,
-    //     ),
-    //   );
-    // } catch (error) {
-    //   console.error(
-    //     "Unable to save column configuration:",
-    //     error,
-    //   );
-    // }
+      localStorage.setItem(
+        finalStorageKey,
+        JSON.stringify(updatedColumns),
+      );
 
-    setSettingsOpen(false);
-    setPage(0);
+      setSettingsOpen(false);
+      setPage(0);
+    } catch (error) {
+      console.error(
+        "Unable to save column configuration:",
+        error,
+      );
+    } finally {
+      setIsSavingColumns(false);
+    }
   };
 
   /* ============================================================
@@ -1557,26 +1584,37 @@ const DynamicRoleTable = ({
                                     },
                                   }}
                                 >
-                                  {hasTimingWarning && (
-                                    <DangerIcon
-                                      aria-label={
-                                        timingStatus === "overdue"
-                                          ? "Due date crossed"
-                                          : "At-risk time crossed"
-                                      }
-                                      titleAccess={
-                                        timingStatus === "overdue"
-                                          ? "Due date crossed"
-                                          : "At-risk time crossed"
-                                      }
-                                      sx={{
-                                        flexShrink: 0,
-                                        width: "14px",
-                                        height: "14px",
-                                        color: timingWarningColor,
-                                      }}
-                                    />
-                                  )}
+                                  <Box
+                                    component="span"
+                                    sx={{
+                                      width: "14px",
+                                      height: "14px",
+                                      flexShrink: 0,
+                                      display: "inline-flex",
+                                      alignItems: "center",
+                                      justifyContent: "center",
+                                    }}
+                                  >
+                                    {hasTimingWarning && (
+                                      <DangerIcon
+                                        aria-label={
+                                          timingStatus === "overdue"
+                                            ? "Due date crossed"
+                                            : "At-risk time crossed"
+                                        }
+                                        titleAccess={
+                                          timingStatus === "overdue"
+                                            ? "Due date crossed"
+                                            : "At-risk time crossed"
+                                        }
+                                        sx={{
+                                          width: "14px",
+                                          height: "14px",
+                                          color: timingWarningColor,
+                                        }}
+                                      />
+                                    )}
+                                  </Box>
                                   {
                                     cellValue
                                   }
@@ -1759,14 +1797,17 @@ const DynamicRoleTable = ({
               size="small"
               variant="contained"
               onClick={handleSaveSettings}
-              disabled={tempSelectedColumns.length === 0}
+              disabled={
+                tempSelectedColumns.length === 0 ||
+                isSavingColumns
+              }
               sx={{
                 fontSize: "12px",
                 borderRadius: "8px",
                 px: 2,
               }}
             >
-              Save
+              {isSavingColumns ? "Saving..." : "Save"}
             </CustomButton>
           </Box>
         }
