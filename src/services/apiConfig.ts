@@ -36,6 +36,10 @@ const apiUrls = {
     real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns/save",
     mock: "/mock/inbox/columnConfigSave.json",
   },
+  columnConfigFetch:{
+real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
+    mock: "/mock/inbox/columnConfigFetch.json",
+  },
  
    // DRS
   drs: {

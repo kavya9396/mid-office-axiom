@@ -23,8 +23,10 @@ import { useMemo, useState } from "react";
 import {
   DangerIcon,
   FilterIcon,
+  KeyDownArrowIcon,
   KeyLeftArrowIcon,
   KeyRightArrowIcon,
+  KeyUpArrowIcon,
   SearchIcon,
   SettingsIcon,
   
@@ -35,6 +37,7 @@ import CustomDialog from "../../components/ui/Dialog/Dialog";
 import { centerFlex, columnFlex } from "../../utils/styles";
 import { useAppDispatch } from "../../store/hooks";
 import { columnConfigSaveThunk } from "../../store/thunks/columnConfigSaveThunk";
+import { columnConfigFetchThunk } from "../../store/thunks/columnConfigFetchThunk";
 
 interface DynamicRoleTableProps {
   title: string;
@@ -384,7 +387,6 @@ const getRowTimingStatus = (
 const DynamicRoleTable = ({
   title,
   data,
-  poolKey = "",
   onApplicationClick,
   storageKey,
   showAddButton = false,
@@ -1008,35 +1010,66 @@ const DynamicRoleTable = ({
         MAX_VISIBLE_COLUMNS,
       );
 
-    const username =
-      localStorage.getItem("username") ?? "";
-console.log('poolkey',poolKey)
-    if (!username || !poolKey) {
+    const username = localStorage.getItem("username") ?? "";
+    const resolvedPoolKey =
+      localStorage.getItem("roleType") ?? "";
+      console.log('username-poolkey',username,resolvedPoolKey)
+
+    if (!username || !resolvedPoolKey) {
       console.error(
         "Username or poolKey is unavailable.",
       );
       return;
     }
 
+    const payload = {
+      username,
+      poolKey: resolvedPoolKey,
+      selectedFields: updatedColumns,
+    };
+console.log('payload',payload)
     try {
       setIsSavingColumns(true);
 
       await dispatch(
-        columnConfigSaveThunk({
+        columnConfigSaveThunk(payload),
+      ).unwrap();
+
+      const fetchedConfig = await dispatch(
+        columnConfigFetchThunk({
           username,
-          poolKey,
-          selectedFields: updatedColumns,
+          poolKey: resolvedPoolKey,
         }),
       ).unwrap();
 
+      const fetchedFields = (
+        fetchedConfig as {
+          availableFields?: string[];
+          selectedFields?: string[];
+        }
+      ).availableFields ?? [];
+
+      const fetchedColumns = fetchedFields
+        .filter(
+          (column) =>
+            columns.includes(column) &&
+            !EXCLUDED_COLUMNS.includes(column),
+        )
+        .slice(0, MAX_VISIBLE_COLUMNS);
+
+      const refreshedColumns =
+        fetchedColumns.length > 0
+          ? fetchedColumns
+          : updatedColumns;
+
       setColumnConfig((previous) => ({
         ...previous,
-        [finalStorageKey]: updatedColumns,
+        [finalStorageKey]: refreshedColumns,
       }));
 
       localStorage.setItem(
         finalStorageKey,
-        JSON.stringify(updatedColumns),
+        JSON.stringify(refreshedColumns),
       );
 
       setSettingsOpen(false);
@@ -2188,7 +2221,7 @@ console.log('poolkey',poolKey)
                               "13px",
                           }}
                         >
-                          â†‘
+                          <KeyUpArrowIcon/>
                         </Button>
 
                         <Button
@@ -2223,7 +2256,7 @@ console.log('poolkey',poolKey)
                               "13px",
                           }}
                         >
-                          â†“
+                          <KeyDownArrowIcon/>
                         </Button>
                       </Box>
                     </ListItemButton>

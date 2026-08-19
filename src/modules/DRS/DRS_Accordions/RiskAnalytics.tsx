@@ -673,7 +673,6 @@ const RiskAnalytics = () => {
     <>
     {riskCards.length > 0 && (
       <>
-      {riskCards.length}
       <Box
         sx={{
           mt: 1,
