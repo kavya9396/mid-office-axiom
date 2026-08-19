@@ -146,7 +146,7 @@ const LeftTask = ({
                 cursor: "pointer",
               }}
             >
-              📂
+              ðŸ“‚
             </Typography>
           </Tooltip>
         ) : (
@@ -338,7 +338,7 @@ const LeftTask = ({
                       fontSize: "16px",
                     }}
                   >
-                    👥
+                    ðŸ‘¥
                   </Typography>
                 ) : (
                   <>
@@ -361,7 +361,7 @@ const LeftTask = ({
                         color: "#777777",
                       }}
                     >
-                      {isRolesOpen ? "▲" : "▼"}
+                      {isRolesOpen ? "â–²" : "â–¼"}
                     </Typography>
                   </>
                 )}
@@ -421,6 +421,16 @@ const LeftTask = ({
           =================================================== */}
 
           <Box
+            role="button"
+            tabIndex={0}
+            aria-label="Search applications"
+            onClick={() => navigate(getSearchApplicationPath())}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                navigate(getSearchApplicationPath());
+              }
+            }}
             sx={{
               height: "40px",
               display: "flex",
@@ -431,6 +441,12 @@ const LeftTask = ({
               px: 1.5,
               borderBottom: "1px solid #eeeeee",
               color: "#333333",
+              cursor: "pointer",
+              "&:hover": { backgroundColor: "#f8f8f8" },
+              "&:focus-visible": {
+                outline: "2px solid #9A2529",
+                outlineOffset: "-2px",
+              },
             }}
           >
             {!isCollapsed && (
@@ -445,13 +461,9 @@ const LeftTask = ({
             )}
 
             <Box
-              onClick={() =>
-                navigate(getSearchApplicationPath())
-              }
               sx={{
                 display: "flex",
                 alignItems: "center",
-                cursor: "pointer",
               }}
             >
               <SearchIcon
@@ -511,7 +523,7 @@ const LeftTask = ({
                   fontSize: "16px",
                 }}
               >
-                📋
+                ðŸ“‹
               </Typography>
             ) : (
               <>

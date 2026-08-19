@@ -16,7 +16,10 @@ import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import BackButton from "../../components/layout/BackButton";
 import { useAppContext } from "../../hooks/useAppContext";
-import { getDRSPath } from "../../routes/routes";
+import {
+  getDRSPath,
+  getSearchApplicationPath,
+} from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import type { PreviousPolicyItem } from "../../types/drs.types";
@@ -213,6 +216,39 @@ const PreviousPolicy = () => {
     : hasReduxPreviousPolicies
       ? reduxQuickLinks
       : quickLinksData;
+
+  const selectedCaseContext = useMemo(() => {
+    try {
+      return JSON.parse(
+        localStorage.getItem("selectedCaseContext") ?? "{}",
+      ) as {
+        applicationNo?: string;
+        source?: string;
+        readOnly?: boolean;
+      };
+    } catch {
+      return {};
+    }
+  }, []);
+
+  const isFromSearchApplication =
+    selectedCaseContext.source === "searchApplication" &&
+    selectedCaseContext.readOnly === true;
+
+  const handleBack = () => {
+    if (isFromSearchApplication) {
+      navigate(getSearchApplicationPath(), {
+        state: {
+          restoreSearchResult: true,
+          applicationNo:
+            selectedCaseContext.applicationNo || safeApplicationId,
+        },
+      });
+      return;
+    }
+
+    navigate(getDRSPath(safeBusinessType, safeApplicationId));
+  };
 
   useEffect(() => {
     if (isApplicationIdMissing || hasReduxPreviousPolicies) {
@@ -423,8 +459,8 @@ const PreviousPolicy = () => {
   return (
     <Container maxWidth={false} disableGutters sx={{ pb: 4, width: "100%" }}>
       <BackButton
-        label="Back to DRS"
-        onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
+        label={isFromSearchApplication ? "Back to Search Application" : "Back to DRS"}
+        onClick={handleBack}
       />
 
       {isApplicationIdMissing && (

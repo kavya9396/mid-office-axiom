@@ -1,16 +1,22 @@
 import { Box, Container, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+
 import BackButton from "../../components/layout/BackButton";
 import type { Column } from "../../components/ui/Table/Table";
 import CustomTable from "../../components/ui/Table/Table";
 import { useAppContext } from "../../hooks/useAppContext";
-import { getDRSPath } from "../../routes/routes";
-import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import {
+  getDRSPath,
+  getSearchApplicationPath,
+} from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import type { RootState } from "../../store/store";
 import type { AuditTrail, AuditTrailRow } from "../../types/drs.types";
+
+const SEARCH_RESULT_STORAGE_KEY = "searchApplicationDrsData";
 
 const auditTrailColumns: Column<AuditTrailRow>[] = [
   { key: "dateTime", header: "Date/Time", width: "13%" },
@@ -26,18 +32,54 @@ const auditTrailColumns: Column<AuditTrailRow>[] = [
   { key: "userRemarks", header: "User Remarks", width: "10%" },
 ];
 
+interface SelectedCaseContext {
+  applicationNo?: string;
+  source?: string;
+  readOnly?: boolean;
+}
+
+interface StoredSearchResult {
+  applicationNo?: string;
+  data?: Record<string, unknown>;
+}
+
 const toDisplay = (value: unknown) => {
   const text = String(value ?? "").trim();
   return text || "-";
 };
 
-const normalizeAuditTrailRows = (rows: unknown): AuditTrail => {
-  if (!Array.isArray(rows)) {
-    return [];
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const readSelectedCaseContext = (): SelectedCaseContext => {
+  try {
+    return JSON.parse(
+      localStorage.getItem("selectedCaseContext") ?? "{}",
+    ) as SelectedCaseContext;
+  } catch {
+    return {};
   }
+};
+
+const readCachedSearchQuickLinks = (): Record<string, unknown> => {
+  try {
+    const rawValue = localStorage.getItem(SEARCH_RESULT_STORAGE_KEY);
+    if (!rawValue) return {};
+
+    const storedResult = JSON.parse(rawValue) as StoredSearchResult;
+    return toRecord(storedResult.data?.quickLinks);
+  } catch {
+    return {};
+  }
+};
+
+const normalizeAuditTrailRows = (rows: unknown): AuditTrail => {
+  if (!Array.isArray(rows)) return [];
 
   return rows.map((row) => {
-    const item = row as Record<string, unknown>;
+    const item = toRecord(row);
 
     return {
       dateTime: toDisplay(item.dateTime),
@@ -55,31 +97,50 @@ const normalizeAuditTrailRows = (rows: unknown): AuditTrail => {
   });
 };
 
-const toRecord = (value: unknown): Record<string, unknown> =>
-  value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-
 const AuditTrailPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
-  const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
+
+  const [selectedCaseContext] = useState<SelectedCaseContext>(() =>
+    readSelectedCaseContext(),
+  );
+  const [cachedSearchQuickLinks] = useState<Record<string, unknown>>(() =>
+    readCachedSearchQuickLinks(),
+  );
+  const [quickLinksData, setQuickLinksData] =
+    useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
   const safeBusinessType = businessType ?? "retail";
-  const safeApplicationNumber = applicationNumber ?? "";
+  const safeApplicationNumber =
+    applicationNumber?.trim() || selectedCaseContext.applicationNo?.trim() || "";
+  const isFromSearchApplication =
+    selectedCaseContext.source === "searchApplication" &&
+    selectedCaseContext.readOnly === true;
+
   const reduxQuickLinks = useMemo(
-    () => toRecord((drsData as unknown as Record<string, unknown> | null)?.quickLinks),
+    () =>
+      toRecord(
+        (drsData as unknown as Record<string, unknown> | null)?.quickLinks,
+      ),
     [drsData],
   );
+
   const hasReduxAuditTrail = Array.isArray(reduxQuickLinks.auditTrail);
+  const hasCachedSearchAuditTrail =
+    isFromSearchApplication &&
+    Array.isArray(cachedSearchQuickLinks.auditTrail);
+
   const effectiveQuickLinksData = !safeApplicationNumber
     ? null
     : hasReduxAuditTrail
       ? reduxQuickLinks
-      : quickLinksData;
+      : hasCachedSearchAuditTrail
+        ? cachedSearchQuickLinks
+        : quickLinksData;
+
   const rows = useMemo<AuditTrail>(
     () => normalizeAuditTrailRows(effectiveQuickLinksData?.auditTrail),
     [effectiveQuickLinksData],
@@ -87,14 +148,23 @@ const AuditTrailPage = () => {
 
   useEffect(() => {
     const loadAuditTrail = async () => {
-      if (!safeApplicationNumber || hasReduxAuditTrail) {
+      if (
+        !safeApplicationNumber ||
+        hasReduxAuditTrail ||
+        hasCachedSearchAuditTrail
+      ) {
         return;
       }
 
       try {
         setLoading(true);
+
         const roleType = localStorage.getItem("roleType") ?? "";
-        const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "System").trim() || "System";
+        const userId = (
+          localStorage.getItem("userId") ??
+          localStorage.getItem("username") ??
+          "System"
+        ).trim() || "System";
 
         const response = await dispatch(
           drsThunk({
@@ -105,7 +175,11 @@ const AuditTrailPage = () => {
           }),
         ).unwrap();
 
-        setQuickLinksData(toRecord((response.data as unknown as Record<string, unknown>)?.quickLinks));
+        setQuickLinksData(
+          toRecord(
+            (response.data as unknown as Record<string, unknown>)?.quickLinks,
+          ),
+        );
       } catch (error) {
         console.error("Failed to load audit trail:", error);
         setQuickLinksData(null);
@@ -115,7 +189,26 @@ const AuditTrailPage = () => {
     };
 
     void loadAuditTrail();
-  }, [dispatch, hasReduxAuditTrail, safeApplicationNumber]);
+  }, [
+    dispatch,
+    hasCachedSearchAuditTrail,
+    hasReduxAuditTrail,
+    safeApplicationNumber,
+  ]);
+
+  const handleBack = () => {
+    if (isFromSearchApplication) {
+      navigate(getSearchApplicationPath(), {
+        state: {
+          restoreSearchResult: true,
+          applicationNo: safeApplicationNumber,
+        },
+      });
+      return;
+    }
+
+    navigate(getDRSPath(safeBusinessType, safeApplicationNumber));
+  };
 
   const title = useMemo(
     () => `Audit Trail${loading ? " (Loading...)" : ""}`,
@@ -123,10 +216,14 @@ const AuditTrailPage = () => {
   );
 
   return (
-    <Container disableGutters>
+    <Container maxWidth={false} disableGutters>
       <BackButton
-        label="Back to DRS"
-        onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationNumber))}
+        label={
+          isFromSearchApplication
+            ? "Back to Search Application"
+            : "Back to DRS"
+        }
+        onClick={handleBack}
       />
 
       <Box sx={{ mt: 1 }}>

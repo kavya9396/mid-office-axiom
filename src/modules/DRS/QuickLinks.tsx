@@ -36,7 +36,27 @@ const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
     return [];
 };
 
-const QuickLinks = () => {
+interface QuickLinksProps {
+    applicationNo?: string;
+    hideSearchApplication?: boolean;
+}
+
+const getSelectedCaseApplicationNo = (): string => {
+    try {
+        const context = JSON.parse(
+            localStorage.getItem("selectedCaseContext") ?? "{}",
+        ) as { applicationNo?: unknown };
+
+        return String(context.applicationNo ?? "").trim();
+    } catch {
+        return "";
+    }
+};
+
+const QuickLinks = ({
+    applicationNo,
+    hideSearchApplication = false,
+}: QuickLinksProps) => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
     const [isOpen, setIsOpen] = useState(false);
@@ -50,7 +70,11 @@ const QuickLinks = () => {
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
         "retail";
-    const safeApplicationNumber = applicationNumber ?? "";
+    const safeApplicationNumber = String(
+        applicationNo ??
+        applicationNumber ??
+        getSelectedCaseApplicationNo(),
+    ).trim();
     const roleType = localStorage.getItem("roleType") ?? "";
     const visibleButtons = [
         'CPT_TASK',
@@ -113,7 +137,14 @@ const QuickLinks = () => {
             ...(roleType == 'CPT_DATA_ENTRY_NMR_TASK' || roleType == 'GUW_FORMAL_TASK' ? [
                 { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
             ]:[]),
-                { label: "Search Application", path: getSearchApplicationPath() },
+        ...(hideSearchApplication
+            ? []
+            : [
+                {
+                    label: "Search Application",
+                    path: getSearchApplicationPath(),
+                },
+            ]),
     ];
 
     const toggleQuickLinks = useCallback(() => {
@@ -208,6 +239,7 @@ const QuickLinks = () => {
 
     return (
         <Box
+            data-drs-quick-links="true"
             sx={{
                 position: "fixed",
                 bottom: "10%",

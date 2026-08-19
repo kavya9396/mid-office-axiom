@@ -58,6 +58,8 @@ interface SelectedCaseContext {
   taskId?: string;
   instanceId?: string;
   taskCompositeId?: string;
+  source?: string;
+  readOnly?: boolean;
 }
 
 interface SnackbarState {
@@ -246,6 +248,10 @@ const DRS = () => {
       ? "BRE-RETAIL"
       : "BRE-GROUP";
 
+  const isSearchApplicationMode =
+    selectedCaseContext.source === "searchApplication" &&
+    selectedCaseContext.readOnly === true;
+
   useEffect(() => {
     if (
       !applicationNo ||
@@ -276,16 +282,18 @@ const DRS = () => {
     const loadPageData = async () => {
       setIsPageLoading(true);
 
-      void dispatch(
-        breThunk({
-          eventName,
-          applicationNumber: applicationNo,
-        }),
-      )
-        .unwrap()
-        .catch((error: unknown) => {
-          console.error("Failed to load BRE:", error);
-        });
+      if (!isSearchApplicationMode) {
+        void dispatch(
+          breThunk({
+            eventName,
+            applicationNumber: applicationNo,
+          }),
+        )
+          .unwrap()
+          .catch((error: unknown) => {
+            console.error("Failed to load BRE:", error);
+          });
+      }
 
       try {
         await dispatch(
@@ -315,6 +323,7 @@ const DRS = () => {
     roleType,
     sections,
     eventName,
+    isSearchApplicationMode,
   ]);
 
   const visibleAccordions = useMemo(
