@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   DangerIcon,
@@ -56,6 +56,8 @@ interface DynamicRoleTableProps {
 type SortDirection = "asc" | "desc";
 
 const MAX_VISIBLE_COLUMNS = 9;
+const SELECTED_TASK_POOL_KEY = "selectedTaskPoolKey";
+const ALL_CASES_POOL_KEY = "ALL_CASES";
 const EXCLUDED_COLUMNS = [
   "id",
   "taskId",
@@ -387,11 +389,17 @@ const getRowTimingStatus = (
 const DynamicRoleTable = ({
   title,
   data,
+  poolKey,
   onApplicationClick,
   storageKey,
   showAddButton = false,
 }: DynamicRoleTableProps) => {
   const dispatch = useAppDispatch();
+
+  const resolvedPoolKey =
+    poolKey ?? localStorage.getItem(SELECTED_TASK_POOL_KEY) ?? "";
+  const canConfigureColumns =
+    Boolean(resolvedPoolKey) && resolvedPoolKey !== ALL_CASES_POOL_KEY;
 
   const [isSavingColumns, setIsSavingColumns] =
     useState(false);
@@ -452,13 +460,75 @@ const DynamicRoleTable = ({
   /* ============================================================
    * COLUMN CONFIGURATION
    *
-   * No useEffect is required here.
-   * This avoids React cascading-render warnings.
+   * The server configuration is refreshed whenever the selected
+   * task/pool changes.
    * ============================================================
    */
 
   const [columnConfig, setColumnConfig] =
     useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    if (!canConfigureColumns || columns.length === 0) {
+      return;
+    }
+
+    const username = localStorage.getItem("username") ?? "";
+    if (!username) {
+      return;
+    }
+
+    let isCurrentRequest = true;
+
+    void dispatch(
+      columnConfigFetchThunk({
+        username,
+        poolKey: resolvedPoolKey,
+      }),
+    )
+      .unwrap()
+      .then((response) => {
+        if (!isCurrentRequest) return;
+
+        const result = response as {
+          availableFields?: string[];
+          selectedFields?: string[];
+        };
+        const fetchedFields =
+          result.selectedFields ?? result.availableFields ?? [];
+        const fetchedColumns = fetchedFields
+          .filter(
+            (column) =>
+              columns.includes(column) &&
+              !EXCLUDED_COLUMNS.includes(column),
+          )
+          .slice(0, MAX_VISIBLE_COLUMNS);
+
+        if (fetchedColumns.length === 0) return;
+
+        setColumnConfig((previous) => ({
+          ...previous,
+          [finalStorageKey]: fetchedColumns,
+        }));
+        localStorage.setItem(
+          finalStorageKey,
+          JSON.stringify(fetchedColumns),
+        );
+      })
+      .catch((error) => {
+        console.error("Unable to fetch column configuration:", error);
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [
+    canConfigureColumns,
+    columns,
+    dispatch,
+    finalStorageKey,
+    resolvedPoolKey,
+  ]);
 
   /**
  * Columns currently checked in the Available Columns list.
@@ -1011,9 +1081,6 @@ const DynamicRoleTable = ({
       );
 
     const username = localStorage.getItem("username") ?? "";
-    const resolvedPoolKey =
-      localStorage.getItem("roleType") ?? "";
-      console.log('username-poolkey',username,resolvedPoolKey)
 
     if (!username || !resolvedPoolKey) {
       console.error(
@@ -1313,9 +1380,11 @@ console.log('payload',payload)
               <FilterIcon width={32} />
             </Box>
 
-            <Box sx={{ cursor: "pointer", mt: 0.5 }} onClick={handleOpenSettings}>
-              <SettingsIcon width={32} />
-            </Box>
+            {canConfigureColumns && (
+              <Box sx={{ cursor: "pointer", mt: 0.5 }} onClick={handleOpenSettings}>
+                <SettingsIcon width={32} />
+              </Box>
+            )}
 
             {/* <IconButton
               size="small"
@@ -1784,7 +1853,7 @@ console.log('payload',payload)
           COLUMN SETTINGS DIALOG
           ========================================================
       */}
-      <CustomDialog
+      {canConfigureColumns && <CustomDialog
         open={settingsOpen}
         onClose={handleCloseSettings}
         maxWidth="md"
@@ -2317,11 +2386,11 @@ console.log('payload',payload)
             The Selected Columns
             order determines the
             table column order. Use
-            â†‘ and â†“ to rearrange
+            Ã¢â€ â€˜ and Ã¢â€ â€œ to rearrange
             columns.
           </Typography>
         </Box> */}
-      </CustomDialog>
+      </CustomDialog>}
     </>
   );
 };
