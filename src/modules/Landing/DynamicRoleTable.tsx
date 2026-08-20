@@ -68,7 +68,10 @@ const EXCLUDED_COLUMNS = [
   "role",
   "businessType",
   "startTime",
-  "atRiskTime"
+  "atRiskTime",
+  "poolName",
+  "pool_name",
+  "poolKey",
 ];
 
 /* ============================================================
@@ -1483,7 +1486,13 @@ console.log('payload',payload)
                       onClick={() => handleSort(column)}
                       sx={{
                         height: "30px",
-                        padding: "0 10px",
+                        // Application-number rows reserve 14px for the
+                        // warning icon plus a 4px gap. Offset this header by
+                        // the same 18px so it starts above the number text,
+                        // not above the icon slot.
+                        padding: isApplicationNumberColumn(column)
+                          ? "0 10px 0 28px"
+                          : "0 10px",
                         backgroundColor: "#eef1f4",
                         color: "#20252a",
                         fontSize: "11px",
