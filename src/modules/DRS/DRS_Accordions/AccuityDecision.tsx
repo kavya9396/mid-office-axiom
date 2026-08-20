@@ -7,48 +7,27 @@ import CustomTextField from "../../../components/ui/TextField/TextField";
 import type { RootState } from "../../../store/store";
 
 type AccuityRule = {
-  description: string;
   status: string;
-  workflowPoolAction: string;
-  finalActionInWorkflow: string;
 };
 
 const ACCUITY_RULES: Record<string, AccuityRule> = {
   C: {
-    description: "Changed",
     status: "Open",
-    workflowPoolAction: "Will be seen in Accuity Pool",
-    finalActionInWorkflow: "Terminal decision not allowed, except Dec/ Post/ AMR",
   },
   "3": {
-    description: "Escalate to CUW Manager",
     status: "Open",
-    workflowPoolAction: "Will be seen in Accuity Pool",
-    finalActionInWorkflow: "Terminal decision not allowed, except Dec/ Post/ AMR",
   },
   G: {
-    description: "False Positive",
     status: "Closed no further check required",
-    workflowPoolAction: "Will NOT be seen in Accuity Pool",
-    finalActionInWorkflow: "CUW Pool, no control required",
   },
   R: {
-    description: "Passed by Rules",
     status: "Closed no further check required",
-    workflowPoolAction: "Will NOT be seen in Accuity Pool",
-    finalActionInWorkflow: "CUW Pool, no control required",
   },
   B: {
-    description: "True Match",
     status: "Status is closed but to process further HOD approval will be required",
-    workflowPoolAction: "Will NOT be seen in Accuity Pool",
-    finalActionInWorkflow: "CUW HOD approval mandatory",
   },
   O: {
-    description: "Open",
     status: "Open",
-    workflowPoolAction: "Will be seen in Accuity Pool",
-    finalActionInWorkflow: "Terminal decision not allowed, except Dec/ Post/ AMR",
   },
 };
 
@@ -115,9 +94,6 @@ const AccuityDecision = () => {
     return {
       revisedStatusCode,
       status,
-      description: rule.description,
-      workflowPoolAction: rule.workflowPoolAction,
-      finalActionInWorkflow: rule.finalActionInWorkflow,
       fircoAcsUrl,
     };
   }, [dataRecord]);
@@ -181,17 +157,7 @@ const AccuityDecision = () => {
               </Box>
             </Box>
 
-            <Box sx={{ mt: 1, display: "grid", gap: 0.45 }}>
-              <Typography sx={{ fontSize: "12px", color: "#3F3F3F" }}>
-                Description: {resolved.description}
-              </Typography>
-              <Typography sx={{ fontSize: "12px", color: "#3F3F3F" }}>
-                Workflow Pool Action: {resolved.workflowPoolAction}
-              </Typography>
-              <Typography sx={{ fontSize: "12px", color: "#3F3F3F" }}>
-                Final Action in Workflow: {resolved.finalActionInWorkflow}
-              </Typography>
-            </Box>
+        
           </Box>
         </CustomAccordion>
       </Box>
