@@ -484,14 +484,24 @@ const UWDecision = () => {
 
     const handleSubmitIntent = () => {
         const breValidation = validateDrsFinalBre(drsData);
+        const roleType = String(
+            localStorage.getItem("roleType") ?? "",
+        ).trim();
         if (!breValidation.canPerformAction) {
             setSubmitMessage(breValidation.message);
             setSubmitStatus("failure");
             return;
         }
-        const applicantTabsValidation = validateApplicantTabsVisited(drsData);
+        const applicantTabsValidation = validateApplicantTabsVisited(
+            drsData,
+            applicationNumber || taskContext.appNo || "",
+            roleType,
+        );
         if (!applicantTabsValidation.isValid) {
-            setSubmitMessage(applicantTabsValidation.message);
+            setSubmitMessage(
+                applicantTabsValidation.message ??
+                "Please visit all Applicant Profile tabs before submitting the decision.",
+            );
             setSubmitStatus("failure");
             return;
         }

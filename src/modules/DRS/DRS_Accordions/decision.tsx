@@ -19,6 +19,7 @@ import type { AppDispatch } from "../../../store/store";
 
 import { title } from "../../../utils/constant";
 import { validateDecision } from "../../../validations/decisionValidations";
+import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
 import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
@@ -54,6 +55,7 @@ interface RequirementManagementRow {
 
 interface DrsData {
   requirementManagement?: RequirementManagementRow[];
+  summary?: Array<{ memberType?: string }>;
 }
 
 interface DrsStateWithRequirementSaveStatus {
@@ -332,6 +334,22 @@ const Decision = () => {
         "warning",
       );
 
+      return;
+    }
+
+    const applicantTabsValidation =
+  validateApplicantTabsVisited(
+    drsState.data,
+    applicationNumber,
+    roleType,
+  );
+
+    if (!applicantTabsValidation.isValid) {
+      showSnackbar(
+        applicantTabsValidation.message ??
+          "Please visit all Applicant Profile tabs before submitting the decision.",
+        "warning",
+      );
       return;
     }
 

@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs, Typography } from "@mui/material";
-import { useState, type SyntheticEvent } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { title } from "../../../utils/constant";
@@ -18,6 +18,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import CustomButton from "../../../components/ui/Button/Button";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import RiskAnalytics from "./RiskAnalytics";
+import { markApplicantTabVisited } from "../../../validations/drsApplicantTabValidation";
 
 /* -------------------------------------------------------------------------- */
 /*                                   TYPES                                    */
@@ -574,7 +575,21 @@ const ApplicantProfile = () => {
    * roleType is coming from localStorage.
    * If it doesn't exist, DEFAULT configuration is used.
    */
-  const roleType = localStorage.getItem("roleType") ?? "DEFAULT";
+  const roleType = (() => {
+    try {
+      const selectedCaseContext = JSON.parse(
+        localStorage.getItem("selectedCaseContext") ?? "{}",
+      ) as { roleType?: string };
+
+      return String(
+        selectedCaseContext.roleType ??
+          localStorage.getItem("roleType") ??
+          "DEFAULT",
+      ).trim();
+    } catch {
+      return localStorage.getItem("roleType") ?? "DEFAULT";
+    }
+  })();
 
   /* ------------------------------------------------------------------------ */
   /*                                STATE                                     */
@@ -606,6 +621,26 @@ const ApplicantProfile = () => {
   /* ------------------------------------------------------------------------ */
 
   const selectedApplicant = summary[selectedMemberTab];
+
+  const resolvedApplicationNumber = String(
+    applicationNumber ??
+      drsRecord.applicationNumber ??
+      drsRecord.applicationNo ??
+      "",
+  ).trim();
+
+  /* Mark the initially displayed member and every selected member as visited. */
+  useEffect(() => {
+    const memberType = selectedApplicant?.memberType?.trim();
+
+    if (!resolvedApplicationNumber || !memberType) return;
+
+    markApplicantTabVisited(
+  resolvedApplicationNumber,
+  roleType,
+  memberType,
+);
+  }, [resolvedApplicationNumber, selectedApplicant?.memberType]);
 
   /* ------------------------------------------------------------------------ */
   /*                         MEMBER TAB CHANGE                                */
@@ -1631,7 +1666,7 @@ const ApplicantProfile = () => {
         drsThunk({
           applicationNo: applicationNumber ?? "",
           userId: currentUserId,
-          roleType: localStorage.getItem("roleType") ?? "CVT_TASK",
+          roleType,
           sections: [
             "breDecision",
             "summary",
