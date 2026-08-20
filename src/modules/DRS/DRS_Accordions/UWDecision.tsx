@@ -1,11 +1,11 @@
 import { Alert, Box, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomRadioGroup from "../../../components/ui/Radio/Radio";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
-import { referralUsersThunk } from "../../../store/thunks/referralUsersThunk";
+
 import CustomButton from "../../../components/ui/Button/Button";
 import UWReinsurer, { UWReinsurerFields } from "./ReInsurer/UWReinsurer";
 import { useNavigate } from "react-router-dom";
@@ -22,12 +22,18 @@ import { getAllReasonRemarks, getNonMedicalReasonRemarks, normalizeDecisionOptio
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { userRoleNameThunk } from "../../../store/thunks/userRoleNameThunk";
+import type { UserRoleUser } from "../../../types/drs.types";
 
-const referralRoleMap: Record<string, string> = {
-    "Refer to HOD": "HoD",
-    "Refer to Sr Uw": "SrUW",
-    "Refer to HO CMO": "HO CMO",
-    "Refer to Reinsurer": "Reinsurer",
+const referralRoleMap: Record<string, "hod" | "sruw" | "cmo"> = {
+    "Refer to HOD": "hod",
+    "Refer to Sr Uw": "sruw",
+    "Refer to CMO": "cmo",
+    "Refer to HO CMO": "cmo",
+};
+
+type ReferralUser = UserRoleUser & {
+    threshold?: boolean;
 };
 
 type CounterOfferRowKey = "baseSumAssured" | "riderSumAssured";
@@ -62,7 +68,6 @@ const createCounterOfferTableState = () => ({
 });
 
 const UWDecision = () => {
-    const users = useSelector((state: RootState) => state.referralUsers.users);
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes)
     const masters = useSelector((state: RootState) => state.drs.masters);
     const dispatch = useDispatch<AppDispatch>();
@@ -89,14 +94,14 @@ const UWDecision = () => {
     const [decisionType, setDecisionType] = useState("counterSign");
     const [referralValue, setReferralValue] = useState("");
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
-    const [thresholdDialogOpen, setThresholdDialogOpen] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [submitMessage, setSubmitMessage] = useState<string | null>(null);
     const [submitStatus, setSubmitStatus] = useState<"success" | "failure" | null>(null);
-    const [excludedUserIds, setExcludedUserIds] = useState<string[]>([]);
-    const [selectedThresholdUserId, setSelectedThresholdUserId] = useState("");
-
-    const lastRoleRef = useRef<string | null>(null);
+    const [roleUsers, setRoleUsers] = useState<ReferralUser[]>([]);
+    const [roleUsersLoading, setRoleUsersLoading] = useState(false);
+    const [excludedReferralNtids, setExcludedReferralNtids] = useState<string[]>([]);
+    const [thresholdDialogOpen, setThresholdDialogOpen] = useState(false);
+    const [thresholdUserNtid, setThresholdUserNtid] = useState("");
 
     const caseUWDecisionOptions = useMemo(() => {
         const misc = (masters as Record<string, unknown> | undefined)?.misc;
@@ -380,6 +385,7 @@ const UWDecision = () => {
 
     const showParallelDecision = [
         "Refer to HO CMO",
+        "Refer to CMO",
         "Refer to Risk",
         "Refer to Accuity",
         "Raise Requirement",
@@ -390,6 +396,7 @@ const UWDecision = () => {
         "Refer to Sr Uw",
         "Refer to Reinsurer",
         "Refer to HO CMO",
+        "Refer to CMO",
     ].includes(caseUWDecisionLabel);
 
     const fetchDecisionCodes = new Set([
@@ -427,10 +434,11 @@ const UWDecision = () => {
     };
 
     const dialogMessage = `Kindly reconfirm if you want to proceed with the case as "${caseUWDecisionLabel}"`;
-    const thresholdMessage = `Threshold is achieved for this user, kindly refer the case to another ${caseUWDecisionLabel}`;
-
     const riskMessage = "Kindly reconfirm if you want to initiate a risk investigation process for the applicant?";
     const taskContext = getDecisionTaskContext(drsData, applicationNumber);
+    const selectedReferralUser = roleUsers.find(
+        (user) => user.ntid === referralValue,
+    );
 
     const handleSubmit = async () => {
         const breValidation = validateDrsFinalBre(drsData);
@@ -459,6 +467,8 @@ const UWDecision = () => {
                         instanceId: taskContext.instanceId,
                         remarks: uwDecisionRemarks.trim(),
                         decision: effectiveCaseUWDecision.trim(),
+                        fullName: selectedReferralUser?.fullName ?? "",
+                        ntid: selectedReferralUser?.ntid ?? "",
                     },
                 }),
             ).unwrap();
@@ -520,18 +530,28 @@ const UWDecision = () => {
             return;
         }
 
+        if (referralRoleMap[caseUWDecisionLabel] && !selectedReferralUser) {
+            setSubmitMessage("Please select a referral user.");
+            setSubmitStatus("failure");
+            return;
+        }
+
         setConfirmationDialogOpen(true);
     };
 
     const userOptions = useMemo(() => {
-        return users
-            .filter(user => !excludedUserIds.includes(user.userId))
+        return roleUsers
+            .filter(
+                (user) =>
+                    user.status.trim().toUpperCase() === "ACTIVE" &&
+                    Boolean(user.fullName?.trim()) &&
+                    !excludedReferralNtids.includes(user.ntid),
+            )
             .map((user) => ({
-                label: user.userName,
-                value: user.userId,
-                ticketsInPool: String(user.ticketsInPool),
+                label: user.fullName!.trim(),
+                value: user.ntid,
             }));
-    }, [users, excludedUserIds]);
+    }, [excludedReferralNtids, roleUsers]);
 
     const referralConfig = {
         "Refer to HOD": {
@@ -549,6 +569,11 @@ const UWDecision = () => {
             options: userOptions,
         },
 
+        "Refer to CMO": {
+            label: "Name of CMO",
+            options: userOptions,
+        },
+
         "Refer to Risk": {
             label: "Risk Referral Reasons",
             options: riskReferralReasonOptions,
@@ -562,22 +587,43 @@ const UWDecision = () => {
 
     const selectedReferralConfig = referralConfig[caseUWDecisionLabel as keyof typeof referralConfig];
 
+    const fetchUsersForReferralDecision = (decisionLabel: string) => {
+        const roleName = referralRoleMap[decisionLabel];
+        setRoleUsers([]);
+        setRoleUsersLoading(false);
+        setExcludedReferralNtids([]);
+        setThresholdUserNtid("");
+        setThresholdDialogOpen(false);
+
+        if (!roleName) return;
+
+        setRoleUsersLoading(true);
+        dispatch(userRoleNameThunk({ roleName }))
+            .unwrap()
+            .then((response) => {
+                setRoleUsers(
+                    Array.isArray(response.data?.users)
+                        ? response.data.users
+                        : [],
+                );
+            })
+            .catch((error) => {
+                setRoleUsers([]);
+                setSubmitMessage(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to fetch users for the selected role.",
+                );
+                setSubmitStatus("failure");
+            })
+            .finally(() => setRoleUsersLoading(false));
+    };
+
     const filteredParallelOptions = useMemo(() => {
         return parallelUWDecisionOptions.filter(
             (option) => option.label !== caseUWDecisionLabel
         );
     }, [caseUWDecisionLabel, parallelUWDecisionOptions]);
-
-    useEffect(() => {
-        const role = referralRoleMap[caseUWDecisionLabel];
-
-        if (!role) return;
-
-        if (lastRoleRef.current === role) return;
-
-        lastRoleRef.current = role;
-        dispatch(referralUsersThunk({ role }));
-    }, [caseUWDecisionLabel, dispatch]);
 
     return (
         <Box sx={{ px: 1 }}>
@@ -636,6 +682,7 @@ const UWDecision = () => {
                             onChange={(value: string) => {
                                 const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
                                 setCaseUWDecision(value);
+                                fetchUsersForReferralDecision(selectedLabel);
                                 setReferralValue("");
                                 setRejectReason("");
                                 setDeclineReasons([]);
@@ -773,18 +820,31 @@ const UWDecision = () => {
                                 label={selectedReferralConfig.label}
                                 value={referralValue}
                                 onChange={(value: string) => {
-                                    setReferralValue(value);
-
-                                    const selectedUser = users.find(
-                                        (user) => user.userId === value
+                                    const selectedUser = roleUsers.find(
+                                        (user) => user.ntid === value,
                                     );
 
-                                    if ((selectedUser?.ticketsInPool ?? 0) >= 15) {
-                                        setSelectedThresholdUserId(value);
-                                        setThresholdDialogOpen(true);
+                                    if (!selectedUser) {
+                                        setReferralValue("");
+                                        return;
                                     }
+
+                                    if (selectedUser.threshold === true) {
+                                        setReferralValue(value);
+                                        setThresholdUserNtid(value);
+                                        setThresholdDialogOpen(true);
+                                        return;
+                                    }
+
+                                    setReferralValue(value);
                                 }}
                                 options={selectedReferralConfig.options}
+                                disabled={roleUsersLoading}
+                                placeholder={
+                                    roleUsersLoading
+                                        ? "Loading users..."
+                                        : "Select user"
+                                }
                             />
                         )}
 
@@ -1039,24 +1099,26 @@ const UWDecision = () => {
                 </Alert>
             </Snackbar>
 
-            {/* Threshold Dialog */}
             <ConfirmationDialog
                 open={thresholdDialogOpen}
-                title="Threshold Limit"
-                buttonText="Ok"
-                message={thresholdMessage}
+                title="Threshold Achieved"
+                buttonText="OK"
+                message="Threshold is achieved, kindly refer the case to some other User"
                 onClose={() => {
-                    if (selectedThresholdUserId) {
-                        setExcludedUserIds(prev => [
-                            ...prev,
-                            selectedThresholdUserId,
-                        ]);
+                    if (thresholdUserNtid) {
+                        setExcludedReferralNtids((current) =>
+                            current.includes(thresholdUserNtid)
+                                ? current
+                                : [...current, thresholdUserNtid],
+                        );
                     }
+
                     setReferralValue("");
-                    setSelectedThresholdUserId("");
+                    setThresholdUserNtid("");
                     setThresholdDialogOpen(false);
                 }}
             />
+
         </Box>
     )
 }

@@ -8,83 +8,46 @@ type ThunkConfig = {
   rejectValue: string;
 };
 
-type ApiThunkRequestConfig<TBody> = Omit<
-  ApiRequest<TBody>,
-  "body"
+type DynamicRequestConfig<TPayload> = Omit<
+  ApiRequest<TPayload>,
+  "body" | "url"
 > & {
+  url: string | ((payload: TPayload) => string);
   fallbackUrl?: string;
-  buildUrl?: (
-    baseUrl: string,
-    payload: TBody,
-  ) => string;
 };
 
-export function createApiThunk<
-  TResponse,
-  TBody = unknown,
->(
+export function createApiThunk<TResponse, TPayload = unknown>(
   typePrefix: string,
-  requestConfig: ApiThunkRequestConfig<TBody>,
+  requestConfig: DynamicRequestConfig<TPayload>,
 ) {
   return createAsyncThunk<
     TResponse,
-    TBody,
+    TPayload,
     ThunkConfig
   >(
     typePrefix,
     async (payload, { rejectWithValue }) => {
-      const {
-        fallbackUrl,
-        buildUrl,
-        ...apiConfig
-      } = requestConfig;
-
-      const isBodyAllowed =
-        apiConfig.method !== "GET" &&
-        apiConfig.method !== "DELETE";
-
-      const requestUrl = buildUrl
-        ? buildUrl(apiConfig.url, payload)
-        : apiConfig.url;
-
       try {
-        return await apiRequest<TResponse, TBody>({
-          ...apiConfig,
+        const {
+          url: configuredUrl,
+          ...remainingConfig
+        } = requestConfig;
+
+        const requestUrl =
+          typeof configuredUrl === "function"
+            ? configuredUrl(payload)
+            : configuredUrl;
+
+        return await apiRequest<TResponse, TPayload>({
+          ...remainingConfig,
           url: requestUrl,
-          body: isBodyAllowed
-            ? payload
-            : undefined,
+          body: payload,
         });
-      } catch (error: unknown) {
-        if (fallbackUrl) {
-          try {
-            const resolvedFallbackUrl = buildUrl
-              ? buildUrl(fallbackUrl, payload)
-              : fallbackUrl;
-
-            return await apiRequest<
-              TResponse,
-              TBody
-            >({
-              ...apiConfig,
-              url: resolvedFallbackUrl,
-              body: isBodyAllowed
-                ? payload
-                : undefined,
-            });
-          } catch (fallbackError: unknown) {
-            return rejectWithValue(
-              fallbackError instanceof Error
-                ? fallbackError.message
-                : "Something went wrong",
-            );
-          }
-        }
-
+      } catch (error) {
         return rejectWithValue(
           error instanceof Error
             ? error.message
-            : "Something went wrong",
+            : "Something went wrong.",
         );
       }
     },

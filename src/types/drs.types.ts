@@ -549,6 +549,8 @@ export type CompleteTaskReq = {
   instanceId: string;
   remarks: string;
   decision: string;
+  fullName?:string;
+  ntid?:string;
 };
 export type CompleteTaskRequest = {
   requestContext: CompleteTaskReq;
@@ -1406,3 +1408,29 @@ export type MasterResponse = {
     misc: MiscMaster[];
   };
 };
+export type UserRoleName = "hod" | "sruw" | "cmo";
+
+export interface UserRoleNameRequest {
+  roleName: UserRoleName;
+}
+
+export interface UserRoleUser {
+  ntid: string;
+  fullName: string | null;
+  email: string | null;
+  status: string;
+}
+
+export interface UserRoleNameData {
+  roleId: string;
+  roleName: string;
+  isActive: boolean;
+  users: UserRoleUser[];
+}
+
+export interface UserRoleNameResponse {
+  response_code: number;
+  error: boolean;
+  message: string;
+  data: UserRoleNameData;
+}
