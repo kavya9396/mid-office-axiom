@@ -29,6 +29,10 @@ import SpecialMedicalForm, { type SpecialMedicalFormHandle } from "./Special Med
 import { getSpecialMedicalConfig } from "./Special Medical/specialMedicalConfig";
 import { saveMerThunk, type MerSaveResponse } from "../../../store/thunks/medicalMerSaveThunk";
 import { buildMerRequest } from "./MER/merPayloadMapper";
+import { buildOtherMedicalRequest } from "./Other Medicals/otherMedicalsPayloadMapper";
+import { saveOtherMedicalThunk } from "../../../store/thunks/medicalOtherSaveThunk";
+import { buildSpecialMedicalRequest } from "./Special Medical/specialMedicalPayloadMapper";
+import { saveSpecialMedicalThunk } from "../../../store/thunks/medicalSpecialSaveThunk";
 
 const getStoredApplicantTab = () =>
   (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
@@ -877,6 +881,77 @@ const ViewMedical = () => {
       }
       return;
     }
+
+    if (subSection.groupLabel === "Other Medicals") {
+  const otherMedicalFormRef =
+    otherMedicalsFormRefs.current[editingSubSectionId];
+
+  if (!otherMedicalFormRef) {
+    return;
+  }
+
+  const isValid = otherMedicalFormRef.validateForm();
+
+  if (!isValid) {
+    return;
+  }
+
+  try {
+    const request = buildOtherMedicalRequest({
+      applicationNumber: safeApplicationId,
+      partyId,
+      createdBy: userId,
+      selectedSubSection: subSection.title,
+      values: otherMedicalFormRef.getFormValues(),
+      tableData: otherMedicalFormRef.getTableData(),
+    });
+
+    // console.log("Request", request);
+
+    await dispatch(saveOtherMedicalThunk(request)).unwrap();
+
+    otherMedicalFormRef.commitEdit();
+    setEditingSubSectionId(null);
+  } catch (error) {
+    console.error("Other Medical save failed:", error);
+  }
+
+  return;
+}
+
+if (subSection.groupLabel === "Special Medical") {
+  const specialMedicalFormRef =
+    specialMedicalFormRefs.current[editingSubSectionId];
+
+  if (!specialMedicalFormRef) {
+    return;
+  }
+
+  const isValid = specialMedicalFormRef.validateForm();
+
+  if (!isValid) {
+    return;
+  }
+
+  try {
+    const request = buildSpecialMedicalRequest({
+      applicationNumber: safeApplicationId,
+      partyId,
+      createdBy: userId,
+      selectedSubSection: subSection.title,
+      values: specialMedicalFormRef.getFormValues(),
+    });
+    
+    await dispatch(saveSpecialMedicalThunk(request)).unwrap();
+
+    specialMedicalFormRef.commitEdit();
+    setEditingSubSectionId(null);
+  } catch (error) {
+    console.error("Special Medical save failed:", error);
+  }
+
+  return;
+}
 
     // Existing behavior for Special Medical / Other Medicals
     formRef.commitEdit();

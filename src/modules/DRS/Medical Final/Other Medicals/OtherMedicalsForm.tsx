@@ -24,6 +24,7 @@ import {
   OTHER_MEDICALS_S13_GROUP_SECTION_LABEL,
   OTHER_MEDICALS_RUA_GROUP_SECTION_LABEL,
 } from "./otherMedicalsConfig";
+import type { OtherMedicalTableData } from "./otherMedicals.types";
 
 type OtherMedicalsFormProps = {
   selectedSubSection?: string;
@@ -32,6 +33,10 @@ type OtherMedicalsFormProps = {
 };
 
 export type OtherMedicalsFormHandle = {
+  validateForm: () => boolean;
+  getFormValues: () => Record<string, string>;
+  getTableData: () => OtherMedicalTableData;
+  setFormValues: (values: Record<string, string>) => void;
   beginEdit: () => void;
   resetEdit: () => void;
   commitEdit: () => void;
@@ -283,7 +288,80 @@ const OtherMedicalsForm = forwardRef<OtherMedicalsFormHandle, OtherMedicalsFormP
   const isS13GroupSection = selectedSubSection === OTHER_MEDICALS_S13_GROUP_SECTION_LABEL;
   const isRuaGroupSection = selectedSubSection === OTHER_MEDICALS_RUA_GROUP_SECTION_LABEL;
 
-  useImperativeHandle(ref, () => ({
+useImperativeHandle(
+  ref,
+  (): OtherMedicalsFormHandle => ({
+    validateForm: () => {
+      const nextErrors = subsectionFields.reduce<
+        Record<string, string>
+      >((errors, field) => {
+        const value = formValues[field.id] ?? "";
+        const error = validateField(field, value);
+
+        if (error) {
+          errors[field.id] = error;
+        }
+
+        return errors;
+      }, {});
+
+      setFormErrors(nextErrors);
+
+      return Object.keys(nextErrors).length === 0;
+    },
+
+    getFormValues: () =>
+      subsectionFields.reduce<Record<string, string>>(
+        (values, field) => {
+          values[field.id] = formValues[field.id] ?? "";
+          return values;
+        },
+        {}
+      ),
+
+    getTableData: () => {
+      if (isCbcGroupSection) {
+        return structuredClone(cbcTableData);
+      }
+
+      if (isLftSection) {
+        return structuredClone(lftTableData);
+      }
+
+      if (isLipidsSection) {
+        return structuredClone(lipidsTableData);
+      }
+
+      if (isOgttGroupSection) {
+        return structuredClone(ogttTableData);
+      }
+
+      if (isSma12GroupSection) {
+        return structuredClone(sma12TableData);
+      }
+
+      if (isTftGroupSection) {
+        return structuredClone(tftTableData);
+      }
+
+      if (isS13GroupSection) {
+        return structuredClone(s13TableData);
+      }
+
+      if (isRuaGroupSection) {
+        return structuredClone(ruaTableData);
+      }
+
+      return {};
+    },
+
+    setFormValues: (nextValues: Record<string, string>) => {
+      setFormValues((currentValues) => ({
+        ...currentValues,
+        ...nextValues,
+      }));
+    },
+
     beginEdit: () => {
       editSnapshotRef.current = {
         formValues: structuredClone(formValues),
@@ -315,8 +393,30 @@ const OtherMedicalsForm = forwardRef<OtherMedicalsFormHandle, OtherMedicalsFormP
     },
     commitEdit: () => {
       editSnapshotRef.current = null;
+      setFormErrors({});
     },
-  }), [cbcTableData, formValues, lftTableData, lipidsTableData, ogttTableData, ruaTableData, s13TableData, sma12TableData, tftTableData]);
+  }),
+  [
+    subsectionFields,
+    formValues,
+    cbcTableData,
+    lftTableData,
+    lipidsTableData,
+    ogttTableData,
+    sma12TableData,
+    tftTableData,
+    s13TableData,
+    ruaTableData,
+    isCbcGroupSection,
+    isLftSection,
+    isLipidsSection,
+    isOgttGroupSection,
+    isSma12GroupSection,
+    isTftGroupSection,
+    isS13GroupSection,
+    isRuaGroupSection,
+  ]
+);
 
   return (
     <Box
