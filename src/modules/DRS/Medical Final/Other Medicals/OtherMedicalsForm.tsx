@@ -37,6 +37,7 @@ export type OtherMedicalsFormHandle = {
   getFormValues: () => Record<string, string>;
   getTableData: () => OtherMedicalTableData;
   setFormValues: (values: Record<string, string>) => void;
+  setTableData: (values: OtherMedicalTableData) => void;
   beginEdit: () => void;
   resetEdit: () => void;
   commitEdit: () => void;
@@ -288,135 +289,176 @@ const OtherMedicalsForm = forwardRef<OtherMedicalsFormHandle, OtherMedicalsFormP
   const isS13GroupSection = selectedSubSection === OTHER_MEDICALS_S13_GROUP_SECTION_LABEL;
   const isRuaGroupSection = selectedSubSection === OTHER_MEDICALS_RUA_GROUP_SECTION_LABEL;
 
-useImperativeHandle(
-  ref,
-  (): OtherMedicalsFormHandle => ({
-    validateForm: () => {
-      const nextErrors = subsectionFields.reduce<
-        Record<string, string>
-      >((errors, field) => {
-        const value = formValues[field.id] ?? "";
-        const error = validateField(field, value);
+  useImperativeHandle(
+    ref,
+    (): OtherMedicalsFormHandle => ({
+      validateForm: () => {
+        const nextErrors = subsectionFields.reduce<
+          Record<string, string>
+        >((errors, field) => {
+          const value = formValues[field.id] ?? "";
+          const error = validateField(field, value);
 
-        if (error) {
-          errors[field.id] = error;
+          if (error) {
+            errors[field.id] = error;
+          }
+
+          return errors;
+        }, {});
+
+        setFormErrors(nextErrors);
+
+        return Object.keys(nextErrors).length === 0;
+      },
+
+      getFormValues: () =>
+        subsectionFields.reduce<Record<string, string>>(
+          (values, field) => {
+            values[field.id] = formValues[field.id] ?? "";
+            return values;
+          },
+          {}
+        ),
+
+      getTableData: () => {
+        if (isCbcGroupSection) {
+          return structuredClone(cbcTableData);
         }
 
-        return errors;
-      }, {});
+        if (isLftSection) {
+          return structuredClone(lftTableData);
+        }
 
-      setFormErrors(nextErrors);
+        if (isLipidsSection) {
+          return structuredClone(lipidsTableData);
+        }
 
-      return Object.keys(nextErrors).length === 0;
-    },
+        if (isOgttGroupSection) {
+          return structuredClone(ogttTableData);
+        }
 
-    getFormValues: () =>
-      subsectionFields.reduce<Record<string, string>>(
-        (values, field) => {
-          values[field.id] = formValues[field.id] ?? "";
-          return values;
-        },
-        {}
-      ),
+        if (isSma12GroupSection) {
+          return structuredClone(sma12TableData);
+        }
 
-    getTableData: () => {
-      if (isCbcGroupSection) {
-        return structuredClone(cbcTableData);
-      }
+        if (isTftGroupSection) {
+          return structuredClone(tftTableData);
+        }
 
-      if (isLftSection) {
-        return structuredClone(lftTableData);
-      }
+        if (isS13GroupSection) {
+          return structuredClone(s13TableData);
+        }
 
-      if (isLipidsSection) {
-        return structuredClone(lipidsTableData);
-      }
+        if (isRuaGroupSection) {
+          return structuredClone(ruaTableData);
+        }
 
-      if (isOgttGroupSection) {
-        return structuredClone(ogttTableData);
-      }
+        return {};
+      },
 
-      if (isSma12GroupSection) {
-        return structuredClone(sma12TableData);
-      }
+      setFormValues: (nextValues: Record<string, string>) => {
+        setFormValues((currentValues) => ({
+          ...currentValues,
+          ...nextValues,
+        }));
+      },
 
-      if (isTftGroupSection) {
-        return structuredClone(tftTableData);
-      }
+      setTableData: (nextTableData: OtherMedicalTableData) => {
+        if (isCbcGroupSection) {
+          setCbcTableData(structuredClone(nextTableData));
+          return;
+        }
 
-      if (isS13GroupSection) {
-        return structuredClone(s13TableData);
-      }
+        if (isLftSection) {
+          setLftTableData(structuredClone(nextTableData));
+          return;
+        }
 
-      if (isRuaGroupSection) {
-        return structuredClone(ruaTableData);
-      }
+        if (isLipidsSection) {
+          setLipidsTableData(structuredClone(nextTableData));
+          return;
+        }
 
-      return {};
-    },
+        if (isOgttGroupSection) {
+          setOgttTableData(structuredClone(nextTableData));
+          return;
+        }
 
-    setFormValues: (nextValues: Record<string, string>) => {
-      setFormValues((currentValues) => ({
-        ...currentValues,
-        ...nextValues,
-      }));
-    },
+        if (isSma12GroupSection) {
+          setSma12TableData(structuredClone(nextTableData));
+          return;
+        }
 
-    beginEdit: () => {
-      editSnapshotRef.current = {
-        formValues: structuredClone(formValues),
-        cbcTableData: structuredClone(cbcTableData),
-        lftTableData: structuredClone(lftTableData),
-        lipidsTableData: structuredClone(lipidsTableData),
-        ogttTableData: structuredClone(ogttTableData),
-        sma12TableData: structuredClone(sma12TableData),
-        tftTableData: structuredClone(tftTableData),
-        s13TableData: structuredClone(s13TableData),
-        ruaTableData: structuredClone(ruaTableData),
-      };
-    },
-    resetEdit: () => {
-      const snapshot = editSnapshotRef.current;
-      if (snapshot) {
-        setFormValues(snapshot.formValues);
-        setCbcTableData(snapshot.cbcTableData);
-        setLftTableData(snapshot.lftTableData);
-        setLipidsTableData(snapshot.lipidsTableData);
-        setOgttTableData(snapshot.ogttTableData);
-        setSma12TableData(snapshot.sma12TableData);
-        setTftTableData(snapshot.tftTableData);
-        setS13TableData(snapshot.s13TableData);
-        setRuaTableData(snapshot.ruaTableData);
-      }
-      setFormErrors({});
-      editSnapshotRef.current = null;
-    },
-    commitEdit: () => {
-      editSnapshotRef.current = null;
-      setFormErrors({});
-    },
-  }),
-  [
-    subsectionFields,
-    formValues,
-    cbcTableData,
-    lftTableData,
-    lipidsTableData,
-    ogttTableData,
-    sma12TableData,
-    tftTableData,
-    s13TableData,
-    ruaTableData,
-    isCbcGroupSection,
-    isLftSection,
-    isLipidsSection,
-    isOgttGroupSection,
-    isSma12GroupSection,
-    isTftGroupSection,
-    isS13GroupSection,
-    isRuaGroupSection,
-  ]
-);
+        if (isTftGroupSection) {
+          setTftTableData(structuredClone(nextTableData));
+          return;
+        }
+
+        if (isS13GroupSection) {
+          setS13TableData(structuredClone(nextTableData));
+          return;
+        }
+
+        if (isRuaGroupSection) {
+          setRuaTableData(structuredClone(nextTableData));
+        }
+      },
+
+      beginEdit: () => {
+        editSnapshotRef.current = {
+          formValues: structuredClone(formValues),
+          cbcTableData: structuredClone(cbcTableData),
+          lftTableData: structuredClone(lftTableData),
+          lipidsTableData: structuredClone(lipidsTableData),
+          ogttTableData: structuredClone(ogttTableData),
+          sma12TableData: structuredClone(sma12TableData),
+          tftTableData: structuredClone(tftTableData),
+          s13TableData: structuredClone(s13TableData),
+          ruaTableData: structuredClone(ruaTableData),
+        };
+      },
+      resetEdit: () => {
+        const snapshot = editSnapshotRef.current;
+        if (snapshot) {
+          setFormValues(snapshot.formValues);
+          setCbcTableData(snapshot.cbcTableData);
+          setLftTableData(snapshot.lftTableData);
+          setLipidsTableData(snapshot.lipidsTableData);
+          setOgttTableData(snapshot.ogttTableData);
+          setSma12TableData(snapshot.sma12TableData);
+          setTftTableData(snapshot.tftTableData);
+          setS13TableData(snapshot.s13TableData);
+          setRuaTableData(snapshot.ruaTableData);
+        }
+        setFormErrors({});
+        editSnapshotRef.current = null;
+      },
+      commitEdit: () => {
+        editSnapshotRef.current = null;
+        setFormErrors({});
+      },
+    }),
+    [
+      subsectionFields,
+      formValues,
+      cbcTableData,
+      lftTableData,
+      lipidsTableData,
+      ogttTableData,
+      sma12TableData,
+      tftTableData,
+      s13TableData,
+      ruaTableData,
+      isCbcGroupSection,
+      isLftSection,
+      isLipidsSection,
+      isOgttGroupSection,
+      isSma12GroupSection,
+      isTftGroupSection,
+      isS13GroupSection,
+      isRuaGroupSection,
+    ]
+  );
 
   return (
     <Box
@@ -483,23 +525,23 @@ useImperativeHandle(
                     sx={
                       !field.editable
                         ? {
-                            "& .MuiInputBase-root": {
-                              backgroundColor: "#F3F4F6",
-                              cursor: "not-allowed",
-                            },
-                            "& .MuiInputBase-input": {
-                              cursor: "not-allowed",
-                            },
-                          }
+                          "& .MuiInputBase-root": {
+                            backgroundColor: "#F3F4F6",
+                            cursor: "not-allowed",
+                          },
+                          "& .MuiInputBase-input": {
+                            cursor: "not-allowed",
+                          },
+                        }
                         : undefined
                     }
                     slotProps={
                       field.type === "date" && field.disableFutureDate
                         ? {
-                            htmlInput: {
-                              max: maxDate,
-                            },
-                          }
+                          htmlInput: {
+                            max: maxDate,
+                          },
+                        }
                         : undefined
                     }
                   />
@@ -516,16 +558,16 @@ useImperativeHandle(
           <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
             CBC Test Parameters
           </Typography>
-          
-          <Box sx={{ 
-            border: "1px solid #E5E7EB", 
-            borderRadius: "8px", 
+
+          <Box sx={{
+            border: "1px solid #E5E7EB",
+            borderRadius: "8px",
             overflow: "hidden",
             backgroundColor: "#fff"
           }}>
             {/* Table Header */}
-            <Box sx={{ 
-              display: "grid", 
+            <Box sx={{
+              display: "grid",
               gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr",
               backgroundColor: "#F9FAFB",
               borderBottom: "1px solid #E5E7EB",
@@ -547,10 +589,10 @@ useImperativeHandle(
               const isRequired = row.required;
 
               return (
-                <Box 
+                <Box
                   key={row.id}
-                  sx={{ 
-                    display: "grid", 
+                  sx={{
+                    display: "grid",
                     gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr",
                     borderBottom: "1px solid #E5E7EB",
                     padding: "12px 16px",
@@ -637,16 +679,16 @@ useImperativeHandle(
           <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
             LFT Test Parameters
           </Typography>
-          
-          <Box sx={{ 
-            border: "1px solid #E5E7EB", 
-            borderRadius: "8px", 
+
+          <Box sx={{
+            border: "1px solid #E5E7EB",
+            borderRadius: "8px",
             overflow: "hidden",
             backgroundColor: "#fff"
           }}>
             {/* Table Header */}
-            <Box sx={{ 
-              display: "grid", 
+            <Box sx={{
+              display: "grid",
               gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr",
               backgroundColor: "#F9FAFB",
               borderBottom: "1px solid #E5E7EB",
@@ -668,10 +710,10 @@ useImperativeHandle(
               const isRequired = row.required;
 
               return (
-                <Box 
+                <Box
                   key={row.id}
-                  sx={{ 
-                    display: "grid", 
+                  sx={{
+                    display: "grid",
                     gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr",
                     borderBottom: "1px solid #E5E7EB",
                     padding: "12px 16px",
@@ -753,7 +795,7 @@ useImperativeHandle(
           <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
             LIPIDS Test Parameters
           </Typography>
-          
+
           <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "8px", overflow: "hidden", backgroundColor: "#fff" }}>
             <Box sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", fontWeight: 600, fontSize: "13px", color: "#374151" }}>
               <Box>Parameter</Box>
@@ -791,7 +833,7 @@ useImperativeHandle(
           <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
             OGTT Test Parameters
           </Typography>
-          
+
           <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "8px", overflow: "hidden", backgroundColor: "#fff" }}>
             <Box sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", fontWeight: 600, fontSize: "13px", color: "#374151" }}>
               <Box>Parameter</Box>
@@ -829,7 +871,7 @@ useImperativeHandle(
           <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
             SMA12 Test Parameters
           </Typography>
-          
+
           <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "8px", overflow: "hidden", backgroundColor: "#fff" }}>
             <Box sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", fontWeight: 600, fontSize: "13px", color: "#374151" }}>
               <Box>Parameter</Box>
@@ -868,7 +910,7 @@ useImperativeHandle(
           <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
             TFT Test Parameters
           </Typography>
-          
+
           <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "8px", overflow: "hidden", backgroundColor: "#fff" }}>
             <Box sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", fontWeight: 600, fontSize: "13px", color: "#374151" }}>
               <Box>Parameter</Box>
@@ -906,7 +948,7 @@ useImperativeHandle(
           <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
             S13 Test Parameters
           </Typography>
-          
+
           <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "8px", overflow: "hidden", backgroundColor: "#fff" }}>
             <Box sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", fontWeight: 600, fontSize: "13px", color: "#374151" }}>
               <Box>Parameter</Box>
@@ -945,7 +987,7 @@ useImperativeHandle(
           <Typography sx={{ fontSize: "16px", fontWeight: 600, mb: 2, color: "#1F2937" }}>
             RUA Test Parameters
           </Typography>
-          
+
           <Box sx={{ border: "1px solid #E5E7EB", borderRadius: "8px", overflow: "hidden", backgroundColor: "#fff" }}>
             <Box sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", backgroundColor: "#F9FAFB", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", fontWeight: 600, fontSize: "13px", color: "#374151" }}>
               <Box>Parameter</Box>
@@ -958,14 +1000,14 @@ useImperativeHandle(
               const rowData = ruaTableData[row.id] || { value: "", labStart: "", labEnd: "", unit: "", findings: "" };
               const masterKey = row.masterKey as keyof typeof masterOptions;
               const options = masterKey ? (masterOptions[masterKey] ?? []) : [];
-              
+
               return (
                 <Box key={row.id} sx={{ display: "grid", gridTemplateColumns: "2fr 1.5fr 1fr 2fr 1fr", borderBottom: "1px solid #E5E7EB", padding: "12px 16px", alignItems: "center", gap: 2, "&:last-child": { borderBottom: "none" }, "&:hover": { backgroundColor: "#F9FAFB" } }}>
                   <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
                     <Typography sx={{ fontSize: "14px", color: "#1F2937" }}>{row.parameter}</Typography>
                     {row.required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
                   </Box>
-                  
+
                   {/* Value field - Dropdown or Text */}
                   {row.fieldType === "dropdown" ? (
                     <CustomSelect
@@ -993,17 +1035,17 @@ useImperativeHandle(
                       sx={{ "& .MuiInputBase-root": { fontSize: "14px" } }}
                     />
                   )}
-                  
+
                   {/* Unit - Display as text */}
                   <Typography sx={{ fontSize: "14px", color: "#374151" }}>{rowData.unit || "-"}</Typography>
-                  
+
                   {/* Normal Range - Min-Max inputs */}
                   <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
                     <CustomTextField fullWidth size="small" value={rowData.labStart} onChange={(e) => handleRuaTableChange(row.id, "labStart", e.target.value)} placeholder="Min" sx={{ "& .MuiInputBase-root": { fontSize: "14px" } }} />
                     <Typography sx={{ color: "#9CA3AF", fontSize: "14px" }}>-</Typography>
                     <CustomTextField fullWidth size="small" value={rowData.labEnd} onChange={(e) => handleRuaTableChange(row.id, "labEnd", e.target.value)} placeholder="Max" sx={{ "& .MuiInputBase-root": { fontSize: "14px" } }} />
                   </Box>
-                  
+
                   {/* Status - Display as text */}
                   <Typography sx={{ fontSize: "14px", color: "#374151" }}>{rowData.findings || "-"}</Typography>
                 </Box>
