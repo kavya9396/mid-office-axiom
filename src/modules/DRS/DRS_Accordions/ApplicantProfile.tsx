@@ -1694,7 +1694,12 @@ const ApplicantProfile = () => {
 
         {/* ==================== RISK ANALYTICS ==================== */}
 
-        {canShowRiskAnalytics && <RiskAnalytics />}
+        {canShowRiskAnalytics && (
+  <RiskAnalytics
+    memberIndex={selectedMemberTab}
+    memberType={selectedApplicant?.memberType}
+  />
+)}
         
 
         <Box sx={{ width: "100%" }}>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -64,11 +64,17 @@ interface RiskAnalyticsItem {
 }
 
 interface SummaryItem {
+  memberType?: string;
   riskAnalytics?: RiskAnalyticsItem[];
 }
 
 interface RiskAnalyticsData {
   summary?: SummaryItem[];
+}
+
+interface RiskAnalyticsProps {
+  memberIndex: number;
+  memberType?: string;
 }
 
 type RiskStatus = "green" | "red";
@@ -650,7 +656,10 @@ const buildRiskCards = (
 /*                               COMPONENT                                    */
 /* -------------------------------------------------------------------------- */
 
-const RiskAnalytics = () => {
+const RiskAnalytics = ({
+  memberIndex,
+  memberType,
+}: RiskAnalyticsProps) => {
   const drsData = useSelector(
     (state: RootState) =>
       state.drs.data,
@@ -662,8 +671,22 @@ const RiskAnalytics = () => {
   const summary =
     drsData?.summary ?? [];
 
-  const riskCards =
-    buildRiskCards(summary);
+  const normalizedMemberType = normalizeValue(memberType);
+
+  const selectedSummary =
+    summary[memberIndex] ??
+    summary.find(
+      (item) =>
+        normalizeValue(item.memberType) === normalizedMemberType,
+    );
+
+  const riskCards = selectedSummary
+    ? buildRiskCards([selectedSummary])
+    : [];
+
+  useEffect(() => {
+    setSelectedCard(null);
+  }, [memberIndex, memberType]);
 
   if (riskCards.length === 0) {
     return null;

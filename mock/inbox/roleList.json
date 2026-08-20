@@ -673,7 +673,7 @@
         "breDecision": "STD",
         "munichReMedicalDecision": "STD",
         "ptlr": "Low",
-        "roleType": "CUW_TASK",
+        "roleType": "PRE_LOGIN_TASK",
         "role": "RETAIL_CUW_USER",
         "businessType": "RETAIL",
         "state": "DRAFT",
@@ -1408,7 +1408,7 @@
         "status": "DRAFT"
       }
     ],
-    "ACCUITY_TASK": [
+    "ACUITY_TASK": [
       {
         "id": 1,
         "taskId": "18763",
@@ -1424,8 +1424,8 @@
         "breDecision": "STD",
         "munichReMedicalDecision": "STD",
         "ptlr": "Low",
-        "roleType": "ACCUITY_TASK",
-        "role": "RETAIL_ACCUITY_USER",
+        "roleType": "ACUITY_TASK",
+        "role": "RETAIL_ACUITY_USER",
         "businessType": "RETAIL",
         "state": "DRAFT",
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
@@ -1447,8 +1447,8 @@
         "breDecision": "STD",
         "munichReMedicalDecision": "STD",
         "ptlr": "Low",
-        "roleType": "ACCUITY_TASK",
-        "role": "RETAIL_ACCUITY_USER",
+        "roleType": "ACUITY_TASK",
+        "role": "RETAIL_ACUITY_USER",
         "businessType": "RETAIL",
         "state": "DRAFT",
         "dateAndTimeStamp": "2026-06-30T19:45:29.847589",

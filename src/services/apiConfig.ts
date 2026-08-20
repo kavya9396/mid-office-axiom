@@ -189,6 +189,12 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     real: "/api/grievance/application/submit",
     mock: "/mock/drs/grievanceApplicationSubmit.mock.json",
   },
+
+  //pre login
+  prelogin:{
+     real: " http://172.30.74.182:8142/icic-prelogin-service/v1/applications/fetch",
+    mock: "/mock/drs/prelogin.mock.json",
+  }
 } as const;
  
 export type ApiKey = keyof typeof apiUrls;

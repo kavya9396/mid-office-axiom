@@ -565,6 +565,7 @@ const RequirementManagementTable = ({
 
   const userId = localStorage.getItem("username") ?? "";
   const normalizedRoleType = normalizeText(roleType).toUpperCase();
+  console.log('normalizedRoleType',normalizedRoleType)
   const requirementSaveStorageKey = `requirementManagementSaved:${
     applicationNumber ?? ""
   }:${normalizedRoleType}`;
@@ -572,10 +573,11 @@ const RequirementManagementTable = ({
     "AMR_MEDICAL_TASK",
     "AMR_NON_MEDICAL_TASK",
     "RECONSIDERATION_TASK",
+    "ACUITY_TASK"
   ].includes(normalizedRoleType);
   const isAddRequirementEnabled =
     Boolean(onAddRequirement) && !isNonEditable;
-  const isSaveButtonVisible = normalizedRoleType !== "AMR_MEDICAL_TASK" && normalizedRoleType !== "AMR_NON_MEDICAL_TASK" && normalizedRoleType !== "RECONSIDERATION_TASK";
+  const isSaveButtonVisible = normalizedRoleType !== "ACUITY_TASK" && normalizedRoleType !== "AMR_MEDICAL_TASK" && normalizedRoleType !== "AMR_NON_MEDICAL_TASK" && normalizedRoleType !== "RECONSIDERATION_TASK";
 
   const roleBasedRequirements = filterRequirementsByRole(
     requirements,

@@ -37,6 +37,7 @@ import BackButton from "../../components/layout/BackButton";
 import CustomButton from "../../components/ui/Button/Button";
 import { title } from "../../utils/constant";
 import { getInboxPath } from "../../routes/routes";
+import { preloginThunk } from "../../store/thunks/preloginThunk";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -296,16 +297,30 @@ const DRS = () => {
       }
 
       try {
-        await dispatch(
-          drsThunk({
-            applicationNo,
-            userId,
-            roleType,
-            sections,
-          }),
-        ).unwrap();
+        const requests: Promise<unknown>[] = [
+          dispatch(
+            drsThunk({
+              applicationNo,
+              userId,
+              roleType,
+              sections,
+            }),
+          ).unwrap(),
+        ];
+
+        if (roleType === "PRE_LOGIN_TASK") {
+          requests.push(
+            dispatch(
+              preloginThunk({
+                applicationNumber: applicationNo,
+              }),
+            ).unwrap(),
+          );
+        }
+
+        await Promise.all(requests);
       } catch (error) {
-        console.error("Failed to load DRS:", error);
+        console.error("Failed to load application details:", error);
       } finally {
         if (
           lastRequestKeyRef.current === requestKey

@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTextField from "../../../components/ui/TextField/TextField";
@@ -22,7 +22,8 @@ import { validateDecision } from "../../../validations/decisionValidations";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
 import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
-import { formatDate } from "../../../utils/dataFormat";
+//import { formatDate } from "../../../utils/dataFormat";
+import { getInboxPath } from "../../../routes/routes";
 
 interface MiscItem {
   type: string;
@@ -61,6 +62,7 @@ interface DrsStateWithRequirementSaveStatus {
 
 const Decision = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const location = useLocation();
 
@@ -106,18 +108,18 @@ const Decision = () => {
       "",
   ).trim();
 
-  const [decisionTimestamp] = useState(() =>
-    new Intl.DateTimeFormat("en-GB", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Kolkata",
-    }).format(new Date()),
-  );
+  // const [decisionTimestamp] = useState(() =>
+  //   new Intl.DateTimeFormat("en-GB", {
+  //     day: "2-digit",
+  //     month: "2-digit",
+  //     year: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     second: "2-digit",
+  //     hour12: false,
+  //     timeZone: "Asia/Kolkata",
+  //   }).format(new Date()),
+  // );
 
   // ================= STATE =================
 
@@ -175,12 +177,12 @@ const Decision = () => {
       "",
   ).trim();
 
-  const showDecisionAuditFields =
-    roleType === "HOD_TASK" ||
-    roleType === "SR_UW_TASK" ||
-    roleType === "CMO_TASK" ||
-    roleType === "VENDOR_CMO_TASK" ||
-    roleType === "HO_CMO_TASK";
+  // const showDecisionAuditFields =
+  //   roleType === "HOD_TASK" ||
+  //   roleType === "SR_UW_TASK" ||
+  //   roleType === "CMO_TASK" ||
+  //   roleType === "VENDOR_CMO_TASK" ||
+  //   roleType === "HO_CMO_TASK";
 
   const showDoNotPayToTpa =
     roleType === "CMO_TASK" || roleType === "HO_CMO_TASK" || roleType === "VENDOR_CMO_TASK";
@@ -462,6 +464,7 @@ const Decision = () => {
         "Decision submitted successfully.",
         "success",
       );
+      navigate(getInboxPath());
 
      
     } catch (error) {
@@ -602,9 +605,7 @@ const Decision = () => {
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                md: showDecisionAuditFields
-                  ? "repeat(3, minmax(0, 1fr))"
-                  : "minmax(280px, 360px)",
+                md:"repeat(3, 1fr)"
               },
               gap: 1,
               width: "100%",
@@ -655,7 +656,7 @@ const Decision = () => {
               </Box>
             </Box>
 
-            {showDecisionAuditFields && (
+            {/* {showDecisionAuditFields && (
               <>
                 <Box sx={{ minWidth: 0 }}>
                   <Typography
@@ -700,7 +701,7 @@ const Decision = () => {
                   />
                 </Box>
               </>
-            )}
+            )} */}
           </Box>
 
           {showDoNotPayToTpa && (

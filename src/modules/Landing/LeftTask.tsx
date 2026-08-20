@@ -8,7 +8,9 @@ import {
 import { useCallback, useEffect } from "react";
 
 import {
+  KeyDownArrowIcon,
   KeyRightArrowIcon,
+  KeyUpArrowIcon,
   SearchIcon,
 } from "../../icons/Icons";
 
@@ -368,7 +370,7 @@ const LeftTask = ({
                         color: "#777777",
                       }}
                     >
-                      {isRolesOpen ? "Ã¢â€“Â²" : "Ã¢â€“Â¼"}
+                      {isRolesOpen ? <KeyUpArrowIcon/> : <KeyDownArrowIcon/>}
                     </Typography>
                   </>
                 )}
