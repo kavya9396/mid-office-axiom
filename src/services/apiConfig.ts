@@ -147,6 +147,10 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     real: "http://172.30.74.182:8155/icic-medical-service/v1/medical-data/save",
     mock: "/mock/drs/medicalSaveAndCalculate.mock.json",
   },
+  medicalSubmit: {
+    real: "http://172.30.74.182:8155/icic-medical-service/v1/medical-data/save",
+    mock: "/mock/drs/medicalSaveAndCalculate.mock.json",
+  },
  
   // Financial
   financialView: {
