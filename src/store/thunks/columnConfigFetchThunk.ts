@@ -10,23 +10,23 @@ export interface ColumnConfigFetchResponse {
   selectedFields: string[];
 }
 
-export const columnConfigFetchThunk =
-  createApiThunk<
-    ColumnConfigFetchResponse,
-    ColumnConfigFetchRequest
-  >("inbox/columnConfigFetch", {
-    url: url("columnConfigFetch"),
-    method: "GET",
+const columnConfigFetchUrl = url("columnConfigFetch");
 
-    buildUrl: (
-      baseUrl,
-      { username, poolKey },
-    ) => {
-      const query = new URLSearchParams({
-        username,
-        poolKey,
-      });
+export const columnConfigFetchThunk = createApiThunk<
+  ColumnConfigFetchResponse,
+  ColumnConfigFetchRequest
+>("inbox/columnConfigFetch", {
+  method: "GET",
 
-      return `${baseUrl}?${query.toString()}`;
-    },
-  });
+  url: ({
+    username,
+    poolKey,
+  }: ColumnConfigFetchRequest): string => {
+    const query = new URLSearchParams({
+      username,
+      poolKey,
+    });
+
+    return `${columnConfigFetchUrl}?${query.toString()}`;
+  },
+});

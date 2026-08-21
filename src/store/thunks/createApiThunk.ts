@@ -16,7 +16,10 @@ type DynamicRequestConfig<TPayload> = Omit<
   fallbackUrl?: string;
 };
 
-export function createApiThunk<TResponse, TPayload = unknown>(
+export function createApiThunk<
+  TResponse,
+  TPayload = unknown,
+>(
   typePrefix: string,
   requestConfig: DynamicRequestConfig<TPayload>,
 ) {
@@ -41,7 +44,10 @@ export function createApiThunk<TResponse, TPayload = unknown>(
         return await apiRequest<TResponse, TPayload>({
           ...remainingConfig,
           url: requestUrl,
-          body: payload,
+          body:
+            remainingConfig.method === "GET"
+              ? undefined
+              : payload,
         });
       } catch (error) {
         return rejectWithValue(

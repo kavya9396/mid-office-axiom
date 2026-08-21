@@ -633,14 +633,24 @@ const ApplicantProfile = () => {
   useEffect(() => {
     const memberType = selectedApplicant?.memberType?.trim();
 
-    if (!resolvedApplicationNumber || !memberType) return;
+    if (
+      !resolvedApplicationNumber ||
+      !roleType ||
+      !memberType
+    ) {
+      return;
+    }
 
     markApplicantTabVisited(
-  resolvedApplicationNumber,
-  roleType,
-  memberType,
-);
-  }, [resolvedApplicationNumber, selectedApplicant?.memberType]);
+      resolvedApplicationNumber,
+      roleType,
+      memberType,
+    );
+  }, [
+    resolvedApplicationNumber,
+    roleType,
+    selectedApplicant?.memberType,
+  ]);
 
   /* ------------------------------------------------------------------------ */
   /*                         MEMBER TAB CHANGE                                */

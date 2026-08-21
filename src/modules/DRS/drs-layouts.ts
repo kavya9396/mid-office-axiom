@@ -1,6 +1,6 @@
 //import BreDecision from "./DRS_Accordions/BreDecision_";
-import CVTDecision from "./DRS_Accordions/CVTDecision";
-import DVTDecision from "./DRS_Accordions/DVTDecision";
+//import CVTDecision from "./DRS_Accordions/CVTDecision";
+//import DVTDecision from "./DRS_Accordions/DVTDecision";
 import ExceptionDecision from "./DRS_Accordions/ExceptionDecision";
 import OpenOtherTasksAccordion from "./DRS_Accordions/OpenOtherTasks";
 import PIVVSection from "./DRS_Accordions/PIVVSection";
@@ -44,14 +44,14 @@ export const accordionRegistry = {
   uwDecision: UWDecision,
   pivvSection: PIVVSection,
   pivvDecision: PIVVDecision,
-  cvtDecision: CVTDecision,
+  //cvtDecision: CVTDecision,
   exceptionDecision: ExceptionDecision,
   openOtherTasks: OpenOtherTasksAccordion,
   preIssuanceRequestChange: PreIssuanceRequestChange,
   summary: ApplicantProfile,
   quickLinks: QuickLinks,
   uwToolkit: UWToolkit,
-  dvtDecision: DVTDecision,
+  //dvtDecision: DVTDecision,
   uacChecklist: UACChecklist,
   uwChecklist: UWChecklist,
   hodDecision: HoDDecision,
