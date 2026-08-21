@@ -8,7 +8,7 @@ import type { AppDispatch, RootState } from "../../../store/store";
 
 import CustomButton from "../../../components/ui/Button/Button";
 import UWReinsurer, { UWReinsurerFields } from "./ReInsurer/UWReinsurer";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import ConfirmationDialog from "../../../components/layout/ConfirmationDialog";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { decisionCodeThunk } from "../../../store/thunks/decisionCodeThunk";
@@ -34,6 +34,16 @@ const referralRoleMap: Record<string, "hod" | "sruw" | "cmo"> = {
 
 type ReferralUser = UserRoleUser & {
     threshold?: boolean;
+};
+
+type TaskApplication = {
+    taskId?: string;
+    instanceId?: string;
+    instanceID?: string;
+};
+
+type LocationState = {
+    application?: TaskApplication;
 };
 
 type CounterOfferRowKey = "baseSumAssured" | "riderSumAssured";
@@ -72,6 +82,7 @@ const UWDecision = () => {
     const masters = useSelector((state: RootState) => state.drs.masters);
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
+    const location = useLocation();
     const { businessType, applicationNumber } = useAppContext();
     const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
     const safeBusinessType =
@@ -102,6 +113,31 @@ const UWDecision = () => {
     const [excludedReferralNtids, setExcludedReferralNtids] = useState<string[]>([]);
     const [thresholdDialogOpen, setThresholdDialogOpen] = useState(false);
     const [thresholdUserNtid, setThresholdUserNtid] = useState("");
+      const application =
+    (location.state as LocationState | null)?.application ?? null;
+
+  // =====================================================
+  // GET VALUES FROM ROW
+  // =====================================================
+
+  const rawTaskId = String(application?.taskId ?? "").trim();
+
+  const [instanceIdFromTask, taskIdFromTask] = rawTaskId.includes(".")
+    ? rawTaskId.split(".")
+    : ["", rawTaskId];
+
+  const taskId = String(
+    application?.taskId && !application.taskId.includes(".")
+      ? application.taskId
+      : taskIdFromTask,
+  ).trim();
+
+  const instanceId = String(
+    application?.instanceId ??
+      application?.instanceID ??
+      instanceIdFromTask ??
+      "",
+  ).trim();
 
     const caseUWDecisionOptions = useMemo(() => {
         const misc = (masters as Record<string, unknown> | undefined)?.misc;
@@ -435,7 +471,16 @@ const UWDecision = () => {
 
     const dialogMessage = `Kindly reconfirm if you want to proceed with the case as "${caseUWDecisionLabel}"`;
     const riskMessage = "Kindly reconfirm if you want to initiate a risk investigation process for the applicant?";
-    const taskContext = getDecisionTaskContext(drsData, applicationNumber);
+    const decisionTaskContext = getDecisionTaskContext(
+        drsData,
+        applicationNumber,
+    );
+
+    const taskContext = {
+        ...decisionTaskContext,
+        taskId: taskId || decisionTaskContext.taskId,
+        instanceId: instanceId || decisionTaskContext.instanceId,
+    };
     const selectedReferralUser = roleUsers.find(
         (user) => user.ntid === referralValue,
     );

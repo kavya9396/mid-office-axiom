@@ -45,6 +45,49 @@ import {
   saveLocalRequirementRows,
 } from "../../../validations/drsRequirementDecisionValidation";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
+import { DRS_LAYOUTS } from "../drs-layouts";
+
+const DRS_LAYOUT_BY_ROLE = {
+  CMO_TASK: "RETAIL_CMO_POOL",
+  CUW_TASK: "RETAIL_CUW_POOL",
+  CVT_TASK: "CVT_TASK",
+  CPT_TASK: "RETAIL_CPT_POOL",
+  HOD_TASK: "RETAIL_HOD_POOL",
+  SR_UW_TASK: "RETAIL_SR_UW_POOL",
+  READY_FOR_ISSUANCE_TASK: "RETAIL_READY_FOR_ISSUANCE_POOL",
+  SYSTEM_WAIT_POOL_AMR_NON_MEDICAL: "RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
+  AMR_NON_MEDICAL_TASK: "RETAIL_AMR_NON_MEDICAL",
+  RECONSIDERATION_TASK: "RETAIL_RECONSIDERATION_POOL",
+  PRE_ISSUANCE_SERVICING_TASK: "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
+  POST_ISSUANCE_TASK: "POST_ISSUANCE_TASK",
+  EXCEPTIONAL_TASK: "RETAIL_EXCEPTIONAL_POOL",
+  PIVV_TASK: "PIVV_TASK",
+  DVT_TASK: "GROUP_DVT_POOL",
+  GUW_TASK: "GROUP_GUW_POOL",
+  MMT_TASK: "GROUP_MMT_POOL",
+  SUW_TASK: "RETAIL_SUW_POOL",
+  VENDOR_CMO_TASK: "RETAIL_VENDOR_CMO_POOL",
+  COPS_TASK: "RETAIL_COPS_POOL",
+  IT_TASK: "RETAIL_IT_POOL",
+  SYSTEM_WAIT_POOL_AMR_MEDICAL: "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
+  RI_TASK: "RETAIL_REINSURER_POOL",
+  REQUIREMENT_POOL: "RETAIL_REQUIREMENT_REVIEW_POOL",
+  CUW_CLAIM_AUDIT_TASK: "RETAIL_CUW_CLAIM_AUDIT",
+  ACCUITY_TASK: "RETAIL_ACCUITY_USER",
+  ECG_TASK: "RETAIL_ECG_POOL",
+  TMT_TASK: "RETAIL_TMT_POOL",
+  GRIEVANCE_TASK: "RETAIL_GRIEVANCE_POOL",
+  REJECT_TASK: "RETAIL_REJECT_POOL",
+  GUW_FORMAL_TASK: "GUW_FORMAL_TASK",
+  DVT_FORMAL_TASK: "DVT_FORMAL_TASK",
+  RISK_TASK: "RISK_TASK",
+  PRE_LOGIN_TASK: "PRE_LOGIN_TASK",
+  AMR_MEDICAL_TASK: "AMR_MEDICAL_TASK",
+  ACUITY_TASK: "ACUITY_TASK",
+  ISSUANCE_TASK: "ISSUANCE_TASK",
+  CPT_DATA_ENTRY_MR_TASK: "CPT_DATA_ENTRY_MR_TASK",
+  CPT_DATA_ENTRY_NMR_TASK: "CPT_DATA_ENTRY_NMR_TASK",
+} as const;
 
 interface RequirementManagementTableProps {
   requirements: AdditionalRequirementRow[];
@@ -565,7 +608,21 @@ const RequirementManagementTable = ({
 
   const userId = localStorage.getItem("username") ?? "";
   const normalizedRoleType = normalizeText(roleType).toUpperCase();
-  console.log('normalizedRoleType',normalizedRoleType)
+  const drsSections = useMemo(() => {
+    const layout =
+      DRS_LAYOUT_BY_ROLE[
+        normalizedRoleType as keyof typeof DRS_LAYOUT_BY_ROLE
+      ];
+    const layoutAccordions = layout ? DRS_LAYOUTS[layout] ?? [] : [];
+
+    return Array.from(
+      new Set([
+        ...layoutAccordions.map(String),
+        "requirementCategoryInfo",
+        "latestBreDecision",
+      ]),
+    );
+  }, [normalizedRoleType]);
   const requirementSaveStorageKey = `requirementManagementSaved:${
     applicationNumber ?? ""
   }:${normalizedRoleType}`;
@@ -1244,11 +1301,10 @@ const RequirementManagementTable = ({
         requirementManagement: createRequestRows(rows),
       } as unknown as ApplicantProfileSubmitRequest["data"];
       const payload = {applicationNo:applicationNumber,
-          roleType: roleType,
+          roleType,
           sections: ["requirementManagement"],
           userId,
           data: updatedDrsData}
-          console.log('payload----------',payload)
 
       await dispatch(
         applicantProfileSubmitThunk(
@@ -1262,7 +1318,7 @@ const RequirementManagementTable = ({
         drsThunk({
           applicationNo: applicationNumber,
           roleType,
-          sections: ["requirementManagement", "requirementCategoryInfo"],
+          sections: drsSections,
           userId,
         }),
       ).unwrap();
