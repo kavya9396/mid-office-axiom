@@ -286,13 +286,16 @@ const PreLogin = () => {
               sx={{ color: "#f58220" }}
             />
 
-            <Typography
-              variant="body2"
-              color="text.secondary"
-              fontWeight={500}
-            >
-              Loading pre-login details...
-            </Typography>
+          <Typography
+  component="span"
+  variant="body2"
+  sx={{
+    color: "text.secondary",
+    fontWeight: 500,
+  }}
+>
+  Loading pre-login details...
+</Typography>
           </Box>
         )}
 
