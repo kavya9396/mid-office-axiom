@@ -1700,6 +1700,7 @@ const ApplicantProfile = () => {
     "DVT_TASK",
     "DVT_FORMAL_TASK",
     "GUW_FORMAL_TASK",
+    "RISK_TASK"
   ].includes(roleType);
 
   const canShowRiskAnalytics = ![
@@ -1710,6 +1711,7 @@ const ApplicantProfile = () => {
     "RECONSIDERATION_TASK",
     "AMR_NON_MEDICAL_TASK",
     "AMR_MEDICAL_TASK",
+    "RISK_TASK"
   ].includes(roleType);
 
   /* ------------------------------------------------------------------------ */

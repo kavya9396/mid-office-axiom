@@ -304,13 +304,10 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks"
   ],
   RISK_TASK:[
-     "breDecision",
     "applicationOverview",
     "summary",
-    "requirementManagement",
     "riskDecision",
     "riskReports",
-    "decisionHistory",
     "quickLinks"
   ]
 };

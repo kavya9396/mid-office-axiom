@@ -23,6 +23,8 @@ import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../valid
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { userRoleNameThunk } from "../../../store/thunks/userRoleNameThunk";
+import { breThunk } from "../../../store/thunks/breThunk";
+import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { UserRoleUser } from "../../../types/drs.types";
 
 const referralRoleMap: Record<string, "hod" | "sruw" | "cmo"> = {
@@ -499,10 +501,36 @@ const UWDecision = () => {
             return;
         }
 
+        let completedStep: "validation" | "bre" | "drs" | "completeTask" =
+            "validation";
+
         try {
             setSubmitLoading(true);
             setSubmitMessage(null);
             setSubmitStatus(null);
+
+            await dispatch(
+                breThunk({
+                    eventName: "BRE-RETAIL",
+                    applicationNumber: taskContext.appNo,
+                }),
+            ).unwrap();
+
+            completedStep = "bre";
+
+            await dispatch(
+                drsThunk({
+                    applicationNo: taskContext.appNo,
+                    userId: taskContext.userId,
+                    roleType: String(
+                        localStorage.getItem("roleType") ?? "",
+                    ).trim(),
+                    sections: ["latestBreDecision"],
+                }),
+            ).unwrap();
+
+            completedStep = "drs";
+
             const response = await dispatch(
                 completeTaskThunk({
                     requestContext: {
@@ -518,6 +546,8 @@ const UWDecision = () => {
                 }),
             ).unwrap();
 
+            completedStep = "completeTask";
+
             const { success, message } = getCompleteTaskResult(response);
             setSubmitMessage(message);
             setSubmitStatus(success ? "success" : "failure");
@@ -530,7 +560,18 @@ const UWDecision = () => {
                 });
             }
         } catch (error) {
-            setSubmitMessage(error instanceof Error ? error.message : "Failed to complete task.");
+            const fallbackMessage =
+                completedStep === "validation"
+                    ? "BRE failed. The decision was not submitted. Please try again."
+                    : completedStep === "bre"
+                      ? "BRE completed, but DRS refresh failed. The decision was not submitted. Please try again."
+                      : "BRE and DRS refresh completed, but the task could not be completed. Please try again.";
+
+            setSubmitMessage(
+                error instanceof Error && error.message
+                    ? error.message
+                    : fallbackMessage,
+            );
             setSubmitStatus("failure");
         } finally {
             setSubmitLoading(false);

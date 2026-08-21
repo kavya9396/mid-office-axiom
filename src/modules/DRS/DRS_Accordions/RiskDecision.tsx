@@ -1,14 +1,12 @@
 import { Box, Typography } from "@mui/material";
 import type { ChangeEvent, MouseEvent } from "react";
-import { useMemo, useState } from "react";
+import {  useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
-import CustomSelect from "../../../components/ui/Select/Select";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppSelector } from "../../../store/hooks";
-import { normalizeDecisionOptions } from "../../../utils/masterOptions";
 import Logo from "../../../assets/ICICI-Logo.svg";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
@@ -177,12 +175,8 @@ const ReportInput = ({
 const RiskDecision = () => {
   const { applicationNumber } = useAppContext();
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
-  const masters = useAppSelector((state) => state.drs.masters);
-  const riskDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "riskDecision", true, true), [masters]);
-  const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason", true, true), [masters]);
   const [remarks, setRemarks] = useState("");
-  const [riskDecision, setRiskDecision] = useState("");
-  const [riskReferralReason, setRiskReferralReason] = useState("");
+  const [riskDecision] = useState("");
   const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
   const [submitMessage, setSubmitMessage] = useState<string | null>(null);
   const [isRiskReportOpen, setIsRiskReportOpen] = useState(false);
@@ -269,7 +263,7 @@ const RiskDecision = () => {
               }}
             />
 
-            <Box
+            {/* <Box
               sx={{
                 display: "grid",
                 gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
@@ -289,7 +283,7 @@ const RiskDecision = () => {
                 onChange={setRiskReferralReason}
                 options={riskReferralReasonOptions}
               />
-            </Box>
+            </Box> */}
 
             <Box sx={{ display: "flex", mt: 1 }}>
               <CustomButton
