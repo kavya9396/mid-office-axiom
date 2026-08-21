@@ -15,6 +15,7 @@ import {
   TableRow,
   TableSortLabel,
   TextField,
+  Tooltip,
   Typography,
 } from "@mui/material";
 
@@ -1508,55 +1509,60 @@ console.log('payload',payload)
                         },
                       }}
                     >
-                      <TableSortLabel
-                        active={isSorted}
-                        direction={
-                          isSorted
-                            ? sortDirection
-                            : "asc"
-                        }
-                        hideSortIcon={false}
-                        sx={{
-                          maxWidth: "100%",
-                          minWidth: 0,
-                          color: "#20252a",
+                      <Tooltip
+  title={formatColumnName(column)}
+  placement="top"
+  arrow
+  enterDelay={300}
+>
+  <TableSortLabel
+    active={isSorted}
+    direction={isSorted ? sortDirection : "asc"}
+    hideSortIcon={false}
+    sx={{
+      maxWidth: "100%",
+      minWidth: 0,
+      color: "#20252a",
 
-                          "&:hover": {
-                            color: "#20252a",
-                          },
+      "&:hover": {
+        color: "#20252a",
+      },
 
-                          "&.Mui-active": {
-                            color: "#0D4C7D",
-                          },
+      "&.Mui-active": {
+        color: "#0D4C7D",
+      },
 
-                          "& .MuiTableSortLabel-icon": {
-                            width: "14px",
-                            height: "14px",
-                            marginLeft: "3px",
-                            color: "#8a8f94 !important",
-                            opacity: 0.65,
-                          },
+      "& .MuiTableSortLabel-icon": {
+        width: "14px",
+        height: "14px",
+        marginLeft: "3px",
+        color: "#8a8f94 !important",
+        opacity: 0.65,
+        flexShrink: 0,
+      },
 
-                          "&.Mui-active .MuiTableSortLabel-icon": {
-                            color: "#0D4C7D !important",
-                            opacity: 1,
-                          },
-                        }}
-                      >
-                        <Typography
-                          component="span"
-                          sx={{
-                            fontSize: "11px",
-                            fontWeight: 600,
-                            lineHeight: 1.2,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                          }}
-                        >
-                          {formatColumnName(column)}
-                        </Typography>
-                      </TableSortLabel>
+      "&.Mui-active .MuiTableSortLabel-icon": {
+        color: "#0D4C7D !important",
+        opacity: 1,
+      },
+    }}
+  >
+    <Typography
+      component="span"
+      sx={{
+        minWidth: 0,
+        fontSize: "11px",
+        fontWeight: 600,
+        lineHeight: 1.2,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {formatColumnName(column)}
+    </Typography>
+  </TableSortLabel>
+</Tooltip>
                     </TableCell>
                   );
                 })}

@@ -249,7 +249,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_ECG_POOL: ["quickLinks"],
   RETAIL_TMT_POOL: ["quickLinks"],
   RETAIL_GRIEVANCE_POOL: ["greivance"],
-  PRE_LOGIN_TASK:["breDecision","preLogin","requirementManagement","uwDecision"],
+  PRE_LOGIN_CUW_TASK:["breDecision","preLogin","requirementManagement","uwDecision"],
   AMR_MEDICAL_TASK:["applicationOverview","requirementManagement","quickLinks"],
   AMR_NON_MEDICAL_TASK:["applicationOverview","requirementManagement","quickLinks"],
  

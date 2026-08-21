@@ -106,7 +106,7 @@ const mapper = {
   GUW_FORMAL_TASK: "GUW_FORMAL_TASK",
   DVT_FORMAL_TASK: "DVT_FORMAL_TASK",
   RISK_TASK: "RISK_TASK",
-  PRE_LOGIN_TASK: "PRE_LOGIN_TASK",
+  PRE_LOGIN_CUW_TASK: "PRE_LOGIN_CUW_TASK",
   AMR_MEDICAL_TASK: "AMR_MEDICAL_TASK",
   ACUITY_TASK: "ACUITY_TASK",
   ISSUANCE_TASK: "ISSUANCE_TASK",
@@ -143,6 +143,61 @@ const normalizeAccordionId = (value: string): string =>
 const isUwToolkitAccordion = (accordionId: string): boolean =>
   normalizeAccordionId(accordionId) === "uwtoolkit";
 
+const normalizeValue = (value: unknown): string =>
+  String(value ?? "").trim().toUpperCase();
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const getNestedData = (value: unknown): Record<string, unknown> => {
+  let current = toRecord(value);
+
+  for (let depth = 0; depth < 4; depth += 1) {
+    const nested = toRecord(current.data);
+
+    if (Object.keys(nested).length === 0) {
+      break;
+    }
+
+    current = nested;
+  }
+
+  return current;
+};
+
+const getRequirementRows = (value: unknown): Record<string, unknown>[] => {
+  const payload = getNestedData(value);
+  const requirements = payload.requirementManagement;
+
+  return Array.isArray(requirements)
+    ? requirements.map(toRecord)
+    : [];
+};
+
+const getMiscItems = (value: unknown): Record<string, unknown>[] => {
+  const payload = getNestedData(value);
+  const misc = payload.misc;
+
+  return Array.isArray(misc) ? misc.map(toRecord) : [];
+};
+
+const getActiveCptDecisionCode = (
+  miscItems: Record<string, unknown>[],
+  codes: string[],
+): string => {
+  const normalizedCodes = new Set(codes.map(normalizeValue));
+  const item = miscItems.find(
+    (masterItem) =>
+      normalizeValue(masterItem.type) === "CPT" &&
+      normalizeValue(masterItem.isActive) === "Y" &&
+      normalizedCodes.has(normalizeValue(masterItem.code)),
+  );
+
+  return String(item?.code ?? "").trim();
+};
+
 const DRS = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -154,6 +209,10 @@ const DRS = () => {
 
   const drsData = useSelector(
     (state: RootState) => state.drs.data,
+  );
+
+  const masterData = useSelector(
+    (state: RootState) => state.masterData,
   );
 
   const [isPageLoading, setIsPageLoading] = useState(true);
@@ -308,7 +367,7 @@ const DRS = () => {
           ).unwrap(),
         ];
 
-        if (roleType === "PRE_LOGIN_TASK") {
+        if (roleType === "PRE_LOGIN_CUW_TASK") {
           requests.push(
             dispatch(
               preloginThunk({
@@ -391,6 +450,52 @@ const DRS = () => {
     return;
   }
 
+  let decision = "AMR";
+
+  if (roleType === "CPT_DATA_ENTRY_NMR_TASK") {
+    const requirementRows = getRequirementRows(drsData);
+    const statuses = requirementRows.map((row) =>
+      normalizeValue(row.status),
+    );
+    const hasPendingRequirement = statuses.includes("PENDING");
+    const areAllRequirementsAccepted =
+      statuses.length > 0 &&
+      statuses.every((status) =>
+        ["ACCEPT", "ACCEPTED"].includes(status),
+      );
+    const miscItems = getMiscItems(masterData);
+
+    if (hasPendingRequirement) {
+      decision = getActiveCptDecisionCode(miscItems, ["AMR"]);
+    } else if (areAllRequirementsAccepted) {
+      decision = getActiveCptDecisionCode(miscItems, [
+        "CLS_TASK",
+        "CLOSE_TASK",
+      ]);
+    } else {
+      setSnackbar({
+        open: true,
+        message:
+          requirementRows.length === 0
+            ? "No requirements are available to submit."
+            : "Every requirement must be either Pending or Accepted before submitting.",
+        severity: "error",
+      });
+      return;
+    }
+
+    if (!decision) {
+      setSnackbar({
+        open: true,
+        message: hasPendingRequirement
+          ? "Active AMR decision is not configured for CPT in the misc master."
+          : "Active close-task decision is not configured for CPT in the misc master.",
+        severity: "error",
+      });
+      return;
+    }
+  }
+
   /*
    * These values are now guaranteed to be strings
    * because the missing-value checks have completed.
@@ -402,7 +507,7 @@ const DRS = () => {
       appNo: applicationNo,
       instanceId,
       remarks: "",
-      decision: "AMR",
+      decision,
     },
   };
 

@@ -732,7 +732,7 @@
         "status": "DRAFT"
       }
     ],
-    "PRE_LOGIN_TASK": [
+    "PRE_LOGIN_CUW_TASK": [
       {
         "id": 1,
         "taskId": "18763",
@@ -748,7 +748,7 @@
         "breDecision": "STD",
         "munichReMedicalDecision": "STD",
         "ptlr": "Low",
-        "roleType": "PRE_LOGIN_TASK",
+        "roleType": "PRE_LOGIN_CUW_TASK",
         "role": "RETAIL_PRE_LOGIN_USER",
         "businessType": "RETAIL",
         "state": "DRAFT",
@@ -3419,7 +3419,7 @@
         "status": "DRAFT"
       }
     ],
-    "PRE_LOGIN_TASK": [
+    "PRE_LOGIN_CUW_TASK": [
       {
         "id": 1,
         "taskId": "18763",
@@ -3435,7 +3435,7 @@
         "breDecision": "STD",
         "munichReMedicalDecision": "STD",
         "ptlr": "Low",
-        "roleType": "PRE_LOGIN_TASK",
+        "roleType": "PRE_LOGIN_CUW_TASK",
         "role": "RETAIL_PRE_LOGIN_USER",
         "businessType": "RETAIL",
         "state": "DRAFT",

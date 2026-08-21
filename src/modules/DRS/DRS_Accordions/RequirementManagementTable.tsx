@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Checkbox,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -81,7 +82,7 @@ const DRS_LAYOUT_BY_ROLE = {
   GUW_FORMAL_TASK: "GUW_FORMAL_TASK",
   DVT_FORMAL_TASK: "DVT_FORMAL_TASK",
   RISK_TASK: "RISK_TASK",
-  PRE_LOGIN_TASK: "PRE_LOGIN_TASK",
+  PRE_LOGIN_CUW_TASK: "PRE_LOGIN_CUW_TASK",
   AMR_MEDICAL_TASK: "AMR_MEDICAL_TASK",
   ACUITY_TASK: "ACUITY_TASK",
   ISSUANCE_TASK: "ISSUANCE_TASK",
@@ -744,6 +745,7 @@ const RequirementManagementTable = ({
     message: "",
     severity: "success",
   });
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleViewDocuments = () => {
     if (!proposerFormUrl) {
@@ -1313,6 +1315,8 @@ const RequirementManagementTable = ({
   };
 
   const handleSave = async () => {
+    if (isSaving) return;
+
     const incompleteNewRow = rows.find((row) =>
       newRowIds.includes(row.__clientRowId) &&
       REQUIRED_NEW_ROW_FIELDS.some(
@@ -1344,6 +1348,18 @@ const RequirementManagementTable = ({
       return;
     }
 
+    if (!applicationNumber || !normalizedRoleType || !userId) {
+      setSnackbar({
+        open: true,
+        message:
+          "Application number, role type, and user ID are required to save requirements.",
+        severity: "error",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+
     try {
       // const selectedCaseContext = toRecord(
       //   (() => {
@@ -1357,16 +1373,6 @@ const RequirementManagementTable = ({
       //   })(),
       // );
 
-
-      if (!applicationNumber || !normalizedRoleType || !userId) {
-        setSnackbar({
-          open: true,
-          message:
-            "Application number, role type, and user ID are required to save requirements.",
-          severity: "error",
-        });
-        return;
-      }
 
       const updatedDrsData = {
         ...drsPayload,
@@ -1422,6 +1428,8 @@ const RequirementManagementTable = ({
             : "Unable to save requirements. Please try again.",
         severity: "error",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
@@ -2075,10 +2083,15 @@ const RequirementManagementTable = ({
           <Button
             variant="contained"
             onClick={handleSave}
-            disabled={rows.length === 0}
+            disabled={rows.length === 0 || isSaving}
             sx={actionButtonSx}
+            startIcon={
+              isSaving ? (
+                <CircularProgress size={16} thickness={5} color="inherit" />
+              ) : undefined
+            }
           >
-            Save
+            {isSaving ? "Saving..." : "Save"}
           </Button>
         )}
 
