@@ -1327,7 +1327,7 @@
         }
       ],
       "openOtherTasks": [],
-      "riskDetails": [],
+      "riskDetails": [{"riskReferralDate":"21-08-2026"}],
       "auditTrail": [
         {
           "dateTime": "2026-08-17T10:54:39.116432",
