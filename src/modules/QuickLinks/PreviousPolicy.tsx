@@ -118,7 +118,7 @@ const formatCurrency = (value?: unknown) => {
 
 const IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
-  { header: "Product name", keys: ["productName", "product", "product_name", "companyName"] },
+  { header: "Product", keys: ["productName", "product", "product_name", "companyName"] },
   { header: "Product Type", keys: ["productType", "product_type"] },
   { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
   { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision", "decision"] },
@@ -131,7 +131,7 @@ const IPRU_COLUMNS: ColumnSpec[] = [
 
 const IIB_NON_IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
-  { header: "Product name", keys: ["productName", "product", "product_name", "companyName"] },
+  { header: "Product", keys: ["productName", "product", "product_name", "companyName"] },
   { header: "Product Type", keys: ["productType", "product_type"] },
   { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
   { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision", "decision"] },

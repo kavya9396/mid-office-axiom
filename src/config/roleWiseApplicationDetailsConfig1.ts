@@ -48,7 +48,7 @@ export type RoleType =
 
 const COMMON_FIELDS: RoleField[] = [
   {
-    label: "Product Name",
+    label: "Product",
     path: "productDetail.0.name",
   },
   {
@@ -83,7 +83,7 @@ const COMMON_FIELDS: RoleField[] = [
 
 const PLAN_FIELDS: RoleField[] = [
   {
-    label: "Plan Name",
+    label: "Product Type",
     path: "productDetail.0.planName",
   },
 ];
