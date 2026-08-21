@@ -5,7 +5,7 @@ export interface RoleField {
 
 const COMMON_FIELDS: RoleField[] = [
   {
-    label: "Product Name",
+    label: "Product",
     path: "productDetail.0.name",
   },
   {
@@ -40,7 +40,7 @@ const COMMON_FIELDS: RoleField[] = [
 
 const PLAN_FIELDS: RoleField[] = [
   {
-    label: "Plan Name",
+    label: "Product Type",
     path: "productDetail.0.type",
   },
 ];
@@ -238,11 +238,11 @@ const RETAIL_SEARCH_APPLICATION_FIELDS: RoleField[] = [
     path: "summary.1.policyDetails.lifeAssuredName",
   },
   {
-    label: "Product Opted",
+    label: "Product",
     path: "summary.1.policyDetails.productName",
   },
   {
-    label: "Plan Opted",
+    label: "Product Type",
     path: "applicationOverview.productDetail.0.productType",
   },
   {
@@ -281,11 +281,11 @@ const GROUP_SEARCH_APPLICATION_FIELDS: RoleField[] = [
     path: "summary.1.policyDetails.lifeAssuredName",
   },
   {
-    label: "Product Opted",
+    label: "Product",
     path: "summary.1.policyDetails.productName",
   },
   {
-    label: "Plan Opted",
+    label: "Product Type",
     path: "applicationOverview.productDetail.0.productType",
   },
   {

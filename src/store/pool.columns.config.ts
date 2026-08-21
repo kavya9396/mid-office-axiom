@@ -44,7 +44,7 @@ export const poolAllowedColumns: Record<string, string[]> = {
     "poolTAT",
   ],
   CUW_TASK: [...baseColumns],
-   PRE_LOGIN_TASK: [
+   PRE_LOGIN_CUW_TASK: [
     ...baseColumns
   ],
   HOD_TASK: [

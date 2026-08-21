@@ -230,7 +230,7 @@ const GrievanceApplication = () => {
                         </Box>
 
                         <Box>
-                            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>Product Opted</Typography>
+                            <Typography sx={{ fontSize: 12, color: "#6B7280" }}>Product</Typography>
                             <Typography sx={{ fontSize: 14, fontWeight: 600 }}>
                                 {applicationData?.productOpted ?? "-"}
                             </Typography>

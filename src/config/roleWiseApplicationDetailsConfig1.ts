@@ -33,7 +33,7 @@ export type RoleType =
   | "RI_TASK"
   | "RISK_TASK"
   | "REQUIREMENT_POOL"
-  | "PRE_LOGIN_TASK"
+  | "PRE_LOGIN_CUW_TASK"
   | "MMT_TASK"
   | "GRIEVANCE_TASK"
   | "CUW_CLAIM_AUDIT_TASK"
@@ -48,7 +48,7 @@ export type RoleType =
 
 const COMMON_FIELDS: RoleField[] = [
   {
-    label: "Product Name",
+    label: "Product",
     path: "productDetail.0.name",
   },
   {
@@ -83,7 +83,7 @@ const COMMON_FIELDS: RoleField[] = [
 
 const PLAN_FIELDS: RoleField[] = [
   {
-    label: "Plan Name",
+    label: "Product Type",
     path: "productDetail.0.planName",
   },
 ];
@@ -295,7 +295,7 @@ const RETAIL_ROLE_CONFIG: Partial<Record<RoleType, RoleField[]>> = {
   RI_TASK: RETAIL_COMMON_PLAN_FIELDS,
   RISK_TASK: RETAIL_COMMON_PLAN_FIELDS,
   REQUIREMENT_POOL: RETAIL_COMMON_PLAN_FIELDS,
-  PRE_LOGIN_TASK: RETAIL_COMMON_PLAN_FIELDS,
+  PRE_LOGIN_CUW_TASK: RETAIL_COMMON_PLAN_FIELDS,
   MMT_TASK: RETAIL_COMMON_PLAN_FIELDS,
   GRIEVANCE_TASK: RETAIL_COMMON_PLAN_FIELDS,
   CUW_CLAIM_AUDIT_TASK: RETAIL_COMMON_PLAN_FIELDS,
