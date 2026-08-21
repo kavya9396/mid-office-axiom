@@ -342,7 +342,7 @@ const DRS = () => {
     const loadPageData = async () => {
       setIsPageLoading(true);
 
-      if (!isSearchApplicationMode) {
+      if (!isSearchApplicationMode && roleType != 'PRE_LOGIN_CUW_TASK') {
         void dispatch(
           breThunk({
             eventName,
