@@ -338,6 +338,14 @@ const getMasterItems = (
         arrayKeys: ["fupCodes", "fupcodes", "fup_codes", "teams"],
         field: "fupCode",
       },
+      requirement: {
+        arrayKeys: ["requirements"],
+        field: "fupCode",
+      },
+      requirements: {
+        arrayKeys: ["requirements"],
+        field: "fupCode",
+      },
     };
     const config = levelConfig[normalizedLevel];
 
@@ -396,7 +404,13 @@ const MASTER_OPTION_KEYS: Record<AddRowField, string[]> = {
   subCategory: ["subCategories", "subcategories"],
   document: ["documents"],
   reason: ["reasons"],
-  fupCode: ["fupCodes", "fupcodes", "fup_codes", "fupCode"],
+  fupCode: [
+    "fupCodes",
+    "fupcodes",
+    "fup_codes",
+    "fupCode",
+    "requirements",
+  ],
 };
 
 const getRequirementMaster = (response: unknown): Record<string, unknown> => {
@@ -912,6 +926,18 @@ const RequirementManagementTable = ({
         ),
       );
       const options = directOptions.length > 0 ? directOptions : fallbackOptions;
+      const returnedFupCode =
+        nextField === "fupCode"
+          ? options[0] ?? normalizeText(row?.fupCode)
+          : "";
+
+      if (
+        nextField === "fupCode" &&
+        returnedFupCode &&
+        !options.includes(returnedFupCode)
+      ) {
+        options.unshift(returnedFupCode);
+      }
 
       if (
         nextField === "team" &&
@@ -943,22 +969,24 @@ const RequirementManagementTable = ({
         },
       }));
 
-      if (nextField === "fupCode" && normalizeText(row?.fupCode)) {
+      if (nextField === "fupCode" && returnedFupCode) {
         const description = getFupDescription(
           requirementMaster,
           requirementItems,
-          row?.fupCode,
+          returnedFupCode,
         );
 
-        if (description) {
-          setRows((currentRows) =>
-            currentRows.map((currentRow) =>
-              currentRow.__clientRowId === rowId
-                ? { ...currentRow, description }
-                : currentRow,
-            ),
-          );
-        }
+        setRows((currentRows) =>
+          currentRows.map((currentRow) =>
+            currentRow.__clientRowId === rowId
+              ? {
+                ...currentRow,
+                fupCode: returnedFupCode,
+                ...(description ? { description } : {}),
+              }
+              : currentRow,
+          ),
+        );
       }
     } catch (error) {
       setSnackbar({
@@ -1467,11 +1495,13 @@ const RequirementManagementTable = ({
     const isLoading =
       loadingMasterField?.rowId === rowId &&
       loadingMasterField.field === field;
+    const hasSelectedFupCode =
+      field === "fupCode" && Boolean(normalizeText(row.fupCode));
     const isDisabled =
       field === "profile"
         ? false
-        : isLoading ||
-        options.length === 0 ||
+        : (isLoading && field !== "fupCode") ||
+        (options.length === 0 && !hasSelectedFupCode) ||
         (Boolean(parentField) && !normalizeText(row[parentField]));
 
     return (
