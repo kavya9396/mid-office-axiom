@@ -227,15 +227,15 @@ export type SearchApplicationBusinessType =
 const RETAIL_SEARCH_APPLICATION_FIELDS: RoleField[] = [
   {
     label: "DOB",
-    path: "summary.1.personalDetails.dob",
+    path: "summary.1.proposerSummary.dob",
   },
-  {
+   {
     label: "Name of Proposer",
-    path: "summary.0.personalDetails.firstName",
+    path: "summary.0.policyDetails.proposerName",
   },
   {
     label: "Name of Life Assured",
-    path: "summary.1.personalDetails.firstName",
+    path: "summary.1.policyDetails.lifeAssuredName",
   },
   {
     label: "Product Opted",
@@ -243,7 +243,7 @@ const RETAIL_SEARCH_APPLICATION_FIELDS: RoleField[] = [
   },
   {
     label: "Plan Opted",
-    path: "summary.1.policyDetails.productType",
+    path: "applicationOverview.productDetail.0.productType",
   },
   {
     label: "Applied SA",
@@ -270,27 +270,27 @@ const RETAIL_SEARCH_APPLICATION_FIELDS: RoleField[] = [
 const GROUP_SEARCH_APPLICATION_FIELDS: RoleField[] = [
   {
     label: "DOB",
-    path: "summary.1.personalDetails.dob",
+    path: "summary.1.proposerSummary.dob",
   },
-  {
+   {
     label: "Name of Proposer",
-    path: "summary.0.personalDetails.firstName",
+    path: "summary.0.policyDetails.proposerName",
   },
   {
     label: "Name of Life Assured",
-    path: "summary.1.personalDetails.firstName",
+    path: "summary.1.policyDetails.lifeAssuredName",
   },
   {
     label: "Product Opted",
-    path: "applicationOverview.productDetail.0.name",
+    path: "summary.1.policyDetails.productName",
   },
   {
     label: "Plan Opted",
-    path: "applicationOverview.productDetail.0.type",
+    path: "applicationOverview.productDetail.0.productType",
   },
   {
     label: "Applied SA",
-    path: "applicationOverview.groupDetails.coverRequested",
+    path: "summary.1.financialDetails.appliedSumAssured",
   },
   {
     label: "Premium",
