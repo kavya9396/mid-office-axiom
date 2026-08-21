@@ -1,4 +1,4 @@
-import { Box, Container, Typography } from "@mui/material";
+import { Box, CircularProgress, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -24,9 +24,18 @@ import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelp
 import MerForm, { type MerFormHandle } from "./MER/MerForm";
 import { getMerConfig } from "./MER/merConfig";
 import OtherMedicalsForm, { type OtherMedicalsFormHandle } from "./Other Medicals/OtherMedicalsForm";
-import { getOtherMedicalsConfig } from "./Other Medicals/otherMedicalsConfig";
+import { CBC_TABLE_ROWS, getOtherMedicalsConfig, LFT_TABLE_ROWS, LIPIDS_TABLE_ROWS, OGTT_TABLE_ROWS, RUA_TABLE_ROWS, S13_TABLE_ROWS, SMA12_TABLE_ROWS, TFT_TABLE_ROWS } from "./Other Medicals/otherMedicalsConfig";
 import SpecialMedicalForm, { type SpecialMedicalFormHandle } from "./Special Medical/SpecialMedicalForm";
 import { getSpecialMedicalConfig } from "./Special Medical/specialMedicalConfig";
+import { saveMerThunk, type MerSaveResponse } from "../../../store/thunks/medicalMerSaveThunk";
+import { buildMerRequest } from "./MER/merPayloadMapper";
+import { buildOtherMedicalRequest } from "./Other Medicals/otherMedicalsPayloadMapper";
+import { saveOtherMedicalThunk } from "../../../store/thunks/medicalOtherSaveThunk";
+import { buildSpecialMedicalRequest } from "./Special Medical/specialMedicalPayloadMapper";
+import { saveSpecialMedicalThunk } from "../../../store/thunks/medicalSpecialSaveThunk";
+import type { OtherMedicalTableData } from "./Other Medicals/otherMedicals.types";
+import type { MedicalCalculatedParameter } from "./Special Medical/specialMedical.types";
+import BreDecision from "../DRS_Accordions/BreDecision";
 
 const getStoredApplicantTab = () =>
   (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
@@ -35,6 +44,145 @@ const DRS_NEW_TAB_CONTEXT_KEY = "drsNewTabContext";
 
 type DRSViewTab = "medical" | "financial";
 type MedicalSectionTab = "mer" | "specialMedical" | "otherMedicals";
+
+const SPECIAL_MEDICAL_SECTION_MAP: Record<string, string> = {
+  "2DECHO": "2decho",
+  "BLOOD UREA and NITRO": "blood_urea_and_nitro",
+  CXR: "cxr",
+  "DOBUTAMINE STRESS ECHOCARDIOGRAM":
+    "dobutamine_stress_echocardiogram",
+  "EXERCISE STRESS ECHOCARDIOGRAM":
+    "exercise_stress_echocardiogram",
+  ECG: "ecg",
+  MAMMOGRAM: "mammogram",
+  "PAP SMEAR": "pap_smear",
+  PFT: "pft",
+  "STOOL TEST": "stool_test",
+  TMT: "tmt",
+  USG: "usg",
+  "Fundoscopy Test": "fundoscopy_test",
+};
+
+const OTHER_MEDICAL_SECTION_MAP: Record<string, string> = {
+  "Blood Sugar Random": "blood_sugar_random",
+  "CBC Group": "cbc_group",
+  COT: "cot",
+  GHB: "ghb",
+  HBA1C: "hba1c",
+  HBSAG: "hbsag",
+  "HIV Elisa": "hiv_elisa",
+  LFT: "lft",
+  LIPIDS: "lipids",
+  "OGTT Group": "ogtt_group",
+  PPBS: "ppbs",
+  "RUA Group": "rua_group",
+  "SERUM COTININE": "serum_cotinine",
+  "SMA12 Group": "sma12_group",
+  "TFT Group": "tft_group",
+  FBS: "fbs",
+  "S13 Group": "s13_group",
+  "HIV Western Blot": "hiv_western_blot",
+  HCV: "hcv",
+  MICROALBUMINURIA: "microalbuminuria",
+  PSA: "psa",
+};
+
+const normalizeMedicalParameter = (value?: string | null) =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/haemoglobin/g, "hemoglobin")
+    .replace(/esinophil/g, "eosinophil")
+    .replace(/[^a-z0-9]/g, "");
+
+const findMedicalParameter = (
+  parameters: MedicalFetchParameter[],
+  names: string[]
+) => {
+  const normalizedNames = names.map(normalizeMedicalParameter);
+
+  return parameters.find((parameter) =>
+    normalizedNames.includes(
+      normalizeMedicalParameter(parameter.paramName)
+    )
+  );
+};
+
+const toMedicalText = (value: unknown) =>
+  value == null ? "" : String(value);
+
+const getParameterDisplayValue = (
+  parameter?: MedicalFetchParameter
+) =>
+  toMedicalText(
+    parameter?.paramValue ??
+    parameter?.findings ??
+    parameter?.result ??
+    parameter?.findingsCalculated
+  );
+
+const buildCommonMedicalValues = (
+  section: MedicalTestSection
+): Record<string, string> => ({
+  medicalType: toMedicalText(section.medicalType),
+  date: toMedicalText(section.testDate),
+  testDate: toMedicalText(section.testDate),
+  diagnosticCentreName: toMedicalText(section.centreName),
+  diagnosticCentreAddress: toMedicalText(section.centreAddress),
+  diagnosticCentrePincode: toMedicalText(section.pincode),
+  doctorName: toMedicalText(section.doctorName),
+  doctorRegistrationNo: toMedicalText(section.doctorRegNo),
+});
+
+const buildOtherMedicalTableData = (
+  parameters: MedicalFetchParameter[],
+  configuredRows: Array<{
+    id: string;
+    parameter: string;
+  }>
+) =>
+  configuredRows.reduce<OtherMedicalTableData>(
+    (result, row) => {
+      const parameter = findMedicalParameter(parameters, [
+        row.parameter,
+        row.id,
+      ]);
+
+      if (!parameter) {
+        return result;
+      }
+
+      result[row.id] = {
+        value: toMedicalText(parameter.paramValue),
+        labStart: toMedicalText(parameter.refRangeFrom),
+        labEnd: toMedicalText(parameter.refRangeTo),
+        unit: toMedicalText(parameter.paramUnits),
+        findings: toMedicalText(
+          parameter.findingsCalculated ??
+          parameter.findings ??
+          parameter.result
+        ),
+      };
+
+      return result;
+    },
+    {}
+  );
+
+const OTHER_MEDICAL_TABLE_ROWS: Record<
+  string,
+  Array<{ id: string; parameter: string }>
+> = {
+  cbc_group: CBC_TABLE_ROWS,
+  lft: LFT_TABLE_ROWS,
+  lipids: LIPIDS_TABLE_ROWS,
+  ogtt_group: OGTT_TABLE_ROWS,
+  rua_group: RUA_TABLE_ROWS,
+  sma12_group: SMA12_TABLE_ROWS,
+  tft_group: TFT_TABLE_ROWS,
+  s13_group: S13_TABLE_ROWS,
+};
+
 type MedicalSectionGroup = {
   key: MedicalSectionTab;
   label: string;
@@ -42,23 +190,52 @@ type MedicalSectionGroup = {
   fields: { id: string | number; section: string; field: string }[];
 };
 
-type SaveMedicalPayload = {
-  applicationNumber: string;
-  partyId: string;
-  createdBy: string;
-  sections: {
-    mer: Record<string, unknown>;
-    habit_and_addictions: { habits: Array<Record<string, unknown>> };
-    measurement: Record<string, unknown>;
-    family_history: { members: Array<Record<string, unknown>> };
-    blood_pressure_and_pulse: Record<string, unknown>;
-    question_table: { answers: Array<Record<string, unknown>> };
-  };
-};
-
 type MedicalFetchRequest = {
   applicationNumber: string;
   partyId: string;
+};
+
+type MedicalFetchParameter = {
+  applicationNumber?: string;
+  partyId?: string;
+  paramName?: string;
+  paramValue?: string | number | null;
+  paramUnits?: string | null;
+  refRangeFrom?: string | null;
+  refRangeTo?: string | null;
+  findings?: string | null;
+  ejectionFraction?: string | number | null;
+  ejectionResult?: string | null;
+  rejectionAbnormality?: string | null;
+  remarks?: string | null;
+  axis?: string | null;
+  heartRate?: string | number | null;
+  heartRateFindings?: string | null;
+  result?: string | null;
+  inspiration?: string | number | null;
+  expiration?: string | number | null;
+  fev1?: string | number | null;
+  fvc?: string | number | null;
+  rv?: string | number | null;
+  rc?: string | number | null;
+  mets?: string | number | null;
+  findingsCalculated?: string | null;
+};
+
+type MedicalTestSection = {
+  testCode?: string;
+  testDtlId?: number;
+  headerStatus?: string;
+  medicalType?: string;
+  testDate?: string;
+  doctorName?: string;
+  doctorRegNo?: string;
+  testName?: string;
+  reqFlag?: string;
+  centreName?: string;
+  centreAddress?: string;
+  pincode?: string;
+  parameters?: MedicalFetchParameter[];
 };
 
 type MedicalFetchResponse = {
@@ -86,6 +263,7 @@ type MedicalFetchResponse = {
         centreAddress?: string;
         pincode?: string;
       };
+
       habit_and_addictions?: {
         habits?: Array<{
           substanceCode?: string;
@@ -94,13 +272,17 @@ type MedicalFetchResponse = {
           startYear?: number | null;
         }>;
       };
+
       measurement?: {
         heightCm?: number | null;
         weightKg?: number | null;
         waistCm?: number | null;
         hipsCm?: number | null;
         bmiCalculated?: number | string | null;
+        heightFtsCalculated?: number | string | null;
+        heightInchCalculated?: number | string | null;
       };
+
       family_history?: {
         members?: Array<{
           relationType?: string;
@@ -109,6 +291,7 @@ type MedicalFetchResponse = {
           aliveStatus?: string;
         }>;
       };
+
       blood_pressure_and_pulse?: {
         pulseRate?: number | null;
         readings?: Array<{
@@ -119,35 +302,18 @@ type MedicalFetchResponse = {
         avgSystolicCalculated?: number | string | null;
         avgDiastolicCalculated?: number | string | null;
       };
-      question_table?: {
-        answers?: Array<{
-          questionId?: string;
-          questionValue?: string;
-        }>;
-      };
-    };
-  };
-};
 
-type SaveMedicalResponse = {
-  response_code?: number;
-  error?: boolean;
-  message?: string;
-  data?: {
-    sections?: {
-      measurement?: {
-        bmiCalculated?: string | number | null;
-      };
-      blood_pressure_and_pulse?: {
-        avgSystolicCalculated?: string | number | null;
-        avgDiastolicCalculated?: string | number | null;
-      };
       question_table?: {
         answers?: Array<{
           questionId?: string;
           questionValue?: string;
         }>;
       };
+
+      [sectionKey: string]:
+      | MedicalTestSection
+      | Record<string, unknown>
+      | undefined;
     };
   };
 };
@@ -172,15 +338,6 @@ const getStoredDrsNewTabContext = (): DrsNewTabContext => {
   } catch {
     return {};
   }
-};
-
-const toYesNoCode = (value: string) => {
-  const normalized = value.trim().toLowerCase();
-  if (normalized === "yes" || normalized === "y") {
-    return "Y";
-  }
-
-  return "N";
 };
 
 const toYesNoLabel = (value?: string | null) => {
@@ -226,17 +383,6 @@ const fromExamPlaceCode = (value?: string | null) => {
   }
 
   return "";
-};
-
-const getValue = (values: Record<string, string>, key: string) => (values[key] ?? "").trim();
-
-const parseNumber = (value: string) => {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
 };
 
 const findSectionIdByTitle = (
@@ -312,7 +458,7 @@ const ViewMedical = () => {
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
-  const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+  const userId = "user-id";
   const roleType = getRoleType();
   const isFormalRole = isFormalTaskRole(roleType);
   const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
@@ -322,17 +468,19 @@ const ViewMedical = () => {
     getStoredApplicantTab();
 
   const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
-  const [saveMessage, setSaveMessage] = useState<string | null>(null);
-  const [saveError, setSaveError] = useState<string | null>(null);
+  // const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  // const [saveError, setSaveError] = useState<string | null>(null);
   const [drsContextLoading, setDrsContextLoading] = useState(false);
   const [drsContextError, setDrsContextError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [medicalFetchData, setMedicalFetchData] = useState<MedicalFetchResponse["data"] | null>(null);
   const [hasHydratedFromFetch, setHasHydratedFromFetch] = useState(false);
-  const [submitLoading, setSubmitLoading] = useState(false);
+  // const [submitLoading, setSubmitLoading] = useState(false);
   const [editingSubSectionId, setEditingSubSectionId] = useState<string | null>(null);
   const merFormRefs = useRef<Record<string, MerFormHandle | null>>({});
+  // const merFormRefs = useRef<MerFormHandle>(null);
+
   const specialMedicalFormRefs = useRef<Record<string, SpecialMedicalFormHandle | null>>({});
   const otherMedicalsFormRefs = useRef<Record<string, OtherMedicalsFormHandle | null>>({});
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
@@ -387,8 +535,8 @@ const ViewMedical = () => {
 
   const medicalFetchPayloadError =
     !drsContextLoading &&
-    !drsContextError &&
-    (!safeApplicationId || !partyId)
+      !drsContextError &&
+      (!safeApplicationId || !partyId)
       ? "Application number or party ID is unavailable for medical fetch."
       : null;
 
@@ -539,16 +687,6 @@ const ViewMedical = () => {
     [activeSubSectionId, flattenedSubSections]
   );
 
-  const selectedSubSection = useMemo(
-    () => flattenedSubSections.find((subSection) => subSection.id === resolvedActiveSubSectionId),
-    [flattenedSubSections, resolvedActiveSubSectionId]
-  );
-
-  const selectedGroup = useMemo(
-    () => medicalSectionGroups.find((group) => group.label === selectedSubSection?.groupLabel),
-    [medicalSectionGroups, selectedSubSection]
-  );
-
   useEffect(() => {
     if (!medicalFetchData?.sections || hasHydratedFromFetch) {
       return;
@@ -626,6 +764,8 @@ const ViewMedical = () => {
         waistCms: measurement.waistCm == null ? "" : String(measurement.waistCm),
         hipsCms: measurement.hipsCm == null ? "" : String(measurement.hipsCm),
         bmi: measurement.bmiCalculated == null ? "" : String(measurement.bmiCalculated),
+        heightFts: measurement.heightFtsCalculated == null ? "" : String(measurement.heightFtsCalculated),
+        inches: measurement.heightInchCalculated == null ? "" : String(measurement.heightInchCalculated),
       });
     }
 
@@ -679,6 +819,271 @@ const ViewMedical = () => {
     if (Object.keys(answerMap).length > 0) {
       questionRef.setFormValues(answerMap);
     }
+
+    flattenedSubSections
+      .filter(
+        (subSection) =>
+          subSection.groupLabel === "Special Medical"
+      )
+      .forEach((subSection) => {
+        const apiSectionKey =
+          SPECIAL_MEDICAL_SECTION_MAP[subSection.title];
+
+        if (!apiSectionKey) {
+          return;
+        }
+
+        const formRef =
+          specialMedicalFormRefs.current[subSection.id];
+
+        const apiSection = sections[
+          apiSectionKey
+        ] as MedicalTestSection | undefined;
+
+        if (!formRef || !apiSection) {
+          return;
+        }
+
+        const parameters = apiSection.parameters ?? [];
+
+        const findingsParameter = findMedicalParameter(
+          parameters,
+          ["Findings", "Main", "Value"]
+        );
+
+        const bloodUreaParameter = findMedicalParameter(
+          parameters,
+          ["Blood Urea", "Urea"]
+        );
+
+        const bunParameter = findMedicalParameter(
+          parameters,
+          ["BUN", "Blood Urea Nitrogen"]
+        );
+
+        const axisParameter = findMedicalParameter(
+          parameters,
+          ["Axis"]
+        );
+
+        const heartRateParameter = findMedicalParameter(
+          parameters,
+          ["Heart Rate", "HeartRate"]
+        );
+
+        const values: Record<string, string> = {
+          ...buildCommonMedicalValues(apiSection),
+
+          findings: toMedicalText(
+            findingsParameter?.findingsCalculated ??
+            findingsParameter?.findings ??
+            findingsParameter?.paramValue
+          ),
+
+          result: toMedicalText(
+            findingsParameter?.result ??
+            findingsParameter?.findingsCalculated
+          ),
+
+          bloodUrea: getParameterDisplayValue(
+            bloodUreaParameter
+          ),
+
+          bun: getParameterDisplayValue(bunParameter),
+
+          ejectionFraction: toMedicalText(
+            findingsParameter?.ejectionFraction ??
+            findMedicalParameter(parameters, [
+              "Ejection Fraction",
+            ])?.paramValue
+          ),
+
+          ejectionResult: toMedicalText(
+            findingsParameter?.ejectionResult ??
+            findMedicalParameter(parameters, [
+              "Ejection Result",
+            ])?.paramValue
+          ),
+
+          rejectionAbnormality: toMedicalText(
+            findingsParameter?.rejectionAbnormality
+          ),
+
+          remarks: toMedicalText(
+            findingsParameter?.remarks
+          ),
+
+          remark: toMedicalText(
+            findingsParameter?.remarks
+          ),
+
+          axis: toMedicalText(
+            axisParameter?.paramValue ??
+            axisParameter?.axis
+          ),
+
+          heartRate: toMedicalText(
+            heartRateParameter?.paramValue ??
+            heartRateParameter?.heartRate
+          ),
+
+          heartRateFindings: toMedicalText(
+            heartRateParameter?.heartRateFindings
+          ),
+
+          inspiration: toMedicalText(
+            findMedicalParameter(parameters, [
+              "Inspiration",
+            ])?.paramValue ??
+            findingsParameter?.inspiration
+          ),
+
+          expiration: toMedicalText(
+            findMedicalParameter(parameters, [
+              "Expiration",
+            ])?.paramValue ??
+            findingsParameter?.expiration
+          ),
+
+          fev1: toMedicalText(
+            findMedicalParameter(parameters, [
+              "FEV1",
+            ])?.paramValue ??
+            findingsParameter?.fev1
+          ),
+
+          fvc: toMedicalText(
+            findMedicalParameter(parameters, [
+              "FVC",
+            ])?.paramValue ??
+            findingsParameter?.fvc
+          ),
+
+          rv: toMedicalText(
+            findMedicalParameter(parameters, [
+              "RV",
+            ])?.paramValue ??
+            findingsParameter?.rv
+          ),
+
+          rc: toMedicalText(
+            findMedicalParameter(parameters, [
+              "RC",
+            ])?.paramValue ??
+            findingsParameter?.rc
+          ),
+
+          mets: toMedicalText(
+            findMedicalParameter(parameters, [
+              "METS",
+            ])?.paramValue ??
+            findingsParameter?.mets
+          ),
+        };
+
+        formRef.setFormValues(values);
+        const calculatedParameters: MedicalCalculatedParameter[] =
+          parameters.map((parameter) => ({
+            ...parameter,
+            paramName: parameter.paramName ?? undefined,
+            paramValue:
+              parameter.paramValue == null
+                ? undefined
+                : String(parameter.paramValue),
+            paramUnits: parameter.paramUnits ?? undefined,
+            refRangeFrom: parameter.refRangeFrom ?? undefined,
+            refRangeTo: parameter.refRangeTo ?? undefined,
+            findings: parameter.findings ?? undefined,
+            ejectionResult:
+              parameter.ejectionResult ?? undefined,
+            rejectionAbnormality:
+              parameter.rejectionAbnormality ?? undefined,
+            remarks: parameter.remarks ?? undefined,
+            axis: parameter.axis ?? undefined,
+            heartRateFindings:
+              parameter.heartRateFindings ?? undefined,
+            result: parameter.result ?? undefined,
+            findingsCalculated:
+              parameter.findingsCalculated ?? undefined,
+          }));
+
+        formRef.setCalculatedFindings(calculatedParameters);
+        // formRef.setCalculatedFindings(parameters);
+      });
+
+
+    flattenedSubSections
+      .filter(
+        (subSection) =>
+          subSection.groupLabel === "Other Medicals"
+      )
+      .forEach((subSection) => {
+        const apiSectionKey =
+          OTHER_MEDICAL_SECTION_MAP[subSection.title];
+
+        if (!apiSectionKey) {
+          return;
+        }
+
+        const formRef =
+          otherMedicalsFormRefs.current[subSection.id];
+
+        const apiSection = sections[
+          apiSectionKey
+        ] as MedicalTestSection | undefined;
+
+        if (!formRef || !apiSection) {
+          return;
+        }
+
+        const parameters = apiSection.parameters ?? [];
+
+        const valueParameter = findMedicalParameter(
+          parameters,
+          ["Value", "Main", "Findings"]
+        );
+
+        formRef.setFormValues({
+          ...buildCommonMedicalValues(apiSection),
+
+          value: getParameterDisplayValue(valueParameter),
+
+          findings: toMedicalText(
+            valueParameter?.findingsCalculated ??
+            valueParameter?.findings ??
+            valueParameter?.result
+          ),
+
+          result: toMedicalText(
+            valueParameter?.result ??
+            valueParameter?.findingsCalculated
+          ),
+
+          labRangeValueStart: toMedicalText(
+            valueParameter?.refRangeFrom
+          ),
+
+          labRangeValueEnd: toMedicalText(
+            valueParameter?.refRangeTo
+          ),
+
+          unitsValue: toMedicalText(
+            valueParameter?.paramUnits
+          ),
+        });
+
+        const tableRows =
+          OTHER_MEDICAL_TABLE_ROWS[apiSectionKey];
+
+        if (tableRows) {
+          formRef.setTableData(
+            buildOtherMedicalTableData(
+              parameters,
+              tableRows
+            )
+          );
+        }
+      });
 
     setHasHydratedFromFetch(true);
   }, [flattenedSubSections, hasHydratedFromFetch, medicalFetchData]);
@@ -780,16 +1185,236 @@ const ViewMedical = () => {
   const handleSubSectionEdit = (subSectionId: string) => {
     getSubSectionEditHandle(subSectionId)?.beginEdit();
     setEditingSubSectionId(subSectionId);
-    setSaveMessage(null);
-    setSaveError(null);
   };
 
   const handleSubSectionSave = async () => {
-    // TODO: Implement save logic for individual subsection
-    if (editingSubSectionId) {
-      getSubSectionEditHandle(editingSubSectionId)?.commitEdit();
+    if (!editingSubSectionId) {
+      return;
     }
-    setSaveMessage("Subsection saved successfully.");
+
+    const subSection = flattenedSubSections.find(
+      (item) => item.id === editingSubSectionId
+    );
+
+    if (!subSection) {
+      return;
+    }
+
+    const formRef = getSubSectionEditHandle(editingSubSectionId);
+
+    if (!formRef) {
+      return;
+    }
+
+    // MER save API
+    // if (subSection.groupLabel === "MER") {
+    //   const merFormRef = merFormRefs.current[editingSubSectionId];
+
+    //   if (!merFormRef) {
+    //     return;
+    //   }
+
+    //   const isValid = merFormRef.validateForm();
+
+    //   if (!isValid) {
+    //     return;
+    //   }
+
+    //   const values = merFormRef.getFormValues();
+
+    //   const request = buildMerRequest({
+    //     applicationNumber: safeApplicationId,
+    //     partyId,
+    //     createdBy: "user-id",
+    //     selectedSubSection: subSection.title,
+    //     values,
+    //   });
+
+    //   console.log("MER Request", request);
+
+    //   try {
+    //     const response = await dispatch(saveMerThunk(request)).unwrap();
+
+    //     merFormRef.commitEdit();
+    //     setEditingSubSectionId(null);
+    //   } catch (error) {
+    //     console.error("MER save failed:", error);
+    //   }
+
+    //   return;
+    // }
+
+    if (subSection.groupLabel === "MER") {
+      const merFormRef = merFormRefs.current[editingSubSectionId];
+
+      if (!merFormRef) {
+        return;
+      }
+
+      const isValid = merFormRef.validateForm();
+
+      if (!isValid) {
+        return;
+      }
+
+      const values = merFormRef.getFormValues();
+
+      const request = buildMerRequest({
+        applicationNumber: safeApplicationId,
+        partyId,
+        createdBy: userId,
+        selectedSubSection: subSection.title,
+        values,
+      });
+
+      // try {
+      //   const response = await dispatch(
+      //     saveMerThunk(request)
+      //   ).unwrap();
+
+      //   const savedSection =
+      //     response.data?.sections;
+
+      //   // Update calculated values returned by API
+      //   if (savedSection?.measurement) {
+      //     merFormRef.setFormValues({
+      //       bmi:
+      //         savedSection.measurement.bmiCalculated == null
+      //           ? ""
+      //           : String(savedSection.measurement.bmiCalculated),
+
+      //       heightFts:
+      //         savedSection.measurement.heightFtsCalculated == null
+      //           ? ""
+      //           : String(savedSection.measurement.heightFtsCalculated),
+
+      //       heightInch:
+      //         savedSection.measurement.heightInchCalculated == null
+      //           ? ""
+      //           : String(savedSection.measurement.heightInchCalculated),
+      //     });
+      //   }
+
+      //   if (savedSection?.blood_pressure_and_pulse) {
+      //     merFormRef.setFormValues({
+      //       avgSystolic:
+      //         savedSection.blood_pressure_and_pulse
+      //           .avgSystolicCalculated == null
+      //           ? ""
+      //           : String(
+      //             savedSection.blood_pressure_and_pulse
+      //               .avgSystolicCalculated
+      //           ),
+
+      //       avgDiastolic:
+      //         savedSection.blood_pressure_and_pulse
+      //           .avgDiastolicCalculated == null
+      //           ? ""
+      //           : String(
+      //             savedSection.blood_pressure_and_pulse
+      //               .avgDiastolicCalculated
+      //           ),
+      //     });
+      //   }
+
+      //   merFormRef.commitEdit();
+      //   setEditingSubSectionId(null);
+      // } catch (error) {
+      //   console.error("MER save failed:", error);
+      // }
+
+      try {
+        const response = await dispatch(
+          saveMerThunk(request)
+        ).unwrap();
+
+        if (response.data?.sections) {
+          applyMerCalculatedValues(
+            response.data.sections
+          );
+        }
+
+        merFormRef.commitEdit();
+        setEditingSubSectionId(null);
+      } catch (error) {
+        console.error("MER save failed:", error);
+      }
+      return;
+    }
+
+    if (subSection.groupLabel === "Other Medicals") {
+      const otherMedicalFormRef =
+        otherMedicalsFormRefs.current[editingSubSectionId];
+
+      if (!otherMedicalFormRef) {
+        return;
+      }
+
+      const isValid = otherMedicalFormRef.validateForm();
+
+      if (!isValid) {
+        return;
+      }
+
+      try {
+        const request = buildOtherMedicalRequest({
+          applicationNumber: safeApplicationId,
+          partyId,
+          createdBy: userId,
+          selectedSubSection: subSection.title,
+          values: otherMedicalFormRef.getFormValues(),
+          tableData: otherMedicalFormRef.getTableData(),
+        });
+
+        // console.log("Request", request);
+
+        await dispatch(saveOtherMedicalThunk(request)).unwrap();
+
+        otherMedicalFormRef.commitEdit();
+        setEditingSubSectionId(null);
+      } catch (error) {
+        console.error("Other Medical save failed:", error);
+      }
+
+      return;
+    }
+
+    if (subSection.groupLabel === "Special Medical") {
+      const specialMedicalFormRef =
+        specialMedicalFormRefs.current[editingSubSectionId];
+
+      if (!specialMedicalFormRef) {
+        return;
+      }
+
+      const isValid = specialMedicalFormRef.validateForm();
+
+      if (!isValid) {
+        return;
+      }
+
+      try {
+        const request = buildSpecialMedicalRequest({
+          applicationNumber: safeApplicationId,
+          partyId,
+          createdBy: userId,
+          selectedSubSection: subSection.title,
+          values: specialMedicalFormRef.getFormValues(),
+        });
+
+        await dispatch(saveSpecialMedicalThunk(request)).unwrap();
+
+        specialMedicalFormRef.commitEdit();
+        setEditingSubSectionId(null);
+      } catch (error) {
+        console.error("Special Medical save failed:", error);
+      }
+
+      return;
+    }
+
+    // Existing behavior for Special Medical / Other Medicals
+    formRef.commitEdit();
     setEditingSubSectionId(null);
   };
 
@@ -798,227 +1423,6 @@ const ViewMedical = () => {
       getSubSectionEditHandle(editingSubSectionId)?.resetEdit();
     }
     setEditingSubSectionId(null);
-    setSaveMessage(null);
-    setSaveError(null);
-  };
-
-  const handleMedicalSave = async () => {
-    setSaveMessage(null);
-    setSaveError(null);
-
-    if (selectedGroup?.key === "mer") {
-      const merSubSectionIds = flattenedSubSections
-        .filter((subSection) => subSection.groupLabel === "MER")
-        .map((subSection) => subSection.id);
-
-      const validationResults: boolean[] = merSubSectionIds.map((subSectionId) => {
-        const merFormRef = merFormRefs.current[subSectionId];
-
-        if (!merFormRef) {
-          return true;
-        }
-
-        return merFormRef.validateForm();
-      });
-
-      const hasAnyInvalidMerForm = validationResults.some((isValid) => !isValid);
-
-      if (hasAnyInvalidMerForm) {
-        setSaveError("Please correct highlighted fields before saving.");
-        return;
-      }
-
-      if (!partyId) {
-        setSaveError("Party ID is unavailable for medical save.");
-        return;
-      }
-
-      const merSectionId = findSectionIdByTitle(flattenedSubSections, "MER");
-      const habitsSectionId = findSectionIdByTitle(flattenedSubSections, "Habit and Addictions");
-      const measurementSectionId = findSectionIdByTitle(flattenedSubSections, "Measurement");
-      const familySectionId = findSectionIdByTitle(flattenedSubSections, "Family history and health status");
-      const bloodPressureSectionId = findSectionIdByTitle(flattenedSubSections, "Blood pressure and Pulse details");
-      const questionTableSectionId = findSectionIdByTitle(flattenedSubSections, "Question Table");
-
-      const merValues = merFormRefs.current[merSectionId]?.getFormValues() ?? {};
-      const habitsValues = merFormRefs.current[habitsSectionId]?.getFormValues() ?? {};
-      const measurementValues = merFormRefs.current[measurementSectionId]?.getFormValues() ?? {};
-      const familyValues = merFormRefs.current[familySectionId]?.getFormValues() ?? {};
-      const bloodPressureValues = merFormRefs.current[bloodPressureSectionId]?.getFormValues() ?? {};
-      const questionValues = merFormRefs.current[questionTableSectionId]?.getFormValues() ?? {};
-
-      const requestPayload: SaveMedicalPayload = {
-        applicationNumber: safeApplicationId,
-        partyId,
-        createdBy: "ui-user",
-        sections: {
-          mer: {
-            firstName: getValue(merValues, "firstName"),
-            lastName: getValue(merValues, "lastName"),
-            genderCode: getValue(merValues, "gender").slice(0, 1).toUpperCase(),
-            educationCode: getValue(merValues, "examineeEducationSd"),
-            occupationCode: getValue(merValues, "examineeOccupationSd"),
-            incomeCode: getValue(merValues, "examineeIncomeSd"),
-            dateOfBirth: getValue(merValues, "examineeDob"),
-            anyDeclPostPolicy: toYesNoCode(getValue(merValues, "anyPreviousLifeInsurancePolicyDeclinePostponeOrIssuedOnRevisedTermSd")),
-            examinerName: getValue(merValues, "nameOfMe"),
-            meCode: getValue(merValues, "meCode"),
-            examDate: getValue(merValues, "dateOfExamination"),
-            examTime: "",
-            examPlace: getValue(merValues, "placeOfExamination"),
-            centreName: getValue(merValues, "diagnosticCentreName"),
-            centreAddress: getValue(merValues, "diagnosticCentreAddress"),
-            pincode: getValue(merValues, "diagnosticCentrePincode"),
-          },
-          habit_and_addictions: {
-            habits: [
-              {
-                substanceCode: "TOBACCO",
-                indicator: toYesNoCode(getValue(habitsValues, "cigarettesBeedisCigar")),
-                quantity: getValue(habitsValues, "cigarettesBeedisCigarQuant"),
-                startYear: parseNumber(getValue(habitsValues, "cigarettesBeedisCigarYear")),
-              },
-              {
-                substanceCode: "GUTKA",
-                indicator: toYesNoCode(getValue(habitsValues, "gutkaSnuffPaan")),
-                quantity: getValue(habitsValues, "gutkaSnuffPaanQuant"),
-                startYear: parseNumber(getValue(habitsValues, "gutkaSnuffPaanYear")),
-              },
-              {
-                substanceCode: "NARCOTICS",
-                indicator: toYesNoCode(getValue(habitsValues, "narcoticConsumption")),
-                quantity: getValue(habitsValues, "narcoticConsumptionQuant"),
-                startYear: parseNumber(getValue(habitsValues, "narcoticConsumptionYear")),
-              },
-              {
-                substanceCode: "ALCOHOL",
-                indicator: toYesNoCode(getValue(habitsValues, "beerWineHardLiquor")),
-                quantity: getValue(habitsValues, "beerWineHardLiquorQuant"),
-                startYear: parseNumber(getValue(habitsValues, "beerWineHardLiquorYear")),
-              },
-            ],
-          },
-          measurement: {
-            heightCm: parseNumber(getValue(measurementValues, "heightCms")),
-            weightKg: parseNumber(getValue(measurementValues, "weightKgs")),
-            waistCm: parseNumber(getValue(measurementValues, "waistCms")),
-            hipsCm: parseNumber(getValue(measurementValues, "hipsCms")),
-          },
-          family_history: {
-            members: [
-              {
-                relationType: "FATHER",
-                memberAge: parseNumber(getValue(familyValues, "age")),
-                healthStatusDesc: getValue(familyValues, "healthStatus"),
-                aliveStatus: getValue(familyValues, "deadOrAlive").toUpperCase().includes("DEAD") ? "DEAD" : "ALIVE",
-              },
-            ],
-          },
-          blood_pressure_and_pulse: {
-            pulseRate: parseNumber(getValue(bloodPressureValues, "pulseRate")),
-            pulseRemark: getValue(bloodPressureValues, "pulseRemarks"),
-            readings: [
-              {
-                readingSeq: 1,
-                bpSystolic: parseNumber(getValue(bloodPressureValues, "systolic1")),
-                bpDiastolic: parseNumber(getValue(bloodPressureValues, "diastolic1")),
-                readingTime: "",
-              },
-              {
-                readingSeq: 2,
-                bpSystolic: parseNumber(getValue(bloodPressureValues, "systolic2")),
-                bpDiastolic: parseNumber(getValue(bloodPressureValues, "diastolic2")),
-                readingTime: "",
-              },
-              {
-                readingSeq: 3,
-                bpSystolic: parseNumber(getValue(bloodPressureValues, "systolic3")),
-                bpDiastolic: parseNumber(getValue(bloodPressureValues, "diastolic3")),
-                readingTime: "",
-              },
-            ],
-          },
-          question_table: {
-            answers: Object.entries(questionValues)
-              .filter(([key]) => key.includes("."))
-              .map(([questionId, questionValue]) => ({
-                questionId,
-                questionValue: toYesNoCode(String(questionValue)),
-                remark: "",
-              })),
-          },
-        },
-      };
-
-      console.log("Payload", requestPayload);
-
-      try {
-        setSubmitLoading(true);
-        setSaveError(null);
-
-        const response = await apiRequest<SaveMedicalResponse, SaveMedicalPayload>({
-          url: url("medicalSaveAndCalculate" as ApiKey),
-          method: "POST",
-          body: requestPayload,
-        });
-
-        const responseSections = response.data?.sections;
-
-        if (measurementSectionId && responseSections?.measurement?.bmiCalculated != null) {
-          merFormRefs.current[measurementSectionId]?.setFormValues({
-            bmi: String(responseSections.measurement.bmiCalculated),
-          });
-        }
-
-        if (bloodPressureSectionId) {
-          const nextValues: Record<string, string> = {};
-          if (responseSections?.blood_pressure_and_pulse?.avgSystolicCalculated != null) {
-            nextValues.avgSystolic = String(responseSections.blood_pressure_and_pulse.avgSystolicCalculated);
-          }
-          if (responseSections?.blood_pressure_and_pulse?.avgDiastolicCalculated != null) {
-            nextValues.avgDiastolic = String(responseSections.blood_pressure_and_pulse.avgDiastolicCalculated);
-          }
-          if (Object.keys(nextValues).length > 0) {
-            merFormRefs.current[bloodPressureSectionId]?.setFormValues(nextValues);
-          }
-        }
-
-        if (questionTableSectionId && responseSections?.question_table?.answers) {
-          const answerMap = responseSections.question_table.answers.reduce<Record<string, string>>((acc, answer) => {
-            const questionId = (answer.questionId ?? "").trim();
-            if (!questionId) {
-              return acc;
-            }
-
-            acc[questionId] = toYesNoLabel(answer.questionValue);
-            return acc;
-          }, {});
-
-          if (Object.keys(answerMap).length > 0) {
-            merFormRefs.current[questionTableSectionId]?.setFormValues(answerMap);
-          }
-        }
-
-        setSaveMessage(response.message ?? "Medical details calculated and saved successfully.");
-      } catch (error) {
-        setSaveError(error instanceof Error ? error.message : "Failed to calculate and submit medical details.");
-      } finally {
-        setSubmitLoading(false);
-      }
-      return;
-    }
-
-    if (selectedGroup?.key === "specialMedical" || selectedGroup?.key === "otherMedicals") {
-      setSaveError("Save validation is currently implemented for MER section only.");
-      return;
-    }
-
-    if (!selectedGroup) {
-      setSaveError("Please correct highlighted fields before saving.");
-      return;
-    }
-
-    setSaveMessage("Validation passed. Ready to save.");
   };
 
   const handleDRSViewTabChange = (value: DRSViewTab) => {
@@ -1038,8 +1442,120 @@ const ViewMedical = () => {
     });
   };
 
+  const applyMerCalculatedValues = (
+    sections: NonNullable<
+      NonNullable<MerSaveResponse["data"]>["sections"]
+    >
+  ) => {
+    const measurementSectionId = findSectionIdByTitle(
+      flattenedSubSections,
+      "Measurement"
+    );
+
+    const bloodPressureSectionId = findSectionIdByTitle(
+      flattenedSubSections,
+      "Blood pressure and Pulse details"
+    );
+
+    const measurementRef =
+      merFormRefs.current[measurementSectionId];
+
+    const bloodPressureRef =
+      merFormRefs.current[bloodPressureSectionId];
+
+    if (measurementRef && sections.measurement) {
+      measurementRef.setFormValues({
+        bmi:
+          sections.measurement.bmiCalculated == null
+            ? ""
+            : String(sections.measurement.bmiCalculated),
+
+        heightFts:
+          sections.measurement.heightFtsCalculated == null
+            ? ""
+            : String(sections.measurement.heightFtsCalculated),
+
+        inches:
+          sections.measurement.heightInchCalculated == null
+            ? ""
+            : String(sections.measurement.heightInchCalculated),
+      });
+    }
+
+    if (
+      bloodPressureRef &&
+      sections.blood_pressure_and_pulse
+    ) {
+      bloodPressureRef.setFormValues({
+        avgSystolic:
+          sections.blood_pressure_and_pulse
+            .avgSystolicCalculated == null
+            ? ""
+            : String(
+              sections.blood_pressure_and_pulse
+                .avgSystolicCalculated
+            ),
+
+        avgDiastolic:
+          sections.blood_pressure_and_pulse
+            .avgDiastolicCalculated == null
+            ? ""
+            : String(
+              sections.blood_pressure_and_pulse
+                .avgDiastolicCalculated
+            ),
+      });
+    }
+  };
+
+  const isPageLoading =
+    drsContextLoading ||
+    loading ||
+    (!medicalFetchData &&
+      !fetchError &&
+      !medicalFetchPayloadError);
+
+/*
+* Keep the full-page loader visible until the DRS summary
+* and Medical Fetch APIs have completed.
+*/
+  if (isPageLoading) {
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          height: "91vh",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: 1.5,
+          backgroundColor: "#f5f7fa",
+        }}
+      >
+        <CircularProgress
+          size={42}
+          thickness={4}
+          sx={{
+            color: "#f58220",
+          }}
+        />
+
+        <Typography
+          variant="body2"
+          sx={{
+            color: "text.secondary",
+            fontWeight: 500,
+          }}
+        >
+          Loading Medical details...
+        </Typography>
+      </Box>
+    );
+  }
+
   return (
-    <Container disableGutters sx={{ pb: 4 }}>
+    <>
       <BackButton
         label="Back to DRS"
         onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
@@ -1059,18 +1575,8 @@ const ViewMedical = () => {
         />
       </Box>
 
-      {/* <BreDecision /> */}
+      <BreDecision />
 
-      {(drsContextLoading || loading) && (
-        <Typography sx={{ color: "#6B7280", mb: 2 }}>
-          {drsContextLoading ? "Loading DRS details..." : "Loading medical details..."}
-        </Typography>
-      )}
-      {(drsContextError || medicalFetchPayloadError || fetchError) && (
-        <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
-          {drsContextError ?? medicalFetchPayloadError ?? fetchError}
-        </Typography>
-      )}
 
       {!isFormalRole && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
@@ -1085,6 +1591,7 @@ const ViewMedical = () => {
         </Box>
       )}
 
+<Box sx={{px: 1}}>
       <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
         <CustomAccordion
           title={isFormalRole ? "Member Profile" : "Applicant Profile"}
@@ -1244,14 +1751,17 @@ const ViewMedical = () => {
                             <>
                               <CustomButton
                                 sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                                disabled={submitLoading || !safeApplicationId}
+                                disabled={
+                                  // submitLoading ||
+                                  !safeApplicationId}
                                 onClick={handleSubSectionSave}
                               >
-                                {submitLoading ? "Saving..." : "Save"}
+                                {/* {submitLoading ? "Saving..." : "Save"} */}
+                                Save
                               </CustomButton>
                               <CustomButton
                                 sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                                disabled={submitLoading}
+                                // disabled={submitLoading}
                                 onClick={() => handleSubSectionReset()}
                               >
                                 Reset
@@ -1265,14 +1775,31 @@ const ViewMedical = () => {
 
                   <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
                     {group?.key === "mer" && (
+                      // <MerForm
+                      //   ref={(node) => {
+                      //     merFormRefs.current[subSection.id] = node;
+                      //   }}
+                      //   selectedSubSection={subSection.title}
+                      //   fields={group.fields}
+                      //   applicationNo={safeApplicationId}
+                      //   isEditing={editingSubSectionId === subSection.id}
+                      // />
                       <MerForm
                         ref={(node) => {
-                          merFormRefs.current[subSection.id] = node;
+                          merFormRefs.current[subSection.id] =
+                            node;
                         }}
-                        selectedSubSection={subSection.title}
+                        selectedSubSection={
+                          subSection.title
+                        }
                         fields={group.fields}
-                        applicationNo={safeApplicationId}
-                        isEditing={editingSubSectionId === subSection.id}
+                        applicationNo={
+                          safeApplicationId
+                        }
+                        isEditing={
+                          editingSubSectionId ===
+                          subSection.id
+                        }
                       />
                     )}
                     {group?.key === "specialMedical" && (
@@ -1302,21 +1829,8 @@ const ViewMedical = () => {
           </Box>
         </Box>
       </Box>
-
-      <Box sx={{ mt: 2, p: 2, border: "1px solid #E4E7EC", borderRadius: 1.5, backgroundColor: "#FFFFFF" }}>
-        {(saveMessage || saveError) && (
-          <Typography sx={{ mb: 1.5, color: saveError ? "#DE2C3B" : "#067647", fontSize: 13 }}>
-            {saveError ?? saveMessage}
-          </Typography>
-        )}
-
-        <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, flexWrap: "wrap" }}>
-          <CustomButton onClick={() => void handleMedicalSave()} disabled={!safeApplicationId || submitLoading} sx={{ minWidth: 120 }}>
-            Save
-          </CustomButton>
-        </Box>
-      </Box>
-    </Container>
+    </Box>
+    </>
   );
 };
 

@@ -15,6 +15,7 @@ import RequirementManagementTable from "./RequirementManagementTable";
 interface RequirementManagementProps {
   requirements?: AdditionalRequirementRow[];
   onAddRequirement?: () => void;
+  readOnly?: boolean;
 }
 
 type DrsRequirementData = DRSUpdateRequest & {
@@ -31,6 +32,7 @@ const normalizeText = (value: unknown): string =>
 const RequirementManagement = ({
   requirements,
   onAddRequirement,
+  readOnly = false,
 }: RequirementManagementProps) => {
   const dispatch = useAppDispatch();
   const [addRowSignal, setAddRowSignal] = useState(0);
@@ -39,12 +41,30 @@ const RequirementManagement = ({
     (state: RootState) => state.drs.data,
   ) as DrsRequirementData | undefined;
 
+  const searchData = useAppSelector(
+    (state: RootState) =>
+      state.searchApplication.response?.data,
+  ) as DrsRequirementData | null | undefined;
+
+   /*
+   * In Search Application, always use search response.
+   * Otherwise, use DRS data and fall back to search data.
+   */
+  const selectedData = readOnly
+    ? searchData
+    : drsData ?? searchData;
+
   const roleType = normalizeText(
-    localStorage.getItem("roleType") || drsData?.roleType,
+    selectedData?.roleType ||
+      localStorage.getItem("roleType"),
   ).toUpperCase();
 
   const requirementRows =
-    requirements ?? drsData?.requirementManagement ?? [];
+    requirements ??
+    selectedData?.requirementManagement ??
+    [];
+
+  console.log("requirement rows", requirementRows)
 
   const isEditable = ![
     "AMR_MEDICAL_TASK",
@@ -56,6 +76,10 @@ const RequirementManagement = ({
   const handleSaveRequirements = async (
     updatedRows: AdditionalRequirementRow[],
   ): Promise<void> => {
+     if (readOnly) {
+      return;
+    }
+
     if (!drsData) {
       throw new Error("DRS data is unavailable. Please reopen the case.");
     }
@@ -104,7 +128,7 @@ const RequirementManagement = ({
         title={title.requirementManagement}
         defaultExpanded
         headerActions={
-          isEditable ? (
+          isEditable && !readOnly ? (
             <Button
               type="button"
               variant="outlined"
@@ -147,8 +171,15 @@ const RequirementManagement = ({
         >
           <RequirementManagementTable
             requirements={requirementRows}
-            onSave={handleSaveRequirements}
-            addRowSignal={addRowSignal}
+            onSave={
+              readOnly
+                ? undefined
+                : handleSaveRequirements
+            }
+            addRowSignal={
+              readOnly ? 0 : addRowSignal
+            }
+            readOnly={readOnly}
           />
         </Box>
       </CustomAccordion>

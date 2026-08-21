@@ -1,14 +1,24 @@
 import { Box, Typography } from "@mui/material";
-import { forwardRef, useCallback, useImperativeHandle, useMemo, useRef, useState } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import CustomSelect from "../../../../components/ui/Select/Select";
 import CustomTextField from "../../../../components/ui/TextField/TextField";
 import mastersMockData from "../../../../../mock/drs/masters.mock.json";
-import type { MedicalFinalConfigField, MerSubSectionFieldConfig } from "./merConfig";
+import type {
+  MedicalFinalConfigField,
+  MerSubSectionFieldConfig,
+} from "./merConfig";
 import { getMerSubSectionFormFields } from "./merConfig";
 
 type MerFormProps = {
   selectedSubSection?: string;
-  fields: MedicalFinalConfigField[];
+  fields?: MedicalFinalConfigField[];
   applicationNo?: string;
   isEditing?: boolean;
 };
@@ -33,13 +43,23 @@ type MastersPayload = {
 };
 
 const toOptionList = (values: MastersOption[] = []) =>
-  values.map((option) => ({
-    label: String(option.description ?? option.value ?? option.code ?? "").trim(),
-    value: String(option.value ?? option.description ?? option.code ?? "").trim(),
-  })).filter((option) => option.label && option.value);
+  values
+    .map((option) => ({
+      label: String(
+        option.description ?? option.value ?? option.code ?? ""
+      ).trim(),
+      value: String(
+        option.value ?? option.description ?? option.code ?? ""
+      ).trim(),
+    }))
+    .filter((option) => option.label && option.value);
 
-const getMasterArray = (data: Record<string, unknown>, key: string): MastersOption[] => {
+const getMasterArray = (
+  data: Record<string, unknown>,
+  key: string
+): MastersOption[] => {
   const value = data[key];
+
   return Array.isArray(value) ? (value as MastersOption[]) : [];
 };
 
@@ -49,12 +69,22 @@ const buildMasterOptions = () => {
 
   return {
     yes_no: toOptionList(getMasterArray(masterData, "yes_no")),
-    place_of_examination: toOptionList(getMasterArray(masterData, "place_of_examination")),
+    place_of_examination: toOptionList(
+      getMasterArray(masterData, "place_of_examination")
+    ),
     gender: toOptionList(getMasterArray(masterData, "gender")),
-    mer_education_sd: toOptionList(getMasterArray(masterData, "mer_education_sd")),
-    mer_occupation_sd: toOptionList(getMasterArray(masterData, "mer_occupation_sd")),
-    family_relation: toOptionList(getMasterArray(masterData, "family_relation")),
-    dead_or_alive: toOptionList(getMasterArray(masterData, "dead_or_alive")),
+    mer_education_sd: toOptionList(
+      getMasterArray(masterData, "mer_education_sd")
+    ),
+    mer_occupation_sd: toOptionList(
+      getMasterArray(masterData, "mer_occupation_sd")
+    ),
+    family_relation: toOptionList(
+      getMasterArray(masterData, "family_relation")
+    ),
+    dead_or_alive: toOptionList(
+      getMasterArray(masterData, "dead_or_alive")
+    ),
   };
 };
 
@@ -66,8 +96,16 @@ const isConditionallyRequired = (
     return false;
   }
 
-  const selectedValue = (values[field.requiredWhen.fieldId] ?? "").trim().toLowerCase();
-  return selectedValue === field.requiredWhen.value.trim().toLowerCase();
+  const selectedValue = (
+    values[field.requiredWhen.fieldId] ?? ""
+  )
+    .trim()
+    .toLowerCase();
+
+  return (
+    selectedValue ===
+    field.requiredWhen.value.trim().toLowerCase()
+  );
 };
 
 const validateField = (
@@ -76,7 +114,10 @@ const validateField = (
   values: Record<string, string>
 ) => {
   const trimmedValue = value.trim();
-  const isRequired = field.required || isConditionallyRequired(field, values);
+
+  const isRequired =
+    field.required ||
+    isConditionallyRequired(field, values);
 
   if (isRequired && !trimmedValue) {
     return "This field is required.";
@@ -86,166 +127,319 @@ const validateField = (
     return "";
   }
 
-  if (field.validation === "alpha" && !/^[A-Za-z ]+$/.test(trimmedValue)) {
+  if (
+    field.validation === "alpha" &&
+    !/^[A-Za-z ]+$/.test(trimmedValue)
+  ) {
     return "Only alphabets are allowed.";
   }
 
-  if (field.validation === "numeric" && !/^\d+$/.test(trimmedValue)) {
+  if (
+    field.validation === "numeric" &&
+    !/^\d+$/.test(trimmedValue)
+  ) {
     return "Only numbers are allowed.";
   }
 
   return "";
 };
 
-const MerForm = forwardRef<MerFormHandle, MerFormProps>(({ selectedSubSection, applicationNo, isEditing = false }, ref) => {
-  const [formValues, setFormValuesState] = useState<Record<string, string>>({
-    applicationNo: applicationNo ?? "",
-  });
-  const [formErrors, setFormErrors] = useState<Record<string, string>>({});
-  const editSnapshotRef = useRef<Record<string, string> | null>(null);
+const MerForm = forwardRef<MerFormHandle, MerFormProps>(
+  (
+    {
+      selectedSubSection,
+      applicationNo,
+      isEditing = false,
+    },
+    ref
+  ) => {
+    const [formValues, setFormValuesState] = useState<
+      Record<string, string>
+    >({
+      applicationNo: applicationNo ?? "",
+    });
 
-  const masterOptions = useMemo(() => buildMasterOptions(), []);
-  const subsectionFields = useMemo(
-    () => getMerSubSectionFormFields(selectedSubSection),
-    [selectedSubSection]
-  );
+    const [formErrors, setFormErrors] = useState<
+      Record<string, string>
+    >({});
 
-  const handleValueChange = (field: MerSubSectionFieldConfig, value: string) => {
-    setFormValuesState((currentValues) => ({
-      ...currentValues,
-      [field.id]: value,
-    }));
+    const editSnapshotRef = useRef<
+      Record<string, string> | null
+    >(null);
 
-    setFormErrors((currentErrors) => ({
-      ...currentErrors,
-      [field.id]: validateField(field, value, { ...formValues, [field.id]: value }),
-    }));
-  };
+    const masterOptions = useMemo(
+      () => buildMasterOptions(),
+      []
+    );
 
-  const getFieldValue = (field: MerSubSectionFieldConfig) => formValues[field.id] ?? field.defaultValue ?? "";
-  const getResolvedFormValues = useCallback(
-    () =>
-      subsectionFields.reduce<Record<string, string>>(
-      (accumulator, field) => ({
-        ...accumulator,
-        [field.id]: formValues[field.id] ?? field.defaultValue ?? "",
-      }),
-      {
-        applicationNo: formValues.applicationNo ?? applicationNo ?? "",
-      }
-      ),
-    [applicationNo, formValues, subsectionFields]
-  );
+    const subsectionFields = useMemo(
+      () =>
+        getMerSubSectionFormFields(
+          selectedSubSection
+        ),
+      [selectedSubSection]
+    );
 
-  useImperativeHandle(
-    ref,
-    () => ({
-      validateForm: () => {
-        const nextErrors = subsectionFields.reduce<Record<string, string>>((accumulator, field) => {
-          const value = formValues[field.id] ?? field.defaultValue ?? "";
-          const error = validateField(field, value, formValues);
+    const handleValueChange = (
+      field: MerSubSectionFieldConfig,
+      value: string
+    ) => {
+      const nextValues = {
+        ...formValues,
+        [field.id]: value,
+      };
 
-          if (error) {
-            accumulator[field.id] = error;
+      setFormValuesState(nextValues);
+
+      setFormErrors((currentErrors) => ({
+        ...currentErrors,
+        [field.id]: validateField(
+          field,
+          value,
+          nextValues
+        ),
+      }));
+    };
+
+    const getFieldValue = (
+      field: MerSubSectionFieldConfig
+    ) =>
+      formValues[field.id] ??
+      field.defaultValue ??
+      "";
+
+    const getResolvedFormValues = useCallback(
+      () =>
+        subsectionFields.reduce<
+          Record<string, string>
+        >(
+          (accumulator, field) => ({
+            ...accumulator,
+            [field.id]:
+              formValues[field.id] ??
+              field.defaultValue ??
+              "",
+          }),
+          {
+            applicationNo:
+              formValues.applicationNo ??
+              applicationNo ??
+              "",
           }
+        ),
+      [
+        applicationNo,
+        formValues,
+        subsectionFields,
+      ]
+    );
 
-          return accumulator;
-        }, {});
+    useImperativeHandle(
+      ref,
+      () => ({
+        validateForm: () => {
+          const nextErrors =
+            subsectionFields.reduce<
+              Record<string, string>
+            >((accumulator, field) => {
+              const value =
+                formValues[field.id] ??
+                field.defaultValue ??
+                "";
 
-        setFormErrors(nextErrors);
-        return Object.keys(nextErrors).length === 0;
-      },
-      getFormValues: () => getResolvedFormValues(),
-      setFormValues: (nextValues: Record<string, string>) => {
-        setFormValuesState((currentValues) => ({
-          ...currentValues,
-          ...nextValues,
-        }));
-      },
-      beginEdit: () => {
-        editSnapshotRef.current = { ...formValues };
-      },
-      resetEdit: () => {
-        if (editSnapshotRef.current) {
-          setFormValuesState(editSnapshotRef.current);
-        }
-        setFormErrors({});
-        editSnapshotRef.current = null;
-      },
-      commitEdit: () => {
-        editSnapshotRef.current = null;
-      },
-    }),
-    [getResolvedFormValues, formValues, subsectionFields]
-  );
+              const error = validateField(
+                field,
+                value,
+                formValues
+              );
 
-  return (
-    <Box
-      component="fieldset"
-      disabled={!isEditing}
-      sx={{
-        border: 0,
-        p: 0,
-        m: 0,
-        minWidth: 0,
-        "& .MuiOutlinedInput-root.Mui-disabled": { backgroundColor: "#F3F4F6" },
-      }}
-    >
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
-          gap: 1.5,
-          mt: 1,
-        }}
-      >
-        {subsectionFields.map((field) => {
-          const value = getFieldValue(field);
-          const error = formErrors[field.id] ?? "";
-          const options = field.masterKey ? (masterOptions[field.masterKey] ?? []) : [];
-          const showRequired = field.required || isConditionallyRequired(field, formValues);
+              if (error) {
+                accumulator[field.id] = error;
+              }
+
+              return accumulator;
+            }, {});
+
+          setFormErrors(nextErrors);
 
           return (
-            <Box key={field.id}>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 1 }}>
-                <Typography sx={{ fontSize: "14px", fontWeight: 400, color: "#444" }}>
-                  {field.label}
-                </Typography>
-                {showRequired && (
-                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>
+            Object.keys(nextErrors).length === 0
+          );
+        },
+
+        getFormValues: () =>
+          getResolvedFormValues(),
+
+        setFormValues: (
+          nextValues: Record<string, string>
+        ) => {
+          setFormValuesState((currentValues) => ({
+            ...currentValues,
+            ...nextValues,
+          }));
+        },
+
+        beginEdit: () => {
+          editSnapshotRef.current = {
+            ...formValues,
+          };
+        },
+
+        resetEdit: () => {
+          if (editSnapshotRef.current) {
+            setFormValuesState(
+              editSnapshotRef.current
+            );
+          }
+
+          setFormErrors({});
+          editSnapshotRef.current = null;
+        },
+
+        commitEdit: () => {
+          editSnapshotRef.current = null;
+          setFormErrors({});
+        },
+      }),
+      [
+        formValues,
+        getResolvedFormValues,
+        subsectionFields,
+      ]
+    );
+
+    return (
+      <Box
+        component="fieldset"
+        disabled={!isEditing}
+        sx={{
+          border: 0,
+          p: 0,
+          m: 0,
+          minWidth: 0,
+
+          "& .MuiOutlinedInput-root.Mui-disabled": {
+            backgroundColor: "#F3F4F6",
+          },
+        }}
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: "repeat(3, minmax(0, 1fr))",
+            },
+            gap: 1.5,
+            mt: 1,
+          }}
+        >
+          {subsectionFields.map((field) => {
+            const value = getFieldValue(field);
+            const error =
+              formErrors[field.id] ?? "";
+
+            const options = field.masterKey
+              ? masterOptions[field.masterKey] ?? []
+              : [];
+
+            const showRequired =
+              field.required ||
+              isConditionallyRequired(
+                field,
+                formValues
+              );
+
+            return (
+              <Box key={field.id}>
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.25,
+                    mb: 1,
+                  }}
+                >
+                  <Typography
+                    sx={{
+                      fontSize: "14px",
+                      fontWeight: 400,
+                      color: "#444",
+                    }}
+                  >
+                    {field.label}
+                  </Typography>
+
+                  {showRequired && (
+                    <Typography
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: "#B42318",
+                      }}
+                    >
+                      *
+                    </Typography>
+                  )}
+                </Box>
+
+                {field.type === "dropdown" ? (
+                  <CustomSelect
+                    value={value}
+                    onChange={(nextValue) =>
+                      handleValueChange(
+                        field,
+                        nextValue
+                      )
+                    }
+                    options={options}
+                    placeholder="Select"
+                    disabled={
+                      !isEditing ||
+                      !field.editable
+                    }
+                    error={Boolean(error)}
+                    helperText={error || " "}
+                  />
+                ) : (
+                  <CustomTextField
+                    fullWidth
+                    size="small"
+                    type={
+                      field.type === "date"
+                        ? "date"
+                        : field.type === "number"
+                        ? "number"
+                        : "text"
+                    }
+                    value={value}
+                    onChange={(event) =>
+                      handleValueChange(
+                        field,
+                        event.target.value
+                      )
+                    }
+                    disabled={
+                      !isEditing ||
+                      !field.editable
+                    }
+                    error={Boolean(error)}
+                    helperText={error || " "}
+                    placeholder={
+                      field.type === "date"
+                        ? "YYYY-MM-DD"
+                        : ""
+                    }
+                  />
                 )}
               </Box>
-
-              {field.type === "dropdown" ? (
-                <CustomSelect
-                  value={value}
-                  onChange={(nextValue) => handleValueChange(field, nextValue)}
-                  options={options}
-                  placeholder="Select"
-                  disabled={!isEditing || !field.editable}
-                  error={Boolean(error)}
-                  helperText={error || " "}
-                />
-              ) : (
-                <CustomTextField
-                  fullWidth
-                  size="small"
-                  type={field.type === "date" ? "date" : (field.type === "number" ? "number" : "text")}
-                  value={value}
-                  onChange={(event) => handleValueChange(field, event.target.value)}
-                  disabled={!isEditing || !field.editable}
-                  error={Boolean(error)}
-                  helperText={error || " "}
-                  placeholder={field.type === "date" ? "YYYY-MM-DD" : ""}
-                />
-              )}
-            </Box>
-          );
-        })}
+            );
+          })}
+        </Box>
       </Box>
-    </Box>
-  );
-});
+    );
+  }
+);
 
 MerForm.displayName = "MerForm";
 

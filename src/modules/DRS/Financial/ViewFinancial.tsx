@@ -1,4 +1,4 @@
-import { Box, Container, Typography, Snackbar, Alert } from "@mui/material";
+import { Box, Typography, Snackbar, Alert, CircularProgress } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -25,9 +25,8 @@ import type { ApplicantTab, FinancialResponse, FinancialResponseSection, Financi
 import { applicantTabs } from "../../../utils/constant";
 import { getSessionMasters } from "../../../utils/masterDataSession";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
-import { CircularProgress } from "@mui/material";
 import { getErrorMessage } from "../../../config/errorMessages";
-// import BreDecision from "../DRS_Accordions/BreDecision_";
+import BreDecision from "../DRS_Accordions/BreDecision";
 import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
 import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
 import {
@@ -149,16 +148,16 @@ const getMastersData = () => {
 const getDisplayValueFromCode = (code: string, masterKey: string): string => {
   const masters = getMastersData();
   const masterList = masters[masterKey as keyof typeof masters];
-  
+
   if (!Array.isArray(masterList)) {
     return code;
   }
-  
+
   // Filter to ensure we're working with MasterOption items
-  const option = (masterList as MasterOption[]).find((item) => 
+  const option = (masterList as MasterOption[]).find((item) =>
     String(item.code).toUpperCase() === String(code).toUpperCase()
   );
-  
+
   return option?.value || option?.description || code;
 };
 
@@ -166,17 +165,17 @@ const getDisplayValueFromCode = (code: string, masterKey: string): string => {
 const getCodeFromDisplayValue = (displayValue: string, masterKey: string): string => {
   const masters = getMastersData();
   const masterList = masters[masterKey as keyof typeof masters];
-  
+
   if (!Array.isArray(masterList)) {
     return displayValue;
   }
-  
+
   // Filter to ensure we're working with MasterOption items
-  const option = (masterList as MasterOption[]).find((item) => 
+  const option = (masterList as MasterOption[]).find((item) =>
     String(item.value).toUpperCase() === String(displayValue).toUpperCase() ||
     String(item.description).toUpperCase() === String(displayValue).toUpperCase()
   );
-  
+
   return option?.code || displayValue;
 };
 
@@ -190,7 +189,7 @@ const toDisplay = (value: unknown) => {
   }
 
   const stringValue = String(value).trim();
-  
+
   // Map Y/N codes to display values from masters
   if (stringValue === "Y" || stringValue === "N") {
     return getDisplayValueFromCode(stringValue, "yes_no");
@@ -1586,11 +1585,11 @@ const renderFieldValue = (
 
     if (isFinancialYearField) {
       return (
-        <FinancialYearPickerField 
-          value={value} 
-          onChange={onChange} 
-          required={isRequired} 
-          errorText={errorText} 
+        <FinancialYearPickerField
+          value={value}
+          onChange={onChange}
+          required={isRequired}
+          errorText={errorText}
         />
       );
     }
@@ -1630,7 +1629,7 @@ const renderFieldValue = (
 
   // Read-only display
   let displayValue = value;
-  
+
   // Format Yes/No values for better display
   if (fieldRule?.inputType === "yesNo" && value) {
     const upperValue = value.toUpperCase();
@@ -2289,39 +2288,39 @@ const renderFormJSection = (
     },
   ];
 
-    return (
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
-        {formJNameMatchItem && (
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
-              gap: 1.25,
-            }}
-          >
-            <Box>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
-                <Typography sx={{ fontSize: 12, color: "#475467" }}>{formJNameMatchItem.label}</Typography>
-                {isFieldMandatory(formJNameMatchItem) && (
-                  <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>
-                )}
-              </Box>
-              {renderFieldValue(
-                getFieldValue(values, section.key, formJNameMatchItem.label, formJNameMatchItem.value),
-                isEditable && !isAlwaysReadOnlyFinancialField(section.key, formJNameMatchItem.label),
-                (nextValue) => onFieldValueChange(section.key, formJNameMatchItem.label, nextValue),
-                isFieldMandatory(formJNameMatchItem),
-                sectionErrors[formJNameMatchItem.label],
-                getFinancialFieldRule(section.key, formJNameMatchItem.label),
-                formJNameMatchItem.label
+  return (
+    <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+      {formJNameMatchItem && (
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "repeat(3, minmax(0, 1fr))" },
+            gap: 1.25,
+          }}
+        >
+          <Box>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
+              <Typography sx={{ fontSize: 12, color: "#475467" }}>{formJNameMatchItem.label}</Typography>
+              {isFieldMandatory(formJNameMatchItem) && (
+                <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>
               )}
             </Box>
+            {renderFieldValue(
+              getFieldValue(values, section.key, formJNameMatchItem.label, formJNameMatchItem.value),
+              isEditable && !isAlwaysReadOnlyFinancialField(section.key, formJNameMatchItem.label),
+              (nextValue) => onFieldValueChange(section.key, formJNameMatchItem.label, nextValue),
+              isFieldMandatory(formJNameMatchItem),
+              sectionErrors[formJNameMatchItem.label],
+              getFinancialFieldRule(section.key, formJNameMatchItem.label),
+              formJNameMatchItem.label
+            )}
           </Box>
-        )}
+        </Box>
+      )}
 
-        <CustomTable title="FORM J" columns={tableColumns} data={tableRows} />
-      </Box>
-    );
+      <CustomTable title="FORM J" columns={tableColumns} data={tableRows} />
+    </Box>
+  );
 };
 
 const renderStandardSection = (
@@ -2464,8 +2463,8 @@ const ViewFinancial = () => {
   }, [currentApplicantTab, drsSummaryMembers]);
   const financialFetchPayloadError =
     !drsContextLoading &&
-    !drsContextError &&
-    (!drsApplicationNumber || !drsPartyId)
+      !drsContextError &&
+      (!drsApplicationNumber || !drsPartyId)
       ? "Application number or party ID is unavailable for financial fetch."
       : null;
   const isFormalRole = isFormalTaskRole(roleType);
@@ -2752,169 +2751,169 @@ const ViewFinancial = () => {
     const appointmentLetter = fieldValues.appointment_letter;
     if (appointmentLetter && Object.keys(appointmentLetter).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignTextField(doc, "companyName", appointmentLetter["Name of the company"]);
-        assignTextField(doc, "partyName", appointmentLetter["Name of the employee"]);
-        assignTextField(doc, "joiningDt", formatDdMmYyyyToIsoDate(appointmentLetter["Joining Date"]));
-        assignNumberField(doc, "grossSalaryPa", appointmentLetter["CTC"]);
-        if (hasDocumentFields(doc)) documents.appointment_letter = doc;
+      assignTextField(doc, "companyName", appointmentLetter["Name of the company"]);
+      assignTextField(doc, "partyName", appointmentLetter["Name of the employee"]);
+      assignTextField(doc, "joiningDt", formatDdMmYyyyToIsoDate(appointmentLetter["Joining Date"]));
+      assignNumberField(doc, "grossSalaryPa", appointmentLetter["CTC"]);
+      if (hasDocumentFields(doc)) documents.appointment_letter = doc;
     }
 
     // salary_slips
     const salarySlips = fieldValues.salary_slips;
     if (salarySlips && Object.keys(salarySlips).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignTextField(doc, "companyName", salarySlips["Company Name"]);
-        assignTextField(doc, "partyName", salarySlips["Life Assured Name"]);
-        assignYesNoField(doc, "nameMatchInd", salarySlips["Is Life Assured Name Same?"]);
-        assignTextField(doc, "pfUan", salarySlips["PF / UAN No"]);
-        assignNumberField(doc, "annualBonus", salarySlips["Annual Bonus/Incentive/Reimbursement"]);
+      assignTextField(doc, "companyName", salarySlips["Company Name"]);
+      assignTextField(doc, "partyName", salarySlips["Life Assured Name"]);
+      assignYesNoField(doc, "nameMatchInd", salarySlips["Is Life Assured Name Same?"]);
+      assignTextField(doc, "pfUan", salarySlips["PF / UAN No"]);
+      assignNumberField(doc, "annualBonus", salarySlips["Annual Bonus/Incentive/Reimbursement"]);
 
-        const months = buildMonthlyEntries(salarySlips, [
-          "Gross Salary Pm1",
-          "Gross Salary Pm2",
-          "Gross Salary Pm3",
-          "Gross Salary Pm4",
-          "Gross Salary Pm5",
-          "Gross Salary Pm6",
-        ], "monthlyGrossSalary");
+      const months = buildMonthlyEntries(salarySlips, [
+        "Gross Salary Pm1",
+        "Gross Salary Pm2",
+        "Gross Salary Pm3",
+        "Gross Salary Pm4",
+        "Gross Salary Pm5",
+        "Gross Salary Pm6",
+      ], "monthlyGrossSalary");
 
       if (months.length > 0) doc.months = months;
-        if (hasDocumentFields(doc)) documents.salary_slips = doc;
+      if (hasDocumentFields(doc)) documents.salary_slips = doc;
     }
 
     // bank_statement
     const bankStatement = fieldValues.bank_statement;
     if (bankStatement && Object.keys(bankStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignTextField(doc, "fullName", bankStatement["Life Assured Name"]);
-        assignYesNoField(doc, "nameMatchInd", bankStatement["Is LA Name Match with Doc Name?"]);
-        assignTextField(doc, "statementPeriod", bankStatement["Statement Period"]);
-        assignNumberField(doc, "openingBalance", bankStatement["Opening Balance"]);
-        assignYesNoField(doc, "liPremiumDeductionInd", bankStatement["Life Insurance Premium Deduction Entry"]);
-        assignYesNoField(doc, "wineBeerEntriesInd", bankStatement["Wine Beer_Entries"]);
-        assignYesNoField(doc, "medEntryInd", bankStatement["Med Entry"]);
-        assignYesNoField(doc, "latest6MonthsInd", bankStatement["Latest 6 months statements given"]);
-        assignYesNoField(doc, "overdraftInd", bankStatement["Any Overdraft(Negative/Debit) Balances"]);
+      assignTextField(doc, "fullName", bankStatement["Life Assured Name"]);
+      assignYesNoField(doc, "nameMatchInd", bankStatement["Is LA Name Match with Doc Name?"]);
+      assignTextField(doc, "statementPeriod", bankStatement["Statement Period"]);
+      assignNumberField(doc, "openingBalance", bankStatement["Opening Balance"]);
+      assignYesNoField(doc, "liPremiumDeductionInd", bankStatement["Life Insurance Premium Deduction Entry"]);
+      assignYesNoField(doc, "wineBeerEntriesInd", bankStatement["Wine Beer_Entries"]);
+      assignYesNoField(doc, "medEntryInd", bankStatement["Med Entry"]);
+      assignYesNoField(doc, "latest6MonthsInd", bankStatement["Latest 6 months statements given"]);
+      assignYesNoField(doc, "overdraftInd", bankStatement["Any Overdraft(Negative/Debit) Balances"]);
 
-        const months = buildMonthlyEntries(bankStatement, [
-          "Monthly Closing Bal 1",
-          "Monthly Closing Bal 2",
-          "Monthly Closing Bal 3",
-          "Monthly Closing Bal 4",
-          "Monthly Closing Bal 5",
-          "Monthly Closing Bal 6",
-        ], "closingBalance");
+      const months = buildMonthlyEntries(bankStatement, [
+        "Monthly Closing Bal 1",
+        "Monthly Closing Bal 2",
+        "Monthly Closing Bal 3",
+        "Monthly Closing Bal 4",
+        "Monthly Closing Bal 5",
+        "Monthly Closing Bal 6",
+      ], "closingBalance");
 
       if (months.length > 0) doc.months = months;
-        if (hasDocumentFields(doc)) documents.bank_statement = doc;
+      if (hasDocumentFields(doc)) documents.bank_statement = doc;
     }
 
     // bank_statement_salary_credit
     const bankStatementSalaryCredit = fieldValues.bank_statement_salary_credit;
     if (bankStatementSalaryCredit && Object.keys(bankStatementSalaryCredit).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignTextField(doc, "fullName", bankStatementSalaryCredit["Life Assured Name"]);
-        assignYesNoField(doc, "nameMatchInd", bankStatementSalaryCredit["Is LA Name Match with Doc Name?"]);
-        assignYesNoField(doc, "salaryCreditedInd", bankStatementSalaryCredit["Salary Credited"]);
-        assignNumberField(doc, "annualBonus", bankStatementSalaryCredit["Annual Bonus /Incentive /Reimbursement"]);
-        assignNumberField(doc, "openingBalance", bankStatementSalaryCredit["Opening Balance"]);
-        assignNumberField(doc, "closingBalance", bankStatementSalaryCredit["Closing Balance"]);
-        assignTextField(doc, "statementPeriod", bankStatementSalaryCredit["Statement Period"]);
+      assignTextField(doc, "fullName", bankStatementSalaryCredit["Life Assured Name"]);
+      assignYesNoField(doc, "nameMatchInd", bankStatementSalaryCredit["Is LA Name Match with Doc Name?"]);
+      assignYesNoField(doc, "salaryCreditedInd", bankStatementSalaryCredit["Salary Credited"]);
+      assignNumberField(doc, "annualBonus", bankStatementSalaryCredit["Annual Bonus /Incentive /Reimbursement"]);
+      assignNumberField(doc, "openingBalance", bankStatementSalaryCredit["Opening Balance"]);
+      assignNumberField(doc, "closingBalance", bankStatementSalaryCredit["Closing Balance"]);
+      assignTextField(doc, "statementPeriod", bankStatementSalaryCredit["Statement Period"]);
 
-        const months = buildMonthlyEntries(bankStatementSalaryCredit, [
-          "Net Salary Credited PM1",
-          "Net Salary Credited PM2",
-          "Net Salary Credited PM3",
-          "Net Salary Credited PM4",
-          "Net Salary Credited PM 5",
-          "Net Salary Credited PM 6",
-        ], "netSalaryCredited");
+      const months = buildMonthlyEntries(bankStatementSalaryCredit, [
+        "Net Salary Credited PM1",
+        "Net Salary Credited PM2",
+        "Net Salary Credited PM3",
+        "Net Salary Credited PM4",
+        "Net Salary Credited PM 5",
+        "Net Salary Credited PM 6",
+      ], "netSalaryCredited");
 
       if (months.length > 0) doc.months = months;
-        if (hasDocumentFields(doc)) documents.bank_statement_salary_credit = doc;
+      if (hasDocumentFields(doc)) documents.bank_statement_salary_credit = doc;
     }
 
     // commission_statement
     const commissionStatement = fieldValues.commission_statement;
     if (commissionStatement && Object.keys(commissionStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-        const months = buildMonthlyEntries(commissionStatement, [
-          "Month 1",
-          "Month 2",
-          "Month 3",
-          "Month 4",
-          "Month 5",
-          "Month 6",
-        ], "commissionAmount");
+      const months = buildMonthlyEntries(commissionStatement, [
+        "Month 1",
+        "Month 2",
+        "Month 3",
+        "Month 4",
+        "Month 5",
+        "Month 6",
+      ], "commissionAmount");
 
       if (months.length > 0) doc.months = months;
-        if (hasDocumentFields(doc)) documents.commission_statement = doc;
+      if (hasDocumentFields(doc)) documents.commission_statement = doc;
     }
 
     // form_j
     const formJ = fieldValues.form_j;
     if (formJ && Object.keys(formJ).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignYesNoField(doc, "nameMatchInd", formJ["Is Form J in the name of LA"]);
-        const months = buildMonthlyEntries(formJ, [
-          "Month1 Receipt1",
-          "Month2 Receipt1",
-          "Month3 Receipt1",
-          "Month4 Receipt1",
-          "Month5 Receipt1",
-          "Month6 Receipt1",
-        ], "receiptAmount");
+      assignYesNoField(doc, "nameMatchInd", formJ["Is Form J in the name of LA"]);
+      const months = buildMonthlyEntries(formJ, [
+        "Month1 Receipt1",
+        "Month2 Receipt1",
+        "Month3 Receipt1",
+        "Month4 Receipt1",
+        "Month5 Receipt1",
+        "Month6 Receipt1",
+      ], "receiptAmount");
 
       if (months.length > 0) doc.months = months;
-        if (hasDocumentFields(doc)) documents.form_j = doc;
+      if (hasDocumentFields(doc)) documents.form_j = doc;
     }
 
     // sip_statement
     const sipStatement = fieldValues.sip_statement;
     if (sipStatement && Object.keys(sipStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignYesNoField(doc, "isLaNameSame", sipStatement["Is SIP Statements in the Name of LA"]);
-        assignYesNoField(doc, "latest6MonthsInd", sipStatement["Latest 6 Months SIP Statements Given"]);
-        const months = buildMonthlyEntries(sipStatement, [
-          "SIP Per Month 1",
-          "SIP Per Month2",
-          "SIP Per Month 3",
-          "SIP Per Month4",
-          "SIP Per Month 5",
-          "SIP Per Month 6",
-        ], "sipAmount");
+      assignYesNoField(doc, "isLaNameSame", sipStatement["Is SIP Statements in the Name of LA"]);
+      assignYesNoField(doc, "latest6MonthsInd", sipStatement["Latest 6 Months SIP Statements Given"]);
+      const months = buildMonthlyEntries(sipStatement, [
+        "SIP Per Month 1",
+        "SIP Per Month2",
+        "SIP Per Month 3",
+        "SIP Per Month4",
+        "SIP Per Month 5",
+        "SIP Per Month 6",
+      ], "sipAmount");
 
       if (months.length > 0) doc.months = months;
-        if (hasDocumentFields(doc)) documents.sip_statement = doc;
+      if (hasDocumentFields(doc)) documents.sip_statement = doc;
     }
 
     // epf_basic
     const epfBasic = fieldValues.epf_basic;
     if (epfBasic && Object.keys(epfBasic).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignTextField(doc, "orgName", epfBasic["Latest Organization Name"]);
-        assignYesNoField(doc, "isOrgNameSame", epfBasic["Is Organization Name Same?"]);
-        assignNumberField(doc, "income", epfBasic["Income"]);
-        if (hasDocumentFields(doc)) documents.epf_basic = doc;
+      assignTextField(doc, "orgName", epfBasic["Latest Organization Name"]);
+      assignYesNoField(doc, "isOrgNameSame", epfBasic["Is Organization Name Same?"]);
+      assignNumberField(doc, "income", epfBasic["Income"]);
+      if (hasDocumentFields(doc)) documents.epf_basic = doc;
     }
 
     // epf_advanced
     const epfAdvanced = fieldValues.epf_advanced;
     if (epfAdvanced && Object.keys(epfAdvanced).length > 0) {
       const doc: Record<string, unknown> = {};
-        assignTextField(doc, "orgName", epfAdvanced["Latest Organization Name"]);
-        assignYesNoField(doc, "isOrgNameSame", epfAdvanced["Is Organization Name Same?"]);
-        const months = buildMonthlyEntries(epfAdvanced, [
-          "PF Contribution M1",
-          "PF Contribution M2",
-          "PF Contribution M3",
-          "PF Contribution M4",
-          "PF Contribution M5",
-          "PF Contribution M6",
-        ], "pfContribution");
+      assignTextField(doc, "orgName", epfAdvanced["Latest Organization Name"]);
+      assignYesNoField(doc, "isOrgNameSame", epfAdvanced["Is Organization Name Same?"]);
+      const months = buildMonthlyEntries(epfAdvanced, [
+        "PF Contribution M1",
+        "PF Contribution M2",
+        "PF Contribution M3",
+        "PF Contribution M4",
+        "PF Contribution M5",
+        "PF Contribution M6",
+      ], "pfContribution");
 
       if (months.length > 0) doc.months = months;
-        if (hasDocumentFields(doc)) documents.epf_advanced = doc;
+      if (hasDocumentFields(doc)) documents.epf_advanced = doc;
     }
 
     // form16
@@ -2925,7 +2924,7 @@ const ViewFinancial = () => {
       if (getString(form16["Life Assured Name"])) doc.partyName = getString(form16["Life Assured Name"]);
       const nameMatch = form16["Is Life Assured Name Same With Doc Name?"];
       if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
-      
+
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
@@ -3039,7 +3038,7 @@ const ViewFinancial = () => {
       const nameMatch = itrIndividual["Is Life Assured Name Same?"];
       if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
       if (getNumeric(itrIndividual["PF deduction - Salaried customers"])) doc.pfDeduction = getNumeric(itrIndividual["PF deduction - Salaried customers"]);
-      
+
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
@@ -3055,7 +3054,7 @@ const ViewFinancial = () => {
         const other = getNumeric(itrIndividual[`Income from Other Sources${suffix}`]);
         const agri = getNumeric(itrIndividual[`Agricultural Income${suffix}`]);
         const exempt = getNumeric(itrIndividual[`Exempt Income(C)${suffix}`]);
-        
+
         if (assessment || salary || business || panMatchedWithBarcode) {
           const yearObj: Record<string, unknown> = {};
           if (assessment) yearObj.assessmentYear = assessment;
@@ -3082,14 +3081,14 @@ const ViewFinancial = () => {
       const doc: Record<string, unknown> = {};
       if (getString(itrNonIndividual["Name of Organisation/Firm"])) doc.orgName = getString(itrNonIndividual["Name of Organisation/Firm"]);
       if (getString(itrNonIndividual["Permanent Account Number"])) doc.panNumber = getString(itrNonIndividual["Permanent Account Number"]);
-      
+
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
         const assessment = getString(itrNonIndividual[`Assessment Year${suffix}`]);
         const business = getNumeric(itrNonIndividual[`Income from Business or Profession${suffix}`]);
         const other = getNumeric(itrNonIndividual[`Income from Other Sources${suffix}`]);
-        
+
         if (assessment || business) {
           const yearObj: Record<string, unknown> = {};
           if (assessment) yearObj.assessmentYear = assessment;
@@ -3112,7 +3111,7 @@ const ViewFinancial = () => {
         const assessment = getString(computationOfIncome[`Assessment Year${suffix}`]);
         const salary = getNumeric(computationOfIncome[`Income from Salary(A)${suffix}`]);
         const exempt = getNumeric(computationOfIncome[`Exempt Income(C)${suffix}`]);
-        
+
         if (assessment || salary) {
           const yearObj: Record<string, unknown> = {};
           if (assessment) yearObj.assessmentYear = assessment;
@@ -3130,7 +3129,7 @@ const ViewFinancial = () => {
     if (profitAndLoss && Object.keys(profitAndLoss).length > 0) {
       const doc: Record<string, unknown> = {};
       if (getString(profitAndLoss["Name of Organization/Firm"])) doc.orgName = getString(profitAndLoss["Name of Organization/Firm"]);
-      
+
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
@@ -3143,7 +3142,7 @@ const ViewFinancial = () => {
         const tax = getNumeric(profitAndLoss[`Tax${suffix}`]);
         const pat = getNumeric(profitAndLoss[`Profit After Tax (PAT)${suffix}`]);
         const sales = getNumeric(profitAndLoss[`Sales${suffix}`]);
-        
+
         if (assessment || pat || sales) {
           const yearObj: Record<string, unknown> = {};
           if (assessment) yearObj.assessmentYear = assessment;
@@ -3453,10 +3452,10 @@ const ViewFinancial = () => {
           ...currentValues.bank_statement_salary_credit,
           ...(toStringField(calculatedDocuments?.bank_statement_salary_credit?.avgNetSalaryCreditedPmCalculated) != null
             ? {
-                "Average Net Salary Credited PM": toStringField(
-                  calculatedDocuments?.bank_statement_salary_credit?.avgNetSalaryCreditedPmCalculated
-                ) as string,
-              }
+              "Average Net Salary Credited PM": toStringField(
+                calculatedDocuments?.bank_statement_salary_credit?.avgNetSalaryCreditedPmCalculated
+              ) as string,
+            }
             : {}),
           ...(toStringField(calculatedDocuments?.bank_statement_salary_credit?.netSalaryCreditedPaCalculated) != null
             ? { "Net Salary Credited PA": toStringField(calculatedDocuments?.bank_statement_salary_credit?.netSalaryCreditedPaCalculated) as string }
@@ -3652,8 +3651,8 @@ const ViewFinancial = () => {
   };
 
   return (
-    <Container disableGutters sx={{ pb: 4 }}>
-      {showLoader && (
+    <>
+    {showLoader && (
         <Box
           sx={{
             position: "fixed",
@@ -3678,7 +3677,7 @@ const ViewFinancial = () => {
         />
       </Box>
 
-      {/* <BreDecision /> */}
+      <BreDecision />
 
       <Snackbar
         open={snackbarOpen}
@@ -3702,256 +3701,259 @@ const ViewFinancial = () => {
         </Alert>
       </Snackbar>
 
-      {!isFormalRole && (
-        <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
-          <CustomTabs
-            tabs={visibleTabs}
-            value={currentApplicantTab}
-            onChange={(value: ApplicantTab) => {
-              setActiveApplicantTab(value);
-            }}
-          />
+      <Box sx={{ px: 1 }}>
+
+        {!isFormalRole && (
+          <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
+            <CustomTabs
+              tabs={visibleTabs}
+              value={currentApplicantTab}
+              onChange={(value: ApplicantTab) => {
+                setActiveApplicantTab(value);
+              }}
+            />
+          </Box>
+        )}
+
+        <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
+          <CustomAccordion title={isFormalRole ? "Member Profile" : "Applicant Profile"} defaultExpanded={false} detailPadding={0}>
+            {isFormalRole ? (
+              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+                <FormalMemberProfile profile={formalMemberProfile} />
+              </Box>
+            ) : (
+              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+                <ApplicantProfile
+                  selectedApplicantTab={currentApplicantTab}
+                  isApplicantDetailsExpanded
+                />
+              </Box>
+            )}
+          </CustomAccordion>
         </Box>
-      )}
 
-      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
-        <CustomAccordion title={isFormalRole ? "Member Profile" : "Applicant Profile"} defaultExpanded={false} detailPadding={0}>
-          {isFormalRole ? (
-            <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-              <FormalMemberProfile profile={formalMemberProfile} />
-            </Box>
-          ) : (
-            <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-              <ApplicantProfile
-                selectedApplicantTab={currentApplicantTab}
-                isApplicantDetailsExpanded
-              />
-            </Box>
-          )}
-        </CustomAccordion>
-      </Box>
-
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: 1.5,
-          alignItems: "flex-start",
-          mt: 1,
-        }}
-      >
         <Box
-          ref={menuContainerRef}
           sx={{
-            width: { xs: "100%", md: 208 },
-            position: { xs: "static", md: "sticky" },
-            top: { md: 124 },
-            alignSelf: "flex-start",
-            borderRadius: 1,
-            overflow: "hidden",
-            border: "1px solid #D6D8DC",
-            backgroundColor: "#F8F9FB",
-            maxHeight: { md: "calc(100vh - 180px)" },
-            overflowY: { md: "auto" },
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 1.5,
+            alignItems: "flex-start",
+            mt: 1,
           }}
         >
-          {displayFinancialSections.map((section) => {
-            const isActive = section.key === resolvedActiveSectionId;
+          <Box
+            ref={menuContainerRef}
+            sx={{
+              width: { xs: "100%", md: 208 },
+              position: { xs: "static", md: "sticky" },
+              top: { md: 124 },
+              alignSelf: "flex-start",
+              borderRadius: 1,
+              overflow: "hidden",
+              border: "1px solid #D6D8DC",
+              backgroundColor: "#F8F9FB",
+              maxHeight: { md: "calc(100vh - 180px)" },
+              overflowY: { md: "auto" },
+            }}
+          >
+            {displayFinancialSections.map((section) => {
+              const isActive = section.key === resolvedActiveSectionId;
 
-            return (
+              return (
+                <Box
+                  key={section.key}
+                  data-financial-menu-id={section.key}
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => handleSectionMenuClick(section.key)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter" || event.key === " ") {
+                      event.preventDefault();
+                      handleSectionMenuClick(section.key);
+                    }
+                  }}
+                  sx={{
+                    px: 1.5,
+                    py: 1.25,
+                    borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
+                    borderBottom: "1px solid #EAECEF",
+                    backgroundColor: isActive ? "#FFFFFF" : "transparent",
+                    color: isActive ? "#B42318" : "#667085",
+                    fontSize: 13,
+                    fontWeight: isActive ? 600 : 500,
+                    lineHeight: 1.3,
+                    cursor: "pointer",
+                    transition: "all 0.2s ease",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 1,
+                  }}
+                >
+                  <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit" }}>
+                    {section.title}
+                  </Typography>
+                  <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
+                    {"\u203A"}
+                  </Typography>
+                </Box>
+              );
+            })}
+          </Box>
+
+          <Box sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
+            {displayFinancialSections.map((section) => (
               <Box
                 key={section.key}
-                data-financial-menu-id={section.key}
-                role="button"
-                tabIndex={0}
-                onClick={() => handleSectionMenuClick(section.key)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    handleSectionMenuClick(section.key);
-                  }
+                data-financial-section={section.key}
+                ref={(node) => {
+                  sectionRefs.current[section.key] = node as HTMLDivElement | null;
                 }}
                 sx={{
-                  px: 1.5,
-                  py: 1.25,
-                  borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
-                  borderBottom: "1px solid #EAECEF",
-                  backgroundColor: isActive ? "#FFFFFF" : "transparent",
-                  color: isActive ? "#B42318" : "#667085",
-                  fontSize: 13,
-                  fontWeight: isActive ? 600 : 500,
-                  lineHeight: 1.3,
-                  cursor: "pointer",
-                  transition: "all 0.2s ease",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 1,
+                  scrollMarginTop: "160px",
+                  border: "1px solid #E4E7EC",
+                  borderRadius: 1.5,
+                  backgroundColor: "#FFFFFF",
+                  boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
+                  overflow: "hidden",
                 }}
               >
-                <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit" }}>
-                  {section.title}
-                </Typography>
-                <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
-                  {"\u203A"}
-                </Typography>
-              </Box>
-            );
-          })}
-        </Box>
-
-        <Box sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
-          {displayFinancialSections.map((section) => (
-            <Box
-              key={section.key}
-              data-financial-section={section.key}
-              ref={(node) => {
-                sectionRefs.current[section.key] = node as HTMLDivElement | null;
-              }}
-              sx={{
-                scrollMarginTop: "160px",
-                border: "1px solid #E4E7EC",
-                borderRadius: 1.5,
-                backgroundColor: "#FFFFFF",
-                boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
-                overflow: "hidden",
-              }}
-            >
-              <Box
-                sx={{
-                  px: { xs: 1.5, md: 2 },
-                  py: 1.25,
-                  borderBottom: "1px solid #E4E7EC",
-                  backgroundColor: "#F8FAFC",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 1,
-                  flexWrap: "wrap",
-                }}
-              >
-                <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>{section.title}</Typography>
-                {roleType === "CPT_DATA_ENTRY_NMR_TASK" && (
-                  <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
-                    <Box sx={{ display: "flex", gap: 1 }}>
-                      {editingSectionKey !== section.key ? (
-                        <CustomButton
-                          sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                          onClick={() => {
-                            setSubmitMessage(null);
-                            setSubmitError(null);
-                            setMessageSectionKey(null);
-                            setSectionErrors((prev) => ({ ...prev, [section.key]: {} }));
-                            setEditingSectionKey(section.key as FinancialSectionKey);
-                          }}
-                        >
-                          Edit
-                        </CustomButton>
-                      ) : (
-                        <>
+                <Box
+                  sx={{
+                    px: { xs: 1.5, md: 2 },
+                    py: 1.25,
+                    borderBottom: "1px solid #E4E7EC",
+                    backgroundColor: "#F8FAFC",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 1,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>{section.title}</Typography>
+                  {roleType === "CPT_DATA_ENTRY_NMR_TASK" && (
+                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+                      <Box sx={{ display: "flex", gap: 1 }}>
+                        {editingSectionKey !== section.key ? (
                           <CustomButton
                             sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                            disabled={submitLoading || !safeApplicationId}
-                            onClick={handleSave}
+                            onClick={() => {
+                              setSubmitMessage(null);
+                              setSubmitError(null);
+                              setMessageSectionKey(null);
+                              setSectionErrors((prev) => ({ ...prev, [section.key]: {} }));
+                              setEditingSectionKey(section.key as FinancialSectionKey);
+                            }}
                           >
-                            {submitLoading ? "Saving..." : "Save"}
+                            Edit
                           </CustomButton>
-                          <CustomButton
-                            sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                            disabled={submitLoading}
-                            onClick={() => handleReset(section.key as FinancialSectionKey)}
-                          >
-                            Reset
-                          </CustomButton>
-                        </>
-                      )}
+                        ) : (
+                          <>
+                            <CustomButton
+                              sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                              disabled={submitLoading || !safeApplicationId}
+                              onClick={handleSave}
+                            >
+                              {submitLoading ? "Saving..." : "Save"}
+                            </CustomButton>
+                            <CustomButton
+                              sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                              disabled={submitLoading}
+                              onClick={() => handleReset(section.key as FinancialSectionKey)}
+                            >
+                              Reset
+                            </CustomButton>
+                          </>
+                        )}
+                      </Box>
+                      {/* submitMessage/submitError shown via snackbar */}
                     </Box>
-                    {/* submitMessage/submitError shown via snackbar */}
-                  </Box>
-                )}
-              </Box>
+                  )}
+                </Box>
 
-              <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
-                {section.key === "form16"
-                  ? renderForm16Section(
+                <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
+                  {section.key === "form16"
+                    ? renderForm16Section(
                       section,
                       financialFieldValues,
                       editingSectionKey === section.key,
                       sectionErrors[section.key] ?? {},
                       handleFieldValueChange
                     )
-                  : section.key === "form16a"
-                    ? renderForm16ASection(
+                    : section.key === "form16a"
+                      ? renderForm16ASection(
                         section,
                         financialFieldValues,
                         editingSectionKey === section.key,
                         sectionErrors[section.key] ?? {},
                         handleFieldValueChange
                       )
-                    : section.key === "computation_of_income"
-                      ? renderComputationOfIncomeSection(
+                      : section.key === "computation_of_income"
+                        ? renderComputationOfIncomeSection(
                           section,
                           financialFieldValues,
                           editingSectionKey === section.key,
                           sectionErrors[section.key] ?? {},
                           handleFieldValueChange
                         )
-                    : section.key === "itr_non_individual"
-                      ? renderITRNonIndividualSection(
-                          section,
-                          financialFieldValues,
-                          editingSectionKey === section.key,
-                          sectionErrors[section.key] ?? {},
-                          handleFieldValueChange
-                        )
-                    : section.key === "itr_individual"
-                      ? renderITRIndividualSection(
-                          section,
-                          financialFieldValues,
-                          editingSectionKey === section.key,
-                          sectionErrors[section.key] ?? {},
-                          handleFieldValueChange
-                        )
-                    : section.key === "profit_and_loss"
-                      ? renderProfitAndLossSection(
-                          section,
-                          financialFieldValues,
-                          editingSectionKey === section.key,
-                          sectionErrors[section.key] ?? {},
-                          handleFieldValueChange
-                        )
-                    : section.key === "gst_income"
-                      ? renderGstIncomeSection(
-                          section,
-                          financialFieldValues,
-                          editingSectionKey === section.key,
-                          sectionErrors[section.key] ?? {},
-                          handleFieldValueChange
-                        )
-                    : section.key === "form_j"
-                      ? renderFormJSection(
-                          section,
-                          financialFieldValues,
-                          editingSectionKey === section.key,
-                          sectionErrors[section.key] ?? {},
-                          handleFieldValueChange
-                        )
-                  : renderStandardSection(
-                      section,
-                      financialFieldValues,
-                      editingSectionKey === section.key,
-                      sectionErrors[section.key] ?? {},
-                      handleFieldValueChange
-                    )}
+                        : section.key === "itr_non_individual"
+                          ? renderITRNonIndividualSection(
+                            section,
+                            financialFieldValues,
+                            editingSectionKey === section.key,
+                            sectionErrors[section.key] ?? {},
+                            handleFieldValueChange
+                          )
+                          : section.key === "itr_individual"
+                            ? renderITRIndividualSection(
+                              section,
+                              financialFieldValues,
+                              editingSectionKey === section.key,
+                              sectionErrors[section.key] ?? {},
+                              handleFieldValueChange
+                            )
+                            : section.key === "profit_and_loss"
+                              ? renderProfitAndLossSection(
+                                section,
+                                financialFieldValues,
+                                editingSectionKey === section.key,
+                                sectionErrors[section.key] ?? {},
+                                handleFieldValueChange
+                              )
+                              : section.key === "gst_income"
+                                ? renderGstIncomeSection(
+                                  section,
+                                  financialFieldValues,
+                                  editingSectionKey === section.key,
+                                  sectionErrors[section.key] ?? {},
+                                  handleFieldValueChange
+                                )
+                                : section.key === "form_j"
+                                  ? renderFormJSection(
+                                    section,
+                                    financialFieldValues,
+                                    editingSectionKey === section.key,
+                                    sectionErrors[section.key] ?? {},
+                                    handleFieldValueChange
+                                  )
+                                  : renderStandardSection(
+                                    section,
+                                    financialFieldValues,
+                                    editingSectionKey === section.key,
+                                    sectionErrors[section.key] ?? {},
+                                    handleFieldValueChange
+                                  )}
 
+                </Box>
               </Box>
-            </Box>
-          ))}
+            ))}
+          </Box>
         </Box>
       </Box>
 
 
-    </Container>
+    </>
   );
 };
 

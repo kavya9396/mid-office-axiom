@@ -8,6 +8,7 @@ import {
   type SpecialMedicalFieldConfig,
   getSpecialMedicalSubSectionFormFields,
 } from "./specialMedicalConfig";
+import type { MedicalCalculatedParameter } from "./specialMedical.types";
 
 type SpecialMedicalFormProps = {
   selectedSubSection?: string;
@@ -16,6 +17,14 @@ type SpecialMedicalFormProps = {
 };
 
 export type SpecialMedicalFormHandle = {
+  validateForm: () => boolean;
+  getFormValues: () => Record<string, string>;
+  setFormValues: (
+    values: Record<string, string>
+  ) => void;
+  setCalculatedFindings: (
+    parameters: MedicalCalculatedParameter[]
+  ) => void;
   beginEdit: () => void;
   resetEdit: () => void;
   commitEdit: () => void;
@@ -112,21 +121,88 @@ const SpecialMedicalForm = forwardRef<SpecialMedicalFormHandle, SpecialMedicalFo
 
   const maxDate = useMemo(() => new Date().toISOString().split("T")[0], []);
 
-  useImperativeHandle(ref, () => ({
-    beginEdit: () => {
-      editSnapshotRef.current = { ...formValues };
+useImperativeHandle(
+  ref,
+  (): SpecialMedicalFormHandle => ({
+    validateForm: () => {
+      const nextErrors = subsectionFields.reduce<
+        Record<string, string>
+      >((errors, field) => {
+        const value = formValues[field.id] ?? "";
+        const error = validateField(field, value);
+
+        if (error) {
+          errors[field.id] = error;
+        }
+
+        return errors;
+      }, {});
+
+      setFormErrors(nextErrors);
+
+      return Object.keys(nextErrors).length === 0;
     },
+
+    getFormValues: () =>
+      subsectionFields.reduce<Record<string, string>>(
+        (values, field) => {
+          values[field.id] = formValues[field.id] ?? "";
+          return values;
+        },
+        {}
+      ),
+
+    setFormValues: (
+      nextValues: Record<string, string>
+    ) => {
+      setFormValues((currentValues) => ({
+        ...currentValues,
+        ...nextValues,
+      }));
+    },
+
+    setCalculatedFindings: (
+      parameters: MedicalCalculatedParameter[]
+    ) => {
+      const calculatedFinding = parameters.find(
+        (parameter) =>
+          String(
+            parameter.findingsCalculated ?? ""
+          ).trim() !== ""
+      )?.findingsCalculated;
+
+      setFormValues((currentValues) => ({
+        ...currentValues,
+        findingsCalculated:
+          calculatedFinding == null
+            ? ""
+            : String(calculatedFinding),
+      }));
+    },
+
+    beginEdit: () => {
+      editSnapshotRef.current =
+        structuredClone(formValues);
+    },
+
     resetEdit: () => {
       if (editSnapshotRef.current) {
-        setFormValues(editSnapshotRef.current);
+        setFormValues(
+          structuredClone(editSnapshotRef.current)
+        );
       }
+
       setFormErrors({});
       editSnapshotRef.current = null;
     },
+
     commitEdit: () => {
       editSnapshotRef.current = null;
+      setFormErrors({});
     },
-  }), [formValues]);
+  }),
+  [formValues, subsectionFields]
+);
 
   return (
     <Box
