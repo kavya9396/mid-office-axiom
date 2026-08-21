@@ -22,30 +22,73 @@ const auditTrailColumns: Column<AuditTrailRow>[] = [
 
 interface AuditTrailProps {
   auditTrail?: AuditTrail;
+  readOnly?: boolean;
 }
 
-const AuditTrailAccordion = ({ auditTrail }: AuditTrailProps) => {
-  const reduxAuditTrail = useSelector((state: RootState) => {
-    const drsData = state.drs.data as unknown as Record<string, unknown> | null;
-    const quickLinks = (drsData?.quickLinks as Record<string, unknown> | undefined) ?? undefined;
-    const value = quickLinks?.auditTrail ?? drsData?.auditTrail;
-    return Array.isArray(value) ? (value as AuditTrail) : [];
-  });
+const toRecord = (
+  value: unknown,
+): Record<string, unknown> =>
+  value &&
+  typeof value === "object" &&
+  !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
 
-  const finalAuditTrail = auditTrail ?? reduxAuditTrail ?? [];
+const getAuditTrail = (
+  source: unknown,
+): AuditTrail => {
+  const root = toRecord(source);
+  const quickLinks = toRecord(root.quickLinks);
+
+  const value =
+    quickLinks.auditTrail ??
+    root.auditTrail;
+
+  return Array.isArray(value)
+    ? (value as AuditTrail)
+    : [];
+};
+
+const AuditTrailAccordion = ({
+  auditTrail,
+  readOnly = false,
+}: AuditTrailProps) => {
+  const reduxAuditTrail = useSelector(
+    (state: RootState): AuditTrail => {
+      const drsAuditTrail =
+        getAuditTrail(state.drs.data);
+
+      const searchAuditTrail =
+        getAuditTrail(
+          state.searchApplication.response?.data,
+        );
+
+      /*
+       * Search mode must prioritize the current search
+       * response instead of possibly stale DRS data.
+       */
+      if (readOnly) {
+        return searchAuditTrail;
+      }
+
+      return drsAuditTrail.length > 0
+        ? drsAuditTrail
+        : searchAuditTrail;
+    },
+  );
+
+  const finalAuditTrail = auditTrail ?? reduxAuditTrail;
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ p:1 }}>
-        <CustomAccordion title="Audit Trail">
-          <CustomTable<AuditTrailRow>
-            title="Audit Trail"
-            columns={auditTrailColumns}
-            data={finalAuditTrail}
-          />
-        </CustomAccordion>
-      </Box>
-    // </Container>
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="Audit Trail" defaultExpanded>
+        <CustomTable<AuditTrailRow>
+          title="Audit Trail"
+          columns={auditTrailColumns}
+          data={finalAuditTrail}
+        />
+      </CustomAccordion>
+    </Box>
   );
 };
 

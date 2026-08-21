@@ -1,5 +1,5 @@
 import { Box, Tab, Tabs, Typography } from "@mui/material";
-import { useState, type SyntheticEvent } from "react";
+import { useEffect, useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import { title } from "../../../utils/constant";
@@ -17,6 +17,8 @@ import { drsThunk } from "../../../store/thunks/drsThunk";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomButton from "../../../components/ui/Button/Button";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
+import RiskAnalytics from "./RiskAnalytics";
+import { markApplicantTabVisited } from "../../../validations/drsApplicantTabValidation";
 
 /* -------------------------------------------------------------------------- */
 /*                                   TYPES                                    */
@@ -357,18 +359,9 @@ interface SummaryMember {
   lifestyleHabits?: LifestyleHabits;
 };
 
-type RiskSectionKey = "medical" | "financial" | "other";
 
-type RiskCardItem = {
-  key: RiskSectionKey;
-  label: string;
-  subLabel: string;
-  data: Record<string, unknown>;
-  isHealthy: boolean;
-  mismatches: string[];
-};
 
-type RiskData = Record<string, unknown>;
+
 
 
 /* -------------------------------------------------------------------------- */
@@ -423,280 +416,9 @@ const applicantTabConfig: Record<string, string[]> = {
 /*                           HELPER FUNCTIONS                                 */
 /* -------------------------------------------------------------------------- */
 
-const getDisplayValue = (
-  data: Record<string, unknown> | null | undefined,
-  keys: string[]
-): unknown => {
-  if (!data) return "-";
 
-  for (const key of keys) {
-    const value = data[key];
 
-    if (typeof value === "string") {
-      if (value.trim() !== "") {
-        return value;
-      }
-      continue;
-    }
 
-    if (value !== null && value !== undefined) {
-      return value;
-    }
-  }
-
-  return "-";
-};
-
-const getFinancialFieldsForDisplay = (
-  data?: RiskData | null
-): Array<{ label: string; value: unknown }> => {
-  const safeData = data ?? {};
-
-  return [
-    {
-      label: "Financial Decision",
-      value:
-        safeData.financialDecision ||
-        safeData.breFinancialDecision ||
-        "-",
-    },
-    {
-      label: "BRE Financial Decision",
-      value: safeData.breFinancialDecision || "-",
-    },
-    {
-      label: "BRE Remark",
-      value:
-        safeData.breRemark ||
-        safeData.remarks ||
-        "-",
-    },
-    {
-      label: "Financial Eligibility",
-      value: safeData.financialEligibility || "-",
-    },
-    {
-      label: "Derived Income",
-      value: safeData.derivedIncome || "-",
-    },
-    {
-      label: "Counter Offer Value",
-      value: safeData.counterOfferValue || "-",
-    },
-    {
-      label: "Additional SA",
-      value: safeData.additionalSA || "-",
-    },
-    {
-      label: "BIU Financial Status (Match/Mismatch)",
-      value:
-        safeData.biuFinancialStatus === "N"
-          ? "Match"
-          : safeData.biuFinancialStatus === "Y"
-            ? "Mismatch"
-            : safeData.biuFinancialStatus || "-",
-    },
-  ];
-};
-
-const getMedicalFieldsForDisplay = (
-  data?: RiskData | null
-): Array<{ label: string; value: unknown }> => {
-  const safeData = data ?? {};
-
-  return [
-    {
-      label: "BRE Physical Medical Decision",
-      value:
-        safeData.brePhysicalMedicalDecision || "-",
-    },
-    {
-      label: "BRE Physical Medical Remark",
-      value:
-        safeData.brePhysicalMedicalRemark || "-",
-    },
-    {
-      label: "BRE Tele/Video MER Decision",
-      value:
-        safeData.breTeleVideoMerDecision || "-",
-    },
-    {
-      label: "BRE Tele/Video MER Remark",
-      value:
-        safeData.breTeleVideoMerRemark || "-",
-    },
-    {
-      label: "MunichRe Medical Decision",
-      value:
-        safeData.munichReMedicalDecision || "-",
-    },
-    {
-      label: "MunichRe Rating",
-      value:
-        safeData.munichReRating || "-",
-    },
-    {
-      label: "BIU Medical Status (Match/Mismatch)",
-      value:
-        safeData.biuMedicalStatus === "N"
-          ? "Match"
-          : safeData.biuMedicalStatus === "Y"
-            ? "Mismatch"
-            : safeData.biuMedicalStatus || "-",
-    },
-  ];
-};
-
-const getOtherRiskFieldsForDisplay = (
-  data?: RiskData | null
-): Array<{ label: string; value: unknown }> => {
-  const safeData = data ?? {};
-
-  return [
-    {
-      label: "PTLR Response",
-      value: getDisplayValue(
-        safeData,
-        ["ptlrResponse"]
-      ),
-    },
-    {
-      label: "DRC Response",
-      value: getDisplayValue(
-        safeData,
-        ["drcResponse"]
-      ),
-    },
-    {
-      label: "Adverse IIB",
-      value: getDisplayValue(
-        safeData,
-        ["adverseIIB", "adverseIib"]
-      ),
-    },
-    {
-      label: "Criminal Question Response (LA)",
-      value: getDisplayValue(
-        safeData,
-        [
-          "criminalQuestionResponseLA",
-          "criminalQuestionResponseLa",
-        ]
-      ),
-    },
-    {
-      label: "PEP Question Response (LA)",
-      value: getDisplayValue(
-        safeData,
-        [
-          "pepQuestionResponseLA",
-          "pepQuestionResponseLa",
-        ]
-      ),
-    },
-    {
-      label: "Criminal Question Response (PR)",
-      value: getDisplayValue(
-        safeData,
-        [
-          "criminalQuestionResponsePR",
-          "criminalQuestionResponsePr",
-        ]
-      ),
-    },
-    {
-      label: "PEP Question Response (PR)",
-      value: getDisplayValue(
-        safeData,
-        [
-          "pepQuestionResponsePR",
-          "pepQuestionResponsePr",
-        ]
-      ),
-    },
-    {
-      label: "Previous Policy Substandard",
-      value: getDisplayValue(
-        safeData,
-        ["previousPolicySubstandard"]
-      ),
-    },
-    {
-      label: "Avocation Related Disclosure",
-      value: getDisplayValue(
-        safeData,
-        ["avocationRelatedDisclosure"]
-      ),
-    },
-    {
-      label: "Health Question Positive",
-      value: getDisplayValue(
-        safeData,
-        ["healthQuestionPositive"]
-      ),
-    },
-    {
-      label: "Employment in Risky Industry",
-      value: getDisplayValue(
-        safeData,
-        ["employmentInRiskyIndustry"]
-      ),
-    },
-    {
-      label: "FATF/OFAC Country Login",
-      value: getDisplayValue(
-        safeData,
-        ["fatfOfacCountryLogin"]
-      ),
-    },
-    {
-      label: "Hazardous Occupation",
-      value: getDisplayValue(
-        safeData,
-        ["hazardousOccupation"]
-      ),
-    },
-    {
-      label: "EDD Flag",
-      value: getDisplayValue(
-        safeData,
-        ["eddFlag"]
-      ),
-    },
-    {
-      label: "Claim Risk Indicator",
-      value: getDisplayValue(
-        safeData,
-        ["claimRiskIndicator"]
-      ),
-    },
-    {
-      label: "Face Match Score",
-      value: getDisplayValue(
-        safeData,
-        [
-          "faceMatchScore",
-          "faceMatchingScore",
-          "facematchScore",
-        ]
-      ),
-    },
-    {
-      label: "Tobacco",
-      value: getDisplayValue(
-        safeData,
-        ["tobacco"]
-      ),
-    },
-    {
-      label: "Narcotics",
-      value: getDisplayValue(
-        safeData,
-        ["narcotics"]
-      ),
-    },
-  ];
-};
 
 const formatMemberType = (
   memberType: string = "",
@@ -820,50 +542,6 @@ const DetailsCard = ({
   </Box>
 );
 
-const riskCards = [
-  {
-    key: "medical",
-    label: "Medical",
-    subLabel: "BRE Medical Decision - STANDARD",
-    isHealthy: true,
-    mismatches: [],
-  },
-  {
-    key: "financial",
-    label: "Financial",
-    subLabel: "BRE Financial Decision - STANDARD",
-    isHealthy: false,
-    mismatches: [
-      "BIU Financial Status: Y (expected N)",
-    ],
-  },
-  {
-    key: "other",
-    label: "Other Risks",
-    subLabel: "BRE Decision - STANDARD",
-    isHealthy: true,
-    mismatches: [],
-  },
-];
-
-const riskDetailGridSx = {
-  display: "grid",
-  gap: 1,
-  gridTemplateColumns: {
-    xs: "1fr",
-    sm: "repeat(2, minmax(0, 1fr))",
-    md: "repeat(4, minmax(0, 1fr))",
-  },
-};
-
-const riskDetailItemSx = {
-  display: "flex",
-  flexDirection: "column" as const,
-  gap: 0.15,
-  minWidth: 0,
-  borderBottom: "1px solid #efefef",
-  pb: 0.6,
-};
 
 /* -------------------------------------------------------------------------- */
 /*                            MAIN COMPONENT                                  */
@@ -877,8 +555,7 @@ const ApplicantProfile = () => {
   const drsRecord = (drsData ?? {}) as Record<string, unknown>;
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
-  const [selectedRiskCard, setSelectedRiskCard] =
-    useState<RiskCardItem | null>(null);
+ 
   /*
    * summary contains objects such as:
    *
@@ -898,7 +575,21 @@ const ApplicantProfile = () => {
    * roleType is coming from localStorage.
    * If it doesn't exist, DEFAULT configuration is used.
    */
-  const roleType = localStorage.getItem("roleType") ?? "DEFAULT";
+  const roleType = (() => {
+    try {
+      const selectedCaseContext = JSON.parse(
+        localStorage.getItem("selectedCaseContext") ?? "{}",
+      ) as { roleType?: string };
+
+      return String(
+        selectedCaseContext.roleType ??
+          localStorage.getItem("roleType") ??
+          "DEFAULT",
+      ).trim();
+    } catch {
+      return localStorage.getItem("roleType") ?? "DEFAULT";
+    }
+  })();
 
   /* ------------------------------------------------------------------------ */
   /*                                STATE                                     */
@@ -930,6 +621,36 @@ const ApplicantProfile = () => {
   /* ------------------------------------------------------------------------ */
 
   const selectedApplicant = summary[selectedMemberTab];
+
+  const resolvedApplicationNumber = String(
+    applicationNumber ??
+      drsRecord.applicationNumber ??
+      drsRecord.applicationNo ??
+      "",
+  ).trim();
+
+  /* Mark the initially displayed member and every selected member as visited. */
+  useEffect(() => {
+    const memberType = selectedApplicant?.memberType?.trim();
+
+    if (
+      !resolvedApplicationNumber ||
+      !roleType ||
+      !memberType
+    ) {
+      return;
+    }
+
+    markApplicantTabVisited(
+      resolvedApplicationNumber,
+      roleType,
+      memberType,
+    );
+  }, [
+    resolvedApplicationNumber,
+    roleType,
+    selectedApplicant?.memberType,
+  ]);
 
   /* ------------------------------------------------------------------------ */
   /*                         MEMBER TAB CHANGE                                */
@@ -1955,7 +1676,7 @@ const ApplicantProfile = () => {
         drsThunk({
           applicationNo: applicationNumber ?? "",
           userId: currentUserId,
-          roleType: localStorage.getItem("roleType") ?? "CVT_TASK",
+          roleType,
           sections: [
             "breDecision",
             "summary",
@@ -1974,10 +1695,21 @@ const ApplicantProfile = () => {
 
   const canShowApplicantActions = ![
     "CVT_TASK",
-    "CPT_TASK",
+    "CPT_DATA_ENTRY_NMR_TASK",
+    "CPT_DATA_ENTRY_MR_TASK",
     "DVT_TASK",
     "DVT_FORMAL_TASK",
     "GUW_FORMAL_TASK",
+  ].includes(roleType);
+
+  const canShowRiskAnalytics = ![
+    "CVT_TASK",
+    "PIVV_TASK",
+    "CPT_DATA_ENTRY_NMR_TASK",
+    "CPT_DATA_ENTRY_MR_TASK",
+    "RECONSIDERATION_TASK",
+    "AMR_NON_MEDICAL_TASK",
+    "AMR_MEDICAL_TASK",
   ].includes(roleType);
 
   /* ------------------------------------------------------------------------ */
@@ -2007,117 +1739,13 @@ const ApplicantProfile = () => {
 
         {/* ==================== RISK ANALYTICS ==================== */}
 
-        {canShowApplicantActions && riskCards.length > 0 && (
-          <Box sx={{ mt: 1, mb: 1.25 }}>
-            <Typography
-              sx={{
-                fontSize: "12px",
-                fontWeight: 800,
-                color: "#2b2b2b",
-                mb: 0.75,
-                lineHeight: 1.2,
-                textTransform: "uppercase",
-              }}
-            >
-              Risk Analytics
-            </Typography>
-
-            <Box
-              sx={{
-                display: "grid",
-                gap: 1,
-                width: "100%",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "repeat(2, minmax(0, 1fr))",
-                  lg: "repeat(3, minmax(0, 1fr))",
-                },
-              }}
-            >
-              {riskCards.map((item) => {
-                const statusColor = item.isHealthy
-                  ? "#3AAE42"
-                  : "#D32F2F";
-
-                return (
-                  <Box
-                    key={item.key}
-                    onClick={() => setSelectedRiskCard(item)}
-                    sx={{
-                      width: "100%",
-                      border: "1px solid #dfdfdf",
-                      borderLeft: `3px solid ${statusColor}`,
-                      borderRadius: "6px",
-                      backgroundColor: "#fff",
-                      px: 1.25,
-                      py: 0.9,
-                      cursor: "pointer",
-
-                      "&:hover": {
-                        backgroundColor: "#fafafa",
-                        boxShadow: "0 2px 6px rgba(0,0,0,0.08)",
-                      },
-                    }}
-                  >
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 0.6,
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          fontSize: "12px",
-                          fontWeight: 700,
-                          color: "#1f1f1f",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        {item.label}
-                      </Typography>
-
-                      <Box
-                        sx={{
-                          width: 16,
-                          height: 16,
-                          borderRadius: "50%",
-                          border: `1.5px solid ${statusColor}`,
-                          color: statusColor,
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          fontSize: "11px",
-                          fontWeight: 700,
-                          lineHeight: 1,
-                        }}
-                      >
-                        {item.isHealthy ? "✓" : "!"}
-                      </Box>
-                    </Box>
-
-                    <Typography
-                      sx={{
-                        display: "inline-flex",
-                        borderRadius: "999px",
-                        border: "1px solid #dddddd",
-                        backgroundColor: "#f2f2f2",
-                        px: 1,
-                        py: 0.25,
-                        fontSize: "11.5px",
-                        lineHeight: "16px",
-                        color: "#4a4a4a",
-                      }}
-                    >
-                      {item.subLabel}
-                    </Typography>
-                  </Box>
-                );
-              })}
-            </Box>
-          </Box>
-        )}
+        {canShowRiskAnalytics && (
+  <RiskAnalytics
+    memberIndex={selectedMemberTab}
+    memberType={selectedApplicant?.memberType}
+  />
+)}
+        
 
         <Box sx={{ width: "100%" }}>
           {/* ================================================================= */}
@@ -2338,19 +1966,33 @@ const ApplicantProfile = () => {
           {/* ================================================================= */}
 
           {canShowApplicantActions && (
-            <Box sx={{ mt: 1, display: "flex", gap: 1, flexWrap: "wrap" }}>
+            <Box
+              sx={{
+                mt: 1.5,
+                pt: 1.5,
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: 1.25,
+                flexWrap: "wrap",
+                borderTop: "1px solid #EEEEEE",
+              }}
+            >
               <CustomButton
                 variant="outlined"
                 sx={{
                   borderRadius: "50px",
                   px: 3,
-                  py: 0.5,
-                  minWidth: "150px",
+                  py: 0.75,
+                  width: { xs: "100%", sm: "180px" },
+                  maxWidth: { xs: "280px", sm: "none" },
                   fontSize: "12px",
                   lineHeight: "16px",
                   fontWeight: 700,
                 }}
-                onClick={() => navigate(getMedicalPath(businessType!, applicationNumber!))}
+                onClick={() =>
+                  navigate(getMedicalPath(businessType!, applicationNumber!))
+                }
               >
                 View Medicals
               </CustomButton>
@@ -2359,13 +2001,16 @@ const ApplicantProfile = () => {
                 sx={{
                   borderRadius: "50px",
                   px: 3,
-                  py: 0.5,
-                  minWidth: "150px",
+                  py: 0.75,
+                  width: { xs: "100%", sm: "180px" },
+                  maxWidth: { xs: "280px", sm: "none" },
                   fontSize: "12px",
                   lineHeight: "16px",
                   fontWeight: 700,
                 }}
-                onClick={() => navigate(getFinancialPath(businessType!, applicationNumber!))}
+                onClick={() =>
+                  navigate(getFinancialPath(businessType!, applicationNumber!))
+                }
               >
                 View Financials
               </CustomButton>
@@ -2436,152 +2081,7 @@ const ApplicantProfile = () => {
         )}
       </CustomDialog>
 
-      {/* ==================== RISK DETAILS DIALOG ==================== */}
-
-      <CustomDialog
-        open={Boolean(selectedRiskCard)}
-        onClose={() => setSelectedRiskCard(null)}
-        title={selectedRiskCard?.label ?? "Risk Details"}
-        maxWidth="md"
-      >
-        {selectedRiskCard && (
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: "column",
-              gap: 0.8,
-              minWidth: {
-                xs: 320,
-                md: 760,
-              },
-              py: 0.25,
-            }}
-          >
-            {/* ==================== FINANCIAL ==================== */}
-
-            {selectedRiskCard.key === "financial" && (
-              <Box sx={riskDetailGridSx}>
-                {getFinancialFieldsForDisplay(
-                  selectedRiskCard.data
-                ).map(({ label, value }) => (
-                  <Box
-                    key={`${selectedRiskCard.key}-${label}`}
-                    sx={riskDetailItemSx}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        lineHeight: "16px",
-                        color: "#616161",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {label}
-                    </Typography>
-
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        lineHeight: "16px",
-                        color: "#1f1f1f",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {value === "" ||
-                        value === null ||
-                        value === undefined
-                        ? "-"
-                        : String(value)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            )}
-
-            {/* ==================== MEDICAL ==================== */}
-
-            {selectedRiskCard.key === "medical" && (
-              <Box sx={riskDetailGridSx}>
-                {getMedicalFieldsForDisplay(
-                  selectedRiskCard.data
-                ).map(({ label, value }) => (
-                  <Box
-                    key={`${selectedRiskCard.key}-${label}`}
-                    sx={riskDetailItemSx}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        lineHeight: "16px",
-                        color: "#616161",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {label}
-                    </Typography>
-
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        lineHeight: "16px",
-                        color: "#1f1f1f",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {value === "" ||
-                        value === null ||
-                        value === undefined
-                        ? "-"
-                        : String(value)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            )}
-
-            {/* ==================== OTHER RISKS ==================== */}
-
-            {selectedRiskCard.key === "other" && (
-              <Box sx={riskDetailGridSx}>
-                {getOtherRiskFieldsForDisplay(
-                  selectedRiskCard.data
-                ).map(({ label, value }) => (
-                  <Box
-                    key={`${selectedRiskCard.key}-${label}`}
-                    sx={riskDetailItemSx}
-                  >
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        lineHeight: "16px",
-                        color: "#616161",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {label}
-                    </Typography>
-
-                    <Typography
-                      sx={{
-                        fontSize: "12px",
-                        lineHeight: "16px",
-                        color: "#1f1f1f",
-                        fontWeight: 700,
-                      }}
-                    >
-                      {value === "" ||
-                        value === null ||
-                        value === undefined
-                        ? "-"
-                        : String(value)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            )}
-          </Box>
-        )}
-      </CustomDialog>
+  
 
     </Box>
   );

@@ -43,7 +43,9 @@ type DocumentRequiredProps = {
 };
 
 const DocumentRequired = ({ data: dataOverride }: DocumentRequiredProps = {}) => {
-  const storeData = useAppSelector((state) => state.drs.data);
+  const storeData = useAppSelector(
+  (state) => state.prelogin.data,
+);
   const data = dataOverride ?? storeData;
   const dataRecord = toRecord(data);
   const documentRequired = toRecord(dataRecord.documentRequired);

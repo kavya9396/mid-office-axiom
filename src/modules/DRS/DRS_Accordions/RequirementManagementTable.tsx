@@ -29,6 +29,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
 import { masterThunk } from "../../../store/thunks/masterThunk";
 import { applicantProfileSubmitThunk } from "../../../store/thunks/applicantProfileSubmitThunk";
+import { drsThunk } from "../../../store/thunks/drsThunk";
 import type {
   AdditionalRequirementRow,
   ApplicantProfileSubmitRequest,
@@ -38,13 +39,62 @@ import {
   CloseIcon,
   FilterIcon,
 } from "../../../icons/Icons";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import {
+  markLocalRequirementRowsUnsaved,
+  saveLocalRequirementRows,
+} from "../../../validations/drsRequirementDecisionValidation";
+import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
+import { DRS_LAYOUTS } from "../drs-layouts";
+
+const DRS_LAYOUT_BY_ROLE = {
+  CMO_TASK: "RETAIL_CMO_POOL",
+  CUW_TASK: "RETAIL_CUW_POOL",
+  CVT_TASK: "CVT_TASK",
+  CPT_TASK: "RETAIL_CPT_POOL",
+  HOD_TASK: "RETAIL_HOD_POOL",
+  SR_UW_TASK: "RETAIL_SR_UW_POOL",
+  READY_FOR_ISSUANCE_TASK: "RETAIL_READY_FOR_ISSUANCE_POOL",
+  SYSTEM_WAIT_POOL_AMR_NON_MEDICAL: "RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
+  AMR_NON_MEDICAL_TASK: "RETAIL_AMR_NON_MEDICAL",
+  RECONSIDERATION_TASK: "RETAIL_RECONSIDERATION_POOL",
+  PRE_ISSUANCE_SERVICING_TASK: "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
+  POST_ISSUANCE_TASK: "POST_ISSUANCE_TASK",
+  EXCEPTIONAL_TASK: "RETAIL_EXCEPTIONAL_POOL",
+  PIVV_TASK: "PIVV_TASK",
+  DVT_TASK: "GROUP_DVT_POOL",
+  GUW_TASK: "GROUP_GUW_POOL",
+  MMT_TASK: "GROUP_MMT_POOL",
+  SUW_TASK: "RETAIL_SUW_POOL",
+  VENDOR_CMO_TASK: "RETAIL_VENDOR_CMO_POOL",
+  COPS_TASK: "RETAIL_COPS_POOL",
+  IT_TASK: "RETAIL_IT_POOL",
+  SYSTEM_WAIT_POOL_AMR_MEDICAL: "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
+  RI_TASK: "RETAIL_REINSURER_POOL",
+  REQUIREMENT_POOL: "RETAIL_REQUIREMENT_REVIEW_POOL",
+  CUW_CLAIM_AUDIT_TASK: "RETAIL_CUW_CLAIM_AUDIT",
+  ACCUITY_TASK: "RETAIL_ACCUITY_USER",
+  ECG_TASK: "RETAIL_ECG_POOL",
+  TMT_TASK: "RETAIL_TMT_POOL",
+  GRIEVANCE_TASK: "RETAIL_GRIEVANCE_POOL",
+  REJECT_TASK: "RETAIL_REJECT_POOL",
+  GUW_FORMAL_TASK: "GUW_FORMAL_TASK",
+  DVT_FORMAL_TASK: "DVT_FORMAL_TASK",
+  RISK_TASK: "RISK_TASK",
+  PRE_LOGIN_TASK: "PRE_LOGIN_TASK",
+  AMR_MEDICAL_TASK: "AMR_MEDICAL_TASK",
+  ACUITY_TASK: "ACUITY_TASK",
+  ISSUANCE_TASK: "ISSUANCE_TASK",
+  CPT_DATA_ENTRY_MR_TASK: "CPT_DATA_ENTRY_MR_TASK",
+  CPT_DATA_ENTRY_NMR_TASK: "CPT_DATA_ENTRY_NMR_TASK",
+} as const;
 
 interface RequirementManagementTableProps {
   requirements: AdditionalRequirementRow[];
   onSave?: (rows: AdditionalRequirementRow[]) => void | Promise<void>;
   onAddRequirement?: () => void;
   addRowSignal?: number;
+  readOnly?: boolean;
 }
 
 interface MiscMasterItem {
@@ -103,14 +153,14 @@ const REQUIRED_NEW_ROW_FIELDS: Array<{
   field: AddRowField;
   label: string;
 }> = [
-  { field: "team", label: "Team" },
-  { field: "profile", label: "Profile" },
-  { field: "category", label: "Category" },
-  { field: "subCategory", label: "Sub Category" },
-  { field: "document", label: "Document" },
-  { field: "reason", label: "Reason" },
-  { field: "fupCode", label: "FUP Code" },
-];
+    { field: "team", label: "Team" },
+    { field: "profile", label: "Profile" },
+    { field: "category", label: "Category" },
+    { field: "subCategory", label: "Sub Category" },
+    { field: "document", label: "Document" },
+    { field: "reason", label: "Reason" },
+    { field: "fupCode", label: "FUP Code" },
+  ];
 
 type RowMasterOptions = Partial<Record<AddRowField, string[]>>;
 
@@ -310,7 +360,7 @@ const getMasterItems = (
 };
 
 const getDefaultTeamByRole = (roleType: string): string => {
-  if (["CVT_TASK", "CPT_DATA_ENTRY_NMR_TASK"].includes(roleType)) {
+  if (["CVT_TASK", "CPT_DATA_ENTRY_NMR_TASK", "CPT_DATA_ENTRY_MR_TASK"].includes(roleType)) {
     return "COPS";
   }
 
@@ -402,9 +452,9 @@ const getFupDescription = (
 
   return normalizeText(
     matchingItem?.description ??
-      matchingItem?.desc ??
-      requirementMaster.description ??
-      requirementMaster.desc,
+    matchingItem?.desc ??
+    requirementMaster.description ??
+    requirementMaster.desc,
   );
 };
 
@@ -490,10 +540,10 @@ const filterRequirementsByRole = (
 
   if (normalizedRoleType === "CPT_DATA_ENTRY_NMR_TASK") {
     return requirements.filter(
-      (row) => normalizeText(row.category).toUpperCase() === "FINANCIAL",
+      (row) => normalizeText(row.category).toUpperCase() !== "MEDICAL" || normalizeText(row.category).toUpperCase() !== "MEDICALS",
     );
   }
-    if (normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK") {
+  if (normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK") {
     return requirements.filter(
       (row) => normalizeText(row.category).toUpperCase() === "MEDICAL",
     );
@@ -507,30 +557,98 @@ const filterRequirementsByRole = (
 
   return requirements;
 };
+interface ApplicationRow {
+  applicationNo?: string;
+  businessType?: string;
+  roleType?: string;
+  userId?: string;
+  [key: string]: unknown;
+}
+const actionButtonSx = {
+  minWidth: 170,
+  borderRadius: "28px",
+  bgcolor: "#ad252a",
+  py: 0.65,
+  textTransform: "none",
+  fontSize: "13px",
+  fontWeight: 600,
+  boxShadow: "none",
+  "&:hover": {
+    bgcolor: "#941f24",
+    boxShadow: "none",
+  },
+};
 
 const RequirementManagementTable = ({
   requirements,
   onAddRequirement,
   addRowSignal = 0,
+  readOnly = false,
 }: RequirementManagementTableProps) => {
+  const location = useLocation();
+  const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const { applicationNumber } = useParams<{ applicationNumber: string }>();
+  const { applicationNumber: routeApplicationNumber } = useParams<{
+    applicationNumber: string;
+  }>();
   const [roleType] = useState(
     () => localStorage.getItem("roleType") ?? "",
   );
+  const application = location.state?.application as ApplicationRow | undefined;
+  const applicationNumber = normalizeText(
+    routeApplicationNumber ??
+    application?.applicationNo ??
+    localStorage.getItem("applicationNo"),
+  );
+  const businessType = (
+    application?.businessType ??
+    localStorage.getItem("businessType") ??
+    ""
+  )
+    .trim()
+    .toLowerCase();
+
   const userId = localStorage.getItem("username") ?? "";
   const normalizedRoleType = normalizeText(roleType).toUpperCase();
-  const requirementSaveStorageKey = `requirementManagementSaved:${
-    applicationNumber ?? ""
-  }:${normalizedRoleType}`;
-  const isNonEditable = [
-    "AMR_MEDICAL_TASK",
-    "AMR_NON_MEDICAL_TASK",
-    "RECONSIDERATION_TASK",
-  ].includes(normalizedRoleType);
+  const requirementSaveStorageKey = `requirementManagementSaved:${applicationNumber ?? ""
+    }:${normalizedRoleType}`;
+  const isNonEditable =
+    readOnly ||
+    [
+      "AMR_MEDICAL_TASK",
+      "AMR_NON_MEDICAL_TASK",
+      "RECONSIDERATION_TASK",
+      "ACUITY_TASK"
+    ].includes(normalizedRoleType);
+
   const isAddRequirementEnabled =
-    Boolean(onAddRequirement) && !isNonEditable;
-  const isSaveButtonVisible = normalizedRoleType !== "AMR_MEDICAL_TASK" && normalizedRoleType !== "AMR_NON_MEDICAL_TASK" && normalizedRoleType !== "RECONSIDERATION_TASK";
+    !readOnly &&
+    Boolean(onAddRequirement) &&
+    !isNonEditable;
+
+  const isSaveButtonVisible =
+    !readOnly &&
+    ![
+      "AMR_MEDICAL_TASK",
+      "AMR_NON_MEDICAL_TASK",
+      "RECONSIDERATION_TASK",
+      "ACUITY_TASK"
+    ].includes(normalizedRoleType);
+  const drsSections = useMemo(() => {
+    const layout =
+      DRS_LAYOUT_BY_ROLE[
+      normalizedRoleType as keyof typeof DRS_LAYOUT_BY_ROLE
+      ];
+    const layoutAccordions = layout ? DRS_LAYOUTS[layout] ?? [] : [];
+
+    return Array.from(
+      new Set([
+        ...layoutAccordions.map(String),
+        "requirementCategoryInfo",
+        "latestBreDecision",
+      ]),
+    );
+  }, [normalizedRoleType]);
 
   const roleBasedRequirements = filterRequirementsByRole(
     requirements,
@@ -541,10 +659,22 @@ const RequirementManagementTable = ({
     (state: RootState) => state.masterData,
   ) as MasterDataResponse;
 
-  const drsStateData = useAppSelector(
-    (state: RootState) => state.drs.data,
+  const sourceStateData = useAppSelector(
+    (state: RootState) => {
+      if (readOnly) {
+        return state.searchApplication.response?.data;
+      }
+
+      return (
+        state.drs.data ??
+        state.searchApplication.response?.data
+      );
+    },
   ) as unknown;
-  const drsPayload = getDrsPayload(drsStateData);
+  const drsPayload = getDrsPayload(sourceStateData);
+  // const drsPayload = getDrsPayload(drsStateData);
+  const quickLinks = toRecord(drsPayload.quickLinks);
+  const proposerFormUrl = normalizeText(quickLinks.proposerForm);
   const applicationOverview = toRecord(drsPayload.applicationOverview);
   const summarySource = Array.isArray(applicationOverview.summary)
     ? applicationOverview.summary
@@ -601,22 +731,36 @@ const RequirementManagementTable = ({
     severity: "success",
   });
 
-  const markRequirementsAsUnsaved = () => {
-    if (normalizedRoleType === "CVT_TASK") {
-      sessionStorage.setItem(requirementSaveStorageKey, "false");
+  const handleViewDocuments = () => {
+    if (!proposerFormUrl) {
+      setSnackbar({
+        open: true,
+        message: "Proposer form is not available.",
+        severity: "error",
+      });
+      return;
     }
+
+    window.open(proposerFormUrl, "_blank", "noopener,noreferrer");
+  };
+
+  const markRequirementsAsUnsaved = () => {
+    markLocalRequirementRowsUnsaved(drsPayload);
+
+    sessionStorage.setItem(requirementSaveStorageKey, "false");
   };
 
   useEffect(() => {
     const currentRoleType = normalizeText(roleType).toUpperCase();
 
     if (currentRoleType === "CVT_TASK") {
-      const storageKey = `requirementManagementSaved:${
-        applicationNumber ?? ""
-      }:${currentRoleType}`;
+      const storageKey = `requirementManagementSaved:${applicationNumber ?? ""
+        }:${currentRoleType}`;
 
       sessionStorage.setItem(storageKey, "false");
     }
+    const storageKey = `requirementManagementSaved:${applicationNumber}:${currentRoleType}`;
+    sessionStorage.setItem(storageKey, "false");
   }, [addRowSignal, applicationNumber, roleType]);
 
   /*
@@ -664,14 +808,14 @@ const RequirementManagementTable = ({
       fupCode: "",
       description: "",
       status: "PENDING",
-     
+
       specialTest: "",
-    
+
       userId: normalizeText(localStorage.getItem("userId")),
       remarks: "",
       udsLink: "",
       ocrStatus: "",
-     
+
     };
 
     setHandledAddRowSignal(addRowSignal);
@@ -724,28 +868,28 @@ const RequirementManagementTable = ({
 
     const requirementMst = row
       ? {
-          ...(normalizeText(row.team) && {
-            team: normalizeText(row.team),
-          }),
-          ...(normalizeText(row.profile) && {
-            profile: normalizeText(row.profile),
-          }),
-          ...(normalizeText(row.category) && {
-            category: normalizeText(row.category),
-          }),
-          ...(normalizeText(row.subCategory) && {
-            subCategory: normalizeText(row.subCategory),
-          }),
-          ...(normalizeText(row.document) && {
-            document: normalizeText(row.document),
-          }),
-          ...(normalizeText(row.reason) && {
-            reason: normalizeText(row.reason),
-          }),
-          ...(normalizeText(row.fupCode) && {
-            fupCode: normalizeText(row.fupCode),
-          }),
-        }
+        ...(normalizeText(row.team) && {
+          team: normalizeText(row.team),
+        }),
+        ...(normalizeText(row.profile) && {
+          profile: normalizeText(row.profile),
+        }),
+        ...(normalizeText(row.category) && {
+          category: normalizeText(row.category),
+        }),
+        ...(normalizeText(row.subCategory) && {
+          subCategory: normalizeText(row.subCategory),
+        }),
+        ...(normalizeText(row.document) && {
+          document: normalizeText(row.document),
+        }),
+        ...(normalizeText(row.reason) && {
+          reason: normalizeText(row.reason),
+        }),
+        ...(normalizeText(row.fupCode) && {
+          fupCode: normalizeText(row.fupCode),
+        }),
+      }
       : undefined;
 
     const requestPayload = {
@@ -926,8 +1070,22 @@ const RequirementManagementTable = ({
     return filteredRows.slice(startIndex, startIndex + ROWS_PER_PAGE);
   }, [filteredRows, page]);
 
-  const gridTemplateColumns = columnWidths
-    .map((width) => `minmax(0, ${width}fr)`)
+  // const gridTemplateColumns = columnWidths
+  //   .map((width) => `minmax(0, ${width}fr)`)
+  //   .join(" ");
+
+  const displayedColumnHeadings = readOnly
+    ? COLUMN_HEADINGS.filter(
+      (heading) => heading !== "Actions",
+    )
+    : [...COLUMN_HEADINGS];
+
+  const displayedColumnWidths = readOnly
+    ? columnWidths.filter((_, index) => index !== 0)
+    : columnWidths;
+
+  const gridTemplateColumns = displayedColumnWidths
+    .map((width) => `${width}fr`)
     .join(" ");
 
   const handleColumnResizeStart = (
@@ -1091,9 +1249,9 @@ const RequirementManagementTable = ({
       currentRows.map((row) =>
         row.__clientRowId === rowId
           ? {
-              ...row,
-              status: selectedStatus,
-            }
+            ...row,
+            status: selectedStatus,
+          }
           : row,
       ),
     );
@@ -1170,7 +1328,7 @@ const RequirementManagementTable = ({
       //     }
       //   })(),
       // );
-     
+
 
       if (!applicationNumber || !normalizedRoleType || !userId) {
         setSnackbar({
@@ -1186,12 +1344,14 @@ const RequirementManagementTable = ({
         ...drsPayload,
         requirementManagement: createRequestRows(rows),
       } as unknown as ApplicantProfileSubmitRequest["data"];
-      const payload = {applicationNo:applicationNumber,
-          roleType: roleType,
-          sections: ["requirementManagement"],
-          userId,
-          data: updatedDrsData}
-          console.log('payload----------',payload)
+      const payload = {
+        applicationNo: applicationNumber,
+        roleType: roleType,
+        sections: ["requirementManagement"],
+        userId,
+        data: updatedDrsData
+      }
+      console.log('payload----------', payload)
 
       await dispatch(
         applicantProfileSubmitThunk(
@@ -1199,9 +1359,24 @@ const RequirementManagementTable = ({
         ),
       ).unwrap();
 
-      if (normalizedRoleType === "CVT_TASK") {
-        sessionStorage.setItem(requirementSaveStorageKey, "true");
-      }
+      // Reload Requirement Management from the server after the PUT succeeds.
+      // The decision dropdown must always use this refreshed API response.
+      await dispatch(
+        drsThunk({
+          applicationNo: applicationNumber,
+          roleType,
+          sections: drsSections,
+          userId,
+        }),
+      ).unwrap();
+
+      saveLocalRequirementRows(
+        drsPayload,
+        createRequestRows(rows),
+        false,
+      );
+
+      sessionStorage.setItem(requirementSaveStorageKey, "true");
 
       setNewRowIds([]);
       setRowMasterOptions({});
@@ -1296,8 +1471,8 @@ const RequirementManagementTable = ({
       field === "profile"
         ? false
         : isLoading ||
-          options.length === 0 ||
-          (Boolean(parentField) && !normalizeText(row[parentField]));
+        options.length === 0 ||
+        (Boolean(parentField) && !normalizeText(row[parentField]));
 
     return (
       <Select
@@ -1360,8 +1535,8 @@ const RequirementManagementTable = ({
             variant="outlined"
             onClick={onAddRequirement}
             sx={{
-              borderColor: "#0a5285",
-              color: "#0a5285",
+              borderColor: "#E45F14",
+              color: "#E45F14",
               bgcolor: "#ffffff",
               minHeight: 30,
               borderRadius: "6px",
@@ -1371,7 +1546,7 @@ const RequirementManagementTable = ({
               textTransform: "none",
               fontWeight: 600,
               "&:hover": {
-                borderColor: "#073f68",
+                borderColor: "#E45F14",
                 bgcolor: "#f4f8fb",
               },
             }}
@@ -1407,7 +1582,7 @@ const RequirementManagementTable = ({
             boxSizing: "border-box",
           }}
         >
-          {COLUMN_HEADINGS.map((heading, columnIndex) => (
+          {/* {COLUMN_HEADINGS.map((heading, columnIndex) => (
             <Box
               key={heading}
               sx={{
@@ -1458,80 +1633,143 @@ const RequirementManagementTable = ({
                 }}
               />
             </Box>
-          ))}
-        </Box>
+          ))} */}
 
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-end",
-            gap: 0.6,
-            minHeight: 36,
-            px: 0.75,
-            py: 0.3,
-            bgcolor: "#fafbfc",
-            borderBottom: "1px solid #e1e5e8",
-            boxSizing: "border-box",
-          }}
-        >
-          {Object.values(filters).some((values) => values.length > 0) && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={handleClearAppliedFilters}
-              sx={{
-                minWidth: 0,
-                height: 28,
-                px: 1,
-                borderColor: "#c73434",
-                borderRadius: "7px",
-                color: "#c73434",
-                bgcolor: "#ffffff",
-                fontSize: "10.5px",
-                fontWeight: 600,
-                lineHeight: 1,
-                textTransform: "none",
-                "&:hover": {
-                  borderColor: "#a52227",
-                  bgcolor: "#fff5f5",
-                },
-              }}
-            >
-              Clear filters
-            </Button>
+          {displayedColumnHeadings.map(
+            (heading) => {
+              const originalColumnIndex =
+                COLUMN_HEADINGS.indexOf(heading);
+
+              return (
+                <Box
+                  key={heading}
+                  sx={{
+                    position: "relative",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.4,
+                    overflow: "hidden",
+                    minWidth: 0,
+                  }}
+                >
+                  <Typography
+                    component="span"
+                    sx={{
+                      appearance: "none",
+                      border: 0,
+                      p: 0,
+                      bgcolor: "transparent",
+                      fontFamily: "inherit",
+                      fontSize: "10.5px",
+                      fontWeight: 700,
+                      color: "#FFF",
+                      lineHeight: 1.15,
+                      whiteSpace: "normal",
+                      overflow: "hidden",
+                      minWidth: 0,
+                      cursor: "default",
+                    }}
+                  >
+                    {heading}
+                  </Typography>
+
+                  {!readOnly && (
+                    <Box
+                      onMouseDown={(event) =>
+                        handleColumnResizeStart(
+                          originalColumnIndex,
+                          event,
+                        )
+                      }
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        right: 0,
+                        width: "7px",
+                        height: "100%",
+                        cursor: "col-resize",
+                        borderRight:
+                          "1px solid rgba(255,255,255,0.3)",
+                      }}
+                    />
+                  )}
+                </Box>
+              );
+            },
           )}
-
-          <Tooltip title="Filter requirements">
-            <IconButton
-              size="small"
-              onClick={handleOpenFilterDialog}
-              sx={{
-                width: 30,
-                height: 28,
-                border: "1px solid #dfe3e7",
-                borderRadius: "7px",
-                color: Object.values(filters).some(
-                  (values) => values.length > 0,
-                )
-                  ? "#E45F14"
-                  : "#555555",
-                bgcolor: Object.values(filters).some(
-                  (values) => values.length > 0,
-                )
-                  ? "#fff1e6"
-                  : "#ffffff",
-                "&:hover": {
-                  borderColor: "#E45F14",
-                  bgcolor: "#fff5ee",
-                },
-              }}
-            >
-              <FilterIcon />
-            </IconButton>
-          </Tooltip>
         </Box>
+        {!readOnly && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              gap: 0.6,
+              minHeight: 36,
+              px: 0.75,
+              py: 0.3,
+              bgcolor: "#fafbfc",
+              borderBottom: "1px solid #e1e5e8",
+              boxSizing: "border-box",
+            }}
+          >
+            {Object.values(filters).some((values) => values.length > 0) && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={handleClearAppliedFilters}
+                sx={{
+                  minWidth: 0,
+                  height: 28,
+                  px: 1,
+                  borderColor: "#c73434",
+                  borderRadius: "7px",
+                  color: "#c73434",
+                  bgcolor: "#ffffff",
+                  fontSize: "10.5px",
+                  fontWeight: 600,
+                  lineHeight: 1,
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "#a52227",
+                    bgcolor: "#fff5f5",
+                  },
+                }}
+              >
+                Clear filters
+              </Button>
+            )}
 
+            <Tooltip title="Filter requirements">
+              <IconButton
+                size="small"
+                onClick={handleOpenFilterDialog}
+                sx={{
+                  width: 30,
+                  height: 28,
+                  border: "1px solid #dfe3e7",
+                  borderRadius: "7px",
+                  color: Object.values(filters).some(
+                    (values) => values.length > 0,
+                  )
+                    ? "#E45F14"
+                    : "#555555",
+                  bgcolor: Object.values(filters).some(
+                    (values) => values.length > 0,
+                  )
+                    ? "#fff1e6"
+                    : "#ffffff",
+                  "&:hover": {
+                    borderColor: "#E45F14",
+                    bgcolor: "#fff5ee",
+                  },
+                }}
+              >
+                <FilterIcon />
+              </IconButton>
+            </Tooltip>
+          </Box>
+        )}
         {visibleRows.length > 0 ? (
           visibleRows.map((row, visibleIndex) => {
             const absoluteIndex = (page - 1) * ROWS_PER_PAGE + visibleIndex;
@@ -1565,6 +1803,7 @@ const RequirementManagementTable = ({
               formatStatus(currentStatus);
 
             return (
+
               <Box
                 key={rowKey}
                 sx={{
@@ -1587,138 +1826,157 @@ const RequirementManagementTable = ({
                   },
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "center",
-                  }}
-                >
-                  {isNewRow && (
-                    <Tooltip title="Remove requirement">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemove(rowKey)}
-                        sx={{
-                          width: 24,
-                          height: 24,
-                          p: 0,
-                          border: "1px solid #d9e2ea",
-                          color: "#78909c",
-                          fontSize: "16px",
-                          "&:hover": {
-                            borderColor: "#d32f2f",
-                            color: "#d32f2f",
-                            bgcolor: "#fff5f5",
-                          },
-                        }}
-                      >
-                        <CloseIcon />
-                      </IconButton>
-                    </Tooltip>
-                  )}
-                </Box>
+                {!readOnly && (
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "center",
+                    }}
+                  >
+                    {isNewRow && (
+                      <Tooltip title="Remove requirement">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleRemove(rowKey)}
+                          sx={{
+                            width: 24,
+                            height: 24,
+                            p: 0,
+                            border: "1px solid #d9e2ea",
+                            color: "#78909c",
+                            fontSize: "16px",
+                            "&:hover": {
+                              borderColor: "#d32f2f",
+                              color: "#d32f2f",
+                              bgcolor: "#fff5f5",
+                            },
+                          }}
+                        >
+                          <CloseIcon />
+                        </IconButton>
+                      </Tooltip>
+                    )}
+                  </Box>
+                )}
 
-                <Select
-                  size="small"
-                  value={selectedStatus}
-                  disabled={
-                    isNonEditable ||
-                    isNewRow ||
-                    row.__isInitiallyAccepted
-                  }
-                  onChange={(event) =>
-                    handleStatusChange(rowKey, event)
-                  }
-                  displayEmpty
-                  sx={{
-                    width: "70%",
-                    minWidth: 0,
-                    height: 25,
-                    borderRadius: "6px",
-                    bgcolor: "#ffffff",
-                    fontSize: "11px",
-                    "& .MuiSelect-select": {
-                      minWidth: "0 !important",
-                      px: 0.6,
-                      py: 0.35,
-                      pr: "20px !important",
-                      overflow: "hidden",
-                      whiteSpace: "nowrap",
-                      textOverflow: "ellipsis",
-                    },
-                    "& .MuiSelect-icon": {
-                      right: 1,
-                      fontSize: 17,
-                    },
-                    "& .MuiOutlinedInput-notchedOutline": {
-                      borderColor: "#cfd8e1",
-                    },
-                  }}
-                >
-                  {!selectedStatus && (
-                    <MenuItem value="" disabled>
-                      Select
-                    </MenuItem>
-                  )}
-
-                  {selectedStatus && !matchingStatusOption && (
-                    <MenuItem value={selectedStatus}>{selectedStatus}</MenuItem>
-                  )}
-
-                  {statusOptions.map((option) => {
-                    const optionValue =
-                      normalizeText(option.value) ||
-                      normalizeText(option.description) ||
-                      normalizeText(option.code);
-
-                    return (
-                      <MenuItem
-                        key={
-                          option.miscMastId || `${option.code}-${optionValue}`
-                        }
-                        value={optionValue}
-                      >
-                        {option.description}
+                {readOnly ? (
+                  renderCompactCell(selectedStatus)
+                ) : (
+                  <Select
+                    size="small"
+                    value={selectedStatus}
+                    disabled={
+                      isNonEditable ||
+                      isNewRow ||
+                      row.__isInitiallyAccepted
+                    }
+                    onChange={(event) =>
+                      handleStatusChange(rowKey, event)
+                    }
+                    displayEmpty
+                    sx={{
+                      width: "70%",
+                      minWidth: 0,
+                      height: 25,
+                      borderRadius: "6px",
+                      bgcolor: "#ffffff",
+                      fontSize: "11px",
+                      "& .MuiSelect-select": {
+                        minWidth: "0 !important",
+                        px: 0.6,
+                        py: 0.35,
+                        pr: "20px !important",
+                        overflow: "hidden",
+                        whiteSpace: "nowrap",
+                        textOverflow: "ellipsis",
+                      },
+                      "& .MuiSelect-icon": {
+                        right: 1,
+                        fontSize: 17,
+                      },
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#cfd8e1",
+                      },
+                    }}
+                  >
+                    {!selectedStatus && (
+                      <MenuItem value="" disabled>
+                        Select
                       </MenuItem>
-                    );
-                  })}
-                </Select>
+                    )}
 
+                    {selectedStatus && !matchingStatusOption && (
+                      <MenuItem value={selectedStatus}>{selectedStatus}</MenuItem>
+                    )}
+
+                    {statusOptions.map((option) => {
+                      const optionValue =
+                        normalizeText(option.value) ||
+                        normalizeText(option.description) ||
+                        normalizeText(option.code);
+
+                      return (
+                        <MenuItem
+                          key={
+                            option.miscMastId || `${option.code}-${optionValue}`
+                          }
+                          value={optionValue}
+                        >
+                          {option.description}
+                        </MenuItem>
+                      );
+                    })}
+                  </Select>
+                )}
                 {renderCompactCell(row.ocrStatus)}
 
-                {isNewRow
+                {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "team")
                   : renderCompactCell(row.team)}
 
-                {isNewRow
+                {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "profile")
                   : renderCompactCell(row.profile)}
 
-                {isNewRow
+                {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "category")
                   : renderCompactCell(row.category)}
 
-                {isNewRow
+                {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "subCategory")
                   : renderCompactCell(row.subCategory)}
 
-                {isNewRow
+                {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "document")
                   : renderCompactCell(row.document)}
 
-                {isNewRow
+                {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "reason")
                   : renderCompactCell(row.reason)}
 
                 {renderCompactCell(row.specialTest)}
 
-                {isNewRow
+                {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "fupCode")
                   : renderCompactCell(row.fupCode)}
 
-                {renderDetailAction("Extra Remarks", getExtraRemarks(row))}
+                {/* {renderDetailAction("Extra Remarks", getExtraRemarks(row))}
 
-                {renderDetailAction("Description", row.description)}
+                {renderDetailAction("Description", row.description)} */}
+
+                {readOnly
+                  ? renderCompactCell(getExtraRemarks(row))
+                  : renderDetailAction(
+                    "Extra Remarks",
+                    getExtraRemarks(row),
+                  )}
+
+                {readOnly
+                  ? renderCompactCell(row.description)
+                  : renderDetailAction(
+                    "Description",
+                    row.description,
+                  )}
 
               </Box>
             );
@@ -1772,288 +2030,342 @@ const RequirementManagementTable = ({
         </Box>
       )}
 
-      {isSaveButtonVisible && (
-        <Box sx={{ mt: 1, mb: 0.5, textAlign: "center" }}>
+      <Box
+        sx={{
+          mt: 1,
+          mb: 0.5,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        {isSaveButtonVisible && (
           <Button
             variant="contained"
             onClick={handleSave}
             disabled={rows.length === 0}
-            sx={{
-              minWidth: 170,
-              borderRadius: "28px",
-              bgcolor: "#ad252a",
-              py: 0.65,
-              textTransform: "none",
-              fontSize: "13px",
-              fontWeight: 600,
-              boxShadow: "none",
-              "&:hover": {
-                bgcolor: "#941f24",
-                boxShadow: "none",
-              },
-            }}
+            sx={actionButtonSx}
           >
             Save
           </Button>
-        </Box>
-      )}
+        )}
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3500}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        onClose={(_, reason) => {
-          if (reason !== "clickaway") {
-            setSnackbar((currentSnackbar) => ({
-              ...currentSnackbar,
-              open: false,
-            }));
-          }
-        }}
-      >
-        <Alert
-          severity={snackbar.severity}
-          variant="filled"
-          onClose={() =>
-            setSnackbar((currentSnackbar) => ({
-              ...currentSnackbar,
-              open: false,
-            }))
-          }
-          sx={{ width: "100%", fontSize: "12px" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+        {normalizedRoleType === "CPT_DATA_ENTRY_NMR_TASK" && (
+          <>
+            <Button
+              variant="contained"
+              onClick={() =>
+                navigate(
+                  getFinancialPath(
+                    businessType,
+                    applicationNumber ?? "",
+                  ),
+                )
+              }
+              sx={actionButtonSx}
+            >
+              View Financials
+            </Button>
 
-      <Dialog
-        open={filterDialogOpen}
-        onClose={() => setFilterDialogOpen(false)}
-        fullWidth
-        maxWidth="sm"
-        slotProps={{
-          paper: {
-            sx: {
-              width: "620px",
-              maxWidth: "calc(100% - 24px)",
-              minHeight: 430,
-              borderRadius: "18px",
-              overflow: "hidden",
-            },
-          },
-        }}
-      >
-        <DialogTitle
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            minHeight: 64,
-            px: 2.25,
-            py: 1,
-            borderBottom: "1px solid #e1e4e7",
-          }}
-        >
-          <Typography sx={{ fontSize: "20px", fontWeight: 700, color: "#075184" }}>
-            FILTER
-          </Typography>
-          <IconButton
-            size="small"
-            onClick={() => setFilterDialogOpen(false)}
-            sx={{
-              width: 28,
-              height: 28,
-              border: "2px solid #075184",
-              color: "#075184",
+            <Button
+              variant="contained"
+              onClick={handleViewDocuments}
+              sx={actionButtonSx}
+            >
+              View Documents
+            </Button>
+          </>
+        )}
+
+        {normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK" && (
+          <>
+            <Button
+              variant="contained"
+              onClick={() =>
+                navigate(
+                  getMedicalPath(
+                    businessType,
+                    applicationNumber ?? "",
+                  ),
+                )
+              }
+              sx={actionButtonSx}
+            >
+              View Medicals
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleViewDocuments}
+              sx={actionButtonSx}
+            >
+              View Documents
+            </Button>
+          </>
+        )}
+      </Box>
+
+      {!readOnly && (
+        <>
+          <Snackbar
+            open={snackbar.open}
+            autoHideDuration={3500}
+            anchorOrigin={{ vertical: "top", horizontal: "center" }}
+            onClose={(_, reason) => {
+              if (reason !== "clickaway") {
+                setSnackbar((currentSnackbar) => ({
+                  ...currentSnackbar,
+                  open: false,
+                }));
+              }
             }}
           >
-            <CloseIcon />
-          </IconButton>
-        </DialogTitle>
+            <Alert
+              severity={snackbar.severity}
+              variant="filled"
+              onClose={() =>
+                setSnackbar((currentSnackbar) => ({
+                  ...currentSnackbar,
+                  open: false,
+                }))
+              }
+              sx={{ width: "100%", fontSize: "12px" }}
+            >
+              {snackbar.message}
+            </Alert>
+          </Snackbar>
 
-        <DialogContent sx={{ display: "flex", p: "0 !important", minHeight: 290 }}>
-          <Box
-            sx={{
-              width: "35%",
-              flexShrink: 0,
-              borderRight: "1px solid #e1e4e7",
-              bgcolor: "#ffffff",
+          <Dialog
+            open={filterDialogOpen}
+            onClose={() => setFilterDialogOpen(false)}
+            fullWidth
+            maxWidth="sm"
+            slotProps={{
+              paper: {
+                sx: {
+                  width: "620px",
+                  maxWidth: "calc(100% - 24px)",
+                  minHeight: 430,
+                  borderRadius: "18px",
+                  overflow: "hidden",
+                },
+              },
             }}
           >
-            {FILTER_LABELS.map(({ field, label }) => {
-              const isSelected = selectedFilterField === field;
-              const selectedCount = draftFilters[field].length;
+            <DialogTitle
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                minHeight: 64,
+                px: 2.25,
+                py: 1,
+                borderBottom: "1px solid #e1e4e7",
+              }}
+            >
+              <Typography sx={{ fontSize: "20px", fontWeight: 700, color: "#075184" }}>
+                FILTER
+              </Typography>
+              <IconButton
+                size="small"
+                onClick={() => setFilterDialogOpen(false)}
+                sx={{
+                  width: 28,
+                  height: 28,
+                  border: "2px solid #075184",
+                  color: "#075184",
+                }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </DialogTitle>
 
-              return (
-                <Button
-                  key={field}
-                  fullWidth
-                  onClick={() => setSelectedFilterField(field)}
-                  sx={{
-                    minHeight: 54,
-                    justifyContent: "space-between",
-                    px: 1.5,
-                    borderRadius: 0,
-                    borderBottom: "1px solid #e1e4e7",
-                    borderLeft: isSelected ? "4px solid #E45F14" : "4px solid transparent",
-                    bgcolor: isSelected ? "#fff5ee" : "#ffffff",
-                    color: isSelected ? "#E45F14" : "#4f4f4f",
-                    fontSize: "13px",
-                    fontWeight: isSelected ? 700 : 500,
-                    textTransform: "none",
-                    "&:hover": { bgcolor: "#fff8f3" },
-                  }}
-                >
-                  <span>{label}</span>
-                  {selectedCount > 0 && (
-                    <Box
-                      component="span"
+            <DialogContent sx={{ display: "flex", p: "0 !important", minHeight: 290 }}>
+              <Box
+                sx={{
+                  width: "35%",
+                  flexShrink: 0,
+                  borderRight: "1px solid #e1e4e7",
+                  bgcolor: "#ffffff",
+                }}
+              >
+                {FILTER_LABELS.map(({ field, label }) => {
+                  const isSelected = selectedFilterField === field;
+                  const selectedCount = draftFilters[field].length;
+
+                  return (
+                    <Button
+                      key={field}
+                      fullWidth
+                      onClick={() => setSelectedFilterField(field)}
                       sx={{
-                        minWidth: 20,
-                        height: 20,
-                        px: 0.5,
-                        borderRadius: "10px",
-                        bgcolor: "#E45F14",
-                        color: "#ffffff",
-                        fontSize: "10px",
-                        lineHeight: "20px",
+                        minHeight: 54,
+                        justifyContent: "space-between",
+                        px: 1.5,
+                        borderRadius: 0,
+                        borderBottom: "1px solid #e1e4e7",
+                        borderLeft: isSelected ? "4px solid #E45F14" : "4px solid transparent",
+                        bgcolor: isSelected ? "#fff5ee" : "#ffffff",
+                        color: isSelected ? "#E45F14" : "#4f4f4f",
+                        fontSize: "13px",
+                        fontWeight: isSelected ? 700 : 500,
+                        textTransform: "none",
+                        "&:hover": { bgcolor: "#fff8f3" },
                       }}
                     >
-                      {selectedCount}
+                      <span>{label}</span>
+                      {selectedCount > 0 && (
+                        <Box
+                          component="span"
+                          sx={{
+                            minWidth: 20,
+                            height: 20,
+                            px: 0.5,
+                            borderRadius: "10px",
+                            bgcolor: "#E45F14",
+                            color: "#ffffff",
+                            fontSize: "10px",
+                            lineHeight: "20px",
+                          }}
+                        >
+                          {selectedCount}
+                        </Box>
+                      )}
+                    </Button>
+                  );
+                })}
+              </Box>
+
+              <Box sx={{ flex: 1, p: 1.75, overflowY: "auto", maxHeight: 290 }}>
+                {filterOptions[selectedFilterField].length > 0 ? (
+                  filterOptions[selectedFilterField].map((option) => (
+                    <Box
+                      key={option}
+                      component="label"
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        minHeight: 40,
+                        px: 0.5,
+                        borderRadius: "6px",
+                        cursor: "pointer",
+                        "&:hover": { bgcolor: "#fafafa" },
+                      }}
+                    >
+                      <Checkbox
+                        size="small"
+                        checked={draftFilters[selectedFilterField].includes(option)}
+                        onChange={() =>
+                          handleDraftFilterToggle(selectedFilterField, option)
+                        }
+                        sx={{
+                          mr: 0.75,
+                          color: "#b8b8b8",
+                          "&.Mui-checked": { color: "#E45F14" },
+                        }}
+                      />
+                      <Typography sx={{ fontSize: "13px", color: "#4f4f4f" }}>
+                        {option}
+                      </Typography>
                     </Box>
-                  )}
-                </Button>
-              );
-            })}
-          </Box>
-
-          <Box sx={{ flex: 1, p: 1.75, overflowY: "auto", maxHeight: 290 }}>
-            {filterOptions[selectedFilterField].length > 0 ? (
-              filterOptions[selectedFilterField].map((option) => (
-                <Box
-                  key={option}
-                  component="label"
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    minHeight: 40,
-                    px: 0.5,
-                    borderRadius: "6px",
-                    cursor: "pointer",
-                    "&:hover": { bgcolor: "#fafafa" },
-                  }}
-                >
-                  <Checkbox
-                    size="small"
-                    checked={draftFilters[selectedFilterField].includes(option)}
-                    onChange={() =>
-                      handleDraftFilterToggle(selectedFilterField, option)
-                    }
-                    sx={{
-                      mr: 0.75,
-                      color: "#b8b8b8",
-                      "&.Mui-checked": { color: "#E45F14" },
-                    }}
-                  />
-                  <Typography sx={{ fontSize: "13px", color: "#4f4f4f" }}>
-                    {option}
+                  ))
+                ) : (
+                  <Typography sx={{ py: 2, textAlign: "center", fontSize: "13px", color: "#777" }}>
+                    No filter values available
                   </Typography>
-                </Box>
-              ))
-            ) : (
-              <Typography sx={{ py: 2, textAlign: "center", fontSize: "13px", color: "#777" }}>
-                No filter values available
+                )}
+              </Box>
+            </DialogContent>
+
+            <DialogActions
+              sx={{
+                justifyContent: "center",
+                gap: 1.5,
+                minHeight: 78,
+                px: 2,
+                py: 1.25,
+                borderTop: "1px solid #e1e4e7",
+              }}
+            >
+              <Button
+                variant="outlined"
+                onClick={handleClearAllFilters}
+                sx={{
+                  minWidth: 160,
+                  height: 42,
+                  borderRadius: "24px",
+                  borderColor: "#bd292f",
+                  color: "#bd292f",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  textTransform: "none",
+                }}
+              >
+                Clear All
+              </Button>
+              <Button
+                variant="contained"
+                onClick={handleApplyFilters}
+                sx={{
+                  minWidth: 160,
+                  height: 42,
+                  borderRadius: "24px",
+                  bgcolor: "#bd292f",
+                  fontSize: "14px",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  boxShadow: "none",
+                  "&:hover": { bgcolor: "#a52227", boxShadow: "none" },
+                }}
+              >
+                Apply
+              </Button>
+            </DialogActions>
+          </Dialog>
+
+          <Dialog
+            open={Boolean(selectedDetail)}
+            onClose={() => setSelectedDetail(null)}
+            fullWidth
+            maxWidth="sm"
+          >
+            <DialogTitle
+              sx={{
+                fontSize: "18px",
+                fontWeight: 600,
+                color: "#0a5285",
+              }}
+            >
+              {selectedDetail?.title}
+            </DialogTitle>
+
+            <DialogContent dividers>
+              <Typography
+                sx={{
+                  fontSize: "14px",
+                  lineHeight: 1.6,
+                  color: "#404040",
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {selectedDetail?.value}
               </Typography>
-            )}
-          </Box>
-        </DialogContent>
+            </DialogContent>
 
-        <DialogActions
-          sx={{
-            justifyContent: "center",
-            gap: 1.5,
-            minHeight: 78,
-            px: 2,
-            py: 1.25,
-            borderTop: "1px solid #e1e4e7",
-          }}
-        >
-          <Button
-            variant="outlined"
-            onClick={handleClearAllFilters}
-            sx={{
-              minWidth: 160,
-              height: 42,
-              borderRadius: "24px",
-              borderColor: "#bd292f",
-              color: "#bd292f",
-              fontSize: "14px",
-              fontWeight: 600,
-              textTransform: "none",
-            }}
-          >
-            Clear All
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleApplyFilters}
-            sx={{
-              minWidth: 160,
-              height: 42,
-              borderRadius: "24px",
-              bgcolor: "#bd292f",
-              fontSize: "14px",
-              fontWeight: 600,
-              textTransform: "none",
-              boxShadow: "none",
-              "&:hover": { bgcolor: "#a52227", boxShadow: "none" },
-            }}
-          >
-            Apply
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      <Dialog
-        open={Boolean(selectedDetail)}
-        onClose={() => setSelectedDetail(null)}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle
-          sx={{
-            fontSize: "18px",
-            fontWeight: 600,
-            color: "#0a5285",
-          }}
-        >
-          {selectedDetail?.title}
-        </DialogTitle>
-
-        <DialogContent dividers>
-          <Typography
-            sx={{
-              fontSize: "14px",
-              lineHeight: 1.6,
-              color: "#404040",
-              overflowWrap: "anywhere",
-            }}
-          >
-            {selectedDetail?.value}
-          </Typography>
-        </DialogContent>
-
-        <DialogActions>
-          <Button
-            onClick={() => setSelectedDetail(null)}
-            sx={{
-              textTransform: "none",
-            }}
-          >
-            Close
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogActions>
+              <Button
+                onClick={() => setSelectedDetail(null)}
+                sx={{
+                  textTransform: "none",
+                }}
+              >
+                Close
+              </Button>
+            </DialogActions>
+          </Dialog>
+        </>
+      )}
     </Box>
   );
 };

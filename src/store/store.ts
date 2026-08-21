@@ -6,6 +6,8 @@ import decisionCodeReducer from "./slices/decisionCodeSlice";
 import breReducer from "./slices/breSlice";
 import masterReducer from "./slices/masterSlice";
 import inboxReducer from "./slices/inboxSlice";
+import searchApplicationReducer from "./slices/searchAppSlice";
+import preloginReducer from "./slices/preloginSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,7 +17,9 @@ export const store = configureStore({
     referralUsers: referralUsersReducer,
     decisionCodes: decisionCodeReducer,
     bre:breReducer,
-    masterData:masterReducer
+    masterData:masterReducer,
+    searchApplication: searchApplicationReducer,
+    prelogin:preloginReducer
   },
 });
 

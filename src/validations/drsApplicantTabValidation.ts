@@ -1,119 +1,168 @@
-import type { ApplicantTab } from "../types/drs.types";
-import { getErrorMessage } from "../config/errorMessages";
-
-export const DRS_REQUIRED_APPLICANT_TABS_KEY = "drsRequiredApplicantTabs";
-export const DRS_VISITED_APPLICANT_TABS_KEY = "drsVisitedApplicantTabs";
-export const DRS_TAB_VISIT_EVENT = "drsApplicantTabsVisitedChanged";
-
-const APPLICANT_TAB_LABELS: Record<ApplicantTab, string> = {
-  proposer: "Proposer",
-  lifeassured: "Life Assured",
-  lifeassured1: "Life Assured 1",
-  lifeassured2: "Life Assured 2",
+type ValidationResult = {
+  isValid: boolean;
+  message?: string;
 };
 
-const toRecord = (value: unknown): Record<string, unknown> =>
-  value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-
-const mapMemberType = (memberTypeValue: unknown, index: number): ApplicantTab => {
-  const normalized = String(memberTypeValue ?? "").trim().toUpperCase();
-
-  if (normalized === "PROPOSER" || normalized.includes("PR")) return "proposer";
-  if (normalized === "LIFEASSURED1" || normalized === "LIFE ASSURED 1") return "lifeassured1";
-  if (normalized === "LIFEASSURED2" || normalized === "LIFE ASSURED 2") return "lifeassured2";
-  if (normalized.includes("LA") || normalized.includes("LIFE")) return index === 1 ? "lifeassured1" : "lifeassured2";
-  if (index === 0) return "proposer";
-  if (index === 1) return "lifeassured1";
-  return "lifeassured2";
+type SummaryMember = {
+  memberType?: string;
 };
 
-export const getRequiredApplicantTabs = (drsData: unknown): ApplicantTab[] => {
-  const root = toRecord(drsData);
-  const summaryRows = Array.isArray(root.summary) ? root.summary : [];
+const STORAGE_KEY_PREFIX = "applicantTabsVisited";
 
-  if (summaryRows.length <= 1) {
-    return [];
+const APPLICANT_TAB_VALIDATION_EXCLUDED_ROLES = new Set([
+  "PIVV_TASK",
+  "CPT_DATA_ENTRY_NMR_TASK",
+  "CPT_DATA_ENTRY_MR_TASK",
+  "RECONSIDERATION_TASK"
+]);
+
+const normalizeMemberType = (value?: string): string =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
+
+const normalizeRoleType = (value?: string): string =>
+  String(value ?? "").trim().toUpperCase();
+
+const getStorageKey = (
+  applicationNumber: string,
+  roleType: string,
+): string =>
+  `${STORAGE_KEY_PREFIX}:${applicationNumber.trim()}:${normalizeRoleType(
+    roleType,
+  )}`;
+
+const readVisitedTabs = (
+  applicationNumber: string,
+  roleType: string,
+): Set<string> => {
+  const normalizedApplicationNumber = applicationNumber.trim();
+  const normalizedRoleType = normalizeRoleType(roleType);
+
+  if (!normalizedApplicationNumber || !normalizedRoleType) {
+    return new Set();
   }
 
-  return Array.from(
-    new Set(
-      summaryRows.map((row, index) => mapMemberType(toRecord(row).memberType, index)),
-    ),
+  try {
+    const value = sessionStorage.getItem(
+      getStorageKey(normalizedApplicationNumber, normalizedRoleType),
+    );
+    const parsed: unknown = value ? JSON.parse(value) : [];
+
+    return new Set(
+      Array.isArray(parsed)
+        ? parsed
+            .map((item) => normalizeMemberType(String(item)))
+            .filter(Boolean)
+        : [],
+    );
+  } catch {
+    return new Set();
+  }
+};
+
+export const markApplicantTabVisited = (
+  applicationNumber: string,
+  roleType: string,
+  memberType: string,
+): void => {
+  const normalizedApplicationNumber = applicationNumber.trim();
+  const normalizedRoleType = normalizeRoleType(roleType);
+  const normalizedMemberType = normalizeMemberType(memberType);
+
+  if (
+    !normalizedApplicationNumber ||
+    !normalizedRoleType ||
+    !normalizedMemberType
+  ) {
+    return;
+  }
+
+  if (
+    APPLICANT_TAB_VALIDATION_EXCLUDED_ROLES.has(normalizedRoleType)
+  ) {
+    return;
+  }
+
+  const visitedTabs = readVisitedTabs(
+    normalizedApplicationNumber,
+    normalizedRoleType,
+  );
+
+  visitedTabs.add(normalizedMemberType);
+
+  sessionStorage.setItem(
+    getStorageKey(normalizedApplicationNumber, normalizedRoleType),
+    JSON.stringify([...visitedTabs]),
   );
 };
 
-export const getStoredApplicantTabs = (key: string): ApplicantTab[] => {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return [];
+export const validateApplicantTabsVisited = (
+  drsData: unknown,
+  applicationNumber = "",
+  roleType = "",
+): ValidationResult => {
+  const root =
+    drsData && typeof drsData === "object"
+      ? (drsData as Record<string, unknown>)
+      : {};
 
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed)
-      ? parsed.filter((value): value is ApplicantTab =>
-          value === "proposer" || value === "lifeassured1" || value === "lifeassured2",
-        )
-      : [];
-  } catch {
-    return [];
-  }
-};
+  const resolvedRoleType = normalizeRoleType(
+    roleType || String(root.roleType ?? ""),
+  );
 
-export const formatApplicantTabLabels = (tabs: ApplicantTab[]): string => {
-  const labels = tabs.map((tab) => APPLICANT_TAB_LABELS[tab] ?? tab);
-
-  if (labels.length <= 1) return labels[0] ?? "applicant section";
-  if (labels.length === 2) return `${labels[0]} and ${labels[1]}`;
-
-  return `${labels.slice(0, -1).join(", ")}, and ${labels[labels.length - 1]}`;
-};
-
-export const syncRequiredApplicantTabs = (drsData: unknown): ApplicantTab[] => {
-  const requiredTabs = getRequiredApplicantTabs(drsData);
-  localStorage.setItem(DRS_REQUIRED_APPLICANT_TABS_KEY, JSON.stringify(requiredTabs));
-
-  const requiredSet = new Set(requiredTabs);
-  const visitedTabs = getStoredApplicantTabs(DRS_VISITED_APPLICANT_TABS_KEY)
-    .filter((tab) => requiredSet.has(tab));
-  localStorage.setItem(DRS_VISITED_APPLICANT_TABS_KEY, JSON.stringify(visitedTabs));
-
-  window.dispatchEvent(new Event(DRS_TAB_VISIT_EVENT));
-  return requiredTabs;
-};
-
-export const markApplicantTabVisited = (tab: ApplicantTab): void => {
-  const requiredTabs = getStoredApplicantTabs(DRS_REQUIRED_APPLICANT_TABS_KEY);
-  if (!requiredTabs.includes(tab)) {
-    return;
+  // These pools do not display Applicant Profile.
+  if (
+    APPLICANT_TAB_VALIDATION_EXCLUDED_ROLES.has(resolvedRoleType)
+  ) {
+    return { isValid: true };
   }
 
-  const visitedTabs = getStoredApplicantTabs(DRS_VISITED_APPLICANT_TABS_KEY);
-  if (visitedTabs.includes(tab)) {
-    return;
+  const summary = Array.isArray(root.summary)
+    ? (root.summary as SummaryMember[])
+    : [];
+
+  const requiredTabs = new Set(
+    summary
+      .map((member) => normalizeMemberType(member.memberType))
+      .filter(Boolean),
+  );
+
+  // Cross-tab validation is unnecessary with zero or one applicant tab.
+  if (requiredTabs.size <= 1) {
+    return { isValid: true };
   }
 
-  localStorage.setItem(DRS_VISITED_APPLICANT_TABS_KEY, JSON.stringify([...visitedTabs, tab]));
-  window.dispatchEvent(new Event(DRS_TAB_VISIT_EVENT));
-};
+  const resolvedApplicationNumber = String(
+    applicationNumber ||
+      root.applicationNumber ||
+      root.applicationNo ||
+      "",
+  ).trim();
 
-export const validateApplicantTabsVisited = (drsData: unknown): { isValid: boolean; message: string } => {
-  const requiredTabs = getRequiredApplicantTabs(drsData);
-  if (requiredTabs.length <= 1) {
-    return { isValid: true, message: "" };
+  if (!resolvedApplicationNumber || !resolvedRoleType) {
+    return {
+      isValid: false,
+      message:
+        "Application or task information is missing. Please reopen the case from Inbox.",
+    };
   }
 
-  const visitedTabs = getStoredApplicantTabs(DRS_VISITED_APPLICANT_TABS_KEY);
-  const pendingTabs = requiredTabs.filter((tab) => !visitedTabs.includes(tab));
+  const visitedTabs = readVisitedTabs(
+    resolvedApplicationNumber,
+    resolvedRoleType,
+  );
 
-  if (pendingTabs.length === 0) {
-    return { isValid: true, message: "" };
-  }
+  const allTabsVisited = [...requiredTabs].every((tab) =>
+    visitedTabs.has(tab),
+  );
 
-  return {
-    isValid: false,
-    message: getErrorMessage("drsApplicantTabsPending", {
-      tabs: formatApplicantTabLabels(pendingTabs),
-    }),
-  };
+  return allTabsVisited
+    ? { isValid: true }
+    : {
+        isValid: false,
+        message:
+          "Please visit both Proposer and Life Assured tabs in Applicant Profile before submitting the decision.",
+      };
 };

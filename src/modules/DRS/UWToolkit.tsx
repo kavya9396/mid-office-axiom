@@ -15,19 +15,19 @@ const uwToolkitLinks = [
   {
     label: "UW ChatBot",
     path: "/chatbot",
-    roles: ["CUW Pool", "GUW Pool"],
+    roles: ["CUW_TAK", "HOD_TASK","SR_UW_TASK","CMO_TASK","GUW_TASK"],
   },
   {
     label: "Calculator",
     path: "/calculator",
-    roles: ["CUW Pool", "GUW Pool"],
+    roles:["CUW_TAK", "HOD_TASK","SR_UW_TASK","CMO_TASK","GUW_TASK"],
   },
   {
     label: "Raise a Grievance",
     path: safeApplicationNumber
       ? getGrievanceRaisePath(safeBusinessType, safeApplicationNumber)
       : "",
-    roles: ["CPT_TASK"],
+    roles: ["CPT_DATA_ENTRY_NMR_TASK","CPT_DATA_ENTRY_MR_TASK"],
   },
 ].filter((link) => link.roles.includes(roleType));
   

@@ -1,6 +1,6 @@
 //import BreDecision from "./DRS_Accordions/BreDecision_";
-import CVTDecision from "./DRS_Accordions/CVTDecision";
-import DVTDecision from "./DRS_Accordions/DVTDecision";
+//import CVTDecision from "./DRS_Accordions/CVTDecision";
+//import DVTDecision from "./DRS_Accordions/DVTDecision";
 import ExceptionDecision from "./DRS_Accordions/ExceptionDecision";
 import OpenOtherTasksAccordion from "./DRS_Accordions/OpenOtherTasks";
 import PIVVSection from "./DRS_Accordions/PIVVSection";
@@ -44,14 +44,14 @@ export const accordionRegistry = {
   uwDecision: UWDecision,
   pivvSection: PIVVSection,
   pivvDecision: PIVVDecision,
-  cvtDecision: CVTDecision,
+  //cvtDecision: CVTDecision,
   exceptionDecision: ExceptionDecision,
   openOtherTasks: OpenOtherTasksAccordion,
   preIssuanceRequestChange: PreIssuanceRequestChange,
   summary: ApplicantProfile,
   quickLinks: QuickLinks,
   uwToolkit: UWToolkit,
-  dvtDecision: DVTDecision,
+  //dvtDecision: DVTDecision,
   uacChecklist: UACChecklist,
   uwChecklist: UWChecklist,
   hodDecision: HoDDecision,
@@ -224,8 +224,8 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "suwDecision",
     "quickLinks",
   ],
-  RETAIL_ACCUITY_USER:["applicationOverview","summary","accuityDecision"],
-  ACUITY_TASK:["applicationOverview","summary","accuityDecision"],
+  RETAIL_ACCUITY_USER:["applicationOverview","summary","requirementManagement","accuityDecision"],
+  ACUITY_TASK:["applicationOverview","summary","requirementManagement","accuityDecision"],
   RETAIL_REQUIREMENT_REVIEW_POOL: ["applicationOverview","requirementManagement","quickLinks"],
   RETAIL_TELE_VIDEO_POOL: ["applicationOverview","requirementManagement","quickLinks"],
   ISSUANCE_TASK: ["breDecision","applicationOverview","requirementManagement","quickLinks"],
@@ -237,14 +237,14 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   // RETAIL_MUNICH_RE_POOL: ["quickLinks"],
   // RETAIL_SCORE_RE_POOL: ["quickLinks"],
   // RETAIL_HANNOVER_RE_POOL: ["quickLinks"],
-  RETAIL_HOD_POOL: ["breDecision","applicationOverview","summary","requirementManagement","hodDecision","decisionHistory","uwToolkit","quickLinks"],
-  RETAIL_SR_UW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","sruwDecision","uwToolkit","quickLinks"],
+  RETAIL_HOD_POOL: ["breDecision","applicationOverview","summary","requirementManagement","decision","decisionHistory","uwToolkit","quickLinks"],
+  RETAIL_SR_UW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","decision","uwToolkit","quickLinks"],
   RETAIL_RISK_POOL: ["quickLinks"],
-  RETAIL_CMO_POOL: ["breDecision","applicationOverview","summary","requirementManagement","hoCMODecision","decisionHistory","uwToolkit","quickLinks"],
+  RETAIL_CMO_POOL: ["breDecision","applicationOverview","summary","requirementManagement","decision","decisionHistory","uwToolkit","quickLinks"],
   RETAIL_ACCUITY_POOL: ["quickLinks"],
   RETAIL_REINSURER_POOL: ["breDecision","applicationOverview","summary","requirementManagement","reinsurerDecision","decisionHistory","quickLinks"],
   RETAIL_IT_POOL:["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
-  RETAIL_VENDOR_CMO_POOL:["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
+  RETAIL_VENDOR_CMO_POOL:["breDecision","applicationOverview","summary","requirementManagement","decision","uwToolkit","quickLinks"],
  
   RETAIL_ECG_POOL: ["quickLinks"],
   RETAIL_TMT_POOL: ["quickLinks"],

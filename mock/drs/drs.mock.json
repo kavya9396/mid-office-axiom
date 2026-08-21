@@ -36,7 +36,7 @@
               "breTeleVideoMerRemark": "",
               "munichReMedicalDecision": "",
               "munichReRating": "",
-              "biuMedicalStatus": "N"
+              "biuMedicalStatus": ""
             },
             "financialRisk": {
               "isFinancial": true,
@@ -46,7 +46,364 @@
               "derivedIncome": "1600000.0",
               "counterOfferValue": "5000000.0",
               "additionalSA": "0.0",
-              "biuFinancialStatus": "false"
+              "biuFinancialStatus": ""
+            },
+            "otherRisk": {
+              "isOthers": true,
+              "ptlrResponse": "",
+              "drcResponse": "N",
+              "adverseIIB": "",
+              "criminalQuestionResponseLA": "No",
+              "pepQuestionResponseLA": "No",
+              "criminalQuestionResponsePR": "No",
+              "pepQuestionResponsePR": "No",
+              "previousPolicySubstandard": "No",
+              "avocationRelatedDisclosure": "",
+              "healthQuestionPositive": "Yes",
+              "employmentInRiskyIndustry": "LowRiskPremium",
+              "fatfOfacCountryLogin": "No",
+              "hazardousOccupation": "",
+              "eddFlag": "Yes",
+              "claimRiskIndicator": "",
+              "faceMatchScore": "",
+              "tobacco": "",
+              "narcotics": ""
+            }
+          }
+        ],
+        "faceMatchDetails": {
+          "document": "",
+          "faceMatchScore": null,
+          "imageQuality": null,
+          "remarks": ""
+        },
+        "proposerSummary": {
+          "title": "",
+          "firstName": "SOHEL",
+          "middleName": "",
+          "lastName": "FDSDFS",
+          "gender": "Male",
+          "maritalStatus": "",
+          "dob": "1988-08-09T00:00",
+          "age": {
+            "years": 38,
+            "days": 8
+          },
+          "profileImage": "",
+          "caseStatus": "DRAFT",
+          "nationality": "India",
+          "countryOfResidence": "India",
+          "residentStatus": "IND",
+          "education": "Graduate",
+          "pioStatus": "0",
+          "highestQualification": "Graduate",
+          "graduationFlag": "",
+          "orgName": "3I INFOTECH",
+          "yearsInServiceOrBusiness": null,
+          "industryType": "",
+          "birthCountry": "",
+          "occupationType": "SPVT",
+          "netIncomeAmt": null,
+          "immigrationStatus": "Indian Resident",
+          "orgType": "PVT",
+          "latestIncYear": 2026,
+          "isPEP": false,
+          "panNo": "",
+          "remarks": "",
+          "ckycNumber": "",
+          "criminalProceeding": "No",
+          "incomeProof": "Aadhaar",
+          "designation": "Manager",
+          "disabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": "",
+          "udidNumber": "UDID-98765"
+        },
+        "applicantDetails": {
+          "dateOfBirth": "1988-08-09",
+          "gender": "Male",
+          "maritalStatus": "",
+          "nationality": "India",
+          "countryOfResidence": "India",
+          "education": "Graduate",
+          "designation": "Manager",
+          "disabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": ""
+        },
+        "financialDetails": {
+          "annualIncome": 5000000,
+          "appliedSumAssured": 1068000,
+          "trsa": 0.0,
+          "tfsa": "Infinity"
+        },
+        "policyDetails": {
+          "proposerName": "",
+          "lifeAssuredName": "SOHEL FDSDFS",
+          "productName": "ICICI Pru GIFT Pro",
+          "modalPremium": 0,
+          "paymentMode": "",
+          "channel": "Agency"
+        },
+        "underwriting": {
+          "remarks": "Product Non Eligible",
+          "breDecision": {
+            "status": "DC",
+            "category": "Decline",
+            "coverage": "Product Non Eligible"
+          }
+        },
+        "kycDetails": {
+          "panNumber": "",
+          "identityProofType": "Aadhaar",
+          "identityProofNumber": "AAAAA1111A",
+          "addressProof": "Aadhaar",
+          "incomeProof": "Aadhaar",
+          "ageProof": "Aadhaar",
+          "existingCkycNumber": "NA",
+          "pep": "No",
+          "criminalProceedings": "No",
+          "panFlag": "Verified",
+          "panAadharSeedingStatus": "Y",
+          "identityProofExpiryDate": "2099-12-31T00:00",
+          "pranNo": "123456789012",
+          "pranNoVerification": "Verified",
+          "udsLink": ""
+        },
+        "address": [
+          {
+            "type": "communication",
+            "addressLine1": "",
+            "addressLine2": "",
+            "addressLine3": "",
+            "landmark": "",
+            "city": "",
+            "state": "",
+            "pinCode": "",
+            "residingCountry": "",
+            "topCity": "",
+            "negativePinCode": ""
+          },
+          {
+            "type": "permanent",
+            "addressLine1": "RFRF",
+            "addressLine2": "FGHJK",
+            "addressLine3": "FGHJKL",
+            "landmark": "",
+            "city": "THANE",
+            "state": "Maharashtra",
+            "pinCode": "400709",
+            "residingCountry": "India",
+            "topCity": "N",
+            "negativePinCode": "N"
+          }
+        ],
+        "communicationAddressDetails": {
+          "addressLine1": "",
+          "addressLine2": "",
+          "addressLine3": "",
+          "landmark": "",
+          "city": "",
+          "state": "",
+          "country": "",
+          "pincode": "",
+          "topCity": "",
+          "negativePinCode": ""
+        },
+        "permanentAddressDetails": {
+          "addressLine1": "RFRF",
+          "addressLine2": "FGHJK",
+          "addressLine3": "FGHJKL",
+          "landmark": "",
+          "city": "THANE",
+          "state": "Maharashtra",
+          "country": "India",
+          "pincode": "400709",
+          "topCity": "N",
+          "negativePinCode": "N"
+        },
+        "contactDetails": {
+          "mobileNo": "9878716726",
+          "alternateMobileNo": "",
+          "alternateMobile": "",
+          "std": "",
+          "landlineNo": "",
+          "landlineNumber": "",
+          "emailId": "TRSTR@GMAIL.COM",
+          "emailPref": "Y",
+          "smsPref": "Y"
+        },
+        "applicantFinancialDetails": {
+          "occupation": "SPVT",
+          "annualIncome": 5000000,
+          "gstin": "",
+          "lastIncomeYear": 2026,
+          "organisationType": "PVT",
+          "organisationName": "3I INFOTECH"
+        },
+        "healthDetail": {
+          "height": "165.1",
+          "weight": "67",
+          "bmi": "25.0",
+          "avgSystolic": "",
+          "avgDiastolic": "",
+          "heightFeet": "",
+          "heightInches": "0",
+          "hazardousOccupation": "",
+          "isDisabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": "",
+          "illnessOrImpairment": [],
+          "substanceConsumption": [
+            {
+              "substance": "",
+              "consumedAs": "",
+              "quantity": {
+                "amount": "",
+                "unit": "day/week"
+              },
+              "noOfYears": null,
+              "advisedByDoctorForAbstinence": ""
+            }
+          ],
+          "medicalQuestionnaire": [
+            {
+              "qtid": "ILLIMPAIRMENT",
+              "value": "no",
+              "remar": "",
+              "subQts": []
+            }
+          ]
+        },
+        "nominee": [
+          {
+            "relationWithLA": "",
+            "relationship": "",
+            "firstName": "TRSTR",
+            "lastName": "FDSDFS",
+            "dob": "1991-03-12T00:00",
+            "gender": "Female",
+            "percentage": 0,
+            "proposerNomineeRelation": "",
+            "accountNumber": "",
+            "ifsc": ""
+          }
+        ],
+        "appointee": [],
+        "genericDetails": {
+          "existingPolicyNumber": "NA",
+          "clientId": "NA",
+          "selfProposed": "Yes",
+          "typeOfProposer": "Individual",
+          "relationshipWithLifeAssured": "Self",
+          "typeOfProposal": "Retail New Business"
+        },
+        "eiaDetails": {
+          "openEIA": "No",
+          "existingEIANumber": "NA",
+          "preferredRepository": "",
+          "convertPolicies": "No"
+        },
+        "fundDetails": {
+          "allocationStrategy": "",
+          "totalAllocation": "",
+          "atpOpted": "",
+          "fundDetail": []
+        },
+        "paymentDetails": {},
+        "payoutDetails": {},
+        "advisorDetails": {
+          "relationWithAdvisor": "others",
+          "acquaintanceDuration": 0,
+          "fileSentToCopsDate": "",
+          "branchUWDate": "",
+          "decalarationDate": "",
+          "declarationPlace": ""
+        },
+        "questions": [
+          {
+            "quesCode": "ILLIMPAIRMENT",
+            "quesFor": "LA",
+            "quesType": "HEALTH",
+            "quesAns": "no"
+          }
+        ],
+        "producerDetails": {
+          "perfiosBank": "No",
+          "premiumPaymentOption": "",
+          "isecExperianCategory": "",
+          "gstInNumber": "",
+          "pasaSegmentCitiesFlag": "",
+          "productSource": "standalone",
+          "imputedMarker": "",
+          "imputedIncome": "0",
+          "prePopulatedValueEdited": "NA",
+          "fnaSumAssured": "0",
+          "componentCode": "",
+          "cdfWaiverFlag": "No",
+          "youthExpressFlag": "N",
+          "atsSource": "",
+          "ipsDiscountFlag": "FALSE",
+          "lumpSumPercentage": "0",
+          "accuityRiskIndicator": "",
+          "primaryLASumAssured": ""
+        },
+        "documentDetails": [
+          {
+            "documentType": "AGE_PROOF",
+            "documentName": "Aadhaar",
+            "documentId": "AAAAA1111A",
+            "validityDate": "2099-12-31T00:00"
+          }
+        ],
+        "bureauDetails": {
+          "cibilScore": "",
+          "cibilIncomeSegment": "",
+          "cibilEligibilityStatus": "N",
+          "cibilServiceStatus": "N",
+          "experianScore": "",
+          "experianIncomeSegment": "",
+          "experianEligibilityStatus": "N",
+          "experianServiceStatus": "N",
+          "payuScore": "",
+          "payuIncomeSegment": "",
+          "payuEligibilityStatus": "N",
+          "payuServiceStatus": "N"
+        }
+      },{
+        "memberType": "proposer",
+        "lifeType": "LA",
+        "customerType": "SHNI",
+        "partyId": "502a6119-6d1b-455a-9e59-7100f4c92967",
+        "jontFlag": false,
+        "lifeNumber": "",
+        "clientId": "NA",
+        "proposerLaRelation": "Self",
+        "jointLARelation": "",
+        "jointPRRelation": "",
+        "nriFlag": false,
+        "fatfFlag": false,
+        "riskAnalytics": [
+          {
+            "medicalRisk": {
+              "isMedical": true,
+              "brePhysicalMedicalDecision": "STP",
+              "brePhysicalMedicalRemark": "",
+              "breTeleVideoMerDecision": "",
+              "breTeleVideoMerRemark": "",
+              "munichReMedicalDecision": "",
+              "munichReRating": "",
+              "biuMedicalStatus": ""
+            },
+            "financialRisk": {
+              "isFinancial": true,
+              "breFinancialDecision": "NON-FSTP",
+              "breRemark": "",
+              "financialEligibility": "4.8E7",
+              "derivedIncome": "1600000.0",
+              "counterOfferValue": "5000000.0",
+              "additionalSA": "0.0",
+              "biuFinancialStatus": ""
             },
             "otherRisk": {
               "isOthers": true,
@@ -480,7 +837,122 @@
       {
         "team": "UW",
         "profile": "",
-        "category": "Internal",
+        "category": "Financial",
+        "subCategory": "Report",
+        "document": "Agent report",
+        "specialTest": "N",
+        "reason": "Document not uploaded",
+        "fupCode": "PIV",
+        "requirementId": 11234,
+        "description": "ACR -Agent confidential report not uploaded",
+        "status": "Accept",
+        "isActive": "Y",
+        "raisedDate": "2026-08-14",
+        "raisedBy": "BRE_URMS",
+        "receivedDate": "2026-08-14",
+        "receivedBy": "icic-bre-urms-service",
+        "validity": "",
+        "userId": "",
+        "remarks": "",
+        "udsLink": "",
+        "ocrStatus": "",
+        "ocrDoc": ""
+      },{
+        "team": "UW",
+        "profile": "",
+        "category": "Financial",
+        "subCategory": "Report",
+        "document": "Agent report",
+        "specialTest": "N",
+        "reason": "Document not uploaded",
+        "fupCode": "PIV",
+        "requirementId": 11234,
+        "description": "ACR -Agent confidential report not uploaded",
+        "status": "Pending",
+        "isActive": "Y",
+        "raisedDate": "2026-08-14",
+        "raisedBy": "BRE_URMS",
+        "receivedDate": "2026-08-14",
+        "receivedBy": "icic-bre-urms-service",
+        "validity": "",
+        "userId": "",
+        "remarks": "",
+        "udsLink": "",
+        "ocrStatus": "",
+        "ocrDoc": ""
+      },{
+        "team": "UW",
+        "profile": "",
+        "category": "Financial",
+        "subCategory": "Report",
+        "document": "Agent report",
+        "specialTest": "N",
+        "reason": "Document not uploaded",
+        "fupCode": "PIV",
+        "requirementId": 11234,
+        "description": "ACR -Agent confidential report not uploaded",
+        "status": "Accept",
+        "isActive": "Y",
+        "raisedDate": "2026-08-14",
+        "raisedBy": "BRE_URMS",
+        "receivedDate": "2026-08-14",
+        "receivedBy": "icic-bre-urms-service",
+        "validity": "",
+        "userId": "",
+        "remarks": "",
+        "udsLink": "",
+        "ocrStatus": "",
+        "ocrDoc": ""
+      },{
+        "team": "UW",
+        "profile": "",
+        "category": "Financial",
+        "subCategory": "Report",
+        "document": "Agent report",
+        "specialTest": "N",
+        "reason": "Document not uploaded",
+        "fupCode": "PIV",
+        "requirementId": 11234,
+        "description": "ACR -Agent confidential report not uploaded",
+        "status": "Accept",
+        "isActive": "Y",
+        "raisedDate": "2026-08-14",
+        "raisedBy": "BRE_URMS",
+        "receivedDate": "2026-08-14",
+        "receivedBy": "icic-bre-urms-service",
+        "validity": "",
+        "userId": "",
+        "remarks": "",
+        "udsLink": "",
+        "ocrStatus": "",
+        "ocrDoc": ""
+      },{
+        "team": "UW",
+        "profile": "",
+        "category": "Financial",
+        "subCategory": "Report",
+        "document": "Agent report",
+        "specialTest": "N",
+        "reason": "Document not uploaded",
+        "fupCode": "PIV",
+        "requirementId": 11234,
+        "description": "ACR -Agent confidential report not uploaded",
+        "status": "Accept",
+        "isActive": "Y",
+        "raisedDate": "2026-08-14",
+        "raisedBy": "BRE_URMS",
+        "receivedDate": "2026-08-14",
+        "receivedBy": "icic-bre-urms-service",
+        "validity": "",
+        "userId": "",
+        "remarks": "",
+        "udsLink": "",
+        "ocrStatus": "",
+        "ocrDoc": ""
+      },{
+        "team": "UW",
+        "profile": "",
+        "category": "Financial",
         "subCategory": "Report",
         "document": "Agent report",
         "specialTest": "N",
@@ -512,7 +984,7 @@
         "fupCode": "OCD",
         "requirementId": 11235,
         "description": "OCD-Submit digital confirmation via Consent Code",
-        "status": "Pending",
+        "status": "Accept",
         "isActive": "Y",
         "raisedDate": "2026-08-14",
         "raisedBy": "BRE_URMS",
@@ -551,7 +1023,7 @@
       }
     ],
     "quickLinks": {
-      "proposerForm": "",
+      "proposerForm": "test",
       "previousPolicies": [
         {
           "policyNumber": "OS94545382",

@@ -1,0 +1,22 @@
+{
+  "poolKey": "CVT_TASK",
+  "availableFields": [
+    "id",
+    "applicationNo",
+    "channel",
+    "sumAssured",
+    "product",
+    "premium",
+    "clientType",
+    "caseType",
+    "dateAndTimeStamp",
+    "taskId",
+    "instanceId",
+    "dueDate",
+    "startTime",
+    "atRiskTime",
+    "businessType",
+    "role",
+    "roleType"
+  ]
+}

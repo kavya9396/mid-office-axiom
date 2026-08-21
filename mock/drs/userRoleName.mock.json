@@ -1,0 +1,49 @@
+{
+
+  "response_code": 200,
+
+  "error": false,
+
+  "message": "OK",
+
+  "data": {
+
+    "roleId": "R04",
+
+    "roleName": "HOD",
+
+    "isActive": true,
+
+
+    "users": [
+
+      {
+
+        "ntid": "ipru74470",
+
+        "fullName": "test user",
+
+        "email": null,
+
+        "status": "ACTIVE",
+        "threshold":true
+
+      },
+
+      {
+
+        "ntid": "IPRU76676",
+
+        "fullName": "Shriram Ghotekar",
+
+        "email": "ram@123.com",
+
+        "status": "ACTIVE",
+        "threshold":false
+
+      }
+
+    ]
+
+  }
+}

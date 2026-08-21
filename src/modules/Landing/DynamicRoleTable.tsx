@@ -18,13 +18,15 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import {
   DangerIcon,
   FilterIcon,
+  KeyDownArrowIcon,
   KeyLeftArrowIcon,
   KeyRightArrowIcon,
+  KeyUpArrowIcon,
   SearchIcon,
   SettingsIcon,
   
@@ -35,6 +37,7 @@ import CustomDialog from "../../components/ui/Dialog/Dialog";
 import { centerFlex, columnFlex } from "../../utils/styles";
 import { useAppDispatch } from "../../store/hooks";
 import { columnConfigSaveThunk } from "../../store/thunks/columnConfigSaveThunk";
+import { columnConfigFetchThunk } from "../../store/thunks/columnConfigFetchThunk";
 
 interface DynamicRoleTableProps {
   title: string;
@@ -53,6 +56,8 @@ interface DynamicRoleTableProps {
 type SortDirection = "asc" | "desc";
 
 const MAX_VISIBLE_COLUMNS = 9;
+const SELECTED_TASK_POOL_KEY = "selectedTaskPoolKey";
+const ALL_CASES_POOL_KEY = "ALL_CASES";
 const EXCLUDED_COLUMNS = [
   "id",
   "taskId",
@@ -63,7 +68,10 @@ const EXCLUDED_COLUMNS = [
   "role",
   "businessType",
   "startTime",
-  "atRiskTime"
+  "atRiskTime",
+  "poolName",
+  "pool_name",
+  "poolKey",
 ];
 
 /* ============================================================
@@ -384,12 +392,17 @@ const getRowTimingStatus = (
 const DynamicRoleTable = ({
   title,
   data,
-  poolKey = "",
+  poolKey,
   onApplicationClick,
   storageKey,
   showAddButton = false,
 }: DynamicRoleTableProps) => {
   const dispatch = useAppDispatch();
+
+  const resolvedPoolKey =
+    poolKey ?? localStorage.getItem(SELECTED_TASK_POOL_KEY) ?? "";
+  const canConfigureColumns =
+    Boolean(resolvedPoolKey) && resolvedPoolKey !== ALL_CASES_POOL_KEY;
 
   const [isSavingColumns, setIsSavingColumns] =
     useState(false);
@@ -450,13 +463,75 @@ const DynamicRoleTable = ({
   /* ============================================================
    * COLUMN CONFIGURATION
    *
-   * No useEffect is required here.
-   * This avoids React cascading-render warnings.
+   * The server configuration is refreshed whenever the selected
+   * task/pool changes.
    * ============================================================
    */
 
   const [columnConfig, setColumnConfig] =
     useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    if (!canConfigureColumns || columns.length === 0) {
+      return;
+    }
+
+    const username = localStorage.getItem("username") ?? "";
+    if (!username) {
+      return;
+    }
+
+    let isCurrentRequest = true;
+
+    void dispatch(
+      columnConfigFetchThunk({
+        username,
+        poolKey: resolvedPoolKey,
+      }),
+    )
+      .unwrap()
+      .then((response) => {
+        if (!isCurrentRequest) return;
+
+        const result = response as {
+          availableFields?: string[];
+          selectedFields?: string[];
+        };
+        const fetchedFields =
+          result.selectedFields ?? result.availableFields ?? [];
+        const fetchedColumns = fetchedFields
+          .filter(
+            (column) =>
+              columns.includes(column) &&
+              !EXCLUDED_COLUMNS.includes(column),
+          )
+          .slice(0, MAX_VISIBLE_COLUMNS);
+
+        if (fetchedColumns.length === 0) return;
+
+        setColumnConfig((previous) => ({
+          ...previous,
+          [finalStorageKey]: fetchedColumns,
+        }));
+        localStorage.setItem(
+          finalStorageKey,
+          JSON.stringify(fetchedColumns),
+        );
+      })
+      .catch((error) => {
+        console.error("Unable to fetch column configuration:", error);
+      });
+
+    return () => {
+      isCurrentRequest = false;
+    };
+  }, [
+    canConfigureColumns,
+    columns,
+    dispatch,
+    finalStorageKey,
+    resolvedPoolKey,
+  ]);
 
   /**
  * Columns currently checked in the Available Columns list.
@@ -1008,35 +1083,63 @@ const DynamicRoleTable = ({
         MAX_VISIBLE_COLUMNS,
       );
 
-    const username =
-      localStorage.getItem("username") ?? "";
-console.log('poolkey',poolKey)
-    if (!username || !poolKey) {
+    const username = localStorage.getItem("username") ?? "";
+
+    if (!username || !resolvedPoolKey) {
       console.error(
         "Username or poolKey is unavailable.",
       );
       return;
     }
 
+    const payload = {
+      username,
+      poolKey: resolvedPoolKey,
+      selectedFields: updatedColumns,
+    };
+console.log('payload',payload)
     try {
       setIsSavingColumns(true);
 
       await dispatch(
-        columnConfigSaveThunk({
+        columnConfigSaveThunk(payload),
+      ).unwrap();
+
+      const fetchedConfig = await dispatch(
+        columnConfigFetchThunk({
           username,
-          poolKey,
-          selectedFields: updatedColumns,
+          poolKey: resolvedPoolKey,
         }),
       ).unwrap();
 
+      const fetchedFields = (
+        fetchedConfig as {
+          availableFields?: string[];
+          selectedFields?: string[];
+        }
+      ).availableFields ?? [];
+
+      const fetchedColumns = fetchedFields
+        .filter(
+          (column) =>
+            columns.includes(column) &&
+            !EXCLUDED_COLUMNS.includes(column),
+        )
+        .slice(0, MAX_VISIBLE_COLUMNS);
+
+      const refreshedColumns =
+        fetchedColumns.length > 0
+          ? fetchedColumns
+          : updatedColumns;
+
       setColumnConfig((previous) => ({
         ...previous,
-        [finalStorageKey]: updatedColumns,
+        [finalStorageKey]: refreshedColumns,
       }));
 
       localStorage.setItem(
         finalStorageKey,
-        JSON.stringify(updatedColumns),
+        JSON.stringify(refreshedColumns),
       );
 
       setSettingsOpen(false);
@@ -1280,9 +1383,11 @@ console.log('poolkey',poolKey)
               <FilterIcon width={32} />
             </Box>
 
-            <Box sx={{ cursor: "pointer", mt: 0.5 }} onClick={handleOpenSettings}>
-              <SettingsIcon width={32} />
-            </Box>
+            {canConfigureColumns && (
+              <Box sx={{ cursor: "pointer", mt: 0.5 }} onClick={handleOpenSettings}>
+                <SettingsIcon width={32} />
+              </Box>
+            )}
 
             {/* <IconButton
               size="small"
@@ -1381,7 +1486,13 @@ console.log('poolkey',poolKey)
                       onClick={() => handleSort(column)}
                       sx={{
                         height: "30px",
-                        padding: "0 10px",
+                        // Application-number rows reserve 14px for the
+                        // warning icon plus a 4px gap. Offset this header by
+                        // the same 18px so it starts above the number text,
+                        // not above the icon slot.
+                        padding: isApplicationNumberColumn(column)
+                          ? "0 10px 0 28px"
+                          : "0 10px",
                         backgroundColor: "#eef1f4",
                         color: "#20252a",
                         fontSize: "11px",
@@ -1751,7 +1862,7 @@ console.log('poolkey',poolKey)
           COLUMN SETTINGS DIALOG
           ========================================================
       */}
-      <CustomDialog
+      {canConfigureColumns && <CustomDialog
         open={settingsOpen}
         onClose={handleCloseSettings}
         maxWidth="md"
@@ -2188,7 +2299,7 @@ console.log('poolkey',poolKey)
                               "13px",
                           }}
                         >
-                          â†‘
+                          <KeyUpArrowIcon/>
                         </Button>
 
                         <Button
@@ -2223,7 +2334,7 @@ console.log('poolkey',poolKey)
                               "13px",
                           }}
                         >
-                          â†“
+                          <KeyDownArrowIcon/>
                         </Button>
                       </Box>
                     </ListItemButton>
@@ -2284,11 +2395,11 @@ console.log('poolkey',poolKey)
             The Selected Columns
             order determines the
             table column order. Use
-            â†‘ and â†“ to rearrange
+            Ã¢â€ â€˜ and Ã¢â€ â€œ to rearrange
             columns.
           </Typography>
         </Box> */}
-      </CustomDialog>
+      </CustomDialog>}
     </>
   );
 };

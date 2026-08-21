@@ -16,7 +16,7 @@ import AuditTrailPage from "../modules/QuickLinks/AuditTrailPage";
 import RiskDetailsPage from "../modules/QuickLinks/RiskDetailsPage";
 import OpenTasksPage from "../modules/QuickLinks/OpenTasksPage";
 import UserManagement from "../modules/DRS/UserManagement";
-// import SearchApplication from "../modules/Landing/SearchApplication";
+import SearchApplication from "../modules/SearchApp/SearchApplication";
 import Inbox from "../modules/Landing/Inbox";
 import MasterDataRoute from "./MasterDataRoute";
 
@@ -54,12 +54,12 @@ export default function AppRoutes() {
             <Route index element={<UserManagement />} />
           </Route>
 
-          {/* <Route
+          <Route
             path={PATHS.SEARCH_APPLICATION}
             element={<RootLayout />}
           >
             <Route index element={<SearchApplication />} />
-          </Route> */}
+          </Route>
 
           <Route element={<BusinessTypeRoute />}>
             {/* Redirect Base Business Type */}
