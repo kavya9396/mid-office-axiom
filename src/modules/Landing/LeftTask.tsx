@@ -5,10 +5,12 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 import {
+  KeyDownArrowIcon,
   KeyRightArrowIcon,
+  KeyUpArrowIcon,
   SearchIcon,
 } from "../../icons/Icons";
 
@@ -47,6 +49,8 @@ interface LeftTaskProps {
 const normalizeKey = (value: string) =>
   value.replace(/[\s_-]/g, "").toUpperCase();
 
+export const SELECTED_TASK_POOL_KEY = "selectedTaskPoolKey";
+
 const LeftTask = ({
   roles,
   menuItems,
@@ -64,15 +68,20 @@ const LeftTask = ({
 
   const navigate = useNavigate();
 
+  const handleTaskSelect = useCallback((taskName: string) => {
+    localStorage.setItem(SELECTED_TASK_POOL_KEY, taskName);
+    onTaskSelect(taskName);
+  }, [onTaskSelect]);
+
   // ==========================================================
   // AUTO SELECT ALL CASES
   // ==========================================================
 
   useEffect(() => {
     if (!selectedTask && menuItems.length > 0) {
-      onTaskSelect("ALL_CASES");
+      handleTaskSelect("ALL_CASES");
     }
-  }, [selectedTask, menuItems.length, onTaskSelect]);
+  }, [selectedTask, menuItems.length, handleTaskSelect]);
 
   // ==========================================================
   // TOTAL CASE COUNT
@@ -109,7 +118,7 @@ const LeftTask = ({
     return (
       <Box
         key={taskName}
-        onClick={() => onTaskSelect(taskName)}
+        onClick={() => handleTaskSelect(taskName)}
         sx={{
           height: "38px",
 
@@ -146,7 +155,7 @@ const LeftTask = ({
                 cursor: "pointer",
               }}
             >
-              📂
+              Ã°Å¸â€œâ€š
             </Typography>
           </Tooltip>
         ) : (
@@ -338,7 +347,7 @@ const LeftTask = ({
                       fontSize: "16px",
                     }}
                   >
-                    👥
+                    Ã°Å¸â€˜Â¥
                   </Typography>
                 ) : (
                   <>
@@ -361,7 +370,7 @@ const LeftTask = ({
                         color: "#777777",
                       }}
                     >
-                      {isRolesOpen ? "▲" : "▼"}
+                      {isRolesOpen ? <KeyUpArrowIcon/> : <KeyDownArrowIcon/>}
                     </Typography>
                   </>
                 )}
@@ -421,6 +430,16 @@ const LeftTask = ({
           =================================================== */}
 
           <Box
+            role="button"
+            tabIndex={0}
+            aria-label="Search applications"
+            onClick={() => navigate(getSearchApplicationPath())}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                navigate(getSearchApplicationPath());
+              }
+            }}
             sx={{
               height: "40px",
               display: "flex",
@@ -431,6 +450,12 @@ const LeftTask = ({
               px: 1.5,
               borderBottom: "1px solid #eeeeee",
               color: "#333333",
+              cursor: "pointer",
+              "&:hover": { backgroundColor: "#f8f8f8" },
+              "&:focus-visible": {
+                outline: "2px solid #9A2529",
+                outlineOffset: "-2px",
+              },
             }}
           >
             {!isCollapsed && (
@@ -445,13 +470,9 @@ const LeftTask = ({
             )}
 
             <Box
-              onClick={() =>
-                navigate(getSearchApplicationPath())
-              }
               sx={{
                 display: "flex",
                 alignItems: "center",
-                cursor: "pointer",
               }}
             >
               <SearchIcon
@@ -466,7 +487,7 @@ const LeftTask = ({
              =================================================== */}
 
           <Box
-            onClick={() => onTaskSelect("ALL_CASES")}
+            onClick={() => handleTaskSelect("ALL_CASES")}
             sx={{
               height: "40px",
 
@@ -511,7 +532,7 @@ const LeftTask = ({
                   fontSize: "16px",
                 }}
               >
-                📋
+                Ã°Å¸â€œâ€¹
               </Typography>
             ) : (
               <>

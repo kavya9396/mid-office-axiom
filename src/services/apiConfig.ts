@@ -6,7 +6,7 @@
 //  When USE_MOCK = false → every thunk hits the real API URL.
 // ============================================================
  
-export const USE_MOCK = true; // <-- flip this one flag to switch modes
+export const USE_MOCK = false; // <-- flip this one flag to switch modes
  
 // --------------- URL registry --------------------------------
 // Add or edit URLs here; thunk files need no further changes.
@@ -35,6 +35,10 @@ const apiUrls = {
   columnConfigSave: {
     real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns/save",
     mock: "/mock/inbox/columnConfigSave.json",
+  },
+  columnConfigFetch:{
+real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
+    mock: "/mock/inbox/columnConfigFetch.json",
   },
  
    // DRS
@@ -185,6 +189,16 @@ const apiUrls = {
     real: "/api/grievance/application/submit",
     mock: "/mock/drs/grievanceApplicationSubmit.mock.json",
   },
+
+  //pre login
+  prelogin:{
+     real: " http://172.30.74.182:8142/icic-prelogin-service/v1/applications/fetch",
+    mock: "/mock/drs/prelogin.mock.json",
+  },
+  userRoleName:{
+     real: "http://172.30.84.196:8103/icic-iam-user-service/v1/users/by-role/{roleName}",
+    mock: "/mock/drs/userRoleName.mock.json",
+  }
 } as const;
  
 export type ApiKey = keyof typeof apiUrls;

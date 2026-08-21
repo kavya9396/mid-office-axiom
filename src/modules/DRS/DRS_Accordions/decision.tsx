@@ -1,7 +1,12 @@
-import { Box, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  FormControlLabel,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTextField from "../../../components/ui/TextField/TextField";
@@ -14,9 +19,12 @@ import type { AppDispatch } from "../../../store/store";
 
 import { title } from "../../../utils/constant";
 import { validateDecision } from "../../../validations/decisionValidations";
+import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
 import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
+//import { formatDate } from "../../../utils/dataFormat";
+import { getInboxPath } from "../../../routes/routes";
 
 interface MiscItem {
   type: string;
@@ -47,6 +55,7 @@ interface RequirementManagementRow {
 
 interface DrsData {
   requirementManagement?: RequirementManagementRow[];
+  summary?: Array<{ memberType?: string }>;
 }
 
 interface DrsStateWithRequirementSaveStatus {
@@ -55,6 +64,7 @@ interface DrsStateWithRequirementSaveStatus {
 
 const Decision = () => {
   const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
 
   const location = useLocation();
 
@@ -89,7 +99,9 @@ const Decision = () => {
   ).trim();
 
   const applicationNumber = String(
-    application?.applicationNo ?? "",
+    application?.applicationNo ??
+      localStorage.getItem("applicationNo") ??
+      "",
   ).trim();
 
   const userId = String(
@@ -98,11 +110,26 @@ const Decision = () => {
       "",
   ).trim();
 
+  // const [decisionTimestamp] = useState(() =>
+  //   new Intl.DateTimeFormat("en-GB", {
+  //     day: "2-digit",
+  //     month: "2-digit",
+  //     year: "numeric",
+  //     hour: "2-digit",
+  //     minute: "2-digit",
+  //     second: "2-digit",
+  //     hour12: false,
+  //     timeZone: "Asia/Kolkata",
+  //   }).format(new Date()),
+  // );
+
   // ================= STATE =================
 
- const [selectedDecision, setSelectedDecision] = useState("");
+  const [selectedDecision, setSelectedDecision] = useState("");
 
   const [remarks, setRemarks] = useState("");
+
+  const [doNotPayToTpa, setDoNotPayToTpa] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -152,6 +179,16 @@ const Decision = () => {
       "",
   ).trim();
 
+  // const showDecisionAuditFields =
+  //   roleType === "HOD_TASK" ||
+  //   roleType === "SR_UW_TASK" ||
+  //   roleType === "CMO_TASK" ||
+  //   roleType === "VENDOR_CMO_TASK" ||
+  //   roleType === "HO_CMO_TASK";
+
+  const showDoNotPayToTpa =
+    roleType === "CMO_TASK" || roleType === "HO_CMO_TASK" || roleType === "VENDOR_CMO_TASK";
+
   const decisionCodeMap: Record<string, string> = {
     CVT_TASK: "CVT",
     DVT_TASK: "DVT",
@@ -170,13 +207,15 @@ const Decision = () => {
     ? decisionCodeMap[roleType] ?? ""
     : "";
 
-  const hasPendingRequirements =
+  const hasOutstandingRequirements =
     roleType === "CVT_TASK" &&
     (drsState.data?.requirementManagement ?? []).some(
       (row) =>
-        String(row.status ?? "")
-          .trim()
-          .toUpperCase() === "PENDING",
+        !["ACCEPT", "ACCEPTED"].includes(
+          String(row.status ?? "")
+            .trim()
+            .toUpperCase(),
+        ),
     );
 
   const hasPivRequirement =
@@ -216,8 +255,16 @@ const Decision = () => {
           "",
         );
 
-        if (hasPendingRequirements) {
+        if (roleType === "CVT_TASK" && hasOutstandingRequirements) {
           return normalizedDecisionValue === "raiserequirement";
+        }
+
+        if (
+          roleType === "CVT_TASK" &&
+          !hasOutstandingRequirements &&
+          normalizedDecisionValue === "raiserequirement"
+        ) {
+          return false;
         }
 
         if (
@@ -281,12 +328,28 @@ const Decision = () => {
     const hasSavedRequirements =
       sessionStorage.getItem(requirementSaveStorageKey) === "true";
 
-    if (roleType === "CVT_TASK" && !hasSavedRequirements) {
+    if (!hasSavedRequirements) {
       showSnackbar(
-        "Please click Save in Requirement Management before submitting the decision.",
+        "Save button is mandatory in Requirement Management before proceeding.",
         "warning",
       );
 
+      return;
+    }
+
+    const applicantTabsValidation =
+  validateApplicantTabsVisited(
+    drsState.data,
+    applicationNumber,
+    roleType,
+  );
+
+    if (!applicantTabsValidation.isValid) {
+      showSnackbar(
+        applicantTabsValidation.message ??
+          "Please visit all Applicant Profile tabs before submitting the decision.",
+        "warning",
+      );
       return;
     }
 
@@ -391,6 +454,9 @@ const Decision = () => {
           instanceId,
           remarks: remarks.trim(),
           decision: selectedDecision,
+          ...(showDoNotPayToTpa && {
+            doNotPayToTPA: doNotPayToTpa,
+          }),
         },
       };
 
@@ -416,6 +482,7 @@ const Decision = () => {
         "Decision submitted successfully.",
         "success",
       );
+      navigate(getInboxPath());
 
      
     } catch (error) {
@@ -551,13 +618,17 @@ const Decision = () => {
                 CASE DECISION
             ===================================================== */}
 
- <Box
-                            sx={{
-                                display: "grid",
-                                gridTemplateColumns: "repeat(3, 1fr)",
-                                gap: 1,
-                            }}
-                        >
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                md:"repeat(3, 1fr)"
+              },
+              gap: 1,
+              width: "100%",
+            }}
+          >
 
             <Box
               sx={{
@@ -603,8 +674,77 @@ const Decision = () => {
               </Box>
             </Box>
 
-            
-</Box>
+            {/* {showDecisionAuditFields && (
+              <>
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      color: "#444",
+                      mb: 0.5,
+                    }}
+                  >
+                    User ID
+                  </Typography>
+
+                  <CustomTextField
+                    fullWidth
+                    value={userId}
+                    disabled
+                    variant="outlined"
+                    size="small"
+                    sx={{ backgroundColor: "#fff" }}
+                  />
+                </Box>
+
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography
+                    sx={{
+                      fontSize: "12px",
+                      fontWeight: 400,
+                      color: "#444",
+                      mb: 0.5,
+                    }}
+                  >
+                    Date & Timestamp
+                  </Typography>
+                  <CustomTextField
+                    fullWidth
+                    value={formatDate(decisionTimestamp)}
+                    disabled
+                    variant="outlined"
+                    size="small"
+                    sx={{ backgroundColor: "#fff" }}
+                  />
+                </Box>
+              </>
+            )} */}
+          </Box>
+
+          {showDoNotPayToTpa && (
+            <FormControlLabel
+              sx={{
+                mt: 0.75,
+                ml: 0,
+                "& .MuiFormControlLabel-label": {
+                  fontSize: "12px",
+                  color: "#444",
+                },
+              }}
+              control={
+                <Checkbox
+                  checked={doNotPayToTpa}
+                  onChange={(event) =>
+                    setDoNotPayToTpa(event.target.checked)
+                  }
+                  size="small"
+                  sx={{ p: 0.5, mr: 0.5 }}
+                />
+              }
+              label="Do not pay to TPA"
+            />
+          )}
           {/* =====================================================
               SUBMIT
           ===================================================== */}

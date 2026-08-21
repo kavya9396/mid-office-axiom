@@ -201,7 +201,9 @@ type CustomerProfileProps = {
 const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   const dispatch = useAppDispatch();
   const { applicationNumber } = useAppContext();
-  const storeData = useAppSelector((state) => state.drs.data);
+  const storeData = useAppSelector(
+  (state) => state.prelogin.data,
+);
   const masters = useAppSelector((state) => state.drs.masters);
   const data = dataOverride ?? storeData;
   const [isEditOpen, setIsEditOpen] = useState(false);

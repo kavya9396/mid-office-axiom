@@ -2,15 +2,18 @@ import { Box, Container, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+
 import BackButton from "../../components/layout/BackButton";
 import type { Column } from "../../components/ui/Table/Table";
 import CustomTable from "../../components/ui/Table/Table";
 import { useAppContext } from "../../hooks/useAppContext";
-import { getDRSPath } from "../../routes/routes";
+import { getDRSPath, getSearchApplicationPath } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import type { RootState } from "../../store/store";
 import type { OpenOtherTaskRow, OpenOtherTasks } from "../../types/drs.types";
+
+const SEARCH_RESULT_STORAGE_KEY = "searchApplicationDrsData";
 
 const openTaskColumns: Column<OpenOtherTaskRow>[] = [
   {
@@ -18,10 +21,7 @@ const openTaskColumns: Column<OpenOtherTaskRow>[] = [
     header: "Service ID",
     width: "13%",
     render: (value) => (
-      <Typography
-        component="span"
-        sx={{ color: "#0B4F8C", textDecoration: "underline", cursor: "pointer" }}
-      >
+      <Typography component="span" sx={{ color: "#0B4F8C", textDecoration: "underline", cursor: "pointer" }}>
         {String(value ?? "-")}
       </Typography>
     ),
@@ -35,19 +35,43 @@ const openTaskColumns: Column<OpenOtherTaskRow>[] = [
   { key: "userPool", header: "User Pool", width: "11%" },
 ];
 
-const toDisplay = (value: unknown) => {
-  const text = String(value ?? "").trim();
-  return text || "-";
+interface SelectedCaseContext {
+  applicationNo?: string;
+  source?: string;
+  readOnly?: boolean;
+}
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const readSelectedCaseContext = (): SelectedCaseContext => {
+  try {
+    return JSON.parse(localStorage.getItem("selectedCaseContext") ?? "{}") as SelectedCaseContext;
+  } catch {
+    return {};
+  }
 };
 
-const normalizeOpenTaskRows = (rows: unknown): OpenOtherTasks => {
-  if (!Array.isArray(rows)) {
-    return [];
+const readCachedSearchQuickLinks = (): Record<string, unknown> => {
+  try {
+    const rawValue = localStorage.getItem(SEARCH_RESULT_STORAGE_KEY);
+    if (!rawValue) return {};
+    const storedResult = toRecord(JSON.parse(rawValue));
+    return toRecord(toRecord(storedResult.data).quickLinks);
+  } catch {
+    return {};
   }
+};
+
+const toDisplay = (value: unknown) => String(value ?? "").trim() || "-";
+
+const normalizeOpenTaskRows = (rows: unknown): OpenOtherTasks => {
+  if (!Array.isArray(rows)) return [];
 
   return rows.map((row) => {
-    const item = row as Record<string, unknown>;
-
+    const item = toRecord(row);
     return {
       serviceID: toDisplay(item.serviceID),
       ct: toDisplay(item.ct),
@@ -61,56 +85,50 @@ const normalizeOpenTaskRows = (rows: unknown): OpenOtherTasks => {
   });
 };
 
-const toRecord = (value: unknown): Record<string, unknown> =>
-  value && typeof value === "object" && !Array.isArray(value)
-    ? (value as Record<string, unknown>)
-    : {};
-
 const OpenTasksPage = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
+
+  const [selectedCaseContext] = useState(readSelectedCaseContext);
+  const [cachedSearchQuickLinks] = useState(readCachedSearchQuickLinks);
   const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
   const safeBusinessType = businessType ?? "retail";
-  const safeApplicationNumber = applicationNumber ?? "";
+  const safeApplicationNumber = applicationNumber?.trim() || selectedCaseContext.applicationNo?.trim() || "";
+  const isFromSearchApplication = selectedCaseContext.source === "searchApplication" && selectedCaseContext.readOnly === true;
+
   const reduxQuickLinks = useMemo(
     () => toRecord((drsData as unknown as Record<string, unknown> | null)?.quickLinks),
     [drsData],
   );
   const hasReduxOpenTasks = Array.isArray(reduxQuickLinks.openOtherTasks);
+  const hasCachedSearchOpenTasks = isFromSearchApplication && Array.isArray(cachedSearchQuickLinks.openOtherTasks);
   const effectiveQuickLinksData = !safeApplicationNumber
     ? null
     : hasReduxOpenTasks
       ? reduxQuickLinks
-      : quickLinksData;
+      : hasCachedSearchOpenTasks
+        ? cachedSearchQuickLinks
+        : quickLinksData;
   const rows = useMemo<OpenOtherTasks>(
     () => normalizeOpenTaskRows(effectiveQuickLinksData?.openOtherTasks),
     [effectiveQuickLinksData],
   );
 
   useEffect(() => {
-    const loadOpenTasks = async () => {
-      if (!safeApplicationNumber || hasReduxOpenTasks) {
-        return;
-      }
+    if (!safeApplicationNumber || hasReduxOpenTasks || hasCachedSearchOpenTasks) return;
 
+    const loadOpenTasks = async () => {
       try {
         setLoading(true);
         const roleType = localStorage.getItem("roleType") ?? "";
         const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "System").trim() || "System";
-
         const response = await dispatch(
-          drsThunk({
-            applicationNo: safeApplicationNumber,
-            userId,
-            roleType,
-            sections: ["quickLinks"],
-          }),
+          drsThunk({ applicationNo: safeApplicationNumber, userId, roleType, sections: ["quickLinks"] }),
         ).unwrap();
-
         setQuickLinksData(toRecord((response.data as unknown as Record<string, unknown>)?.quickLinks));
       } catch (error) {
         console.error("Failed to load open tasks:", error);
@@ -121,27 +139,29 @@ const OpenTasksPage = () => {
     };
 
     void loadOpenTasks();
-  }, [dispatch, hasReduxOpenTasks, safeApplicationNumber]);
+  }, [dispatch, hasCachedSearchOpenTasks, hasReduxOpenTasks, safeApplicationNumber]);
 
-  const title = useMemo(
-    () => `Pre Issuance Servicing${loading ? " (Loading...)" : ""}`,
-    [loading],
-  );
+  const handleBack = () => {
+    if (isFromSearchApplication) {
+      navigate(getSearchApplicationPath(), {
+        state: { restoreSearchResult: true, applicationNo: safeApplicationNumber },
+      });
+      return;
+    }
+    navigate(getDRSPath(safeBusinessType, safeApplicationNumber));
+  };
+
+  const title = `Pre Issuance Servicing${loading ? " (Loading...)" : ""}`;
 
   return (
-    <Container disableGutters>
+    <Container maxWidth={false} disableGutters>
       <BackButton
-        label="Back to DRS"
-        onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationNumber))}
+        label={isFromSearchApplication ? "Back to Search Application" : "Back to DRS"}
+        onClick={handleBack}
       />
-
       <Box sx={{ mt: 1 }}>
         {rows.length > 0 ? (
-          <CustomTable<OpenOtherTaskRow>
-            title={title}
-            columns={openTaskColumns}
-            data={rows}
-          />
+          <CustomTable<OpenOtherTaskRow> title={title} columns={openTaskColumns} data={rows} />
         ) : (
           <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>
             {loading ? "Loading open tasks..." : "No open tasks found"}

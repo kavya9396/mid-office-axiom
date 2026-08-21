@@ -7,6 +7,7 @@ import breReducer from "./slices/breSlice";
 import masterReducer from "./slices/masterSlice";
 import inboxReducer from "./slices/inboxSlice";
 import searchApplicationReducer from "./slices/searchAppSlice";
+import preloginReducer from "./slices/preloginSlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ export const store = configureStore({
     bre:breReducer,
     masterData:masterReducer,
     searchApplication: searchApplicationReducer,
+    prelogin:preloginReducer
   },
 });
 

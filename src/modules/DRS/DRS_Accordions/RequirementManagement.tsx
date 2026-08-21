@@ -70,6 +70,7 @@ const RequirementManagement = ({
     "AMR_MEDICAL_TASK",
     "AMR_NON_MEDICAL_TASK",
     "RECONSIDERATION_TASK",
+    "ACUITY_TASK"
   ].includes(roleType);
 
   const handleSaveRequirements = async (

@@ -1,0 +1,74 @@
+{
+  "applicationNumber": "string",
+  "submitDate": "string",
+  "sourceSystem": "string",
+  "totalPremium": "string",
+  "caseType": "string",
+  "customerProfile": [
+    {
+      "type": "string",
+      "customerDetails": [
+        {
+          "type": "string",
+          "name": "string",
+          "dob": "string",
+          "gender": "string",
+          "occupation": "string",
+          "companyName": "string",
+          "website": "string",
+          "linkedinProfile": "string",
+          "designation": "string",
+          "earnedIncome": "string",
+          "pep": "string",
+          "proposerName": "string",
+          "pan": "string",
+          "mobileNo": "string",
+          "emailId": "string",
+          "medicalProfile": {
+            "pastMedicalHistory": "string",
+            "currentMedicalHistory": "string",
+            "remarks": "string"
+          }
+        }
+      ]
+    }
+  ],
+  "productDetail": {
+    "code": "string",
+    "name": "string",
+    "premium": 0,
+    "sumAssured": 0
+  },
+  "sourcingDetail": {
+    "agentCode": "string",
+    "salesChannel": "string",
+    "channelCode": "string"
+  },
+  "insuranceDetails": [
+    {
+      "type": "string",
+      "existingInsurance": [
+        {
+          "policyNumber": "string",
+          "plan": "string",
+          "type": "string",
+          "companyName": "string",
+          "sumAssured": "string",
+          "dateOfCommencement": "string",
+          "acceptanceTerms": "string",
+          "policyStatus": "string"
+        }
+      ],
+      "simultaneousPolicies": [
+        {
+          "companyName": "string",
+          "sumAssured": "string",
+          "type": "string",
+          "plan": "string",
+          "policyStatus": "string"
+        }
+      ]
+    }
+  ],
+  "approvalReqdFor": { "financial": true, "medical": true }
+}
