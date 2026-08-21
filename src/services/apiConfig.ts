@@ -30,7 +30,7 @@ const apiUrls = {
   },
   searchApplication: {
     real: "http://172.30.74.182:8094/api/v1/drs/ui/search-application",
-    mock: "/mock/drs/drs.mock.json",
+    mock: "/mock/inbox/search-application.json",
   },
   columnConfigSave: {
     real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns/save",

@@ -1,15 +1,44 @@
-import type { AdditionalRequirementRow, ApplicationDetails, ApplicationOverview, AuditTrail, RiderDetail, SummaryResponse } from "./drs.types";
+import type {
+  AdditionalRequirementRow,
+  ApplicationOverview,
+  AuditTrail,
+  BreDecisionResponse,
+  RiderDetail,
+  SummaryResponse,
+} from "./drs.types";
 
-export type SearchRequest = {
+export interface ApplicationDetails {
+  dob: string;
+  proposerName: string;
+  lifeAssuredName: string;
+  productOpted: string;
+  planOpted: string;
+  appliedSA: number | string;
+  premium: number | string;
+  clientType: string;
+  lastBucket: string;
+  lastUser: string;
+}
+
+export interface SearchRequest {
   applicationNo: string;
-};
+}
 
-export type SearchResponse = {
-    applicationDetails:ApplicationDetails;
-  applicationOverview: ApplicationOverview;
+export interface SearchResponse {
+  applicationDetails: ApplicationDetails;
+  applicationOverview?: ApplicationOverview;
+  breDecision?: BreDecisionResponse;
   summary: SummaryResponse[];
   riderDetails: RiderDetail[];
-  requirements: AdditionalRequirementRow[];
-  auditTrail:AuditTrail;
-  udsLink:string;
-};
+  requirementManagement: AdditionalRequirementRow[];
+  auditTrail: AuditTrail[];
+  udsLink: string;
+  drsLink?: string;
+  roleType?: string;
+}
+
+export interface SearchApiResponse {
+  success: boolean;
+  message?: string;
+  data: SearchResponse;
+}

@@ -27,43 +27,67 @@ type BRERow = {
   finalBre?: string;
 };
 
-const BreDecision = () => {
+interface BreDecisionProps {
+  readOnly?: boolean;
+}
+
+const BreDecision = ({
+  readOnly = false,
+}: BreDecisionProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const { applicationNumber, businessType } = useAppContext();
+  const {
+    applicationNumber,
+    businessType,
+  } = useAppContext();
+
   const roleType =
     localStorage.getItem("roleType") ?? "";
 
-  const drsData = useAppSelector(
+  /*
+   * Keep the complete DRS slice because the actual
+   * DRS response is available under state.drs.data.
+   */
+  const drsState = useAppSelector(
     (state) => state.drs,
   );
 
   /*
-   * This Redux state is populated when breThunk is
-   * dispatched from the main DRS page.
+   * Search API's inner response object.
+   */
+  const searchData = useAppSelector(
+    (state) =>
+      state.searchApplication.response?.data,
+  );
+
+  /*
+   * Latest manually triggered BRE response.
+   * This is used only during the normal DRS flow.
    */
   const finalBreData = useAppSelector(
     (state) => state.bre,
   );
 
   /*
-   * Initial BRE response received from the DRS API.
+   * Do not combine drsState and searchData into one
+   * variable because they have different TypeScript types.
    */
-  const breDecisionData =
-    drsData?.data?.breDecision;
+  const breDecisionData = readOnly
+    ? searchData?.breDecision
+    : drsState.data?.breDecision;
 
   /*
-   * Latest BRE response received from the DRS API.
-   * This is used until the BRE API response is available.
+   * Search response might not have latestBreDecision.
+   * In that case, show breDecision as both initial and final.
    */
-  const latestBreDecisionData =
-    drsData?.data?.latestBreDecision;
+  const latestBreDecisionData = readOnly
+    ? 
+    // searchData?.latestBreDecision ??
+      searchData?.breDecision
+    : drsState.data?.latestBreDecision ??
+      drsState.data?.breDecision;
 
-  /*
-   * This state is used only when the user manually
-   * clicks the refresh button.
-   */
   const [breResponse, setBreResponse] =
     useState<BreResponse | null>(null);
 
@@ -71,19 +95,19 @@ const BreDecision = () => {
     useState(false);
 
   /*
-   * Response priority:
-   *
-   * 1. Manual refresh BRE response
-   * 2. Redux BRE response loaded from the DRS page
-   * 3. latestBreDecision from the DRS response
+   * Manual BRE response must never be used while viewing
+   * the searched application in read-only mode.
    */
-  const finalBreDecisionData =
-    breResponse?.data ??
-    finalBreData?.data?.data;
+  const finalBreDecisionData = readOnly
+    ? undefined
+    : breResponse?.data ??
+      finalBreData?.data?.data;
 
-  const hasBreApiResponse = Boolean(
-    finalBreDecisionData?.breOutput,
-  );
+  const hasBreApiResponse =
+    !readOnly &&
+    Boolean(
+      finalBreDecisionData?.breOutput,
+    );
 
   const storageBusinessType = (
     businessType ||
@@ -97,6 +121,14 @@ const BreDecision = () => {
       : "BRE-GROUP";
 
   const handleRefresh = async () => {
+    /*
+     * Additional protection in case this function
+     * is invoked programmatically.
+     */
+    if (readOnly) {
+      return;
+    }
+
     const reTriggerCount =
       latestBreDecisionData?.reTriggerCount ?? 0;
 
@@ -235,7 +267,7 @@ const BreDecision = () => {
     );
   };
 
-  const showRefreshButton =
+  const showRefreshButton = !readOnly &&
     roleType !== "AMR_MEDICAL_TASK" &&
     roleType !== "AMR_NON_MEDICAL_TASK";
 

@@ -219,3 +219,123 @@ export const roleWiseConfig: Record<string, RoleField[]> = {
 export const getRoleFields = (role: string): RoleField[] => {
   return roleWiseConfig[role] ?? COMMON_FIELDS;
 };
+
+export type SearchApplicationBusinessType =
+  | "retail"
+  | "group";
+
+const RETAIL_SEARCH_APPLICATION_FIELDS: RoleField[] = [
+  {
+    label: "DOB",
+    path: "summary.1.personalDetails.dob",
+  },
+  {
+    label: "Name of Proposer",
+    path: "summary.0.personalDetails.firstName",
+  },
+  {
+    label: "Name of Life Assured",
+    path: "summary.1.personalDetails.firstName",
+  },
+  {
+    label: "Product Opted",
+    path: "summary.1.policyDetails.productName",
+  },
+  {
+    label: "Plan Opted",
+    path: "summary.1.policyDetails.productType",
+  },
+  {
+    label: "Applied SA",
+    path: "summary.1.financialDetails.appliedSumAssured",
+  },
+  {
+    label: "Premium",
+    path: "basicDetails.totalPremium",
+  },
+  {
+    label: "Client Type",
+    path: "summary.1.genericDetails.typeOfProposer",
+  },
+  {
+    label: "Last Bucket",
+    path: "quickLinks.auditTrail.0.toPool",
+  },
+  {
+    label: "Last User",
+    path: "quickLinks.auditTrail.0.toPoolUser",
+  },
+];
+
+const GROUP_SEARCH_APPLICATION_FIELDS: RoleField[] = [
+  {
+    label: "DOB",
+    path: "summary.1.personalDetails.dob",
+  },
+  {
+    label: "Name of Proposer",
+    path: "summary.0.personalDetails.firstName",
+  },
+  {
+    label: "Name of Life Assured",
+    path: "summary.1.personalDetails.firstName",
+  },
+  {
+    label: "Product Opted",
+    path: "applicationOverview.productDetail.0.name",
+  },
+  {
+    label: "Plan Opted",
+    path: "applicationOverview.productDetail.0.type",
+  },
+  {
+    label: "Applied SA",
+    path: "applicationOverview.groupDetails.coverRequested",
+  },
+  {
+    label: "Premium",
+    path: "basicDetails.totalPremium",
+  },
+  {
+    label: "Client Type",
+    path: "summary.1.genericDetails.typeOfProposer",
+  },
+  {
+    label: "Master Policy No.",
+    path: "applicationOverview.groupDetails.masterPolicyNo",
+  },
+  {
+    label: "LAN No.",
+    path: "applicationOverview.sourcingDetail.lanNumber",
+  },
+  {
+    label: "Last Bucket",
+    path: "quickLinks.auditTrail.0.toPool",
+  },
+  {
+    label: "Last User",
+    path: "quickLinks.auditTrail.0.toPoolUser",
+  },
+];
+
+export const searchApplicationConfig: Record<
+  SearchApplicationBusinessType,
+  RoleField[]
+> = {
+  retail: RETAIL_SEARCH_APPLICATION_FIELDS,
+  group: GROUP_SEARCH_APPLICATION_FIELDS,
+};
+
+export const getSearchApplicationFields = (
+  businessType?: string,
+): RoleField[] => {
+  const normalizedBusinessType = String(
+    businessType ?? "",
+  )
+    .trim()
+    .toLowerCase();
+
+  return normalizedBusinessType === "group"
+    ? searchApplicationConfig.group
+    : searchApplicationConfig.retail;
+};
