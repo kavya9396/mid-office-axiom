@@ -1,928 +1,938 @@
 {
-    "success": true,
-    "data": {
-        "basicDetails": {
-            "applicationNumber": "OS90378859",
-            "lastLoginDate": "2026-08-17T18:33:24.812712",
-            "submitDate": "2026-06-29T00:00:00.0",
-            "totalPremium": 148344,
-            "sourceSystem": ""
-        },
-        "applicationStatus": {
-            "digidrive": "active",
-            "requirement": "pending",
-            "ocr": "pending",
-            "bre": "pending",
-            "underwriting": "active",
-            "issuance": "pending"
-        },
-        "applicationInfo": {
-            "applicationDate": "2026-06-29T00:00:00.0",
-            "comboFlag": "no",
-            "storyCode": "",
-            "pbRiskScore": "",
-            "comboNumber": "OS90378859",
-            "lifeCount": null,
-            "proposerType": "Individual",
-            "umCode": "",
-            "source": "BRHL",
-            "simultaneousPolicies": false,
-            "simultaneousLifeSA": 0,
-            "isLAPropSame": true,
-            "otherPolicySA": 0,
-            "lifeType": "Main Life",
-            "coApplicationFlag": "no",
-            "gaVisitorId": "",
-            "isTagged": "",
-            "taggedAppNo": "NA",
-            "taggedRelation": "NA",
-            "spousePolicyNo": "NA",
-            "trsa": null,
-            "tfsa": null
-        },
-        "requirementCategoryInfo": {
-            "medicalCategory": null,
-            "financialCategory": null,
-            "internalCategory": null
-        },
-        "breDecision": {
-            "decision": "NSTP",
-            "initialDecision": "NSTP",
-            "isInitial": "N",
-            "isLatest": "N",
-            "remarks": "",
-            "discrepancy": "-",
-            "timestamp": "",
-            "action": "",
-            "reTriggerCount": 0
-        },
-        "latestBreDecision": {},
-        "summary": [
-            {
-                "memberType": "proposer",
-                "lifeType": "PR",
-                "customerType": null,
-                "partyId": "a1e83b4f-ace9-4223-820c-3a8f73b580e9",
-                "jontFlag": false,
-                "lifeNumber": "",
-                "clientId": "NA",
-                "proposerLaRelation": "Self",
-                "jointLARelation": "",
-                "jointPRRelation": "",
-                "nriFlag": false,
-                "fatfFlag": false,
-                "riskAnalytics": [
-                    {
-                        "medicalRisk": {
-                            "isMedical": true,
-                            "brePhysicalMedicalDecision": "",
-                            "brePhysicalMedicalRemark": "",
-                            "breTeleVideoMerDecision": "",
-                            "breTeleVideoMerRemark": "",
-                            "munichReMedicalDecision": "",
-                            "munichReRating": "",
-                            "biuMedicalStatus": "N"
-                        },
-                        "financialRisk": {
-                            "isFinancial": true,
-                            "breFinancialDecision": "",
-                            "breRemark": "",
-                            "financialEligibility": "",
-                            "derivedIncome": "",
-                            "counterOfferValue": "",
-                            "additionalSA": "",
-                            "biuFinancialStatus": ""
-                        },
-                        "otherRisk": {
-                            "isOthers": true,
-                            "ptlrResponse": "",
-                            "drcResponse": "",
-                            "adverseIIB": "",
-                            "criminalQuestionResponseLA": "No",
-                            "pepQuestionResponseLA": "No",
-                            "criminalQuestionResponsePR": "No",
-                            "pepQuestionResponsePR": "No",
-                            "previousPolicySubstandard": "",
-                            "avocationRelatedDisclosure": "",
-                            "healthQuestionPositive": "No",
-                            "employmentInRiskyIndustry": "",
-                            "fatfOfacCountryLogin": "",
-                            "hazardousOccupation": "",
-                            "eddFlag": "",
-                            "claimRiskIndicator": "",
-                            "faceMatchScore": "",
-                            "tobacco": "",
-                            "narcotics": ""
-                        }
-                    }
-                ],
-                "faceMatchDetails": {
-                    "document": "",
-                    "faceMatchScore": null,
-                    "imageQuality": null,
-                    "remarks": ""
-                },
-                "proposerSummary": {
-                    "title": "",
-                    "firstName": "SHANKAR",
-                    "middleName": "",
-                    "lastName": "PATIL",
-                    "gender": "Male",
-                    "maritalStatus": "M",
-                    "dob": "1997-02-10T00:00",
-                    "age": {
-                        "years": 29,
-                        "days": 192
-                    },
-                    "profileImage": "",
-                    "caseStatus": "DRAFT",
-                    "nationality": "India",
-                    "countryOfResidence": "India",
-                    "residentStatus": "India",
-                    "education": "Graduate",
-                    "pioStatus": "0",
-                    "highestQualification": "Graduate",
-                    "graduationFlag": "",
-                    "orgName": "ICICI bank Limited",
-                    "yearsInServiceOrBusiness": null,
-                    "industryType": "",
-                    "birthCountry": "",
-                    "occupationType": "SPVT",
-                    "netIncomeAmt": null,
-                    "immigrationStatus": "Indian Resident",
-                    "orgType": "PUB",
-                    "latestIncYear": 2026,
-                    "isPEP": false,
-                    "panNo": "",
-                    "remarks": "",
-                    "ckycNumber": "",
-                    "criminalProceeding": "No",
-                    "incomeProof": "ANM",
-                    "designation": "",
-                    "disabled": "",
-                    "percentageOfImpairment": "",
-                    "typeOfImpairment": "",
-                    "udidNumber": ""
-                },
-                "applicantDetails": {
-                    "dateOfBirth": "1997-02-10",
-                    "gender": "Male",
-                    "maritalStatus": "M",
-                    "nationality": "India",
-                    "countryOfResidence": "India",
-                    "education": "Graduate",
-                    "designation": "",
-                    "disabled": "",
-                    "percentageOfImpairment": "",
-                    "typeOfImpairment": ""
-                },
-                "financialDetails": {
-                    "annualIncome": 100000,
-                    "appliedSumAssured": 5100000,
-                    "trsa": null,
-                    "tfsa": null
-                },
-                "policyDetails": {
-                    "proposerName": "SHANKAR PATIL",
-                    "lifeAssuredName": "SHANKAR PATIL",
-                    "productName": "ICICI PRU SUPER PROTECT CREDIT",
-                    "modalPremium": 0,
-                    "paymentMode": "",
-                    "channel": "BRHL"
-                },
-                "underwriting": {
-                    "remarks": "",
-                    "breDecision": {
-                        "status": "",
-                        "category": "",
-                        "coverage": ""
-                    }
-                },
-                "kycDetails": {
-                    "panNumber": "",
-                    "identityProofType": "ANM",
-                    "identityProofNumber": "AAAAA1111A",
-                    "addressProof": "ANM",
-                    "incomeProof": "ANM",
-                    "ageProof": "ANM",
-                    "existingCkycNumber": "NA",
-                    "pep": "No",
-                    "criminalProceedings": "No",
-                    "panFlag": "",
-                    "panAadharSeedingStatus": "",
-                    "identityProofExpiryDate": "",
-                    "pranNo": "",
-                    "pranNoVerification": "",
-                    "udsLink": ""
-                },
-                "address": [
-                    {
-                        "type": "communication",
-                        "addressLine1": "",
-                        "addressLine2": "",
-                        "addressLine3": "",
-                        "landmark": "",
-                        "city": "",
-                        "state": "",
-                        "pinCode": "",
-                        "residingCountry": "",
-                        "topCity": "",
-                        "negativePinCode": ""
-                    },
-                    {
-                        "type": "permanent",
-                        "addressLine1": "MALAD",
-                        "addressLine2": "",
-                        "addressLine3": "",
-                        "landmark": "",
-                        "city": "MUMBAI",
-                        "state": "Maharashtra",
-                        "pinCode": "400001",
-                        "residingCountry": "India",
-                        "topCity": "Y",
-                        "negativePinCode": "Low"
-                    }
-                ],
-                "communicationAddressDetails": {
-                    "addressLine1": "",
-                    "addressLine2": "",
-                    "addressLine3": "",
-                    "landmark": "",
-                    "city": "",
-                    "state": "",
-                    "country": "",
-                    "pincode": "",
-                    "topCity": "",
-                    "negativePinCode": ""
-                },
-                "permanentAddressDetails": {
-                    "addressLine1": "MALAD",
-                    "addressLine2": "",
-                    "addressLine3": "",
-                    "landmark": "",
-                    "city": "MUMBAI",
-                    "state": "Maharashtra",
-                    "country": "India",
-                    "pincode": "400001",
-                    "topCity": "Y",
-                    "negativePinCode": "Low"
-                },
-                "contactDetails": {
-                    "mobileNo": "7898767876",
-                    "alternateMobileNo": "",
-                    "alternateMobile": "",
-                    "std": "",
-                    "landlineNo": "",
-                    "landlineNumber": "",
-                    "emailId": "SDFS@GMAIL.COM",
-                    "emailPref": "Y",
-                    "smsPref": "Y"
-                },
-                "applicantFinancialDetails": {
-                    "occupation": "SPVT",
-                    "annualIncome": 100000,
-                    "gstin": "",
-                    "lastIncomeYear": 2026,
-                    "organisationType": "PUB",
-                    "organisationName": "ICICI bank Limited"
-                },
-                "healthDetail": {
-                    "height": "162.6",
-                    "weight": "",
-                    "bmi": "",
-                    "avgSystolic": "",
-                    "avgDiastolic": "",
-                    "heightFeet": "",
-                    "heightInches": "0",
-                    "hazardousOccupation": "",
-                    "isDisabled": "",
-                    "percentageOfImpairment": "",
-                    "typeOfImpairment": "",
-                    "illnessOrImpairment": [],
-                    "substanceConsumption": [
-                        {
-                            "substance": "",
-                            "consumedAs": "",
-                            "quantity": {
-                                "amount": "",
-                                "unit": "day/week"
-                            },
-                            "noOfYears": null,
-                            "advisedByDoctorForAbstinence": ""
-                        }
-                    ],
-                    "medicalQuestionnaire": [
-                        {
-                            "qtid": "ILLIMPAIRMENT",
-                            "value": "no",
-                            "remar": "",
-                            "subQts": []
-                        },
-                        {
-                            "qtid": "EXCLIENT",
-                            "value": "No",
-                            "remar": "",
-                            "subQts": []
-                        }
-                    ]
-                },
-                "nominee": [
-                    {
-                        "relationWithLA": "",
-                        "relationship": "",
-                        "firstName": "SMITA",
-                        "lastName": "PATIL",
-                        "dob": "1999-04-03T00:00",
-                        "gender": "Female",
-                        "percentage": 0,
-                        "proposerNomineeRelation": "",
-                        "accountNumber": "",
-                        "ifsc": ""
-                    }
-                ],
-                "appointee": [],
-                "genericDetails": {
-                    "existingPolicyNumber": "NA",
-                    "clientId": "NA",
-                    "selfProposed": "Yes",
-                    "typeOfProposer": "Individual",
-                    "relationshipWithLifeAssured": "Self",
-                    "typeOfProposal": "Retail New Business"
-                },
-                "eiaDetails": {
-                    "openEIA": "No",
-                    "existingEIANumber": "NA",
-                    "preferredRepository": "",
-                    "convertPolicies": "No"
-                },
-                "fundDetails": {
-                    "allocationStrategy": "",
-                    "totalAllocation": "",
-                    "atpOpted": "",
-                    "fundDetail": []
-                },
-                "paymentDetails": {},
-                "payoutDetails": {},
-                "advisorDetails": {
-                    "relationWithAdvisor": "",
-                    "acquaintanceDuration": 0,
-                    "fileSentToCopsDate": "",
-                    "branchUWDate": "",
-                    "decalarationDate": "",
-                    "declarationPlace": ""
-                },
-                "questions": [
-                    {
-                        "quesCode": "ILLIMPAIRMENT",
-                        "quesFor": "LA",
-                        "quesType": "HEALTH",
-                        "quesAns": "no"
-                    },
-                    {
-                        "quesCode": "EXCLIENT",
-                        "quesFor": "LA",
-                        "quesType": "GEN",
-                        "quesAns": "No"
-                    }
-                ],
-                "producerDetails": {
-                    "perfiosBank": "No",
-                    "premiumPaymentOption": "RP0",
-                    "isecExperianCategory": "",
-                    "gstInNumber": "",
-                    "pasaSegmentCitiesFlag": "",
-                    "productSource": "standalone",
-                    "imputedMarker": "",
-                    "imputedIncome": "0",
-                    "prePopulatedValueEdited": "NA",
-                    "fnaSumAssured": "0",
-                    "componentCode": "GSPS",
-                    "cdfWaiverFlag": "No",
-                    "youthExpressFlag": "N",
-                    "atsSource": "",
-                    "ipsDiscountFlag": "",
-                    "lumpSumPercentage": "0",
-                    "accuityRiskIndicator": "",
-                    "primaryLASumAssured": ""
-                },
-                "documentDetails": [
-                    {
-                        "documentType": "ID",
-                        "documentName": "ANM",
-                        "documentId": "AAAAA1111A",
-                        "validityDate": ""
-                    }
-                ],
-                "bureauDetails": {
-                    "cibilScore": "",
-                    "cibilIncomeSegment": "",
-                    "cibilEligibilityStatus": "Y",
-                    "cibilServiceStatus": "Y",
-                    "experianScore": "",
-                    "experianIncomeSegment": "",
-                    "experianEligibilityStatus": "Y",
-                    "experianServiceStatus": "Y",
-                    "payuScore": "",
-                    "payuIncomeSegment": "",
-                    "payuEligibilityStatus": "Y",
-                    "payuServiceStatus": "Y"
-                }
+  "success": true,
+  "data": {
+    "basicDetails": {
+      "applicationNumber": "OS90378859",
+      "lastLoginDate": "2026-08-17T18:33:24.812712",
+      "submitDate": "2026-06-29T00:00:00.0",
+      "totalPremium": 148344,
+      "sourceSystem": ""
+    },
+    "applicationStatus": {
+      "digidrive": "active",
+      "requirement": "pending",
+      "ocr": "pending",
+      "bre": "pending",
+      "underwriting": "active",
+      "issuance": "pending"
+    },
+    "applicationInfo": {
+      "applicationDate": "2026-06-29T00:00:00.0",
+      "comboFlag": "no",
+      "storyCode": "",
+      "pbRiskScore": "",
+      "comboNumber": "OS90378859",
+      "lifeCount": null,
+      "proposerType": "Individual",
+      "umCode": "",
+      "source": "BRHL",
+      "simultaneousPolicies": false,
+      "simultaneousLifeSA": 0,
+      "isLAPropSame": true,
+      "otherPolicySA": 0,
+      "lifeType": "Main Life",
+      "coApplicationFlag": "no",
+      "gaVisitorId": "",
+      "isTagged": "",
+      "taggedAppNo": "NA",
+      "taggedRelation": "NA",
+      "spousePolicyNo": "NA",
+      "trsa": null,
+      "tfsa": null
+    },
+    "requirementCategoryInfo": {
+      "medicalCategory": null,
+      "financialCategory": null,
+      "internalCategory": null
+    },
+    "breDecision": {
+      "decision": "NSTP",
+      "initialDecision": "NSTP",
+      "isInitial": "N",
+      "isLatest": "N",
+      "remarks": "",
+      "discrepancy": "-",
+      "timestamp": "",
+      "action": "",
+      "reTriggerCount": 0
+    },
+    "latestBreDecision": {
+      "decision": "DC",
+      "initialDecision": "RM",
+      "isInitial": "Y",
+      "isLatest": "N",
+      "remarks": "Product Non Eligible",
+      "discrepancy": "ACR#OCD#PAN#ADP#AGE#IDM#KYP",
+      "timestamp": "14/08/2026, 1108hrs",
+      "action": "Decline",
+      "reTriggerCount": 39
+    },
+    "summary": [
+      {
+        "memberType": "proposer",
+        "lifeType": "PR",
+        "customerType": null,
+        "partyId": "a1e83b4f-ace9-4223-820c-3a8f73b580e9",
+        "jontFlag": false,
+        "lifeNumber": "",
+        "clientId": "NA",
+        "proposerLaRelation": "Self",
+        "jointLARelation": "",
+        "jointPRRelation": "",
+        "nriFlag": false,
+        "fatfFlag": false,
+        "riskAnalytics": [
+          {
+            "medicalRisk": {
+              "isMedical": true,
+              "brePhysicalMedicalDecision": "",
+              "brePhysicalMedicalRemark": "",
+              "breTeleVideoMerDecision": "",
+              "breTeleVideoMerRemark": "",
+              "munichReMedicalDecision": "",
+              "munichReRating": "",
+              "biuMedicalStatus": "N"
             },
-            {
-                "memberType": "lifeassured1",
-                "lifeType": "LA",
-                "customerType": null,
-                "partyId": "29075a52-ee72-46b7-ab55-b14879bfe3bf",
-                "jontFlag": false,
-                "lifeNumber": "",
-                "clientId": "NA",
-                "proposerLaRelation": "Self",
-                "jointLARelation": "",
-                "jointPRRelation": "",
-                "nriFlag": false,
-                "fatfFlag": false,
-                "faceMatchDetails": {
-                    "document": "",
-                    "faceMatchScore": null,
-                    "imageQuality": null,
-                    "remarks": ""
-                },
-                "proposerSummary": {
-                    "title": "",
-                    "firstName": "SHANKAR",
-                    "middleName": "",
-                    "lastName": "PATIL",
-                    "gender": "Male",
-                    "maritalStatus": "M",
-                    "dob": "1997-02-10T00:00",
-                    "age": {
-                        "years": 29,
-                        "days": 192
-                    },
-                    "profileImage": "",
-                    "caseStatus": "DRAFT",
-                    "nationality": "India",
-                    "countryOfResidence": "India",
-                    "residentStatus": "India",
-                    "education": "Graduate",
-                    "pioStatus": "0",
-                    "highestQualification": "Graduate",
-                    "graduationFlag": "",
-                    "orgName": "ICICI bank Limited",
-                    "yearsInServiceOrBusiness": null,
-                    "industryType": "",
-                    "birthCountry": "",
-                    "occupationType": "SPVT",
-                    "netIncomeAmt": null,
-                    "immigrationStatus": "Indian Resident",
-                    "orgType": "PUB",
-                    "latestIncYear": 2026,
-                    "isPEP": false,
-                    "panNo": "",
-                    "remarks": "",
-                    "ckycNumber": "",
-                    "criminalProceeding": "No",
-                    "incomeProof": "ANM",
-                    "designation": "",
-                    "disabled": "",
-                    "percentageOfImpairment": "",
-                    "typeOfImpairment": "",
-                    "udidNumber": ""
-                },
-                "applicantDetails": {
-                    "dateOfBirth": "1997-02-10",
-                    "gender": "Male",
-                    "maritalStatus": "M",
-                    "nationality": "India",
-                    "countryOfResidence": "India",
-                    "education": "Graduate",
-                    "designation": "",
-                    "disabled": "",
-                    "percentageOfImpairment": "",
-                    "typeOfImpairment": ""
-                },
-                "financialDetails": {
-                    "annualIncome": 100000,
-                    "appliedSumAssured": 5100000,
-                    "trsa": null,
-                    "tfsa": null
-                },
-                "policyDetails": {
-                    "proposerName": "SHANKAR PATIL",
-                    "lifeAssuredName": "SHANKAR PATIL",
-                    "productName": "ICICI PRU SUPER PROTECT CREDIT",
-                    "modalPremium": 0,
-                    "paymentMode": "",
-                    "channel": "BRHL"
-                },
-                "underwriting": {
-                    "remarks": "",
-                    "breDecision": {
-                        "status": "",
-                        "category": "",
-                        "coverage": ""
-                    }
-                },
-                "kycDetails": {
-                    "panNumber": "",
-                    "identityProofType": "ANM",
-                    "identityProofNumber": "AAAAA1111A",
-                    "addressProof": "ANM",
-                    "incomeProof": "ANM",
-                    "ageProof": "ANM",
-                    "existingCkycNumber": "NA",
-                    "pep": "No",
-                    "criminalProceedings": "No",
-                    "panFlag": "",
-                    "panAadharSeedingStatus": "",
-                    "identityProofExpiryDate": "",
-                    "pranNo": "",
-                    "pranNoVerification": "",
-                    "udsLink": ""
-                },
-                "address": [
-                    {
-                        "type": "communication",
-                        "addressLine1": "",
-                        "addressLine2": "",
-                        "addressLine3": "",
-                        "landmark": "",
-                        "city": "",
-                        "state": "",
-                        "pinCode": "",
-                        "residingCountry": "",
-                        "topCity": "",
-                        "negativePinCode": ""
-                    },
-                    {
-                        "type": "permanent",
-                        "addressLine1": "MALAD",
-                        "addressLine2": "",
-                        "addressLine3": "",
-                        "landmark": "",
-                        "city": "MUMBAI",
-                        "state": "Maharashtra",
-                        "pinCode": "400001",
-                        "residingCountry": "India",
-                        "topCity": "Y",
-                        "negativePinCode": "Low"
-                    }
-                ],
-                "communicationAddressDetails": {
-                    "addressLine1": "",
-                    "addressLine2": "",
-                    "addressLine3": "",
-                    "landmark": "",
-                    "city": "",
-                    "state": "",
-                    "country": "",
-                    "pincode": "",
-                    "topCity": "",
-                    "negativePinCode": ""
-                },
-                "permanentAddressDetails": {
-                    "addressLine1": "MALAD",
-                    "addressLine2": "",
-                    "addressLine3": "",
-                    "landmark": "",
-                    "city": "MUMBAI",
-                    "state": "Maharashtra",
-                    "country": "India",
-                    "pincode": "400001",
-                    "topCity": "Y",
-                    "negativePinCode": "Low"
-                },
-                "contactDetails": {
-                    "mobileNo": "7898767876",
-                    "alternateMobileNo": "",
-                    "alternateMobile": "",
-                    "std": "",
-                    "landlineNo": "",
-                    "landlineNumber": "",
-                    "emailId": "SDFS@GMAIL.COM",
-                    "emailPref": "Y",
-                    "smsPref": "Y"
-                },
-                "applicantFinancialDetails": {
-                    "occupation": "SPVT",
-                    "annualIncome": 100000,
-                    "gstin": "",
-                    "lastIncomeYear": 2026,
-                    "organisationType": "PUB",
-                    "organisationName": "ICICI bank Limited"
-                },
-                "healthDetail": {
-                    "height": "162.6",
-                    "weight": "",
-                    "bmi": "",
-                    "avgSystolic": "",
-                    "avgDiastolic": "",
-                    "heightFeet": "",
-                    "heightInches": "0",
-                    "hazardousOccupation": "",
-                    "isDisabled": "",
-                    "percentageOfImpairment": "",
-                    "typeOfImpairment": "",
-                    "illnessOrImpairment": [],
-                    "substanceConsumption": [
-                        {
-                            "substance": "",
-                            "consumedAs": "",
-                            "quantity": {
-                                "amount": "",
-                                "unit": "day/week"
-                            },
-                            "noOfYears": null,
-                            "advisedByDoctorForAbstinence": ""
-                        }
-                    ],
-                    "medicalQuestionnaire": [
-                        {
-                            "qtid": "ILLIMPAIRMENT",
-                            "value": "no",
-                            "remar": "",
-                            "subQts": []
-                        },
-                        {
-                            "qtid": "EXCLIENT",
-                            "value": "No",
-                            "remar": "",
-                            "subQts": []
-                        }
-                    ]
-                },
-                "nominee": [
-                    {
-                        "relationWithLA": "",
-                        "relationship": "",
-                        "firstName": "SMITA",
-                        "lastName": "PATIL",
-                        "dob": "1999-04-03T00:00",
-                        "gender": "Female",
-                        "percentage": 0,
-                        "proposerNomineeRelation": "",
-                        "accountNumber": "",
-                        "ifsc": ""
-                    }
-                ],
-                "appointee": [],
-                "genericDetails": {
-                    "existingPolicyNumber": "NA",
-                    "clientId": "NA",
-                    "selfProposed": "Yes",
-                    "typeOfProposer": "Individual",
-                    "relationshipWithLifeAssured": "Self",
-                    "typeOfProposal": "Retail New Business"
-                },
-                "eiaDetails": {
-                    "openEIA": "No",
-                    "existingEIANumber": "NA",
-                    "preferredRepository": "",
-                    "convertPolicies": "No"
-                },
-                "fundDetails": {
-                    "allocationStrategy": "",
-                    "totalAllocation": "",
-                    "atpOpted": "",
-                    "fundDetail": []
-                },
-                "paymentDetails": {},
-                "payoutDetails": {},
-                "advisorDetails": {
-                    "relationWithAdvisor": "",
-                    "acquaintanceDuration": 0,
-                    "fileSentToCopsDate": "",
-                    "branchUWDate": "",
-                    "decalarationDate": "",
-                    "declarationPlace": ""
-                },
-                "questions": [
-                    {
-                        "quesCode": "ILLIMPAIRMENT",
-                        "quesFor": "LA",
-                        "quesType": "HEALTH",
-                        "quesAns": "no"
-                    },
-                    {
-                        "quesCode": "EXCLIENT",
-                        "quesFor": "LA",
-                        "quesType": "GEN",
-                        "quesAns": "No"
-                    }
-                ],
-                "producerDetails": {
-                    "perfiosBank": "No",
-                    "premiumPaymentOption": "RP0",
-                    "isecExperianCategory": "",
-                    "gstInNumber": "",
-                    "pasaSegmentCitiesFlag": "",
-                    "productSource": "standalone",
-                    "imputedMarker": "",
-                    "imputedIncome": "0",
-                    "prePopulatedValueEdited": "NA",
-                    "fnaSumAssured": "0",
-                    "componentCode": "GSPS",
-                    "cdfWaiverFlag": "No",
-                    "youthExpressFlag": "N",
-                    "atsSource": "",
-                    "ipsDiscountFlag": "",
-                    "lumpSumPercentage": "0",
-                    "accuityRiskIndicator": "",
-                    "primaryLASumAssured": ""
-                },
-                "documentDetails": [
-                    {
-                        "documentType": "ID",
-                        "documentName": "ANM",
-                        "documentId": "AAAAA1111A",
-                        "validityDate": ""
-                    }
-                ],
-                "bureauDetails": {
-                    "cibilScore": "",
-                    "cibilIncomeSegment": "",
-                    "cibilEligibilityStatus": "Y",
-                    "cibilServiceStatus": "Y",
-                    "experianScore": "",
-                    "experianIncomeSegment": "",
-                    "experianEligibilityStatus": "Y",
-                    "experianServiceStatus": "Y",
-                    "payuScore": "",
-                    "payuIncomeSegment": "",
-                    "payuEligibilityStatus": "Y",
-                    "payuServiceStatus": "Y"
-                }
+            "financialRisk": {
+              "isFinancial": true,
+              "breFinancialDecision": "",
+              "breRemark": "",
+              "financialEligibility": "",
+              "derivedIncome": "",
+              "counterOfferValue": "",
+              "additionalSA": "",
+              "biuFinancialStatus": ""
+            },
+            "otherRisk": {
+              "isOthers": true,
+              "ptlrResponse": "",
+              "drcResponse": "",
+              "adverseIIB": "",
+              "criminalQuestionResponseLA": "No",
+              "pepQuestionResponseLA": "No",
+              "criminalQuestionResponsePR": "No",
+              "pepQuestionResponsePR": "No",
+              "previousPolicySubstandard": "",
+              "avocationRelatedDisclosure": "",
+              "healthQuestionPositive": "No",
+              "employmentInRiskyIndustry": "",
+              "fatfOfacCountryLogin": "",
+              "hazardousOccupation": "",
+              "eddFlag": "",
+              "claimRiskIndicator": "",
+              "faceMatchScore": "",
+              "tobacco": "",
+              "narcotics": ""
             }
+          }
         ],
-        "applicationOverview": {
-            "sourcingDetail": {
-                "agentCode": "00000046",
-                "bankCode": "05K",
-                "corporateAgent": "",
-                "negativeAdvisor": "",
-                "agencyType": "AG",
-                "areaCode": "",
-                "partnerType": "",
-                "lanNumber": "",
-                "partnerBank": "",
-                "salesChannel": "Agency",
-                "fscfsm": "",
-                "cafosCode": "",
-                "companyCode": "NCOMBO",
-                "spCode": "",
-                "csrlim": "",
-                "bank": "",
-                "branch": "",
-                "channelCode": "Agency",
-                "drcChannelCode": "Agency",
-                "subChannelCode": "",
-                "agentName": "Santosh, Nayak",
-                "trsa": null,
-                "tfsa": null
-            },
-            "groupDetails": {
-                "coverageOption": "",
-                "coverageStatus": "",
-                "moratorium": "",
-                "loanType": "",
-                "bankType": "",
-                "loanTerm": null,
-                "loanAmount": null,
-                "typeOfLoan": "",
-                "dateOfLoanDisbursement": "",
-                "shareOfLoan": null,
-                "applicantStatus": "",
-                "shareOfLoanJl": null,
-                "applicantStatusJl": "",
-                "masterPolicyHolder": ""
-            },
-            "productDetail": [
-                {
-                    "type": "base",
-                    "code": "GP1",
-                    "name": "ICICI PRU SUPER PROTECT CREDIT",
-                    "faceValue": "5100000",
-                    "coverageOption": "ICICI PRU SUPER PROTECT CREDIT",
-                    "term": "",
-                    "premiumMode": "",
-                    "renewalPremiumMode": "",
-                    "premiumFrequency": "",
-                    "annualPremium": 175046,
-                    "installmentPremium": "0",
-                    "installmentPremiumWithTax": null,
-                    "ratingFactor": "",
-                    "isEligible": "",
-                    "riskCessationTerm": 360,
-                    "premiumCessationTerm": 1,
-                    "paymentAmount": null,
-                    "premiumModeFpd": "",
-                    "baseAnnualPremium": null,
-                    "premium": 0,
-                    "sumAssured": 5100000,
-                    "loanLimit": null,
-                    "deathBenefitPayoutOption": "",
-                    "benefitOption": "",
-                    "statCode": "",
-                    "incomeBenefitFlag": "",
-                    "lifeStageBenefitFlag": "",
-                    "statCodeD": "",
-                    "statCodeE": "",
-                    "initialSumAssured": "",
-                    "modalPremium": 0,
-                    "productType": "",
-                    "customerType": null,
-                    "policyType": "Retail New Business",
-                    "policyTerm": null,
-                    "premiumPaymentTerm": 1
-                }
-            ],
-            "riderDetails": [],
-            "customer": {
-                "customerType": null,
-                "policyType": "Retail New Business"
-            },
-            "policyDetails": {
-                "proposerName": "SHANKAR PATIL",
-                "lifeAssuredName": "SHANKAR PATIL",
-                "modalPremium": 0,
-                "policyTerm": null,
-                "premiumPaymentTerm": 1,
-                "paymentMode": ""
+        "faceMatchDetails": {
+          "document": "",
+          "faceMatchScore": null,
+          "imageQuality": null,
+          "remarks": ""
+        },
+        "proposerSummary": {
+          "title": "",
+          "firstName": "SHANKAR",
+          "middleName": "",
+          "lastName": "PATIL",
+          "gender": "Male",
+          "maritalStatus": "M",
+          "dob": "1997-02-10T00:00",
+          "age": {
+            "years": 29,
+            "days": 192
+          },
+          "profileImage": "",
+          "caseStatus": "DRAFT",
+          "nationality": "India",
+          "countryOfResidence": "India",
+          "residentStatus": "India",
+          "education": "Graduate",
+          "pioStatus": "0",
+          "highestQualification": "Graduate",
+          "graduationFlag": "",
+          "orgName": "ICICI bank Limited",
+          "yearsInServiceOrBusiness": null,
+          "industryType": "",
+          "birthCountry": "",
+          "occupationType": "SPVT",
+          "netIncomeAmt": null,
+          "immigrationStatus": "Indian Resident",
+          "orgType": "PUB",
+          "latestIncYear": 2026,
+          "isPEP": false,
+          "panNo": "",
+          "remarks": "",
+          "ckycNumber": "",
+          "criminalProceeding": "No",
+          "incomeProof": "ANM",
+          "designation": "",
+          "disabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": "",
+          "udidNumber": ""
+        },
+        "applicantDetails": {
+          "dateOfBirth": "1997-02-10",
+          "gender": "Male",
+          "maritalStatus": "M",
+          "nationality": "India",
+          "countryOfResidence": "India",
+          "education": "Graduate",
+          "designation": "",
+          "disabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": ""
+        },
+        "financialDetails": {
+          "annualIncome": 100000,
+          "appliedSumAssured": 5100000,
+          "trsa": null,
+          "tfsa": null
+        },
+        "policyDetails": {
+          "proposerName": "SHANKAR PATIL",
+          "lifeAssuredName": "SHANKAR PATIL",
+          "productName": "ICICI PRU SUPER PROTECT CREDIT",
+          "modalPremium": 0,
+          "paymentMode": "",
+          "channel": "BRHL"
+        },
+        "underwriting": {
+          "remarks": "",
+          "breDecision": {
+            "status": "",
+            "category": "",
+            "coverage": ""
+          }
+        },
+        "kycDetails": {
+          "panNumber": "",
+          "identityProofType": "ANM",
+          "identityProofNumber": "AAAAA1111A",
+          "addressProof": "ANM",
+          "incomeProof": "ANM",
+          "ageProof": "ANM",
+          "existingCkycNumber": "NA",
+          "pep": "No",
+          "criminalProceedings": "No",
+          "panFlag": "",
+          "panAadharSeedingStatus": "",
+          "identityProofExpiryDate": "",
+          "pranNo": "",
+          "pranNoVerification": "",
+          "udsLink": ""
+        },
+        "address": [
+          {
+            "type": "communication",
+            "addressLine1": "",
+            "addressLine2": "",
+            "addressLine3": "",
+            "landmark": "",
+            "city": "",
+            "state": "",
+            "pinCode": "",
+            "residingCountry": "",
+            "topCity": "",
+            "negativePinCode": ""
+          },
+          {
+            "type": "permanent",
+            "addressLine1": "MALAD",
+            "addressLine2": "",
+            "addressLine3": "",
+            "landmark": "",
+            "city": "MUMBAI",
+            "state": "Maharashtra",
+            "pinCode": "400001",
+            "residingCountry": "India",
+            "topCity": "Y",
+            "negativePinCode": "Low"
+          }
+        ],
+        "communicationAddressDetails": {
+          "addressLine1": "",
+          "addressLine2": "",
+          "addressLine3": "",
+          "landmark": "",
+          "city": "",
+          "state": "",
+          "country": "",
+          "pincode": "",
+          "topCity": "",
+          "negativePinCode": ""
+        },
+        "permanentAddressDetails": {
+          "addressLine1": "MALAD",
+          "addressLine2": "",
+          "addressLine3": "",
+          "landmark": "",
+          "city": "MUMBAI",
+          "state": "Maharashtra",
+          "country": "India",
+          "pincode": "400001",
+          "topCity": "Y",
+          "negativePinCode": "Low"
+        },
+        "contactDetails": {
+          "mobileNo": "7898767876",
+          "alternateMobileNo": "",
+          "alternateMobile": "",
+          "std": "",
+          "landlineNo": "",
+          "landlineNumber": "",
+          "emailId": "SDFS@GMAIL.COM",
+          "emailPref": "Y",
+          "smsPref": "Y"
+        },
+        "applicantFinancialDetails": {
+          "occupation": "SPVT",
+          "annualIncome": 100000,
+          "gstin": "",
+          "lastIncomeYear": 2026,
+          "organisationType": "PUB",
+          "organisationName": "ICICI bank Limited"
+        },
+        "healthDetail": {
+          "height": "162.6",
+          "weight": "",
+          "bmi": "",
+          "avgSystolic": "",
+          "avgDiastolic": "",
+          "heightFeet": "",
+          "heightInches": "0",
+          "hazardousOccupation": "",
+          "isDisabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": "",
+          "illnessOrImpairment": [],
+          "substanceConsumption": [
+            {
+              "substance": "",
+              "consumedAs": "",
+              "quantity": {
+                "amount": "",
+                "unit": "day/week"
+              },
+              "noOfYears": null,
+              "advisedByDoctorForAbstinence": ""
             }
+          ],
+          "medicalQuestionnaire": [
+            {
+              "qtid": "ILLIMPAIRMENT",
+              "value": "no",
+              "remar": "",
+              "subQts": []
+            },
+            {
+              "qtid": "EXCLIENT",
+              "value": "No",
+              "remar": "",
+              "subQts": []
+            }
+          ]
         },
-        "requirementManagement": [],
-        "pivvSection": {
-            "pivvPoolRemarks": "",
-            "remarkDate": "",
-            "pivvPoolDecision": "",
-            "reason": "",
-            "userId": ""
+        "nominee": [
+          {
+            "relationWithLA": "",
+            "relationship": "",
+            "firstName": "SMITA",
+            "lastName": "PATIL",
+            "dob": "1999-04-03T00:00",
+            "gender": "Female",
+            "percentage": 0,
+            "proposerNomineeRelation": "",
+            "accountNumber": "",
+            "ifsc": ""
+          }
+        ],
+        "appointee": [],
+        "genericDetails": {
+          "existingPolicyNumber": "NA",
+          "clientId": "NA",
+          "selfProposed": "Yes",
+          "typeOfProposer": "Individual",
+          "relationshipWithLifeAssured": "Self",
+          "typeOfProposal": "Retail New Business"
         },
-        "quickLinks": {
-            "proposerForm": "",
-            "previousPolicies": [],
-            "openOtherTasks": [],
-            "riskDetails": [],
-            "auditTrail": [
-                {
-                    "dateTime": "2026-08-19T17:11:52.033197",
-                    "fromPool": "",
-                    "fromPoolUser": "MS-group-bpm",
-                    "toPool": "",
-                    "toPoolUser": "",
-                    "subPool": "PIPELINE",
-                    "userId": "MS-group-bpm",
-                    "uwDecision": "",
-                    "breDecision": "BPM_TASK"
-                },
-                {
-                    "dateTime": "2026-08-17T13:07:34.167734",
-                    "fromPool": "",
-                    "fromPoolUser": "MS-group-bpm",
-                    "toPool": "",
-                    "toPoolUser": "",
-                    "subPool": "PIPELINE",
-                    "userId": "MS-group-bpm",
-                    "uwDecision": "",
-                    "breDecision": "BPM_TASK"
-                },
-                {
-                    "dateTime": "2026-08-17T13:06:32.492261",
-                    "fromPool": "",
-                    "fromPoolUser": "MS-group-bpm",
-                    "toPool": "",
-                    "toPoolUser": "",
-                    "subPool": "PIPELINE",
-                    "userId": "MS-group-bpm",
-                    "uwDecision": "",
-                    "breDecision": "BPM_CASE_STATUS"
-                },
-                {
-                    "dateTime": "2026-08-17T13:06:32.247883",
-                    "fromPool": "",
-                    "fromPoolUser": "MS-group-bpm",
-                    "toPool": "",
-                    "toPoolUser": "",
-                    "subPool": "PIPELINE",
-                    "userId": "MS-group-bpm",
-                    "uwDecision": "",
-                    "breDecision": "BPM_CASE_STATUS"
-                },
-                {
-                    "dateTime": "2026-08-17T13:04:23.674115",
-                    "fromPool": "",
-                    "fromPoolUser": "MS-group-bpm",
-                    "toPool": "",
-                    "toPoolUser": "",
-                    "subPool": "PIPELINE",
-                    "userId": "MS-group-bpm",
-                    "uwDecision": "",
-                    "breDecision": "BPM_TASK"
-                }
-            ]
+        "eiaDetails": {
+          "openEIA": "No",
+          "existingEIANumber": "NA",
+          "preferredRepository": "",
+          "convertPolicies": "No"
         },
-        "decisionHistory": [],
-        "medicals": [],
-        "financials": []
-    }
+        "fundDetails": {
+          "allocationStrategy": "",
+          "totalAllocation": "",
+          "atpOpted": "",
+          "fundDetail": []
+        },
+        "paymentDetails": {},
+        "payoutDetails": {},
+        "advisorDetails": {
+          "relationWithAdvisor": "",
+          "acquaintanceDuration": 0,
+          "fileSentToCopsDate": "",
+          "branchUWDate": "",
+          "decalarationDate": "",
+          "declarationPlace": ""
+        },
+        "questions": [
+          {
+            "quesCode": "ILLIMPAIRMENT",
+            "quesFor": "LA",
+            "quesType": "HEALTH",
+            "quesAns": "no"
+          },
+          {
+            "quesCode": "EXCLIENT",
+            "quesFor": "LA",
+            "quesType": "GEN",
+            "quesAns": "No"
+          }
+        ],
+        "producerDetails": {
+          "perfiosBank": "No",
+          "premiumPaymentOption": "RP0",
+          "isecExperianCategory": "",
+          "gstInNumber": "",
+          "pasaSegmentCitiesFlag": "",
+          "productSource": "standalone",
+          "imputedMarker": "",
+          "imputedIncome": "0",
+          "prePopulatedValueEdited": "NA",
+          "fnaSumAssured": "0",
+          "componentCode": "GSPS",
+          "cdfWaiverFlag": "No",
+          "youthExpressFlag": "N",
+          "atsSource": "",
+          "ipsDiscountFlag": "",
+          "lumpSumPercentage": "0",
+          "accuityRiskIndicator": "",
+          "primaryLASumAssured": ""
+        },
+        "documentDetails": [
+          {
+            "documentType": "ID",
+            "documentName": "ANM",
+            "documentId": "AAAAA1111A",
+            "validityDate": ""
+          }
+        ],
+        "bureauDetails": {
+          "cibilScore": "",
+          "cibilIncomeSegment": "",
+          "cibilEligibilityStatus": "Y",
+          "cibilServiceStatus": "Y",
+          "experianScore": "",
+          "experianIncomeSegment": "",
+          "experianEligibilityStatus": "Y",
+          "experianServiceStatus": "Y",
+          "payuScore": "",
+          "payuIncomeSegment": "",
+          "payuEligibilityStatus": "Y",
+          "payuServiceStatus": "Y"
+        }
+      },
+      {
+        "memberType": "lifeassured1",
+        "lifeType": "LA",
+        "customerType": null,
+        "partyId": "29075a52-ee72-46b7-ab55-b14879bfe3bf",
+        "jontFlag": false,
+        "lifeNumber": "",
+        "clientId": "NA",
+        "proposerLaRelation": "Self",
+        "jointLARelation": "",
+        "jointPRRelation": "",
+        "nriFlag": false,
+        "fatfFlag": false,
+        "faceMatchDetails": {
+          "document": "",
+          "faceMatchScore": null,
+          "imageQuality": null,
+          "remarks": ""
+        },
+        "proposerSummary": {
+          "title": "",
+          "firstName": "SHANKAR",
+          "middleName": "",
+          "lastName": "PATIL",
+          "gender": "Male",
+          "maritalStatus": "M",
+          "dob": "1997-02-10T00:00",
+          "age": {
+            "years": 29,
+            "days": 192
+          },
+          "profileImage": "",
+          "caseStatus": "DRAFT",
+          "nationality": "India",
+          "countryOfResidence": "India",
+          "residentStatus": "India",
+          "education": "Graduate",
+          "pioStatus": "0",
+          "highestQualification": "Graduate",
+          "graduationFlag": "",
+          "orgName": "ICICI bank Limited",
+          "yearsInServiceOrBusiness": null,
+          "industryType": "",
+          "birthCountry": "",
+          "occupationType": "SPVT",
+          "netIncomeAmt": null,
+          "immigrationStatus": "Indian Resident",
+          "orgType": "PUB",
+          "latestIncYear": 2026,
+          "isPEP": false,
+          "panNo": "",
+          "remarks": "",
+          "ckycNumber": "",
+          "criminalProceeding": "No",
+          "incomeProof": "ANM",
+          "designation": "",
+          "disabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": "",
+          "udidNumber": ""
+        },
+        "applicantDetails": {
+          "dateOfBirth": "1997-02-10",
+          "gender": "Male",
+          "maritalStatus": "M",
+          "nationality": "India",
+          "countryOfResidence": "India",
+          "education": "Graduate",
+          "designation": "",
+          "disabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": ""
+        },
+        "financialDetails": {
+          "annualIncome": 100000,
+          "appliedSumAssured": 5100000,
+          "trsa": null,
+          "tfsa": null
+        },
+        "policyDetails": {
+          "proposerName": "SHANKAR PATIL",
+          "lifeAssuredName": "SHANKAR PATIL",
+          "productName": "ICICI PRU SUPER PROTECT CREDIT",
+          "modalPremium": 0,
+          "paymentMode": "",
+          "channel": "BRHL"
+        },
+        "underwriting": {
+          "remarks": "",
+          "breDecision": {
+            "status": "",
+            "category": "",
+            "coverage": ""
+          }
+        },
+        "kycDetails": {
+          "panNumber": "",
+          "identityProofType": "ANM",
+          "identityProofNumber": "AAAAA1111A",
+          "addressProof": "ANM",
+          "incomeProof": "ANM",
+          "ageProof": "ANM",
+          "existingCkycNumber": "NA",
+          "pep": "No",
+          "criminalProceedings": "No",
+          "panFlag": "",
+          "panAadharSeedingStatus": "",
+          "identityProofExpiryDate": "",
+          "pranNo": "",
+          "pranNoVerification": "",
+          "udsLink": ""
+        },
+        "address": [
+          {
+            "type": "communication",
+            "addressLine1": "",
+            "addressLine2": "",
+            "addressLine3": "",
+            "landmark": "",
+            "city": "",
+            "state": "",
+            "pinCode": "",
+            "residingCountry": "",
+            "topCity": "",
+            "negativePinCode": ""
+          },
+          {
+            "type": "permanent",
+            "addressLine1": "MALAD",
+            "addressLine2": "",
+            "addressLine3": "",
+            "landmark": "",
+            "city": "MUMBAI",
+            "state": "Maharashtra",
+            "pinCode": "400001",
+            "residingCountry": "India",
+            "topCity": "Y",
+            "negativePinCode": "Low"
+          }
+        ],
+        "communicationAddressDetails": {
+          "addressLine1": "",
+          "addressLine2": "",
+          "addressLine3": "",
+          "landmark": "",
+          "city": "",
+          "state": "",
+          "country": "",
+          "pincode": "",
+          "topCity": "",
+          "negativePinCode": ""
+        },
+        "permanentAddressDetails": {
+          "addressLine1": "MALAD",
+          "addressLine2": "",
+          "addressLine3": "",
+          "landmark": "",
+          "city": "MUMBAI",
+          "state": "Maharashtra",
+          "country": "India",
+          "pincode": "400001",
+          "topCity": "Y",
+          "negativePinCode": "Low"
+        },
+        "contactDetails": {
+          "mobileNo": "7898767876",
+          "alternateMobileNo": "",
+          "alternateMobile": "",
+          "std": "",
+          "landlineNo": "",
+          "landlineNumber": "",
+          "emailId": "SDFS@GMAIL.COM",
+          "emailPref": "Y",
+          "smsPref": "Y"
+        },
+        "applicantFinancialDetails": {
+          "occupation": "SPVT",
+          "annualIncome": 100000,
+          "gstin": "",
+          "lastIncomeYear": 2026,
+          "organisationType": "PUB",
+          "organisationName": "ICICI bank Limited"
+        },
+        "healthDetail": {
+          "height": "162.6",
+          "weight": "",
+          "bmi": "",
+          "avgSystolic": "",
+          "avgDiastolic": "",
+          "heightFeet": "",
+          "heightInches": "0",
+          "hazardousOccupation": "",
+          "isDisabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": "",
+          "illnessOrImpairment": [],
+          "substanceConsumption": [
+            {
+              "substance": "",
+              "consumedAs": "",
+              "quantity": {
+                "amount": "",
+                "unit": "day/week"
+              },
+              "noOfYears": null,
+              "advisedByDoctorForAbstinence": ""
+            }
+          ],
+          "medicalQuestionnaire": [
+            {
+              "qtid": "ILLIMPAIRMENT",
+              "value": "no",
+              "remar": "",
+              "subQts": []
+            },
+            {
+              "qtid": "EXCLIENT",
+              "value": "No",
+              "remar": "",
+              "subQts": []
+            }
+          ]
+        },
+        "nominee": [
+          {
+            "relationWithLA": "",
+            "relationship": "",
+            "firstName": "SMITA",
+            "lastName": "PATIL",
+            "dob": "1999-04-03T00:00",
+            "gender": "Female",
+            "percentage": 0,
+            "proposerNomineeRelation": "",
+            "accountNumber": "",
+            "ifsc": ""
+          }
+        ],
+        "appointee": [],
+        "genericDetails": {
+          "existingPolicyNumber": "NA",
+          "clientId": "NA",
+          "selfProposed": "Yes",
+          "typeOfProposer": "Individual",
+          "relationshipWithLifeAssured": "Self",
+          "typeOfProposal": "Retail New Business"
+        },
+        "eiaDetails": {
+          "openEIA": "No",
+          "existingEIANumber": "NA",
+          "preferredRepository": "",
+          "convertPolicies": "No"
+        },
+        "fundDetails": {
+          "allocationStrategy": "",
+          "totalAllocation": "",
+          "atpOpted": "",
+          "fundDetail": []
+        },
+        "paymentDetails": {},
+        "payoutDetails": {},
+        "advisorDetails": {
+          "relationWithAdvisor": "",
+          "acquaintanceDuration": 0,
+          "fileSentToCopsDate": "",
+          "branchUWDate": "",
+          "decalarationDate": "",
+          "declarationPlace": ""
+        },
+        "questions": [
+          {
+            "quesCode": "ILLIMPAIRMENT",
+            "quesFor": "LA",
+            "quesType": "HEALTH",
+            "quesAns": "no"
+          },
+          {
+            "quesCode": "EXCLIENT",
+            "quesFor": "LA",
+            "quesType": "GEN",
+            "quesAns": "No"
+          }
+        ],
+        "producerDetails": {
+          "perfiosBank": "No",
+          "premiumPaymentOption": "RP0",
+          "isecExperianCategory": "",
+          "gstInNumber": "",
+          "pasaSegmentCitiesFlag": "",
+          "productSource": "standalone",
+          "imputedMarker": "",
+          "imputedIncome": "0",
+          "prePopulatedValueEdited": "NA",
+          "fnaSumAssured": "0",
+          "componentCode": "GSPS",
+          "cdfWaiverFlag": "No",
+          "youthExpressFlag": "N",
+          "atsSource": "",
+          "ipsDiscountFlag": "",
+          "lumpSumPercentage": "0",
+          "accuityRiskIndicator": "",
+          "primaryLASumAssured": ""
+        },
+        "documentDetails": [
+          {
+            "documentType": "ID",
+            "documentName": "ANM",
+            "documentId": "AAAAA1111A",
+            "validityDate": ""
+          }
+        ],
+        "bureauDetails": {
+          "cibilScore": "",
+          "cibilIncomeSegment": "",
+          "cibilEligibilityStatus": "Y",
+          "cibilServiceStatus": "Y",
+          "experianScore": "",
+          "experianIncomeSegment": "",
+          "experianEligibilityStatus": "Y",
+          "experianServiceStatus": "Y",
+          "payuScore": "",
+          "payuIncomeSegment": "",
+          "payuEligibilityStatus": "Y",
+          "payuServiceStatus": "Y"
+        }
+      }
+    ],
+    "applicationOverview": {
+      "sourcingDetail": {
+        "agentCode": "00000046",
+        "bankCode": "05K",
+        "corporateAgent": "",
+        "negativeAdvisor": "",
+        "agencyType": "AG",
+        "areaCode": "",
+        "partnerType": "",
+        "lanNumber": "",
+        "partnerBank": "",
+        "salesChannel": "Agency",
+        "fscfsm": "",
+        "cafosCode": "",
+        "companyCode": "NCOMBO",
+        "spCode": "",
+        "csrlim": "",
+        "bank": "",
+        "branch": "",
+        "channelCode": "Agency",
+        "drcChannelCode": "Agency",
+        "subChannelCode": "",
+        "agentName": "Santosh, Nayak",
+        "trsa": null,
+        "tfsa": null
+      },
+      "groupDetails": {
+        "coverageOption": "",
+        "coverageStatus": "",
+        "moratorium": "",
+        "loanType": "",
+        "bankType": "",
+        "loanTerm": null,
+        "loanAmount": null,
+        "typeOfLoan": "",
+        "dateOfLoanDisbursement": "",
+        "shareOfLoan": null,
+        "applicantStatus": "",
+        "shareOfLoanJl": null,
+        "applicantStatusJl": "",
+        "masterPolicyHolder": ""
+      },
+      "productDetail": [
+        {
+          "type": "base",
+          "code": "GP1",
+          "name": "ICICI PRU SUPER PROTECT CREDIT",
+          "faceValue": "5100000",
+          "coverageOption": "ICICI PRU SUPER PROTECT CREDIT",
+          "term": "",
+          "premiumMode": "",
+          "renewalPremiumMode": "",
+          "premiumFrequency": "",
+          "annualPremium": 175046,
+          "installmentPremium": "0",
+          "installmentPremiumWithTax": null,
+          "ratingFactor": "",
+          "isEligible": "",
+          "riskCessationTerm": 360,
+          "premiumCessationTerm": 1,
+          "paymentAmount": null,
+          "premiumModeFpd": "",
+          "baseAnnualPremium": null,
+          "premium": 0,
+          "sumAssured": 5100000,
+          "loanLimit": null,
+          "deathBenefitPayoutOption": "",
+          "benefitOption": "",
+          "statCode": "",
+          "incomeBenefitFlag": "",
+          "lifeStageBenefitFlag": "",
+          "statCodeD": "",
+          "statCodeE": "",
+          "initialSumAssured": "",
+          "modalPremium": 0,
+          "productType": "",
+          "customerType": null,
+          "policyType": "Retail New Business",
+          "policyTerm": null,
+          "premiumPaymentTerm": 1
+        }
+      ],
+      "riderDetails": [],
+      "customer": {
+        "customerType": null,
+        "policyType": "Retail New Business"
+      },
+      "policyDetails": {
+        "proposerName": "SHANKAR PATIL",
+        "lifeAssuredName": "SHANKAR PATIL",
+        "modalPremium": 0,
+        "policyTerm": null,
+        "premiumPaymentTerm": 1,
+        "paymentMode": ""
+      }
+    },
+    "requirementManagement": [],
+    "pivvSection": {
+      "pivvPoolRemarks": "",
+      "remarkDate": "",
+      "pivvPoolDecision": "",
+      "reason": "",
+      "userId": ""
+    },
+    "quickLinks": {
+      "proposerForm": "",
+      "previousPolicies": [],
+      "openOtherTasks": [],
+      "riskDetails": [],
+      "auditTrail": [
+        {
+          "dateTime": "2026-08-19T17:11:52.033197",
+          "fromPool": "",
+          "fromPoolUser": "MS-group-bpm",
+          "toPool": "",
+          "toPoolUser": "",
+          "subPool": "PIPELINE",
+          "userId": "MS-group-bpm",
+          "uwDecision": "",
+          "breDecision": "BPM_TASK"
+        },
+        {
+          "dateTime": "2026-08-17T13:07:34.167734",
+          "fromPool": "",
+          "fromPoolUser": "MS-group-bpm",
+          "toPool": "",
+          "toPoolUser": "",
+          "subPool": "PIPELINE",
+          "userId": "MS-group-bpm",
+          "uwDecision": "",
+          "breDecision": "BPM_TASK"
+        },
+        {
+          "dateTime": "2026-08-17T13:06:32.492261",
+          "fromPool": "",
+          "fromPoolUser": "MS-group-bpm",
+          "toPool": "",
+          "toPoolUser": "",
+          "subPool": "PIPELINE",
+          "userId": "MS-group-bpm",
+          "uwDecision": "",
+          "breDecision": "BPM_CASE_STATUS"
+        },
+        {
+          "dateTime": "2026-08-17T13:06:32.247883",
+          "fromPool": "",
+          "fromPoolUser": "MS-group-bpm",
+          "toPool": "",
+          "toPoolUser": "",
+          "subPool": "PIPELINE",
+          "userId": "MS-group-bpm",
+          "uwDecision": "",
+          "breDecision": "BPM_CASE_STATUS"
+        },
+        {
+          "dateTime": "2026-08-17T13:04:23.674115",
+          "fromPool": "",
+          "fromPoolUser": "MS-group-bpm",
+          "toPool": "",
+          "toPoolUser": "",
+          "subPool": "PIPELINE",
+          "userId": "MS-group-bpm",
+          "uwDecision": "",
+          "breDecision": "BPM_TASK"
+        }
+      ]
+    },
+    "decisionHistory": [],
+    "medicals": [],
+    "financials": []
+  }
 }
