@@ -1515,10 +1515,10 @@ const ViewMedical = () => {
       !fetchError &&
       !medicalFetchPayloadError);
 
-/*
-* Keep the full-page loader visible until the DRS summary
-* and Medical Fetch APIs have completed.
-*/
+  /*
+  * Keep the full-page loader visible until the DRS summary
+  * and Medical Fetch APIs have completed.
+  */
   if (isPageLoading) {
     return (
       <Box
@@ -1591,245 +1591,251 @@ const ViewMedical = () => {
         </Box>
       )}
 
-<Box sx={{px: 1}}>
-      <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
-        <CustomAccordion
-          title={isFormalRole ? "Member Profile" : "Applicant Profile"}
-          defaultExpanded={false}
-          detailPadding={0}
-        >
-          {isFormalRole ? (
-            <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-              <FormalMemberProfile profile={formalMemberProfile} />
-            </Box>
-          ) : (
-            <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-              <ApplicantProfile selectedApplicantTab={currentApplicantTab} isApplicantDetailsExpanded />
-            </Box>
-          )}
-        </CustomAccordion>
-      </Box>
+      <Box sx={{ px: 1 }}>
+        <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
+          <CustomAccordion
+            title={isFormalRole ? "Member Profile" : "Applicant Profile"}
+            defaultExpanded={false}
+            detailPadding={0}
+          >
+            {isFormalRole ? (
+              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+                <FormalMemberProfile profile={formalMemberProfile} />
+              </Box>
+            ) : (
+              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
+                <ApplicantProfile selectedApplicantTab={currentApplicantTab} isApplicantDetailsExpanded />
+              </Box>
+            )}
+          </CustomAccordion>
+        </Box>
 
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: { xs: "column", md: "row" },
-          gap: 1.5,
-          alignItems: "flex-start",
-          mt: 1,
-        }}
-      >
         <Box
-          ref={menuContainerRef}
           sx={{
-            width: { xs: "100%", md: 208 },
-            position: { xs: "static", md: "sticky" },
-            top: { md: 124 },
-            alignSelf: "flex-start",
-            borderRadius: 1,
-            overflow: "hidden",
-            border: "1px solid #D6D8DC",
-            backgroundColor: "#F8F9FB",
-            maxHeight: { md: "calc(100vh - 180px)" },
-            overflowY: { md: "auto" },
+            display: "flex",
+            flexDirection: { xs: "column", md: "row" },
+            gap: 1.5,
+            alignItems: "flex-start",
+            mt: 1,
           }}
         >
-          {medicalSectionGroups.map((group) => (
-            <Box key={group.key}>
-              <Typography
-                sx={{
-                  px: 1.5,
-                  py: 1,
-                  fontSize: 12,
-                  fontWeight: 700,
-                  color: "#344054",
-                  backgroundColor: "#EEF2F6",
-                  borderBottom: "1px solid #E4E7EC",
-                  textTransform: "uppercase",
-                  letterSpacing: 0.35,
-                }}
-              >
-                {group.label}
-              </Typography>
+          <Box
+            ref={menuContainerRef}
+            sx={{
+              width: { xs: "100%", md: 208 },
+              position: { xs: "static", md: "sticky" },
+              top: { md: 124 },
+              alignSelf: "flex-start",
+              borderRadius: 1,
+              overflow: "hidden",
+              border: "1px solid #D6D8DC",
+              backgroundColor: "#F8F9FB",
+              maxHeight: { md: "calc(100vh - 180px)" },
+              overflowY: { md: "auto" },
+            }}
+          >
+            {medicalSectionGroups.map((group) => (
+              <Box key={group.key}>
+                <Typography
+                  sx={{
+                    px: 1.5,
+                    py: 1,
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#344054",
+                    backgroundColor: "#EEF2F6",
+                    borderBottom: "1px solid #E4E7EC",
+                    textTransform: "uppercase",
+                    letterSpacing: 0.35,
+                  }}
+                >
+                  {group.label}
+                </Typography>
 
-              {group.subSections.map((subSection, index) => {
-                const subSectionId = `${group.key}-${index}`;
-                const isActive = subSectionId === resolvedActiveSubSectionId;
+                {group.subSections.map((subSection, index) => {
+                  const subSectionId = `${group.key}-${index}`;
+                  const isActive = subSectionId === resolvedActiveSubSectionId;
+
+                  return (
+                    <Box
+                      key={subSectionId}
+                      data-medical-menu-id={subSectionId}
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => handleSubSectionMenuClick(subSectionId)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" || event.key === " ") {
+                          event.preventDefault();
+                          handleSubSectionMenuClick(subSectionId);
+                        }
+                      }}
+                      sx={{
+                        px: 1.5,
+                        py: 1.25,
+                        borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
+                        borderBottom: "1px solid #EAECEF",
+                        backgroundColor: isActive ? "#FFFFFF" : "transparent",
+                        color: isActive ? "#B42318" : "#667085",
+                        fontSize: 13,
+                        fontWeight: isActive ? 600 : 500,
+                        lineHeight: 1.3,
+                        cursor: "pointer",
+                        transition: "all 0.2s ease",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit" }}>
+                        {subSection}
+                      </Typography>
+                      <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
+                        {"\u203A"}
+                      </Typography>
+                    </Box>
+                  );
+                })}
+              </Box>
+            ))}
+          </Box>
+
+          <Box sx={{ flex: 1, width: "100%", minHeight: 240 }}>
+            <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+              {flattenedSubSections.map((subSection) => {
+                const group = medicalSectionGroups.find((medicalGroup) => medicalGroup.label === subSection.groupLabel);
 
                 return (
                   <Box
-                    key={subSectionId}
-                    data-medical-menu-id={subSectionId}
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => handleSubSectionMenuClick(subSectionId)}
-                    onKeyDown={(event) => {
-                      if (event.key === "Enter" || event.key === " ") {
-                        event.preventDefault();
-                        handleSubSectionMenuClick(subSectionId);
-                      }
+                    key={subSection.id}
+                    data-medical-section-id={subSection.id}
+                    ref={(node) => {
+                      sectionRefs.current[subSection.id] = node as HTMLDivElement | null;
                     }}
                     sx={{
-                      px: 1.5,
-                      py: 1.25,
-                      borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
-                      borderBottom: "1px solid #EAECEF",
-                      backgroundColor: isActive ? "#FFFFFF" : "transparent",
-                      color: isActive ? "#B42318" : "#667085",
-                      fontSize: 13,
-                      fontWeight: isActive ? 600 : 500,
-                      lineHeight: 1.3,
-                      cursor: "pointer",
-                      transition: "all 0.2s ease",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: 1,
+                      scrollMarginTop: "160px",
+                      border: "1px solid #E4E7EC",
+                      borderRadius: 1.5,
+                      backgroundColor: "#FFFFFF",
+                      boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
+                      overflow: "hidden",
                     }}
                   >
-                    <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit" }}>
-                      {subSection}
-                    </Typography>
-                    <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
-                      {"\u203A"}
-                    </Typography>
+                    <Box
+                      sx={{
+                        px: { xs: 1.5, md: 2 },
+                        py: 1.25,
+                        borderBottom: "1px solid #E4E7EC",
+                        backgroundColor: "#F8FAFC",
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        gap: 1,
+                        flexWrap: "wrap",
+                      }}
+                    >
+                      <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>
+                        {subSection.title}
+                      </Typography>
+                      {roleType === "CPT_DATA_ENTRY_MR_TASK" && (
+                        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
+                          <Box sx={{ display: "flex", gap: 1 }}>
+                            {editingSubSectionId !== subSection.id ? (
+                              <CustomButton
+                                sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                                onClick={() => handleSubSectionEdit(subSection.id)}
+                              >
+                                Edit
+                              </CustomButton>
+                            ) : (
+                              <>
+                                <CustomButton
+                                  sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                                  disabled={
+                                    // submitLoading ||
+                                    !safeApplicationId}
+                                  onClick={handleSubSectionSave}
+                                >
+                                  {/* {submitLoading ? "Saving..." : "Save"} */}
+                                  Save
+                                </CustomButton>
+                                <CustomButton
+                                  sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                                  // disabled={submitLoading}
+                                  onClick={() => handleSubSectionReset()}
+                                >
+                                  Reset
+                                </CustomButton>
+                              </>
+                            )}
+                          </Box>
+                        </Box>
+                      )}
+                    </Box>
+
+                    <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
+                      {group?.key === "mer" && (
+                        // <MerForm
+                        //   ref={(node) => {
+                        //     merFormRefs.current[subSection.id] = node;
+                        //   }}
+                        //   selectedSubSection={subSection.title}
+                        //   fields={group.fields}
+                        //   applicationNo={safeApplicationId}
+                        //   isEditing={editingSubSectionId === subSection.id}
+                        // />
+                        <MerForm
+                          ref={(node) => {
+                            merFormRefs.current[subSection.id] =
+                              node;
+                          }}
+                          selectedSubSection={
+                            subSection.title
+                          }
+                          fields={group.fields}
+                          applicationNo={
+                            safeApplicationId
+                          }
+                          isEditing={
+                            editingSubSectionId ===
+                            subSection.id
+                          }
+                        />
+                      )}
+                      {group?.key === "specialMedical" && (
+                        <SpecialMedicalForm
+                          ref={(node) => {
+                            specialMedicalFormRefs.current[subSection.id] = node;
+                          }}
+                          selectedSubSection={subSection.title}
+                          fields={group.fields}
+                          isEditing={editingSubSectionId === subSection.id}
+                        />
+                      )}
+                      {group?.key === "otherMedicals" && (
+                        <OtherMedicalsForm
+                          ref={(node) => {
+                            otherMedicalsFormRefs.current[subSection.id] = node;
+                          }}
+                          selectedSubSection={subSection.title}
+                          fields={group.fields}
+                          isEditing={editingSubSectionId === subSection.id}
+                        />
+                      )}
+                    </Box>
                   </Box>
                 );
               })}
             </Box>
-          ))}
-        </Box>
-
-        <Box sx={{ flex: 1, width: "100%", minHeight: 240 }}>
-          <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-            {flattenedSubSections.map((subSection) => {
-              const group = medicalSectionGroups.find((medicalGroup) => medicalGroup.label === subSection.groupLabel);
-
-              return (
-                <Box
-                  key={subSection.id}
-                  data-medical-section-id={subSection.id}
-                  ref={(node) => {
-                    sectionRefs.current[subSection.id] = node as HTMLDivElement | null;
-                  }}
-                  sx={{
-                    scrollMarginTop: "160px",
-                    border: "1px solid #E4E7EC",
-                    borderRadius: 1.5,
-                    backgroundColor: "#FFFFFF",
-                    boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
-                    overflow: "hidden",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      px: { xs: 1.5, md: 2 },
-                      py: 1.25,
-                      borderBottom: "1px solid #E4E7EC",
-                      backgroundColor: "#F8FAFC",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      gap: 1,
-                      flexWrap: "wrap",
-                    }}
-                  >
-                    <Typography sx={{ fontSize: 16, fontWeight: 700, color: "#1F2937" }}>
-                      {subSection.title}
-                    </Typography>
-                    {roleType === "CPT_DATA_ENTRY_MR_TASK" && (
-                      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 0.5 }}>
-                        <Box sx={{ display: "flex", gap: 1 }}>
-                          {editingSubSectionId !== subSection.id ? (
-                            <CustomButton
-                              sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                              onClick={() => handleSubSectionEdit(subSection.id)}
-                            >
-                              Edit
-                            </CustomButton>
-                          ) : (
-                            <>
-                              <CustomButton
-                                sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                                disabled={
-                                  // submitLoading ||
-                                  !safeApplicationId}
-                                onClick={handleSubSectionSave}
-                              >
-                                {/* {submitLoading ? "Saving..." : "Save"} */}
-                                Save
-                              </CustomButton>
-                              <CustomButton
-                                sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
-                                // disabled={submitLoading}
-                                onClick={() => handleSubSectionReset()}
-                              >
-                                Reset
-                              </CustomButton>
-                            </>
-                          )}
-                        </Box>
-                      </Box>
-                    )}
-                  </Box>
-
-                  <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
-                    {group?.key === "mer" && (
-                      // <MerForm
-                      //   ref={(node) => {
-                      //     merFormRefs.current[subSection.id] = node;
-                      //   }}
-                      //   selectedSubSection={subSection.title}
-                      //   fields={group.fields}
-                      //   applicationNo={safeApplicationId}
-                      //   isEditing={editingSubSectionId === subSection.id}
-                      // />
-                      <MerForm
-                        ref={(node) => {
-                          merFormRefs.current[subSection.id] =
-                            node;
-                        }}
-                        selectedSubSection={
-                          subSection.title
-                        }
-                        fields={group.fields}
-                        applicationNo={
-                          safeApplicationId
-                        }
-                        isEditing={
-                          editingSubSectionId ===
-                          subSection.id
-                        }
-                      />
-                    )}
-                    {group?.key === "specialMedical" && (
-                      <SpecialMedicalForm
-                        ref={(node) => {
-                          specialMedicalFormRefs.current[subSection.id] = node;
-                        }}
-                        selectedSubSection={subSection.title}
-                        fields={group.fields}
-                        isEditing={editingSubSectionId === subSection.id}
-                      />
-                    )}
-                    {group?.key === "otherMedicals" && (
-                      <OtherMedicalsForm
-                        ref={(node) => {
-                          otherMedicalsFormRefs.current[subSection.id] = node;
-                        }}
-                        selectedSubSection={subSection.title}
-                        fields={group.fields}
-                        isEditing={editingSubSectionId === subSection.id}
-                      />
-                    )}
-                  </Box>
-                </Box>
-              );
-            })}
           </Box>
         </Box>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2, bgcolor: "#fff", mt: 1, borderRadius: 2 }}>
+          <CustomButton sx={{ width: 100, py: 0.5, fontSize: 13, borderRadius: "50px" }}>
+            Submit
+          </CustomButton>
+        </Box>
       </Box>
-    </Box>
     </>
   );
 };
