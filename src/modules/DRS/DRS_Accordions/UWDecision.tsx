@@ -22,6 +22,8 @@ import { getAllReasonRemarks, getNonMedicalReasonRemarks, normalizeDecisionOptio
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
+import { validateBreCounterSignDecision } from "../../../validations/breCUWValidations";
+import { validateAdditionalUwDecision } from "../../../validations/breadditionalValidations";
 import { userRoleNameThunk } from "../../../store/thunks/userRoleNameThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
 import { drsThunk } from "../../../store/thunks/drsThunk";
@@ -79,6 +81,11 @@ const createCounterOfferTableState = () => ({
     },
 });
 
+const toRecord = (value: unknown): Record<string, unknown> =>
+    value && typeof value === "object" && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : {};
+
 const UWDecision = () => {
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes)
     const masters = useSelector((state: RootState) => state.drs.masters);
@@ -87,6 +94,21 @@ const UWDecision = () => {
     const location = useLocation();
     const { businessType, applicationNumber } = useAppContext();
     const drsData = useSelector((state: RootState) => state.drs.data as unknown as Record<string, unknown> | null);
+    const breResponse = useSelector((state: RootState) => {
+        const rootState = state as unknown as Record<string, unknown>;
+        const breState = toRecord(rootState.bre);
+        const drsState = toRecord(rootState.drs);
+
+        return (
+            breState.response ??
+            breState.data ??
+            breState.breData ??
+            drsState.breResponse ??
+            drsState.breData ??
+            drsState.breExternalApiOutputs ??
+            null
+        );
+    });
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
@@ -579,6 +601,29 @@ const UWDecision = () => {
     };
 
     const handleSubmitIntent = () => {
+        const breCounterSignValidation = validateBreCounterSignDecision(
+            drsData,
+            breResponse,
+            caseUWDecisionLabel,
+            resolvedDecisionCode,
+        );
+        if (!breCounterSignValidation.isValid) {
+            setSubmitMessage(breCounterSignValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
+        const additionalUwValidation = validateAdditionalUwDecision(
+            drsData,
+            caseUWDecisionLabel,
+            resolvedDecisionCode,
+        );
+        if (!additionalUwValidation.isValid) {
+            setSubmitMessage(additionalUwValidation.message);
+            setSubmitStatus("failure");
+            return;
+        }
+
         const breValidation = validateDrsFinalBre(drsData);
         const roleType = String(
             localStorage.getItem("roleType") ?? "",

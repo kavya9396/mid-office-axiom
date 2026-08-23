@@ -34,6 +34,24 @@
               "brePhysicalMedicalRemark": "",
               "breTeleVideoMerDecision": "",
               "breTeleVideoMerRemark": "",
+              "teleMerPrompting": false,
+              "videoMerPrompting": false,
+              "tuwStatus": "",
+              "tuwReason": "",
+              "cotTest": {
+                "received": false,
+                "discrepancyStatus": "",
+                "result": "",
+                "mandatoryFieldsComplete": false
+              },
+              "merHabits": {
+                "cigarettesOrBeedisOrCigar": false,
+                "gutkaSnuffPaan": false
+              },
+              "teleMerHabits": {
+                "cigarettesOrBeedisOrCigar": false,
+                "gutkaSnuffPaan": false
+              },
               "munichReMedicalDecision": "",
               "munichReRating": "",
               "biuMedicalStatus": ""
@@ -47,6 +65,13 @@
               "counterOfferValue": "5000000.0",
               "additionalSA": "0.0",
               "biuFinancialStatus": ""
+            },
+            "biuModelResponse": {
+              "model": "",
+              "predict": "",
+              "action": "",
+              "modelOutput": "",
+              "modelName": ""
             },
             "otherRisk": {
               "isOthers": true,
@@ -66,8 +91,13 @@
               "eddFlag": "Yes",
               "claimRiskIndicator": "",
               "faceMatchScore": "",
+              "smokerIndicator": "",
+              "tobaccoIndicator": "",
+              "narcoticIndicator": "",
               "tobacco": "",
-              "narcotics": ""
+              "narcotics": "",
+              "covidAdverseReply": "No",
+              "accuityTransactionStatus": ""
             }
           }
         ],
@@ -310,7 +340,9 @@
           "atpOpted": "",
           "fundDetail": []
         },
-        "paymentDetails": {},
+        "paymentDetails": {
+          "isThirdPartyPayment": false
+        },
         "payoutDetails": {},
         "advisorDetails": {
           "relationWithAdvisor": "others",
@@ -391,6 +423,24 @@
               "brePhysicalMedicalRemark": "",
               "breTeleVideoMerDecision": "",
               "breTeleVideoMerRemark": "",
+              "teleMerPrompting": false,
+              "videoMerPrompting": false,
+              "tuwStatus": "",
+              "tuwReason": "",
+              "cotTest": {
+                "received": false,
+                "discrepancyStatus": "",
+                "result": "",
+                "mandatoryFieldsComplete": false
+              },
+              "merHabits": {
+                "cigarettesOrBeedisOrCigar": false,
+                "gutkaSnuffPaan": false
+              },
+              "teleMerHabits": {
+                "cigarettesOrBeedisOrCigar": false,
+                "gutkaSnuffPaan": false
+              },
               "munichReMedicalDecision": "",
               "munichReRating": "",
               "biuMedicalStatus": ""
@@ -404,6 +454,13 @@
               "counterOfferValue": "5000000.0",
               "additionalSA": "0.0",
               "biuFinancialStatus": ""
+            },
+            "biuModelResponse": {
+              "model": "",
+              "predict": "",
+              "action": "",
+              "modelOutput": "",
+              "modelName": ""
             },
             "otherRisk": {
               "isOthers": true,
@@ -423,8 +480,13 @@
               "eddFlag": "Yes",
               "claimRiskIndicator": "",
               "faceMatchScore": "",
+              "smokerIndicator": "",
+              "tobaccoIndicator": "",
+              "narcoticIndicator": "",
               "tobacco": "",
-              "narcotics": ""
+              "narcotics": "",
+              "covidAdverseReply": "No",
+              "accuityTransactionStatus": ""
             }
           }
         ],
@@ -667,7 +729,9 @@
           "atpOpted": "",
           "fundDetail": []
         },
-        "paymentDetails": {},
+        "paymentDetails": {
+          "isThirdPartyPayment": false
+        },
         "payoutDetails": {},
         "advisorDetails": {
           "relationWithAdvisor": "others",
@@ -776,6 +840,8 @@
           "type": "base",
           "code": "E36",
           "name": "ICICI Pru GIFT Pro",
+          "category":"Saving",
+          "allowedUwDecisions": [],
           "faceValue": "1068000",
           "coverageOption": "",
           "term": "",
@@ -822,7 +888,8 @@
         "modalPremium": 0,
         "policyTerm": null,
         "premiumPaymentTerm": 10,
-        "paymentMode": ""
+        "paymentMode": "",
+        "proposalApplicationDate": ""
       }
     },
     "pivvSection": {
@@ -1385,6 +1452,73 @@
           "breDecision": "CLIENT_ENQUIRY_STARTED"
         }
       ]
+    },
+    "uwDecisionValidationFlags": {
+      "rule18": false,
+      "rule19": false,
+      "rule20": false,
+      "rule21": false,
+      "rule22": false,
+      "rule24": false,
+      "rule25": false,
+      "rule26": false,
+      "rule27": false,
+      "rule28": false,
+      "rule29": false,
+      "rule30": false,
+      "rule31": false,
+      "rule32": false,
+      "rule33": false,
+      "rule34": false,
+      "rule38": false,
+      "rule39": false,
+      "rule40": false,
+      "rule41": false,
+      "rule42": false,
+      "rule43": false,
+      "rule44": false,
+      "rule45": false,
+      "rule46": false,
+      "rule47": false,
+      "rule48": false,
+      "rule49": false,
+      "rule50": false,
+      "rule56": false,
+      "rule57": false,
+      "rule60": false,
+      "rule61": false,
+      "rule62": false,
+      "rule63": false,
+      "rule64": false,
+      "rule65": false,
+      "rule66": false,
+      "rule67": false,
+      "rule68": false,
+      "rule69": false,
+      "rule70": false,
+      "rule73": false,
+      "rule74": false,
+      "rule75": false,
+      "rule76": false,
+      "rule77": false,
+      "rule78": false,
+      "rule81": false,
+      "rule82": false,
+      "rule83": false,
+      "rule84": false,
+      "rule85": false,
+      "rule86": false,
+      "rule87": false,
+      "rule88": false,
+      "rule89": false,
+      "rule90": false,
+      "rule91": false,
+      "rule92": false,
+      "rule93": false,
+      "rule94": false,
+      "rule95": false,
+      "rule96": false,
+      "rule97": false
     },
     "roleType": "CVT_TASK",
     "userId": "ipru75031"
