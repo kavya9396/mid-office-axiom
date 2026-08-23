@@ -83,7 +83,7 @@ const BreDecision = ({
    */
   const latestBreDecisionData = readOnly
     ? 
-    // searchData?.latestBreDecision ??
+    searchData?.latestBreDecision ??
       searchData?.breDecision
     : drsState.data?.latestBreDecision ??
       drsState.data?.breDecision;

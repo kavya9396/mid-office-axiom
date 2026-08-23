@@ -125,8 +125,8 @@ import type { SearchApiResponse } from "../../types/search.types";
 import { searchThunk } from "../../store/thunks/searchAppThunk";
 import CustomSnackbar from "../../components/ui/SnackBar/Snackbar";
 import BreDecision from "../DRS/DRS_Accordions/BreDecision";
-// import ApplicationOverview from "../DRS/DRS_Accordions/ApplicationOverview";
-// import Summary from "../DRS/DRS_Accordions/Summary";
+import ApplicationOverview from "../DRS/DRS_Accordions/ApplicationOverview";
+import ApplicantProfile from "../DRS/DRS_Accordions/ApplicantProfile";
 
 const APPLICATION_NUMBER_REGEX = /^[A-Za-z0-9]{10}$/;
 
@@ -495,9 +495,9 @@ return (
            */}
           <BreDecision readOnly />
 
-          {/* <ApplicationOverview readOnly />
+          <ApplicationOverview readOnly />
 
-          <Summary readOnly /> */}
+          <ApplicantProfile readOnly />
 
           <RequirementManagement readOnly />
         </Box>

@@ -339,3 +339,62 @@ export const getSearchApplicationFields = (
     ? searchApplicationConfig.group
     : searchApplicationConfig.retail;
 };
+
+/*
+ * Search Application does not contain roleType or businessType for Application Overview.
+ * These fields therefore provide a role-independent read-only view.
+ */
+export const SEARCH_APPLICATION_FIELDS: RoleField[] = [
+  {
+    label: "Product",
+    path: "productDetail.0.name",
+  },
+  {
+    label: "Product Type",
+    path: "productDetail.0.planName",
+  },
+  {
+    label: "Agent Code",
+    path: "sourcingDetail.agentCode",
+  },
+  {
+    label: "Agent Name",
+    path: "sourcingDetail.agentName",
+  },
+  {
+    label: "Sum Assured",
+    path: "productDetail.0.sumAssured",
+  },
+  {
+    label: "Customer Type",
+    path: "productDetail.0.customerType",
+  },
+  {
+    label: "Channel",
+    path: "sourcingDetail.channelCode",
+  },
+  {
+    label: "Sub Channel",
+    path: "sourcingDetail.subChannelCode",
+  },
+  {
+    label: "Policy Type",
+    path: "productDetail.0.policyType",
+  },
+  {
+    label: "Modal Premium",
+    path: "productDetail.0.faceValue",
+  },
+  {
+    label: "Policy Term",
+    path: "productDetail.0.policyTerm",
+  },
+  {
+    label: "Premium Payment Term",
+    path: "productDetail.0.premiumPaymentTerm",
+  },
+  {
+    label: "Payment Mode",
+    path: "policyDetails.paymentMode",
+  },
+];

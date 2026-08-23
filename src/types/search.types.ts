@@ -28,6 +28,7 @@ export interface SearchResponse {
   applicationDetails: ApplicationDetails;
   applicationOverview?: ApplicationOverview;
   breDecision?: BreDecisionResponse;
+  latestBreDecision?: BreDecisionResponse;
   summary: SummaryResponse[];
   riderDetails: RiderDetail[];
   requirementManagement: AdditionalRequirementRow[];

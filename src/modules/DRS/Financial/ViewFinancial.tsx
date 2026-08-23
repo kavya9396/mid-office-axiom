@@ -3652,7 +3652,7 @@ const ViewFinancial = () => {
 
   return (
     <>
-    {showLoader && (
+      {showLoader && (
         <Box
           sx={{
             position: "fixed",
@@ -3949,6 +3949,12 @@ const ViewFinancial = () => {
               </Box>
             ))}
           </Box>
+        </Box>
+
+        <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2, bgcolor: "#fff", mt: 1, borderRadius: 2 }}>
+          <CustomButton sx={{ width: 100, py: 0.5, fontSize: 13, borderRadius: "50px" }}>
+            Submit
+          </CustomButton>
         </Box>
       </Box>
 
