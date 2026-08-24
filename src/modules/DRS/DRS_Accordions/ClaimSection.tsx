@@ -254,14 +254,14 @@ const ClaimSection = () => {
       policyNumber:
         getTextOrFallback(
           firstRow?.policyNumber ||
-            pickValue(applicationInfo ?? {}, ["policyNumber", "policyNo", "policy_number"]) ||
-            toText(dataRecord.applicationNumber),
+          pickValue(applicationInfo ?? {}, ["policyNumber", "policyNo", "policy_number"]) ||
+          toText(dataRecord.applicationNumber),
           DUMMY_READONLY_FIELDS.policyNumber,
         ),
       productCode:
         getTextOrFallback(
           firstRow?.productCode ||
-            pickValue(firstProduct ?? {}, ["productCode", "code", "product_code"]),
+          pickValue(firstProduct ?? {}, ["productCode", "code", "product_code"]),
           DUMMY_READONLY_FIELDS.productCode,
         ),
       claimKey: "",
@@ -322,8 +322,8 @@ const ClaimSection = () => {
   };
 
   return (
-     <>
-      <Box sx={{ mt: 2,p:1 }}>
+    <>
+      <Box sx={{ px: 1 }}>
         <CustomAccordion title="Claims Section" defaultExpanded>
           <Box sx={{ p: 1 }}>
             <CustomTable<ClaimRow>

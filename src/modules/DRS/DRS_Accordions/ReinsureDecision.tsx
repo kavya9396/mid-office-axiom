@@ -57,121 +57,119 @@ const ReinsureDecision = () => {
   };
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ p:1 }}>
-        <CustomAccordion title="Reinsurer Decision" defaultExpanded>
-          <Box
-            sx={{
-              mt: 1,
-              p: 2,
-              borderRadius: "12px",
-              backgroundColor: "#f6f6f6",
-            }}
-          >
-            <Box sx={{ mb: 2 }}>
-              <Typography
-                sx={{
-                  fontSize: "14px",
-                  fontWeight: 400,
-                  color: "#444",
-                  mb: 1,
-                }}
-              >
-                Reinsurer Remarks
-              </Typography>
-              <CustomTextField
-                fullWidth
-                multiline
-                minRows={3}
-                placeholder="Enter remarks..."
-                value={remarks}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (value.length <= 10000) {
-                    setRemarks(value);
-                  }
-                }}
-                variant="outlined"
-                size="small"
-                sx={{
-                  backgroundColor: "#fff",
-                  borderRadius: "10px",
-                }}
-              />
-              <Typography
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  fontSize: "12px",
-                  color: "#888",
-                  mt: 0.5,
-                }}
-              >
-                {remarks.length}/10000
-              </Typography>
-            </Box>
-
-            <Box
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="Reinsurer Decision" defaultExpanded>
+        <Box
+          sx={{
+            mt: 1,
+            p: 2,
+            borderRadius: "12px",
+            backgroundColor: "#f6f6f6",
+          }}
+        >
+          <Box sx={{ mb: 2 }}>
+            <Typography
               sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: 2,
+                fontSize: "14px",
+                fontWeight: 400,
+                color: "#444",
+                mb: 1,
               }}
             >
-              <CustomSelect
-                label="Reinsurer Decision"
-                value={decision}
-                onChange={setDecision}
-                options={reinsurerDecisionOptions}
-              />
-
-              <CustomSelect
-                label="Reinsurer Decision ID No."
-                value={decisionId}
-                onChange={setDecisionId}
-                options={reinsurerDecisionIdOptions}
-              />
-            </Box>
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              gap: 2,
-              mt: 2,
-            }}
-          >
-            <CustomButton
-              variant="contained"
-              disabled={isSubmitDisabled}
-              onClick={handleSubmitIntent}
-              sx={{
-                minWidth: 200,
-                height: 44,
-                borderRadius: "50px",
-                fontWeight: 600,
-                px: 3,
-                whiteSpace: "nowrap",
-              }}
-            >
-              Submit
-            </CustomButton>
-          </Box>
-          {submitMessage && (
-            <Typography sx={{ mt: 1, fontSize: 12, color: "#DE2C3B" }}>
-              {submitMessage}
+              Reinsurer Remarks
             </Typography>
-          )}
-        </CustomAccordion>
+            <CustomTextField
+              fullWidth
+              multiline
+              minRows={3}
+              placeholder="Enter remarks..."
+              value={remarks}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value.length <= 10000) {
+                  setRemarks(value);
+                }
+              }}
+              variant="outlined"
+              size="small"
+              sx={{
+                backgroundColor: "#fff",
+                borderRadius: "10px",
+              }}
+            />
+            <Typography
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                fontSize: "12px",
+                color: "#888",
+                mt: 0.5,
+              }}
+            >
+              {remarks.length}/10000
+            </Typography>
+          </Box>
 
-        <ConfirmationDialog
-          open={isConfirmOpen}
-          message={dialogMessage}
-          onClose={() => setIsConfirmOpen(false)}
-          onConfirm={() => navigate(getInboxPath(safeBusinessType))}
-        />
-      </Box>
-    // </Container>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: 2,
+            }}
+          >
+            <CustomSelect
+              label="Reinsurer Decision"
+              value={decision}
+              onChange={setDecision}
+              options={reinsurerDecisionOptions}
+            />
+
+            <CustomSelect
+              label="Reinsurer Decision ID No."
+              value={decisionId}
+              onChange={setDecisionId}
+              options={reinsurerDecisionIdOptions}
+            />
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            gap: 2,
+            mt: 2,
+          }}
+        >
+          <CustomButton
+            variant="contained"
+            disabled={isSubmitDisabled}
+            onClick={handleSubmitIntent}
+            sx={{
+              minWidth: 200,
+              height: 44,
+              borderRadius: "50px",
+              fontWeight: 600,
+              px: 3,
+              whiteSpace: "nowrap",
+            }}
+          >
+            Submit
+          </CustomButton>
+        </Box>
+        {submitMessage && (
+          <Typography sx={{ mt: 1, fontSize: 12, color: "#DE2C3B" }}>
+            {submitMessage}
+          </Typography>
+        )}
+      </CustomAccordion>
+
+      <ConfirmationDialog
+        open={isConfirmOpen}
+        message={dialogMessage}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={() => navigate(getInboxPath(safeBusinessType))}
+      />
+    </Box>
   );
 };
 

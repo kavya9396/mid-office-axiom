@@ -98,65 +98,63 @@ const ExceptionDecision = () => {
   };
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ p:1 }}>
-        <CustomAccordion title="UW Decision" defaultExpanded>
-          <Box
-            sx={{
-              mt: 0.75,
-              p: 1.25,
-              borderRadius: "6px",
-              backgroundColor: "#F6F6F6",
-            }}
-          >
-            <Box sx={{ maxWidth: 520 }}>
-              <CustomSelect
-                label="Exception PoolDecision"
-                value={decision}
-                onChange={(value: string) => {
-                  setDecision(value);
-                  setSubmitMessage(null);
-                }}
-                options={decisionOptions}
-                placeholder="Select"
-              />
-            </Box>
-
-            {submitMessage && (
-              <Typography
-                sx={{
-                  mt: 0.75,
-                  fontSize: 12,
-                  color: submitMessage.toLowerCase().includes("success") ? "#0F8A3D" : "#DE2C3B",
-                }}
-              >
-                {submitMessage}
-              </Typography>
-            )}
-          </Box>
-
-          <Box sx={{ display: "flex", mt: 1 }}>
-            <CustomButton
-              variant="contained"
-              disabled={!isSubmitEnabled || submitLoading}
-              onClick={handleSubmitIntent}
-              sx={{ minWidth: 130, height: 36, borderRadius: "999px" }}
-            >
-              {submitLoading ? "Submitting..." : "Submit"}
-            </CustomButton>
-          </Box>
-        </CustomAccordion>
-
-        <ConfirmationDialog
-          open={openConfirmation}
-          message="Do you want to submit the case?"
-          onClose={() => setOpenConfirmation(false)}
-          onConfirm={() => {
-            void handleSubmit();
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="UW Decision" defaultExpanded>
+        <Box
+          sx={{
+            mt: 0.75,
+            p: 1.25,
+            borderRadius: "6px",
+            backgroundColor: "#F6F6F6",
           }}
-        />
-      </Box>
-    // </Container>
+        >
+          <Box sx={{ maxWidth: 520 }}>
+            <CustomSelect
+              label="Exception PoolDecision"
+              value={decision}
+              onChange={(value: string) => {
+                setDecision(value);
+                setSubmitMessage(null);
+              }}
+              options={decisionOptions}
+              placeholder="Select"
+            />
+          </Box>
+
+          {submitMessage && (
+            <Typography
+              sx={{
+                mt: 0.75,
+                fontSize: 12,
+                color: submitMessage.toLowerCase().includes("success") ? "#0F8A3D" : "#DE2C3B",
+              }}
+            >
+              {submitMessage}
+            </Typography>
+          )}
+        </Box>
+
+        <Box sx={{ display: "flex", mt: 1 }}>
+          <CustomButton
+            variant="contained"
+            disabled={!isSubmitEnabled || submitLoading}
+            onClick={handleSubmitIntent}
+            sx={{ minWidth: 130, height: 36, borderRadius: "999px" }}
+          >
+            {submitLoading ? "Submitting..." : "Submit"}
+          </CustomButton>
+        </Box>
+      </CustomAccordion>
+
+      <ConfirmationDialog
+        open={openConfirmation}
+        message="Do you want to submit the case?"
+        onClose={() => setOpenConfirmation(false)}
+        onConfirm={() => {
+          void handleSubmit();
+        }}
+      />
+    </Box>
   );
 };
 

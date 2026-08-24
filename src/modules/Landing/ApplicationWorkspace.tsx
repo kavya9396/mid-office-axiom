@@ -423,10 +423,10 @@ const ApplicationWorkspace = ({
           >
             {String(
               application.applicationNo ??
-                application.applicationNumber ??
-                application.application_no ??
-                application.application_number ??
-                "-",
+              application.applicationNumber ??
+              application.application_no ??
+              application.application_number ??
+              "-",
             )}
           </Typography>
         </Box>
@@ -1247,17 +1247,17 @@ const CompactDecision = ({
           backgroundColor: isApproved
             ? "#ecfdf3"
             : isRejected
-            ? "#fff1f2"
-            : isPending
-            ? "#fff8e7"
-            : "#eef4f8",
+              ? "#fff1f2"
+              : isPending
+                ? "#fff8e7"
+                : "#eef4f8",
           color: isApproved
             ? "#087443"
             : isRejected
-            ? "#9A2529"
-            : isPending
-            ? "#946200"
-            : "#0D4C7D",
+              ? "#9A2529"
+              : isPending
+                ? "#946200"
+                : "#0D4C7D",
           fontSize: "9px",
           fontWeight: 600,
           lineHeight: 1.2,

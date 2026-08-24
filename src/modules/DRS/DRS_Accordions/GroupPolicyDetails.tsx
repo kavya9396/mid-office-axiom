@@ -52,11 +52,11 @@ const GroupPolicyDetails = () => {
       label: "Login Date",
       value: toDisplayValue(
         formatDateWithOrdinalTime(basicDetails.lastLoginDate ?? firstProduct.lastLoginDate) ||
-          basicDetails.lastLoginDate ||
-          firstProduct.lastLoginDate
+        basicDetails.lastLoginDate ||
+        firstProduct.lastLoginDate
       ),
     },
-        {
+    {
       label: "Loan Amount",
       value: formatCurrencyINR(loanAmount),
     },
@@ -80,7 +80,7 @@ const GroupPolicyDetails = () => {
       label: "Moratorium Period",
       value: toDisplayValue(groupDetails.moratoriumPeriod ?? groupDetails.moratorium),
     },
-    
+
     {
       label: "Share Of Loan Main Life(00)",
       value: toDisplayValue(groupDetails.shareOfLoan ?? groupDetails.shareOfLoanMainLife),
@@ -90,7 +90,7 @@ const GroupPolicyDetails = () => {
       label: "Coverage Status",
       value: toDisplayValue(groupDetails.coverageStatus),
     },
-    
+
     {
       label: "Application Status Main Life(00)",
       value: toDisplayValue(groupDetails.applicantStatus ?? groupDetails.applicationStatusMainLife),
@@ -110,15 +110,13 @@ const GroupPolicyDetails = () => {
   ];
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ p:1 }}>
-        <CustomAccordion title="Group Policy Details" defaultExpanded>
-          <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
-            <GridSection columns={3} items={details} />
-          </Box>
-        </CustomAccordion>
-      </Box>
-    // </Container>
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="Group Policy Details" defaultExpanded>
+        <Box sx={{ p: 2, backgroundColor: "#f6f6f6", borderRadius: "8px" }}>
+          <GridSection columns={3} items={details} />
+        </Box>
+      </CustomAccordion>
+    </Box>
   );
 };
 

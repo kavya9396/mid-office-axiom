@@ -201,35 +201,33 @@ const DecisionHistory = () => {
   }, [historyRows]);
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ p:1 }}>
-        <CustomAccordion title="Decision History" defaultExpanded>
-          <Box sx={{ p: 1 }}>
-            {sortedRows.length > 0 ? (
-              <CustomTable<DecisionHistoryRow>
-                title="Decision History Table"
-                columns={decisionHistoryColumns}
-                data={sortedRows}
-              />
-            ) : (
-              <Box
-                sx={{
-                  mt: 2,
-                  border: "1px dashed #d9d9d9",
-                  borderRadius: "12px",
-                  p: 2,
-                  textAlign: "center",
-                  color: "#6F6F6F",
-                  fontSize: "13px",
-                }}
-              >
-                No decision records available.
-              </Box>
-            )}
-          </Box>
-        </CustomAccordion>
-      </Box>
-    // </Container>
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="Decision History" defaultExpanded>
+        <Box sx={{ p: 1 }}>
+          {sortedRows.length > 0 ? (
+            <CustomTable<DecisionHistoryRow>
+              title="Decision History Table"
+              columns={decisionHistoryColumns}
+              data={sortedRows}
+            />
+          ) : (
+            <Box
+              sx={{
+                mt: 2,
+                border: "1px dashed #d9d9d9",
+                borderRadius: "12px",
+                p: 2,
+                textAlign: "center",
+                color: "#6F6F6F",
+                fontSize: "13px",
+              }}
+            >
+              No decision records available.
+            </Box>
+          )}
+        </Box>
+      </CustomAccordion>
+    </Box>
   );
 };
 

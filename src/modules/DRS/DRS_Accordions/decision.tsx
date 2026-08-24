@@ -23,7 +23,6 @@ import { validateApplicantTabsVisited } from "../../../validations/drsApplicantT
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
 import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
-//import { formatDate } from "../../../utils/dataFormat";
 import { getInboxPath } from "../../../routes/routes";
 
 interface MiscItem {
@@ -93,21 +92,21 @@ const Decision = () => {
 
   const instanceId = String(
     application?.instanceId ??
-      application?.instanceID ??
-      instanceIdFromTask ??
-      "",
+    application?.instanceID ??
+    instanceIdFromTask ??
+    "",
   ).trim();
 
   const applicationNumber = String(
     application?.applicationNo ??
-      localStorage.getItem("applicationNo") ??
-      "",
+    localStorage.getItem("applicationNo") ??
+    "",
   ).trim();
 
   const userId = String(
     application?.userId ??
-      localStorage.getItem("username") ??
-      "",
+    localStorage.getItem("username") ??
+    "",
   ).trim();
 
   // const [decisionTimestamp] = useState(() =>
@@ -175,8 +174,8 @@ const Decision = () => {
 
   const roleType = String(
     application?.roleType ??
-      localStorage.getItem("roleType") ??
-      "",
+    localStorage.getItem("roleType") ??
+    "",
   ).trim();
 
   // const showDecisionAuditFields =
@@ -197,10 +196,10 @@ const Decision = () => {
     RECONSIDERATION_TASK: "RECONS",
     REJECT_TASK: "RECONS",
     DVT_FORMAL_TASK: "DVT_FOR",
-    HOD_TASK:"HOD",
-    SR_UW_TASK:"SUW",
-    CMO_TASK:"CMO",
-    HO_CMO_TASK:"CMO"
+    HOD_TASK: "HOD",
+    SR_UW_TASK: "SUW",
+    CMO_TASK: "CMO",
+    HO_CMO_TASK: "CMO"
   };
 
   const decisionCode = roleType
@@ -338,16 +337,16 @@ const Decision = () => {
     }
 
     const applicantTabsValidation =
-  validateApplicantTabsVisited(
-    drsState.data,
-    applicationNumber,
-    roleType,
-  );
+      validateApplicantTabsVisited(
+        drsState.data,
+        applicationNumber,
+        roleType,
+      );
 
     if (!applicantTabsValidation.isValid) {
       showSnackbar(
         applicantTabsValidation.message ??
-          "Please visit all Applicant Profile tabs before submitting the decision.",
+        "Please visit all Applicant Profile tabs before submitting the decision.",
         "warning",
       );
       return;
@@ -361,7 +360,7 @@ const Decision = () => {
     if (!validationResult.isValid) {
       showSnackbar(
         validationResult.message ||
-          "Please check the fields.",
+        "Please check the fields.",
         "error",
       );
 
@@ -484,7 +483,7 @@ const Decision = () => {
       );
       navigate(getInboxPath());
 
-     
+
     } catch (error) {
       // =====================================================
       // API FAILURE
@@ -612,9 +611,9 @@ const Decision = () => {
               </Typography>
             </Box>
 
-           
+
           </Box>
- {/* =====================================================
+          {/* =====================================================
                 CASE DECISION
             ===================================================== */}
 
@@ -623,7 +622,7 @@ const Decision = () => {
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
-                md:"repeat(3, 1fr)"
+                md: "repeat(3, 1fr)"
               },
               gap: 1,
               width: "100%",
@@ -673,53 +672,6 @@ const Decision = () => {
                 />
               </Box>
             </Box>
-
-            {/* {showDecisionAuditFields && (
-              <>
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      fontWeight: 400,
-                      color: "#444",
-                      mb: 0.5,
-                    }}
-                  >
-                    User ID
-                  </Typography>
-
-                  <CustomTextField
-                    fullWidth
-                    value={userId}
-                    disabled
-                    variant="outlined"
-                    size="small"
-                    sx={{ backgroundColor: "#fff" }}
-                  />
-                </Box>
-
-                <Box sx={{ minWidth: 0 }}>
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      fontWeight: 400,
-                      color: "#444",
-                      mb: 0.5,
-                    }}
-                  >
-                    Date & Timestamp
-                  </Typography>
-                  <CustomTextField
-                    fullWidth
-                    value={formatDate(decisionTimestamp)}
-                    disabled
-                    variant="outlined"
-                    size="small"
-                    sx={{ backgroundColor: "#fff" }}
-                  />
-                </Box>
-              </>
-            )} */}
           </Box>
 
           {showDoNotPayToTpa && (

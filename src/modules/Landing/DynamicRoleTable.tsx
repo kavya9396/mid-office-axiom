@@ -30,7 +30,7 @@ import {
   KeyUpArrowIcon,
   SearchIcon,
   SettingsIcon,
-  
+
 } from "../../icons/Icons";
 import CustomButton from "../../components/ui/Button/Button";
 import CustomCheckbox from "../../components/ui/Checkbox/Checkbox";
@@ -1098,7 +1098,7 @@ const DynamicRoleTable = ({
       poolKey: resolvedPoolKey,
       selectedFields: updatedColumns,
     };
-console.log('payload',payload)
+    console.log('payload', payload)
     try {
       setIsSavingColumns(true);
 
@@ -1205,26 +1205,6 @@ console.log('payload',payload)
 
   return (
     <>
-      {/* <Paper
-        elevation={0}
-        sx={{
-          mt: 0,
-          width: "100%",
-          height: "calc(100dvh - 64px)",
-          maxHeight: "calc(100dvh - 64px)",
-          minHeight: 0,
-          display: "flex",
-          flexDirection: "column",
-          border:
-            "1px solid #d9dfe4",
-          borderRadius: "10px",
-          overflow: "hidden",
-          backgroundColor: "#fff",
-          boxShadow:
-            "0 1px 3px rgba(0,0,0,0.04)",
-          boxSizing: "border-box",
-        }}
-      > */}
       <Box
         sx={{
           ...columnFlex,
@@ -1356,25 +1336,6 @@ console.log('payload',payload)
                 }}
               />
             )}
-
-            {/* <IconButton
-              size="small"
-              onClick={() =>
-                setShowSearch((previous) => !previous)
-              }
-              sx={{
-                width: "30px",
-                height: "28px",
-                border: "1px solid #dfe3e6",
-                borderRadius: "5px",
-                color: "#454b50",
-
-                "&:hover": {
-                  backgroundColor: "#f4f6f7",
-                },
-              }}
-            >
-            </IconButton> */}
             <Box sx={{ cursor: "pointer", mt: 0.5 }} onClick={() =>
               setShowSearch((previous) => !previous)
             }>
@@ -1389,41 +1350,6 @@ console.log('payload',payload)
                 <SettingsIcon width={32} />
               </Box>
             )}
-
-            {/* <IconButton
-              size="small"
-              sx={{
-                width: "30px",
-                height: "28px",
-                border: "1px solid #dfe3e6",
-                borderRadius: "5px",
-                color: "#454b50",
-
-                "&:hover": {
-                  backgroundColor: "#f4f6f7",
-                },
-              }}
-            >
-              <FilterIcon />
-            </IconButton> */}
-
-            {/* <IconButton
-              size="small"
-              onClick={handleOpenSettings}
-              sx={{
-                width: "30px",
-                height: "28px",
-                border: "1px solid #dfe3e6",
-                borderRadius: "5px",
-                color: "#454b50",
-
-                "&:hover": {
-                  backgroundColor: "#f4f6f7",
-                },
-              }}
-            >
-              <SettingsIcon />
-            </IconButton> */}
           </Box>
         </Box>
 
@@ -1437,10 +1363,6 @@ console.log('payload',payload)
             width: "100%",
             flex: 1,
             height: "calc(100vh - 180px)",
-            // minHeight: 0,
-            // maxHeight: "none",
-            // overflowX: "auto",
-            // overflowY: "auto",
             boxSizing: "border-box",
 
             "&::-webkit-scrollbar": {
@@ -1510,59 +1432,59 @@ console.log('payload',payload)
                       }}
                     >
                       <Tooltip
-  title={formatColumnName(column)}
-  placement="top"
-  arrow
-  enterDelay={300}
->
-  <TableSortLabel
-    active={isSorted}
-    direction={isSorted ? sortDirection : "asc"}
-    hideSortIcon={false}
-    sx={{
-      maxWidth: "100%",
-      minWidth: 0,
-      color: "#20252a",
+                        title={formatColumnName(column)}
+                        placement="top"
+                        arrow
+                        enterDelay={300}
+                      >
+                        <TableSortLabel
+                          active={isSorted}
+                          direction={isSorted ? sortDirection : "asc"}
+                          hideSortIcon={false}
+                          sx={{
+                            maxWidth: "100%",
+                            minWidth: 0,
+                            color: "#20252a",
 
-      "&:hover": {
-        color: "#20252a",
-      },
+                            "&:hover": {
+                              color: "#20252a",
+                            },
 
-      "&.Mui-active": {
-        color: "#0D4C7D",
-      },
+                            "&.Mui-active": {
+                              color: "#0D4C7D",
+                            },
 
-      "& .MuiTableSortLabel-icon": {
-        width: "14px",
-        height: "14px",
-        marginLeft: "3px",
-        color: "#8a8f94 !important",
-        opacity: 0.65,
-        flexShrink: 0,
-      },
+                            "& .MuiTableSortLabel-icon": {
+                              width: "14px",
+                              height: "14px",
+                              marginLeft: "3px",
+                              color: "#8a8f94 !important",
+                              opacity: 0.65,
+                              flexShrink: 0,
+                            },
 
-      "&.Mui-active .MuiTableSortLabel-icon": {
-        color: "#0D4C7D !important",
-        opacity: 1,
-      },
-    }}
-  >
-    <Typography
-      component="span"
-      sx={{
-        minWidth: 0,
-        fontSize: "11px",
-        fontWeight: 600,
-        lineHeight: 1.2,
-        overflow: "hidden",
-        textOverflow: "ellipsis",
-        whiteSpace: "nowrap",
-      }}
-    >
-      {formatColumnName(column)}
-    </Typography>
-  </TableSortLabel>
-</Tooltip>
+                            "&.Mui-active .MuiTableSortLabel-icon": {
+                              color: "#0D4C7D !important",
+                              opacity: 1,
+                            },
+                          }}
+                        >
+                          <Typography
+                            component="span"
+                            sx={{
+                              minWidth: 0,
+                              fontSize: "11px",
+                              fontWeight: 600,
+                              lineHeight: 1.2,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {formatColumnName(column)}
+                          </Typography>
+                        </TableSortLabel>
+                      </Tooltip>
                     </TableCell>
                   );
                 })}
@@ -1886,10 +1808,6 @@ console.log('payload',payload)
           </Typography>
         }
         actionsSx={{ justifyContent: "center", pb: 2 }}
-        // contentSx={{
-        //   p: 2.5,
-        //   backgroundColor: "#f7f8fa",
-        // }}
         actions={
           <Box
             sx={{
@@ -2305,7 +2223,7 @@ console.log('payload',payload)
                               "13px",
                           }}
                         >
-                          <KeyUpArrowIcon/>
+                          <KeyUpArrowIcon />
                         </Button>
 
                         <Button
@@ -2340,7 +2258,7 @@ console.log('payload',payload)
                               "13px",
                           }}
                         >
-                          <KeyDownArrowIcon/>
+                          <KeyDownArrowIcon />
                         </Button>
                       </Box>
                     </ListItemButton>
@@ -2373,38 +2291,6 @@ console.log('payload',payload)
             </List>
           </Box>
         </Box>
-
-        {/* INFORMATION */}
-
-        {/* <Box
-          sx={{
-            mt: 1.5,
-            px: 1.5,
-            py: 1,
-            backgroundColor:
-              "#eef5fa",
-            borderRadius:
-              "6px",
-            border:
-              "1px solid #d8e7f2",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize:
-                "10.5px",
-              color:
-                "#456",
-            }}
-          >
-            <strong>Tip:</strong>{" "}
-            The Selected Columns
-            order determines the
-            table column order. Use
-            Ã¢â€ â€˜ and Ã¢â€ â€œ to rearrange
-            columns.
-          </Typography>
-        </Box> */}
       </CustomDialog>}
     </>
   );

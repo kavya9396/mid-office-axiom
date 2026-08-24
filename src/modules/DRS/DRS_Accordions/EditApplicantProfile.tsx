@@ -554,85 +554,85 @@ const EditApplicantProfile = ({
     });
   };
 
-const createUpdatedMember = (
-  member: EditableMember,
+  const createUpdatedMember = (
+    member: EditableMember,
 
-  formValues: FormValues,
+    formValues: FormValues,
 
-): EditableMember => {
+  ): EditableMember => {
 
-  const existingAddresses = member.address ?? [];
- 
-  const updatedAddresses = existingAddresses.map((address) => {
+    const existingAddresses = member.address ?? [];
 
-    const addressType = address.type?.trim().toLowerCase();
- 
-    if (addressType === "communication") {
+    const updatedAddresses = existingAddresses.map((address) => {
 
-      return {
+      const addressType = address.type?.trim().toLowerCase();
 
-        ...address,
+      if (addressType === "communication") {
 
-        pinCode: formValues.communicationPincode.trim(),
+        return {
 
-      };
+          ...address,
 
-    }
- 
-    if (addressType === "permanent") {
+          pinCode: formValues.communicationPincode.trim(),
 
-      return {
+        };
 
-        ...address,
+      }
 
-        pinCode: formValues.permanentPincode.trim(),
+      if (addressType === "permanent") {
 
-      };
+        return {
 
-    }
- 
-    return address;
+          ...address,
 
-  });
- 
-  return {
+          pinCode: formValues.permanentPincode.trim(),
 
-    ...member,
- 
-    proposerSummary: {
+        };
 
-      ...member.proposerSummary,
+      }
 
-      dob: formValues.dob,
+      return address;
 
-      gender: formValues.gender,
+    });
 
-      residentStatus: formValues.residentialStatus,
+    return {
 
-    },
- 
-    kycDetails: {
+      ...member,
 
-      ...member.kycDetails,
+      proposerSummary: {
 
-      panNumber: formValues.panNumber.trim().toUpperCase(),
+        ...member.proposerSummary,
 
-      pranNo: formValues.pranNumber.trim(),
+        dob: formValues.dob,
 
-      identityProofType: formValues.identityProof,
+        gender: formValues.gender,
 
-      ageProof: formValues.ageProof,
+        residentStatus: formValues.residentialStatus,
 
-      addressProof: formValues.addressProof,
+      },
 
-    },
- 
-    address: updatedAddresses,
+      kycDetails: {
+
+        ...member.kycDetails,
+
+        panNumber: formValues.panNumber.trim().toUpperCase(),
+
+        pranNo: formValues.pranNumber.trim(),
+
+        identityProofType: formValues.identityProof,
+
+        ageProof: formValues.ageProof,
+
+        addressProof: formValues.addressProof,
+
+      },
+
+      address: updatedAddresses,
+
+    };
 
   };
 
-};
- 
 
   const getErrorMessage = (error: unknown): string => {
     if (error instanceof Error) {

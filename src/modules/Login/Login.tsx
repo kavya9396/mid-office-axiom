@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 
 import LoginImage from "../../assets/Login-Image.svg";
 import IPRULogo from "../../assets/ICICI Logo_.svg";
-//import AxiomLogo from "../../assets/Axiom Logo.svg";
 import IBMLogo from "../../assets/IBM Logo.svg";
 
 import CustomTextField from "../../components/ui/TextField/TextField";
@@ -299,22 +298,6 @@ const Login = () => {
               Log in to access your account
             </Typography>
           </Box>
-
-          {/* Header */}
-          {/* <Box>
-            <Box
-              component="img"
-              src={AxiomLogo}
-              alt="Axiom Logo"
-            />
-
-            <Typography
-              variant="body1"
-              color="text.secondary"
-            >
-              Log in to access your account
-            </Typography>
-          </Box> */}
 
           {/* Login Form */}
           <Box

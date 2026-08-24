@@ -44,8 +44,8 @@ type DocumentRequiredProps = {
 
 const DocumentRequired = ({ data: dataOverride }: DocumentRequiredProps = {}) => {
   const storeData = useAppSelector(
-  (state) => state.prelogin.data,
-);
+    (state) => state.prelogin.data,
+  );
   const data = dataOverride ?? storeData;
   const dataRecord = toRecord(data);
   const documentRequired = toRecord(dataRecord.documentRequired);
@@ -63,91 +63,89 @@ const DocumentRequired = ({ data: dataOverride }: DocumentRequiredProps = {}) =>
   }
 
   return (
-    // <Container disableGutters>
-      <Box sx={{p:1 }}>
-        <CustomAccordion title="Documents Required" defaultExpanded>
-          <Paper elevation={0} sx={{ border: "1px solid #D8D8D8", borderRadius: "12px", overflow: "hidden" }}>
-            <Box sx={{ backgroundColor: "#004A80", color: "#fff", px: 2, py: 1 }}>
-              <Typography sx={{ fontSize: "12px", fontWeight: 700 }}>
-                {toText(form16.title) || "FORM 16 (Latest Assessment Year)"}
-              </Typography>
-            </Box>
-            <TableContainer>
-              <Table
-                size="small"
-                sx={{
-                  "& th": {
-                    backgroundColor: "#E9EEF3",
-                    color: "#4A4A4A",
-                    fontSize: "12px",
-                    fontWeight: 600,
-                    px: 2,
-                    py: 1,
-                    borderBottom: "1px solid #D6D6D6",
-                  },
-                  "& td": {
-                    color: "#4A4A4A",
-                    fontSize: "12px",
-                    px: 2,
-                    py: 1,
-                    borderBottom: "1px solid #E1E1E1",
-                  },
-                  "& tr:last-child td": {
-                    borderBottom: "none",
-                  },
-                }}
-              >
-                <TableHead>
-                  <TableRow>
-                    <TableCell sx={{ width: "18%" }} />
-                    <TableCell>{yearHeaders[0] ?? "Year 1"}</TableCell>
-                    <TableCell>{yearHeaders[1] ?? "Year 2"}</TableCell>
-                    <TableCell>{yearHeaders[2] ?? "Year 3"}</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {rows.map((row) => (
-                    <TableRow key={row.label}>
-                      <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>{row.label}</TableCell>
-                      <TableCell>{row.year1}</TableCell>
-                      <TableCell>{row.year2}</TableCell>
-                      <TableCell>{row.year3}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Paper>
-
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 180px))" },
-              gap: 1.5,
-              mt: 2,
-              p: 1.5,
-              backgroundColor: "#f6f6f6",
-              borderRadius: "8px",
-            }}
-          >
-            <CustomTextField
-              label="Is Life Assured Name Same With Doc Name?"
-              value={isLifeAssuredNameSame}
-              slotProps={{ input: { readOnly: true } }}
-              fullWidth
-              sx={{ backgroundColor: "#fff" }}
-            />
-            <CustomTextField
-              label="Company Name"
-              value={companyName}
-              slotProps={{ input: { readOnly: true } }}
-              fullWidth
-              sx={{ backgroundColor: "#fff" }}
-            />
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="Documents Required" defaultExpanded>
+        <Paper elevation={0} sx={{ border: "1px solid #D8D8D8", borderRadius: "12px", overflow: "hidden" }}>
+          <Box sx={{ backgroundColor: "#004A80", color: "#fff", px: 2, py: 1 }}>
+            <Typography sx={{ fontSize: "12px", fontWeight: 700 }}>
+              {toText(form16.title) || "FORM 16 (Latest Assessment Year)"}
+            </Typography>
           </Box>
-        </CustomAccordion>
-      </Box>
-    // </Container>
+          <TableContainer>
+            <Table
+              size="small"
+              sx={{
+                "& th": {
+                  backgroundColor: "#E9EEF3",
+                  color: "#4A4A4A",
+                  fontSize: "12px",
+                  fontWeight: 600,
+                  px: 2,
+                  py: 1,
+                  borderBottom: "1px solid #D6D6D6",
+                },
+                "& td": {
+                  color: "#4A4A4A",
+                  fontSize: "12px",
+                  px: 2,
+                  py: 1,
+                  borderBottom: "1px solid #E1E1E1",
+                },
+                "& tr:last-child td": {
+                  borderBottom: "none",
+                },
+              }}
+            >
+              <TableHead>
+                <TableRow>
+                  <TableCell sx={{ width: "18%" }} />
+                  <TableCell>{yearHeaders[0] ?? "Year 1"}</TableCell>
+                  <TableCell>{yearHeaders[1] ?? "Year 2"}</TableCell>
+                  <TableCell>{yearHeaders[2] ?? "Year 3"}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {rows.map((row) => (
+                  <TableRow key={row.label}>
+                    <TableCell sx={{ backgroundColor: "#E9EEF3", fontWeight: 600 }}>{row.label}</TableCell>
+                    <TableCell>{row.year1}</TableCell>
+                    <TableCell>{row.year2}</TableCell>
+                    <TableCell>{row.year3}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
+
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 180px))" },
+            gap: 1.5,
+            mt: 2,
+            p: 1.5,
+            backgroundColor: "#f6f6f6",
+            borderRadius: "8px",
+          }}
+        >
+          <CustomTextField
+            label="Is Life Assured Name Same With Doc Name?"
+            value={isLifeAssuredNameSame}
+            slotProps={{ input: { readOnly: true } }}
+            fullWidth
+            sx={{ backgroundColor: "#fff" }}
+          />
+          <CustomTextField
+            label="Company Name"
+            value={companyName}
+            slotProps={{ input: { readOnly: true } }}
+            fullWidth
+            sx={{ backgroundColor: "#fff" }}
+          />
+        </Box>
+      </CustomAccordion>
+    </Box>
   );
 };
 

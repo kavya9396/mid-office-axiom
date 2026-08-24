@@ -77,8 +77,8 @@ const toRecord = (
   value: unknown,
 ): Record<string, unknown> =>
   value &&
-  typeof value === "object" &&
-  !Array.isArray(value)
+    typeof value === "object" &&
+    !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
 
@@ -286,16 +286,16 @@ const PreLogin = () => {
               sx={{ color: "#f58220" }}
             />
 
-          <Typography
-  component="span"
-  variant="body2"
-  sx={{
-    color: "text.secondary",
-    fontWeight: 500,
-  }}
->
-  Loading pre-login details...
-</Typography>
+            <Typography
+              component="span"
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                fontWeight: 500,
+              }}
+            >
+              Loading pre-login details...
+            </Typography>
           </Box>
         )}
 

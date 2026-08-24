@@ -82,11 +82,11 @@ const BreDecision = ({
    * In that case, show breDecision as both initial and final.
    */
   const latestBreDecisionData = readOnly
-    ? 
+    ?
     searchData?.latestBreDecision ??
-      searchData?.breDecision
+    searchData?.breDecision
     : drsState.data?.latestBreDecision ??
-      drsState.data?.breDecision;
+    drsState.data?.breDecision;
 
   const [breResponse, setBreResponse] =
     useState<BreResponse | null>(null);
@@ -101,7 +101,7 @@ const BreDecision = ({
   const finalBreDecisionData = readOnly
     ? undefined
     : breResponse?.data ??
-      finalBreData?.data?.data;
+    finalBreData?.data?.data;
 
   const hasBreApiResponse =
     !readOnly &&

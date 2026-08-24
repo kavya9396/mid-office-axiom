@@ -413,7 +413,7 @@ const MedicalInsuranceDetails = ({
   }
 
   return (
-    <Box sx={{ p: 1 }}>
+    <Box sx={{ px: 1 }}>
       <CustomAccordion
         title="Medical and Insurance Details"
         defaultExpanded

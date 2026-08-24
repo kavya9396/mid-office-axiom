@@ -31,22 +31,22 @@ const getFormFields = (options: {
   maritalStatusOptions: SelectOption[];
   pepOptions: SelectOption[];
 }): FormField[] => [
-  { name: "productApplied", label: "Product Applied" },
-  { name: "appliedSumAssured", label: "Applied Sum Assured" },
-  { name: "lifeAssuredName", label: "Life Assured Name" },
-  { name: "dob", label: "DOB", type: "date" },
-  { name: "gender", label: "Gender", type: "select", options: options.genderOptions },
-  { name: "maritalStatus", label: "Marital Status", type: "select", options: options.maritalStatusOptions },
-  { name: "education", label: "Education" },
-  { name: "occupation", label: "Occupation" },
-  { name: "designation", label: "Designation" },
-  { name: "companyName", label: "Company Name" },
-  { name: "earnedIncome", label: "Earned Income" },
-  { name: "website", label: "Website" },
-  { name: "personalLinkedInProfile", label: "Personal LinkedIn Profile" },
-  { name: "pep", label: "PEP", type: "select", options: options.pepOptions },
-  { name: "criminalHistory", label: "Criminal History" },
-];
+    { name: "productApplied", label: "Product Applied" },
+    { name: "appliedSumAssured", label: "Applied Sum Assured" },
+    { name: "lifeAssuredName", label: "Life Assured Name" },
+    { name: "dob", label: "DOB", type: "date" },
+    { name: "gender", label: "Gender", type: "select", options: options.genderOptions },
+    { name: "maritalStatus", label: "Marital Status", type: "select", options: options.maritalStatusOptions },
+    { name: "education", label: "Education" },
+    { name: "occupation", label: "Occupation" },
+    { name: "designation", label: "Designation" },
+    { name: "companyName", label: "Company Name" },
+    { name: "earnedIncome", label: "Earned Income" },
+    { name: "website", label: "Website" },
+    { name: "personalLinkedInProfile", label: "Personal LinkedIn Profile" },
+    { name: "pep", label: "PEP", type: "select", options: options.pepOptions },
+    { name: "criminalHistory", label: "Criminal History" },
+  ];
 
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -202,8 +202,8 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   const dispatch = useAppDispatch();
   const { applicationNumber } = useAppContext();
   const storeData = useAppSelector(
-  (state) => state.prelogin.data,
-);
+    (state) => state.prelogin.data,
+  );
   const masters = useAppSelector((state) => state.drs.masters);
   const data = dataOverride ?? storeData;
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -303,128 +303,20 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   }
 
   return (
-    <>
-      <Box sx={{ mt: 2 }}>
-        <CustomAccordion title="Customer Profile" defaultExpanded>
-          <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1.5 }}>
-            <IconButton
-              aria-label="Edit customer profile"
-              onClick={handleEditOpen}
-              sx={{ color: "#9A2529", border: "1px solid #e7b6b8", width: 34, height: 34 }}
-            >
-              <EditIcon width={16} height={16} />
-            </IconButton>
-          </Box>
-
-          {submitStatus && !isEditOpen && (
-            <Alert severity={submitStatus.type} sx={{ mb: 1.5 }}>
-              {submitStatus.message}
-            </Alert>
-          )}
-
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", md: "96px minmax(0, 1fr)" },
-          gap: 2.5,
-          p: 2,
-          borderRadius: "8px",
-          backgroundColor: "#eaf1f5",
-        }}
-      >
-        <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
-          <Avatar src={profileImage} alt={displayProfile.lifeAssuredName} sx={{ width: 76, height: 76 }} />
-          {displayProfile.pep !== "Yes" && (
-            <Typography
-              sx={{
-                px: 1,
-                py: 0.25,
-                borderRadius: "999px",
-                backgroundColor: "#43a047",
-                color: "#fff",
-                fontSize: "11px",
-                fontWeight: 700,
-              }}
-            >
-              Green Case
-            </Typography>
-          )}
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="Customer Profile" defaultExpanded>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1.5 }}>
+          <IconButton
+            aria-label="Edit customer profile"
+            onClick={handleEditOpen}
+            sx={{ color: "#9A2529", border: "1px solid #e7b6b8", width: 34, height: 34 }}
+          >
+            <EditIcon width={16} height={16} />
+          </IconButton>
         </Box>
 
-        <Box sx={{ minWidth: 0 }}>
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "flex-start",
-              justifyContent: "space-between",
-              gap: 2,
-              borderBottom: "1px solid #bdd1df",
-              pb: 1.2,
-              mb: 1.4,
-            }}
-          >
-            <Box sx={{ minWidth: 0 }}>
-              <Typography sx={{ fontSize: "18px", fontWeight: 800, color: "#1f2937" }}>
-                {displayProfile.lifeAssuredName || "-"}
-              </Typography>
-              <Typography sx={{ fontSize: "13px", color: "#4b5563" }}>
-                DOB: {formatDisplayDate(displayProfile.dob) || "-"}
-              </Typography>
-            </Box>
-            <Typography
-              sx={{
-                px: 1.5,
-                py: 0.5,
-                borderRadius: "999px",
-                backgroundColor: "#fff",
-                color: "#063E6F",
-                fontSize: "13px",
-                fontWeight: 700,
-                border: "1px solid #c8d7e3",
-                whiteSpace: "nowrap",
-              }}
-            >
-              {[displayProfile.gender, toText(toRecord(profile.personalDetails).age) ? `${toText(toRecord(profile.personalDetails).age)} Years` : ""]
-                .filter(Boolean)
-                .join(", ") || "-"}
-            </Typography>
-          </Box>
-
-          <Box
-            sx={{
-              display: "grid",
-              gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
-              gap: "14px 24px",
-            }}
-          >
-            {detailItems.map((item) => (
-              <Box key={item.label} sx={{ minWidth: 0 }}>
-                <Typography sx={{ fontSize: "12px", color: "#637381", mb: 0.25 }}>{item.label}</Typography>
-                <Typography sx={{ fontSize: "14px", color: "#111827", fontWeight: 700, overflowWrap: "anywhere" }}>
-                  {item.value || "-"}
-                </Typography>
-              </Box>
-            ))}
-          </Box>
-        </Box>
-      </Box>
-
-      <CustomDialog
-        open={isEditOpen}
-        onClose={handleClose}
-        title="Edit Customer Profile"
-        maxWidth="md"
-        titleSx={modalTitleStyles}
-        contentSx={{ pt: 1 }}
-        actionsSx={{ justifyContent: "center", pb: 2.5 }}
-        actions={
-          <CustomButton onClick={handleSave} disabled={isSaving} sx={{ minWidth: 140, borderRadius: "999px" }}>
-            {isSaving ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : "Save"}
-          </CustomButton>
-        }
-      >
-        {submitStatus && isEditOpen && (
-          <Alert severity={submitStatus.type} sx={{ mb: 2 }}>
+        {submitStatus && !isEditOpen && (
+          <Alert severity={submitStatus.type} sx={{ mb: 1.5 }}>
             {submitStatus.message}
           </Alert>
         )}
@@ -432,41 +324,147 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
         <Box
           sx={{
             display: "grid",
-            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
-            gap: 1.5,
-            p: 1.5,
+            gridTemplateColumns: { xs: "1fr", md: "96px minmax(0, 1fr)" },
+            gap: 2.5,
+            p: 2,
             borderRadius: "8px",
-            backgroundColor: "#f7f7f7",
+            backgroundColor: "#eaf1f5",
           }}
         >
-          {formFields.map((field) => (
-            <Box key={field.name}>
-              {field.type === "select" ? (
-                <CustomSelect
-                  label={field.label}
-                  value={toText(formValues?.[field.name])}
-                  options={field.options ?? []}
-                  onChange={(value) => handleChange(field.name, value)}
-                />
-              ) : (
-                <>
-                  <Typography sx={labelStyles}>{field.label}</Typography>
-                  <CustomTextField
-                    fullWidth
-                    type={field.type === "date" ? "date" : "text"}
-                    value={toText(formValues?.[field.name])}
-                    onChange={(event) => handleChange(field.name, event.target.value)}
-                    sx={{ backgroundColor: "#fff" }}
-                  />
-                </>
-              )}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 1 }}>
+            <Avatar src={profileImage} alt={displayProfile.lifeAssuredName} sx={{ width: 76, height: 76 }} />
+            {displayProfile.pep !== "Yes" && (
+              <Typography
+                sx={{
+                  px: 1,
+                  py: 0.25,
+                  borderRadius: "999px",
+                  backgroundColor: "#43a047",
+                  color: "#fff",
+                  fontSize: "11px",
+                  fontWeight: 700,
+                }}
+              >
+                Green Case
+              </Typography>
+            )}
+          </Box>
+
+          <Box sx={{ minWidth: 0 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "flex-start",
+                justifyContent: "space-between",
+                gap: 2,
+                borderBottom: "1px solid #bdd1df",
+                pb: 1.2,
+                mb: 1.4,
+              }}
+            >
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontSize: "18px", fontWeight: 800, color: "#1f2937" }}>
+                  {displayProfile.lifeAssuredName || "-"}
+                </Typography>
+                <Typography sx={{ fontSize: "13px", color: "#4b5563" }}>
+                  DOB: {formatDisplayDate(displayProfile.dob) || "-"}
+                </Typography>
+              </Box>
+              <Typography
+                sx={{
+                  px: 1.5,
+                  py: 0.5,
+                  borderRadius: "999px",
+                  backgroundColor: "#fff",
+                  color: "#063E6F",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  border: "1px solid #c8d7e3",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                {[displayProfile.gender, toText(toRecord(profile.personalDetails).age) ? `${toText(toRecord(profile.personalDetails).age)} Years` : ""]
+                  .filter(Boolean)
+                  .join(", ") || "-"}
+              </Typography>
             </Box>
-          ))}
+
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", lg: "repeat(4, minmax(0, 1fr))" },
+                gap: "14px 24px",
+              }}
+            >
+              {detailItems.map((item) => (
+                <Box key={item.label} sx={{ minWidth: 0 }}>
+                  <Typography sx={{ fontSize: "12px", color: "#637381", mb: 0.25 }}>{item.label}</Typography>
+                  <Typography sx={{ fontSize: "14px", color: "#111827", fontWeight: 700, overflowWrap: "anywhere" }}>
+                    {item.value || "-"}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
         </Box>
-      </CustomDialog>
-        </CustomAccordion>
-      </Box>
-    </>
+
+        <CustomDialog
+          open={isEditOpen}
+          onClose={handleClose}
+          title="Edit Customer Profile"
+          maxWidth="md"
+          titleSx={modalTitleStyles}
+          contentSx={{ pt: 1 }}
+          actionsSx={{ justifyContent: "center", pb: 2.5 }}
+          actions={
+            <CustomButton onClick={handleSave} disabled={isSaving} sx={{ minWidth: 140, borderRadius: "999px" }}>
+              {isSaving ? <CircularProgress size={18} sx={{ color: "#fff" }} /> : "Save"}
+            </CustomButton>
+          }
+        >
+          {submitStatus && isEditOpen && (
+            <Alert severity={submitStatus.type} sx={{ mb: 2 }}>
+              {submitStatus.message}
+            </Alert>
+          )}
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: "repeat(3, minmax(0, 1fr))" },
+              gap: 1.5,
+              p: 1.5,
+              borderRadius: "8px",
+              backgroundColor: "#f7f7f7",
+            }}
+          >
+            {formFields.map((field) => (
+              <Box key={field.name}>
+                {field.type === "select" ? (
+                  <CustomSelect
+                    label={field.label}
+                    value={toText(formValues?.[field.name])}
+                    options={field.options ?? []}
+                    onChange={(value) => handleChange(field.name, value)}
+                  />
+                ) : (
+                  <>
+                    <Typography sx={labelStyles}>{field.label}</Typography>
+                    <CustomTextField
+                      fullWidth
+                      type={field.type === "date" ? "date" : "text"}
+                      value={toText(formValues?.[field.name])}
+                      onChange={(event) => handleChange(field.name, event.target.value)}
+                      sx={{ backgroundColor: "#fff" }}
+                    />
+                  </>
+                )}
+              </Box>
+            ))}
+          </Box>
+        </CustomDialog>
+      </CustomAccordion>
+    </Box>
   );
 };
 

@@ -3,7 +3,6 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
-import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import { useAppContext } from "../../../hooks/useAppContext";
@@ -19,10 +18,7 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { applicantTabs } from "../../../utils/constant";
-// import BreDecision from "../DRS_Accordions/BreDecision_";
-import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
-import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
-import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
+import { isFormalTaskRole } from "../formalProfileHelpers";
 import MerForm, { type MerFormHandle } from "./MER/MerForm";
 import { getMerConfig } from "./MER/merConfig";
 import OtherMedicalsForm, { type OtherMedicalsFormHandle } from "./Other Medicals/OtherMedicalsForm";
@@ -39,6 +35,7 @@ import type { OtherMedicalTableData } from "./Other Medicals/otherMedicals.types
 import type { MedicalCalculatedParameter } from "./Special Medical/specialMedical.types";
 import BreDecision from "../DRS_Accordions/BreDecision";
 import { KeyDownArrowIcon, KeyRightArrowIcon } from "../../../icons/Icons";
+import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
 
 const getStoredApplicantTab = () =>
   (localStorage.getItem("drsSelectedApplicantTab") as ApplicantTab | null) ?? "proposer";
@@ -482,7 +479,6 @@ const ViewMedical = () => {
   const userId = String(localStorage.getItem("userId") ?? "").trim();
   const roleType = getRoleType();
   const isFormalRole = isFormalTaskRole(roleType);
-  const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
@@ -510,7 +506,6 @@ const ViewMedical = () => {
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const merFormRefs = useRef<Record<string, MerFormHandle | null>>({});
-  // const merFormRefs = useRef<MerFormHandle>(null);
 
   const specialMedicalFormRefs = useRef<Record<string, SpecialMedicalFormHandle | null>>({});
   const otherMedicalsFormRefs = useRef<Record<string, OtherMedicalsFormHandle | null>>({});
@@ -1198,7 +1193,7 @@ const ViewMedical = () => {
       setSubmitError(null);
 
       await dispatch(
-        breThunk({ applicationNumber: safeApplicationId ,eventName:"ME"})
+        breThunk({ applicationNumber: safeApplicationId, eventName: "ME" })
       ).unwrap();
 
       await dispatch(
@@ -1312,44 +1307,6 @@ const ViewMedical = () => {
       return;
     }
 
-    // MER save API
-    // if (subSection.groupLabel === "MER") {
-    //   const merFormRef = merFormRefs.current[editingSubSectionId];
-
-    //   if (!merFormRef) {
-    //     return;
-    //   }
-
-    //   const isValid = merFormRef.validateForm();
-
-    //   if (!isValid) {
-    //     return;
-    //   }
-
-    //   const values = merFormRef.getFormValues();
-
-    //   const request = buildMerRequest({
-    //     applicationNumber: safeApplicationId,
-    //     partyId,
-    //     createdBy: "user-id",
-    //     selectedSubSection: subSection.title,
-    //     values,
-    //   });
-
-    //   console.log("MER Request", request);
-
-    //   try {
-    //     const response = await dispatch(saveMerThunk(request)).unwrap();
-
-    //     merFormRef.commitEdit();
-    //     setEditingSubSectionId(null);
-    //   } catch (error) {
-    //     console.error("MER save failed:", error);
-    //   }
-
-    //   return;
-    // }
-
     if (subSection.groupLabel === "MER") {
       const merFormRef = merFormRefs.current[editingSubSectionId];
 
@@ -1372,62 +1329,6 @@ const ViewMedical = () => {
         selectedSubSection: subSection.title,
         values,
       });
-
-      // try {
-      //   const response = await dispatch(
-      //     saveMerThunk(request)
-      //   ).unwrap();
-
-      //   const savedSection =
-      //     response.data?.sections;
-
-      //   // Update calculated values returned by API
-      //   if (savedSection?.measurement) {
-      //     merFormRef.setFormValues({
-      //       bmi:
-      //         savedSection.measurement.bmiCalculated == null
-      //           ? ""
-      //           : String(savedSection.measurement.bmiCalculated),
-
-      //       heightFts:
-      //         savedSection.measurement.heightFtsCalculated == null
-      //           ? ""
-      //           : String(savedSection.measurement.heightFtsCalculated),
-
-      //       heightInch:
-      //         savedSection.measurement.heightInchCalculated == null
-      //           ? ""
-      //           : String(savedSection.measurement.heightInchCalculated),
-      //     });
-      //   }
-
-      //   if (savedSection?.blood_pressure_and_pulse) {
-      //     merFormRef.setFormValues({
-      //       avgSystolic:
-      //         savedSection.blood_pressure_and_pulse
-      //           .avgSystolicCalculated == null
-      //           ? ""
-      //           : String(
-      //             savedSection.blood_pressure_and_pulse
-      //               .avgSystolicCalculated
-      //           ),
-
-      //       avgDiastolic:
-      //         savedSection.blood_pressure_and_pulse
-      //           .avgDiastolicCalculated == null
-      //           ? ""
-      //           : String(
-      //             savedSection.blood_pressure_and_pulse
-      //               .avgDiastolicCalculated
-      //           ),
-      //     });
-      //   }
-
-      //   merFormRef.commitEdit();
-      //   setEditingSubSectionId(null);
-      // } catch (error) {
-      //   console.error("MER save failed:", error);
-      // }
 
       try {
         const response = await dispatch(
@@ -1683,7 +1584,6 @@ const ViewMedical = () => {
 
       <BreDecision />
 
-
       {!isFormalRole && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
           <CustomTabs
@@ -1697,24 +1597,11 @@ const ViewMedical = () => {
         </Box>
       )}
 
+      <Box sx={{ mt: 1 }}>
+        <ApplicantProfile readOnly />
+      </Box>
+
       <Box sx={{ px: 1 }}>
-        <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
-          <CustomAccordion
-            title={isFormalRole ? "Member Profile" : "Applicant Profile"}
-            defaultExpanded={false}
-            detailPadding={0}
-          >
-            {isFormalRole ? (
-              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-                <FormalMemberProfile profile={formalMemberProfile} />
-              </Box>
-            ) : (
-              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-                <ApplicantProfile selectedApplicantTab={currentApplicantTab} isApplicantDetailsExpanded />
-              </Box>
-            )}
-          </CustomAccordion>
-        </Box>
 
         <Box
           sx={{
@@ -1776,50 +1663,50 @@ const ViewMedical = () => {
                 </Box>
 
                 <Collapse in={expandedGroups[group.key]} timeout="auto" unmountOnExit>
-                {group.subSections.map((subSection, index) => {
-                  const subSectionId = `${group.key}-${index}`;
-                  const isActive = subSectionId === resolvedActiveSubSectionId;
+                  {group.subSections.map((subSection, index) => {
+                    const subSectionId = `${group.key}-${index}`;
+                    const isActive = subSectionId === resolvedActiveSubSectionId;
 
-                  return (
-                    <Box
-                      key={subSectionId}
-                      data-medical-menu-id={subSectionId}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => handleSubSectionMenuClick(subSectionId)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" || event.key === " ") {
-                          event.preventDefault();
-                          handleSubSectionMenuClick(subSectionId);
-                        }
-                      }}
-                      sx={{
-                        px: 1.5,
-                        py: 0.85,
-                        borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
-                        borderBottom: "1px solid #EAECEF",
-                        backgroundColor: isActive ? "#FFFFFF" : "transparent",
-                        color: isActive ? "#B42318" : "#667085",
-                        fontSize: 11.5,
-                        fontWeight: isActive ? 600 : 500,
-                        lineHeight: 1.3,
-                        cursor: "pointer",
-                        transition: "all 0.2s ease",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        gap: 1,
-                      }}
-                    >
-                      <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit", lineHeight: 1.2 }}>
-                        {subSection}
-                      </Typography>
-                      <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
-                        {"\u203A"}
-                      </Typography>
-                    </Box>
-                  );
-                })}
+                    return (
+                      <Box
+                        key={subSectionId}
+                        data-medical-menu-id={subSectionId}
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => handleSubSectionMenuClick(subSectionId)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") {
+                            event.preventDefault();
+                            handleSubSectionMenuClick(subSectionId);
+                          }
+                        }}
+                        sx={{
+                          px: 1.5,
+                          py: 0.85,
+                          borderLeft: isActive ? "3px solid #DE2C3B" : "3px solid transparent",
+                          borderBottom: "1px solid #EAECEF",
+                          backgroundColor: isActive ? "#FFFFFF" : "transparent",
+                          color: isActive ? "#B42318" : "#667085",
+                          fontSize: 11.5,
+                          fontWeight: isActive ? 600 : 500,
+                          lineHeight: 1.3,
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          gap: 1,
+                        }}
+                      >
+                        <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit", lineHeight: 1.2 }}>
+                          {subSection}
+                        </Typography>
+                        <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
+                          {"\u203A"}
+                        </Typography>
+                      </Box>
+                    );
+                  })}
                 </Collapse>
               </Box>
             ))}
@@ -1921,88 +1808,79 @@ const ViewMedical = () => {
                     </Box>
 
                     <Collapse in={isSubSectionExpanded} timeout="auto" unmountOnExit>
-                    <Box
-                      sx={{
-                        p: { xs: 1, md: 1.25 },
-                        minWidth: 0,
-                        "& .MuiGrid-item, & .MuiFormControl-root": { minWidth: 0 },
-                        "& .MuiFormLabel-root, & .MuiInputLabel-root, & .MuiTypography-root": {
-                          whiteSpace: "normal",
-                          overflowWrap: "anywhere",
-                          wordBreak: "break-word",
-                          lineHeight: 1.2,
-                          fontSize: "12px",
-                        },
-                        "& .MuiInputBase-root": { minHeight: 32, fontSize: 11.5 },
-                        "& .MuiInputBase-input": { py: 0.55, fontSize: 11.5 },
-                        "& .MuiSelect-select": { py: "7px !important", fontSize: 11.5 },
-                        "& .MuiGrid-container": { alignItems: "stretch", rowGap: "10px" },
-                        "& .MuiGrid-item": {
-                          display: "flex",
-                          flexDirection: "column",
-                          alignSelf: "stretch",
+                      <Box
+                        sx={{
+                          p: { xs: 1, md: 1.25 },
                           minWidth: 0,
-                        },
-                        "& .MuiGrid-item > .MuiBox-root:first-of-type, & .MuiGrid-item > .MuiTypography-root:first-of-type": {
-                          minHeight: { xs: "auto", md: 60 },
-                          alignItems: "flex-start",
-                          overflowWrap: "anywhere",
-                        },
-                        "& .MuiGrid-item .MuiFormControl-root": {
-                          marginTop: "auto",
-                          width: "100%",
-                        },
-                      }}
-                    >
-                      {group?.key === "mer" && (
-                        // <MerForm
-                        //   ref={(node) => {
-                        //     merFormRefs.current[subSection.id] = node;
-                        //   }}
-                        //   selectedSubSection={subSection.title}
-                        //   fields={group.fields}
-                        //   applicationNo={safeApplicationId}
-                        //   isEditing={editingSubSectionId === subSection.id}
-                        // />
-                        <MerForm
-                          ref={(node) => {
-                            merFormRefs.current[subSection.id] =
-                              node;
-                          }}
-                          selectedSubSection={
-                            subSection.title
-                          }
-                          fields={group.fields}
-                          applicationNo={
-                            safeApplicationId
-                          }
-                          isEditing={
-                            editingSubSectionId ===
-                            subSection.id
-                          }
-                        />
-                      )}
-                      {group?.key === "specialMedical" && (
-                        <SpecialMedicalForm
-                          ref={(node) => {
-                            specialMedicalFormRefs.current[subSection.id] = node;
-                          }}
-                          selectedSubSection={subSection.title}
-                          fields={group.fields}
-                          isEditing={editingSubSectionId === subSection.id}
-                        />
-                      )}
-                      {group?.key === "otherMedicals" && (
-                        <OtherMedicalsForm
-                          ref={(node) => {
-                            otherMedicalsFormRefs.current[subSection.id] = node;
-                          }}
-                          selectedSubSection={subSection.title}
-                          fields={group.fields}
-                          isEditing={editingSubSectionId === subSection.id}
-                        />
-                      )}
-                    </Box>
+                          "& .MuiGrid-item, & .MuiFormControl-root": { minWidth: 0 },
+                          "& .MuiFormLabel-root, & .MuiInputLabel-root, & .MuiTypography-root": {
+                            whiteSpace: "normal",
+                            overflowWrap: "anywhere",
+                            wordBreak: "break-word",
+                            lineHeight: 1.2,
+                            fontSize: "12px",
+                          },
+                          "& .MuiInputBase-root": { minHeight: 32, fontSize: 11.5 },
+                          "& .MuiInputBase-input": { py: 0.55, fontSize: 11.5 },
+                          "& .MuiSelect-select": { py: "7px !important", fontSize: 11.5 },
+                          "& .MuiGrid-container": { alignItems: "stretch", rowGap: "10px" },
+                          "& .MuiGrid-item": {
+                            display: "flex",
+                            flexDirection: "column",
+                            alignSelf: "stretch",
+                            minWidth: 0,
+                          },
+                          "& .MuiGrid-item > .MuiBox-root:first-of-type, & .MuiGrid-item > .MuiTypography-root:first-of-type": {
+                            minHeight: { xs: "auto", md: 60 },
+                            alignItems: "flex-start",
+                            overflowWrap: "anywhere",
+                          },
+                          "& .MuiGrid-item .MuiFormControl-root": {
+                            marginTop: "auto",
+                            width: "100%",
+                          },
+                        }}
+                      >
+                        {group?.key === "mer" && (
+                          <MerForm
+                            ref={(node) => {
+                              merFormRefs.current[subSection.id] =
+                                node;
+                            }}
+                            selectedSubSection={
+                              subSection.title
+                            }
+                            fields={group.fields}
+                            applicationNo={
+                              safeApplicationId
+                            }
+                            isEditing={
+                              editingSubSectionId ===
+                              subSection.id
+                            }
+                          />
+                        )}
+                        {group?.key === "specialMedical" && (
+                          <SpecialMedicalForm
+                            ref={(node) => {
+                              specialMedicalFormRefs.current[subSection.id] = node;
+                            }}
+                            selectedSubSection={subSection.title}
+                            fields={group.fields}
+                            isEditing={editingSubSectionId === subSection.id}
+                          />
+                        )}
+                        {group?.key === "otherMedicals" && (
+                          <OtherMedicalsForm
+                            ref={(node) => {
+                              otherMedicalsFormRefs.current[subSection.id] = node;
+                            }}
+                            selectedSubSection={subSection.title}
+                            fields={group.fields}
+                            isEditing={editingSubSectionId === subSection.id}
+                          />
+                        )}
+                      </Box>
                     </Collapse>
                   </Box>
                 );

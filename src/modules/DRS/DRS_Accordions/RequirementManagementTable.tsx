@@ -1361,19 +1361,6 @@ const RequirementManagementTable = ({
     setIsSaving(true);
 
     try {
-      // const selectedCaseContext = toRecord(
-      //   (() => {
-      //     try {
-      //       return JSON.parse(
-      //         localStorage.getItem("selectedCaseContext") ?? "{}",
-      //       ) as unknown;
-      //     } catch {
-      //       return {};
-      //     }
-      //   })(),
-      // );
-
-
       const updatedDrsData = {
         ...drsPayload,
         requirementManagement: createRequestRows(rows),
@@ -1620,59 +1607,6 @@ const RequirementManagementTable = ({
             boxSizing: "border-box",
           }}
         >
-          {/* {COLUMN_HEADINGS.map((heading, columnIndex) => (
-            <Box
-              key={heading}
-              sx={{
-                position: "relative",
-                display: "flex",
-                alignItems: "center",
-                gap: 0.4,
-                overflow: "hidden",
-                minWidth: 0,
-              }}
-            >
-              <Typography
-                component="span"
-                sx={{
-                  appearance: "none",
-                  border: 0,
-                  p: 0,
-                  bgcolor: "transparent",
-                  fontFamily: "inherit",
-                  fontSize: "10.5px",
-                  fontWeight: 700,
-                  color: "#FFF",
-                  lineHeight: 1.15,
-                  whiteSpace: "normal",
-                  overflow: "hidden",
-                  minWidth: 0,
-                  cursor: "default",
-                }}
-              >
-                {heading}
-              </Typography>
-
-              <Box
-                onMouseDown={(event) =>
-                  handleColumnResizeStart(columnIndex, event)
-                }
-                sx={{
-                  position: "absolute",
-                  top: 0,
-                  right: 0,
-                  width: "7px",
-                  height: "100%",
-                  cursor: "col-resize",
-                  borderRight: "1px solid rgba(255,255,255,0.3)",
-                  "&:hover": {
-                    bgcolor: "rgba(255,255,255,0.22)",
-                  },
-                }}
-              />
-            </Box>
-          ))} */}
-
           {displayedColumnHeadings.map(
             (heading) => {
               const originalColumnIndex =
@@ -1997,10 +1931,6 @@ const RequirementManagementTable = ({
                 {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "fupCode")
                   : renderCompactCell(row.fupCode)}
-
-                {/* {renderDetailAction("Extra Remarks", getExtraRemarks(row))}
-
-                {renderDetailAction("Description", row.description)} */}
 
                 {readOnly
                   ? renderCompactCell(getExtraRemarks(row))

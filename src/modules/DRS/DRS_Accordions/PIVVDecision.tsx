@@ -192,115 +192,113 @@ const PIVVDecision = () => {
   };
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ p: 1 }}>
-        <CustomAccordion title="PIVV Decision" defaultExpanded>
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="PIVV Decision" defaultExpanded>
+        <Box
+          sx={{
+            backgroundColor: "#F6F6F6",
+            p: 1.25,
+            mt: 0.75,
+            borderRadius: "6px",
+          }}
+        >
           <Box
             sx={{
-              backgroundColor: "#F6F6F6",
-              p: 1.25,
-              mt: 0.75,
-              borderRadius: "6px",
+              display: "grid",
+              gridTemplateColumns: "repeat(2, 1fr)",
+              gap: 1,
             }}
           >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "repeat(2, 1fr)",
-                gap: 1,
+            <CustomSelect
+              label="PIVV Pool Decision"
+              value={decision}
+              onChange={(value: string) => {
+                setDecision(value);
+                setSubmitMessage(null);
               }}
-            >
-              <CustomSelect
-                label="PIVV Pool Decision"
-                value={decision}
-                onChange={(value: string) => {
-                  setDecision(value);
-                  setSubmitMessage(null);
-                }}
-                options={pivvDecisionOptions}
-              />
-            </Box>
+              options={pivvDecisionOptions}
+            />
+          </Box>
 
+          <Typography
+            sx={{
+              fontSize: "12px",
+              fontWeight: 400,
+              color: "#444",
+              mt: 1,
+              mb: 0.5,
+            }}
+          >
+            Remarks
+          </Typography>
+
+          <CustomTextField
+            fullWidth
+            multiline
+            minRows={2}
+            placeholder="Enter remarks..."
+            value={remarks}
+            onChange={(event) => {
+              const value = event.target.value;
+              if (value.length <= 10000) {
+                setRemarks(value);
+                setSubmitMessage(null);
+              }
+            }}
+            sx={{ backgroundColor: "#fff" }}
+          />
+
+          <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
+            {remarks.length}/10000
+          </Typography>
+
+          {!taskContext.taskId && (
+            <Typography sx={{ mt: 0.75, fontSize: 12, color: "#DE2C3B" }}>
+              Task ID is missing. Please open the case from inbox again.
+            </Typography>
+          )}
+
+          {submitMessage && (
             <Typography
               sx={{
-                fontSize: "12px",
-                fontWeight: 400,
-                color: "#444",
-                mt: 1,
-                mb: 0.5,
+                mt: 0.75,
+                fontSize: 12,
+                color: submitMessage.toLowerCase().includes("success") ? "#0F8A3D" : "#DE2C3B",
               }}
             >
-              Remarks
+              {submitMessage}
             </Typography>
+          )}
+        </Box>
 
-            <CustomTextField
-              fullWidth
-              multiline
-              minRows={2}
-              placeholder="Enter remarks..."
-              value={remarks}
-              onChange={(event) => {
-                const value = event.target.value;
-                if (value.length <= 10000) {
-                  setRemarks(value);
-                  setSubmitMessage(null);
-                }
-              }}
-              sx={{ backgroundColor: "#fff" }}
-            />
+        <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
+          <CustomButton
+            variant="contained"
+            disabled={!isSubmitEnabled || !taskContext.taskId || submitLoading}
+            onClick={handleSubmitIntent}
+            sx={{
+              minWidth: 150,
+              height: 36,
+              borderRadius: "50px",
+              fontWeight: 600,
+              px: 2.5,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {submitLoading ? "Submitting..." : "Submit"}
+          </CustomButton>
+        </Box>
+      </CustomAccordion>
 
-            <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
-              {remarks.length}/10000
-            </Typography>
-
-            {!taskContext.taskId && (
-              <Typography sx={{ mt: 0.75, fontSize: 12, color: "#DE2C3B" }}>
-                Task ID is missing. Please open the case from inbox again.
-              </Typography>
-            )}
-
-            {submitMessage && (
-              <Typography
-                sx={{
-                  mt: 0.75,
-                  fontSize: 12,
-                  color: submitMessage.toLowerCase().includes("success") ? "#0F8A3D" : "#DE2C3B",
-                }}
-              >
-                {submitMessage}
-              </Typography>
-            )}
-          </Box>
-
-          <Box sx={{ display: "flex", gap: 1, mt: 1 }}>
-            <CustomButton
-              variant="contained"
-              disabled={!isSubmitEnabled || !taskContext.taskId || submitLoading}
-              onClick={handleSubmitIntent}
-              sx={{
-                minWidth: 150,
-                height: 36,
-                borderRadius: "50px",
-                fontWeight: 600,
-                px: 2.5,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {submitLoading ? "Submitting..." : "Submit"}
-            </CustomButton>
-          </Box>
-        </CustomAccordion>
-
-        <ConfirmationDialog
-          open={confirmationDialogOpen}
-          message="Do you want to submit the case?"
-          onClose={() => setConfirmationDialogOpen(false)}
-          onConfirm={() => {
-            void handleSubmit();
-          }}
-        />
-      </Box>
-    // </Container>
+      <ConfirmationDialog
+        open={confirmationDialogOpen}
+        message="Do you want to submit the case?"
+        onClose={() => setConfirmationDialogOpen(false)}
+        onConfirm={() => {
+          void handleSubmit();
+        }}
+      />
+    </Box>
   );
 };
 

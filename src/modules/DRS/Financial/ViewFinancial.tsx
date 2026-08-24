@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
 import CustomButton from "../../../components/ui/Button/Button";
-import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -27,15 +26,14 @@ import { getSessionMasters } from "../../../utils/masterDataSession";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
 import { getErrorMessage } from "../../../config/errorMessages";
 import BreDecision from "../DRS_Accordions/BreDecision";
-import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
-import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
+import { isFormalTaskRole } from "../formalProfileHelpers";
 import {
   financialSections,
   type FinancialField,
   type FinancialSectionConfig,
   type FinancialSectionKey,
 } from "./financialAccordionConfig";
-import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
+import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
 
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
 
@@ -2468,7 +2466,6 @@ const ViewFinancial = () => {
       ? "Application number or party ID is unavailable for financial fetch."
       : null;
   const isFormalRole = isFormalTaskRole(roleType);
-  const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
   const displayFinancialSections = useMemo(
     () => buildFinancialSectionsFromResponse(financialData?.sections),
     [financialData?.sections]
@@ -3679,59 +3676,23 @@ const ViewFinancial = () => {
 
       <BreDecision />
 
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={3000}
-        onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          variant="filled"
-          sx={{
-            width: "100%",
-            ...(snackbarSeverity === "info" && {
-              backgroundColor: "#0f5b92",
-              color: "#ffffff",
-            }),
-          }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+      {!isFormalRole && (
+        <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
+          <CustomTabs
+            tabs={visibleTabs}
+            value={currentApplicantTab}
+            onChange={(value: ApplicantTab) => {
+              setActiveApplicantTab(value);
+            }}
+          />
+        </Box>
+      )}
+
+      <Box sx={{ mt: 1 }}>
+        <ApplicantProfile readOnly />
+      </Box>
 
       <Box sx={{ px: 1 }}>
-
-        {!isFormalRole && (
-          <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
-            <CustomTabs
-              tabs={visibleTabs}
-              value={currentApplicantTab}
-              onChange={(value: ApplicantTab) => {
-                setActiveApplicantTab(value);
-              }}
-            />
-          </Box>
-        )}
-
-        <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
-          <CustomAccordion title={isFormalRole ? "Member Profile" : "Applicant Profile"} defaultExpanded={false} detailPadding={0}>
-            {isFormalRole ? (
-              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-                <FormalMemberProfile profile={formalMemberProfile} />
-              </Box>
-            ) : (
-              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-                <ApplicantProfile
-                  selectedApplicantTab={currentApplicantTab}
-                  isApplicantDetailsExpanded
-                />
-              </Box>
-            )}
-          </CustomAccordion>
-        </Box>
-
         <Box
           sx={{
             display: "flex",
@@ -3958,7 +3919,27 @@ const ViewFinancial = () => {
         </Box>
       </Box>
 
-
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
+          severity={snackbarSeverity}
+          variant="filled"
+          sx={{
+            width: "100%",
+            ...(snackbarSeverity === "info" && {
+              backgroundColor: "#0f5b92",
+              color: "#ffffff",
+            }),
+          }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
