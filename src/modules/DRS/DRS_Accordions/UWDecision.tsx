@@ -18,7 +18,7 @@ import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
-import { getAllReasonRemarks, getNonMedicalReasonRemarks, normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
@@ -85,6 +85,52 @@ const toRecord = (value: unknown): Record<string, unknown> =>
     value && typeof value === "object" && !Array.isArray(value)
         ? (value as Record<string, unknown>)
         : {};
+
+type ReasonOption = {
+    label: string;
+    value: string;
+};
+
+const getReasonOptionsFromMasters = (
+    masters: unknown,
+    requestType?: "MEDICAL" | "NON_MEDICAL",
+): ReasonOption[] => {
+    const masterRecord = toRecord(masters);
+    const masterData = toRecord(masterRecord.data);
+    const rawReasons = masterRecord.reason ?? masterData.reason;
+
+    if (!Array.isArray(rawReasons)) return [];
+
+    const options = rawReasons
+        .filter((reason) => {
+            const item = toRecord(reason);
+            const isActive = String(item.isActive ?? "Y")
+                .trim()
+                .toUpperCase();
+            const itemRequestType = String(item.requestType ?? "")
+                .trim()
+                .toUpperCase();
+
+            return (
+                isActive === "Y" &&
+                (!requestType || itemRequestType === requestType)
+            );
+        })
+        .map((reason) => {
+            const item = toRecord(reason);
+            const label = String(
+                item.description ?? item.value ?? item.code ?? "",
+            ).trim();
+            const value = String(item.iibCode ?? "").trim();
+
+            return { label, value };
+        })
+        .filter((option) => option.label && option.value);
+
+    return Array.from(
+        new Map(options.map((option) => [option.value, option])).values(),
+    );
+};
 
 const UWDecision = () => {
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes)
@@ -243,8 +289,14 @@ const UWDecision = () => {
     // const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason", true, true), [masters]);
     const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
 
-    const nonMedicalOptions = getNonMedicalReasonRemarks(masters.reasonRemarks);
-    const allOptions = getAllReasonRemarks(masters.reasonRemarks);
+    const nonMedicalOptions = useMemo(
+        () => getReasonOptionsFromMasters(masters, "NON_MEDICAL"),
+        [masters],
+    );
+    const allReasonOptions = useMemo(
+        () => getReasonOptionsFromMasters(masters),
+        [masters],
+    );
 
     const parallelUWDecisionOptions = useMemo(() => {
         const misc = (masters as Record<string, unknown> | undefined)?.misc;
@@ -553,19 +605,62 @@ const UWDecision = () => {
 
             completedStep = "drs";
 
+            const toIibCode = (value: string): number | undefined => {
+                const normalizedValue = value.trim();
+                if (!normalizedValue) return undefined;
+
+                const iibCode = Number(normalizedValue);
+                return Number.isFinite(iibCode) ? iibCode : undefined;
+            };
+
+            const rejectIibCode = toIibCode(rejectReason);
+            const postponeIibCode = toIibCode(postponeReason);
+            const selectedDeclineIibCodes = declineReasons
+                .map(toIibCode)
+                .filter((iibCode): iibCode is number => iibCode !== undefined);
+
+            const optionalReason: number | number[] | undefined =
+                isRejectDecision && rejectIibCode !== undefined
+                    ? rejectIibCode
+                    : isDeclineDecision && selectedDeclineIibCodes.length > 0
+                      ? selectedDeclineIibCodes
+                      : isPostponeDecision && postponeIibCode !== undefined
+                        ? postponeIibCode
+                        : undefined;
+
+            const completeTaskPayload = {
+                requestContext: {
+                    taskId: taskContext.taskId,
+                    userId: taskContext.userId,
+                    appNo: taskContext.appNo,
+                    instanceId: taskContext.instanceId,
+                    remarks: uwDecisionRemarks.trim(),
+                    decision: effectiveCaseUWDecision.trim(),
+                    ...(optionalReason !== undefined
+                        ? { reason: optionalReason }
+                        : {}),
+                    ...(showDecisionCode && resolvedDecisionCode.trim()
+                        ? { decisionCode: resolvedDecisionCode.trim() }
+                        : {}),
+                    ...(postponementPeriod.trim()
+                        ? { postponementPeriod: postponementPeriod.trim() }
+                        : {}),
+                    ...(isAcceptDecision && resolvedSmokerStatus.trim()
+                        ? { smokerStatus: resolvedSmokerStatus.trim() }
+                        : {}),
+                    ...(selectedReferralUser?.fullName?.trim()
+                        ? { fullName: selectedReferralUser.fullName.trim() }
+                        : {}),
+                    ...(selectedReferralUser?.ntid?.trim()
+                        ? { ntid: selectedReferralUser.ntid.trim() }
+                        : {}),
+                },
+            };
+
+            console.log("completeTaskThunk payload:", completeTaskPayload);
+
             const response = await dispatch(
-                completeTaskThunk({
-                    requestContext: {
-                        taskId: taskContext.taskId,
-                        userId: taskContext.userId,
-                        appNo: taskContext.appNo,
-                        instanceId: taskContext.instanceId,
-                        remarks: uwDecisionRemarks.trim(),
-                        decision: effectiveCaseUWDecision.trim(),
-                        fullName: selectedReferralUser?.fullName ?? "",
-                        ntid: selectedReferralUser?.ntid ?? "",
-                    },
-                }),
+                completeTaskThunk(completeTaskPayload),
             ).unwrap();
 
             completedStep = "completeTask";
@@ -895,7 +990,7 @@ const UWDecision = () => {
                                     maxCount={3}
                                     value={declineReasons}
                                     onChange={setDeclineReasons}
-                                    options={allOptions}
+                                    options={allReasonOptions}
                                     placeholder="Select reasons"
                                 />
                             </>
@@ -907,7 +1002,7 @@ const UWDecision = () => {
                                     label="Postpone Reason"
                                     value={postponeReason}
                                     onChange={setPostponeReason}
-                                    options={allOptions}
+                                    options={allReasonOptions}
                                 />
                                 <CustomSelect
                                     label="Postponement Period"

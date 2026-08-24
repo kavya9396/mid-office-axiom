@@ -5,6 +5,8 @@ import {
   Select,
   MenuItem,
   Typography,
+  Chip,
+  Box,
 } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material/Select";
 
@@ -59,14 +61,14 @@ export default function CustomSelect(props: CustomSelectProps) {
 
   const maxCount = multiple ? props.maxCount : undefined;
 
-//  const toTitleCase = (text: string) =>
-//   text
-//     .toLowerCase()
-//     .split(" ")
-//     .map(
-//       (word) => word.charAt(0).toUpperCase() + word.slice(1)
-//     )
-//     .join(" ");
+  //  const toTitleCase = (text: string) =>
+  //   text
+  //     .toLowerCase()
+  //     .split(" ")
+  //     .map(
+  //       (word) => word.charAt(0).toUpperCase() + word.slice(1)
+  //     )
+  //     .join(" ");
 
   const handleChange = (
     e: SelectChangeEvent<string | string[]>
@@ -90,8 +92,27 @@ export default function CustomSelect(props: CustomSelectProps) {
     }
   };
 
+  const removeSelectedValue = (
+    selectedValue: string,
+    event: React.SyntheticEvent,
+  ) => {
+    event.stopPropagation();
+
+    if (!multiple || !Array.isArray(value)) return;
+
+    const updatedValues = value.filter(
+      (item) => item !== selectedValue,
+    );
+
+    (
+      onChange as
+      | ((values: string[]) => void)
+      | undefined
+    )?.(updatedValues);
+  };
+
   const defaultRenderValue = (
-    selected: string | string[]
+    selected: string | string[],
   ) => {
     if (
       !selected ||
@@ -104,15 +125,88 @@ export default function CustomSelect(props: CustomSelectProps) {
       );
     }
 
-    const lookupLabel = (val: string) => {
-      const label =
-        options.find((opt) => opt.value === val)?.label ?? val;
-
-      return label;
-    };
+    const lookupLabel = (selectedValue: string) =>
+      options.find(
+        (option) => option.value === selectedValue,
+      )?.label ?? selectedValue;
 
     if (Array.isArray(selected)) {
-      return selected.map(lookupLabel).join(", ");
+      return (
+        <Box
+          sx={{
+            width: "100%",
+            minWidth: 0,
+            display: "flex",
+            alignItems: "center",
+            gap: 0.5,
+            overflowX: "auto",
+            overflowY: "hidden",
+            py: 0.25,
+
+            "&::-webkit-scrollbar": {
+              height: 3,
+            },
+
+            "&::-webkit-scrollbar-thumb": {
+              backgroundColor: "#c4c4c4",
+              borderRadius: 4,
+            },
+          }}
+        >
+          {selected.map((selectedValue) => {
+            const selectedLabel =
+              lookupLabel(selectedValue);
+
+            return (
+              <Chip
+                key={selectedValue}
+                label={selectedLabel}
+                title={selectedLabel}
+                size="small"
+                disabled={disabled}
+                onMouseDown={(event) => {
+                  // Prevent opening the Select when clicking cross.
+                  event.stopPropagation();
+                }}
+                onDelete={
+                  disabled
+                    ? undefined
+                    : (event) =>
+                      removeSelectedValue(
+                        selectedValue,
+                        event,
+                      )
+                }
+                sx={{
+                  height: 26,
+                  maxWidth: 120,
+                  flexShrink: 0,
+                  borderRadius: "6px",
+                  backgroundColor: "#f8e9ea",
+                  color: "#7b1d21",
+
+                  "& .MuiChip-label": {
+                    px: 1,
+                    display: "block",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    whiteSpace: "nowrap",
+                  },
+
+                  "& .MuiChip-deleteIcon": {
+                    fontSize: 17,
+                    color: "#9A2529",
+
+                    "&:hover": {
+                      color: "#651619",
+                    },
+                  },
+                }}
+              />
+            );
+          })}
+        </Box>
+      );
     }
 
     return lookupLabel(selected);
@@ -146,8 +240,8 @@ export default function CustomSelect(props: CustomSelectProps) {
           renderValue={
             (renderValue ||
               defaultRenderValue) as (
-              value: string | string[]
-            ) => React.ReactNode
+                value: string | string[]
+              ) => React.ReactNode
           }
           sx={{
             height: 40,
@@ -163,19 +257,20 @@ export default function CustomSelect(props: CustomSelectProps) {
             },
 
             "&.Mui-focused .MuiOutlinedInput-notchedOutline":
-              {
-                borderColor: "#9A2529",
-                borderWidth: "2px",
-              },
-
+            {
+              borderColor: "#9A2529",
+              borderWidth: "2px",
+            },
             "& .MuiSelect-select": {
               px: 2,
-              py: 1,
+              py: "4px !important",
+              height: "100%",
+              minHeight: "0 !important",
+              boxSizing: "border-box",
               display: "flex",
               alignItems: "center",
-              whiteSpace: "normal",
-              overflow: "visible",
-              textOverflow: "unset",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
             },
           }}
         >
@@ -188,11 +283,11 @@ export default function CustomSelect(props: CustomSelectProps) {
           {options.map((option) => {
             const isDisabled = Boolean(
               option.disabled ||
-                (multiple &&
-                  maxCount &&
-                  Array.isArray(value) &&
-                  value.length >= maxCount &&
-                  !value.includes(option.value))
+              (multiple &&
+                maxCount &&
+                Array.isArray(value) &&
+                value.length >= maxCount &&
+                !value.includes(option.value))
             );
 
             return (
@@ -200,6 +295,20 @@ export default function CustomSelect(props: CustomSelectProps) {
                 key={option.value}
                 value={option.value}
                 disabled={isDisabled}
+                sx={{
+                  "&.Mui-selected": {
+                    backgroundColor: "#f8e9ea",
+                    color: "#7b1d21",
+                  },
+
+                  "&.Mui-selected:hover": {
+                    backgroundColor: "#f3d6d8",
+                  },
+
+                  "&.Mui-selected.Mui-focusVisible": {
+                    backgroundColor: "#f3d6d8",
+                  },
+                }}
               >
                 {option.label}
               </MenuItem>
