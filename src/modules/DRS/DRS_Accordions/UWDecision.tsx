@@ -5,7 +5,6 @@ import CustomSelect from "../../../components/ui/Select/Select";
 import CustomRadioGroup from "../../../components/ui/Radio/Radio";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
-
 import CustomButton from "../../../components/ui/Button/Button";
 import UWReinsurer, { UWReinsurerFields } from "./ReInsurer/UWReinsurer";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -18,7 +17,7 @@ import { openRequirementManagement } from "./requirementManagementEvents";
 import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
-import { normalizeDecisionOptions, toMasterLabel } from "../../../utils/masterOptions";
+import { toMasterLabel } from "../../../utils/masterOptions";
 import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
@@ -130,6 +129,43 @@ const getReasonOptionsFromMasters = (
     return Array.from(
         new Map(options.map((option) => [option.value, option])).values(),
     );
+};
+
+const getPostponementPeriodOptions = (
+    masters: unknown,
+): ReasonOption[] => {
+    const masterRecord = toRecord(masters);
+    const masterData = toRecord(masterRecord.data);
+    const rawMisc = masterRecord.misc ?? masterData.misc;
+
+    if (!Array.isArray(rawMisc)) return [];
+
+    return rawMisc
+        .filter((option) => {
+            const item = toRecord(option);
+
+            return (
+                String(item.isActive ?? "")
+                    .trim()
+                    .toUpperCase() === "Y" &&
+                String(item.type ?? "")
+                    .trim()
+                    .toUpperCase() === "POSTPONE_PERIOD"
+            );
+        })
+        .map((option) => {
+            const item = toRecord(option);
+
+            return {
+                label: String(
+                    item.description ?? item.value ?? item.code ?? "",
+                ).trim(),
+                value: String(
+                    item.code ?? item.value ?? "",
+                ).trim(),
+            };
+        })
+        .filter((option) => option.label && option.value);
 };
 
 const UWDecision = () => {
@@ -281,20 +317,18 @@ const UWDecision = () => {
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
-    // const firstUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "firstUWDecision", true, true), [masters]);
-    // const parallelUWDecisionOptions = useMemo(() => normalizeDecisionOptions(masters, "parallelUWDecision", true, true), [masters]);
-    const postponementPeriodOptions = useMemo(() => normalizeDecisionOptions(masters, "postponementPeriod", true, true), [masters]);
-    // const riskReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "riskReferralReason", true, true), [masters]);
-    // const reinsurerReferralReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "reinsurerReferralReason", true, true), [masters]);
-    // const holdReasonOptions = useMemo(() => normalizeDecisionOptions(masters, "holdReason", true, true), [masters]);
+    const postponementPeriodOptions = useMemo(
+        () => getPostponementPeriodOptions(masters),
+        [masters],
+    );
     const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
 
     const nonMedicalOptions = useMemo(
         () => getReasonOptionsFromMasters(masters, "NON_MEDICAL"),
         [masters],
     );
-    const allReasonOptions = useMemo(
-        () => getReasonOptionsFromMasters(masters),
+    const medicalReasonOptions = useMemo(
+        () => getReasonOptionsFromMasters(masters, "MEDICAL"),
         [masters],
     );
 
@@ -990,7 +1024,7 @@ const UWDecision = () => {
                                     maxCount={3}
                                     value={declineReasons}
                                     onChange={setDeclineReasons}
-                                    options={allReasonOptions}
+                                    options={medicalReasonOptions}
                                     placeholder="Select reasons"
                                 />
                             </>
@@ -1002,7 +1036,7 @@ const UWDecision = () => {
                                     label="Postpone Reason"
                                     value={postponeReason}
                                     onChange={setPostponeReason}
-                                    options={allReasonOptions}
+                                    options={medicalReasonOptions}
                                 />
                                 <CustomSelect
                                     label="Postponement Period"

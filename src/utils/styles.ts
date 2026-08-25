@@ -103,7 +103,7 @@ export const fieldStylesEdit = {
 };
 
 export const modalTitleStyles = {
-  color: "#063E6F",
+  color: "#9A2529",
   fontWeight: 800,
   textTransform: "uppercase",
   fontSize: "16px",
