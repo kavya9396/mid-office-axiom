@@ -1,5 +1,3 @@
-import { merFieldConfig } from "../../Medical/merFieldConfig";
-
 export type MedicalFinalConfigField = {
   id: string | number;
   section: string;
@@ -499,9 +497,39 @@ export const getMerSubSectionFormFields = (selectedSubSection?: string): MerSubS
   return MER_PRIMARY_SUBSECTION_FORM_FIELDS;
 };
 
-export const getMerConfig = (): MedicalFinalConfigField[] =>
-  merFieldConfig.map((field) => ({
-    id: field.id,
-    section: field.section,
-    field: field.field,
-  }));
+export const getMerConfig = (): MedicalFinalConfigField[] => {
+  const allSubsections = [
+    {
+      label: MER_SECTION_LABEL,
+      fields: MER_PRIMARY_SUBSECTION_FORM_FIELDS,
+    },
+    {
+      label: HABIT_AND_ADDICTIONS_SECTION_LABEL,
+      fields: MER_HABIT_AND_ADDICTIONS_SUBSECTION_FORM_FIELDS,
+    },
+    {
+      label: MEASUREMENT_SECTION_LABEL,
+      fields: MER_MEASUREMENT_SUBSECTION_FORM_FIELDS,
+    },
+    {
+      label: FAMILY_HISTORY_AND_HEALTH_STATUS_SECTION_LABEL,
+      fields: MER_FAMILY_HISTORY_AND_HEALTH_STATUS_SUBSECTION_FORM_FIELDS,
+    },
+    {
+      label: BLOOD_PRESSURE_AND_PULSE_DETAILS_SECTION_LABEL,
+      fields: MER_BLOOD_PRESSURE_DETAILS_SUBSECTION_FORM_FIELDS,
+    },
+    {
+      label: PULSE_RATE_DETAILS_SECTION_LABEL,
+      fields: MER_PULSE_RATE_DETAILS_SUBSECTION_FORM_FIELDS,
+    },
+  ];
+
+  return allSubsections.flatMap((subsection) =>
+    subsection.fields.map((field) => ({
+      id: field.id,
+      section: subsection.label,
+      field: field.label,
+    }))
+  );
+};
