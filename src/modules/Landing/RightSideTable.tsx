@@ -14,19 +14,15 @@ import AllocationManagement from "./AllocationManagement";
 import { useState } from "react";
 import { useAppDispatch } from "../../store/hooks";
 import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
+import { breThunk } from "../../store/thunks/breThunk";
 
 interface RightSideTableProps {
   selectedRole: string | null;
   selectedTask: string | null;
 
-  selectedTaskData: Record<
-    string,
-    unknown
-  >[];
+  selectedTaskData: Record<string, unknown>[];
 
-  selectedApplication:
-  | Record<string, unknown>
-  | null;
+  selectedApplication: Record<string, unknown> | null;
 
   onApplicationClick: (
     application: Record<string, unknown>,
@@ -35,18 +31,11 @@ interface RightSideTableProps {
   onApplicationBack: () => void;
 }
 
-const normalizeRoleKey = (
-  value: string,
-) =>
-  value
-    .replace(/[\s_-]/g, "")
-    .toUpperCase();
+const normalizeRoleKey = (value: string) =>
+  value.replace(/[\s_-]/g, "").toUpperCase();
 
-const normalizeTaskKey = (
-  value: string,
-) =>
-  value
-    .replace(/_/g, " ");
+const normalizeTaskKey = (value: string) =>
+  value.replace(/_/g, " ");
 
 const RightSideTable = ({
   selectedRole,
@@ -57,11 +46,8 @@ const RightSideTable = ({
 }: RightSideTableProps) => {
   const dispatch = useAppDispatch();
 
-  const [claimError, setClaimError] =
-    useState("");
-
-  const [claimLoading, setClaimLoading] =
-    useState(false);
+  const [claimError, setClaimError] = useState("");
+  const [claimLoading, setClaimLoading] = useState(false);
 
   /**
    * Handles clicking an application row.
@@ -75,27 +61,54 @@ const RightSideTable = ({
   const handleApplicationClick = async (
     application: Record<string, unknown>,
   ) => {
-    const username =
-      localStorage.getItem("username") ?? "";
-
-    const password =
-      localStorage.getItem("password") ?? "";
-
+    const username = localStorage.getItem("username") ?? "";
+    const password = localStorage.getItem("password") ?? "";
     /**
      * Task ID comes directly from the selected row.
      *
      * Example:
      * application.taskId = "23574"
      */
-    const taskId = String(
-      application.taskId ?? "",
+    const taskId = String(application.taskId ?? "").trim();
+
+    const applicationNumber = String(
+      application.applicationNo ??
+        application.applicationNumber ??
+        application.application_no ??
+        "",
     ).trim();
+
+    const businessType = String(
+      application.businessType ??
+        localStorage.getItem("businessType") ??
+        "",
+    )
+      .trim()
+      .toLowerCase();
+
+    const roleType = String(
+      application.roleType ??
+        selectedTask ??
+        localStorage.getItem("roleType") ??
+        "",
+    )
+      .trim()
+      .toUpperCase();
 
     if (!taskId) {
       setClaimError(
         "Task ID is missing. Unable to claim this case.",
       );
+      return;
+    }
 
+    if (
+      roleType !== "PRE_LOGIN_CUW_TASK" &&
+      !applicationNumber
+    ) {
+      setClaimError(
+        "Application number is missing. Unable to run BRE.",
+      );
       return;
     }
 
@@ -112,30 +125,39 @@ const RightSideTable = ({
 
       const isClaimed =
         response.success === true ||
-        response.state?.toLowerCase() ===
-        "claimed";
+        response.state?.toLowerCase() === "claimed";
 
       if (!isClaimed) {
         setClaimError(
-          response.message ||
-          "Failed to claim task.",
+          response.message || "Failed to claim task.",
         );
-
         return;
       }
 
-      /**
-       * Claim successful.
-       *
-       * Pass the complete row to the parent so that
-       * the application workspace can open.
-       */
+      // PRE_LOGIN_CUW_TASK did not run BRE in the previous DRS flow.
+      if (roleType !== "PRE_LOGIN_CUW_TASK") {
+        const eventName =
+          businessType === "retail"
+            ? "BRE-RETAIL"
+            : "BRE-GROUP";
+
+        await dispatch(
+          breThunk({
+            eventName,
+            applicationNumber,
+          }),
+        ).unwrap();
+      }
+
+      // Open the application only after claim and BRE succeed.
       onApplicationClick(application);
     } catch (error) {
       setClaimError(
-        error instanceof Error
-          ? error.message
-          : "Failed to claim task.",
+        typeof error === "string"
+          ? error
+          : error instanceof Error
+            ? error.message
+            : "Unable to claim the task or run BRE.",
       );
     } finally {
       setClaimLoading(false);
@@ -166,8 +188,7 @@ const RightSideTable = ({
   // ==========================================================
 
   if (selectedRole) {
-    const role =
-      normalizeRoleKey(selectedRole);
+    const role = normalizeRoleKey(selectedRole);
 
     // USER MANAGEMENT
     // if (role === "USERMANAGEMENT") {
@@ -248,18 +269,13 @@ const RightSideTable = ({
     return (
       <>
         <DynamicRoleTable
-          title={`${normalizeTaskKey(
-            selectedTask,
-          )} Details`}
+          title={`${normalizeTaskKey(selectedTask)} Details`}
           data={selectedTaskData}
-          onApplicationClick={
-            handleApplicationClick
-          }
+          onApplicationClick={handleApplicationClick}
           showAddButton={
             selectedRole
-              ? normalizeRoleKey(
-                selectedRole,
-              ) === "USERMANAGEMENT"
+              ? normalizeRoleKey(selectedRole) ===
+                "USERMANAGEMENT"
               : false
           }
         />
@@ -268,23 +284,17 @@ const RightSideTable = ({
         <Snackbar
           open={Boolean(claimError)}
           autoHideDuration={3000}
-          onClose={() =>
-            setClaimError("")
-          }
+          onClose={() => setClaimError("")}
           anchorOrigin={{
             vertical: "top",
             horizontal: "center",
           }}
         >
           <Alert
-            onClose={() =>
-              setClaimError("")
-            }
+            onClose={() => setClaimError("")}
             severity="error"
             variant="filled"
-            sx={{
-              width: "100%",
-            }}
+            sx={{ width: "100%" }}
           >
             {claimError}
           </Alert>
@@ -300,8 +310,7 @@ const RightSideTable = ({
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              backgroundColor:
-                "rgba(0,0,0,0.25)",
+              backgroundColor: "rgba(0,0,0,0.25)",
             }}
           >
             <Box
@@ -312,7 +321,7 @@ const RightSideTable = ({
               }}
             >
               <Typography>
-                Claiming task...
+                Claiming task and running BRE...
               </Typography>
             </Box>
           </Box>
@@ -320,10 +329,6 @@ const RightSideTable = ({
       </>
     );
   }
-
-  // ==========================================================
-  // EMPTY
-  // ==========================================================
 
   return (
     <Paper

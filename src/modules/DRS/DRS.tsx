@@ -308,10 +308,6 @@ const DRS = () => {
       ? "BRE-RETAIL"
       : "BRE-GROUP";
 
-  const isSearchApplicationMode =
-    selectedCaseContext.source === "searchApplication" &&
-    selectedCaseContext.readOnly === true;
-
   useEffect(() => {
     if (
       !applicationNo ||
@@ -329,7 +325,6 @@ const DRS = () => {
       applicationNo,
       userId,
       roleType,
-      eventName,
       sections.join(","),
     ].join("|");
 
@@ -341,19 +336,6 @@ const DRS = () => {
 
     const loadPageData = async () => {
       setIsPageLoading(true);
-
-      if (!isSearchApplicationMode && roleType != 'PRE_LOGIN_CUW_TASK') {
-        void dispatch(
-          breThunk({
-            eventName,
-            applicationNumber: applicationNo,
-          }),
-        )
-          .unwrap()
-          .catch((error: unknown) => {
-            console.error("Failed to load BRE:", error);
-          });
-      }
 
       try {
         const requests: Promise<unknown>[] = [
@@ -396,8 +378,6 @@ const DRS = () => {
     userId,
     roleType,
     sections,
-    eventName,
-    isSearchApplicationMode,
   ]);
 
   const visibleAccordions = useMemo(
