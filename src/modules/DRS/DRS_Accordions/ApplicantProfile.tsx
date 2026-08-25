@@ -2107,7 +2107,7 @@ import CustomTable from "../../../components/ui/Table/Table";
 import { centerFlex } from "../../../utils/styles";
 import KeyValueTable from "../../../components/ui/KeyValueTable/KeyValueTable";
 import { drsThunk } from "../../../store/thunks/drsThunk";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import CustomButton from "../../../components/ui/Button/Button";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import RiskAnalytics from "./RiskAnalytics";
@@ -2649,6 +2649,7 @@ const ApplicantProfile = ({
 }: ApplicantProfileProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const {
     businessType: routeBusinessType,
     applicationNumber: routeApplicationNumber,
@@ -3830,15 +3831,21 @@ const ApplicantProfile = ({
     }
   };
 
-  const canShowApplicantActions = ![
-    "CVT_TASK",
-    "CPT_DATA_ENTRY_NMR_TASK",
-    "CPT_DATA_ENTRY_MR_TASK",
-    "DVT_TASK",
-    "DVT_FORMAL_TASK",
-    "GUW_FORMAL_TASK",
-    "RISK_TASK"
-  ].includes(roleType);
+  const isMedicalOrFinancialPath = ["/medical", "/financial"].some(
+    (path) => pathname.toLowerCase().includes(path),
+  );
+
+  const canShowApplicantActions =
+    !isMedicalOrFinancialPath &&
+    ![
+      "CVT_TASK",
+      "CPT_DATA_ENTRY_NMR_TASK",
+      "CPT_DATA_ENTRY_MR_TASK",
+      "DVT_TASK",
+      "DVT_FORMAL_TASK",
+      "GUW_FORMAL_TASK",
+      "RISK_TASK",
+    ].includes(roleType);
 
   const canShowRiskAnalytics = ![
     "CVT_TASK",

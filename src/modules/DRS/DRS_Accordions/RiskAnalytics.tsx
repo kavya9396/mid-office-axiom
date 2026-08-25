@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -665,28 +665,28 @@ const RiskAnalytics = ({
       state.drs.data,
   ) as RiskAnalyticsData | null;
 
-  const [selectedCard, setSelectedCard] =
-    useState<RiskCard | null>(null);
+const [selectedCardId, setSelectedCardId] =
+  useState<string | null>(null);
 
-  const summary =
-    drsData?.summary ?? [];
+const summary = drsData?.summary ?? [];
 
-  const normalizedMemberType = normalizeValue(memberType);
+const normalizedMemberType = normalizeValue(memberType);
 
-  const selectedSummary =
-    summary[memberIndex] ??
-    summary.find(
-      (item) =>
-        normalizeValue(item.memberType) === normalizedMemberType,
-    );
+const selectedSummary =
+  summary[memberIndex] ??
+  summary.find(
+    (item) =>
+      normalizeValue(item.memberType) === normalizedMemberType,
+  );
 
-  const riskCards = selectedSummary
-    ? buildRiskCards([selectedSummary])
-    : [];
+const riskCards = selectedSummary
+  ? buildRiskCards([selectedSummary])
+  : [];
 
-  useEffect(() => {
-    setSelectedCard(null);
-  }, [memberIndex, memberType]);
+const selectedCard =
+  riskCards.find(
+    (card) => card.id === selectedCardId,
+  ) ?? null;
 
   if (riskCards.length === 0) {
     return null;
@@ -743,8 +743,8 @@ const RiskAnalytics = ({
                 component="button"
                 type="button"
                 onClick={() =>
-                  setSelectedCard(card)
-                }
+  setSelectedCardId(card.id)
+}
                 sx={{
                   display: "flex",
                   flexDirection: "column",
@@ -851,7 +851,7 @@ const RiskAnalytics = ({
       <CustomDialog
         open={Boolean(selectedCard)}
         onClose={() =>
-          setSelectedCard(null)
+          setSelectedCardId(null)
         }
         title={
   selectedCard?.label === "Other Risk"
