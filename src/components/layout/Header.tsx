@@ -108,7 +108,7 @@ const Header = () => {
           boxShadow:
             "0 3px 12px rgba(111, 24, 24, 0.25)",
           position: "relative",
-          zIndex: 1100,
+          // zIndex: 1100,
           overflow: "hidden",
         }}
       >

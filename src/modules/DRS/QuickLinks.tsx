@@ -19,6 +19,7 @@ import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { referToItThunk } from "../../store/thunks/referToItThunk";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomButton from "../../components/ui/Button/Button";
+import CustomSnackbar from "../../components/ui/SnackBar/Snackbar";
 import { modalTitleStyles } from "../../utils/styles";
 
 const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
@@ -40,6 +41,56 @@ interface QuickLinksProps {
     applicationNo?: string;
     hideSearchApplication?: boolean;
 }
+
+interface QuickLinkItem {
+    label: string;
+    path: string;
+    unavailableMessage?: string;
+}
+
+interface DrsQuickLinksData {
+    proposerForm?: unknown;
+    previousPolicies?: unknown;
+    openOtherTasks?: unknown;
+    riskDetails?: unknown;
+    auditTrail?: unknown;
+}
+
+interface SnackbarState {
+    open: boolean;
+    message: string;
+}
+
+const getEmptyArrayMessage = (
+    value: unknown,
+    message: string,
+): string | undefined =>
+    Array.isArray(value) && value.length === 0 ? message : undefined;
+
+const NEW_TAB_LABELS = new Set([
+    "Proposal Form & Documents",
+    "Document link",
+]);
+
+const openOrFocusNamedWindow = (url: string, name: string): void => {
+    try {
+        const win = window.open(url, name);
+
+        if (win) {
+            try {
+                win.focus();
+            } catch {
+                // Ignore cross-origin focus errors.
+            }
+        }
+    } catch {
+        try {
+            window.open(url, "_blank");
+        } catch {
+            // Ignore browser popup errors.
+        }
+    }
+};
 
 const getSelectedCaseApplicationNo = (): string => {
     try {
@@ -63,6 +114,10 @@ const QuickLinks = ({
     const [openReferToItDialog, setOpenReferToItDialog] = useState(false);
     const [referToItLoading, setReferToItLoading] = useState(false);
     const [referToItError, setReferToItError] = useState<string | null>(null);
+    const [quickLinkSnackbar, setQuickLinkSnackbar] = useState<SnackbarState>({
+        open: false,
+        message: "",
+    });
     const { businessType, applicationNumber } = useAppContext();
     const drsData = useAppSelector((state) => state.drs.data);
 
@@ -112,22 +167,60 @@ const QuickLinks = ({
     }) ?? summaryEntries[0];
 
     const summaryPersonal = (selectedSummary?.personalDetails as Record<string, unknown> | undefined) ?? {};
+    const drsQuickLinks = (
+        drsData as unknown as { quickLinks?: DrsQuickLinksData } | null
+    )?.quickLinks;
+
     const proposerFormLink = String(
-        (drsData as unknown as { quickLinks?: { proposerForm?: string } } | null)?.quickLinks?.proposerForm ??
+        drsQuickLinks?.proposerForm ??
         summaryPersonal.UDSLink ??
         "",
     ).trim();
 
-    const quickLinks = [
+    const quickLinks: QuickLinkItem[] = [
         ...(roleType !== 'DVT_FORMAL_TASK' ? [
-        { label: "Proposal Form & Documents", path: proposerFormLink },
-        { label: "Previous Policies", path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "" },
-        { label: "Open Tasks", path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "" },
+        {
+            label: "Proposal Form & Documents",
+            path: proposerFormLink,
+            unavailableMessage: !proposerFormLink
+                ? "There is no document link found."
+                : undefined,
+        },
+        {
+            label: "Previous Policies",
+            path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "",
+            unavailableMessage: getEmptyArrayMessage(
+                drsQuickLinks?.previousPolicies,
+                "There are no previous policies found.",
+            ),
+        },
+        {
+            label: "Open Tasks",
+            path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "",
+            unavailableMessage: getEmptyArrayMessage(
+                drsQuickLinks?.openOtherTasks,
+                "There are no open tasks found.",
+            ),
+        },
         ] : []),
         ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' ? [
-            { label: "Risk Details", path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "" },
+            {
+                label: "Risk Details",
+                path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "",
+                unavailableMessage: getEmptyArrayMessage(
+                    drsQuickLinks?.riskDetails,
+                    "There are no risk details found.",
+                ),
+            },
         ] : []),
-        { label: "Audit Trail", path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "" },
+        {
+            label: "Audit Trail",
+            path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "",
+            unavailableMessage: getEmptyArrayMessage(
+                drsQuickLinks?.auditTrail,
+                "There is no audit trail found.",
+            ),
+        },
         { label: "Refer to IT", path: "" },
         ...(isPoolRole
             ? [
@@ -182,29 +275,19 @@ const QuickLinks = ({
         }
     }, [dispatch, navigate, roleType, safeApplicationNumber, safeBusinessType]);
 
-    const openOrFocusNamedWindow = (url: string, name: string) => {
-        try {
-            const win = window.open(url, name);
-            if (win) {
-                try {
-                    win.focus();
-                } catch {
-                    // ignore cross-origin focus errors
-                }
-            }
-        } catch  {
-            // fallback to simple open
-            try { window.open(url, "_blank"); } catch { /* ignore */ }
-        }
-    };
-
-    const NEW_TAB_LABELS = new Set(["Proposal Form & Documents", "Document link"]);
-
     const handleNavigate = useCallback(
-        (label: string, path: string) => {
+        (label: string, path: string, unavailableMessage?: string) => {
             if (label === "Refer to IT") {
                 setReferToItError(null);
                 setOpenReferToItDialog(true);
+                return;
+            }
+
+            if (unavailableMessage) {
+                setQuickLinkSnackbar({
+                    open: true,
+                    message: unavailableMessage,
+                });
                 return;
             }
 
@@ -279,17 +362,25 @@ const QuickLinks = ({
 
                         <Divider />
 
-                        {quickLinks.map(({ label, path }, index) => (
+                        {quickLinks.map(({ label, path, unavailableMessage }, index) => (
                             <Box key={label}>
                                 <Box
-                                    onClick={() => handleNavigate(label, path)}
+                                    onClick={() =>
+                                        handleNavigate(label, path, unavailableMessage)
+                                    }
                                     sx={{
                                         px: 2,
                                         py: 1.5,
                                         display: "flex",
                                         alignItems: "center",
                                         justifyContent: "space-between",
-                                        cursor: path || label === "Refer to IT" ? "pointer" : "default",
+                                        cursor:
+                                            path ||
+                                            unavailableMessage ||
+                                            label === "Refer to IT" ||
+                                            label === "Proposal Form & Documents"
+                                                ? "pointer"
+                                                : "default",
                                     }}
                                 >
                                     <Typography sx={{ fontSize: 14, color: "#444" }}>
@@ -353,6 +444,18 @@ const QuickLinks = ({
                     </Box>
                 </Box>
             </Box>
+
+            <CustomSnackbar
+                open={quickLinkSnackbar.open}
+                message={quickLinkSnackbar.message}
+                severity="error"
+                onClose={() =>
+                    setQuickLinkSnackbar((previous) => ({
+                        ...previous,
+                        open: false,
+                    }))
+                }
+            />
 
             <CustomDialog
                 open={openReferToItDialog}

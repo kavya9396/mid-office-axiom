@@ -34,7 +34,7 @@ import ApplicationOverview from "./DRS_Accordions/ApplicationOverview";
 import Decision from "./DRS_Accordions/decision";
 import BreDecision from "./DRS_Accordions/BreDecision";
 import ApplicantProfile from "./DRS_Accordions/ApplicantProfile";
- 
+
 export const accordionRegistry = {
   //breDecision1:BreDecision1,
   breDecision: BreDecision,
@@ -64,41 +64,49 @@ export const accordionRegistry = {
   riskDecision: RiskDecision,
   greivance: GrievanceApplication,
   decisionHistory: DecisionHistory,
-  groupPolicyDetails:GroupPolicyDetails,
+  groupPolicyDetails: GroupPolicyDetails,
   customerProfile: CustomerProfile,
   medicalInsuranceDetails: MedicalInsuranceDetails,
   documentRequired: DocumentRequired,
   preLogin: PreLogin,
-  decision:Decision,
+  decision: Decision,
   // applicantProfile:ApplicantProfile
 } as const;
- 
+
 type AccordionKey = keyof typeof accordionRegistry;
- 
+
 type DrsDataRecord = Record<string, unknown>;
- 
+
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
- 
-const hasNonEmptyArray = (value: unknown): boolean => Array.isArray(value) && value.length > 0;
- 
+
+const hasNonEmptyArray = (value: unknown): boolean =>
+  Array.isArray(value) && value.length > 0;
+
 const hasObjectContent = (value: unknown): boolean => {
   const record = toRecord(value);
   return Object.keys(record).length > 0;
 };
- 
-const sectionAvailabilityCheck: Partial<Record<AccordionKey, (data: DrsDataRecord) => boolean>> = {
+
+const sectionAvailabilityCheck: Partial<
+  Record<AccordionKey, (data: DrsDataRecord) => boolean>
+> = {
   applicationOverview: (data) => hasObjectContent(data.applicationOverview),
-  summary: (data) => hasNonEmptyArray(data.summary) || hasNonEmptyArray(data.customerDetails),
+  summary: (data) =>
+    hasNonEmptyArray(data.summary) || hasNonEmptyArray(data.customerDetails),
   pivvSection: (data) => hasObjectContent(data.pivvSection),
   requirementManagement: (data) => hasNonEmptyArray(data.requirementManagement),
-  breDecision: (data) => hasObjectContent(data.breDecision) || hasObjectContent(toRecord(data.externalAPIs).breOutput),
+  breDecision: (data) =>
+    hasObjectContent(data.breDecision) ||
+    hasObjectContent(toRecord(data.externalAPIs).breOutput),
   quickLinks: (data) => hasObjectContent(data.quickLinks),
-  customerProfile: (data) => hasNonEmptyArray(data.summary) || hasNonEmptyArray(data.customerDetails),
+  customerProfile: (data) =>
+    hasNonEmptyArray(data.summary) || hasNonEmptyArray(data.customerDetails),
   medicalInsuranceDetails: (data) =>
-    hasObjectContent(data.medicalInsuranceDetails) || hasNonEmptyArray(toRecord(data.quickLinks).previousPolicies),
+    hasObjectContent(data.medicalInsuranceDetails) ||
+    hasNonEmptyArray(toRecord(data.quickLinks).previousPolicies),
   documentRequired: (data) => hasObjectContent(data.documentRequired),
   preLogin: (data) =>
     hasObjectContent(data.preLogin) ||
@@ -108,31 +116,33 @@ const sectionAvailabilityCheck: Partial<Record<AccordionKey, (data: DrsDataRecor
     hasObjectContent(data.documentRequired) ||
     hasNonEmptyArray(toRecord(data.quickLinks).previousPolicies),
 };
- 
+
 export const getPoolWiseAvailableAccordions = (
   layoutKey: string | undefined,
   data?: unknown,
 ): AccordionKey[] => {
-  const baseAccordions = layoutKey ? DRS_LAYOUTS[layoutKey] ?? [] : [];
- 
+  const baseAccordions = layoutKey ? (DRS_LAYOUTS[layoutKey] ?? []) : [];
+
   const accordionsWithQuickLinks = baseAccordions.includes("quickLinks")
     ? baseAccordions
     : [...baseAccordions, "quickLinks"];
- 
-  return accordionsWithQuickLinks.filter((accordion): accordion is AccordionKey => {
-    if (!(accordion in accordionRegistry)) {
-      return false;
-    }
- 
-    const checker = sectionAvailabilityCheck[accordion as AccordionKey];
-    if (!checker || !data) {
-      return true;
-    }
- 
-    return checker((data as DrsDataRecord) ?? {});
-  });
+
+  return accordionsWithQuickLinks.filter(
+    (accordion): accordion is AccordionKey => {
+      if (!(accordion in accordionRegistry)) {
+        return false;
+      }
+
+      const checker = sectionAvailabilityCheck[accordion as AccordionKey];
+      if (!checker || !data) {
+        return true;
+      }
+
+      return checker((data as DrsDataRecord) ?? {});
+    },
+  );
 };
- 
+
 export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   RETAIL_COPS_POOL: [
     "breDecision",
@@ -141,8 +151,9 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "pivvSection",
     "requirementManagement",
     "cvtDecision",
-    "quickLinks"
-  ],CVT_TASK: [
+    "quickLinks",
+  ],
+  CVT_TASK: [
     "breDecision",
     // "applicantProfile",
     "summary",
@@ -150,22 +161,25 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "pivvSection",
     "requirementManagement",
     "decision",
-    "quickLinks"
+    "quickLinks",
   ],
-  RETAIL_CPT_POOL: [
+  // RETAIL_CPT_POOL: [
+  //   "applicationOverview",
+  //   "requirementManagement",
+  //   "quickLinks",
+  //   "uwToolkit",
+  // ],
+  CPT_DATA_ENTRY_NMR_TASK: [
+    "applicationOverview",
+    "requirementManagement",
+    "quickLinks",
+  ],
+  CPT_DATA_ENTRY_MR_TASK: [
     "applicationOverview",
     "requirementManagement",
     "quickLinks",
     "uwToolkit",
   ],
-  CPT_DATA_ENTRY_NMR_TASK:["applicationOverview",
-    "requirementManagement",
-    "quickLinks",
-    "uwToolkit",],
-  CPT_DATA_ENTRY_MR_TASK:["applicationOverview",
-    "requirementManagement",
-    "quickLinks",
-    "uwToolkit",],
   RETAIL_PRE_ISSUANCE_SERVICING_POOL: [
     "openOtherTasks",
     "applicationOverview",
@@ -176,7 +190,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "breDecision",
     "applicationOverview",
     "requirementManagement",
-    "exceptionDecision"
+    "exceptionDecision",
   ],
   PIVV_TASK: [
     "applicationOverview",
@@ -201,13 +215,9 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "breDecision",
     "applicationOverview",
     "requirementManagement",
-    "decision"
+    "decision",
   ],
-  RETAIL_CUW_CLAIM_AUDIT: [
-    "applicationOverview",
-    "claimSection",
-    "quickLinks"
-  ],
+  RETAIL_CUW_CLAIM_AUDIT: ["applicationOverview", "claimSection", "quickLinks"],
   RETAIL_REINSTATEMENT_SUW: [
     "applicationOverview",
     "postIssuanceServicing",
@@ -224,36 +234,136 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "suwDecision",
     "quickLinks",
   ],
-  RETAIL_ACCUITY_USER:["applicationOverview","summary","requirementManagement","accuityDecision"],
-  ACUITY_TASK:["applicationOverview","summary","requirementManagement","accuityDecision"],
-  RETAIL_REQUIREMENT_REVIEW_POOL: ["applicationOverview","requirementManagement","quickLinks"],
-  RETAIL_TELE_VIDEO_POOL: ["applicationOverview","requirementManagement","quickLinks"],
-  ISSUANCE_TASK: ["breDecision","applicationOverview","requirementManagement","quickLinks"],
-  RETAIL_REJECT_POOL: ["applicationOverview","requirementManagement","reconsiderationDecision","quickLinks"],
-  RETAIL_SUW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
-  RETAIL_CUW_POOL: ["breDecision","applicationOverview","summary", "requirementManagement","uwDecision","decisionHistory","uwToolkit","quickLinks"],
+  RETAIL_ACCUITY_USER: [
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "accuityDecision",
+  ],
+  ACUITY_TASK: [
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "accuityDecision",
+  ],
+  RETAIL_REQUIREMENT_REVIEW_POOL: [
+    "applicationOverview",
+    "requirementManagement",
+    "quickLinks",
+  ],
+  RETAIL_TELE_VIDEO_POOL: [
+    "applicationOverview",
+    "requirementManagement",
+    "quickLinks",
+  ],
+  ISSUANCE_TASK: [
+    "breDecision",
+    "applicationOverview",
+    "requirementManagement",
+    "quickLinks",
+  ],
+  RETAIL_REJECT_POOL: [
+    "applicationOverview",
+    "requirementManagement",
+    "reconsiderationDecision",
+    "quickLinks",
+  ],
+  RETAIL_SUW_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "uwDecision",
+    "quickLinks",
+  ],
+  RETAIL_CUW_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "uwDecision",
+    "decisionHistory",
+    "quickLinks",
+  ],
   // RETAIL_SWISS_RE_POOL: ["applicationOverview","quickLinks"],
   // RETAIL_RGA_POOL: ["quickLinks"],
   // RETAIL_MUNICH_RE_POOL: ["quickLinks"],
   // RETAIL_SCORE_RE_POOL: ["quickLinks"],
   // RETAIL_HANNOVER_RE_POOL: ["quickLinks"],
-  RETAIL_HOD_POOL: ["breDecision","applicationOverview","summary","requirementManagement","decision","decisionHistory","uwToolkit","quickLinks"],
-  RETAIL_SR_UW_POOL: ["breDecision","applicationOverview","summary","requirementManagement","decision","uwToolkit","quickLinks"],
+  RETAIL_HOD_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "decision",
+    "decisionHistory",
+    "quickLinks",
+  ],
+  RETAIL_SR_UW_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "decision",
+    "quickLinks",
+  ],
   RETAIL_RISK_POOL: ["quickLinks"],
-  RETAIL_CMO_POOL: ["breDecision","applicationOverview","summary","requirementManagement","decision","decisionHistory","uwToolkit","quickLinks"],
+  RETAIL_CMO_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "decision",
+    "decisionHistory",
+    "quickLinks",
+  ],
   RETAIL_ACCUITY_POOL: ["quickLinks"],
-  RETAIL_REINSURER_POOL: ["breDecision","applicationOverview","summary","requirementManagement","reinsurerDecision","decisionHistory","quickLinks"],
-  RETAIL_IT_POOL:["breDecision","applicationOverview","summary","requirementManagement","uwDecision","uwToolkit","quickLinks"],
-  RETAIL_VENDOR_CMO_POOL:["breDecision","applicationOverview","summary","requirementManagement","decision","uwToolkit","quickLinks"],
- 
+  RETAIL_REINSURER_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "reinsurerDecision",
+    "decisionHistory",
+    "quickLinks",
+  ],
+  RETAIL_IT_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "uwDecision",
+    "quickLinks",
+  ],
+  RETAIL_VENDOR_CMO_POOL: [
+    "breDecision",
+    "applicationOverview",
+    "summary",
+    "requirementManagement",
+    "decision",
+    "quickLinks",
+  ],
+
   RETAIL_ECG_POOL: ["quickLinks"],
   RETAIL_TMT_POOL: ["quickLinks"],
   RETAIL_GRIEVANCE_POOL: ["greivance"],
-  PRE_LOGIN_CUW_TASK:["breDecision","preLogin","requirementManagement","uwDecision"],
-  AMR_MEDICAL_TASK:["applicationOverview","requirementManagement","quickLinks"],
-  AMR_NON_MEDICAL_TASK:["applicationOverview","requirementManagement","quickLinks"],
- 
- 
+  PRE_LOGIN_CUW_TASK: [
+    "breDecision",
+    "preLogin",
+    "requirementManagement",
+    "uwDecision",
+  ],
+  AMR_MEDICAL_TASK: [
+    "applicationOverview",
+    "requirementManagement",
+    "quickLinks",
+  ],
+  AMR_NON_MEDICAL_TASK: [
+    "applicationOverview",
+    "requirementManagement",
+    "quickLinks",
+  ],
+
   GROUP_DVT_POOL: [
     "breDecision",
     "applicationOverview",
@@ -281,11 +391,11 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "applicationOverview",
     "quickLinks",
   ],
-  GROUP_MMT_POOL:[
+  GROUP_MMT_POOL: [
     "applicationOverview",
     "summary",
     "requirementManagement",
-    "quickLinks"
+    "quickLinks",
   ],
   GUW_FORMAL_TASK: [
     "breDecision",
@@ -294,22 +404,20 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "requirementManagement",
     "uwDecision",
     "decisionHistory",
-    "quickLinks"
+    "quickLinks",
   ],
   DVT_FORMAL_TASK: [
     "breDecision",
     "applicationOverview",
     "summary",
     "requirementManagement",
-    "quickLinks"
+    "quickLinks",
   ],
-  RISK_TASK:[
+  RISK_TASK: [
     "applicationOverview",
     "summary",
     "riskDecision",
     "riskReports",
-    "quickLinks"
-  ]
+    "quickLinks",
+  ],
 };
- 
- 

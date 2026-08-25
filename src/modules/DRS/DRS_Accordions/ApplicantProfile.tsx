@@ -3448,7 +3448,7 @@ const ApplicantProfile = ({
                     sx={{
                       px: 2.5,
                       py: 1.25,
-                      backgroundColor: "#0D4F81",
+                      backgroundColor: "#E45F14",
                     }}
                   >
                     <Typography
@@ -3466,7 +3466,7 @@ const ApplicantProfile = ({
                   <Box
                     sx={{
                       ...centerFlex,
-                      bgcolor: "#D2D7DE",
+                      bgcolor: "#f6f6f6",
                     }}
                   >
                     <Typography

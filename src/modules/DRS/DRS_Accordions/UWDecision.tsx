@@ -43,6 +43,7 @@ type TaskApplication = {
     taskId?: string;
     instanceId?: string;
     instanceID?: string;
+    taskCompositeId?: string;
 };
 
 type LocationState = {
@@ -84,6 +85,32 @@ const toRecord = (value: unknown): Record<string, unknown> =>
     value && typeof value === "object" && !Array.isArray(value)
         ? (value as Record<string, unknown>)
         : {};
+
+const toText = (value: unknown): string => String(value ?? "").trim();
+
+const getSelectedCaseContext = (): Record<string, unknown> => {
+    try {
+        return toRecord(JSON.parse(localStorage.getItem("selectedCaseContext") ?? "null"));
+    } catch {
+        return {};
+    }
+};
+
+const splitCompositeTaskId = (
+    value: unknown,
+): { taskId: string; instanceId: string } => {
+    const compositeId = toText(value);
+    const separatorIndex = compositeId.indexOf(".");
+
+    if (separatorIndex < 0) {
+        return { taskId: compositeId, instanceId: "" };
+    }
+
+    return {
+        instanceId: compositeId.slice(0, separatorIndex).trim(),
+        taskId: compositeId.slice(separatorIndex + 1).trim(),
+    };
+};
 
 type ReasonOption = {
     label: string;
@@ -219,31 +246,41 @@ const UWDecision = () => {
     const [excludedReferralNtids, setExcludedReferralNtids] = useState<string[]>([]);
     const [thresholdDialogOpen, setThresholdDialogOpen] = useState(false);
     const [thresholdUserNtid, setThresholdUserNtid] = useState("");
-      const application =
-    (location.state as LocationState | null)?.application ?? null;
+    const application =
+        (location.state as LocationState | null)?.application ?? null;
+    const storedCaseContext = getSelectedCaseContext();
+    const storedApplicationNumber = toText(
+        storedCaseContext.applicationNo ?? storedCaseContext.applicationNumber,
+    );
+    const selectedCaseContext =
+        !applicationNumber ||
+            !storedApplicationNumber ||
+            applicationNumber.trim() === storedApplicationNumber
+            ? storedCaseContext
+            : {};
 
-  // =====================================================
-  // GET VALUES FROM ROW
-  // =====================================================
+    // =====================================================
+    // GET VALUES FROM ROW
+    // =====================================================
 
-  const rawTaskId = String(application?.taskId ?? "").trim();
+    const routeTask = splitCompositeTaskId(
+        application?.taskCompositeId || application?.taskId,
+    );
+    const storedTask = splitCompositeTaskId(
+        selectedCaseContext.taskCompositeId || selectedCaseContext.taskId,
+    );
 
-  const [instanceIdFromTask, taskIdFromTask] = rawTaskId.includes(".")
-    ? rawTaskId.split(".")
-    : ["", rawTaskId];
+    const taskId =
+        routeTask.taskId ||
+        storedTask.taskId;
 
-  const taskId = String(
-    application?.taskId && !application.taskId.includes(".")
-      ? application.taskId
-      : taskIdFromTask,
-  ).trim();
-
-  const instanceId = String(
-    application?.instanceId ??
-      application?.instanceID ??
-      instanceIdFromTask ??
-      "",
-  ).trim();
+    const instanceId =
+        toText(application?.instanceId) ||
+        toText(application?.instanceID) ||
+        routeTask.instanceId ||
+        toText(selectedCaseContext.instanceId) ||
+        toText(selectedCaseContext.instanceID) ||
+        storedTask.instanceId;
 
     const caseUWDecisionOptions = useMemo(() => {
         const misc = (masters as Record<string, unknown> | undefined)?.misc;
@@ -585,17 +622,26 @@ const UWDecision = () => {
         drsData,
         applicationNumber,
     );
+    const fallbackTask = splitCompositeTaskId(decisionTaskContext.taskId);
 
     const taskContext = {
         ...decisionTaskContext,
-        taskId: taskId || decisionTaskContext.taskId,
-        instanceId: instanceId || decisionTaskContext.instanceId,
+        taskId: taskId || fallbackTask.taskId,
+        instanceId:
+            instanceId ||
+            toText(decisionTaskContext.instanceId) ||
+            fallbackTask.instanceId,
     };
     const selectedReferralUser = roleUsers.find(
         (user) => user.ntid === referralValue,
     );
 
     const handleSubmit = async () => {
+        if (!uwDecisionRemarks.trim()) {
+            setSubmitMessage("UW Remarks is mandatory.");
+            setSubmitStatus("failure");
+            return;
+        }
         const breValidation = validateDrsFinalBre(drsData);
         if (!breValidation.canPerformAction) {
             setSubmitMessage(breValidation.message);
@@ -657,10 +703,10 @@ const UWDecision = () => {
                 isRejectDecision && rejectIibCode !== undefined
                     ? rejectIibCode
                     : isDeclineDecision && selectedDeclineIibCodes.length > 0
-                      ? selectedDeclineIibCodes
-                      : isPostponeDecision && postponeIibCode !== undefined
-                        ? postponeIibCode
-                        : undefined;
+                        ? selectedDeclineIibCodes
+                        : isPostponeDecision && postponeIibCode !== undefined
+                            ? postponeIibCode
+                            : undefined;
 
             const completeTaskPayload = {
                 requestContext: {
@@ -715,8 +761,8 @@ const UWDecision = () => {
                 completedStep === "validation"
                     ? "BRE failed. The decision was not submitted. Please try again."
                     : completedStep === "bre"
-                      ? "BRE completed, but DRS refresh failed. The decision was not submitted. Please try again."
-                      : "BRE and DRS refresh completed, but the task could not be completed. Please try again.";
+                        ? "BRE completed, but DRS refresh failed. The decision was not submitted. Please try again."
+                        : "BRE and DRS refresh completed, but the task could not be completed. Please try again.";
 
             setSubmitMessage(
                 error instanceof Error && error.message
@@ -730,6 +776,12 @@ const UWDecision = () => {
     };
 
     const handleSubmitIntent = () => {
+        if (!uwDecisionRemarks.trim()) {
+            setSubmitMessage("UW Remarks is mandatory.");
+            setSubmitStatus("failure");
+            return;
+        }
+
         const breCounterSignValidation = validateBreCounterSignDecision(
             drsData,
             breResponse,
@@ -909,6 +961,7 @@ const UWDecision = () => {
 
                     <CustomTextField
                         fullWidth
+                        required
                         multiline
                         minRows={2}
                         placeholder="Enter remarks..."

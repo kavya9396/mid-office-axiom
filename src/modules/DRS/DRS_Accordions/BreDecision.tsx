@@ -199,51 +199,59 @@ const BreDecision = ({
   const isFinalBreSuccess =
     Boolean(finalBreStatus);
 
-  const renderDiscrepancy = (
-    value?: string,
-    compareValue?: string,
-  ) => {
-    const codes =
-      value
-        ?.trim()
-        .split(/\s+/)
-        .filter(Boolean) ?? [];
+ const splitDiscrepancyCodes = (value?: string): string[] =>
+  String(value ?? "")
+    .split("#")
+    .map((code) => code.trim())
+    .filter(Boolean);
 
-    const compareCodes = new Set(
-      compareValue
-        ?.trim()
-        .split(/\s+/)
-        .filter(Boolean) ?? [],
-    );
+const renderDiscrepancy = (
+  value?: string,
+  compareValue?: string,
+) => {
+  const codes = splitDiscrepancyCodes(value);
 
-    return (
-      <Box
-        sx={{
-          whiteSpace: "normal",
-          overflowWrap: "anywhere",
-        }}
-      >
-        {codes.map((code, index) => {
-          const isUpdated =
-            !compareCodes.has(code);
+  const compareCodes = new Set(
+    splitDiscrepancyCodes(compareValue).map((code) =>
+      code.toUpperCase(),
+    ),
+  );
 
-          return (
+  return (
+    <Box
+      sx={{
+        whiteSpace: "normal",
+        overflowWrap: "anywhere",
+      }}
+    >
+      {codes.map((code, index) => {
+        const isUpdated = !compareCodes.has(
+          code.toUpperCase(),
+        );
+
+        return (
+          <Box
+            key={`${code}-${index}`}
+            component="span"
+          >
+            {index > 0 && "#"}
+
             <Box
-              key={`${code}-${index}`}
               component="span"
               sx={{
                 backgroundColor: isUpdated
-                  ? "#FFF59D"
+                  ? "#FFEAD7"
                   : "transparent",
               }}
             >
-              #{code}{" "}
+              {code}
             </Box>
-          );
-        })}
-      </Box>
-    );
-  };
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
 
   const renderDifference = (
     value?: string,
@@ -257,7 +265,7 @@ const BreDecision = ({
         component="span"
         sx={{
           backgroundColor: isDifferent
-            ? "#FFF59D"
+            ? "#FFEAD7"
             : "transparent",
           px: isDifferent ? "2px" : 0,
         }}

@@ -29,7 +29,7 @@ export default function KeyValueTable({
   return (
     <Box
       sx={{
-        backgroundColor: "#F1F1F1",
+        backgroundColor: "#f6f6f6",
         borderRadius: 5,
         overflow: "hidden",
         border: "1px solid #E3E3E3",
@@ -40,7 +40,7 @@ export default function KeyValueTable({
         sx={{
           px: 2.5,
           py: 1.25,
-          backgroundColor: "#0D4F81",
+          backgroundColor: "#E45F14",
         }}
       >
         <Typography
@@ -75,10 +75,10 @@ export default function KeyValueTable({
                 {/* FIRST LABEL */}
                 <TableCell
                   sx={{
-                    backgroundColor: "#D2D7DE",
+                    backgroundColor: "#FFEAD7",
                     width: "16.66%",
                     borderBottom: "1px solid #C9CDD3",
-                    fontWeight: 600,
+                    fontWeight: 700,
                   }}
                 >
                   {row.firstLabel}
@@ -92,10 +92,10 @@ export default function KeyValueTable({
                 {/* SECOND LABEL */}
                 <TableCell
                   sx={{
-                    backgroundColor: "#D2D7DE",
+                    backgroundColor: "#FFEAD7",
                     width: "16.66%",
                     borderBottom: "1px solid #C9CDD3",
-                    fontWeight: 600,
+                    fontWeight: 700,
                   }}
                 >
                   {row.secondLabel}
@@ -109,10 +109,10 @@ export default function KeyValueTable({
                 {/* THIRD LABEL */}
                 <TableCell
                   sx={{
-                    backgroundColor: "#D2D7DE",
+                    backgroundColor: "#FFEAD7",
                     width: "16.66%",
                     borderBottom: "1px solid #C9CDD3",
-                    fontWeight: 600,
+                    fontWeight: 700,
                   }}
                 >
                   {row.thirdLabel}

@@ -62,6 +62,42 @@ interface DrsStateWithRequirementSaveStatus {
   data?: DrsData;
 }
 
+const toRecord = (value: unknown): Record<string, unknown> =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : {};
+
+const toText = (value: unknown): string =>
+  String(value ?? "").trim();
+
+const getSelectedCaseContext = (): Record<string, unknown> => {
+  try {
+    return toRecord(
+      JSON.parse(
+        localStorage.getItem("selectedCaseContext") ?? "null",
+      ),
+    );
+  } catch {
+    return {};
+  }
+};
+
+const splitCompositeTaskId = (
+  value: unknown,
+): { taskId: string; instanceId: string } => {
+  const compositeId = toText(value);
+  const separatorIndex = compositeId.indexOf(".");
+
+  if (separatorIndex < 0) {
+    return { taskId: compositeId, instanceId: "" };
+  }
+
+  return {
+    instanceId: compositeId.slice(0, separatorIndex).trim(),
+    taskId: compositeId.slice(separatorIndex + 1).trim(),
+  };
+};
+
 const Decision = () => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -74,38 +110,52 @@ const Decision = () => {
 
   const application =
     (location.state as LocationState | null)?.application ?? null;
+  const storedCaseContext = getSelectedCaseContext();
+  const routeApplicationNumber = toText(application?.applicationNo);
+  const storedApplicationNumber = toText(
+    storedCaseContext.applicationNo ??
+      storedCaseContext.applicationNumber,
+  );
+  const selectedCaseContext =
+    !routeApplicationNumber ||
+    !storedApplicationNumber ||
+    routeApplicationNumber === storedApplicationNumber
+      ? storedCaseContext
+      : {};
 
   // =====================================================
   // GET VALUES FROM ROW
   // =====================================================
 
-  const rawTaskId = String(application?.taskId ?? "").trim();
+  const routeTask = splitCompositeTaskId(
+    application?.taskCompositeId || application?.taskId,
+  );
+  const storedTask = splitCompositeTaskId(
+    selectedCaseContext.taskCompositeId ||
+      selectedCaseContext.taskId,
+  );
 
-  const [instanceIdFromTask, taskIdFromTask] = rawTaskId.includes(".")
-    ? rawTaskId.split(".")
-    : ["", rawTaskId];
+  const taskId = routeTask.taskId || storedTask.taskId;
 
-  const taskId = String(
-    application?.taskId && !application.taskId.includes(".")
-      ? application.taskId
-      : taskIdFromTask,
-  ).trim();
-
-  const instanceId = String(
-    application?.instanceId ??
-      application?.instanceID ??
-      instanceIdFromTask ??
-      "",
-  ).trim();
+  const instanceId =
+    toText(application?.instanceId) ||
+    toText(application?.instanceID) ||
+    routeTask.instanceId ||
+    toText(selectedCaseContext.instanceId) ||
+    toText(selectedCaseContext.instanceID) ||
+    storedTask.instanceId;
 
   const applicationNumber = String(
     application?.applicationNo ??
+      selectedCaseContext.applicationNo ??
+      selectedCaseContext.applicationNumber ??
       localStorage.getItem("applicationNo") ??
       "",
   ).trim();
 
   const userId = String(
     application?.userId ??
+      selectedCaseContext.userId ??
       localStorage.getItem("username") ??
       "",
   ).trim();
@@ -175,6 +225,7 @@ const Decision = () => {
 
   const roleType = String(
     application?.roleType ??
+      selectedCaseContext.roleType ??
       localStorage.getItem("roleType") ??
       "",
   ).trim();
