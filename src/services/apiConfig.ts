@@ -200,7 +200,7 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     mock: "/mock/drs/prelogin.mock.json",
   },
   userRoleName:{
-     real: "http://172.30.84.196:8103/icic-iam-user-service/v1/users/by-role/{roleName}",
+     real: "http://172.30.74.182:8103/icic-iam-user-service/v1/users/by-role/{roleName}",
     mock: "/mock/drs/userRoleName.mock.json",
   }
 } as const;
