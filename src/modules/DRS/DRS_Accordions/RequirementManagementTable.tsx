@@ -560,7 +560,7 @@ const filterRequirementsByRole = (
   }
   if (normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK") {
     return requirements.filter(
-      (row) => normalizeText(row.category).toUpperCase() === "MEDICAL",
+      (row) => normalizeText(row.category).toUpperCase() === "MEDICAL" || normalizeText(row.category).toUpperCase() === "MEDICALS",
     );
   }
 

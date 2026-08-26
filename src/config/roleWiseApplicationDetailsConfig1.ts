@@ -84,7 +84,7 @@ const COMMON_FIELDS: RoleField[] = [
 const PLAN_FIELDS: RoleField[] = [
   {
     label: "Product Type",
-    path: "productDetail.0.planName",
+    path: "productDetail.0.type",
   },
 ];
 

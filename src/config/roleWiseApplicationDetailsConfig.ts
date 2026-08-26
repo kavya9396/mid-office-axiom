@@ -243,7 +243,7 @@ const RETAIL_SEARCH_APPLICATION_FIELDS: RoleField[] = [
   },
   {
     label: "Product Type",
-    path: "applicationOverview.productDetail.0.productType",
+    path: "applicationOverview.productDetail.0.type",
   },
   {
     label: "Applied SA",
@@ -286,7 +286,7 @@ const GROUP_SEARCH_APPLICATION_FIELDS: RoleField[] = [
   },
   {
     label: "Product Type",
-    path: "applicationOverview.productDetail.0.productType",
+    path: "applicationOverview.productDetail.0.type",
   },
   {
     label: "Applied SA",
@@ -351,7 +351,7 @@ export const SEARCH_APPLICATION_FIELDS: RoleField[] = [
   },
   {
     label: "Product Type",
-    path: "productDetail.0.planName",
+    path: "productDetail.0.type",
   },
   {
     label: "Agent Code",
