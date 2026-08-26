@@ -277,7 +277,7 @@ const renderDiscrepancy = (
 
   const showRefreshButton = !readOnly &&
     roleType !== "AMR_MEDICAL_TASK" &&
-    roleType !== "AMR_NON_MEDICAL_TASK";
+    roleType !== "AMR_NON_MEDICAL_TASK" && roleType !== "CPT_DATA_ENTRY_NMR_TASK" && roleType !== "CPT_DATA_ENTRY_MR_TASK";
 
   const breColumns: Column<BRERow>[] = [
     {

@@ -6,7 +6,8 @@ export const title = {
   applicationOverview: "Application Details",
   applicantDetails: "Applicant Details",
   backToInbox: "Back to Inbox",
-  requirementManagement:"Requirement Management"
+  requirementManagement:"Requirement Management",
+  backToCPT:"Back to CPT DRS"
 };
 
 export const reasonOptions = [

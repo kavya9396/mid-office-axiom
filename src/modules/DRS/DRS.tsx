@@ -137,6 +137,14 @@ const normalizeTaskId = (value: string): string => {
   return parts.at(-1)?.trim() ?? normalizedValue;
 };
 
+const isBrowserRefresh = (): boolean => {
+  const [navigationEntry] = performance.getEntriesByType(
+    "navigation",
+  ) as PerformanceNavigationTiming[];
+
+  return navigationEntry?.type === "reload";
+};
+
 const normalizeAccordionId = (value: string): string =>
   value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
@@ -225,6 +233,7 @@ const DRS = () => {
   });
 
   const lastRequestKeyRef = useRef<string | null>(null);
+  const isBrowserRefreshRef = useRef(isBrowserRefresh());
 
   const selectedCaseContext = useMemo(
     () => getSelectedCaseContext(),
@@ -349,6 +358,19 @@ const DRS = () => {
           ).unwrap(),
         ];
 
+        // BRE is required only when entering the DRS page. On a browser
+        // refresh, reuse the existing BRE data and fetch only the DRS data.
+        if (!isBrowserRefreshRef.current) {
+          requests.push(
+            dispatch(
+              breThunk({
+                eventName,
+                applicationNumber: applicationNo,
+              }),
+            ).unwrap(),
+          );
+        }
+
         if (roleType === "PRE_LOGIN_CUW_TASK") {
           requests.push(
             dispatch(
@@ -378,6 +400,7 @@ const DRS = () => {
     userId,
     roleType,
     sections,
+    eventName,
   ]);
 
   const visibleAccordions = useMemo(

@@ -51,7 +51,7 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     mock: "/mock/drs/masters.mock.json",
   },
   decisionCodes: {
-    real: "/api/drs/decision-codes",
+    real: "http://172.30.74.182:8080/api/v1/underwriting/decision-master/options?decisionType=STD&dataEntry=Medical",
     mock: "/mock/drs/decisionCodes.json",
   },
   bre: {

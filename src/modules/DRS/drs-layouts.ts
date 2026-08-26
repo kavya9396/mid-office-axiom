@@ -190,7 +190,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "breDecision",
     "applicationOverview",
     "requirementManagement",
-    "exceptionDecision",
+    "decision",
   ],
   PIVV_TASK: [
     "applicationOverview",

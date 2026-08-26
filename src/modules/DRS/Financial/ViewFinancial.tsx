@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
 import CustomButton from "../../../components/ui/Button/Button";
-import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -19,23 +18,21 @@ import { useAppDispatch } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import { financialThunk } from "../../../store/thunks/financialThunk";
-import { breRetriggerThunk } from "../../../store/thunks/breRetriggerThunk";
+import { breThunk } from "../../../store/thunks/breThunk";
 import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
 import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest, MasterOption } from "../../../types/drs.types";
-import { applicantTabs } from "../../../utils/constant";
+import { applicantTabs, title } from "../../../utils/constant";
 import { getSessionMasters } from "../../../utils/masterDataSession";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
 import { getErrorMessage } from "../../../config/errorMessages";
 import BreDecision from "../DRS_Accordions/BreDecision";
-import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
-import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
 import {
   financialSections,
   type FinancialField,
   type FinancialSectionConfig,
   type FinancialSectionKey,
 } from "./financialAccordionConfig";
-import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
+import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
 
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
 
@@ -2389,7 +2386,7 @@ const ViewFinancial = () => {
   const [financialDataLoaded, setFinancialDataLoaded] = useState(false);
   const [breRetriggerLoaded, setBreRetriggerLoaded] = useState(false);
   const [financialData, setFinancialData] = useState<FinancialResponse | null>(null);
-  const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
+  const [activeApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
   const [financialFieldValues, setFinancialFieldValues] = useState<Record<FinancialSectionKey, Record<string, string>>>(
     buildInitialFieldValues
   );
@@ -2467,8 +2464,6 @@ const ViewFinancial = () => {
       (!drsApplicationNumber || !drsPartyId)
       ? "Application number or party ID is unavailable for financial fetch."
       : null;
-  const isFormalRole = isFormalTaskRole(roleType);
-  const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
   const displayFinancialSections = useMemo(
     () => buildFinancialSectionsFromResponse(financialData?.sections),
     [financialData?.sections]
@@ -2558,7 +2553,7 @@ const ViewFinancial = () => {
         setSnackbarSeverity("info");
         setSnackbarOpen(true);
         const response = await dispatch(
-          breRetriggerThunk({ eventName: "FE", applicationNumber: drsApplicationNumber })
+          breThunk({ eventName: "FE", applicationNumber: drsApplicationNumber })
         ).unwrap();
 
         const payload = response.data ?? {};
@@ -3667,17 +3662,25 @@ const ViewFinancial = () => {
           <CircularProgress size={64} sx={{ color: "#fff" }} />
         </Box>
       )}
-      <BackButton label="Back to DRS" onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
+      <BackButton label={title.backToCPT} onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
 
-      <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
-        <CustomTabs
-          tabs={drsViewTabs}
-          value="financial"
-          onChange={(value: DRSViewTab) => handleDRSViewTabChange(value)}
-        />
+      {roleType !== "CPT_DATA_ENTRY_NMR_TASK" && (
+        <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
+          <CustomTabs
+            tabs={drsViewTabs}
+            value="financial"
+            onChange={(value: DRSViewTab) => handleDRSViewTabChange(value)}
+          />
+        </Box>
+      )}
+
+      <Box sx={{ mb: 1 }}>
+        <BreDecision />
       </Box>
 
-      <BreDecision />
+      <Box sx={{ mb: 1 }}>
+        <ApplicantProfile />
+      </Box>
 
       <Snackbar
         open={snackbarOpen}
@@ -3703,34 +3706,6 @@ const ViewFinancial = () => {
 
       <Box sx={{ px: 1 }}>
 
-        {!isFormalRole && (
-          <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
-            <CustomTabs
-              tabs={visibleTabs}
-              value={currentApplicantTab}
-              onChange={(value: ApplicantTab) => {
-                setActiveApplicantTab(value);
-              }}
-            />
-          </Box>
-        )}
-
-        <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
-          <CustomAccordion title={isFormalRole ? "Member Profile" : "Applicant Profile"} defaultExpanded={false} detailPadding={0}>
-            {isFormalRole ? (
-              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-                <FormalMemberProfile profile={formalMemberProfile} />
-              </Box>
-            ) : (
-              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-                <ApplicantProfile
-                  selectedApplicantTab={currentApplicantTab}
-                  isApplicantDetailsExpanded
-                />
-              </Box>
-            )}
-          </CustomAccordion>
-        </Box>
 
         <Box
           sx={{
@@ -3739,20 +3714,25 @@ const ViewFinancial = () => {
             gap: 1.5,
             alignItems: "flex-start",
             mt: 1,
+            width: "100%",
+            minWidth: 0,
           }}
         >
           <Box
             ref={menuContainerRef}
             sx={{
-              width: { xs: "100%", md: 208 },
+              width: { xs: "100%", md: 280 },
+              minWidth: { md: 280 },
+              flex: { md: "0 0 280px" },
               position: { xs: "static", md: "sticky" },
-              top: { md: 124 },
+              top: { md: 16 },
               alignSelf: "flex-start",
               borderRadius: 1,
               overflow: "hidden",
               border: "1px solid #D6D8DC",
               backgroundColor: "#F8F9FB",
-              maxHeight: { md: "calc(100vh - 180px)" },
+              height: { md: "calc(100vh - 32px)" },
+              maxHeight: { md: "calc(100vh - 32px)" },
               overflowY: { md: "auto" },
             }}
           >
@@ -3790,7 +3770,14 @@ const ViewFinancial = () => {
                     gap: 1,
                   }}
                 >
-                  <Typography sx={{ fontSize: "inherit", fontWeight: "inherit", color: "inherit" }}>
+                  <Typography
+                    sx={{
+                      fontSize: "inherit",
+                      fontWeight: "inherit",
+                      color: "inherit",
+                      overflowWrap: "anywhere",
+                    }}
+                  >
                     {section.title}
                   </Typography>
                   <Typography sx={{ fontSize: 14, color: "inherit", lineHeight: 1 }}>
@@ -3801,7 +3788,17 @@ const ViewFinancial = () => {
             })}
           </Box>
 
-          <Box sx={{ flex: 1, width: "100%", display: "flex", flexDirection: "column", gap: 2 }}>
+          <Box
+            sx={{
+              flex: "1 1 0",
+              minWidth: 0,
+              maxWidth: { md: "calc(100% - 292px)" },
+              display: "flex",
+              flexDirection: "column",
+              gap: 2,
+              overflowX: "auto",
+            }}
+          >
             {displayFinancialSections.map((section) => (
               <Box
                 key={section.key}
