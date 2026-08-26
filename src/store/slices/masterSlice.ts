@@ -1,19 +1,10 @@
-import type { MasterResponse } from '../../types/drs.types';
-import { masterThunk } from './../thunks/masterThunk';
 import { createSlice } from "@reduxjs/toolkit";
 
-// types/drs.types.ts
-
-export interface MiscMaster {
-  code: string;
-  description: string;
-  value: string;
-  isActive: string;
-  miscMastId: string;
-}
+import type { MastersResponse } from "../../types/drs.types";
+import { mastersThunk } from "../thunks/mastersThunk";
 
 interface MasterState {
-  data: MasterResponse | null;
+  data: MastersResponse | null;
   loading: boolean;
   error: string | null;
 }
@@ -30,16 +21,25 @@ const masterSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(masterThunk.pending, (state) => {
+      .addCase(mastersThunk.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
-      .addCase(masterThunk.fulfilled, (state, action) => {
+      .addCase(mastersThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.data = action.payload; // or action.payload.data depending on API
+        state.error = null;
+
+        // A requirement_mst lookup returns only that requested master.
+        // Merge it so previously loaded decision masters stay available.
+        state.data = {
+          ...(state.data ?? {}),
+          ...action.payload,
+        } as MastersResponse;
       })
-      .addCase(masterThunk.rejected, (state, action) => {
+      .addCase(mastersThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message ?? null;
+        state.error =
+          action.error.message ?? "Unable to load master data";
       });
   },
 });

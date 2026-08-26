@@ -28,13 +28,13 @@ import {
 
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
-import { masterThunk } from "../../../store/thunks/masterThunk";
+import { mastersThunk } from "../../../store/thunks/mastersThunk";
 import { applicantProfileSubmitThunk } from "../../../store/thunks/applicantProfileSubmitThunk";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import type {
   AdditionalRequirementRow,
   ApplicantProfileSubmitRequest,
-  MasterRequest,
+  MastersRequest,
 } from "../../../types/drs.types";
 import {
   CloseIcon,
@@ -913,10 +913,10 @@ const RequirementManagementTable = ({
       ...(requirementMst && Object.keys(requirementMst).length > 0
         ? { requirementMst }
         : {}),
-    } as unknown as MasterRequest;
+    } as unknown as MastersRequest;
 
     try {
-      const response = await dispatch(masterThunk(requestPayload)).unwrap();
+      const response = await dispatch(mastersThunk(requestPayload)).unwrap();
       const requirementMaster = getRequirementMaster(response);
       const requirementItems = getMasterItems(response, "requirement_mst");
       const directOptions = getRequirementOptions(requirementMaster, nextField);
