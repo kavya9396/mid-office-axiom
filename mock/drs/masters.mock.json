@@ -2450,8 +2450,8 @@
             },
             {
                 "code": "REF_ACU",
-                "description": "Refer to Acuity",
-                "value": "Refer to Acuity",
+                "description": "Refer to Accuity",
+                "value": "Refer to Accuity",
                 "isActive": "Y",
                 "miscMastId": "56",
                 "type": "CUW"

@@ -690,7 +690,7 @@ const createUpdatedMember = (
           ...drsData,
           summary: updatedSummary,
         },
-        isAcuity: true,
+        isAccuity: true,
       };
       console.log('payload--------', payload)
       const response: ApplicantProfileSubmitResponse =

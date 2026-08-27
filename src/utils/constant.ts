@@ -825,8 +825,8 @@ export const rm_document = [
     value: "Declaration",
   },
   {
-    label: "Acuity Check",
-    value: "Acuity Check",
+    label: "Accuity Check",
+    value: "Accuity Check",
   },
   {
     label: "Invalid",
