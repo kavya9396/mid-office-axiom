@@ -290,24 +290,24 @@ const DRS = () => {
 
   const applicationNo = String(
     application?.applicationNo ??
-      selectedCaseContext.applicationNo ??
-      localStorage.getItem("applicationNo") ??
-      "",
+    selectedCaseContext.applicationNo ??
+    localStorage.getItem("applicationNo") ??
+    "",
   ).trim();
 
   const userId = String(
     application?.userId ??
-      selectedCaseContext.userId ??
-      localStorage.getItem("userId") ??
-      localStorage.getItem("username") ??
-      "",
+    selectedCaseContext.userId ??
+    localStorage.getItem("userId") ??
+    localStorage.getItem("username") ??
+    "",
   ).trim();
 
   const businessType = String(
     application?.businessType ??
-      selectedCaseContext.businessType ??
-      localStorage.getItem("businessType") ??
-      "",
+    selectedCaseContext.businessType ??
+    localStorage.getItem("businessType") ??
+    "",
   )
     .trim()
     .toLowerCase();
@@ -413,149 +413,149 @@ const DRS = () => {
   );
 
   const handleSubmit = async () => {
-  if (isSubmitting) {
-    return;
-  }
+    if (isSubmitting) {
+      return;
+    }
 
-  const rawTaskId = String(
-    application?.taskId ??
+    const rawTaskId = String(
+      application?.taskId ??
       selectedCaseContext.taskId ??
       selectedCaseContext.taskCompositeId ??
       localStorage.getItem("taskId") ??
       localStorage.getItem("taskCompositeId") ??
       "",
-  ).trim();
+    ).trim();
 
-  const taskId = normalizeTaskId(rawTaskId);
+    const taskId = normalizeTaskId(rawTaskId);
 
-  const instanceId = String(
-    application?.instanceId ??
+    const instanceId = String(
+      application?.instanceId ??
       selectedCaseContext.instanceId ??
       localStorage.getItem("instanceId") ??
       "",
-  ).trim();
+    ).trim();
 
-  if (!applicationNo || !userId) {
-    setSnackbar({
-      open: true,
-      message: "Application number or user ID is missing.",
-      severity: "error",
-    });
-    return;
-  }
+    if (!applicationNo || !userId) {
+      setSnackbar({
+        open: true,
+        message: "Application number or user ID is missing.",
+        severity: "error",
+      });
+      return;
+    }
 
-  if (!taskId || !instanceId) {
-    setSnackbar({
-      open: true,
-      message: "Task ID or instance ID is missing.",
-      severity: "error",
-    });
-    return;
-  }
+    if (!taskId || !instanceId) {
+      setSnackbar({
+        open: true,
+        message: "Task ID or instance ID is missing.",
+        severity: "error",
+      });
+      return;
+    }
 
-  let decision = "AMR";
+    let decision = "AMR";
 
-  if (roleType === "CPT_DATA_ENTRY_NMR_TASK") {
-    const requirementRows = getRequirementRows(drsData);
-    const statuses = requirementRows.map((row) =>
-      normalizeValue(row.status),
-    );
-    const hasPendingRequirement = statuses.includes("PENDING");
-    const areAllRequirementsAccepted =
-      statuses.length > 0 &&
-      statuses.every((status) =>
-        ["ACCEPT", "ACCEPTED"].includes(status),
+    if (roleType === "CPT_DATA_ENTRY_NMR_TASK") {
+      const requirementRows = getRequirementRows(drsData);
+      const statuses = requirementRows.map((row) =>
+        normalizeValue(row.status),
       );
-    const miscItems = getMiscItems(masterData);
+      const hasPendingRequirement = statuses.includes("PENDING");
+      const areAllRequirementsAccepted =
+        statuses.length > 0 &&
+        statuses.every((status) =>
+          ["ACCEPT", "ACCEPTED"].includes(status),
+        );
+      const miscItems = getMiscItems(masterData);
 
-    if (hasPendingRequirement) {
-      decision = getActiveCptDecisionCode(miscItems, ["AMR"]);
-    } else if (areAllRequirementsAccepted) {
-      decision = getActiveCptDecisionCode(miscItems, [
-        "CLS_TASK",
-        "CLOSE_TASK",
-      ]);
-    } else {
+      if (hasPendingRequirement) {
+        decision = getActiveCptDecisionCode(miscItems, ["AMR"]);
+      } else if (areAllRequirementsAccepted) {
+        decision = getActiveCptDecisionCode(miscItems, [
+          "CLS_TASK",
+          "CLOSE_TASK",
+        ]);
+      } else {
+        setSnackbar({
+          open: true,
+          message:
+            requirementRows.length === 0
+              ? "No requirements are available to submit."
+              : "Every requirement must be either Pending or Accepted before submitting.",
+          severity: "error",
+        });
+        return;
+      }
+
+      if (!decision) {
+        setSnackbar({
+          open: true,
+          message: hasPendingRequirement
+            ? "Active AMR decision is not configured for CPT in the misc master."
+            : "Active close-task decision is not configured for CPT in the misc master.",
+          severity: "error",
+        });
+        return;
+      }
+    }
+
+    /*
+     * These values are now guaranteed to be strings
+     * because the missing-value checks have completed.
+     */
+    const payload = {
+      requestContext: {
+        taskId,
+        userId,
+        appNo: applicationNo,
+        instanceId,
+        remarks: "",
+        decision,
+      },
+    };
+
+    setIsSubmitting(true);
+
+    try {
+      // Complete-task is called only after BRE succeeds.
+      await dispatch(
+        breThunk({
+          eventName,
+          applicationNumber: applicationNo,
+        }),
+      ).unwrap();
+
+      await dispatch(
+        completeTaskThunk(payload),
+      ).unwrap();
+
+      setSnackbar({
+        open: true,
+        message: "Application submitted successfully.",
+        severity: "success",
+      });
+
+      window.setTimeout(() => {
+        navigate(getInboxPath());
+      }, 800);
+    } catch (error) {
+      console.error(
+        "Failed to submit application:",
+        error,
+      );
+
       setSnackbar({
         open: true,
         message:
-          requirementRows.length === 0
-            ? "No requirements are available to submit."
-            : "Every requirement must be either Pending or Accepted before submitting.",
+          typeof error === "string"
+            ? error
+            : "Unable to submit the application. Please try again.",
         severity: "error",
       });
-      return;
+    } finally {
+      setIsSubmitting(false);
     }
-
-    if (!decision) {
-      setSnackbar({
-        open: true,
-        message: hasPendingRequirement
-          ? "Active AMR decision is not configured for CPT in the misc master."
-          : "Active close-task decision is not configured for CPT in the misc master.",
-        severity: "error",
-      });
-      return;
-    }
-  }
-
-  /*
-   * These values are now guaranteed to be strings
-   * because the missing-value checks have completed.
-   */
-  const payload = {
-    requestContext: {
-      taskId,
-      userId,
-      appNo: applicationNo,
-      instanceId,
-      remarks: "",
-      decision,
-    },
   };
-
-  setIsSubmitting(true);
-
-  try {
-    // Complete-task is called only after BRE succeeds.
-    await dispatch(
-      breThunk({
-        eventName,
-        applicationNumber: applicationNo,
-      }),
-    ).unwrap();
-
-    await dispatch(
-      completeTaskThunk(payload),
-    ).unwrap();
-
-    setSnackbar({
-      open: true,
-      message: "Application submitted successfully.",
-      severity: "success",
-    });
-
-    window.setTimeout(() => {
-      navigate(getInboxPath());
-    }, 800);
-  } catch (error) {
-    console.error(
-      "Failed to submit application:",
-      error,
-    );
-
-    setSnackbar({
-      open: true,
-      message:
-        typeof error === "string"
-          ? error
-          : "Unable to submit the application. Please try again.",
-      severity: "error",
-    });
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
   const renderSubmitButton = () => (
     <Box
@@ -570,18 +570,20 @@ const DRS = () => {
       <CustomButton
         onClick={handleSubmit}
         disabled={isSubmitting}
-        sx={{minWidth: 170,
-  borderRadius: "28px",
-  bgcolor: "#ad252a",
-  py: 0.65,
-  textTransform: "none",
-  fontSize: "13px",
-  fontWeight: 600,
-  boxShadow: "none",
-  "&:hover": {
-    bgcolor: "#941f24",
-    boxShadow: "none",
-  }}}
+        sx={{
+          minWidth: 170,
+          borderRadius: "28px",
+          bgcolor: "#ad252a",
+          py: 0.65,
+          textTransform: "none",
+          fontSize: "13px",
+          fontWeight: 600,
+          boxShadow: "none",
+          "&:hover": {
+            bgcolor: "#941f24",
+            boxShadow: "none",
+          }
+        }}
       >
         <Box
           component="span"
@@ -652,8 +654,92 @@ const DRS = () => {
       <BackButton
         label={title.backToInbox}
         onClick={() => navigate(getInboxPath())}
-      />
+        rightSlot={
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 2,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {/* Application Number */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "baseline",
+                gap: 0.75,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: "#777",
+                  letterSpacing: "0.2px",
+                }}
+              >
+                Application No. :
+              </Typography>
 
+              <Typography
+                sx={{
+                  fontSize: "14px",
+                  fontWeight: 700,
+                  color: "#9A2529",
+                  letterSpacing: "0.3px",
+                }}
+              >
+                {applicationNo}
+              </Typography>
+            </Box>
+
+            {/* Divider */}
+            <Box
+              sx={{
+                width: "1px",
+                height: 24,
+                backgroundColor: "#ddd",
+              }}
+            />
+
+            {/* Business Type */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                px: 1.5,
+                py: 0.65,
+                borderRadius: "20px",
+                backgroundColor: "#FFEAD7",
+                border: "1px solid rgba(228, 95, 20, 0.25)",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: "12px",
+                  fontWeight: 500,
+                  color: "#7A4A35",
+                }}
+              >
+                Business Type :
+              </Typography>
+
+              <Typography
+                sx={{
+                  fontSize: "13px",
+                  fontWeight: 800,
+                  color: "#9A2529",
+                  letterSpacing: "0.6px",
+                }}
+              >
+                {businessType.toUpperCase()}
+              </Typography>
+            </Box>
+          </Box>
+        }
+      />
       <Box
         sx={{
           display: "flex",
