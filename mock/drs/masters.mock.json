@@ -2033,25 +2033,25 @@
                 "type": "REQT_ST"
             },
             {
+                "code": "1_MONTH",
+                "description": "1 Month",
+                "value": "1 Month",
+                "isActive": "Y",
+                "miscMastId": "117",
+                "type": "POSTPONE_PERIOD"
+            },
+            {
                 "code": "3_MONTHS",
                 "description": "3 Months",
                 "value": "3 Months",
                 "isActive": "Y",
-                "miscMastId": "117",
+                "miscMastId": "118",
                 "type": "POSTPONE_PERIOD"
             },
             {
                 "code": "6_MONTHS",
                 "description": "6 Months",
                 "value": "6 Months",
-                "isActive": "Y",
-                "miscMastId": "118",
-                "type": "POSTPONE_PERIOD"
-            },
-            {
-                "code": "1_MONTH",
-                "description": "1 Month",
-                "value": "1 Month",
                 "isActive": "Y",
                 "miscMastId": "119",
                 "type": "POSTPONE_PERIOD"
@@ -2103,6 +2103,22 @@
                 "isActive": "Y",
                 "miscMastId": "125",
                 "type": "REQT_ST"
+            },
+            {
+                "code": "SESSION",
+                "description": "15",
+                "value": "15",
+                "isActive": "Y",
+                "miscMastId": "126",
+                "type": "SES_TIMEOUT"
+            },
+            {
+                "code": "CO",
+                "description": "Counter Offer",
+                "value": "Counter Offer",
+                "isActive": "Y",
+                "miscMastId": "51",
+                "type": "TERM_DEC"
             },
             {
                 "code": "RAISE_GRV",
@@ -2369,25 +2385,25 @@
                 "type": "TERM_DEC"
             },
             {
+                "code": "BOR_STD",
+                "description": "Borderline Standard",
+                "value": "Borderline Standard",
+                "isActive": "Y",
+                "miscMastId": "47",
+                "type": "TERM_DEC"
+            },
+            {
                 "code": "REJ",
                 "description": "Reject",
                 "value": "Reject",
                 "isActive": "Y",
-                "miscMastId": "47",
+                "miscMastId": "48",
                 "type": "TERM_DEC"
             },
             {
                 "code": "DC",
                 "description": "Decline",
                 "value": "Decline",
-                "isActive": "Y",
-                "miscMastId": "48",
-                "type": "TERM_DEC"
-            },
-            {
-                "code": "POSTP",
-                "description": "Postpone",
-                "value": "Postpone",
                 "isActive": "Y",
                 "miscMastId": "49",
                 "type": "TERM_DEC"
@@ -2401,9 +2417,9 @@
                 "type": "PROFILE"
             },
             {
-                "code": "CO",
-                "description": "Counter Offer",
-                "value": "Counter Offer",
+                "code": "POSTP",
+                "description": "Postpone",
+                "value": "Postpone",
                 "isActive": "Y",
                 "miscMastId": "50",
                 "type": "TERM_DEC"
@@ -2450,8 +2466,8 @@
             },
             {
                 "code": "REF_ACU",
-                "description": "Refer to Accuity",
-                "value": "Refer to Accuity",
+                "description": "Refer to Acuity",
+                "value": "Refer to Acuity",
                 "isActive": "Y",
                 "miscMastId": "56",
                 "type": "CUW"
@@ -2807,34 +2823,9 @@
                 "description": "High than normal level of sugar as per Hemoglobin A1c test",
                 "value": "High than normal level of sugar as per Hemoglobin A1c test",
                 "isActive": "Y",
-                "requestId": 883,
+                "requestId": 881,
                 "requestType": "MEDICAL",
                 "iibCode": 1404
-            },{
-                "code": "REASON_RMK",
-                "description": "High test",
-                "value": "High than normal level of sugar as per Hemoglobin A1c test",
-                "isActive": "Y",
-                "requestId": 882,
-                "requestType": "NON_MEDICAL",
-                "iibCode": 1403
-            },{
-                "code": "REASON_RMK",
-                "description": "normal test",
-                "value": "High than normal level of sugar as per Hemoglobin A1c test",
-                "isActive": "Y",
-                "requestId": 881,
-                "requestType": "NON_MEDICAL",
-                "iibCode": 1402
-            }
-            ,{
-                "code": "REASON_RMK",
-                "description": "abnormal test",
-                "value": "High than normal level of sugar as per Hemoglobin A1c test",
-                "isActive": "Y",
-                "requestId": 880,
-                "requestType": "NON_MEDICAL",
-                "iibCode": 1401
             }
         ]
     },

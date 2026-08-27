@@ -12,9 +12,10 @@ import {
   getSearchApplicationPath,
 } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
-import { drsThunk } from "../../store/thunks/drsThunk";
 import type { RootState } from "../../store/store";
+import { drsThunk } from "../../store/thunks/drsThunk";
 import type { AuditTrail, AuditTrailRow } from "../../types/drs.types";
+import { formatDate } from "../../utils/dataFormat";
 
 const SEARCH_RESULT_STORAGE_KEY = "searchApplicationDrsData";
 
@@ -39,19 +40,28 @@ interface SelectedCaseContext {
 }
 
 interface StoredSearchResult {
-  applicationNo?: string;
   data?: Record<string, unknown>;
 }
 
-const toDisplay = (value: unknown) => {
-  const text = String(value ?? "").trim();
-  return text || "-";
-};
+const toDisplay = (value: unknown): string =>
+  String(value ?? "").trim() || "-";
 
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
     : {};
+
+const formatDateTime = (value: unknown): string => {
+  if (value === undefined || value === null || value === "") {
+    return "-";
+  }
+
+  const formattedValue = formatDate(
+    value instanceof Date ? value : String(value),
+  );
+
+  return formattedValue || "-";
+};
 
 const readSelectedCaseContext = (): SelectedCaseContext => {
   try {
@@ -82,7 +92,7 @@ const normalizeAuditTrailRows = (rows: unknown): AuditTrail => {
     const item = toRecord(row);
 
     return {
-      dateTime: toDisplay(item.dateTime),
+      dateTime: formatDateTime(item.dateTime),
       fromPool: toDisplay(item.fromPool),
       fromPoolUser: toDisplay(item.fromPoolUser),
       toPool: toDisplay(item.toPool),
@@ -103,19 +113,17 @@ const AuditTrailPage = () => {
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
 
-  const [selectedCaseContext] = useState<SelectedCaseContext>(() =>
-    readSelectedCaseContext(),
-  );
-  const [cachedSearchQuickLinks] = useState<Record<string, unknown>>(() =>
-    readCachedSearchQuickLinks(),
-  );
+  const [selectedCaseContext] = useState(readSelectedCaseContext);
+  const [cachedSearchQuickLinks] = useState(readCachedSearchQuickLinks);
   const [quickLinksData, setQuickLinksData] =
     useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationNumber =
-    applicationNumber?.trim() || selectedCaseContext.applicationNo?.trim() || "";
+    applicationNumber?.trim() ||
+    selectedCaseContext.applicationNo?.trim() ||
+    "";
   const isFromSearchApplication =
     selectedCaseContext.source === "searchApplication" &&
     selectedCaseContext.readOnly === true;
@@ -147,24 +155,25 @@ const AuditTrailPage = () => {
   );
 
   useEffect(() => {
-    const loadAuditTrail = async () => {
-      if (
-        !safeApplicationNumber ||
-        hasReduxAuditTrail ||
-        hasCachedSearchAuditTrail
-      ) {
-        return;
-      }
+    if (
+      !safeApplicationNumber ||
+      hasReduxAuditTrail ||
+      hasCachedSearchAuditTrail
+    ) {
+      return;
+    }
 
+    const loadAuditTrail = async () => {
       try {
         setLoading(true);
 
         const roleType = localStorage.getItem("roleType") ?? "";
-        const userId = (
-          localStorage.getItem("userId") ??
-          localStorage.getItem("username") ??
-          "System"
-        ).trim() || "System";
+        const userId =
+          (
+            localStorage.getItem("userId") ??
+            localStorage.getItem("username") ??
+            "System"
+          ).trim() || "System";
 
         const response = await dispatch(
           drsThunk({
@@ -210,10 +219,7 @@ const AuditTrailPage = () => {
     navigate(getDRSPath(safeBusinessType, safeApplicationNumber));
   };
 
-  const title = useMemo(
-    () => `Audit Trail${loading ? " (Loading...)" : ""}`,
-    [loading],
-  );
+  const title = `Audit Trail${loading ? " (Loading...)" : ""}`;
 
   return (
     <Container maxWidth={false} disableGutters>
@@ -235,7 +241,9 @@ const AuditTrailPage = () => {
           />
         ) : (
           <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>
-            {loading ? "Loading audit trail..." : "No audit trail records found"}
+            {loading
+              ? "Loading audit trail..."
+              : "No audit trail records found"}
           </Typography>
         )}
       </Box>

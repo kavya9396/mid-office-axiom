@@ -1,4 +1,5 @@
 import {
+  Alert,
   Box,
   Button,
   List,
@@ -6,6 +7,7 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -385,6 +387,16 @@ const getRowTimingStatus = (
   return null;
 };
 
+const getPriorityRank = (
+  row: Record<string, unknown>,
+): number => {
+  const status = getRowTimingStatus(row);
+
+  if (status === "overdue") return 0;
+  if (status === "atRisk") return 1;
+  return 2;
+};
+
 /* ============================================================
  * COMPONENT
  * ============================================================
@@ -417,6 +429,9 @@ const DynamicRoleTable = ({
 
   const [rowsPerPage, setRowsPerPage] =
     useState(25);
+
+  const [priorityValidationOpen, setPriorityValidationOpen] =
+    useState(false);
 
   const [searchText, setSearchText] =
     useState("");
@@ -702,11 +717,17 @@ const DynamicRoleTable = ({
    * ============================================================
    */
   const sortedData = useMemo(() => {
-    if (!sortColumn) {
-      return filteredData;
-    }
-
     return [...filteredData].sort((a, b) => {
+      const priorityComparison =
+        getPriorityRank(a) - getPriorityRank(b);
+
+      if (priorityComparison !== 0) {
+        return priorityComparison;
+      }
+
+      // Column sorting applies only inside the same priority group.
+      if (!sortColumn) return 0;
+
       const aValue = a[sortColumn];
       const bValue = b[sortColumn];
 
@@ -749,6 +770,23 @@ const DynamicRoleTable = ({
         : -comparison;
     });
   }, [filteredData, sortColumn, sortDirection]);
+
+  const handleApplicationClick = (
+    row: Record<string, unknown>,
+  ) => {
+    const highestInboxPriority = data.reduce(
+      (highestPriority, inboxRow) =>
+        Math.min(highestPriority, getPriorityRank(inboxRow)),
+      2,
+    );
+
+    if (getPriorityRank(row) > highestInboxPriority) {
+      setPriorityValidationOpen(true);
+      return;
+    }
+
+    onApplicationClick?.(row);
+  };
 
   /* ============================================================
    * PAGINATION
@@ -1185,14 +1223,16 @@ console.log('payload',payload)
   const handleDownloadExcel = () => {
     if (
       !sortedData.length ||
-      !selectedColumns.length
+      !columns.length
     ) {
       return;
     }
 
     downloadRowsAsExcel({
       rows: sortedData,
-      columnKeys: selectedColumns,
+      // Export every available backend column, not only the columns
+      // currently selected and visible in the table.
+      columnKeys: columns,
       title,
     });
   };
@@ -1308,16 +1348,82 @@ console.log('payload',payload)
               ======================================================
           */}
 
-          <CustomButton
-            size="small"
-            variant="outlined"
-            onClick={
-              handleDownloadExcel
-            }
-            sx={{ fontSize: "10px" }}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1.5,
+              minWidth: 0,
+            }}
           >
-            Download Excel
-          </CustomButton>
+            <CustomButton
+              size="small"
+              variant="outlined"
+              onClick={
+                handleDownloadExcel
+              }
+              sx={{
+                fontSize: "10px",
+                flexShrink: 0,
+              }}
+            >
+              Download Excel
+            </CustomButton>
+
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 1.25,
+                whiteSpace: "nowrap",
+              }}
+            >
+              {[
+                {
+                  label: "High Priority",
+                  color: "#D32F2F",
+                },
+                {
+                  label: "At Risk",
+                  color: "#C05600",
+                },
+                {
+                  label: "Normal",
+                  color: "#155a87",
+                },
+              ].map((indicator) => (
+                <Box
+                  key={indicator.label}
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                  }}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      width: "8px",
+                      height: "8px",
+                      borderRadius: "50%",
+                      backgroundColor: indicator.color,
+                      flexShrink: 0,
+                    }}
+                  />
+                  <Typography
+                    component="span"
+                    sx={{
+                      fontSize: "10px",
+                      lineHeight: 1,
+                      color: "#4b5055",
+                    }}
+                  >
+                    {indicator.label}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+          </Box>
 
           {/* ======================================================
               RIGHT SIDE TOOLBAR
@@ -1669,11 +1775,7 @@ console.log('payload',payload)
                               {isApplicationNumber ? (
                                 <Box
                                   component="span"
-                                  onClick={() =>
-                                    onApplicationClick?.(
-                                      row,
-                                    )
-                                  }
+                                  onClick={() => handleApplicationClick(row)}
                                   sx={{
                                     cursor:
                                       "pointer",
@@ -1868,6 +1970,21 @@ console.log('payload',payload)
           COLUMN SETTINGS DIALOG
           ========================================================
       */}
+      <Snackbar
+        open={priorityValidationOpen}
+        autoHideDuration={4000}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        onClose={() => setPriorityValidationOpen(false)}
+      >
+        <Alert
+          severity="error"
+          variant="filled"
+          onClose={() => setPriorityValidationOpen(false)}
+        >
+          Please complete the priority task first before claiming this task.
+        </Alert>
+      </Snackbar>
+
       {canConfigureColumns && <CustomDialog
         open={settingsOpen}
         onClose={handleCloseSettings}
@@ -2401,7 +2518,7 @@ console.log('payload',payload)
             The Selected Columns
             order determines the
             table column order. Use
-            Ã¢â€ â€˜ and Ã¢â€ â€œ to rearrange
+            ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¹Ã…â€œ and ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã¢â‚¬Å“ to rearrange
             columns.
           </Typography>
         </Box> */}

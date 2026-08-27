@@ -1448,7 +1448,7 @@ const RequirementManagementTable = ({
     const text = normalizeText(value);
 
     return (
-      <Tooltip title={text} arrow disableHoverListener={!text}>
+      <Tooltip title={text} arrow disableHoverListener={!text} placement="top">
         <Typography sx={cellTextStyles}>{text || "-"}</Typography>
       </Tooltip>
     );
@@ -1459,7 +1459,7 @@ const RequirementManagementTable = ({
 
     return (
       <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Tooltip title={text || `No ${title.toLowerCase()} available`} arrow>
+        <Tooltip title={text || `No ${title.toLowerCase()} available`} arrow  placement="top">
           <span>
             <IconButton
               size="small"
@@ -1778,7 +1778,7 @@ const RequirementManagementTable = ({
               </Button>
             )}
 
-            <Tooltip title="Filter requirements">
+            <Tooltip title="Filter requirements"  placement="top">
               <IconButton
                 size="small"
                 onClick={handleOpenFilterDialog}
@@ -1872,7 +1872,7 @@ const RequirementManagementTable = ({
                     }}
                   >
                     {isNewRow && (
-                      <Tooltip title="Remove requirement">
+                      <Tooltip title="Remove requirement"  placement="top">
                         <IconButton
                           size="small"
                           onClick={() => handleRemove(rowKey)}

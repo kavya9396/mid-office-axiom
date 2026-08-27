@@ -1,13 +1,14 @@
 import type { ApplicantInfoTab, ApplicantTab } from "../types/drs.types";
 
 export const title = {
-  breDecision: "Bre Decision",
+  breDecision: "BRE Decision",
   decision: "Case Decision",
   applicationOverview: "Application Details",
   applicantDetails: "Applicant Details",
   backToInbox: "Back to Inbox",
   requirementManagement:"Requirement Management",
-  backToCPT:"Back to CPT DRS"
+  backToCPT:"Back to CPT DRS",
+  backToDRS:"Back to DRS"
 };
 
 export const reasonOptions = [

@@ -2100,7 +2100,7 @@ import type { AppDispatch, RootState } from "../../../store/store";
 import EditApplicantProfile from "./EditApplicantProfile";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import { GridSection } from "../../../components/layout/GridSection";
-import { buildTripleFields, formatCurrencyINR, formatDOB, maskString, toDisplayValue } from "../../../utils/helpers";
+import { buildTripleFields, formatCurrencyINR, maskString, toDisplayValue } from "../../../utils/helpers";
 import type { HealthInformation, LifestyleHabits, NomineeRow } from "../../../types/drs.types";
 import type { Column } from "../../../components/ui/Table/Table";
 import CustomTable from "../../../components/ui/Table/Table";
@@ -2112,6 +2112,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import RiskAnalytics from "./RiskAnalytics";
 import { markApplicantTabVisited } from "../../../validations/drsApplicantTabValidation";
+import { formatDate } from "../../../utils/dataFormat";
 
 /* -------------------------------------------------------------------------- */
 /*                                   TYPES                                    */
@@ -2545,8 +2546,8 @@ const displayValue = (value: unknown): string => {
   return String(value);
 };
 
-const formatDateOnly = (value?: string): string =>
-  value ? value.split("T")[0] : "-";
+// const formatDateOnly = (value?: string): string =>
+//   value ? value.split("T")[0] : "-";
 
 const ExpandableDetailField = ({
   label,
@@ -2877,7 +2878,7 @@ const ApplicantProfile = ({
           { label: "Applicant Name", value: applicantName },
           {
             label: "Date of Birth",
-            value: formatDateOnly(personal.dob),
+            value: formatDate(personal.dob, false),
           },
           {
             label: "Age",
@@ -2936,7 +2937,7 @@ const ApplicantProfile = ({
           { label: "Identity Proof Type", value: kyc.identityProofType },
           {
             label: "Identity Proof Expiry Date",
-            value: formatDateOnly(kyc.identityProofExpiryDate),
+            value: formatDate(kyc.identityProofExpiryDate,false),
           },
           {
             label: "Identity Proof Number",
@@ -3511,7 +3512,7 @@ const ApplicantProfile = ({
                 .filter(Boolean)
                 .join(" "),
             ),
-            nomineeDOB: toDisplayValue(formatDOB(item.dob)),
+            nomineeDOB: toDisplayValue(formatDate(item.dob,false)),
             gender: toDisplayValue(item.gender),
             relationship: toDisplayValue(
               item.proposerNomineeRelation,
@@ -3529,7 +3530,7 @@ const ApplicantProfile = ({
                 .join(" "),
             ),
             appointeeGender: toDisplayValue(item.gender),
-            appointeeDOB: toDisplayValue(formatDOB(item.dob)),
+            appointeeDOB: toDisplayValue(formatDate(item.dob,false)),
             appointeeRelationship: toDisplayValue(
               item.relationWithNominee,
             ),

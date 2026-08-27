@@ -316,6 +316,7 @@ const DRS = () => {
     businessType === "retail"
       ? "BRE-RETAIL"
       : "BRE-GROUP";
+      console.log('eventName',businessType,eventName)
 
   useEffect(() => {
     if (
@@ -667,15 +668,24 @@ const DRS = () => {
             <Box
               sx={{
                 display: "flex",
-                alignItems: "baseline",
+                alignItems: "center",
                 gap: 0.75,
+                px: 1.5,
+                py: 0.65,
+                borderRadius: "20px",
+                backgroundColor:
+                  businessType === "retail" ? "#FFEAD7" : "#9A2529",
+                border:
+                  businessType === "retail"
+                    ? "1px solid rgba(228, 95, 20, 0.25)"
+                    : "1px solid #9A2529",
               }}
             >
               <Typography
                 sx={{
                   fontSize: "12px",
                   fontWeight: 500,
-                  color: "#777",
+                  color: businessType === "retail" ? "#7A4A35" : "#FFEAD7",
                   letterSpacing: "0.2px",
                 }}
               >
@@ -686,7 +696,7 @@ const DRS = () => {
                 sx={{
                   fontSize: "14px",
                   fontWeight: 700,
-                  color: "#9A2529",
+                  color: businessType === "retail" ? "#9A2529" : "#FFEAD7",
                   letterSpacing: "0.3px",
                 }}
               >
@@ -694,49 +704,6 @@ const DRS = () => {
               </Typography>
             </Box>
 
-            {/* Divider */}
-            <Box
-              sx={{
-                width: "1px",
-                height: 24,
-                backgroundColor: "#ddd",
-              }}
-            />
-
-            {/* Business Type */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.75,
-                px: 1.5,
-                py: 0.65,
-                borderRadius: "20px",
-                backgroundColor: "#FFEAD7",
-                border: "1px solid rgba(228, 95, 20, 0.25)",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  color: "#7A4A35",
-                }}
-              >
-                Business Type :
-              </Typography>
-
-              <Typography
-                sx={{
-                  fontSize: "13px",
-                  fontWeight: 800,
-                  color: "#9A2529",
-                  letterSpacing: "0.6px",
-                }}
-              >
-                {businessType.toUpperCase()}
-              </Typography>
-            </Box>
           </Box>
         }
       />
