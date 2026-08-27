@@ -114,6 +114,12 @@ const mapper = {
   CPT_DATA_ENTRY_NMR_TASK: "CPT_DATA_ENTRY_NMR_TASK",
 } as const;
 
+const SUMMARY_SECTION_ROLES = new Set([
+  "CPT_DATA_ENTRY_NMR_TASK",
+  "CPT_DATA_ENTRY_MR_TASK",
+  "PIVV_TASK",
+]);
+
 const getSelectedCaseContext = (): SelectedCaseContext => {
   try {
     const value = localStorage.getItem("selectedCaseContext");
@@ -283,9 +289,12 @@ const DRS = () => {
           ...layoutAccordions.map(String),
           "requirementCategoryInfo",
           "latestBreDecision",
+          ...(SUMMARY_SECTION_ROLES.has(roleType.toUpperCase())
+            ? ["summary"]
+            : []),
         ]),
       ),
-    [layoutAccordions],
+    [layoutAccordions, roleType],
   );
 
   const applicationNo = String(

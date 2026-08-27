@@ -177,7 +177,7 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
   },
  
   // Grievance
-  grievanceView: {
+  raiseGrievance: {
     real: "/api/grievance/view",
     mock: "/mock/drs/grievance.mock.json",
   },
