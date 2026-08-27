@@ -18,7 +18,6 @@ const BackButton = ({
   label = "Back",
   onClick,
   underline = true,
-  justify = "flex-start",
   rightSlot,
 }: BackButtonProps) => {
   const navigate = useNavigate();
@@ -29,8 +28,23 @@ const BackButton = ({
   };
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ display: "flex", justifyContent: justify, alignItems: "center", m: 0,p:1 }}>
+    <Box
+      sx={{
+        position: "relative",
+        display: "flex",
+        alignItems: "center",
+        px: 1,
+        py: 1.5,
+      }}
+    >
+      {/* Left */}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          flexShrink: 0,
+        }}
+      >
         <CustomButton
           variant="text"
           size="small"
@@ -38,18 +52,38 @@ const BackButton = ({
           sx={{
             textTransform: "none",
             minWidth: 42,
-            m:0,
-            p:0,
-            ...(underline && { textDecoration: "underline" }),
+            m: 0,
+            p: 0,
+            color: "#9A2529",
+            fontWeight: 600,
+            ...(underline && {
+              textDecoration: "underline",
+            }),
           }}
         >
           <KeyLeftArrowIcon />
           {label}
         </CustomButton>
-
-        {rightSlot}
       </Box>
-    // </Container>
+
+      {/* Center */}
+      {rightSlot && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "max-content",
+            maxWidth: "calc(100% - 180px)",
+          }}
+        >
+          {rightSlot}
+        </Box>
+      )}
+    </Box>
   );
 };
 
