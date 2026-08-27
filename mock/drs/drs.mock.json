@@ -10,7 +10,17 @@
       "discrepancy": "ACR#OCD#PAN#ADP#AGE#IDM#KYP",
       "timestamp": "14/08/2026, 1108hrs",
       "action": "Decline",
-      "reTriggerCount": 39
+      "reTriggerCount": 2
+    },"latestBreDecision": {
+      "decision": "ST",
+      "initialDecision": "Non-STP",
+      "isInitial": "Y",
+      "isLatest": "N",
+      "remarks": "Product Non Eligible",
+      "discrepancy": "ACR#OCD#PAN#ADP#AGE#IDM#KYP",
+      "timestamp": "14/08/2026, 1108hrs",
+      "action": "Decline",
+      "reTriggerCount": 2
     },
     "summary": [
       {
@@ -840,7 +850,7 @@
           "type": "base",
           "code": "E36",
           "name": "ICICI Pru GIFT Pro",
-          "category":"Saving",
+          "category":"Term",
           "allowedUwDecisions": [],
           "faceValue": "1068000",
           "coverageOption": "",

@@ -17,6 +17,7 @@ import { getInboxPath } from "../../../routes/routes";
 import { useAppSelector } from "../../../store/hooks";
 import type { AppDispatch } from "../../../store/store";
 import { breThunk } from "../../../store/thunks/breThunk";
+import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { BreResponse } from "../../../types/drs.types";
 import { title } from "../../../utils/constant";
 import { formatDate } from "../../../utils/dataFormat";
@@ -44,6 +45,7 @@ const BreDecision = ({
 
   const roleType =
     localStorage.getItem("roleType") ?? "";
+    const userId = localStorage.getItem("username") ?? "";
 
   /*
    * Keep the complete DRS slice because the actual
@@ -59,14 +61,6 @@ const BreDecision = ({
   const searchData = useAppSelector(
     (state) =>
       state.searchApplication.response?.data,
-  );
-
-  /*
-   * Latest manually triggered BRE response.
-   * This is used only during the normal DRS flow.
-   */
-  const finalBreData = useAppSelector(
-    (state) => state.bre,
   );
 
   /*
@@ -100,8 +94,7 @@ const BreDecision = ({
    */
   const finalBreDecisionData = readOnly
     ? undefined
-    : breResponse?.data ??
-      finalBreData?.data?.data;
+    : breResponse?.data;
 
   const hasBreApiResponse =
     !readOnly &&
@@ -153,6 +146,15 @@ const BreDecision = ({
       ).unwrap();
 
       setBreResponse(response);
+
+      await dispatch(
+        drsThunk({
+          applicationNo: applicationNumber,
+          userId,
+          roleType,
+          sections: ["latestBreDecision"],
+        }),
+      ).unwrap();
     } catch (error) {
       console.error(
         "BRE API failed:",
@@ -164,9 +166,8 @@ const BreDecision = ({
   /*
    * Final BRE values.
    *
-   * Redux is automatically updated after the DRS page
-   * dispatches breThunk, causing this component to render
-   * with the latest BRE API values.
+   * A manual refresh uses the immediate BRE response.
+   * A normal page load uses DRS latestBreDecision.
    */
   const finalBreDecision = hasBreApiResponse
     ? finalBreDecisionData?.breOutput

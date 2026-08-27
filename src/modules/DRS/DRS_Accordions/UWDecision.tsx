@@ -1,6 +1,6 @@
 import { Alert, Box, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomRadioGroup from "../../../components/ui/Radio/Radio";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,7 +18,7 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { getDecisionTaskContext } from "./decisionTaskContext";
 import { getCompleteTaskResult } from "./completeTaskResponse";
 import { toMasterLabel } from "../../../utils/masterOptions";
-import { filterAcceptDecisionOptions, validateDrsFinalBre } from "../../../validations/drsBreValidation";
+import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 import { validateApplicantTabsVisited } from "../../../validations/drsApplicantTabValidation";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { validateBreCounterSignDecision } from "../../../validations/breCUWValidations";
@@ -87,6 +87,53 @@ const toRecord = (value: unknown): Record<string, unknown> =>
         : {};
 
 const toText = (value: unknown): string => String(value ?? "").trim();
+
+const findFirstScalarByKey = (
+    value: unknown,
+    keys: string[],
+): unknown => {
+    const normalizedKeys = new Set(
+        keys.map((key) => key.replace(/[_\s-]/g, "").toUpperCase()),
+    );
+    const visited = new Set<object>();
+
+    const visit = (current: unknown): unknown => {
+        if (!current || typeof current !== "object") return undefined;
+        if (visited.has(current)) return undefined;
+        visited.add(current);
+
+        if (Array.isArray(current)) {
+            for (const item of current) {
+                const result = visit(item);
+                if (result !== undefined) return result;
+            }
+            return undefined;
+        }
+
+        const record = current as Record<string, unknown>;
+
+        for (const [key, item] of Object.entries(record)) {
+            const normalizedKey = key.replace(/[_\s-]/g, "").toUpperCase();
+            if (
+                normalizedKeys.has(normalizedKey) &&
+                item !== null &&
+                item !== "" &&
+                typeof item !== "object"
+            ) {
+                return item;
+            }
+        }
+
+        for (const item of Object.values(record)) {
+            const result = visit(item);
+            if (result !== undefined) return result;
+        }
+
+        return undefined;
+    };
+
+    return visit(value);
+};
 
 const getSelectedCaseContext = (): Record<string, unknown> => {
     try {
@@ -209,8 +256,8 @@ const UWDecision = () => {
         const drsState = toRecord(rootState.drs);
 
         return (
-            breState.response ??
             breState.data ??
+            breState.response ??
             breState.breData ??
             drsState.breResponse ??
             drsState.breData ??
@@ -218,6 +265,47 @@ const UWDecision = () => {
             null
         );
     });
+    const breResponseRecord = toRecord(breResponse);
+    const finalBreResponseData = toRecord(breResponseRecord.data);
+    const finalBreOutput = toRecord(
+        finalBreResponseData.breOutput ?? breResponseRecord.breOutput,
+    );
+    const finalBreDecisionFromApi = toText(
+        toRecord(finalBreOutput.decisionTypes).breDecision,
+    ).toUpperCase();
+    const latestBreDecisionFromDrs = toText(
+        toRecord(toRecord(drsData).latestBreDecision).decision,
+    ).toUpperCase();
+    const finalBreDecision =
+        finalBreDecisionFromApi || latestBreDecisionFromDrs;
+    const canShowStandardDecision = ["ST", "STP", "STD"].includes(
+        finalBreDecision,
+    );
+    const dataEntry = toText(
+        findFirstScalarByKey(drsData, ["dataentry", "dataEntry"]),
+    );
+    const applicationOverview = toRecord(toRecord(drsData).applicationOverview);
+    const productDetails = Array.isArray(applicationOverview.productDetail)
+        ? applicationOverview.productDetail
+        : [];
+    const firstProductDetail = toRecord(productDetails[0]);
+    const productCategory = toText(firstProductDetail.category).toUpperCase();
+
+    useEffect(() => {
+        const overview = toRecord(toRecord(drsData).applicationOverview);
+        const details = Array.isArray(overview.productDetail)
+            ? overview.productDetail
+            : [];
+
+        console.log("UW Decision - productDetail:", details);
+        console.log("UW Decision - first product detail:", toRecord(details[0]));
+        console.log("UW Decision - product category:", productCategory);
+    }, [drsData, productCategory]);
+
+    const isTermProduct = productCategory
+    .trim()
+    .toUpperCase()
+    .includes("TERM");
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
@@ -227,7 +315,7 @@ const UWDecision = () => {
     const [caseUWDecision, setCaseUWDecision] = useState("");
     const [uwDecision, setUwDecision] = useState("");
     const [decisionCode, setDecisionCode] = useState("");
-    const [rejectReason, setRejectReason] = useState("");
+    const [rejectReason, setRejectReason] = useState<string[]>([]);
     const [declineReasons, setDeclineReasons] = useState<string[]>([]);
     const [postponeReason, setPostponeReason] = useState("");
     const [postponementPeriod, setPostponementPeriod] = useState("");
@@ -283,7 +371,9 @@ const UWDecision = () => {
         storedTask.instanceId;
 
     const caseUWDecisionOptions = useMemo(() => {
-        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+        const masterRecord = toRecord(masters);
+        const masterData = toRecord(masterRecord.data);
+        const misc = masterRecord.misc ?? masterData.misc;
 
         const toMasterList = (options?: unknown): unknown[] => {
             if (Array.isArray(options)) return options;
@@ -305,10 +395,15 @@ const UWDecision = () => {
 
         const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
 
-        const cuwOptions = rawList
+        const decisionOptions = rawList
             .filter(
-                (option) =>
-                    String(option?.type ?? "").trim().toUpperCase() === "CUW"
+                (option) => {
+                    const type = String(option?.type ?? "")
+                        .trim()
+                        .toUpperCase();
+
+                    return type === "TERM_DEC" || type === "CUW";
+                }
             )
             .map((option) => {
                 const code = String(
@@ -348,8 +443,13 @@ const UWDecision = () => {
                 disabled?: boolean;
             }>;
 
-        return filterAcceptDecisionOptions(cuwOptions, drsData);
-    }, [drsData, masters]);
+        return decisionOptions.filter((option) => {
+            const isStandardOption =
+                option.code.trim().toUpperCase() === "STD";
+
+            return !isStandardOption || canShowStandardDecision;
+        });
+    }, [canShowStandardDecision, drsData, masters]);
 
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
@@ -359,6 +459,15 @@ const UWDecision = () => {
         [masters],
     );
     const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
+    const selectedCaseDecisionOption = caseUWDecisionOptions.find(
+        (option) => option.value === effectiveCaseUWDecision,
+    );
+    const selectedDecisionCode = toText(
+        selectedCaseDecisionOption?.code ?? selectedCaseDecisionOption?.value,
+    );
+    const isStandardDecision =
+        selectedCaseDecisionOption?.type.trim().toUpperCase() === "TERM_DEC" &&
+        selectedDecisionCode.toUpperCase() === "STD";
 
     const nonMedicalOptions = useMemo(
         () => getReasonOptionsFromMasters(masters, "NON_MEDICAL"),
@@ -560,11 +669,10 @@ const UWDecision = () => {
     }, [masters]);
 
     const showDecisionCode = [
-        "Accept",
         "Reject",
         "Decline",
         "Postpone",
-    ].includes(caseUWDecisionLabel);
+    ].includes(caseUWDecisionLabel) || isStandardDecision;
 
     const showParallelDecision = [
         "Refer to HO CMO",
@@ -583,23 +691,27 @@ const UWDecision = () => {
     ].includes(caseUWDecisionLabel);
 
     const fetchDecisionCodes = new Set([
-        "Accept",
         "Reject",
         "Decline",
         "Postpone",
     ]);
 
     const showDecisionType = caseUWDecisionLabel === "Refer to Sr Uw" || caseUWDecisionLabel === "Refer to HOD";
-    const isAcceptDecision = caseUWDecisionLabel === "Accept";
     const isRejectDecision = caseUWDecisionLabel === "Reject";
     const isDeclineDecision = caseUWDecisionLabel === "Decline";
     const isPostponeDecision = caseUWDecisionLabel === "Postpone";
     const isCounterOfferDecision = caseUWDecisionLabel === "Counter Offer";
-    const resolvedDecisionCode = (isAcceptDecision || isRejectDecision || isDeclineDecision || isPostponeDecision)
-        ? (decisionCode || decisionCodes[0]?.value || "")
+    const returnedDecisionCode = toRecord(decisionCodes[0]);
+    const resolvedDecisionCode = (isStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision)
+        ? (decisionCode || toText(
+            returnedDecisionCode.value ?? returnedDecisionCode.code,
+        ))
         : decisionCode;
-    const resolvedSmokerStatus = isAcceptDecision
-        ? (smokerStatus || "Non Smoker")
+    const resolvedSmokerStatus = isStandardDecision
+        ? (smokerStatus || toText(
+            returnedDecisionCode.smokerStatus ??
+            returnedDecisionCode.smoker_status,
+        ))
         : smokerStatus;
 
     const updateCounterOfferCell = (
@@ -693,7 +805,8 @@ const UWDecision = () => {
                 return Number.isFinite(iibCode) ? iibCode : undefined;
             };
 
-            const rejectIibCode = toIibCode(rejectReason);
+            const rejectIibCode = rejectReason.map(toIibCode)
+                .filter((iibCode): iibCode is number => iibCode !== undefined);;
             const postponeIibCode = toIibCode(postponeReason);
             const selectedDeclineIibCodes = declineReasons
                 .map(toIibCode)
@@ -725,7 +838,7 @@ const UWDecision = () => {
                     ...(postponementPeriod.trim()
                         ? { postponementPeriod: postponementPeriod.trim() }
                         : {}),
-                    ...(isAcceptDecision && resolvedSmokerStatus.trim()
+                    ...(isStandardDecision && isTermProduct && resolvedSmokerStatus.trim()
                         ? { smokerStatus: resolvedSmokerStatus.trim() }
                         : {}),
                     ...(selectedReferralUser?.fullName?.trim()
@@ -942,15 +1055,15 @@ const UWDecision = () => {
             <CustomAccordion title="UW Decision" defaultExpanded>
                 <Box
                     sx={{
-                        mt: 0.75,
-                        p: 1.25,
+                        mt: 0.5,
+                        p: 1,
                         borderRadius: "6px",
                         backgroundColor: "#f6f6f6",
                     }}
                 >
                     <Typography
                         sx={{
-                            fontSize: "12px",
+                            fontSize: "11px",
                             fontWeight: 400,
                             color: "#444",
                             mb: 0.5,
@@ -963,7 +1076,7 @@ const UWDecision = () => {
                         fullWidth
                         required
                         multiline
-                        minRows={2}
+                        minRows={1}
                         placeholder="Enter remarks..."
                         value={uwDecisionRemarks}
                         onChange={(e) => {
@@ -976,28 +1089,72 @@ const UWDecision = () => {
                         sx={{
                             backgroundColor: "#fff",
                             borderRadius: "6px",
+                            "& .MuiInputBase-root": {
+                                minHeight: 48,
+                                fontSize: "12px",
+                            },
+                            "& .MuiInputBase-input": {
+                                py: 0.75,
+                            },
                         }}
                     />
-                    <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "11px", color: "#888", mt: 0.25 }}>
+                    <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "10px", lineHeight: 1.2, color: "#888", mt: 0.2 }}>
                         {uwDecisionRemarks.length}/10000
                     </Typography>
 
                     <Box
                         sx={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(3, 1fr)",
-                            gap: 1,
+                            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                            alignItems: "end",
+                            columnGap: 1,
+                            rowGap: 0.75,
+                            "& > *": {
+                                minWidth: 0,
+                            },
+                            "& .MuiFormControl-root": {
+                                width: "100%",
+                                minWidth: 0,
+                            },
+                            "& .MuiInputBase-root": {
+                                height: 34,
+                                minHeight: 34,
+                                borderRadius: "6px",
+                                backgroundColor: "#fff",
+                                fontSize: "12px",
+                            },
+                            "& .MuiInputBase-input, & .MuiSelect-select": {
+                                fontSize: "12px",
+                                lineHeight: 1.2,
+                                py: "7px !important",
+                            },
+                            "& .MuiTypography-root": {
+                                fontSize: "11px",
+                                lineHeight: 1.2,
+                            },
                         }}
                     >
                         <CustomSelect
                             label="Case UW Decision"
                             value={effectiveCaseUWDecision}
-                            onChange={(value: string) => {
+                            onChange={async (value: string) => {
+                                const selectedOption = caseUWDecisionOptions.find(
+                                    (option) => option.value === value,
+                                );
+                                const masterDecisionCode = toText(
+                                    selectedOption?.code ?? selectedOption?.value,
+                                );
                                 const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
+                                const selectedIsStandard =
+                                    selectedOption?.type.trim().toUpperCase() === "TERM_DEC" &&
+                                    masterDecisionCode.toUpperCase() === "STD";
+                                const shouldFetchDecisionCode =
+                                    selectedIsStandard || fetchDecisionCodes.has(selectedLabel);
+
                                 setCaseUWDecision(value);
                                 fetchUsersForReferralDecision(selectedLabel);
                                 setReferralValue("");
-                                setRejectReason("");
+                                setRejectReason([]);
                                 setDeclineReasons([]);
                                 setPostponeReason("");
                                 setPostponementPeriod("");
@@ -1005,17 +1162,33 @@ const UWDecision = () => {
                                 setSubmitMessage(null);
                                 setSubmitStatus(null);
 
-                                if (!fetchDecisionCodes.has(selectedLabel)) {
+                                setDecisionCode("");
+                                setSmokerStatus("");
+
+                                if (shouldFetchDecisionCode) {
+                                    const response = await dispatch(
+                                        decisionCodeThunk({
+                                            decision: masterDecisionCode,
+                                            dataentry: dataEntry,
+                                        } as Parameters<typeof decisionCodeThunk>[0])
+                                    ).unwrap();
+
+                                    setDecisionCode(toText(
+                                        findFirstScalarByKey(response, [
+                                            "decisionCode",
+                                            "code",
+                                            "value",
+                                        ]),
+                                    ));
+                                    setSmokerStatus(toText(
+                                        findFirstScalarByKey(response, [
+                                            "smokerStatus",
+                                            "smoker_status",
+                                        ]),
+                                    ));
+                                } else {
                                     setDecisionCode("");
                                     setSmokerStatus("");
-                                }
-
-                                if (fetchDecisionCodes.has(selectedLabel)) {
-                                    dispatch(
-                                        decisionCodeThunk({
-                                            decision: selectedLabel,
-                                        })
-                                    );
                                 }
 
                                 if (selectedLabel === "Raise Requirement") {
@@ -1026,14 +1199,15 @@ const UWDecision = () => {
                         />
 
                         {showDecisionCode && (
-                            (isAcceptDecision || isRejectDecision || isDeclineDecision || isPostponeDecision) ? (
+                            (isStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision) ? (
                                 <Box>
                                     <Typography
                                         sx={{
-                                            fontSize: "14px",
+                                            fontSize: "11px",
                                             fontWeight: 400,
                                             color: "#444",
-                                            mb: 1,
+                                            lineHeight: 1.2,
+                                            mb: 0.5,
                                         }}
                                     >
                                         Decision Code
@@ -1045,7 +1219,8 @@ const UWDecision = () => {
                                         disabled
                                         sx={{
                                             "& .MuiInputBase-root": {
-                                                borderRadius: "8px",
+                                                height: 34,
+                                                borderRadius: "6px",
                                             },
                                         }}
                                     />
@@ -1064,6 +1239,8 @@ const UWDecision = () => {
                             <CustomSelect
                                 label="Reject Reason"
                                 value={rejectReason}
+                                 multiple={true}
+                                    maxCount={3}
                                 onChange={setRejectReason}
                                 options={nonMedicalOptions}
                             />
@@ -1100,13 +1277,14 @@ const UWDecision = () => {
                             </>
                         )}
 
-                        {isAcceptDecision && (
+                        {isStandardDecision && isTermProduct && (
                             <Box>
                                 <Typography
                                     sx={{
                                         fontSize: "12px",
                                         fontWeight: 400,
                                         color: "#444",
+                                        lineHeight: 1.2,
                                         mb: 0.5,
                                     }}
                                 >
@@ -1119,7 +1297,7 @@ const UWDecision = () => {
                                     disabled
                                     sx={{
                                         "& .MuiInputBase-root": {
-                                            height: 36,
+                                            height: 34,
                                             borderRadius: "6px",
                                             backgroundColor: "#fff",
                                         },
@@ -1356,12 +1534,13 @@ const UWDecision = () => {
                             variant="contained"
                             disabled={submitLoading}
                             onClick={handleSubmitIntent}
-                            sx={{
-                                minWidth: 150,
-                                height: 36,
-                                borderRadius: "50px",
-                                fontWeight: 600,
-                                px: 2.5,
+                        sx={{
+                            minWidth: 120,
+                            height: 32,
+                            borderRadius: "50px",
+                            fontWeight: 600,
+                            fontSize: "12px",
+                            px: 2,
                                 whiteSpace: "nowrap",
                             }}
                         >
