@@ -30,9 +30,9 @@ type CustomTableProps<T> = {
 
 export default function CustomTable<T extends object>({
   title,
-  columns,
-  data,
-  headerAction
+  columns = [],
+  data = [],
+  headerAction,
 }: CustomTableProps<T>) {
   return (
     <Paper
@@ -53,7 +53,7 @@ export default function CustomTable<T extends object>({
             py: 1.2,
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center"
+            alignItems: "center",
           }}
         >
           <Typography sx={{ fontSize: "12px", fontWeight: 700 }}>
@@ -108,11 +108,11 @@ export default function CustomTable<T extends object>({
                     width: col.width,
                     ...(col.sticky
                       ? {
-                        position: "sticky",
-                        [col.sticky]: 0,
-                        zIndex: 3,
-                        backgroundColor: "#E9EEF3",
-                      }
+                          position: "sticky",
+                          [col.sticky]: 0,
+                          zIndex: 3,
+                          backgroundColor: "#E9EEF3",
+                        }
                       : {}),
                   }}
                 >
@@ -124,25 +124,14 @@ export default function CustomTable<T extends object>({
                       lineHeight: 1.2,
                     }}
                   >
-                    {/* HEADER TITLE */}
-                    {/* <Typography
-                      sx={{
-                        fontSize: "12px",
-                        fontWeight: 600,
-                        color: "#4A4A4A",
-                      }}
-                    >
-                      {col.headerRender ? col.headerRender() : col.header}
-                    </Typography> */}
-
-                     {col.headerRender ? (
+                    {col.headerRender ? (
                       col.headerRender()
                     ) : (
                       <Typography
                         sx={{
                           fontSize: "12px",
                           fontWeight: 600,
-                          color: "000",
+                          color: "#000",
                         }}
                       >
                         {col.header}
@@ -176,45 +165,51 @@ export default function CustomTable<T extends object>({
 
           {/* BODY */}
           <TableBody>
-            {data.map((row, rowIndex) => (
-              <TableRow key={rowIndex}>
-                {columns.map((col) => {
-                  const value = row[col.key];
-                  const content = col.render
-                    ? col.render(value, row, rowIndex)
-                    : (value as React.ReactNode);
-
-                  return (
-                    <TableCell
-                      key={String(col.key)}
-                      sx={{
-                        fontSize: "12px",
-                        ...(col.sticky
-                          ? {
-                            position: "sticky",
-                            [col.sticky]: 0,
-                            zIndex: 2,
-                            backgroundColor: "#FFFFFF",
-                          }
-                          : {}),
-                      }}
-                    >
-                      {col.render ? (
-                        content
-                      ) : (
-                        <Typography
-                          sx={{
-                            fontSize: "10px",
-                          }}
-                        >
-                          {content}
-                        </Typography>
-                      )}
-                    </TableCell>
-                  );
-                })}
+            {data.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={columns.length || 1} align="center">
+                  <Typography sx={{ fontSize: "11px", py: 1 }}>
+                    No data available
+                  </Typography>
+                </TableCell>
               </TableRow>
-            ))}
+            ) : (
+              data.map((row, rowIndex) => (
+                <TableRow key={rowIndex}>
+                  {columns.map((col) => {
+                    const value = row[col.key];
+                    const content = col.render
+                      ? col.render(value, row, rowIndex)
+                      : (value as React.ReactNode);
+
+                    return (
+                      <TableCell
+                        key={String(col.key)}
+                        sx={{
+                          fontSize: "12px",
+                          ...(col.sticky
+                            ? {
+                                position: "sticky",
+                                [col.sticky]: 0,
+                                zIndex: 2,
+                                backgroundColor: "#FFFFFF",
+                              }
+                            : {}),
+                        }}
+                      >
+                        {col.render ? (
+                          content
+                        ) : (
+                          <Typography sx={{ fontSize: "10px" }}>
+                            {content}
+                          </Typography>
+                        )}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       </TableContainer>
