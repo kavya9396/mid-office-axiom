@@ -25,6 +25,11 @@ const toRecord = (value: unknown): Record<string, unknown> =>
         ? (value as Record<string, unknown>)
         : {};
 
+const toDisplayText = (value: unknown): string =>
+    value === null || value === undefined
+        ? ""
+        : String(value).trim();
+
 const toMasterList = (options: unknown): unknown[] => {
     if (Array.isArray(options)) return options;
 
@@ -166,6 +171,9 @@ const CounterOffer = () => {
     const masters = useAppSelector(
         (state) => state.drs.masters,
     );
+    const drsData = useAppSelector(
+        (state) => state.drs.data,
+    );
 
     const [counterOfferTable, setCounterOfferTable] =
         useState<CounterOfferTableState>(
@@ -195,6 +203,41 @@ const CounterOffer = () => {
         };
     }, [masters]);
 
+    const {
+        baseProductDetail,
+        riderProductDetail,
+    } = useMemo(() => {
+        const drsRecord = toRecord(drsData);
+        const nestedDataRecord = toRecord(drsRecord.data);
+        const responseData =
+            Object.keys(nestedDataRecord).length > 0
+                ? nestedDataRecord
+                : drsRecord;
+        const applicationOverview = toRecord(
+            responseData.applicationOverview,
+        );
+        const rawProductDetails =
+            applicationOverview.productDetail ??
+            applicationOverview.productDetails;
+        const productDetails = Array.isArray(rawProductDetails)
+            ? rawProductDetails
+            : [];
+
+        const findProductByType = (productType: string) =>
+            toRecord(
+                productDetails.find(
+                    (product) =>
+                        toDisplayText(toRecord(product).type)
+                            .toUpperCase() === productType,
+                ),
+            );
+
+        return {
+            baseProductDetail: findProductByType("BASE"),
+            riderProductDetail: findProductByType("RIDER"),
+        };
+    }, [drsData]);
+
     const updateCounterOfferCell = (
         rowKey: CounterOfferRowKey,
         field: CounterOfferField,
@@ -213,14 +256,20 @@ const CounterOffer = () => {
         {
             rowKey: "baseSumAssured",
             applicationNo: "Base SA",
-            proposerLifeAssured: "",
-            appliedSA: "",
+            proposerLifeAssured: "Life Assured",
+            appliedSA: toDisplayText(
+                baseProductDetail.sumAssured,
+            ),
             changedSA:
                 counterOfferTable.baseSumAssured.changedSA,
-            policyTerm: "",
+            policyTerm: toDisplayText(
+                baseProductDetail.policyTerm,
+            ),
             changedPT:
                 counterOfferTable.baseSumAssured.changedPT,
-            premiumPaymentTerm: "",
+            premiumPaymentTerm: toDisplayText(
+                baseProductDetail.premiumPaymentTerm,
+            ),
             changedPPT:
                 counterOfferTable.baseSumAssured.changedPPT,
             classRequirement:
@@ -244,14 +293,20 @@ const CounterOffer = () => {
         {
             rowKey: "riderSumAssured",
             applicationNo: "Rider SA",
-            proposerLifeAssured: "",
-            appliedSA: "",
+            proposerLifeAssured: "Life Assured",
+            appliedSA: toDisplayText(
+                riderProductDetail.sumAssured,
+            ),
             changedSA:
                 counterOfferTable.riderSumAssured.changedSA,
-            policyTerm: "",
+            policyTerm: toDisplayText(
+                riderProductDetail.policyTerm,
+            ),
             changedPT:
                 counterOfferTable.riderSumAssured.changedPT,
-            premiumPaymentTerm: "",
+            premiumPaymentTerm: toDisplayText(
+                riderProductDetail.premiumPaymentTerm,
+            ),
             changedPPT:
                 counterOfferTable.riderSumAssured.changedPPT,
             classRequirement:
