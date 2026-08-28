@@ -461,15 +461,6 @@ const uniqSectionTitles = (titles: string[]) => {
     });
 };
 
-const shouldHideMerSubSection = (title: string) => {
-  const normalized = title.trim().toLowerCase();
-  return (
-    // Temporarily hidden subsections.
-    normalized === "question table" ||
-    normalized === "tuw details"
-  );
-};
-
 const ViewMedical = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -618,12 +609,9 @@ const ViewMedical = () => {
         {
           key: "mer",
           label: "MER",
-          subSections: [
-            ...uniqSectionTitles(merConfig.map((field) => field.section)).filter(
-              (sectionTitle) => !shouldHideMerSubSection(sectionTitle)
-            ),
-            "Question Table",
-          ],
+          subSections: uniqSectionTitles(
+            merConfig.map((field) => field.section)
+          ),
           fields: merConfig,
         },
         {
