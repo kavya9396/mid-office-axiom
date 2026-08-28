@@ -2407,6 +2407,7 @@ const ViewFinancial = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "warning" | "error" | "info">("success");
+  const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
     if (!messageSectionKey) return;
@@ -2421,9 +2422,20 @@ const ViewFinancial = () => {
       setSnackbarOpen(true);
     }, 0);
   }, [messageSectionKey, submitMessage, submitError]);
+
+  useEffect(() => {
+    const handlePageScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handlePageScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handlePageScroll);
+  }, []);
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
   const drsDataRecord = drsData as unknown as Record<string, unknown> | null;
+  const quickLinks = asRecord(drsDataRecord?.quickLinks);
+  const udsLink = toDisplay(quickLinks?.proposerForm).trim();
   const drsSummaryMembers = asArray(drsDataRecord?.summary);
   const drsApplicationNumber = toDisplay(
     firstDefined(
@@ -3645,6 +3657,17 @@ const ViewFinancial = () => {
     setMessageSectionKey(null);
   };
 
+  const handleUdsLinkClick = () => {
+    if (!udsLink) {
+      setSnackbarMessage("UDS link is not available.");
+      setSnackbarSeverity("warning");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    window.open(udsLink, "_blank", "noopener,noreferrer");
+  };
+
   return (
     <>
       {showLoader && (
@@ -3662,7 +3685,49 @@ const ViewFinancial = () => {
           <CircularProgress size={64} sx={{ color: "#fff" }} />
         </Box>
       )}
-      <BackButton label={title.backToCPT} onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))} />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1,
+          px: { xs: 1, sm: 1.5 },
+          py: 0.75,
+          mb: 1,
+          border: "1px solid #D7E3EC",
+          borderRadius: 1.5,
+          background: "linear-gradient(90deg, #F7FBFE 0%, #FFFFFF 100%)",
+          boxShadow: "0 2px 8px rgba(15, 91, 146, 0.07)",
+        }}
+      >
+        <BackButton
+          label={roleType === "CPT_DATA_ENTRY_NMR_TASK" ? title.backToCPT : title.backToDRS}
+          onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
+        />
+
+        <Button
+          onClick={handleUdsLinkClick}
+          variant="text"
+          size="small"
+          sx={{
+            minWidth: "auto",
+            px: 0.5,
+            color: "#344054",
+            fontSize: 12,
+            fontWeight: 600,
+            textTransform: "none",
+            textDecoration: "underline",
+            textUnderlineOffset: "3px",
+            "&:hover": {
+              color: "#1D2939",
+              backgroundColor: "transparent",
+              textDecoration: "underline",
+            },
+          }}
+        >
+          View UDS Link
+        </Button>
+      </Box>
 
       {roleType !== "CPT_DATA_ENTRY_NMR_TASK" && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
@@ -3703,6 +3768,35 @@ const ViewFinancial = () => {
           {snackbarMessage}
         </Alert>
       </Snackbar>
+
+      {showScrollTop && (
+        <IconButton
+          aria-label="Scroll to top"
+          title="Scroll to top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          sx={{
+            position: "fixed",
+            right: { xs: 16, sm: 24 },
+            bottom: { xs: 16, sm: 24 },
+            zIndex: 1200,
+            width: 40,
+            height: 40,
+            color: "#FFFFFF",
+            backgroundColor: "#344054",
+            border: "1px solid #475467",
+            boxShadow: "0 4px 12px rgba(16, 24, 40, 0.22)",
+            transition: "transform 0.2s ease, background-color 0.2s ease",
+            "&:hover": {
+              backgroundColor: "#1D2939",
+              transform: "translateY(-2px)",
+            },
+          }}
+        >
+          <Box component="span" sx={{ fontSize: 22, lineHeight: 1 }}>
+            ↑
+          </Box>
+        </IconButton>
+      )}
 
       <Box sx={{ px: 1 }}>
 

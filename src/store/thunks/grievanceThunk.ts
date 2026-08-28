@@ -1,8 +1,27 @@
-import { createApiThunk } from "./createApiThunk";
 import { url } from "../../services/apiConfig";
-import type { GrievanceRequest, GrievanceResponse } from "../../types/drs.types";
+import { createApiThunk } from "./createApiThunk";
 
-export const grievanceThunk = createApiThunk<GrievanceResponse, GrievanceRequest>(
-  "grievance/view",
-  { url: url("grievanceView"), method: "POST" },
+export type RaiseGrievanceRow = {
+  requirementId: string | number;
+  memberType: string;
+  fupCode: string;
+  memberName: string;
+  remarksByUser: string;
+  remarksByTpa: string;
+};
+
+export type RaiseGrievanceRequest = {
+  applicationNumber: string;
+  userId: string;
+  roleType: string;
+  taskId: string;
+  instanceId: string;
+  grievanceDetails: RaiseGrievanceRow[];
+};
+
+export type RaiseGrievanceResponse = { success: boolean; message?: string };
+
+export const raiseGrievanceThunk = createApiThunk<RaiseGrievanceResponse, RaiseGrievanceRequest>(
+  "grievance/raise",
+  { url: url("raiseGrievance"), method: "POST" },
 );

@@ -21,5 +21,6 @@
   "applicantValidVoterId": "Enter a valid Voter ID (e.g. ABC1234567)",
   "applicantValidAadhaar": "Enter a valid Aadhaar number (12 digits)",
   "applicantValidPassport": "Enter a valid Passport number (e.g. A1234567)",
-  "applicantValidDrivingLicense": "Enter a valid Driving License number"
+  "applicantValidDrivingLicense": "Enter a valid Driving License number",
+  "completePriorityTask": "Please complete the priority task first before claiming this task."
 }

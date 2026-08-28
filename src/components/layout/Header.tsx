@@ -6,7 +6,9 @@ import {
   Typography,
 } from "@mui/material";
 import {
+  useCallback,
   useEffect,
+  useRef,
   useState,
   type MouseEvent,
 } from "react";
@@ -24,9 +26,64 @@ import {
 import { auth } from "../../utils/auth";
 import { formatDateForUI } from "../../utils/helpers";
 import BreakTime from "./BreakTime";
-import { useSessionTimeout } from "./sessionTimeoutContext";
 
 const HEADER_HEIGHT = 57;
+const FALLBACK_SESSION_TIMEOUT_MINUTES = 15;
+const MASTER_DATA_STORAGE_KEY = "masterData";
+
+type MiscMaster = {
+  type?: unknown;
+  value?: unknown;
+  description?: unknown;
+  isActive?: unknown;
+};
+
+const getSessionTimeoutMs = () => {
+  try {
+    const storedMasters = sessionStorage.getItem(
+      MASTER_DATA_STORAGE_KEY,
+    );
+
+    if (!storedMasters) {
+      return FALLBACK_SESSION_TIMEOUT_MINUTES * 60 * 1000;
+    }
+
+    const parsedMasters = JSON.parse(storedMasters) as {
+      data?: { misc?: MiscMaster[] };
+      misc?: MiscMaster[];
+    };
+
+    const miscMasters = Array.isArray(parsedMasters.misc)
+      ? parsedMasters.misc
+      : Array.isArray(parsedMasters.data?.misc)
+        ? parsedMasters.data.misc
+        : [];
+
+    const sessionTimeoutMaster = miscMasters.find(
+      (item) =>
+        String(item.type ?? "").trim().toUpperCase() ===
+          "SES_TIMEOUT" &&
+        String(item.isActive ?? "Y").trim().toUpperCase() ===
+          "Y",
+    );
+
+    const timeoutMinutes = Number(
+      sessionTimeoutMaster?.value ??
+        sessionTimeoutMaster?.description,
+    );
+
+    if (
+      !Number.isFinite(timeoutMinutes) ||
+      timeoutMinutes <= 0
+    ) {
+      return FALLBACK_SESSION_TIMEOUT_MINUTES * 60 * 1000;
+    }
+
+    return timeoutMinutes * 60 * 1000;
+  } catch {
+    return FALLBACK_SESSION_TIMEOUT_MINUTES * 60 * 1000;
+  }
+};
 
 const formatDateTime = (date: Date) =>
   formatDateForUI(date);
@@ -50,7 +107,11 @@ const formatSessionTime = (remainingMs: number) => {
 
 const Header = () => {
   const navigate = useNavigate();
-  const { remainingMs } = useSessionTimeout();
+
+  const sessionTimeoutMsRef = useRef<number | null>(null);
+  const sessionDeadlineRef = useRef<number | null>(null);
+  const [remainingMs, setRemainingMs] =
+    useState<number | null>(null);
 
   const username =
     localStorage.getItem("username") ?? "";
@@ -58,21 +119,115 @@ const Header = () => {
   const [dialogOpen, setDialogOpen] =
     useState<boolean>(false);
 
-  const [currentTime, setCurrentTime] = useState(() =>
-    formatDateTime(new Date()),
-  );
+  const [currentTime, setCurrentTime] = useState("");
 
   const [userMenuAnchor, setUserMenuAnchor] =
     useState<HTMLElement | null>(null);
 
   const isUserMenuOpen = Boolean(userMenuAnchor);
 
+  const resetSessionTimeout = useCallback(() => {
+    const latestSessionTimeoutMs = getSessionTimeoutMs();
+
+    sessionTimeoutMsRef.current = latestSessionTimeoutMs;
+    sessionDeadlineRef.current =
+      Date.now() + latestSessionTimeoutMs;
+    setRemainingMs(latestSessionTimeoutMs);
+  }, []);
+
   useEffect(() => {
+    const initializeSessionTimeout = () => {
+      const initialSessionTimeoutMs = getSessionTimeoutMs();
+
+      sessionTimeoutMsRef.current = initialSessionTimeoutMs;
+      sessionDeadlineRef.current =
+        Date.now() + initialSessionTimeoutMs;
+      setRemainingMs(initialSessionTimeoutMs);
+    };
+
+    const initialSessionTimer = window.setTimeout(
+      initializeSessionTimeout,
+      0,
+    );
+
+    const activityEvents: Array<keyof WindowEventMap> = [
+      "mousedown",
+      "keydown",
+      "scroll",
+      "touchstart",
+    ];
+
+    activityEvents.forEach((eventName) => {
+      window.addEventListener(
+        eventName,
+        resetSessionTimeout,
+        { passive: true },
+      );
+    });
+
     const interval = window.setInterval(() => {
-      setCurrentTime(formatDateTime(new Date()));
+      const latestSessionTimeoutMs = getSessionTimeoutMs();
+
+      if (
+        latestSessionTimeoutMs !==
+        sessionTimeoutMsRef.current
+      ) {
+        sessionTimeoutMsRef.current = latestSessionTimeoutMs;
+        sessionDeadlineRef.current =
+          Date.now() + latestSessionTimeoutMs;
+      }
+
+      const sessionDeadline = sessionDeadlineRef.current;
+
+      if (sessionDeadline === null) {
+        return;
+      }
+
+      const nextRemainingMs = Math.max(
+        0,
+        sessionDeadline - Date.now(),
+      );
+
+      setRemainingMs(nextRemainingMs);
+
+      if (nextRemainingMs === 0) {
+        window.clearInterval(interval);
+        auth.logout();
+        navigate("/login", { replace: true });
+      }
     }, 1000);
 
-    return () => window.clearInterval(interval);
+    return () => {
+      window.clearTimeout(initialSessionTimer);
+      window.clearInterval(interval);
+
+      activityEvents.forEach((eventName) => {
+        window.removeEventListener(
+          eventName,
+          resetSessionTimeout,
+        );
+      });
+    };
+  }, [navigate, resetSessionTimeout]);
+
+  useEffect(() => {
+    const updateCurrentTime = () => {
+      setCurrentTime(formatDateTime(new Date()));
+    };
+
+    const initialUpdate = window.setTimeout(
+      updateCurrentTime,
+      0,
+    );
+
+    const interval = window.setInterval(() => {
+      updateCurrentTime();
+    }, 1000);
+
+    return () => {
+      window.clearTimeout(initialUpdate);
+      window.clearInterval(interval);
+    };
   }, []);
 
   const handleUserMenuOpen = (
@@ -190,7 +345,9 @@ const Header = () => {
                 }}
               >
                 Session:{" "}
-                {formatSessionTime(remainingMs)}
+                {remainingMs === null
+                  ? "--:--"
+                  : formatSessionTime(remainingMs)}
               </Typography>
             </Box>
 

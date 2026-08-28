@@ -13,6 +13,7 @@ import {
   Pagination,
   Select,
   Snackbar,
+  TextField,
   Tooltip,
   Typography,
   type SelectChangeEvent,
@@ -74,7 +75,7 @@ const DRS_LAYOUT_BY_ROLE = {
   RI_TASK: "RETAIL_REINSURER_POOL",
   REQUIREMENT_POOL: "RETAIL_REQUIREMENT_REVIEW_POOL",
   CUW_CLAIM_AUDIT_TASK: "RETAIL_CUW_CLAIM_AUDIT",
-  ACCUITY_TASK: "RETAIL_ACCUITY_USER",
+  ACCUITY_TASK_: "RETAIL_ACCUITY_USER",
   ECG_TASK: "RETAIL_ECG_POOL",
   TMT_TASK: "RETAIL_TMT_POOL",
   GRIEVANCE_TASK: "RETAIL_GRIEVANCE_POOL",
@@ -84,7 +85,7 @@ const DRS_LAYOUT_BY_ROLE = {
   RISK_TASK: "RISK_TASK",
   PRE_LOGIN_CUW_TASK: "PRE_LOGIN_CUW_TASK",
   AMR_MEDICAL_TASK: "AMR_MEDICAL_TASK",
-  ACUITY_TASK: "ACUITY_TASK",
+  ACCUITY_TASK: "ACCUITY_TASK",
   ISSUANCE_TASK: "ISSUANCE_TASK",
   CPT_DATA_ENTRY_MR_TASK: "CPT_DATA_ENTRY_MR_TASK",
   CPT_DATA_ENTRY_NMR_TASK: "CPT_DATA_ENTRY_NMR_TASK",
@@ -209,14 +210,16 @@ const COLUMN_HEADINGS = [
   "Sub Category",
   "Document",
   "Reason",
-  "Special Test",
+  // "Special Test",
   "FUP Code",
   "Extra Remarks",
   "Description",
 ] as const;
 
 const DEFAULT_COLUMN_WIDTHS = [
-  60, 125, 95, 85, 95, 105, 115, 120, 145, 100, 85, 95, 85,
+  60, 125, 95, 85, 95, 105, 115, 120, 145,
+  // 100, // Special Test
+  85, 170, 85,
 ];
 const MIN_COLUMN_WEIGHT = 30;
 
@@ -486,6 +489,30 @@ const formatStatus = (status: unknown): string => {
 const getStatusComparableValue = (value: unknown): string =>
   normalizeText(value).toUpperCase();
 
+const STATUS_PRIORITY: Record<string, number> = {
+  PENDING: 0,
+  WAIVED: 1,
+  ACCEPT: 2,
+  ACCEPTED: 2,
+};
+
+const getStatusPriority = (status: unknown): number =>
+  STATUS_PRIORITY[getStatusComparableValue(status)] ?? 3;
+
+const getStatusSummaryLabel = (status: unknown): string => {
+  const normalizedStatus = getStatusComparableValue(status);
+
+  if (!normalizedStatus) {
+    return "Not Set";
+  }
+
+  if (["ACCEPT", "ACCEPTED"].includes(normalizedStatus)) {
+    return "Accepted";
+  }
+
+  return formatStatus(normalizedStatus);
+};
+
 const validateRequirementsForSave = (
   rows: AdditionalRequirementRow[],
   roleType: string,
@@ -633,7 +660,7 @@ const RequirementManagementTable = ({
       "AMR_MEDICAL_TASK",
       "AMR_NON_MEDICAL_TASK",
       "RECONSIDERATION_TASK",
-      "ACUITY_TASK"
+      "ACCUITY_TASK"
     ].includes(normalizedRoleType);
 
   const isAddRequirementEnabled =
@@ -647,7 +674,7 @@ const RequirementManagementTable = ({
       "AMR_MEDICAL_TASK",
       "AMR_NON_MEDICAL_TASK",
       "RECONSIDERATION_TASK",
-      "ACUITY_TASK"
+      "ACCUITY_TASK"
     ].includes(normalizedRoleType);
   const drsSections = useMemo(() => {
     const layout =
@@ -1070,9 +1097,24 @@ const RequirementManagementTable = ({
     );
   }, [rows]);
 
-  const filteredRows = useMemo(
-    () =>
-      rows.filter((row) =>
+  const statusSummary = useMemo(() => {
+    const counts = rows.reduce<Record<string, number>>((summary, row) => {
+      const label = getStatusSummaryLabel(row.status);
+
+      summary[label] = (summary[label] ?? 0) + 1;
+      return summary;
+    }, {});
+
+    return Object.entries(counts).sort(([firstStatus], [secondStatus]) => {
+      const priorityDifference =
+        getStatusPriority(firstStatus) - getStatusPriority(secondStatus);
+
+      return priorityDifference || firstStatus.localeCompare(secondStatus);
+    });
+  }, [rows]);
+
+  const filteredRows = useMemo(() => {
+    const matchingRows = rows.filter((row) =>
         (Object.keys(filters) as FilterField[]).every((field) => {
           const selectedValues = filters[field];
 
@@ -1085,9 +1127,19 @@ const RequirementManagementTable = ({
             )
           );
         }),
-      ),
-    [filters, rows],
-  );
+      );
+
+    return matchingRows
+      .map((row, originalIndex) => ({ row, originalIndex }))
+      .sort((first, second) => {
+        const priorityDifference =
+          getStatusPriority(first.row.status) -
+          getStatusPriority(second.row.status);
+
+        return priorityDifference || first.originalIndex - second.originalIndex;
+      })
+      .map(({ row }) => row);
+  }, [filters, rows]);
 
   const pageCount = Math.max(
     1,
@@ -1285,6 +1337,22 @@ const RequirementManagementTable = ({
           : row,
       ),
     );
+    setPage(1);
+  };
+
+  const handleExtraRemarksChange = (rowId: string, value: string) => {
+    markRequirementsAsUnsaved();
+
+    setRows((currentRows) =>
+      currentRows.map((row) =>
+        row.__clientRowId === rowId
+          ? {
+            ...row,
+            extraRemarks: value,
+          }
+          : row,
+      ),
+    );
   };
 
   const handleRemove = (rowId: string) => {
@@ -1448,7 +1516,7 @@ const RequirementManagementTable = ({
     const text = normalizeText(value);
 
     return (
-      <Tooltip title={text} arrow disableHoverListener={!text}>
+      <Tooltip title={text} arrow disableHoverListener={!text} placement="left">
         <Typography sx={cellTextStyles}>{text || "-"}</Typography>
       </Tooltip>
     );
@@ -1459,7 +1527,7 @@ const RequirementManagementTable = ({
 
     return (
       <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Tooltip title={text || `No ${title.toLowerCase()} available`} arrow>
+        <Tooltip title={text || `No ${title.toLowerCase()} available`} arrow  placement="left">
           <span>
             <IconButton
               size="small"
@@ -1540,11 +1608,11 @@ const RequirementManagementTable = ({
           "& .MuiSelect-icon": { right: 0, fontSize: 15 },
         }}
       >
-        <MenuItem value="" disabled sx={{ fontSize: "11px" }}>
+        <MenuItem value="" disabled sx={{ fontSize: "10px" }}>
           {isLoading ? "Loading..." : "Select"}
         </MenuItem>
         {options.map((option) => (
-          <MenuItem key={option} value={option} sx={{ fontSize: "11px" }}>
+          <MenuItem key={option} value={option} sx={{ fontSize: "10px" }}>
             {option}
           </MenuItem>
         ))}
@@ -1751,6 +1819,63 @@ const RequirementManagementTable = ({
               boxSizing: "border-box",
             }}
           >
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                flexWrap: "wrap",
+                gap: 0.5,
+                mr: "auto",
+              }}
+            >
+              {statusSummary.map(([status, count]) => (
+                <Box
+                  key={status}
+                  sx={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 0.4,
+                    height: 24,
+                    px: 0.8,
+                    border: "1px solid #dde2e6",
+                    borderRadius: "12px",
+                    bgcolor:
+                      status === "Pending"
+                        ? "#fff3e8"
+                        : status === "Waived"
+                          ? "#eef6ff"
+                          : "#ffffff",
+                    color: status === "Pending" ? "#b54a00" : "#4f4f4f",
+                  }}
+                >
+                  <Typography
+                    component="span"
+                    sx={{ fontSize: "10.5px", fontWeight: 600, lineHeight: 1 }}
+                  >
+                    {status}
+                  </Typography>
+                  <Typography
+                    component="span"
+                    sx={{
+                      minWidth: 17,
+                      height: 17,
+                      px: 0.4,
+                      borderRadius: "9px",
+                      bgcolor: status === "Pending" ? "#E45F14" : "#697780",
+                      color: "#ffffff",
+                      fontSize: "9.5px",
+                      fontWeight: 700,
+                      lineHeight: "17px",
+                      textAlign: "center",
+                    }}
+                  >
+                    {count}
+                  </Typography>
+                </Box>
+              ))}
+            </Box>
+
             {Object.values(filters).some((values) => values.length > 0) && (
               <Button
                 variant="outlined"
@@ -1778,7 +1903,7 @@ const RequirementManagementTable = ({
               </Button>
             )}
 
-            <Tooltip title="Filter requirements">
+            <Tooltip title="Filter requirements"  placement="left">
               <IconButton
                 size="small"
                 onClick={handleOpenFilterDialog}
@@ -1872,7 +1997,7 @@ const RequirementManagementTable = ({
                     }}
                   >
                     {isNewRow && (
-                      <Tooltip title="Remove requirement">
+                      <Tooltip title="Remove requirement"  placement="left">
                         <IconButton
                           size="small"
                           onClick={() => handleRemove(rowKey)}
@@ -1918,7 +2043,7 @@ const RequirementManagementTable = ({
                       height: 25,
                       borderRadius: "6px",
                       bgcolor: "#ffffff",
-                      fontSize: "11px",
+                      fontSize: "10px",
                       "& .MuiSelect-select": {
                         minWidth: "0 !important",
                         px: 0.6,
@@ -1938,13 +2063,15 @@ const RequirementManagementTable = ({
                     }}
                   >
                     {!selectedStatus && (
-                      <MenuItem value="" disabled>
+                      <MenuItem value="" disabled sx={{ fontSize: "10px" }}>
                         Select
                       </MenuItem>
                     )}
 
                     {selectedStatus && !matchingStatusOption && (
-                      <MenuItem value={selectedStatus}>{selectedStatus}</MenuItem>
+                      <MenuItem value={selectedStatus} sx={{ fontSize: "10px" }}>
+                        {selectedStatus}
+                      </MenuItem>
                     )}
 
                     {statusOptions.map((option) => {
@@ -1959,6 +2086,7 @@ const RequirementManagementTable = ({
                             option.miscMastId || `${option.code}-${optionValue}`
                           }
                           value={optionValue}
+                          sx={{ fontSize: "10px" }}
                         >
                           {option.description}
                         </MenuItem>
@@ -1992,7 +2120,9 @@ const RequirementManagementTable = ({
                   ? renderAddRowSelect(row, rowKey, "reason")
                   : renderCompactCell(row.reason)}
 
-                {renderCompactCell(row.specialTest)}
+                {/* Special Test is currently not part of the table.
+                    Keep this code for future use if the column is enabled again. */}
+                {/* {renderCompactCell(row.specialTest)} */}
 
                 {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "fupCode")
@@ -2002,12 +2132,52 @@ const RequirementManagementTable = ({
 
                 {renderDetailAction("Description", row.description)} */}
 
-                {readOnly
-                  ? renderCompactCell(getExtraRemarks(row))
-                  : renderDetailAction(
-                    "Extra Remarks",
-                    getExtraRemarks(row),
-                  )}
+                {readOnly ? (
+                  renderCompactCell(getExtraRemarks(row))
+                ) : (
+                  <Tooltip
+                    title={normalizeText(getExtraRemarks(row))}
+                    arrow
+                    disableHoverListener={!normalizeText(getExtraRemarks(row))}
+                    placement="left"
+                  >
+                    <TextField
+                      size="small"
+                      fullWidth
+                      value={normalizeText(getExtraRemarks(row))}
+                      disabled={isNonEditable}
+                      placeholder="Optional remarks"
+                      onChange={(event) =>
+                        handleExtraRemarksChange(rowKey, event.target.value)
+                      }
+                      slotProps={{
+                        htmlInput: {
+                          "aria-label": "Extra remarks (optional)",
+                        },
+                      }}
+                      sx={{
+                        minWidth: 0,
+                        "& .MuiInputBase-root": {
+                          height: 25,
+                          borderRadius: "6px",
+                          bgcolor: "#ffffff",
+                          fontSize: "10.5px",
+                        },
+                        "& .MuiInputBase-input": {
+                          minWidth: 0,
+                          px: 0.7,
+                          py: 0.35,
+                          overflow: "hidden",
+                          whiteSpace: "nowrap",
+                          textOverflow: "ellipsis",
+                        },
+                        "& .MuiOutlinedInput-notchedOutline": {
+                          borderColor: "#cfd8e1",
+                        },
+                      }}
+                    />
+                  </Tooltip>
+                )}
 
                 {readOnly
                   ? renderCompactCell(row.description)

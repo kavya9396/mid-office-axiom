@@ -1,9 +1,8 @@
-import { Box, CircularProgress, Collapse, Typography } from "@mui/material";
+import { Alert, Box, Button, CircularProgress, Collapse, IconButton, Snackbar, Typography } from "@mui/material";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
-import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import { useAppContext } from "../../../hooks/useAppContext";
@@ -20,9 +19,7 @@ import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { applicantTabs, title } from "../../../utils/constant";
 // import BreDecision from "../DRS_Accordions/BreDecision_";
-import ApplicantProfile from "../DRS_Accordions/ApplicantProfile/ApplicantProfile";
-import FormalMemberProfile from "../DRS_Accordions/ApplicantProfile/FormalMemberProfile";
-import { buildFormalMemberProfile, isFormalTaskRole } from "../formalProfileHelpers";
+import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
 import MerForm, { type MerFormHandle } from "./MER/MerForm";
 import { getMerConfig } from "./MER/merConfig";
 import OtherMedicalsForm, { type OtherMedicalsFormHandle } from "./Other Medicals/OtherMedicalsForm";
@@ -481,18 +478,15 @@ const ViewMedical = () => {
   const drsData = useSelector((state: RootState) => state.drs.data);
   const userId = String(localStorage.getItem("userId") ?? "").trim();
   const roleType = getRoleType();
-  const isFormalRole = isFormalTaskRole(roleType);
-  const formalMemberProfile = useMemo(() => buildFormalMemberProfile(drsData), [drsData]);
+  const isCptMedicalRole = roleType.toUpperCase() === "CPT_DATA_ENTRY_MR_TASK";
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
     getStoredApplicantTab();
 
-  const [activeApplicantTab, setActiveApplicantTab] = useState<ApplicantTab>(requestedApplicantTab);
   // const [saveMessage, setSaveMessage] = useState<string | null>(null);
   // const [saveError, setSaveError] = useState<string | null>(null);
   const [drsContextLoading, setDrsContextLoading] = useState(false);
-  const [drsContextError, setDrsContextError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [medicalFetchData, setMedicalFetchData] = useState<MedicalFetchResponse["data"] | null>(null);
@@ -509,6 +503,8 @@ const ViewMedical = () => {
   );
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+  const [udsSnackbarOpen, setUdsSnackbarOpen] = useState(false);
   const merFormRefs = useRef<Record<string, MerFormHandle | null>>({});
   // const merFormRefs = useRef<MerFormHandle>(null);
 
@@ -516,6 +512,9 @@ const ViewMedical = () => {
   const otherMedicalsFormRefs = useRef<Record<string, OtherMedicalsFormHandle | null>>({});
   const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const menuContainerRef = useRef<HTMLDivElement | null>(null);
+  const drsRequestKeyRef = useRef("");
+  const medicalRequestKeyRef = useRef("");
+  const breRequestKeyRef = useRef("");
 
   const safeBusinessType = businessType ?? "retail";
   const safeApplicationId = applicationNumber ?? String(medicalFetchData?.applicationNumber ?? "");
@@ -523,6 +522,13 @@ const ViewMedical = () => {
   const storedNewTabContext = useMemo(() => getStoredDrsNewTabContext(), []);
   const selectedCaseContext = useMemo(() => getSelectedCaseContext(), []);
   const drsDataRecord = drsData as Record<string, unknown> | null;
+  const quickLinks =
+    drsDataRecord?.quickLinks &&
+    typeof drsDataRecord.quickLinks === "object" &&
+    !Array.isArray(drsDataRecord.quickLinks)
+      ? (drsDataRecord.quickLinks as Record<string, unknown>)
+      : undefined;
+  const udsLink = String(quickLinks?.proposerForm ?? "").trim();
   const drsApplicationNumber = String(drsDataRecord?.applicationNumber ?? safeApplicationId).trim();
   const drsSummaryMembers = useMemo(
     () => (Array.isArray(drsDataRecord?.summary) ? (drsDataRecord?.summary as Array<Record<string, unknown>>) : []),
@@ -544,10 +550,10 @@ const ViewMedical = () => {
 
   const currentApplicantTab = useMemo(
     () =>
-      visibleApplicantTabs.some((tab) => tab.key === activeApplicantTab)
-        ? activeApplicantTab
+      visibleApplicantTabs.some((tab) => tab.key === requestedApplicantTab)
+        ? requestedApplicantTab
         : (visibleApplicantTabs[0]?.key ?? "proposer"),
-    [activeApplicantTab, visibleApplicantTabs]
+    [requestedApplicantTab, visibleApplicantTabs]
   );
 
   const activeMemberRecord = useMemo(
@@ -566,21 +572,24 @@ const ViewMedical = () => {
   );
 
   const medicalFetchPayloadError =
-    !drsContextLoading &&
-      !drsContextError &&
-      (!safeApplicationId || !partyId)
+    !safeApplicationId || !partyId
       ? "Application number or party ID is unavailable for medical fetch."
       : null;
 
   useEffect(() => {
-    if (!safeApplicationId || !roleType || !userId) {
+    if (drsSummaryMembers.length > 0 || !safeApplicationId || !roleType || !userId) {
       return;
     }
+
+    const requestKey = `${safeApplicationId}:${roleType}:${userId}`;
+    if (drsRequestKeyRef.current === requestKey) {
+      return;
+    }
+    drsRequestKeyRef.current = requestKey;
 
     const fetchDrsContext = async () => {
       try {
         setDrsContextLoading(true);
-        setDrsContextError(null);
         await dispatch(
           drsThunk({
             applicationNo: safeApplicationId,
@@ -590,14 +599,14 @@ const ViewMedical = () => {
           })
         ).unwrap();
       } catch (error) {
-        setDrsContextError(error instanceof Error ? error.message : "Failed to fetch DRS details.");
+        console.error("Failed to fetch DRS details:", error);
       } finally {
         setDrsContextLoading(false);
       }
     };
 
     void fetchDrsContext();
-  }, [dispatch, roleType, safeApplicationId, userId]);
+  }, [dispatch, drsSummaryMembers.length, roleType, safeApplicationId, userId]);
 
   const medicalSectionGroups = useMemo<MedicalSectionGroup[]>(
     () => {
@@ -651,6 +660,12 @@ const ViewMedical = () => {
       return;
     }
 
+    const requestKey = `${safeApplicationId}:${partyId}`;
+    if (medicalRequestKeyRef.current === requestKey) {
+      return;
+    }
+    medicalRequestKeyRef.current = requestKey;
+
     const payload: MedicalFetchRequest = {
       applicationNumber: safeApplicationId,
       partyId,
@@ -682,6 +697,11 @@ const ViewMedical = () => {
   // On page load, call BRE retrigger for ME and store its breOutput as final BRE
   useEffect(() => {
     if (!drsApplicationNumber) return;
+
+    if (breRequestKeyRef.current === drsApplicationNumber) {
+      return;
+    }
+    breRequestKeyRef.current = drsApplicationNumber;
 
     const callMe = async () => {
       try {
@@ -1548,6 +1568,24 @@ const ViewMedical = () => {
     });
   };
 
+  const handleUdsLinkClick = () => {
+    if (!udsLink) {
+      setUdsSnackbarOpen(true);
+      return;
+    }
+
+    window.open(udsLink, "_blank", "noopener,noreferrer");
+  };
+
+  useEffect(() => {
+    const handlePageScroll = () => {
+      setShowScrollTop(window.scrollY > 300);
+    };
+
+    window.addEventListener("scroll", handlePageScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handlePageScroll);
+  }, []);
+
   const applyMerCalculatedValues = (
     sections: NonNullable<
       NonNullable<MerSaveResponse["data"]>["sections"]
@@ -1662,10 +1700,94 @@ const ViewMedical = () => {
 
   return (
     <>
-      <BackButton
-        label={title.backToCPT}
-        onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
-      />
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 1,
+          px: { xs: 1, sm: 1.5 },
+          py: 0.75,
+          mb: 1,
+          border: "1px solid #D7E3EC",
+          borderRadius: 1.5,
+          background: "linear-gradient(90deg, #F7FBFE 0%, #FFFFFF 100%)",
+          boxShadow: "0 2px 8px rgba(15, 91, 146, 0.07)",
+        }}
+      >
+        <BackButton
+          label={isCptMedicalRole ? title.backToCPT : title.backToDRS}
+          onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
+        />
+
+        <Button
+          onClick={handleUdsLinkClick}
+          variant="text"
+          size="small"
+          sx={{
+            minWidth: "auto",
+            px: 0.5,
+            color: "#344054",
+            fontSize: 12,
+            fontWeight: 600,
+            textTransform: "none",
+            textDecoration: "underline",
+            textUnderlineOffset: "3px",
+            "&:hover": {
+              color: "#1D2939",
+              backgroundColor: "transparent",
+              textDecoration: "underline",
+            },
+          }}
+        >
+          View UDS Link
+        </Button>
+      </Box>
+
+      <Snackbar
+        open={udsSnackbarOpen}
+        autoHideDuration={3000}
+        onClose={() => setUdsSnackbarOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
+          severity="warning"
+          variant="filled"
+          onClose={() => setUdsSnackbarOpen(false)}
+          sx={{ width: "100%" }}
+        >
+          UDS link is not available.
+        </Alert>
+      </Snackbar>
+
+      {showScrollTop && (
+        <IconButton
+          aria-label="Scroll to top"
+          title="Scroll to top"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          sx={{
+            position: "fixed",
+            right: { xs: 16, sm: 24 },
+            bottom: { xs: 16, sm: 24 },
+            zIndex: 1200,
+            width: 40,
+            height: 40,
+            color: "#FFFFFF",
+            backgroundColor: "#344054",
+            border: "1px solid #475467",
+            boxShadow: "0 4px 12px rgba(16, 24, 40, 0.22)",
+            transition: "transform 0.2s ease, background-color 0.2s ease",
+            "&:hover": {
+              backgroundColor: "#1D2939",
+              transform: "translateY(-2px)",
+            },
+          }}
+        >
+          <Box component="span" sx={{ fontSize: 22, lineHeight: 1 }}>
+            ↑
+          </Box>
+        </IconButton>
+      )}
 
       {isApplicationIdMissing && (
         <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
@@ -1673,71 +1795,52 @@ const ViewMedical = () => {
         </Typography>
       )}
 
-      <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
-        <CustomTabs
-          tabs={drsViewTabs}
-          value="medical"
-          onChange={(value: DRSViewTab) => handleDRSViewTabChange(value)}
-        />
-      </Box>
-
-      <BreDecision />
-
-
-      {!isFormalRole && (
+      {!isCptMedicalRole && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
           <CustomTabs
-            tabs={visibleApplicantTabs}
-            value={currentApplicantTab}
-            onChange={(value: ApplicantTab) => {
-              setActiveApplicantTab(value);
-              localStorage.setItem("drsSelectedApplicantTab", value);
-            }}
+            tabs={drsViewTabs}
+            value="medical"
+            onChange={(value: DRSViewTab) => handleDRSViewTabChange(value)}
           />
         </Box>
       )}
 
-      <Box sx={{ px: 1 }}>
-        <Box sx={{ position: "sticky", top: 12, zIndex: 10, mb: 1, mt: 2 }}>
-          <CustomAccordion
-            title={isFormalRole ? "Member Profile" : "Applicant Profile"}
-            defaultExpanded={false}
-            detailPadding={0}
-          >
-            {isFormalRole ? (
-              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-                <FormalMemberProfile profile={formalMemberProfile} />
-              </Box>
-            ) : (
-              <Box sx={{ px: { xs: 2, md: 3 }, py: 2, backgroundColor: "#FFFFFF" }}>
-                <ApplicantProfile selectedApplicantTab={currentApplicantTab} isApplicantDetailsExpanded />
-              </Box>
-            )}
-          </CustomAccordion>
-        </Box>
+      <BreDecision />
 
+
+      <Box sx={{ mt: 1, mb: 1 }}>
+        <ApplicantProfile />
+      </Box>
+
+      <Box sx={{ px: 1 }}>
         <Box
           sx={{
             display: "flex",
             flexDirection: { xs: "column", md: "row" },
             gap: 1.5,
-            alignItems: "flex-start",
+            alignItems: { xs: "stretch", md: "flex-start" },
             mt: 1,
+            minWidth: 0,
           }}
         >
           <Box
             ref={menuContainerRef}
             sx={{
               width: { xs: "100%", md: 208 },
+              minWidth: { md: 208 },
+              flex: { md: "0 0 208px" },
               position: { xs: "static", md: "sticky" },
-              top: { md: 124 },
+              top: { md: 0 },
               alignSelf: "flex-start",
               borderRadius: 1,
-              overflow: "hidden",
               border: "1px solid #D6D8DC",
               backgroundColor: "#F8F9FB",
-              maxHeight: { md: "calc(100vh - 180px)" },
+              boxSizing: "border-box",
+              height: { md: "100vh" },
+              maxHeight: { md: "100vh" },
+              overflowX: "hidden",
               overflowY: { md: "auto" },
+              scrollbarGutter: "stable",
             }}
           >
             {medicalSectionGroups.map((group) => (
@@ -1825,7 +1928,7 @@ const ViewMedical = () => {
             ))}
           </Box>
 
-          <Box sx={{ flex: 1, width: "100%", minHeight: 240 }}>
+          <Box sx={{ flex: 1, width: "100%", minWidth: 0, minHeight: 240 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
               {flattenedSubSections.map((subSection) => {
                 const group = medicalSectionGroups.find((medicalGroup) => medicalGroup.label === subSection.groupLabel);
@@ -1880,7 +1983,7 @@ const ViewMedical = () => {
                           {subSection.title}
                         </Typography>
                       </Box>
-                      {roleType === "CPT_DATA_ENTRY_MR_TASK" && (
+                      {isCptMedicalRole && (
                         <Box
                           onClick={(event) => event.stopPropagation()}
                           onKeyDown={(event) => event.stopPropagation()}

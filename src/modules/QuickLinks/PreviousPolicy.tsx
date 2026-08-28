@@ -24,6 +24,7 @@ import { useAppDispatch } from "../../store/hooks";
 import { drsThunk } from "../../store/thunks/drsThunk";
 import type { PreviousPolicyItem } from "../../types/drs.types";
 import type { RootState } from "../../store/store";
+import { formatDate } from "../../utils/dataFormat";
 
 const defaultRowsPerPage = 5;
 
@@ -116,16 +117,29 @@ const formatCurrency = (value?: unknown) => {
   return `₹ ${numericValue.toLocaleString("en-IN")}`;
 };
 
+const formatDateOnly = (value: unknown): string => {
+  if (value === undefined || value === null || value === "" || value === "-") {
+    return "-";
+  }
+
+  const formattedDate = formatDate(
+    value instanceof Date ? value : String(value),
+    false,
+  );
+
+  return formattedDate || "-";
+};
+
 const IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
   { header: "Product", keys: ["productName", "product", "product_name", "companyName"] },
   { header: "Product Type", keys: ["productType", "product_type"] },
-  { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
+  { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"], formatter: formatDateOnly },
   { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision", "decision"] },
   { header: "Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
-  { header: "Medicals Received date", keys: ["medicalsReceivedDate", "medicalReceivedDate", "medicals_received_date", "medicalsDate"] },
+  { header: "Medicals Received date", keys: ["medicalsReceivedDate", "medicalReceivedDate", "medicals_received_date", "medicalsDate"], formatter: formatDateOnly },
   { header: "Validity", keys: ["validityMedical", "medicalValidity", "validityPeriod"] },
-  { header: "Financials Received date", keys: ["financialsReceivedDate", "financialReceivedDate", "financials_received_date", "financialDate"] },
+  { header: "Financials Received date", keys: ["financialsReceivedDate", "financialReceivedDate", "financials_received_date", "financialDate"], formatter: formatDateOnly },
   { header: "Validity", keys: ["validityFinancial", "financialValidity", "validityPeriod"] },
 ];
 
@@ -133,7 +147,7 @@ const IIB_NON_IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
   { header: "Product", keys: ["productName", "product", "product_name", "companyName"] },
   { header: "Product Type", keys: ["productType", "product_type"] },
-  { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"] },
+  { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"], formatter: formatDateOnly },
   { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision", "decision"] },
   { header: "Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
 ];
@@ -160,7 +174,7 @@ const APP_FORM_DETAILS_COLUMNS: ColumnSpec[] = [
   { header: "Rider Sum Assured", keys: ["riderSumAssured", "rider_sum_assured"], formatter: formatCurrency },
   { header: "Policy Decision", keys: ["policyDecision", "policy_decision"] },
   { header: "Company name", keys: ["companyName", "company_name"] },
-  { header: "Policy decision Date", keys: ["policyDecisionDate", "policy_decision_date"] },
+  { header: "Policy decision Date", keys: ["policyDecisionDate", "policy_decision_date"], formatter: formatDateOnly },
   { header: "Policy Status", keys: ["policyStatus", "policy_status"] },
   { header: "Reason for Decline/Postpone/ Withdraw", keys: ["reasonForDecision", "reasonForDecline", "reasonForPostpone", "reasonForWithdraw", "reason_for_decision"] },
   { header: "Policy Belongs to me - Yes/No", keys: ["policyBelongsToMe", "policy_belongs_to_me"] },

@@ -98,7 +98,7 @@ const mapper = {
   RI_TASK: "RETAIL_REINSURER_POOL",
   REQUIREMENT_POOL: "RETAIL_REQUIREMENT_REVIEW_POOL",
   CUW_CLAIM_AUDIT_TASK: "RETAIL_CUW_CLAIM_AUDIT",
-  ACCUITY_TASK: "RETAIL_ACCUITY_USER",
+  ACCUITY_TASK_: "RETAIL_ACCUITY_USER",
   ECG_TASK: "RETAIL_ECG_POOL",
   TMT_TASK: "RETAIL_TMT_POOL",
   GRIEVANCE_TASK: "RETAIL_GRIEVANCE_POOL",
@@ -108,11 +108,17 @@ const mapper = {
   RISK_TASK: "RISK_TASK",
   PRE_LOGIN_CUW_TASK: "PRE_LOGIN_CUW_TASK",
   AMR_MEDICAL_TASK: "AMR_MEDICAL_TASK",
-  ACUITY_TASK: "ACUITY_TASK",
+  ACCUITY_TASK: "ACCUITY_TASK",
   ISSUANCE_TASK: "ISSUANCE_TASK",
   CPT_DATA_ENTRY_MR_TASK: "CPT_DATA_ENTRY_MR_TASK",
   CPT_DATA_ENTRY_NMR_TASK: "CPT_DATA_ENTRY_NMR_TASK",
 } as const;
+
+const SUMMARY_SECTION_ROLES = new Set([
+  "CPT_DATA_ENTRY_NMR_TASK",
+  "CPT_DATA_ENTRY_MR_TASK",
+  "PIVV_TASK",
+]);
 
 const getSelectedCaseContext = (): SelectedCaseContext => {
   try {
@@ -283,9 +289,12 @@ const DRS = () => {
           ...layoutAccordions.map(String),
           "requirementCategoryInfo",
           "latestBreDecision",
+          ...(SUMMARY_SECTION_ROLES.has(roleType.toUpperCase())
+            ? ["summary"]
+            : []),
         ]),
       ),
-    [layoutAccordions],
+    [layoutAccordions, roleType],
   );
 
   const applicationNo = String(
@@ -316,6 +325,7 @@ const DRS = () => {
     businessType === "retail"
       ? "BRE-RETAIL"
       : "BRE-GROUP";
+      console.log('eventName',businessType,eventName)
 
   useEffect(() => {
     if (
@@ -667,15 +677,24 @@ const DRS = () => {
             <Box
               sx={{
                 display: "flex",
-                alignItems: "baseline",
+                alignItems: "center",
                 gap: 0.75,
+                px: 1.5,
+                py: 0.65,
+                borderRadius: "20px",
+                backgroundColor:
+                  businessType === "retail" ? "#FFEAD7" : "#9A2529",
+                border:
+                  businessType === "retail"
+                    ? "1px solid rgba(228, 95, 20, 0.25)"
+                    : "1px solid #9A2529",
               }}
             >
               <Typography
                 sx={{
                   fontSize: "12px",
                   fontWeight: 500,
-                  color: "#777",
+                  color: businessType === "retail" ? "#7A4A35" : "#FFEAD7",
                   letterSpacing: "0.2px",
                 }}
               >
@@ -686,7 +705,7 @@ const DRS = () => {
                 sx={{
                   fontSize: "14px",
                   fontWeight: 700,
-                  color: "#9A2529",
+                  color: businessType === "retail" ? "#9A2529" : "#FFEAD7",
                   letterSpacing: "0.3px",
                 }}
               >
@@ -694,49 +713,6 @@ const DRS = () => {
               </Typography>
             </Box>
 
-            {/* Divider */}
-            <Box
-              sx={{
-                width: "1px",
-                height: 24,
-                backgroundColor: "#ddd",
-              }}
-            />
-
-            {/* Business Type */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.75,
-                px: 1.5,
-                py: 0.65,
-                borderRadius: "20px",
-                backgroundColor: "#FFEAD7",
-                border: "1px solid rgba(228, 95, 20, 0.25)",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  color: "#7A4A35",
-                }}
-              >
-                Business Type :
-              </Typography>
-
-              <Typography
-                sx={{
-                  fontSize: "13px",
-                  fontWeight: 800,
-                  color: "#9A2529",
-                  letterSpacing: "0.6px",
-                }}
-              >
-                {businessType.toUpperCase()}
-              </Typography>
-            </Box>
           </Box>
         }
       />

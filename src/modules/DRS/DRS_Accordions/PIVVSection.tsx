@@ -3,8 +3,8 @@ import { useSelector } from "react-redux";
 
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import type { RootState } from "../../../store/store";
-import { formatDateWithOrdinalTime } from "../../../utils/helpers";
 import LastUWRemarks from "../LastUWRemarks";
+import { formatDate } from "../../../utils/dataFormat";
 
 type PIVVSectionData = {
   pivvPoolRemarks?: unknown;
@@ -52,9 +52,15 @@ const PIVVSection = () => {
     return null;
   }
 
-  const formattedRemarkDate = hasValue(pivvSection?.remarkDate)
-    ? formatDateWithOrdinalTime(pivvSection?.remarkDate)
-    : "";
+  const remarkDate = pivvSection?.remarkDate;
+
+const formattedRemarkDate = hasValue(remarkDate)
+  ? formatDate(
+      remarkDate instanceof Date || typeof remarkDate === "string"
+        ? remarkDate
+        : String(remarkDate),
+    )
+  : "";
 
   return (
     <Box sx={{ p: 1 }}>

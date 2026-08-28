@@ -240,7 +240,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "requirementManagement",
     "accuityDecision",
   ],
-  ACUITY_TASK: [
+  ACCUITY_TASK: [
     "applicationOverview",
     "summary",
     "requirementManagement",

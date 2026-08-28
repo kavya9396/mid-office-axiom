@@ -1156,7 +1156,7 @@ export interface ApplicantProfileSubmitRequest {
   userId: string;
   roleType: string;
   sections: string[];
-  isAcuity?: boolean;
+  isAccuity?: boolean;
 }
 
 export interface ApplicantProfileSubmitResponse {
