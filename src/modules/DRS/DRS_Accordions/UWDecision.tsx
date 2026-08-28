@@ -1,4 +1,4 @@
-import { Alert, Box, Snackbar, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Typography } from "@mui/material"
+import { Alert, Box, Snackbar, Typography } from "@mui/material"
 import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -27,6 +27,7 @@ import { userRoleNameThunk } from "../../../store/thunks/userRoleNameThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { UserRoleUser } from "../../../types/drs.types";
+import CounterOffer from "./CounterOffer";
 
 const referralRoleMap: Record<string, "hod" | "sruw" | "cmo"> = {
     "Refer to HOD": "hod",
@@ -50,36 +51,36 @@ type LocationState = {
     application?: TaskApplication;
 };
 
-type CounterOfferRowKey = "baseSumAssured" | "riderSumAssured";
-type CounterOfferFieldKey =
-    | "changedSA"
-    | "changedPT"
-    | "changedPPT"
-    | "extraPremiumDecision"
-    | "revisedPremium"
-    | "gst"
-    | "reasons";
+// type CounterOfferRowKey = "baseSumAssured" | "riderSumAssured";
+// type CounterOfferFieldKey =
+//     | "changedSA"
+//     | "changedPT"
+//     | "changedPPT"
+//     | "extraPremiumDecision"
+//     | "revisedPremium"
+//     | "gst"
+//     | "reasons";
 
-const createCounterOfferTableState = () => ({
-    baseSumAssured: {
-        changedSA: "",
-        changedPT: "",
-        changedPPT: "",
-        extraPremiumDecision: "",
-        revisedPremium: "",
-        gst: "",
-        reasons: "",
-    },
-    riderSumAssured: {
-        changedSA: "",
-        changedPT: "",
-        changedPPT: "",
-        extraPremiumDecision: "",
-        revisedPremium: "",
-        gst: "",
-        reasons: "",
-    },
-});
+// const createCounterOfferTableState = () => ({
+//     baseSumAssured: {
+//         changedSA: "",
+//         changedPT: "",
+//         changedPPT: "",
+//         extraPremiumDecision: "",
+//         revisedPremium: "",
+//         gst: "",
+//         reasons: "",
+//     },
+//     riderSumAssured: {
+//         changedSA: "",
+//         changedPT: "",
+//         changedPPT: "",
+//         extraPremiumDecision: "",
+//         revisedPremium: "",
+//         gst: "",
+//         reasons: "",
+//     },
+// });
 
 const toRecord = (value: unknown): Record<string, unknown> =>
     value && typeof value === "object" && !Array.isArray(value)
@@ -320,7 +321,7 @@ const UWDecision = () => {
     const [postponeReason, setPostponeReason] = useState("");
     const [postponementPeriod, setPostponementPeriod] = useState("");
     const [smokerStatus, setSmokerStatus] = useState("");
-    const [counterOfferTable, setCounterOfferTable] = useState(createCounterOfferTableState);
+    // const [counterOfferTable, setCounterOfferTable] = useState(createCounterOfferTableState);
     const [parallelDecision, setParallelDecision] = useState("");
     const [holdReasons, setHoldReasons] = useState("");
     const [decisionType, setDecisionType] = useState("counterSign");
@@ -722,19 +723,19 @@ const UWDecision = () => {
         ))
         : smokerStatus;
 
-    const updateCounterOfferCell = (
-        rowKey: CounterOfferRowKey,
-        field: CounterOfferFieldKey,
-        value: string
-    ) => {
-        setCounterOfferTable((prev) => ({
-            ...prev,
-            [rowKey]: {
-                ...prev[rowKey],
-                [field]: value,
-            },
-        }));
-    };
+    // const updateCounterOfferCell = (
+    //     rowKey: CounterOfferRowKey,
+    //     field: CounterOfferFieldKey,
+    //     value: string
+    // ) => {
+    //     setCounterOfferTable((prev) => ({
+    //         ...prev,
+    //         [rowKey]: {
+    //             ...prev[rowKey],
+    //             [field]: value,
+    //         },
+    //     }));
+    // };
 
     const dialogMessage = `Kindly reconfirm if you want to proceed with the case as "${caseUWDecisionLabel}"`;
     const riskMessage = "Kindly reconfirm if you want to initiate a risk investigation process for the applicant?";
@@ -1166,7 +1167,7 @@ const UWDecision = () => {
                                 setDeclineReasons([]);
                                 setPostponeReason("");
                                 setPostponementPeriod("");
-                                setCounterOfferTable(createCounterOfferTableState());
+                                // setCounterOfferTable(createCounterOfferTableState());
                                 setSubmitMessage(null);
                                 setSubmitStatus(null);
 
@@ -1396,136 +1397,138 @@ const UWDecision = () => {
                     )}
 
                     {isCounterOfferDecision && (
-                        <Box sx={{ mt: 1.25 }}>
-                            <Typography
-                                sx={{
-                                    fontSize: "13px",
-                                    fontWeight: 600,
-                                    color: "#1f2937",
-                                    mb: 0.75,
-                                }}
-                            >
-                                Counter Offer Details
-                            </Typography>
+                        // <Box sx={{ mt: 1.25 }}>
+                        //     <Typography
+                        //         sx={{
+                        //             fontSize: "13px",
+                        //             fontWeight: 600,
+                        //             color: "#1f2937",
+                        //             mb: 0.75,
+                        //         }}
+                        //     >
+                        //         Counter Offer Details
+                        //     </Typography>
 
-                            <TableContainer
-                                sx={{
-                                    border: "1px solid #d7d7d7",
-                                    borderRadius: "6px",
-                                    overflowX: "auto",
-                                    backgroundColor: "#fff",
-                                }}
-                            >
-                                <Table size="small" sx={{ minWidth: 1900 }}>
-                                    <TableHead>
-                                        <TableRow>
-                                            {[
-                                                "Application No.",
-                                                "Proposer / Life Assured (auto filled)",
-                                                "Applied SA (auto filled)",
-                                                "Changed SA",
-                                                "PT (auto filled)",
-                                                "Changed PT",
-                                                "PPT (auto filled)",
-                                                "Changed PPT",
-                                                "Extra Premium / Decision",
-                                                "Premium Collected (auto filled)",
-                                                "Revised Premium",
-                                                "GST",
-                                                "Reasons",
-                                            ].map((header) => (
-                                                <TableCell
-                                                    key={header}
-                                                    sx={{
-                                                        backgroundColor: "#f3f7fc",
-                                                        fontSize: "12px",
-                                                        fontWeight: 600,
-                                                        color: "#2b2b2b",
-                                                        whiteSpace: "normal",
-                                                        minWidth: 130,
-                                                        borderRight: "1px solid #e3e3e3",
-                                                    }}
-                                                >
-                                                    {header}
-                                                </TableCell>
-                                            ))}
-                                        </TableRow>
-                                    </TableHead>
+                        //     <TableContainer
+                        //         sx={{
+                        //             border: "1px solid #d7d7d7",
+                        //             borderRadius: "6px",
+                        //             overflowX: "auto",
+                        //             backgroundColor: "#fff",
+                        //         }}
+                        //     >
+                        //         <Table size="small" sx={{ minWidth: 1900 }}>
+                        //             <TableHead>
+                        //                 <TableRow>
+                        //                     {[
+                        //                         "Application No.",
+                        //                         "Proposer / Life Assured (auto filled)",
+                        //                         "Applied SA (auto filled)",
+                        //                         "Changed SA",
+                        //                         "PT (auto filled)",
+                        //                         "Changed PT",
+                        //                         "PPT (auto filled)",
+                        //                         "Changed PPT",
+                        //                         "Extra Premium / Decision",
+                        //                         "Premium Collected (auto filled)",
+                        //                         "Revised Premium",
+                        //                         "GST",
+                        //                         "Reasons",
+                        //                     ].map((header) => (
+                        //                         <TableCell
+                        //                             key={header}
+                        //                             sx={{
+                        //                                 backgroundColor: "#f3f7fc",
+                        //                                 fontSize: "12px",
+                        //                                 fontWeight: 600,
+                        //                                 color: "#2b2b2b",
+                        //                                 whiteSpace: "normal",
+                        //                                 minWidth: 130,
+                        //                                 borderRight: "1px solid #e3e3e3",
+                        //                             }}
+                        //                         >
+                        //                             {header}
+                        //                         </TableCell>
+                        //                     ))}
+                        //                 </TableRow>
+                        //             </TableHead>
 
-                                    <TableBody>
-                                        {[
-                                            { key: "baseSumAssured", label: "Base Sum Assured" },
-                                            { key: "riderSumAssured", label: "Rider Sum Assured" },
-                                        ].map((row) => (
-                                            <TableRow key={row.key}>
-                                                <TableCell sx={{ minWidth: 160, fontWeight: 600 }}>{row.label}</TableCell>
-                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                <TableCell>
-                                                    <CustomTextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={counterOfferTable[row.key as CounterOfferRowKey].changedSA}
-                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedSA", e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                <TableCell>
-                                                    <CustomTextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={counterOfferTable[row.key as CounterOfferRowKey].changedPT}
-                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPT", e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                <TableCell>
-                                                    <CustomTextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={counterOfferTable[row.key as CounterOfferRowKey].changedPPT}
-                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPPT", e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <CustomTextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={counterOfferTable[row.key as CounterOfferRowKey].extraPremiumDecision}
-                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "extraPremiumDecision", e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
-                                                <TableCell>
-                                                    <CustomTextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={counterOfferTable[row.key as CounterOfferRowKey].revisedPremium}
-                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "revisedPremium", e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <CustomTextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={counterOfferTable[row.key as CounterOfferRowKey].gst}
-                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "gst", e.target.value)}
-                                                    />
-                                                </TableCell>
-                                                <TableCell>
-                                                    <CustomTextField
-                                                        fullWidth
-                                                        size="small"
-                                                        value={counterOfferTable[row.key as CounterOfferRowKey].reasons}
-                                                        onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "reasons", e.target.value)}
-                                                    />
-                                                </TableCell>
-                                            </TableRow>
-                                        ))}
-                                    </TableBody>
-                                </Table>
-                            </TableContainer>
-                        </Box>
+                        //             <TableBody>
+                        //                 {[
+                        //                     { key: "baseSumAssured", label: "Base Sum Assured" },
+                        //                     { key: "riderSumAssured", label: "Rider Sum Assured" },
+                        //                 ].map((row) => (
+                        //                     <TableRow key={row.key}>
+                        //                         <TableCell sx={{ minWidth: 160, fontWeight: 600 }}>{row.label}</TableCell>
+                        //                         <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                        //                         <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                        //                         <TableCell>
+                        //                             <CustomTextField
+                        //                                 fullWidth
+                        //                                 size="small"
+                        //                                 value={counterOfferTable[row.key as CounterOfferRowKey].changedSA}
+                        //                                 onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedSA", e.target.value)}
+                        //                             />
+                        //                         </TableCell>
+                        //                         <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                        //                         <TableCell>
+                        //                             <CustomTextField
+                        //                                 fullWidth
+                        //                                 size="small"
+                        //                                 value={counterOfferTable[row.key as CounterOfferRowKey].changedPT}
+                        //                                 onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPT", e.target.value)}
+                        //                             />
+                        //                         </TableCell>
+                        //                         <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                        //                         <TableCell>
+                        //                             <CustomTextField
+                        //                                 fullWidth
+                        //                                 size="small"
+                        //                                 value={counterOfferTable[row.key as CounterOfferRowKey].changedPPT}
+                        //                                 onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "changedPPT", e.target.value)}
+                        //                             />
+                        //                         </TableCell>
+                        //                         <TableCell>
+                        //                             <CustomTextField
+                        //                                 fullWidth
+                        //                                 size="small"
+                        //                                 value={counterOfferTable[row.key as CounterOfferRowKey].extraPremiumDecision}
+                        //                                 onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "extraPremiumDecision", e.target.value)}
+                        //                             />
+                        //                         </TableCell>
+                        //                         <TableCell><CustomTextField fullWidth size="small" value="Auto-filled" disabled /></TableCell>
+                        //                         <TableCell>
+                        //                             <CustomTextField
+                        //                                 fullWidth
+                        //                                 size="small"
+                        //                                 value={counterOfferTable[row.key as CounterOfferRowKey].revisedPremium}
+                        //                                 onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "revisedPremium", e.target.value)}
+                        //                             />
+                        //                         </TableCell>
+                        //                         <TableCell>
+                        //                             <CustomTextField
+                        //                                 fullWidth
+                        //                                 size="small"
+                        //                                 value={counterOfferTable[row.key as CounterOfferRowKey].gst}
+                        //                                 onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "gst", e.target.value)}
+                        //                             />
+                        //                         </TableCell>
+                        //                         <TableCell>
+                        //                             <CustomTextField
+                        //                                 fullWidth
+                        //                                 size="small"
+                        //                                 value={counterOfferTable[row.key as CounterOfferRowKey].reasons}
+                        //                                 onChange={(e) => updateCounterOfferCell(row.key as CounterOfferRowKey, "reasons", e.target.value)}
+                        //                             />
+                        //                         </TableCell>
+                        //                     </TableRow>
+                        //                 ))}
+                        //             </TableBody>
+                        //         </Table>
+                        //     </TableContainer>
+                        // </Box>
+
+                        <CounterOffer />
                     )}
 
                 </Box>
