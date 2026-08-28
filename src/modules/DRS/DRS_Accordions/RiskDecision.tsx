@@ -1,13 +1,13 @@
 import { Box, Typography } from "@mui/material";
 import type { ChangeEvent, MouseEvent } from "react";
-import {  useState } from "react";
+import { useState } from "react";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { useAppSelector } from "../../../store/hooks";
-import Logo from "../../../assets/ICICI-Logo.svg";
+import Logo from "../../../assets/ICICI Logo_.svg";
 import { validateRequirementDecision } from "../../../validations/drsRequirementDecisionValidation";
 import { validateDrsFinalBre } from "../../../validations/drsBreValidation";
 
@@ -239,7 +239,7 @@ const RiskDecision = () => {
 
   return (
     <>
-      <Box sx={{ mt: 1,p:1 }}>
+      <Box sx={{ mt: 1, p: 1 }}>
         <CustomAccordion title="Risk Decision" chip={riskReportButton} defaultExpanded>
           <Box
             sx={{
@@ -262,28 +262,6 @@ const RiskDecision = () => {
                 mb: 1,
               }}
             />
-
-            {/* <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
-                gap: 1.25,
-                mb: 1,
-              }}
-            >
-              <CustomSelect
-                label="Risk Decision"
-                value={riskDecision}
-                onChange={setRiskDecision}
-                options={riskDecisionOptions}
-              />
-              <CustomSelect
-                label="Risk Referral Reasons"
-                value={riskReferralReason}
-                onChange={setRiskReferralReason}
-                options={riskReferralReasonOptions}
-              />
-            </Box> */}
 
             <Box sx={{ display: "flex", mt: 1 }}>
               <CustomButton
