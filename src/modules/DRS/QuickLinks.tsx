@@ -16,7 +16,7 @@ import {
 } from "../../routes/routes";
 import { useAppContext } from "../../hooks/useAppContext";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { referToItThunk } from "../../store/thunks/referToItThunk";
+import { completeTaskThunk } from "../../store/thunks/completeTaskThunk";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomButton from "../../components/ui/Button/Button";
 import CustomSnackbar from "../../components/ui/SnackBar/Snackbar";
@@ -104,6 +104,75 @@ const getSelectedCaseApplicationNo = (): string => {
     }
 };
 
+interface SelectedCaseContext {
+    applicationNo?: string;
+    userId?: string;
+    businessType?: string;
+    taskId?: string;
+    instanceId?: string;
+    taskCompositeId?: string;
+    roleType?: string;
+}
+
+interface MiscMaster {
+    type?: unknown;
+    code?: unknown;
+    miscMastType?: unknown;
+    miscMastCode?: unknown;
+}
+
+const getMiscType = (master: MiscMaster): string =>
+    String(master.type ?? master.miscMastType ?? "").trim().toUpperCase();
+
+const getMiscCode = (master: MiscMaster | undefined): string =>
+    String(master?.code ?? master?.miscMastCode ?? "").trim();
+
+const toRecord = (value: unknown): Record<string, unknown> =>
+    value && typeof value === "object" && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : {};
+
+const getNestedData = (value: unknown): Record<string, unknown> => {
+    let current = toRecord(value);
+
+    for (let depth = 0; depth < 4; depth += 1) {
+        const nested = toRecord(current.data);
+
+        if (Object.keys(nested).length === 0) break;
+        current = nested;
+    }
+
+    return current;
+};
+
+const getMiscMasters = (value: unknown): MiscMaster[] => {
+    const misc = getNestedData(value).misc;
+
+    return Array.isArray(misc)
+        ? misc.filter(
+            (item): item is MiscMaster =>
+                !!item && typeof item === "object" && !Array.isArray(item),
+        )
+        : [];
+};
+
+const normalizeTaskId = (value: string): string => {
+    const normalizedValue = value.trim();
+
+    if (!normalizedValue) return "";
+    return normalizedValue.split(".").at(-1)?.trim() ?? normalizedValue;
+};
+
+const getSelectedCaseContext = (): SelectedCaseContext => {
+    try {
+        return JSON.parse(
+            localStorage.getItem("selectedCaseContext") ?? "{}",
+        ) as SelectedCaseContext;
+    } catch {
+        return {};
+    }
+};
+
 const QuickLinks = ({
     applicationNo,
     hideSearchApplication = false,
@@ -118,19 +187,38 @@ const QuickLinks = ({
         open: false,
         message: "",
     });
-    const { businessType, applicationNumber } = useAppContext();
+    const {
+        businessType,
+        applicationNumber,
+    } = useAppContext();
     const drsData = useAppSelector((state) => state.drs.data);
+    const masterData = useAppSelector((state) => state.masterData);
 
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
         "retail";
+    const selectedCaseContext = getSelectedCaseContext();
     const safeApplicationNumber = String(
         applicationNo ??
         applicationNumber ??
+        selectedCaseContext.applicationNo ??
+        localStorage.getItem("applicationNo") ??
         getSelectedCaseApplicationNo(),
     ).trim();
-    const roleType = localStorage.getItem("roleType") ?? "";
+    const safeUserId = String(
+        selectedCaseContext.userId ??
+        localStorage.getItem("userId") ??
+        localStorage.getItem("username") ??
+        "",
+    ).trim();
+    const roleType =
+        selectedCaseContext.roleType ?? localStorage.getItem("roleType") ?? "";
+    const referToItDecisionCode = getMiscCode(
+        getMiscMasters(masterData).find(
+            (master) => getMiscType(master) === "REF_IT",
+        ),
+    );
     const visibleButtons = [
         'CPT_TASK',
         'CPT_DATA_ENTRY_MR_TASK',
@@ -245,8 +333,32 @@ const QuickLinks = ({
     }, []);
 
     const handleReferToIt = useCallback(async () => {
-        if (!safeApplicationNumber || !roleType) {
-            setReferToItError("Missing application or role information.");
+        const rawTaskId = String(
+            selectedCaseContext.taskId ??
+            selectedCaseContext.taskCompositeId ??
+            localStorage.getItem("taskId") ??
+            localStorage.getItem("taskCompositeId") ??
+            "",
+        ).trim();
+        const taskId = normalizeTaskId(rawTaskId);
+        const instanceId = String(
+            selectedCaseContext.instanceId ??
+            localStorage.getItem("instanceId") ??
+            "",
+        ).trim();
+
+        if (!safeApplicationNumber || !safeUserId) {
+            setReferToItError("Application number or user ID is missing.");
+            return;
+        }
+
+        if (!taskId || !instanceId) {
+            setReferToItError("Task ID or instance ID is missing.");
+            return;
+        }
+
+        if (!referToItDecisionCode) {
+            setReferToItError("Refer to IT decision code is not available in masters.");
             return;
         }
 
@@ -255,10 +367,15 @@ const QuickLinks = ({
             setReferToItError(null);
 
             await dispatch(
-                referToItThunk({
-                    applicationId: safeApplicationNumber,
-                    roleType,
-                    decision: "Refer to IT",
+                completeTaskThunk({
+                    requestContext: {
+                        taskId,
+                        userId: safeUserId,
+                        appNo: safeApplicationNumber,
+                        instanceId,
+                        remarks: "",
+                        decision: referToItDecisionCode,
+                    },
                 }),
             ).unwrap();
 
@@ -273,7 +390,17 @@ const QuickLinks = ({
         } finally {
             setReferToItLoading(false);
         }
-    }, [dispatch, navigate, roleType, safeApplicationNumber, safeBusinessType]);
+    }, [
+        dispatch,
+        navigate,
+        referToItDecisionCode,
+        safeApplicationNumber,
+        safeBusinessType,
+        safeUserId,
+        selectedCaseContext.instanceId,
+        selectedCaseContext.taskId,
+        selectedCaseContext.taskCompositeId,
+    ]);
 
     const handleNavigate = useCallback(
         (label: string, path: string, unavailableMessage?: string) => {

@@ -2498,7 +2498,7 @@ const ViewFinancial = () => {
             applicationNo: safeApplicationId,
             userId,
             roleType,
-            sections: ["summary"],
+            sections: ["breDecision","latestBreDecision","summary"],
           })
         ).unwrap();
         // Clear error on success

@@ -445,12 +445,20 @@ const UWDecision = () => {
             }>;
 
         return decisionOptions.filter((option) => {
-            const isStandardOption =
-                option.code.trim().toUpperCase() === "STD";
+            const normalizedCode = option.code.trim().toUpperCase();
+            const normalizedLabel = option.label
+                .trim()
+                .replace(/[\s_-]+/g, " ")
+                .toUpperCase();
+            const isBorderlineStandardOption =
+                normalizedCode === "STD" ||
+                normalizedLabel === "BORDERLINE STANDARD";
 
-            return !isStandardOption || canShowStandardDecision;
+            return (
+                !isBorderlineStandardOption || canShowStandardDecision
+            );
         });
-    }, [canShowStandardDecision, drsData, masters]);
+    }, [canShowStandardDecision, masters]);
 
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision

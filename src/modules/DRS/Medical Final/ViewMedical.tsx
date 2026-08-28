@@ -595,7 +595,7 @@ const ViewMedical = () => {
             applicationNo: safeApplicationId,
             userId,
             roleType,
-            sections: ["summary"],
+            sections: ["breDecision","latestBreDecision","summary"],
           })
         ).unwrap();
       } catch (error) {
