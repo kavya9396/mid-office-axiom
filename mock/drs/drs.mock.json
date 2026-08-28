@@ -12,7 +12,7 @@
       "action": "Decline",
       "reTriggerCount": 2
     },"latestBreDecision": {
-      "decision": "ST",
+      "decision": "RM",
       "initialDecision": "Non-STP",
       "isInitial": "Y",
       "isLatest": "N",
