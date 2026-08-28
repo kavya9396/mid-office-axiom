@@ -314,8 +314,10 @@ const UWDecision = () => {
 
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
     const [caseUWDecision, setCaseUWDecision] = useState("");
+    const [outlier, setOutlier] = useState("");
     const [uwDecision, setUwDecision] = useState("");
     const [decisionCode, setDecisionCode] = useState("");
+    const [borderlineStandardReasons, setBorderlineStandardReasons] = useState<string[]>([]);
     const [rejectReason, setRejectReason] = useState<string[]>([]);
     const [declineReasons, setDeclineReasons] = useState<string[]>([]);
     const [postponeReason, setPostponeReason] = useState("");
@@ -451,7 +453,7 @@ const UWDecision = () => {
                 .replace(/[\s_-]+/g, " ")
                 .toUpperCase();
             const isBorderlineStandardOption =
-                normalizedCode === "STD" ||
+                normalizedCode === "BOR_STD" ||
                 normalizedLabel === "BORDERLINE STANDARD";
 
             return (
@@ -474,18 +476,36 @@ const UWDecision = () => {
     const selectedDecisionCode = toText(
         selectedCaseDecisionOption?.code ?? selectedCaseDecisionOption?.value,
     );
+    const normalizedCaseUWDecisionLabel = caseUWDecisionLabel
+        .trim()
+        .replace(/[\s_-]+/g, " ")
+        .toUpperCase();
     const isStandardDecision =
-        selectedCaseDecisionOption?.type.trim().toUpperCase() === "TERM_DEC" &&
-        selectedDecisionCode.toUpperCase() === "STD";
+        normalizedCaseUWDecisionLabel === "STANDARD";
+    const isBorderlineStandardDecision =
+        normalizedCaseUWDecisionLabel === "BORDERLINE STANDARD" ||
+        selectedDecisionCode.trim().toUpperCase() === "BOR_STD";
 
     const nonMedicalOptions = useMemo(
         () => getReasonOptionsFromMasters(masters, "NON_MEDICAL"),
         [masters],
     );
-    const medicalReasonOptions = useMemo(
-        () => getReasonOptionsFromMasters(masters, "MEDICAL"),
-        [masters],
-    );
+    const medicalAndNonMedicalOptions = useMemo(() => {
+        const medicalOptions = getReasonOptionsFromMasters(masters, "MEDICAL");
+        const nonMedicalReasonOptions = getReasonOptionsFromMasters(
+            masters,
+            "NON_MEDICAL",
+        );
+
+        return Array.from(
+            new Map(
+                [...medicalOptions, ...nonMedicalReasonOptions].map((option) => [
+                    option.value,
+                    option,
+                ]),
+            ).values(),
+        );
+    }, [masters]);
 
     const parallelUWDecisionOptions = useMemo(() => {
         const misc = (masters as Record<string, unknown> | undefined)?.misc;
@@ -681,7 +701,9 @@ const UWDecision = () => {
         "Reject",
         "Decline",
         "Postpone",
-    ].includes(caseUWDecisionLabel) || isStandardDecision;
+    ].includes(caseUWDecisionLabel) ||
+        isStandardDecision ||
+        isBorderlineStandardDecision;
 
     const showParallelDecision = [
         "Refer to HO CMO",
@@ -711,17 +733,25 @@ const UWDecision = () => {
     const isPostponeDecision = caseUWDecisionLabel === "Postpone";
     const isCounterOfferDecision = caseUWDecisionLabel === "Counter Offer";
     const returnedDecisionCode = toRecord(decisionCodes[0]);
-    const resolvedDecisionCode = (isStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision)
+    const summary = Array.isArray(toRecord(drsData).summary)
+        ? toRecord(drsData).summary as unknown[]
+        : [];
+    const healthDetails = toRecord(toRecord(summary[0]).healthDetail);
+    const healthSmokerStatus = toText(
+        healthDetails.smokerStatus ?? healthDetails.smoker_status,
+    );
+    const resolvedDecisionCode = (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision)
         ? (decisionCode || toText(
             returnedDecisionCode.value ?? returnedDecisionCode.code,
         ))
         : decisionCode;
     const resolvedSmokerStatus = isStandardDecision
-        ? (smokerStatus || toText(
+        ? (healthSmokerStatus || smokerStatus || toText(
             returnedDecisionCode.smokerStatus ??
             returnedDecisionCode.smoker_status,
         ))
         : smokerStatus;
+    const showBorderlineStandardReasons = isBorderlineStandardDecision;
 
     // const updateCounterOfferCell = (
     //     rowKey: CounterOfferRowKey,
@@ -815,14 +845,19 @@ const UWDecision = () => {
             };
 
             const rejectIibCode = rejectReason.map(toIibCode)
-                .filter((iibCode): iibCode is number => iibCode !== undefined);;
+                .filter((iibCode): iibCode is number => iibCode !== undefined);
+            const borderlineStandardIibCodes = borderlineStandardReasons
+                .map(toIibCode)
+                .filter((iibCode): iibCode is number => iibCode !== undefined);
             const postponeIibCode = toIibCode(postponeReason);
             const selectedDeclineIibCodes = declineReasons
                 .map(toIibCode)
                 .filter((iibCode): iibCode is number => iibCode !== undefined);
 
             const optionalReason: number | number[] | undefined =
-                isRejectDecision && rejectIibCode !== undefined
+                showBorderlineStandardReasons && borderlineStandardIibCodes.length > 0
+                    ? borderlineStandardIibCodes
+                    : isRejectDecision && rejectIibCode.length > 0
                     ? rejectIibCode
                     : isDeclineDecision && selectedDeclineIibCodes.length > 0
                         ? selectedDeclineIibCodes
@@ -838,6 +873,7 @@ const UWDecision = () => {
                     instanceId: taskContext.instanceId,
                     remarks: uwDecisionRemarks.trim(),
                     decision: effectiveCaseUWDecision.trim(),
+                    ...(outlier.trim() ? { outlier: outlier.trim() } : {}),
                     ...(optionalReason !== undefined
                         ? { reason: optionalReason }
                         : {}),
@@ -960,6 +996,12 @@ const UWDecision = () => {
         // Validate decline reasons selection
         if (isDeclineDecision && declineReasons.length === 0) {
             setSubmitMessage("Please select at least one decline reason.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (isBorderlineStandardDecision && borderlineStandardReasons.length === 0) {
+            setSubmitMessage("Please select at least one borderline standard reason.");
             setSubmitStatus("failure");
             return;
         }
@@ -1154,15 +1196,24 @@ const UWDecision = () => {
                                     selectedOption?.code ?? selectedOption?.value,
                                 );
                                 const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
-                                const selectedIsStandard =
-                                    selectedOption?.type.trim().toUpperCase() === "TERM_DEC" &&
-                                    masterDecisionCode.toUpperCase() === "STD";
+                                const normalizedSelectedLabel = selectedLabel
+                                    .trim()
+                                    .replace(/[\s_-]+/g, " ")
+                                    .toUpperCase();
+                                const selectedIsStandard = normalizedSelectedLabel === "STANDARD";
+                                const selectedIsBorderlineStandard =
+                                    normalizedSelectedLabel === "BORDERLINE STANDARD" ||
+                                    masterDecisionCode.trim().toUpperCase() === "BOR_STD";
                                 const shouldFetchDecisionCode =
-                                    selectedIsStandard || fetchDecisionCodes.has(selectedLabel);
+                                    selectedIsStandard ||
+                                    selectedIsBorderlineStandard ||
+                                    fetchDecisionCodes.has(selectedLabel);
 
                                 setCaseUWDecision(value);
+                                setOutlier("");
                                 fetchUsersForReferralDecision(selectedLabel);
                                 setReferralValue("");
+                                setBorderlineStandardReasons([]);
                                 setRejectReason([]);
                                 setDeclineReasons([]);
                                 setPostponeReason("");
@@ -1207,8 +1258,37 @@ const UWDecision = () => {
                             options={caseUWDecisionOptions}
                         />
 
+                        {effectiveCaseUWDecision && (
+                            <Box>
+                                <Typography
+                                    sx={{
+                                        fontSize: "11px",
+                                        fontWeight: 400,
+                                        color: "#444",
+                                        lineHeight: 1.2,
+                                        mb: 0.5,
+                                    }}
+                                >
+                                    Outlier
+                                </Typography>
+                                <CustomTextField
+                                    fullWidth
+                                    size="small"
+                                    value={outlier}
+                                    placeholder="Enter outlier"
+                                    onChange={(event) => setOutlier(event.target.value)}
+                                    sx={{
+                                        "& .MuiInputBase-root": {
+                                            height: 34,
+                                            borderRadius: "6px",
+                                        },
+                                    }}
+                                />
+                            </Box>
+                        )}
+
                         {showDecisionCode && (
-                            (isStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision) ? (
+                            (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision) ? (
                                 <Box>
                                     <Typography
                                         sx={{
@@ -1255,6 +1335,18 @@ const UWDecision = () => {
                             />
                         )}
 
+                        {showBorderlineStandardReasons && (
+                            <CustomSelect
+                                label="Borderline Standard Reason"
+                                value={borderlineStandardReasons}
+                                multiple={true}
+                                maxCount={3}
+                                onChange={setBorderlineStandardReasons}
+                                options={medicalAndNonMedicalOptions}
+                                placeholder="Select reasons"
+                            />
+                        )}
+
                         {isDeclineDecision && (
                             <>
                                 <CustomSelect
@@ -1263,7 +1355,7 @@ const UWDecision = () => {
                                     maxCount={3}
                                     value={declineReasons}
                                     onChange={setDeclineReasons}
-                                    options={medicalReasonOptions}
+                                    options={medicalAndNonMedicalOptions}
                                     placeholder="Select reasons"
                                 />
                             </>
@@ -1275,7 +1367,7 @@ const UWDecision = () => {
                                     label="Postpone Reason"
                                     value={postponeReason}
                                     onChange={setPostponeReason}
-                                    options={medicalReasonOptions}
+                                    options={medicalAndNonMedicalOptions}
                                 />
                                 <CustomSelect
                                     label="Postponement Period"

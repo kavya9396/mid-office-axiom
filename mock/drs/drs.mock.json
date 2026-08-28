@@ -12,7 +12,7 @@
       "action": "Decline",
       "reTriggerCount": 2
     },"latestBreDecision": {
-      "decision": "RM",
+      "decision": "ST",
       "initialDecision": "Non-STP",
       "isInitial": "Y",
       "isLatest": "N",
@@ -293,6 +293,7 @@
           "isDisabled": "",
           "percentageOfImpairment": "",
           "typeOfImpairment": "",
+          "smokerStatus":"Non Smoker",
           "illnessOrImpairment": [],
           "substanceConsumption": [
             {
