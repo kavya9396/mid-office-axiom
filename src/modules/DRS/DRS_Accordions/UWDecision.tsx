@@ -318,6 +318,7 @@ const UWDecision = () => {
     const [uwDecision, setUwDecision] = useState("");
     const [decisionCode, setDecisionCode] = useState("");
     const [borderlineStandardReasons, setBorderlineStandardReasons] = useState<string[]>([]);
+    const [counterOfferReasons, setCounterOfferReasons] = useState<string[]>([]);
     const [rejectReason, setRejectReason] = useState<string[]>([]);
     const [declineReasons, setDeclineReasons] = useState<string[]>([]);
     const [postponeReason, setPostponeReason] = useState("");
@@ -849,6 +850,9 @@ const UWDecision = () => {
             const borderlineStandardIibCodes = borderlineStandardReasons
                 .map(toIibCode)
                 .filter((iibCode): iibCode is number => iibCode !== undefined);
+            const counterOfferIibCodes = counterOfferReasons
+                .map(toIibCode)
+                .filter((iibCode): iibCode is number => iibCode !== undefined);
             const postponeIibCode = toIibCode(postponeReason);
             const selectedDeclineIibCodes = declineReasons
                 .map(toIibCode)
@@ -857,13 +861,15 @@ const UWDecision = () => {
             const optionalReason: number | number[] | undefined =
                 showBorderlineStandardReasons && borderlineStandardIibCodes.length > 0
                     ? borderlineStandardIibCodes
-                    : isRejectDecision && rejectIibCode.length > 0
-                    ? rejectIibCode
-                    : isDeclineDecision && selectedDeclineIibCodes.length > 0
-                        ? selectedDeclineIibCodes
-                        : isPostponeDecision && postponeIibCode !== undefined
-                            ? postponeIibCode
-                            : undefined;
+                    : isCounterOfferDecision && counterOfferIibCodes.length > 0
+                        ? counterOfferIibCodes
+                        : isRejectDecision && rejectIibCode.length > 0
+                            ? rejectIibCode
+                            : isDeclineDecision && selectedDeclineIibCodes.length > 0
+                                ? selectedDeclineIibCodes
+                                : isPostponeDecision && postponeIibCode !== undefined
+                                    ? postponeIibCode
+                                    : undefined;
 
             const completeTaskPayload = {
                 requestContext: {
@@ -1214,6 +1220,7 @@ const UWDecision = () => {
                                 fetchUsersForReferralDecision(selectedLabel);
                                 setReferralValue("");
                                 setBorderlineStandardReasons([]);
+                                setCounterOfferReasons([]);
                                 setRejectReason([]);
                                 setDeclineReasons([]);
                                 setPostponeReason("");
@@ -1342,6 +1349,18 @@ const UWDecision = () => {
                                 multiple={true}
                                 maxCount={3}
                                 onChange={setBorderlineStandardReasons}
+                                options={medicalAndNonMedicalOptions}
+                                placeholder="Select reasons"
+                            />
+                        )}
+
+                        {isCounterOfferDecision && (
+                            <CustomSelect
+                                label="Counter Offer Reason"
+                                value={counterOfferReasons}
+                                multiple={true}
+                                maxCount={3}
+                                onChange={setCounterOfferReasons}
                                 options={medicalAndNonMedicalOptions}
                                 placeholder="Select reasons"
                             />
