@@ -29,7 +29,6 @@ import {
 
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
-import { mastersThunk } from "../../../store/thunks/mastersThunk";
 import { applicantProfileSubmitThunk } from "../../../store/thunks/applicantProfileSubmitThunk";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import type {
@@ -48,6 +47,7 @@ import {
 } from "../../../validations/drsRequirementDecisionValidation";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { DRS_LAYOUTS } from "../drs-layouts";
+import { requirementMastersThunk } from "../../../store/thunks/requirementMastersThunk";
 
 const DRS_LAYOUT_BY_ROLE = {
   CMO_TASK: "RETAIL_CMO_POOL",
@@ -946,7 +946,12 @@ const RequirementManagementTable = ({
     } as unknown as MastersRequest;
 
     try {
-      const response = await dispatch(mastersThunk(requestPayload)).unwrap();
+      // This thunk has its own action type and is intentionally not handled by
+      // masterSlice. The limited requirement response therefore stays local
+      // and cannot overwrite the full application-wide master data.
+      const response = await dispatch(
+        requirementMastersThunk(requestPayload),
+      ).unwrap();
       const requirementMaster = getRequirementMaster(response);
       const requirementItems = getMasterItems(response, "requirement_mst");
       const directOptions = getRequirementOptions(requirementMaster, nextField);

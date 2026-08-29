@@ -71,6 +71,21 @@ const toRecord = (value: unknown): Record<string, unknown> =>
 const toText = (value: unknown): string =>
   String(value ?? "").trim();
 
+const getSessionMasterMisc = (): MiscItem[] => {
+  try {
+    const storedMasterData = toRecord(
+      JSON.parse(sessionStorage.getItem("masterData") ?? "{}"),
+    );
+    const firstData = toRecord(storedMasterData.data);
+    const secondData = toRecord(firstData.data);
+    const misc = secondData.misc ?? firstData.misc ?? storedMasterData.misc;
+
+    return Array.isArray(misc) ? (misc as MiscItem[]) : [];
+  } catch {
+    return [];
+  }
+};
+
 const getSelectedCaseContext = (): Record<string, unknown> => {
   try {
     return toRecord(
@@ -282,12 +297,17 @@ const Decision = () => {
 
   // ================= MASTER DATA =================
 
+  const reduxMisc = masterData?.data?.data?.misc;
+  const sessionMisc = getSessionMasterMisc();
+
+  // Requirement Management calls the same master API with only
+  // `requirement_mst`. That response may replace Redux misc with an empty
+  // array. Never allow the limited response to blank Decision dropdowns;
+  // fall back to the complete masters loaded when the user logged in.
   const miscData =
-    masterData?.data?.data?.misc ||
-    JSON.parse(
-      sessionStorage.getItem("masterData") || "{}",
-    )?.data?.misc ||
-    [];
+    Array.isArray(reduxMisc) && reduxMisc.length > 0
+      ? reduxMisc
+      : sessionMisc;
 
   // ================= DECISION OPTIONS =================
 
