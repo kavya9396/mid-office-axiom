@@ -201,7 +201,7 @@ const Grievance = () => {
       ),
     },
     { key: "fupCode", header: "FUP Code", width: "20%", render: (value) => <Typography sx={{ fontSize: 12 }}>{text(value) || "-"}</Typography> },
-    { key: "memberName", header: "Life Assured / Proposer", width: "25%", render: (value) => <Typography sx={{ fontSize: 12 }}>{text(value) || "-"}</Typography> },
+    { key: "memberName", header: "Profile", width: "25%", render: (value) => <Typography sx={{ fontSize: 12 }}>{text(value) || "-"}</Typography> },
     { key: "remarksByUser", header: "Remarks By User *", width: "30%", render: (_value, row) => <TextField fullWidth required error={remarksErrors.has(row.rowId)} helperText={remarksErrors.has(row.rowId) ? "Remarks are mandatory." : ""} size="small" value={row.remarksByUser} placeholder="Enter remarks..." slotProps={{ htmlInput: { maxLength: 1000 } }} onChange={(event) => changeRemarks(row.rowId, event.target.value)} sx={{ "& .MuiInputBase-root": { fontSize: 12, backgroundColor: "#fff" }, "& .MuiFormHelperText-root": { mx: 0, fontSize: 10 } }} /> },
     { key: "remarksByTpa", header: "Remarks By TPA", width: "25%", render: (value) => <Typography sx={{ fontSize: 12 }}>{text(value)}</Typography> },
   ];
