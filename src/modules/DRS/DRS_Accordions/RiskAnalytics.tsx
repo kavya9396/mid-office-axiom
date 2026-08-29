@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Box,
   Typography,
@@ -101,147 +101,147 @@ const MEDICAL_FIELDS: Array<{
   key: keyof MedicalRisk;
   label: string;
 }> = [
-  {
-    key: "brePhysicalMedicalDecision",
-    label: "BRE Physical Medical Decision",
-  },
-  {
-    key: "brePhysicalMedicalRemark",
-    label: "BRE Physical Medical Remark",
-  },
-  {
-    key: "breTeleVideoMerDecision",
-    label: "BRE Tele/Video MER Decision",
-  },
-  {
-    key: "breTeleVideoMerRemark",
-    label: "BRE Tele/Video MER Remark",
-  },
-  {
-    key: "munichReMedicalDecision",
-    label: "MunichRe Medical Decision",
-  },
-  {
-    key: "munichReRating",
-    label: "MunichRe Rating",
-  },
-  {
-    key: "biuMedicalStatus",
-    label: "BIU Medical Status",
-  },
-];
+    {
+      key: "brePhysicalMedicalDecision",
+      label: "BRE Physical Medical Decision",
+    },
+    {
+      key: "brePhysicalMedicalRemark",
+      label: "BRE Physical Medical Remark",
+    },
+    {
+      key: "breTeleVideoMerDecision",
+      label: "BRE Tele/Video MER Decision",
+    },
+    {
+      key: "breTeleVideoMerRemark",
+      label: "BRE Tele/Video MER Remark",
+    },
+    {
+      key: "munichReMedicalDecision",
+      label: "MunichRe Medical Decision",
+    },
+    {
+      key: "munichReRating",
+      label: "MunichRe Rating",
+    },
+    {
+      key: "biuMedicalStatus",
+      label: "BIU Medical Status",
+    },
+  ];
 
 const FINANCIAL_FIELDS: Array<{
   key: keyof FinancialRisk;
   label: string;
 }> = [
-  {
-    key: "breFinancialDecision",
-    label: "BRE Financial Decision",
-  },
-  {
-    key: "breRemark",
-    label: "BRE Remark",
-  },
-  {
-    key: "financialEligibility",
-    label: "Financial Eligibility",
-  },
-  {
-    key: "derivedIncome",
-    label: "Derived Income",
-  },
-  {
-    key: "counterOfferValue",
-    label: "Counter Offer Value",
-  },
-  {
-    key: "additionalSA",
-    label: "Additional SA",
-  },
-  {
-    key: "biuFinancialStatus",
-    label: "BIU Financial Status",
-  },
-];
+    {
+      key: "breFinancialDecision",
+      label: "BRE Financial Decision",
+    },
+    {
+      key: "breRemark",
+      label: "BRE Remark",
+    },
+    {
+      key: "financialEligibility",
+      label: "Financial Eligibility",
+    },
+    {
+      key: "derivedIncome",
+      label: "Derived Income",
+    },
+    {
+      key: "counterOfferValue",
+      label: "Counter Offer Value",
+    },
+    {
+      key: "additionalSA",
+      label: "Additional SA",
+    },
+    {
+      key: "biuFinancialStatus",
+      label: "BIU Financial Status",
+    },
+  ];
 
 const OTHER_FIELDS: Array<{
   key: keyof OtherRisk;
   label: string;
 }> = [
-  {
-    key: "ptlrResponse",
-    label: "PTLR Response",
-  },
-  {
-    key: "drcResponse",
-    label: "DRC Response",
-  },
-  {
-    key: "adverseIIB",
-    label: "Adverse IIB",
-  },
-  {
-    key: "criminalQuestionResponseLA",
-    label: "Criminal Question Response LA",
-  },
-  {
-    key: "pepQuestionResponseLA",
-    label: "PEP Question Response LA",
-  },
-  {
-    key: "criminalQuestionResponsePR",
-    label: "Criminal Question Response PR",
-  },
-  {
-    key: "pepQuestionResponsePR",
-    label: "PEP Question Response PR",
-  },
-  {
-    key: "previousPolicySubstandard",
-    label: "Previous Policy Substandard",
-  },
-  {
-    key: "avocationRelatedDisclosure",
-    label: "Avocation Related Disclosure",
-  },
-  {
-    key: "healthQuestionPositive",
-    label: "Health Question Positive",
-  },
-  {
-    key: "employmentInRiskyIndustry",
-    label: "Employment In Risky Industry",
-  },
-  {
-    key: "fatfOfacCountryLogin",
-    label: "FATF/OFAC Country Login",
-  },
-  {
-    key: "hazardousOccupation",
-    label: "Hazardous Occupation",
-  },
-  {
-    key: "eddFlag",
-    label: "EDD Flag",
-  },
-  {
-    key: "claimRiskIndicator",
-    label: "Claim Risk Indicator",
-  },
-  {
-    key: "faceMatchScore",
-    label: "Face Match Score",
-  },
-  {
-    key: "tobacco",
-    label: "Tobacco",
-  },
-  {
-    key: "narcotics",
-    label: "Narcotics",
-  },
-];
+    {
+      key: "ptlrResponse",
+      label: "PTLR Response",
+    },
+    {
+      key: "drcResponse",
+      label: "DRC Response",
+    },
+    {
+      key: "adverseIIB",
+      label: "Adverse IIB",
+    },
+    {
+      key: "criminalQuestionResponseLA",
+      label: "Criminal Question Response LA",
+    },
+    {
+      key: "pepQuestionResponseLA",
+      label: "PEP Question Response LA",
+    },
+    {
+      key: "criminalQuestionResponsePR",
+      label: "Criminal Question Response PR",
+    },
+    {
+      key: "pepQuestionResponsePR",
+      label: "PEP Question Response PR",
+    },
+    {
+      key: "previousPolicySubstandard",
+      label: "Previous Policy Substandard",
+    },
+    {
+      key: "avocationRelatedDisclosure",
+      label: "Avocation Related Disclosure",
+    },
+    {
+      key: "healthQuestionPositive",
+      label: "Health Question Positive",
+    },
+    {
+      key: "employmentInRiskyIndustry",
+      label: "Employment In Risky Industry",
+    },
+    {
+      key: "fatfOfacCountryLogin",
+      label: "FATF/OFAC Country Login",
+    },
+    {
+      key: "hazardousOccupation",
+      label: "Hazardous Occupation",
+    },
+    {
+      key: "eddFlag",
+      label: "EDD Flag",
+    },
+    {
+      key: "claimRiskIndicator",
+      label: "Claim Risk Indicator",
+    },
+    {
+      key: "faceMatchScore",
+      label: "Face Match Score",
+    },
+    {
+      key: "tobacco",
+      label: "Tobacco",
+    },
+    {
+      key: "narcotics",
+      label: "Narcotics",
+    },
+  ];
 
 /* -------------------------------------------------------------------------- */
 /*                                   COLORS                                   */
@@ -373,7 +373,7 @@ const getFinancialStatus = (
    */
   const hasRedValue =
     financialDecision ===
-      "nonfstp" ||
+    "nonfstp" ||
     biuFinancialStatus === "y";
 
   return hasRedValue
@@ -665,11 +665,10 @@ const RiskAnalytics = ({
       state.drs.data,
   ) as RiskAnalyticsData | null;
 
-  const [selectedCard, setSelectedCard] =
-    useState<RiskCard | null>(null);
+  const [selectedCardId, setSelectedCardId] =
+    useState<string | null>(null);
 
-  const summary =
-    drsData?.summary ?? [];
+  const summary = drsData?.summary ?? [];
 
   const normalizedMemberType = normalizeValue(memberType);
 
@@ -684,9 +683,10 @@ const RiskAnalytics = ({
     ? buildRiskCards([selectedSummary])
     : [];
 
-  useEffect(() => {
-    setSelectedCard(null);
-  }, [memberIndex, memberType]);
+  const selectedCard =
+    riskCards.find(
+      (card) => card.id === selectedCardId,
+    ) ?? null;
 
   if (riskCards.length === 0) {
     return null;
@@ -694,241 +694,241 @@ const RiskAnalytics = ({
 
   return (
     <>
-    {riskCards.length > 0 && (
-      <>
-      <Box
-        sx={{
-          mt: 1,
-          mb: 1.25,
-        }}
-      >
-        <Typography
-          sx={{
-            mb: 0.75,
-            color: "#2b2b2b",
-            fontSize: "12px",
-            fontWeight: 800,
-            lineHeight: 1.2,
-            textTransform: "uppercase",
-          }}
-        >
-          Risk Analytics
-        </Typography>
-
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              sm: "repeat(2, minmax(0, 1fr))",
-              lg: "repeat(3, minmax(0, 1fr))",
-            },
-            alignItems: "stretch",
-            gap: 1,
-            width: "100%",
-          }}
-        >
-          {riskCards.map((card) => {
-            const statusColor =
-              STATUS_COLORS[card.status];
-
-            const statusBackground =
-              STATUS_BACKGROUNDS[
-                card.status
-              ];
-
-            return (
-              <Box
-                key={card.id}
-                component="button"
-                type="button"
-                onClick={() =>
-                  setSelectedCard(card)
-                }
-                sx={{
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "100%",
-                  minHeight: 66,
-                  border:
-                    "1px solid #dfdfdf",
-                  borderLeft:
-                    `4px solid ${statusColor}`,
-                  borderRadius: "6px",
-                  backgroundColor: "#fff",
-                  px: 1.25,
-                  py: 0.9,
-                  cursor: "pointer",
-                  textAlign: "left",
-                  boxSizing: "border-box",
-                  transition:
-                    "all 0.2s ease",
-
-                  "&:hover": {
-                    backgroundColor:
-                      "#fafafa",
-                    boxShadow:
-                      "0 2px 6px rgba(0,0,0,0.08)",
-                  },
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent:
-                      "space-between",
-                    alignItems: "center",
-                    width: "100%",
-                    mb: card.subLabel
-                      ? 0.6
-                      : 0,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      color: "#1f1f1f",
-                      fontSize: "12px",
-                      fontWeight: 700,
-                      lineHeight: 1.2,
-                    }}
-                  >
-                    {card.label}
-                  </Typography>
-
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent:
-                        "center",
-                      width: 18,
-                      height: 18,
-                      flexShrink: 0,
-                      border:
-                        `1.5px solid ${statusColor}`,
-                      borderRadius: "50%",
-                      color: statusColor,
-                    }}
-                  >
-                    <KeyRightArrowIcon
-                      sx={{
-                        fontSize: "15px",
-                      }}
-                    />
-                  </Box>
-                </Box>
-
-                {card.subLabel && (
-                  <Typography
-                    sx={{
-                      display:
-                        "inline-flex",
-                      alignSelf:
-                        "flex-start",
-                      border:
-                        `1px solid ${statusColor}`,
-                      borderRadius:
-                        "999px",
-                      backgroundColor:
-                        statusBackground,
-                      px: 1,
-                      py: 0.25,
-                      color: statusColor,
-                      fontSize: "11.5px",
-                      fontWeight: 600,
-                      lineHeight: "16px",
-                    }}
-                  >
-                    {card.subLabel}
-                  </Typography>
-                )}
-              </Box>
-            );
-          })}
-        </Box>
-      </Box>
-
-      <CustomDialog
-        open={Boolean(selectedCard)}
-        onClose={() =>
-          setSelectedCard(null)
-        }
-        title={
-  selectedCard?.label === "Other Risk"
-    ? `${selectedCard.label} Details`
-    : selectedCard
-      ? `${selectedCard.label} Risk Details`
-      : "Risk Details"
-}
-        maxWidth="lg"
-      >
-        {selectedCard && (
+      {riskCards.length > 0 && (
+        <>
           <Box
             sx={{
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(1, minmax(0, 1fr))",
-                sm: "repeat(2, minmax(0, 1fr))",
-                md: "repeat(3, minmax(0, 1fr))",
-                lg: "repeat(6, minmax(0, 1fr))",
-              },
-              gap: 1,
-              width: "100%",
-              minWidth: {
-                xs: "auto",
-                md: 850,
-              },
-              py: 0.5,
+              mt: 1,
+              mb: 1.25,
             }}
           >
-            {selectedCard.details.map(
-              (detail) => (
-                <Box
-                  key={detail.key}
-                  sx={{
-                    minWidth: 0,
-                    border:
-                      "1px solid #e1e1e1",
-                    borderRadius: "6px",
-                    backgroundColor:
-                      "#f7f7f7",
-                    px: 1,
-                    py: 0.8,
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      mb: 0.35,
-                      color: "#666",
-                      fontSize: "10px",
-                      lineHeight: 1.25,
-                    }}
-                  >
-                    {detail.label}
-                  </Typography>
+            <Typography
+              sx={{
+                mb: 0.75,
+                color: "#2b2b2b",
+                fontSize: "12px",
+                fontWeight: 800,
+                lineHeight: 1.2,
+                textTransform: "uppercase",
+              }}
+            >
+              Risk Analytics
+            </Typography>
 
-                  <Typography
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "repeat(2, minmax(0, 1fr))",
+                  lg: "repeat(3, minmax(0, 1fr))",
+                },
+                alignItems: "stretch",
+                gap: 1,
+                width: "100%",
+              }}
+            >
+              {riskCards.map((card) => {
+                const statusColor =
+                  STATUS_COLORS[card.status];
+
+                const statusBackground =
+                  STATUS_BACKGROUNDS[
+                  card.status
+                  ];
+
+                return (
+                  <Box
+                    key={card.id}
+                    component="button"
+                    type="button"
+                    onClick={() =>
+                      setSelectedCardId(card.id)
+                    }
                     sx={{
-                      color: "#1f1f1f",
-                      fontSize: "11.5px",
-                      fontWeight: 700,
-                      lineHeight: 1.3,
-                      overflowWrap:
-                        "anywhere",
+                      display: "flex",
+                      flexDirection: "column",
+                      width: "100%",
+                      minHeight: 66,
+                      border:
+                        "1px solid #dfdfdf",
+                      borderLeft:
+                        `4px solid ${statusColor}`,
+                      borderRadius: "6px",
+                      backgroundColor: "#fff",
+                      px: 1.25,
+                      py: 0.9,
+                      cursor: "pointer",
+                      textAlign: "left",
+                      boxSizing: "border-box",
+                      transition:
+                        "all 0.2s ease",
+
+                      "&:hover": {
+                        backgroundColor:
+                          "#fafafa",
+                        boxShadow:
+                          "0 2px 6px rgba(0,0,0,0.08)",
+                      },
                     }}
                   >
-                    {displayValue(
-                      detail.value,
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent:
+                          "space-between",
+                        alignItems: "center",
+                        width: "100%",
+                        mb: card.subLabel
+                          ? 0.6
+                          : 0,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          color: "#1f1f1f",
+                          fontSize: "12px",
+                          fontWeight: 700,
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        {card.label}
+                      </Typography>
+
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent:
+                            "center",
+                          width: 18,
+                          height: 18,
+                          flexShrink: 0,
+                          border:
+                            `1.5px solid ${statusColor}`,
+                          borderRadius: "50%",
+                          color: statusColor,
+                        }}
+                      >
+                        <KeyRightArrowIcon
+                          sx={{
+                            fontSize: "15px",
+                          }}
+                        />
+                      </Box>
+                    </Box>
+
+                    {card.subLabel && (
+                      <Typography
+                        sx={{
+                          display:
+                            "inline-flex",
+                          alignSelf:
+                            "flex-start",
+                          border:
+                            `1px solid ${statusColor}`,
+                          borderRadius:
+                            "999px",
+                          backgroundColor:
+                            statusBackground,
+                          px: 1,
+                          py: 0.25,
+                          color: statusColor,
+                          fontSize: "11.5px",
+                          fontWeight: 600,
+                          lineHeight: "16px",
+                        }}
+                      >
+                        {card.subLabel}
+                      </Typography>
                     )}
-                  </Typography>
-                </Box>
-              ),
-            )}
+                  </Box>
+                );
+              })}
+            </Box>
           </Box>
-        )}
-      </CustomDialog>
-      </>
-)}
+
+          <CustomDialog
+            open={Boolean(selectedCard)}
+            onClose={() =>
+              setSelectedCardId(null)
+            }
+            title={
+              selectedCard?.label === "Other Risk"
+                ? `${selectedCard.label} Details`
+                : selectedCard
+                  ? `${selectedCard.label} Risk Details`
+                  : "Risk Details"
+            }
+            maxWidth="lg"
+          >
+            {selectedCard && (
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "repeat(1, minmax(0, 1fr))",
+                    sm: "repeat(2, minmax(0, 1fr))",
+                    md: "repeat(3, minmax(0, 1fr))",
+                    lg: "repeat(6, minmax(0, 1fr))",
+                  },
+                  gap: 1,
+                  width: "100%",
+                  minWidth: {
+                    xs: "auto",
+                    md: 850,
+                  },
+                  py: 0.5,
+                }}
+              >
+                {selectedCard.details.map(
+                  (detail) => (
+                    <Box
+                      key={detail.key}
+                      sx={{
+                        minWidth: 0,
+                        border:
+                          "1px solid #e1e1e1",
+                        borderRadius: "6px",
+                        backgroundColor:
+                          "#f7f7f7",
+                        px: 1,
+                        py: 0.8,
+                      }}
+                    >
+                      <Typography
+                        sx={{
+                          mb: 0.35,
+                          color: "#666",
+                          fontSize: "10px",
+                          lineHeight: 1.25,
+                        }}
+                      >
+                        {detail.label}
+                      </Typography>
+
+                      <Typography
+                        sx={{
+                          color: "#1f1f1f",
+                          fontSize: "11.5px",
+                          fontWeight: 700,
+                          lineHeight: 1.3,
+                          overflowWrap:
+                            "anywhere",
+                        }}
+                      >
+                        {displayValue(
+                          detail.value,
+                        )}
+                      </Typography>
+                    </Box>
+                  ),
+                )}
+              </Box>
+            )}
+          </CustomDialog>
+        </>
+      )}
     </>
   );
 };

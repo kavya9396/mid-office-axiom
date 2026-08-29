@@ -34,6 +34,7 @@ import ApplicationOverview from "./DRS_Accordions/ApplicationOverview";
 import Decision from "./DRS_Accordions/decision";
 import BreDecision from "./DRS_Accordions/BreDecision";
 import ApplicantProfile from "./DRS_Accordions/ApplicantProfile";
+import ITDRS from "./DRS_Accordions/ITDRS";
 
 export const accordionRegistry = {
   //breDecision1:BreDecision1,
@@ -71,6 +72,7 @@ export const accordionRegistry = {
   preLogin: PreLogin,
   decision: Decision,
   // applicantProfile:ApplicantProfile
+  itdrs: ITDRS,
 } as const;
 
 type AccordionKey = keyof typeof accordionRegistry;
@@ -117,28 +119,58 @@ const sectionAvailabilityCheck: Partial<
     hasNonEmptyArray(toRecord(data.quickLinks).previousPolicies),
 };
 
+// export const getPoolWiseAvailableAccordions = (
+//   layoutKey: string | undefined,
+//   data?: unknown,
+// ): AccordionKey[] => {
+//   const baseAccordions = layoutKey ? (DRS_LAYOUTS[layoutKey] ?? []) : [];
+
+//   const accordionsWithQuickLinks = baseAccordions.includes("quickLinks")
+//     ? baseAccordions
+//     : [...baseAccordions, "quickLinks"];
+
+//   return accordionsWithQuickLinks.filter(
+//     (accordion): accordion is AccordionKey => {
+//       if (!(accordion in accordionRegistry)) {
+//         return false;
+//       }
+
+//       const checker = sectionAvailabilityCheck[accordion as AccordionKey];
+//       if (!checker || !data) {
+//         return true;
+//       }
+
+//       return checker((data as DrsDataRecord) ?? {});
+//     },
+//   );
+// };
+
 export const getPoolWiseAvailableAccordions = (
   layoutKey: string | undefined,
   data?: unknown,
 ): AccordionKey[] => {
-  const baseAccordions = layoutKey ? (DRS_LAYOUTS[layoutKey] ?? []) : [];
+  const baseAccordions = layoutKey
+    ? DRS_LAYOUTS[layoutKey] ?? []
+    : [];
 
-  const accordionsWithQuickLinks = baseAccordions.includes("quickLinks")
-    ? baseAccordions
-    : [...baseAccordions, "quickLinks"];
-
-  return accordionsWithQuickLinks.filter(
+  return baseAccordions.filter(
     (accordion): accordion is AccordionKey => {
       if (!(accordion in accordionRegistry)) {
         return false;
       }
 
-      const checker = sectionAvailabilityCheck[accordion as AccordionKey];
+      const checker =
+        sectionAvailabilityCheck[
+          accordion as AccordionKey
+        ];
+
       if (!checker || !data) {
         return true;
       }
 
-      return checker((data as DrsDataRecord) ?? {});
+      return checker(
+        (data as DrsDataRecord) ?? {},
+      );
     },
   );
 };
@@ -328,12 +360,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks",
   ],
   RETAIL_IT_POOL: [
-    "breDecision",
-    "applicationOverview",
-    "summary",
-    "requirementManagement",
-    "uwDecision",
-    "quickLinks",
+   "itdrs"
   ],
   RETAIL_VENDOR_CMO_POOL: [
     "breDecision",

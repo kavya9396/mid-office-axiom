@@ -1,7 +1,7 @@
 import { Box, Divider, Typography } from "@mui/material";
 import { KeyRightArrowIcon, LinkIcon, PlusIcon } from "../../icons/Icons";
 import { centerFlex, columnFlex } from "../../utils/styles";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { useCallback, useState } from "react";
 import {
     getAuditTrailPath,
@@ -20,6 +20,7 @@ import { completeTaskThunk } from "../../store/thunks/completeTaskThunk";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import CustomButton from "../../components/ui/Button/Button";
 import CustomSnackbar from "../../components/ui/SnackBar/Snackbar";
+import CustomTextField from "../../components/ui/TextField/TextField";
 import { modalTitleStyles } from "../../utils/styles";
 
 const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
@@ -106,12 +107,20 @@ const getSelectedCaseApplicationNo = (): string => {
 
 interface SelectedCaseContext {
     applicationNo?: string;
+    applicationNumber?: string;
     userId?: string;
     businessType?: string;
     taskId?: string;
     instanceId?: string;
+    instanceID?: string;
     taskCompositeId?: string;
     roleType?: string;
+}
+
+type ApplicationRow = SelectedCaseContext;
+
+interface LocationState {
+    application?: ApplicationRow;
 }
 
 interface MiscMaster {
@@ -131,6 +140,8 @@ const toRecord = (value: unknown): Record<string, unknown> =>
     value && typeof value === "object" && !Array.isArray(value)
         ? (value as Record<string, unknown>)
         : {};
+
+const toText = (value: unknown): string => String(value ?? "").trim();
 
 const getNestedData = (value: unknown): Record<string, unknown> => {
     let current = toRecord(value);
@@ -156,11 +167,20 @@ const getMiscMasters = (value: unknown): MiscMaster[] => {
         : [];
 };
 
-const normalizeTaskId = (value: string): string => {
-    const normalizedValue = value.trim();
+const splitCompositeTaskId = (
+    value: unknown,
+): { taskId: string; instanceId: string } => {
+    const compositeId = toText(value);
+    const separatorIndex = compositeId.indexOf(".");
 
-    if (!normalizedValue) return "";
-    return normalizedValue.split(".").at(-1)?.trim() ?? normalizedValue;
+    if (separatorIndex < 0) {
+        return { taskId: compositeId, instanceId: "" };
+    }
+
+    return {
+        instanceId: compositeId.slice(0, separatorIndex).trim(),
+        taskId: compositeId.slice(separatorIndex + 1).trim(),
+    };
 };
 
 const getSelectedCaseContext = (): SelectedCaseContext => {
@@ -178,11 +198,14 @@ const QuickLinks = ({
     hideSearchApplication = false,
 }: QuickLinksProps) => {
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useAppDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const [openReferToItDialog, setOpenReferToItDialog] = useState(false);
     const [referToItLoading, setReferToItLoading] = useState(false);
     const [referToItError, setReferToItError] = useState<string | null>(null);
+    const [referToItRemarks, setReferToItRemarks] = useState("");
+    const [referToItRemarksTouched, setReferToItRemarksTouched] = useState(false);
     const [quickLinkSnackbar, setQuickLinkSnackbar] = useState<SnackbarState>({
         open: false,
         message: "",
@@ -193,28 +216,78 @@ const QuickLinks = ({
     } = useAppContext();
     const drsData = useAppSelector((state) => state.drs.data);
     const masterData = useAppSelector((state) => state.masterData);
-    const selectedCaseContext = getSelectedCaseContext();
+    const application =
+        (location.state as LocationState | null)?.application ?? null;
+    const storedCaseContext = getSelectedCaseContext();
+    const routeApplicationNumber = toText(
+        application?.applicationNo ?? application?.applicationNumber,
+    );
+    const storedApplicationNumber = toText(
+        storedCaseContext.applicationNo ??
+        storedCaseContext.applicationNumber,
+    );
+    const canUseStoredCase =
+        !routeApplicationNumber ||
+        !storedApplicationNumber ||
+        routeApplicationNumber === storedApplicationNumber;
+    const selectedCaseContext = canUseStoredCase
+        ? storedCaseContext
+        : {};
+
+    const routeTask = splitCompositeTaskId(
+        application?.taskCompositeId || application?.taskId,
+    );
+    const storedTask = splitCompositeTaskId(
+        selectedCaseContext.taskCompositeId || selectedCaseContext.taskId,
+    );
+    const localTask = canUseStoredCase
+        ? splitCompositeTaskId(
+            localStorage.getItem("taskCompositeId") ||
+            localStorage.getItem("taskId"),
+        )
+        : { taskId: "", instanceId: "" };
+
+    const taskId = routeTask.taskId || storedTask.taskId || localTask.taskId;
+    const instanceId =
+        toText(application?.instanceId) ||
+        toText(application?.instanceID) ||
+        routeTask.instanceId ||
+        toText(selectedCaseContext.instanceId) ||
+        toText(selectedCaseContext.instanceID) ||
+        storedTask.instanceId ||
+        (canUseStoredCase
+            ? toText(localStorage.getItem("instanceId"))
+            : "") ||
+        localTask.instanceId;
 
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
+        normalizeBusinessType(application?.businessType) ??
         normalizeBusinessType(selectedCaseContext.businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
         "retail";
     const safeApplicationNumber = String(
         applicationNo ??
-        applicationNumber ??
+        application?.applicationNo ??
+        application?.applicationNumber ??
         selectedCaseContext.applicationNo ??
+        selectedCaseContext.applicationNumber ??
+        applicationNumber ??
         localStorage.getItem("applicationNo") ??
         getSelectedCaseApplicationNo(),
     ).trim();
     const safeUserId = String(
+        application?.userId ??
         selectedCaseContext.userId ??
         localStorage.getItem("userId") ??
         localStorage.getItem("username") ??
         "",
     ).trim();
     const roleType =
-        selectedCaseContext.roleType ?? localStorage.getItem("roleType") ?? "";
+        application?.roleType ??
+        selectedCaseContext.roleType ??
+        localStorage.getItem("roleType") ??
+        "";
     const referToItDecisionCode = getMiscCode(
         getMiscMasters(masterData).find(
             (master) => getMiscType(master) === "REF_IT",
@@ -268,29 +341,29 @@ const QuickLinks = ({
 
     const quickLinks: QuickLinkItem[] = [
         ...(roleType !== 'DVT_FORMAL_TASK' ? [
-        {
-            label: "Proposal Form & Documents",
-            path: proposerFormLink,
-            unavailableMessage: !proposerFormLink
-                ? "There is no document link found."
-                : undefined,
-        },
-        {
-            label: "Previous Policies",
-            path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "",
-            unavailableMessage: getEmptyArrayMessage(
-                drsQuickLinks?.previousPolicies,
-                "There are no previous policies found.",
-            ),
-        },
-        {
-            label: "Open Tasks",
-            path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "",
-            unavailableMessage: getEmptyArrayMessage(
-                drsQuickLinks?.openOtherTasks,
-                "There are no open tasks found.",
-            ),
-        },
+            {
+                label: "Proposal Form & Documents",
+                path: proposerFormLink,
+                unavailableMessage: !proposerFormLink
+                    ? "There is no document link found."
+                    : undefined,
+            },
+            {
+                label: "Previous Policies",
+                path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "",
+                unavailableMessage: getEmptyArrayMessage(
+                    drsQuickLinks?.previousPolicies,
+                    "There are no previous policies found.",
+                ),
+            },
+            {
+                label: "Open Tasks",
+                path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "",
+                unavailableMessage: getEmptyArrayMessage(
+                    drsQuickLinks?.openOtherTasks,
+                    "There are no open tasks found.",
+                ),
+            },
         ] : []),
         ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' ? [
             {
@@ -316,9 +389,9 @@ const QuickLinks = ({
                 { label: "View Medical", path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "" },
             ]
             : []),
-            ...(roleType == 'CPT_DATA_ENTRY_NMR_TASK' || roleType == 'GUW_FORMAL_TASK' ? [
-                { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
-            ]:[]),
+        ...(roleType == 'CPT_DATA_ENTRY_NMR_TASK' || roleType == 'GUW_FORMAL_TASK' ? [
+            { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
+        ] : []),
         ...(hideSearchApplication
             ? []
             : [
@@ -334,19 +407,13 @@ const QuickLinks = ({
     }, []);
 
     const handleReferToIt = useCallback(async () => {
-        const rawTaskId = String(
-            selectedCaseContext.taskId ??
-            selectedCaseContext.taskCompositeId ??
-            localStorage.getItem("taskId") ??
-            localStorage.getItem("taskCompositeId") ??
-            "",
-        ).trim();
-        const taskId = normalizeTaskId(rawTaskId);
-        const instanceId = String(
-            selectedCaseContext.instanceId ??
-            localStorage.getItem("instanceId") ??
-            "",
-        ).trim();
+        const trimmedRemarks = referToItRemarks.trim();
+
+        if (!trimmedRemarks) {
+            setReferToItRemarksTouched(true);
+            setReferToItError("Remarks are required.");
+            return;
+        }
 
         if (!safeApplicationNumber || !safeUserId) {
             setReferToItError("Application number or user ID is missing.");
@@ -363,22 +430,26 @@ const QuickLinks = ({
             return;
         }
 
+        const payload = {
+            businessType: safeBusinessType,
+            requestContext: {
+                taskId,
+                userId: safeUserId,
+                appNo: safeApplicationNumber,
+                instanceId,
+                remarks: trimmedRemarks,
+                decision: referToItDecisionCode,
+            },
+        };
+
+        console.log("Referring to IT -> Complete task payload", payload)
+
         try {
             setReferToItLoading(true);
             setReferToItError(null);
 
             await dispatch(
-                completeTaskThunk({
-                    businessType: safeBusinessType,
-                    requestContext: {
-                        taskId,
-                        userId: safeUserId,
-                        appNo: safeApplicationNumber,
-                        instanceId,
-                        remarks: "",
-                        decision: referToItDecisionCode,
-                    },
-                }),
+                completeTaskThunk(payload),
             ).unwrap();
 
             setOpenReferToItDialog(false);
@@ -399,15 +470,17 @@ const QuickLinks = ({
         safeApplicationNumber,
         safeBusinessType,
         safeUserId,
-        selectedCaseContext.instanceId,
-        selectedCaseContext.taskId,
-        selectedCaseContext.taskCompositeId,
+        taskId,
+        instanceId,
+        referToItRemarks,
     ]);
 
     const handleNavigate = useCallback(
         (label: string, path: string, unavailableMessage?: string) => {
             if (label === "Refer to IT") {
                 setReferToItError(null);
+                setReferToItRemarks("");
+                setReferToItRemarksTouched(false);
                 setOpenReferToItDialog(true);
                 return;
             }
@@ -505,9 +578,9 @@ const QuickLinks = ({
                                         justifyContent: "space-between",
                                         cursor:
                                             path ||
-                                            unavailableMessage ||
-                                            label === "Refer to IT" ||
-                                            label === "Proposal Form & Documents"
+                                                unavailableMessage ||
+                                                label === "Refer to IT" ||
+                                                label === "Proposal Form & Documents"
                                                 ? "pointer"
                                                 : "default",
                                     }}
@@ -589,7 +662,12 @@ const QuickLinks = ({
             <CustomDialog
                 open={openReferToItDialog}
                 showCloseIcon={true}
-                onClose={() => setOpenReferToItDialog(false)}
+                onClose={() => {
+                    setOpenReferToItDialog(false);
+                    setReferToItError(null);
+                    setReferToItRemarks("");
+                    setReferToItRemarksTouched(false);
+                }}
                 title={
                     <Typography
                         sx={{
@@ -608,10 +686,10 @@ const QuickLinks = ({
                         onClick={() => {
                             void handleReferToIt();
                         }}
-                        disabled={referToItLoading}
+                        disabled={!referToItRemarks.trim() || referToItLoading}
                         sx={{ borderRadius: "50px", paddingX: "40px" }}
                     >
-                        {referToItLoading ? "Submitting..." : "Refer to IT"}
+                        {referToItLoading ? "Submitting..." : "Submit"}
                     </CustomButton>
                 }
             >
@@ -623,6 +701,27 @@ const QuickLinks = ({
                 >
                     Kindly refer this ticket to IT Team.
                 </Typography>
+                <CustomTextField
+                    fullWidth
+                    required
+                    multiline
+                    minRows={2}
+                    placeholder="Enter remarks"
+                    value={referToItRemarks}
+                    onChange={(event) => {
+                        setReferToItRemarks(event.target.value);
+                        setReferToItError(null);
+                    }}
+                    onBlur={() => setReferToItRemarksTouched(true)}
+                    error={referToItRemarksTouched && !referToItRemarks.trim()}
+                    helperText={
+                        referToItRemarksTouched && !referToItRemarks.trim()
+                            ? "Remarks are required."
+                            : " "
+                    }
+                    disabled={referToItLoading}
+                    sx={{ mt: 2 }}
+                />
                 {referToItError && (
                     <Typography
                         sx={{

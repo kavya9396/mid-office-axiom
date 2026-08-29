@@ -14,6 +14,14 @@ type CounterOfferSelectOption = {
     disabled: boolean;
 };
 
+type CounterOfferProps = {
+    reasonOptions: Array<{
+        label: string;
+        value: string;
+        disabled?: boolean;
+    }>;
+};
+
 const COUNTER_OFFER_MASTER_TYPES = {
     emrClass: "EMR_CLASS",
     feClass: "FE_CLASS",
@@ -113,7 +121,24 @@ type CounterOfferField =
     | "revisedPremium"
     | "reasons";
 
-type CounterOfferValues = Record<CounterOfferField, string>;
+type CounterOfferValues = {
+    changedSA: string;
+    changedPT: string;
+    changedPPT: string;
+    classRequirement: string;
+    classRequirementRemarks: string;
+    classRequirement2: string;
+    classRequirement2Remarks: string;
+    code: string;
+    revisedPremium: string;
+    reasons: string;
+};
+
+type CounterOfferStringField = {
+    [Field in CounterOfferField]: CounterOfferValues[Field] extends string
+        ? Field
+        : never;
+}[CounterOfferField];
 
 export type CounterOfferTableState = Record<
     CounterOfferRowKey,
@@ -167,7 +192,7 @@ const initialCounterOfferTable: CounterOfferTableState = {
     },
 };
 
-const CounterOffer = () => {
+const CounterOffer = ({ reasonOptions }: CounterOfferProps) => {
     const masters = useAppSelector(
         (state) => state.drs.masters,
     );
@@ -238,18 +263,22 @@ const CounterOffer = () => {
         };
     }, [drsData]);
 
-    const updateCounterOfferCell = (
+    const updateCounterOfferCell = <Field extends CounterOfferField>(
         rowKey: CounterOfferRowKey,
-        field: CounterOfferField,
-        value: string,
+        field: Field,
+        value: CounterOfferValues[Field],
     ) => {
-        setCounterOfferTable((previous) => ({
-            ...previous,
-            [rowKey]: {
+        setCounterOfferTable((previous) => {
+            const updatedRow: CounterOfferValues = {
                 ...previous[rowKey],
                 [field]: value,
-            },
-        }));
+            };
+
+            return {
+                ...previous,
+                [rowKey]: updatedRow,
+            };
+        });
     };
 
     const counterOfferRows: CounterOfferTableRow[] = [
@@ -361,12 +390,9 @@ const CounterOffer = () => {
     const renderEditableField = (
         value: string,
         row: CounterOfferTableRow,
-        field: CounterOfferField,
+        field: CounterOfferStringField,
     ) => {
-        const isTextField =
-            field === "reasons" ||
-            field === "classRequirementRemarks" ||
-            field === "classRequirement2Remarks";
+        const isTextField = field === "reasons";
 
         return (
             <CustomTextField
@@ -398,6 +424,47 @@ const CounterOffer = () => {
         );
     };
 
+    const renderReasonDropdown = (
+        value: string,
+        row: CounterOfferTableRow,
+        field:
+            | "classRequirementRemarks"
+            | "classRequirement2Remarks",
+    ) => (
+        <Box
+            sx={{
+                minWidth: 0,
+                "& .MuiInputBase-root": {
+                    height: 32,
+                    fontSize: "10px",
+                    borderRadius: "8px",
+                },
+                "& .MuiSelect-select": {
+                    px: "6px !important",
+                    py: "4px !important",
+                    fontSize: "10px",
+                },
+                "& .MuiChip-root": {
+                    height: 22,
+                    fontSize: "9px",
+                },
+            }}
+        >
+            <CustomSelect
+                value={value}
+                options={reasonOptions}
+                placeholder="Select reason"
+                onChange={(selectedValue) =>
+                    updateCounterOfferCell(
+                        row.rowKey,
+                        field,
+                        selectedValue,
+                    )
+                }
+            />
+        </Box>
+    );
+
     const renderClassRequirementDropdown = (
         value: string,
         row: CounterOfferTableRow,
@@ -405,7 +472,13 @@ const CounterOffer = () => {
     ) => {
         const options =
             field === "classRequirement"
-                ? emrClassOptions
+                ? row.rowKey === "baseSumAssured"
+                    ? emrClassOptions.filter(
+                        (option) =>
+                            option.value.trim().toUpperCase() !==
+                            "DECLINE",
+                    )
+                    : emrClassOptions
                 : feClassOptions;
 
         return (
@@ -568,7 +641,7 @@ const CounterOffer = () => {
             header: "EMR Reasons",
             width: "10%",
             render: (value, row) =>
-                renderEditableField(
+                renderReasonDropdown(
                     String(value ?? ""),
                     row,
                     "classRequirementRemarks",
@@ -590,7 +663,7 @@ const CounterOffer = () => {
             header: "FE Reasons",
             width: "10%",
             render: (value, row) =>
-                renderEditableField(
+                renderReasonDropdown(
                     String(value ?? ""),
                     row,
                     "classRequirement2Remarks",

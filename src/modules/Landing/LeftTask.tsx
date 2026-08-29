@@ -49,6 +49,28 @@ interface LeftTaskProps {
 const normalizeKey = (value: string) =>
   value.replace(/[\s_-]/g, "").toUpperCase();
 
+const getTwoCharacterInitials = (value: string): string => {
+  const words = toDisplayLabel(value)
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (words.length >= 2) {
+    return `${words[0][0]}${words[1][0]}`.toUpperCase();
+  }
+
+  const singleWord = words[0] ?? "";
+
+  if (!singleWord) {
+    return "--";
+  }
+
+  return singleWord
+    .slice(0, 2)
+    .padEnd(2, singleWord[0])
+    .toUpperCase();
+};
+
 export const SELECTED_TASK_POOL_KEY = "selectedTaskPoolKey";
 
 const LeftTask = ({
@@ -151,11 +173,12 @@ const LeftTask = ({
           >
             <Typography
               sx={{
-                fontSize: "16px",
+                fontSize: "12px",
+                fontWeight: 700,
                 cursor: "pointer",
               }}
             >
-              Ã°Å¸â€œâ€š
+              {getTwoCharacterInitials(taskName)}
             </Typography>
           </Tooltip>
         ) : (
@@ -344,10 +367,11 @@ const LeftTask = ({
                 {isCollapsed ? (
                   <Typography
                     sx={{
-                      fontSize: "16px",
+                      fontSize: "12px",
+                      fontWeight: 700,
                     }}
                   >
-                    Ã°Å¸â€˜Â¥
+                    UH
                   </Typography>
                 ) : (
                   <>
@@ -529,10 +553,11 @@ const LeftTask = ({
             {isCollapsed ? (
               <Typography
                 sx={{
-                  fontSize: "16px",
+                  fontSize: "12px",
+                  fontWeight: 700,
                 }}
               >
-                Ã°Å¸â€œâ€¹
+                {getTwoCharacterInitials("ALL_CASES")}
               </Typography>
             ) : (
               <>

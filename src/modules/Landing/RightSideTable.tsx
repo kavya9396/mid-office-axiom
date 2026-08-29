@@ -37,6 +37,31 @@ const normalizeRoleKey = (value: string) =>
 const normalizeTaskKey = (value: string) =>
   value.replace(/_/g, " ");
 
+const storeTaskIdInContext = (taskId: string) => {
+  localStorage.setItem("taskId", taskId);
+
+  try {
+    const selectedCaseContext = JSON.parse(
+      localStorage.getItem("selectedCaseContext") ?? "{}",
+    ) as Record<string, unknown>;
+
+    localStorage.setItem(
+      "selectedCaseContext",
+      JSON.stringify({
+        ...selectedCaseContext,
+        taskId,
+      }),
+    );
+  } catch {
+    localStorage.setItem(
+      "selectedCaseContext",
+      JSON.stringify({
+        taskId,
+      }),
+    );
+  }
+};
+
 const RightSideTable = ({
   selectedRole,
   selectedTask,
@@ -69,29 +94,31 @@ const RightSideTable = ({
      * Example:
      * application.taskId = "23574"
      */
-    const taskId = String(application.taskId ?? "").trim();
+    const taskId = String(
+      application.taskId ?? "",
+    ).trim();
 
     const applicationNumber = String(
       application.applicationNo ??
-      application.applicationNumber ??
-      application.application_no ??
-      "",
+        application.applicationNumber ??
+        application.application_no ??
+        "",
     ).trim();
 
     const businessType =
       String(
         application.businessType ??
-        localStorage.getItem("businessType") ??
-        "retail",
+          localStorage.getItem("businessType") ??
+          "retail",
       )
         .trim()
         .toLowerCase() || "retail";
 
     const roleType = String(
       application.roleType ??
-      selectedTask ??
-      localStorage.getItem("roleType") ??
-      "",
+        selectedTask ??
+        localStorage.getItem("roleType") ??
+        "",
     )
       .trim()
       .toUpperCase();
@@ -115,6 +142,7 @@ const RightSideTable = ({
 
     try {
       setClaimLoading(true);
+      setClaimError("");
 
       const response = await dispatch(
         claimTaskThunk({
@@ -151,8 +179,22 @@ const RightSideTable = ({
         ).unwrap();
       }
 
-      // Open the application only after claim and BRE succeed.
+      /*
+       * Store the task ID before opening the application.
+       * QuickLinks can read it directly from localStorage.
+       */
+      localStorage.setItem("taskId", taskId);
+
+      /*
+       * The parent may create or replace selectedCaseContext.
+       */
       onApplicationClick(application);
+
+      /*
+       * Update selectedCaseContext after the parent callback
+       * so that taskId is not accidentally removed.
+       */
+      storeTaskIdInContext(taskId);
     } catch (error) {
       setClaimError(
         typeof error === "string"
@@ -180,7 +222,7 @@ const RightSideTable = ({
           overflow: "auto",
         }}
       >
-        {/* your existing ApplicationWorkspace here */}
+        {/* Your existing ApplicationWorkspace here */}
       </Box>
     );
   }
@@ -277,7 +319,7 @@ const RightSideTable = ({
           showAddButton={
             selectedRole
               ? normalizeRoleKey(selectedRole) ===
-              "USERMANAGEMENT"
+                "USERMANAGEMENT"
               : false
           }
         />

@@ -11,7 +11,8 @@
       "timestamp": "14/08/2026, 1108hrs",
       "action": "Decline",
       "reTriggerCount": 2
-    },"latestBreDecision": {
+    },
+    "latestBreDecision": {
       "decision": "ST",
       "initialDecision": "Non-STP",
       "isInitial": "Y",
@@ -293,7 +294,7 @@
           "isDisabled": "",
           "percentageOfImpairment": "",
           "typeOfImpairment": "",
-          "smokerStatus":"Non Smoker",
+          "smokerStatus": "Non Smoker",
           "illnessOrImpairment": [],
           "substanceConsumption": [
             {
@@ -413,7 +414,8 @@
           "payuEligibilityStatus": "N",
           "payuServiceStatus": "N"
         }
-      },{
+      },
+      {
         "memberType": "proposer",
         "lifeType": "LA",
         "customerType": "SHNI",
@@ -851,7 +853,7 @@
           "type": "base",
           "code": "E36",
           "name": "ICICI Pru GIFT Pro",
-          "category":"Term",
+          "category": "Term",
           "allowedUwDecisions": [],
           "faceValue": "1068000",
           "coverageOption": "",
@@ -891,7 +893,7 @@
           "type": "rider",
           "code": "E36",
           "name": "ICICI Pru GIFT Pro",
-          "category":"Term",
+          "category": "Term",
           "allowedUwDecisions": [],
           "faceValue": "1068000",
           "coverageOption": "",
@@ -950,7 +952,14 @@
       "reason": "",
       "userId": ""
     },
-
+    "itSection": {
+      "referenceNumber": "IT-2026-000123",
+      "raisedBy": "Vijay Aahale",
+      "raisedDate": "2026-08-29T10:30:00",
+      "userRemarks": "Application is unable to proceed due to an unexpected system error.",
+      "errorCode": "IT-ERR-5001",
+      "errorDescription": "Unable to complete the requested operation. Please retry after some time."
+    },
     "requirementManagement": [
       {
         "team": "UW",
@@ -975,7 +984,8 @@
         "udsLink": "",
         "ocrStatus": "",
         "ocrDoc": ""
-      },{
+      },
+      {
         "team": "UW",
         "profile": "",
         "category": "Financial",
@@ -998,7 +1008,8 @@
         "udsLink": "",
         "ocrStatus": "",
         "ocrDoc": ""
-      },{
+      },
+      {
         "team": "UW",
         "profile": "",
         "category": "Financial",
@@ -1021,7 +1032,8 @@
         "udsLink": "",
         "ocrStatus": "",
         "ocrDoc": ""
-      },{
+      },
+      {
         "team": "UW",
         "profile": "",
         "category": "Medical",
@@ -1044,7 +1056,8 @@
         "udsLink": "",
         "ocrStatus": "",
         "ocrDoc": ""
-      },{
+      },
+      {
         "team": "UW",
         "profile": "",
         "category": "Medicals",
@@ -1067,7 +1080,8 @@
         "udsLink": "",
         "ocrStatus": "",
         "ocrDoc": ""
-      },{
+      },
+      {
         "team": "UW",
         "profile": "",
         "category": "Financial",
@@ -1445,7 +1459,7 @@
         }
       ],
       "openOtherTasks": [],
-      "riskDetails": [{"riskReferralDate":"21-08-2026"}],
+      "riskDetails": [{ "riskReferralDate": "21-08-2026" }],
       "auditTrail": [
         {
           "dateTime": "2026-08-17T10:54:39.116432",

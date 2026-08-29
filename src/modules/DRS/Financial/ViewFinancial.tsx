@@ -3702,14 +3702,6 @@ const ViewFinancial = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
-          gap: 1,
-          px: { xs: 1, sm: 1.5 },
-          py: 0.75,
-          mb: 1,
-          border: "1px solid #D7E3EC",
-          borderRadius: 1.5,
-          background: "linear-gradient(90deg, #F7FBFE 0%, #FFFFFF 100%)",
-          boxShadow: "0 2px 8px rgba(15, 91, 146, 0.07)",
         }}
       >
         <BackButton
@@ -3717,28 +3709,20 @@ const ViewFinancial = () => {
           onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
         />
 
-        <Button
-          onClick={handleUdsLinkClick}
+        <CustomButton
           variant="text"
           size="small"
+          onClick={handleUdsLinkClick}
           sx={{
-            minWidth: "auto",
-            px: 0.5,
-            color: "#344054",
-            fontSize: 12,
-            fontWeight: 600,
             textTransform: "none",
+            px: 1,
+            color: "#9A2529",
+            fontWeight: 600,
             textDecoration: "underline",
-            textUnderlineOffset: "3px",
-            "&:hover": {
-              color: "#1D2939",
-              backgroundColor: "transparent",
-              textDecoration: "underline",
-            },
           }}
         >
           View UDS Link
-        </Button>
+        </CustomButton>
       </Box>
 
       {roleType !== "CPT_DATA_ENTRY_NMR_TASK" && (

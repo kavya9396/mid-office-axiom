@@ -706,6 +706,7 @@ const UWDecision = () => {
         "Reject",
         "Decline",
         "Postpone",
+        "Counter Offer",
     ].includes(caseUWDecisionLabel) ||
         isStandardDecision ||
         isBorderlineStandardDecision;
@@ -730,6 +731,7 @@ const UWDecision = () => {
         "Reject",
         "Decline",
         "Postpone",
+        "Counter Offer",
     ]);
 
     const showDecisionType = caseUWDecisionLabel === "Refer to Sr Uw" || caseUWDecisionLabel === "Refer to HOD";
@@ -745,7 +747,7 @@ const UWDecision = () => {
     const healthSmokerStatus = toText(
         healthDetails.smokerStatus ?? healthDetails.smoker_status,
     );
-    const resolvedDecisionCode = (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision)
+    const resolvedDecisionCode = (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision || isCounterOfferDecision)
         ? (decisionCode || toText(
             returnedDecisionCode.value ?? returnedDecisionCode.code,
         ))
@@ -1302,7 +1304,7 @@ const UWDecision = () => {
                         )}
 
                         {showDecisionCode && (
-                            (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision) ? (
+                            (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision || isCounterOfferDecision) ? (
                                 <Box>
                                     <Typography
                                         sx={{
@@ -1646,7 +1648,9 @@ const UWDecision = () => {
                         //     </TableContainer>
                         // </Box>
 
-                        <CounterOffer />
+                        <CounterOffer
+                            reasonOptions={medicalAndNonMedicalOptions}
+                        />
                     )}
 
                 </Box>
