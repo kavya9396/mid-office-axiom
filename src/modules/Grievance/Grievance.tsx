@@ -55,6 +55,7 @@ const Grievance = () => {
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [error, setError] = useState("");
+  const [remarksErrors, setRemarksErrors] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const load = async () => {
@@ -90,33 +91,38 @@ const Grievance = () => {
   }), [drsData.summary]);
 
   const rows = useMemo<Row[]>(() => {
-    const byMember = new Map(summaries.map((item) => [normalize(item.memberType), item]));
-
     return array(drsData.requirementManagement).map(record)
       .filter((item) => ["medical", "medicals"].includes(normalize(item.category)))
       .map((item, index) => {
-        const memberType = text(item.memberType ?? item.member_type ?? item.lifeMemberType);
-        const summary = byMember.get(normalize(memberType));
-        const isProposer = normalize(memberType).includes("proposer");
-        const rowId = `${text(item.requirementId) || "requirement"}-${memberType}-${index}`;
+        const profile = text(
+          item.profile ?? item.memberType ?? item.member_type ?? item.lifeMemberType,
+        );
+        const rowId = `${text(item.requirementId) || "requirement"}-${profile}-${index}`;
 
         return {
           rowId,
           requirementId: text(item.requirementId) || index,
-          memberType,
+          memberType: profile,
           fupCode: text(item.fupCode),
-          memberName: (isProposer ? summary?.proposerName : summary?.lifeAssuredName) || memberType || "-",
+          memberName: profile || "-",
           remarksByUser: editedRemarks[rowId] ?? text(item.remarksByUser ?? item.remarksUser),
           remarksByTpa: text(item.remarksByTpa ?? item.remarksTpa),
         };
       });
-  }, [drsData.requirementManagement, editedRemarks, summaries]);
+  }, [drsData.requirementManagement, editedRemarks]);
 
   const changeRemarks = (rowId: string, remarksByUser: string) => {
     setEditedRemarks((current) => ({
       ...current,
       [rowId]: remarksByUser,
     }));
+    if (remarksByUser.trim()) {
+      setRemarksErrors((current) => {
+        const next = new Set(current);
+        next.delete(rowId);
+        return next;
+      });
+    }
   };
 
   const allSelected = rows.length > 0 && selectedRowIds.size === rows.length;
@@ -136,8 +142,21 @@ const Grievance = () => {
   };
 
   const submit = async () => {
-    const grievanceDetails = rows
-      .filter((row) => selectedRowIds.has(row.rowId))
+    const selectedRows = rows.filter((row) => selectedRowIds.has(row.rowId));
+    const rowsWithoutRemarks = selectedRows
+      .filter((row) => !row.remarksByUser.trim())
+      .map((row) => row.rowId);
+
+    if (rowsWithoutRemarks.length > 0) {
+      setRemarksErrors(new Set(rowsWithoutRemarks));
+      setError("Remarks By User is mandatory for every selected requirement.");
+      return;
+    }
+
+    setRemarksErrors(new Set());
+    setError("");
+
+    const grievanceDetails = selectedRows
       .map((row) => ({
       requirementId: row.requirementId,
       memberType: row.memberType,
@@ -198,8 +217,8 @@ const Grievance = () => {
       ),
     },
     { key: "fupCode", header: "FUP Code", width: "20%", render: (value) => <Typography sx={{ fontSize: 12 }}>{text(value) || "-"}</Typography> },
-    { key: "memberName", header: "Life Assured / Proposer", width: "25%", render: (value) => <Typography sx={{ fontSize: 12 }}>{text(value) || "-"}</Typography> },
-    { key: "remarksByUser", header: "Remarks By User", width: "30%", render: (_value, row) => <TextField fullWidth size="small" value={row.remarksByUser} placeholder="Enter remarks..." slotProps={{ htmlInput: { maxLength: 1000 } }} onChange={(event) => changeRemarks(row.rowId, event.target.value)} sx={{ "& .MuiInputBase-root": { fontSize: 12, backgroundColor: "#fff" } }} /> },
+    { key: "memberName", header: "Profile", width: "25%", render: (value) => <Typography sx={{ fontSize: 12 }}>{text(value) || "-"}</Typography> },
+    { key: "remarksByUser", header: "Remarks By User *", width: "30%", render: (_value, row) => <TextField fullWidth required error={remarksErrors.has(row.rowId)} helperText={remarksErrors.has(row.rowId) ? "Remarks are mandatory." : ""} size="small" value={row.remarksByUser} placeholder="Enter remarks..." slotProps={{ htmlInput: { maxLength: 1000 } }} onChange={(event) => changeRemarks(row.rowId, event.target.value)} sx={{ "& .MuiInputBase-root": { fontSize: 12, backgroundColor: "#fff" }, "& .MuiFormHelperText-root": { mx: 0, fontSize: 10 } }} /> },
     { key: "remarksByTpa", header: "Remarks By TPA", width: "25%", render: (value) => <Typography sx={{ fontSize: 12 }}>{text(value)}</Typography> },
   ];
 
