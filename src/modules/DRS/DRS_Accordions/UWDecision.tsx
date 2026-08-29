@@ -31,9 +31,27 @@ import CounterOffer from "./CounterOffer";
 
 const referralRoleMap: Record<string, "hod" | "sruw" | "cmo"> = {
     "Refer to HOD": "hod",
-    "Refer to Sr Uw": "sruw",
+    "Refer to Sr UW": "sruw",
     "Refer to CMO": "cmo",
     "Refer to HO CMO": "cmo",
+};
+
+const canonicalReferralDecisionLabel = (value: string) => {
+    const normalized = value
+        .trim()
+        .replace(/[._-]+/g, " ")
+        .replace(/\s+/g, " ")
+        .toUpperCase();
+
+    if (normalized === "REFER TO SR UW") return "Refer to Sr UW";
+    if (normalized === "REFER TO HOD") return "Refer to HOD";
+    if (normalized === "REFER TO HO CMO") return "Refer to HO CMO";
+    if (normalized === "REFER TO CMO") return "Refer to CMO";
+    if (normalized === "REFER TO RISK") return "Refer to Risk";
+    if (normalized === "REFER TO REINSURER") return "Refer to Reinsurer";
+    if (normalized === "REFER TO ACCUITY") return "Refer to Accuity";
+
+    return value.trim();
 };
 
 type ReferralUser = UserRoleUser & {
@@ -330,8 +348,14 @@ const UWDecision = () => {
     const [smokerStatus, setSmokerStatus] = useState("");
     // const [counterOfferTable, setCounterOfferTable] = useState(createCounterOfferTableState);
     const [parallelDecision, setParallelDecision] = useState("");
+    const [parallelReferralValue, setParallelReferralValue] = useState("");
+    const [parallelRoleUsers, setParallelRoleUsers] = useState<ReferralUser[]>([]);
+    const [parallelRoleUsersLoading, setParallelRoleUsersLoading] = useState(false);
     const [holdReasons, setHoldReasons] = useState("");
     const [decisionType, setDecisionType] = useState("counterSign");
+    const [referralReason, setReferralReason] = useState("");
+    const [firstUwDecisionCode, setFirstUwDecisionCode] = useState("");
+    const [firstUwSmokerStatus, setFirstUwSmokerStatus] = useState("");
     const [referralValue, setReferralValue] = useState("");
     const [confirmationDialogOpen, setConfirmationDialogOpen] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
@@ -550,8 +574,14 @@ const UWDecision = () => {
             .filter((option) => option.label && option.value);
     }, [masters]);
 
+    const parallelDecisionLabel = canonicalReferralDecisionLabel(
+        toMasterLabel(parallelDecision, parallelUWDecisionOptions),
+    );
+
     const firstUWDecisionOptions = useMemo(() => {
-        const misc = (masters as Record<string, unknown> | undefined)?.misc;
+        const masterRecord = toRecord(masters);
+        const masterData = toRecord(masterRecord.data);
+        const misc = masterRecord.misc ?? masterData.misc;
 
         if (!Array.isArray(misc)) {
             return [];
@@ -562,7 +592,7 @@ const UWDecision = () => {
                 const item = option as Record<string, unknown>;
 
                 return (
-                    String(item.type ?? "").trim().toUpperCase() === "UW_DECISION" &&
+                    String(item.type ?? "").trim().toUpperCase() === "TERM_DEC" &&
                     String(item.isActive ?? "").trim().toUpperCase() === "Y"
                 );
             })
@@ -585,8 +615,53 @@ const UWDecision = () => {
                     ).trim(),
                 };
             })
+            .filter((option) => option.label && option.value)
+            .filter((option) => {
+                const isBorderlineStandard =
+                    option.value.trim().toUpperCase() === "BOR_STD" ||
+                    option.label.trim().toUpperCase() === "BORDERLINE STANDARD";
+
+                return !isBorderlineStandard || canShowStandardDecision;
+            });
+    }, [canShowStandardDecision, masters]);
+
+    const referralReasonOptions = useMemo(() => {
+        const masterRecord = toRecord(masters);
+        const masterData = toRecord(masterRecord.data);
+        const misc = masterRecord.misc ?? masterData.misc;
+        const list = Array.isArray(misc) ? misc : [];
+
+        const referralDecisionLabel = ["Refer to HOD", "Refer to Sr UW"].includes(
+            caseUWDecisionLabel,
+        )
+            ? caseUWDecisionLabel
+            : parallelDecisionLabel;
+        const isSrUwReferral = referralDecisionLabel === "Refer to Sr UW";
+        const reasonType = isSrUwReferral
+            ? decisionType === "opinion"
+                ? "REF_SRUW_OP_RSN"
+                : "REF_SRUW_CS_RSN"
+            : decisionType === "opinion"
+                ? "REF_HOD_OP_RSN"
+                : "REF_HOD_CS_RSN";
+
+        return list
+            .filter((option) => {
+                const item = toRecord(option);
+                return (
+                    toText(item.type).toUpperCase() === reasonType &&
+                    toText(item.isActive).toUpperCase() === "Y"
+                );
+            })
+            .map((option) => {
+                const item = toRecord(option);
+                return {
+                    label: toText(item.description ?? item.value ?? item.code),
+                    value: toText(item.code ?? item.value),
+                };
+            })
             .filter((option) => option.label && option.value);
-    }, [masters]);
+    }, [caseUWDecisionLabel, decisionType, masters, parallelDecisionLabel]);
 
     const riskReferralReasonOptions = useMemo(() => {
         const misc = (masters as Record<string, unknown> | undefined)?.misc;
@@ -706,6 +781,7 @@ const UWDecision = () => {
         "Reject",
         "Decline",
         "Postpone",
+        "Counter Offer",
     ].includes(caseUWDecisionLabel) ||
         isStandardDecision ||
         isBorderlineStandardDecision;
@@ -718,21 +794,62 @@ const UWDecision = () => {
         "Raise Requirement",
     ].includes(caseUWDecisionLabel);
 
-    const showFirstUWDecision = [
+    const firstUwReferralLabels = [
         "Refer to HOD",
-        "Refer to Sr Uw",
+        "Refer to Sr UW",
         "Refer to Reinsurer",
+        "Refer to Risk",
+        "Refer to Accuity",
         "Refer to HO CMO",
         "Refer to CMO",
-    ].includes(caseUWDecisionLabel);
+    ];
+    const showFirstUWDecision =
+        firstUwReferralLabels.includes(caseUWDecisionLabel) ||
+        firstUwReferralLabels.includes(parallelDecisionLabel);
 
     const fetchDecisionCodes = new Set([
         "Reject",
         "Decline",
         "Postpone",
+        "Counter Offer",
     ]);
 
-    const showDecisionType = caseUWDecisionLabel === "Refer to Sr Uw" || caseUWDecisionLabel === "Refer to HOD";
+    const activeCounterSignReferralLabel = ["Refer to HOD", "Refer to Sr UW"].includes(
+        caseUWDecisionLabel,
+    )
+        ? caseUWDecisionLabel
+        : parallelDecisionLabel;
+    const isReferToHod = activeCounterSignReferralLabel === "Refer to HOD";
+    const isReferToSrUw = activeCounterSignReferralLabel === "Refer to Sr UW";
+    const showReferralDecisionFlow = isReferToHod || isReferToSrUw;
+    const showDecisionType = showReferralDecisionFlow;
+    const showFirstUwTerminalFlow = showFirstUWDecision && Boolean(uwDecision);
+    const referralReasonLabel = isReferToSrUw
+        ? "Sr UW Reasons"
+        : "HOD Reasons";
+    const firstUwDecisionLabel = toMasterLabel(
+        uwDecision,
+        firstUWDecisionOptions,
+    );
+    const normalizedFirstUwDecisionLabel = firstUwDecisionLabel
+        .trim()
+        .replace(/[\s_-]+/g, " ")
+        .toUpperCase();
+    const isFirstUwStandard = normalizedFirstUwDecisionLabel === "STANDARD";
+    const isFirstUwBorderlineStandard =
+        normalizedFirstUwDecisionLabel === "BORDERLINE STANDARD" ||
+        uwDecision.trim().toUpperCase() === "BOR_STD";
+    const isFirstUwReject = normalizedFirstUwDecisionLabel === "REJECT";
+    const isFirstUwDecline = normalizedFirstUwDecisionLabel === "DECLINE";
+    const isFirstUwPostpone = normalizedFirstUwDecisionLabel === "POSTPONE";
+    const isFirstUwCounterOffer = normalizedFirstUwDecisionLabel === "COUNTER OFFER";
+    const showFirstUwDecisionCode =
+        isFirstUwStandard ||
+        isFirstUwBorderlineStandard ||
+        isFirstUwReject ||
+        isFirstUwDecline ||
+        isFirstUwPostpone ||
+        isFirstUwCounterOffer;
     const isRejectDecision = caseUWDecisionLabel === "Reject";
     const isDeclineDecision = caseUWDecisionLabel === "Decline";
     const isPostponeDecision = caseUWDecisionLabel === "Postpone";
@@ -745,7 +862,9 @@ const UWDecision = () => {
     const healthSmokerStatus = toText(
         healthDetails.smokerStatus ?? healthDetails.smoker_status,
     );
-    const resolvedDecisionCode = (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision)
+    const resolvedFirstUwSmokerStatus =
+        healthSmokerStatus || firstUwSmokerStatus;
+    const resolvedDecisionCode = (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision || isCounterOfferDecision)
         ? (decisionCode || toText(
             returnedDecisionCode.value ?? returnedDecisionCode.code,
         ))
@@ -790,6 +909,9 @@ const UWDecision = () => {
     };
     const selectedReferralUser = roleUsers.find(
         (user) => user.ntid === referralValue,
+    );
+    const selectedParallelReferralUser = parallelRoleUsers.find(
+        (user) => user.ntid === parallelReferralValue,
     );
 
     const handleSubmit = async () => {
@@ -876,6 +998,18 @@ const UWDecision = () => {
                                 : isPostponeDecision && postponeIibCode !== undefined
                                     ? postponeIibCode
                                     : undefined;
+            const optionalFirstUwReason: number | number[] | undefined =
+                isFirstUwBorderlineStandard && borderlineStandardIibCodes.length > 0
+                    ? borderlineStandardIibCodes
+                    : isFirstUwCounterOffer && counterOfferIibCodes.length > 0
+                        ? counterOfferIibCodes
+                        : isFirstUwReject && rejectIibCode.length > 0
+                            ? rejectIibCode
+                            : isFirstUwDecline && selectedDeclineIibCodes.length > 0
+                                ? selectedDeclineIibCodes
+                                : isFirstUwPostpone && postponeIibCode !== undefined
+                                    ? postponeIibCode
+                                    : undefined;
 
             const completeTaskPayload = {
                 businessType: safeBusinessType,
@@ -904,6 +1038,41 @@ const UWDecision = () => {
                         : {}),
                     ...(selectedReferralUser?.ntid?.trim()
                         ? { ntid: selectedReferralUser.ntid.trim() }
+                        : {}),
+                    ...(selectedReferralConfig && !selectedReferralUser && referralValue.trim()
+                        ? { referralValue: referralValue.trim() }
+                        : {}),
+                    ...(parallelDecision.trim()
+                        ? { parallelDecision: parallelDecision.trim() }
+                        : {}),
+                    ...(selectedParallelReferralUser?.fullName?.trim()
+                        ? { parallelFullName: selectedParallelReferralUser.fullName.trim() }
+                        : {}),
+                    ...(selectedParallelReferralUser?.ntid?.trim()
+                        ? { parallelNtid: selectedParallelReferralUser.ntid.trim() }
+                        : {}),
+                    ...(!selectedParallelReferralUser && parallelReferralValue.trim()
+                        ? { parallelReferralReason: parallelReferralValue.trim() }
+                        : {}),
+                    ...(showReferralDecisionFlow && referralReason.trim()
+                        ? isReferToSrUw
+                            ? { srUwReason: referralReason.trim() }
+                            : { hodReason: referralReason.trim() }
+                        : {}),
+                    ...(showReferralDecisionFlow
+                        ? { decisionType }
+                        : {}),
+                    ...(showFirstUwTerminalFlow && uwDecision.trim()
+                        ? { firstUwDecision: uwDecision.trim() }
+                        : {}),
+                    ...(showFirstUwTerminalFlow && showFirstUwDecisionCode && firstUwDecisionCode.trim()
+                        ? { firstUwDecisionCode: firstUwDecisionCode.trim() }
+                        : {}),
+                    ...(showFirstUwTerminalFlow && optionalFirstUwReason !== undefined
+                        ? { firstUwReason: optionalFirstUwReason }
+                        : {}),
+                    ...(showFirstUwTerminalFlow && isFirstUwStandard && isTermProduct && resolvedFirstUwSmokerStatus.trim()
+                        ? { firstUwSmokerStatus: resolvedFirstUwSmokerStatus.trim() }
                         : {}),
                 },
             };
@@ -1019,8 +1188,72 @@ const UWDecision = () => {
             return;
         }
 
+        if (showReferralDecisionFlow && !referralReason.trim()) {
+            setSubmitMessage(`Please select ${referralReasonLabel}.`);
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (showReferralDecisionFlow && !uwDecision.trim()) {
+            setSubmitMessage("Please select 1st UW Decision.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (showFirstUwTerminalFlow && isFirstUwReject && rejectReason.length === 0) {
+            setSubmitMessage("Please select at least one reject reason.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (showFirstUwTerminalFlow && isFirstUwBorderlineStandard && borderlineStandardReasons.length === 0) {
+            setSubmitMessage("Please select at least one borderline standard reason.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (showFirstUwTerminalFlow && isFirstUwDecline && declineReasons.length === 0) {
+            setSubmitMessage("Please select at least one decline reason.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (showFirstUwTerminalFlow && isFirstUwPostpone && !postponeReason.trim()) {
+            setSubmitMessage("Please select postpone reason.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (showFirstUwTerminalFlow && isFirstUwPostpone && !postponementPeriod.trim()) {
+            setSubmitMessage("Please select postponement period.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (showFirstUwTerminalFlow && isFirstUwCounterOffer && counterOfferReasons.length === 0) {
+            setSubmitMessage("Please select at least one counter offer reason.");
+            setSubmitStatus("failure");
+            return;
+        }
+
         if (referralRoleMap[caseUWDecisionLabel] && !selectedReferralUser) {
             setSubmitMessage("Please select a referral user.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (referralRoleMap[parallelDecisionLabel] && !selectedParallelReferralUser) {
+            setSubmitMessage("Please select a user for the parallel UW decision.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        if (
+            selectedParallelReferralConfig &&
+            !referralRoleMap[parallelDecisionLabel] &&
+            !parallelReferralValue.trim()
+        ) {
+            setSubmitMessage("Please complete the parallel UW referral field.");
             setSubmitStatus("failure");
             return;
         }
@@ -1042,13 +1275,26 @@ const UWDecision = () => {
             }));
     }, [excludedReferralNtids, roleUsers]);
 
+    const parallelUserOptions = useMemo(() => {
+        return parallelRoleUsers
+            .filter(
+                (user) =>
+                    user.status.trim().toUpperCase() === "ACTIVE" &&
+                    Boolean(user.fullName?.trim()),
+            )
+            .map((user) => ({
+                label: user.fullName!.trim(),
+                value: user.ntid,
+            }));
+    }, [parallelRoleUsers]);
+
     const referralConfig = {
         "Refer to HOD": {
             label: "Name of HoD",
             options: userOptions,
         },
 
-        "Refer to Sr Uw": {
+        "Refer to Sr UW": {
             label: "Name of Sr.UW",
             options: userOptions,
         },
@@ -1076,8 +1322,22 @@ const UWDecision = () => {
 
     const selectedReferralConfig = referralConfig[caseUWDecisionLabel as keyof typeof referralConfig];
 
+    const parallelReferralConfig = {
+        "Refer to HOD": { label: "Name of HoD", options: parallelUserOptions },
+        "Refer to Sr UW": { label: "Name of Sr.UW", options: parallelUserOptions },
+        "Refer to HO CMO": { label: "Name of HO CMO", options: parallelUserOptions },
+        "Refer to CMO": { label: "Name of CMO", options: parallelUserOptions },
+        "Refer to Risk": { label: "Risk Referral Reasons", options: riskReferralReasonOptions },
+        "Refer to Reinsurer": { label: "Reinsurer Referral reasons", options: reinsurerReferralReasonOptions },
+    };
+    const selectedParallelReferralConfig = parallelReferralConfig[
+        parallelDecisionLabel as keyof typeof parallelReferralConfig
+    ];
+
     const fetchUsersForReferralDecision = (decisionLabel: string) => {
-        const roleName = referralRoleMap[decisionLabel];
+        const roleName = referralRoleMap[
+            canonicalReferralDecisionLabel(decisionLabel)
+        ];
         setRoleUsers([]);
         setRoleUsersLoading(false);
         setExcludedReferralNtids([]);
@@ -1108,10 +1368,49 @@ const UWDecision = () => {
             .finally(() => setRoleUsersLoading(false));
     };
 
+    const fetchUsersForParallelDecision = (decisionLabel: string) => {
+        const roleName = referralRoleMap[
+            canonicalReferralDecisionLabel(decisionLabel)
+        ];
+        setParallelRoleUsers([]);
+        setParallelRoleUsersLoading(false);
+
+        if (!roleName) return;
+
+        setParallelRoleUsersLoading(true);
+        dispatch(userRoleNameThunk({ roleName }))
+            .unwrap()
+            .then((response) => {
+                setParallelRoleUsers(
+                    Array.isArray(response.data?.users)
+                        ? response.data.users
+                        : [],
+                );
+            })
+            .catch((error) => {
+                setParallelRoleUsers([]);
+                setSubmitMessage(
+                    error instanceof Error
+                        ? error.message
+                        : "Failed to fetch users for the parallel decision.",
+                );
+                setSubmitStatus("failure");
+            })
+            .finally(() => setParallelRoleUsersLoading(false));
+    };
+
     const filteredParallelOptions = useMemo(() => {
-        return parallelUWDecisionOptions.filter(
-            (option) => option.label !== caseUWDecisionLabel
+        const normalizeDecisionLabel = (value: string) =>
+            value.trim().replace(/[\s_-]+/g, " ").toUpperCase();
+        const normalizedCaseDecision = normalizeDecisionLabel(
+            caseUWDecisionLabel,
         );
+
+        return parallelUWDecisionOptions.filter((option) => {
+            const normalizedOptionLabel = normalizeDecisionLabel(option.label);
+
+            return normalizedOptionLabel !== normalizedCaseDecision;
+        });
     }, [caseUWDecisionLabel, parallelUWDecisionOptions]);
 
     return (
@@ -1226,12 +1525,19 @@ const UWDecision = () => {
                                 setOutlier("");
                                 fetchUsersForReferralDecision(selectedLabel);
                                 setReferralValue("");
+                                setParallelDecision("");
+                                setParallelReferralValue("");
+                                setParallelRoleUsers([]);
                                 setBorderlineStandardReasons([]);
                                 setCounterOfferReasons([]);
                                 setRejectReason([]);
                                 setDeclineReasons([]);
                                 setPostponeReason("");
                                 setPostponementPeriod("");
+                                setReferralReason("");
+                                setUwDecision("");
+                                setFirstUwDecisionCode("");
+                                setFirstUwSmokerStatus("");
                                 // setCounterOfferTable(createCounterOfferTableState());
                                 setSubmitMessage(null);
                                 setSubmitStatus(null);
@@ -1438,6 +1744,11 @@ const UWDecision = () => {
                                 label={selectedReferralConfig.label}
                                 value={referralValue}
                                 onChange={(value: string) => {
+                                    if (!referralRoleMap[caseUWDecisionLabel]) {
+                                        setReferralValue(value);
+                                        return;
+                                    }
+
                                     const selectedUser = roleUsers.find(
                                         (user) => user.ntid === value,
                                     );
@@ -1470,8 +1781,33 @@ const UWDecision = () => {
                             <CustomSelect
                                 label="Parallel UW Decision"
                                 value={parallelDecision}
-                                onChange={setParallelDecision}
+                                onChange={(value: string) => {
+                                    const selectedLabel = toMasterLabel(
+                                        value,
+                                        parallelUWDecisionOptions,
+                                    );
+                                    setParallelDecision(value);
+                                    setParallelReferralValue("");
+                                    setReferralReason("");
+                                    setDecisionType("counterSign");
+                                    fetchUsersForParallelDecision(selectedLabel);
+                                }}
                                 options={filteredParallelOptions}
+                            />
+                        )}
+
+                        {showParallelDecision && selectedParallelReferralConfig && (
+                            <CustomSelect
+                                label={selectedParallelReferralConfig.label}
+                                value={parallelReferralValue}
+                                onChange={setParallelReferralValue}
+                                options={selectedParallelReferralConfig.options}
+                                disabled={parallelRoleUsersLoading}
+                                placeholder={
+                                    parallelRoleUsersLoading
+                                        ? "Loading users..."
+                                        : "Select value"
+                                }
                             />
                         )}
 
@@ -1484,13 +1820,143 @@ const UWDecision = () => {
                             />
                         )}
 
+                        {showDecisionType && (
+                            <Box sx={{ alignSelf: "end" }}>
+                                <CustomRadioGroup
+                                    row
+                                    value={decisionType}
+                                    onChange={(e) => {
+                                        setDecisionType(e.target.value);
+                                        setReferralReason("");
+                                    }}
+                                    options={[
+                                        { label: "Counter Sign", value: "counterSign" },
+                                        { label: "Opinion", value: "opinion" },
+                                    ]}
+                                />
+                            </Box>
+                        )}
+
+                        {showReferralDecisionFlow && (
+                            <CustomSelect
+                                label={referralReasonLabel}
+                                value={referralReason}
+                                onChange={setReferralReason}
+                                options={referralReasonOptions}
+                                placeholder={`Select ${referralReasonLabel}`}
+                            />
+                        )}
+
                         {showFirstUWDecision && (
                             <CustomSelect
                                 label="1st UW Decision"
                                 value={uwDecision}
-                                onChange={setUwDecision}
+                                onChange={async (value: string) => {
+                                    setUwDecision(value);
+                                    setFirstUwDecisionCode("");
+                                    setFirstUwSmokerStatus("");
+                                    setBorderlineStandardReasons([]);
+                                    setCounterOfferReasons([]);
+                                    setRejectReason([]);
+                                    setDeclineReasons([]);
+                                    setPostponeReason("");
+                                    setPostponementPeriod("");
+
+                                    const selectedOption = firstUWDecisionOptions.find(
+                                        (option) => option.value === value,
+                                    );
+                                    const selectedLabel = toText(selectedOption?.label);
+                                    const normalizedLabel = selectedLabel
+                                        .trim()
+                                        .replace(/[\s_-]+/g, " ")
+                                        .toUpperCase();
+                                    const shouldFetch = [
+                                        "STANDARD",
+                                        "BORDERLINE STANDARD",
+                                        "REJECT",
+                                        "DECLINE",
+                                        "POSTPONE",
+                                        "COUNTER OFFER",
+                                    ].includes(normalizedLabel);
+
+                                    if (!shouldFetch) return;
+
+                                    const response = await dispatch(
+                                        decisionCodeThunk({
+                                            decision: value,
+                                            dataentry: dataEntry,
+                                        } as Parameters<typeof decisionCodeThunk>[0]),
+                                    ).unwrap();
+
+                                    setFirstUwDecisionCode(toText(
+                                        findFirstScalarByKey(response, [
+                                            "decisionCode",
+                                            "code",
+                                            "value",
+                                        ]),
+                                    ));
+                                    setFirstUwSmokerStatus(toText(
+                                        findFirstScalarByKey(response, [
+                                            "smokerStatus",
+                                            "smoker_status",
+                                        ]),
+                                    ));
+                                }}
                                 options={firstUWDecisionOptions}
                             />
+                        )}
+
+                        {showFirstUwTerminalFlow && showFirstUwDecisionCode && (
+                            <Box>
+                                <Typography sx={{ fontSize: "11px", color: "#444", lineHeight: 1.2, mb: 0.5 }}>
+                                    Decision Code
+                                </Typography>
+                                <CustomTextField
+                                    fullWidth
+                                    size="small"
+                                    value={firstUwDecisionCode}
+                                    disabled
+                                    sx={{ "& .MuiInputBase-root": { height: 34, borderRadius: "6px" } }}
+                                />
+                            </Box>
+                        )}
+
+                        {showFirstUwTerminalFlow && isFirstUwReject && (
+                            <CustomSelect label="Reject Reason" value={rejectReason} multiple={true} maxCount={3} onChange={setRejectReason} options={nonMedicalOptions} />
+                        )}
+
+                        {showFirstUwTerminalFlow && isFirstUwBorderlineStandard && (
+                            <CustomSelect label="Borderline Standard Reason" value={borderlineStandardReasons} multiple={true} maxCount={3} onChange={setBorderlineStandardReasons} options={medicalAndNonMedicalOptions} />
+                        )}
+
+                        {showFirstUwTerminalFlow && isFirstUwDecline && (
+                            <CustomSelect label="Decline Reason" value={declineReasons} multiple={true} maxCount={3} onChange={setDeclineReasons} options={medicalAndNonMedicalOptions} />
+                        )}
+
+                        {showFirstUwTerminalFlow && isFirstUwPostpone && (
+                            <>
+                                <CustomSelect label="Postpone Reason" value={postponeReason} onChange={setPostponeReason} options={medicalAndNonMedicalOptions} />
+                                <CustomSelect label="Postponement Period" value={postponementPeriod} onChange={setPostponementPeriod} options={postponementPeriodOptions} />
+                            </>
+                        )}
+
+                        {showFirstUwTerminalFlow && isFirstUwCounterOffer && (
+                            <CustomSelect label="Counter Offer Reason" value={counterOfferReasons} multiple={true} maxCount={3} onChange={setCounterOfferReasons} options={medicalAndNonMedicalOptions} />
+                        )}
+
+                        {showFirstUwTerminalFlow && isFirstUwStandard && isTermProduct && (
+                            <Box>
+                                <Typography sx={{ fontSize: "11px", color: "#444", lineHeight: 1.2, mb: 0.5 }}>
+                                    Smoker Status
+                                </Typography>
+                                <CustomTextField
+                                    fullWidth
+                                    size="small"
+                                    value={resolvedFirstUwSmokerStatus}
+                                    disabled
+                                    sx={{ "& .MuiInputBase-root": { height: 34, borderRadius: "6px", backgroundColor: "#fff" } }}
+                                />
+                            </Box>
                         )}
                     </Box>
 
@@ -1500,21 +1966,8 @@ const UWDecision = () => {
                         </>
                     )}
 
-                    {showDecisionType && (
-                        <Box sx={{ mt: 1 }}>
-                            <CustomRadioGroup
-                                row
-                                value={decisionType}
-                                onChange={(e) => setDecisionType(e.target.value)}
-                                options={[
-                                    { label: "Counter Sign", value: "counterSign" },
-                                    { label: "Opinion", value: "opinion" },
-                                ]}
-                            />
-                        </Box>
-                    )}
-
-                    {isCounterOfferDecision && (
+                    {(isCounterOfferDecision ||
+                        (showFirstUwTerminalFlow && isFirstUwCounterOffer)) && (
                         // <Box sx={{ mt: 1.25 }}>
                         //     <Typography
                         //         sx={{
