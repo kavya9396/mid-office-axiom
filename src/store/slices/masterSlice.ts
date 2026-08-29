@@ -29,11 +29,37 @@ const masterSlice = createSlice({
         state.loading = false;
         state.error = null;
 
-        // A requirement_mst lookup returns only that requested master.
-        // Merge it so previously loaded decision masters stay available.
+        const existingResponse = state.data;
+        const incomingResponse = action.payload;
+
+        /*
+         * Login returns the complete master response:
+         * {
+         *   data: {
+         *     misc: [...],
+         *     reason: [...],
+         *     gender: [...],
+         *     requirement_mst: {...}
+         *   }
+         * }
+         *
+         * Requirement lookup returns a partial response:
+         * {
+         *   data: {
+         *     requirement_mst: {...}
+         *   }
+         * }
+         *
+         * Merge the nested data object so requirement_mst is updated
+         * without removing misc, reason and other login-time masters.
+         */
         state.data = {
-          ...(state.data ?? {}),
-          ...action.payload,
+          ...(existingResponse ?? {}),
+          ...incomingResponse,
+          data: {
+            ...(existingResponse?.data ?? {}),
+            ...(incomingResponse.data ?? {}),
+          },
         } as MastersResponse;
       })
       .addCase(mastersThunk.rejected, (state, action) => {
