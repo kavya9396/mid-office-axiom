@@ -146,6 +146,7 @@ const PIVVDecision = () => {
 
       const response = await dispatch(
         completeTaskThunk({
+          businessType: safeBusinessType,
           requestContext: {
             appNo: taskContext.appNo,
             userId: taskContext.userId,

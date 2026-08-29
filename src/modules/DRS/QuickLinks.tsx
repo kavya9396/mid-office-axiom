@@ -193,12 +193,13 @@ const QuickLinks = ({
     } = useAppContext();
     const drsData = useAppSelector((state) => state.drs.data);
     const masterData = useAppSelector((state) => state.masterData);
+    const selectedCaseContext = getSelectedCaseContext();
 
     const safeBusinessType =
         normalizeBusinessType(businessType) ??
+        normalizeBusinessType(selectedCaseContext.businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
         "retail";
-    const selectedCaseContext = getSelectedCaseContext();
     const safeApplicationNumber = String(
         applicationNo ??
         applicationNumber ??
@@ -368,6 +369,7 @@ const QuickLinks = ({
 
             await dispatch(
                 completeTaskThunk({
+                    businessType: safeBusinessType,
                     requestContext: {
                         taskId,
                         userId: safeUserId,

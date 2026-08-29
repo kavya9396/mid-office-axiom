@@ -648,10 +648,10 @@ const RequirementManagementTable = ({
   const businessType = (
     application?.businessType ??
     localStorage.getItem("businessType") ??
-    ""
+    "retail"
   )
     .trim()
-    .toLowerCase();
+    .toLowerCase() || "retail";
 
   const userId = localStorage.getItem("username") ?? "";
   const normalizedRoleType = normalizeText(roleType).toUpperCase();
@@ -1451,6 +1451,7 @@ const RequirementManagementTable = ({
       } as unknown as ApplicantProfileSubmitRequest["data"];
       const payload = {
         applicationNo: applicationNumber,
+        businessType,
         roleType: roleType,
         sections: ["requirementManagement"],
         userId,
@@ -1472,6 +1473,7 @@ const RequirementManagementTable = ({
           roleType,
           sections: drsSections,
           userId,
+          businessType,
         }),
       ).unwrap();
 

@@ -73,24 +73,25 @@ const RightSideTable = ({
 
     const applicationNumber = String(
       application.applicationNo ??
-        application.applicationNumber ??
-        application.application_no ??
-        "",
+      application.applicationNumber ??
+      application.application_no ??
+      "",
     ).trim();
 
-    const businessType = String(
-      application.businessType ??
+    const businessType =
+      String(
+        application.businessType ??
         localStorage.getItem("businessType") ??
-        "",
-    )
-      .trim()
-      .toLowerCase();
+        "retail",
+      )
+        .trim()
+        .toLowerCase() || "retail";
 
     const roleType = String(
       application.roleType ??
-        selectedTask ??
-        localStorage.getItem("roleType") ??
-        "",
+      selectedTask ??
+      localStorage.getItem("roleType") ??
+      "",
     )
       .trim()
       .toUpperCase();
@@ -137,14 +138,15 @@ const RightSideTable = ({
       // PRE_LOGIN_CUW_TASK did not run BRE in the previous DRS flow.
       if (roleType !== "PRE_LOGIN_CUW_TASK") {
         const eventName =
-          businessType === "retail"
-            ? "BRE-RETAIL"
-            : "BRE-GROUP";
+          businessType === "group"
+            ? "BRE-GROUP"
+            : "BRE-RETAIL";
 
         await dispatch(
           breThunk({
             eventName,
             applicationNumber,
+            businessType,
           }),
         ).unwrap();
       }
@@ -275,7 +277,7 @@ const RightSideTable = ({
           showAddButton={
             selectedRole
               ? normalizeRoleKey(selectedRole) ===
-                "USERMANAGEMENT"
+              "USERMANAGEMENT"
               : false
           }
         />

@@ -5,13 +5,17 @@
 //  When USE_MOCK = true  → every thunk hits its mock JSON file.
 //  When USE_MOCK = false → every thunk hits the real API URL.
 // ============================================================
- 
 export const USE_MOCK = false; // <-- flip this one flag to switch modes
- 
+
+export type BusinessType = "retail" | "group";
+
+type BusinessSpecificUrls = Readonly<Record<BusinessType, string>>;
+
 // --------------- URL registry --------------------------------
-// Add or edit URLs here; thunk files need no further changes.
+// Add or edit URLs here; thunk files only need to pass businessType
+// for endpoints that differ between Retail and Group.
 // -------------------------------------------------------------
- 
+
 const apiUrls = {
   // Auth
   login: {
@@ -29,21 +33,27 @@ const apiUrls = {
     mock: "/mock/inbox/poolData.json",
   },
   searchApplication: {
-    real: "http://172.30.74.182:8094/api/v1/drs/ui/search-application",
+    real: {
+      retail: "http://172.30.74.182:8094/api/v1/drs/ui/search-application",
+      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/search-application",
+    },
     mock: "/mock/inbox/search-application.json",
   },
   columnConfigSave: {
     real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns/save",
     mock: "/mock/inbox/columnConfigSave.json",
   },
-  columnConfigFetch:{
-real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
+  columnConfigFetch: {
+    real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     mock: "/mock/inbox/columnConfigFetch.json",
   },
- 
-   // DRS
+
+  // DRS
   drs: {
-    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
+    real: {
+      retail: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
+      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/drs-data",
+    },
     mock: "/mock/drs/drs.mock.json",
   },
   masters: {
@@ -55,19 +65,31 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     mock: "/mock/drs/decisionCodes.json",
   },
   bre: {
-    real: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
+    real: {
+      retail: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
+      group: "http://172.30.84.196:8132/icic-group-bpm-service/v1/group/events",
+    },
     mock: "/mock/drs/breRetrigger.mock.json",
   },
   breRetrigger: {
-    real: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
+    real: {
+      retail: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
+      group: "http://172.30.84.196:8132/icic-group-bpm-service/v1/group/events",
+    },
     mock: "/mock/drs/breRetrigger.mock.json",
   },
   applicantProfileSubmit: {
-    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
+    real: {
+      retail: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
+      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/drs-data",
+    },
     mock: "/mock/drs/applicantProfileSubmit.mock.json",
   },
   customerProfileSubmit: {
-    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
+    real: {
+      retail: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
+      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/drs-data",
+    },
     mock: "/mock/drs/customerProfileSubmit.mock.json",
   },
   referToIt: {
@@ -87,11 +109,17 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     mock: "/mock/drs/preIssuanceRequestChangeSubmit.mock.json",
   },
   requirementManagementSave: {
-    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
+    real: {
+      retail: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
+      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/drs-data",
+    },
     mock: "/mock/drs/requirementManagementSubmit.mock.json",
   },
   completeTask: {
-    real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/complete-task/retail",
+    real: {
+      retail: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/complete-task/retail",
+      group: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/complete-task/group",
+    },
     mock: "/mock/drs/completeTask.mock.json",
   },
   referralUsers: {
@@ -110,14 +138,13 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     real: "/api/drs/risk-details",
     mock: "/mock/drs/drs.mock.json",
   },
- 
+
   //Claim Task
-    claimTask: {
+  claimTask: {
     real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/user-tasks/claim",
-    mock: "/mock/inbox/claimTask.mock.json"
+    mock: "/mock/inbox/claimTask.mock.json",
   },
- 
- 
+
   // Medical
   medicalView: {
     real: "/api/medical/view",
@@ -151,7 +178,7 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     real: "http://172.30.74.182:8155/icic-medical-service/v1/medical-data/save",
     mock: "/mock/drs/medicalSaveAndCalculate.mock.json",
   },
- 
+
   // Financial
   financialView: {
     real: "http://172.30.74.182:8156/icic-finance-service/v1/fetch",
@@ -169,13 +196,13 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     real: "http://172.30.74.182:8156/icic-finance-service/v1/save",
     mock: "/mock/drs/financialCommissionCalculate.mock.json",
   },
- 
+
   // Previous Policies
   previousPoliciesView: {
     real: "/api/previousPolicies/view",
     mock: "/mock/drs/previousPolicies.mock.json",
   },
- 
+
   // Grievance
   raiseGrievance: {
     real: "/api/grievance/view",
@@ -194,23 +221,37 @@ real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/pool-columns",
     mock: "/mock/drs/grievanceApplicationSubmit.mock.json",
   },
 
-  //pre login
-  prelogin:{
-     real: " http://172.30.74.182:8142/icic-prelogin-service/v1/applications/fetch",
+  // Pre-login
+  prelogin: {
+    real: " http://172.30.74.182:8142/icic-prelogin-service/v1/applications/fetch",
     mock: "/mock/drs/prelogin.mock.json",
   },
-  userRoleName:{
-     real: "http://172.30.74.182:8103/icic-iam-user-service/v1/users/by-role/{roleName}",
+  userRoleName: {
+    real: "http://172.30.74.182:8103/icic-iam-user-service/v1/users/by-role/{roleName}",
     mock: "/mock/drs/userRoleName.mock.json",
-  }
+  },
 } as const;
- 
+
 export type ApiKey = keyof typeof apiUrls;
- 
-/** Returns the resolved URL based on the USE_MOCK flag. */
-export const url = (key: ApiKey): string =>
-  USE_MOCK ? apiUrls[key].mock : apiUrls[key].real;
- 
- 
- 
- 
+
+const normalizeBusinessType = (businessType?: string): BusinessType =>
+  businessType?.trim().toLowerCase() === "group" ? "group" : "retail";
+
+/**
+ * Returns the resolved URL based on USE_MOCK and businessType.
+ * Shared endpoints ignore businessType. Business-specific endpoints default
+ * to Retail when businessType is missing or is not "group".
+ */
+export const url = (key: ApiKey, businessType?: string): string => {
+  const endpoint = apiUrls[key];
+
+  if (USE_MOCK) {
+    return endpoint.mock;
+  }
+
+  const realUrl: string | BusinessSpecificUrls = endpoint.real;
+
+  return typeof realUrl === "string"
+    ? realUrl
+    : realUrl[normalizeBusinessType(businessType)];
+};

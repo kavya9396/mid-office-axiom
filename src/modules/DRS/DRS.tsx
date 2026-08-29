@@ -316,15 +316,15 @@ const DRS = () => {
     application?.businessType ??
     selectedCaseContext.businessType ??
     localStorage.getItem("businessType") ??
-    "",
+    "retail",
   )
     .trim()
     .toLowerCase();
 
   const eventName =
-    businessType === "retail"
-      ? "BRE-RETAIL"
-      : "BRE-GROUP";
+    businessType === "group"
+      ? "BRE-GROUP"
+      : "BRE-RETAIL";
       console.log('eventName',businessType,eventName)
 
   useEffect(() => {
@@ -344,6 +344,7 @@ const DRS = () => {
       applicationNo,
       userId,
       roleType,
+      businessType,
       sections.join(","),
     ].join("|");
 
@@ -364,6 +365,7 @@ const DRS = () => {
               userId,
               roleType,
               sections,
+              businessType,
             }),
           ).unwrap(),
         ];
@@ -376,6 +378,7 @@ const DRS = () => {
               breThunk({
                 eventName,
                 applicationNumber: applicationNo,
+                businessType,
               }),
             ).unwrap(),
           );
@@ -409,6 +412,7 @@ const DRS = () => {
     applicationNo,
     userId,
     roleType,
+    businessType,
     sections,
     eventName,
   ]);
@@ -514,6 +518,7 @@ const DRS = () => {
      * because the missing-value checks have completed.
      */
     const payload = {
+      businessType,
       requestContext: {
         taskId,
         userId,
@@ -532,6 +537,7 @@ const DRS = () => {
         breThunk({
           eventName,
           applicationNumber: applicationNo,
+          businessType,
         }),
       ).unwrap();
 

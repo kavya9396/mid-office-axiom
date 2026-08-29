@@ -21,7 +21,14 @@ const openTaskColumns: Column<OpenOtherTaskRow>[] = [
     header: "Service ID",
     width: "13%",
     render: (value) => (
-      <Typography component="span" sx={{ color: "#0B4F8C", textDecoration: "underline", cursor: "pointer" }}>
+      <Typography
+        component="span"
+        sx={{
+          color: "#0B4F8C",
+          textDecoration: "underline",
+          cursor: "pointer",
+        }}
+      >
         {String(value ?? "-")}
       </Typography>
     ),
@@ -37,6 +44,7 @@ const openTaskColumns: Column<OpenOtherTaskRow>[] = [
 
 interface SelectedCaseContext {
   applicationNo?: string;
+  businessType?: string;
   source?: string;
   readOnly?: boolean;
 }
@@ -48,7 +56,9 @@ const toRecord = (value: unknown): Record<string, unknown> =>
 
 const readSelectedCaseContext = (): SelectedCaseContext => {
   try {
-    return JSON.parse(localStorage.getItem("selectedCaseContext") ?? "{}") as SelectedCaseContext;
+    return JSON.parse(
+      localStorage.getItem("selectedCaseContext") ?? "{}",
+    ) as SelectedCaseContext;
   } catch {
     return {};
   }
@@ -58,6 +68,7 @@ const readCachedSearchQuickLinks = (): Record<string, unknown> => {
   try {
     const rawValue = localStorage.getItem(SEARCH_RESULT_STORAGE_KEY);
     if (!rawValue) return {};
+
     const storedResult = toRecord(JSON.parse(rawValue));
     return toRecord(toRecord(storedResult.data).quickLinks);
   } catch {
@@ -72,6 +83,7 @@ const normalizeOpenTaskRows = (rows: unknown): OpenOtherTasks => {
 
   return rows.map((row) => {
     const item = toRecord(row);
+
     return {
       serviceID: toDisplay(item.serviceID),
       ct: toDisplay(item.ct),
@@ -93,19 +105,42 @@ const OpenTasksPage = () => {
 
   const [selectedCaseContext] = useState(readSelectedCaseContext);
   const [cachedSearchQuickLinks] = useState(readCachedSearchQuickLinks);
-  const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
+  const [quickLinksData, setQuickLinksData] =
+    useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const safeBusinessType = businessType ?? "retail";
-  const safeApplicationNumber = applicationNumber?.trim() || selectedCaseContext.applicationNo?.trim() || "";
-  const isFromSearchApplication = selectedCaseContext.source === "searchApplication" && selectedCaseContext.readOnly === true;
+  const safeBusinessType =
+    String(
+      businessType ??
+        selectedCaseContext.businessType ??
+        localStorage.getItem("businessType") ??
+        "retail",
+    )
+      .trim()
+      .toLowerCase() || "retail";
+
+  const safeApplicationNumber =
+    applicationNumber?.trim() ||
+    selectedCaseContext.applicationNo?.trim() ||
+    "";
+
+  const isFromSearchApplication =
+    selectedCaseContext.source === "searchApplication" &&
+    selectedCaseContext.readOnly === true;
 
   const reduxQuickLinks = useMemo(
-    () => toRecord((drsData as unknown as Record<string, unknown> | null)?.quickLinks),
+    () =>
+      toRecord(
+        (drsData as unknown as Record<string, unknown> | null)?.quickLinks,
+      ),
     [drsData],
   );
+
   const hasReduxOpenTasks = Array.isArray(reduxQuickLinks.openOtherTasks);
-  const hasCachedSearchOpenTasks = isFromSearchApplication && Array.isArray(cachedSearchQuickLinks.openOtherTasks);
+  const hasCachedSearchOpenTasks =
+    isFromSearchApplication &&
+    Array.isArray(cachedSearchQuickLinks.openOtherTasks);
+
   const effectiveQuickLinksData = !safeApplicationNumber
     ? null
     : hasReduxOpenTasks
@@ -113,23 +148,48 @@ const OpenTasksPage = () => {
       : hasCachedSearchOpenTasks
         ? cachedSearchQuickLinks
         : quickLinksData;
+
   const rows = useMemo<OpenOtherTasks>(
     () => normalizeOpenTaskRows(effectiveQuickLinksData?.openOtherTasks),
     [effectiveQuickLinksData],
   );
 
   useEffect(() => {
-    if (!safeApplicationNumber || hasReduxOpenTasks || hasCachedSearchOpenTasks) return;
+    if (
+      !safeApplicationNumber ||
+      hasReduxOpenTasks ||
+      hasCachedSearchOpenTasks
+    ) {
+      return;
+    }
 
     const loadOpenTasks = async () => {
       try {
         setLoading(true);
+
         const roleType = localStorage.getItem("roleType") ?? "";
-        const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "System").trim() || "System";
+        const userId =
+          (
+            localStorage.getItem("userId") ??
+            localStorage.getItem("username") ??
+            "System"
+          ).trim() || "System";
+
         const response = await dispatch(
-          drsThunk({ applicationNo: safeApplicationNumber, userId, roleType, sections: ["quickLinks"] }),
+          drsThunk({
+            applicationNo: safeApplicationNumber,
+            userId,
+            roleType,
+            businessType: safeBusinessType,
+            sections: ["quickLinks"],
+          }),
         ).unwrap();
-        setQuickLinksData(toRecord((response.data as unknown as Record<string, unknown>)?.quickLinks));
+
+        setQuickLinksData(
+          toRecord(
+            (response.data as unknown as Record<string, unknown>)?.quickLinks,
+          ),
+        );
       } catch (error) {
         console.error("Failed to load open tasks:", error);
         setQuickLinksData(null);
@@ -139,29 +199,48 @@ const OpenTasksPage = () => {
     };
 
     void loadOpenTasks();
-  }, [dispatch, hasCachedSearchOpenTasks, hasReduxOpenTasks, safeApplicationNumber]);
+  }, [
+    dispatch,
+    hasCachedSearchOpenTasks,
+    hasReduxOpenTasks,
+    safeApplicationNumber,
+    safeBusinessType,
+  ]);
 
   const handleBack = () => {
     if (isFromSearchApplication) {
       navigate(getSearchApplicationPath(), {
-        state: { restoreSearchResult: true, applicationNo: safeApplicationNumber },
+        state: {
+          restoreSearchResult: true,
+          applicationNo: safeApplicationNumber,
+        },
       });
       return;
     }
+
     navigate(getDRSPath(safeBusinessType, safeApplicationNumber));
   };
 
-  const title = `Pre Issuance Servicing${loading ? " (Loading...)" : ""}`;
+  const tableTitle = `Pre Issuance Servicing${loading ? " (Loading...)" : ""}`;
 
   return (
     <Container maxWidth={false} disableGutters>
       <BackButton
-        label={isFromSearchApplication ? "Back to Search Application" : "Back to DRS"}
+        label={
+          isFromSearchApplication
+            ? "Back to Search Application"
+            : "Back to DRS"
+        }
         onClick={handleBack}
       />
+
       <Box sx={{ mt: 1 }}>
         {rows.length > 0 ? (
-          <CustomTable<OpenOtherTaskRow> title={title} columns={openTaskColumns} data={rows} />
+          <CustomTable<OpenOtherTaskRow>
+            title={tableTitle}
+            columns={openTaskColumns}
+            data={rows}
+          />
         ) : (
           <Typography sx={{ fontSize: "14px", fontWeight: 600 }}>
             {loading ? "Loading open tasks..." : "No open tasks found"}

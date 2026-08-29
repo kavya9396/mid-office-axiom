@@ -47,7 +47,14 @@ const Grievance = () => {
   const navigate = useNavigate();
   const navState = useLocation().state as NavState;
   const applicationNumber = navState?.applicationNumber ?? localStorage.getItem("applicationNumber") ?? "";
-  const businessType = navState?.businessType ?? localStorage.getItem("businessType") ?? "retail";
+  const businessType =
+    String(
+      navState?.businessType ??
+        localStorage.getItem("businessType") ??
+        "retail",
+    )
+      .trim()
+      .toLowerCase() || "retail";
   const roleType = localStorage.getItem("roleType") ?? "";
   const userId = localStorage.getItem("userId") ?? "";
   const taskId = navState?.taskId ?? localStorage.getItem("taskId") ?? "";
@@ -71,6 +78,7 @@ const Grievance = () => {
           applicationNo: applicationNumber,
           userId,
           roleType,
+          businessType,
           sections: ["summary", "requirementManagement"],
         })).unwrap();
         const root = record(response);
@@ -82,7 +90,7 @@ const Grievance = () => {
       }
     };
     void load();
-  }, [applicationNumber, dispatch, roleType, userId]);
+  }, [applicationNumber, businessType, dispatch, roleType, userId]);
 
   const summaries = useMemo<Summary[]>(() => array(drsData.summary).map((value) => {
     const item = record(value);
@@ -178,7 +186,15 @@ const Grievance = () => {
       remarksByUser: row.remarksByUser.trim(),
       remarksByTpa: "",
     }));
-    const payload = { applicationNumber, userId, roleType, taskId, instanceId, grievanceDetails };
+    const payload = {
+      applicationNumber,
+      businessType,
+      userId,
+      roleType,
+      taskId,
+      instanceId,
+      grievanceDetails,
+    };
     console.log("Raise grievance request payload:", payload);
     try {
       setSubmitLoading(true);

@@ -1,11 +1,18 @@
-import { createApiThunk } from "./createApiThunk";
 import { url } from "../../services/apiConfig";
-import type { CompleteTaskRequest, CompleteTaskResponse } from "../../types/drs.types";
+import type {
+  CompleteTaskRequest,
+  CompleteTaskResponse,
+} from "../../types/drs.types";
+import { createApiThunk } from "./createApiThunk";
 
-export const completeTaskThunk = createApiThunk<CompleteTaskResponse, CompleteTaskRequest>(
-  "drs/completeTask",
-  {
-    url: url("completeTask"),
-    method: "POST",
-  },
-);
+type BusinessAwareCompleteTaskRequest = CompleteTaskRequest & {
+  businessType: string;
+};
+
+export const completeTaskThunk = createApiThunk<
+  CompleteTaskResponse,
+  BusinessAwareCompleteTaskRequest
+>("drs/completeTask", {
+  url: (request) => url("completeTask", request.businessType),
+  method: "POST",
+});

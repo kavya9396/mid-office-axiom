@@ -216,7 +216,14 @@ const PreviousPolicy = () => {
   const [pagination, setPagination] =
     useState<PaginationState>(initialPagination);
 
-  const safeBusinessType = businessType ?? "retail";
+  const safeBusinessType =
+    String(
+      businessType ??
+        localStorage.getItem("businessType") ??
+        "retail",
+    )
+      .trim()
+      .toLowerCase() || "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = localStorage.getItem("roleType") ?? "";
   const isApplicationIdMissing = !safeApplicationId;
@@ -279,6 +286,7 @@ const PreviousPolicy = () => {
             applicationNo: safeApplicationId,
             userId,
             roleType,
+            businessType: safeBusinessType,
             sections: ["quickLinks"],
           }),
         ).unwrap();
@@ -293,7 +301,14 @@ const PreviousPolicy = () => {
     };
 
     void fetchPreviousPolicies();
-  }, [dispatch, hasReduxPreviousPolicies, isApplicationIdMissing, roleType, safeApplicationId]);
+  }, [
+    dispatch,
+    hasReduxPreviousPolicies,
+    isApplicationIdMissing,
+    roleType,
+    safeApplicationId,
+    safeBusinessType,
+  ]);
 
   const ipruRows = useMemo(() => {
     return getFirstSectionRows(effectiveQuickLinksData, [

@@ -121,6 +121,7 @@ import ApplicationDetails from "./ApplicationDetails";
 import RequirementManagement from "../DRS/DRS_Accordions/RequirementManagement";
 import AuditTrailAccordion from "../DRS/DRS_Accordions/AuditTrail";
 import { useAppDispatch } from "../../store/hooks";
+import { useAppContext } from "../../hooks/useAppContext";
 import type { SearchApiResponse } from "../../types/search.types";
 import { searchThunk } from "../../store/thunks/searchAppThunk";
 import CustomSnackbar from "../../components/ui/SnackBar/Snackbar";
@@ -149,6 +150,16 @@ const initialSnackbarState: SnackbarState = {
 const SearchApplication = () => {
     const navigate = useNavigate();
     const dispatch = useAppDispatch();
+    const { businessType } = useAppContext();
+
+    const safeBusinessType =
+        String(
+            businessType ??
+            localStorage.getItem("businessType") ??
+            "retail",
+        )
+            .trim()
+            .toLowerCase() || "retail";
 
     const [applicationNumber, setApplicationNumber] = useState("");
     const [searchData, setSearchData] = useState<SearchApiResponse | null>(null);
@@ -201,6 +212,7 @@ const SearchApplication = () => {
             const response = await dispatch(
                 searchThunk({
                     applicationNo: normalizedApplicationNumber,
+                    businessType: safeBusinessType,
                 }),
             ).unwrap();
 

@@ -416,9 +416,22 @@ const EditApplicantProfile = ({
   onSave,
 }: EditApplicantProfileProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const { applicationNumber } = useParams<{ applicationNumber: string }>();
+  const {
+    applicationNumber,
+    businessType: routeBusinessType,
+  } = useParams<{
+    applicationNumber: string;
+    businessType: string;
+  }>();
   const roleType = localStorage.getItem("roleType") ?? "CVT_TASK";
   const userId = localStorage.getItem("username") ?? "";
+  const businessType = String(
+    routeBusinessType ??
+      localStorage.getItem("businessType") ??
+      "retail",
+  )
+    .trim()
+    .toLowerCase() || "retail";
   /*
    * MasterDataRoute reloads this shared slice after a browser refresh.
    * Do not read state.drs.masters here because that is not the slice
@@ -470,6 +483,7 @@ const EditApplicantProfile = ({
             applicationNo: applicationNumber ?? "",
             userId,
             roleType,
+            businessType,
             sections: [
               "breDecision",
               "summary",
@@ -510,6 +524,7 @@ const EditApplicantProfile = ({
     memberIndex,
     open,
     masters,
+    businessType,
   ]);
   const update = (field: keyof FormValues, value: string) => {
     let nextValue = value;
@@ -681,11 +696,14 @@ const createUpdatedMember = (
         index === memberIndex ? updatedMember : member,
       );
 
-      const payload: ApplicantProfileSubmitRequest = {
+      const payload: ApplicantProfileSubmitRequest & {
+        businessType: string;
+      } = {
         applicationNo: applicationNumber ?? "",
         roleType,
         sections: ["summary"],
         userId,
+        businessType,
         data: {
           ...drsData,
           summary: updatedSummary,

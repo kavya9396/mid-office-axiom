@@ -507,7 +507,14 @@ const ViewMedical = () => {
   const medicalRequestKeyRef = useRef("");
   const breRequestKeyRef = useRef("");
 
-  const safeBusinessType = businessType ?? "retail";
+  const safeBusinessType =
+    String(
+      businessType ??
+        localStorage.getItem("businessType") ??
+        "retail",
+    )
+      .trim()
+      .toLowerCase() || "retail";
   const safeApplicationId = applicationNumber ?? String(medicalFetchData?.applicationNumber ?? "");
   const isApplicationIdMissing = !safeApplicationId;
   const storedNewTabContext = useMemo(() => getStoredDrsNewTabContext(), []);
@@ -572,7 +579,7 @@ const ViewMedical = () => {
       return;
     }
 
-    const requestKey = `${safeApplicationId}:${roleType}:${userId}`;
+    const requestKey = `${safeBusinessType}:${safeApplicationId}:${roleType}:${userId}`;
     if (drsRequestKeyRef.current === requestKey) {
       return;
     }
@@ -586,6 +593,7 @@ const ViewMedical = () => {
             applicationNo: safeApplicationId,
             userId,
             roleType,
+            businessType: safeBusinessType,
             sections: ["breDecision","latestBreDecision","summary"],
           })
         ).unwrap();
@@ -597,7 +605,14 @@ const ViewMedical = () => {
     };
 
     void fetchDrsContext();
-  }, [dispatch, drsSummaryMembers.length, roleType, safeApplicationId, userId]);
+  }, [
+    dispatch,
+    drsSummaryMembers.length,
+    roleType,
+    safeApplicationId,
+    safeBusinessType,
+    userId,
+  ]);
 
   const medicalSectionGroups = useMemo<MedicalSectionGroup[]>(
     () => {
@@ -686,15 +701,21 @@ const ViewMedical = () => {
   useEffect(() => {
     if (!drsApplicationNumber) return;
 
-    if (breRequestKeyRef.current === drsApplicationNumber) {
+    const requestKey = `${safeBusinessType}:${drsApplicationNumber}`;
+
+    if (breRequestKeyRef.current === requestKey) {
       return;
     }
-    breRequestKeyRef.current = drsApplicationNumber;
+    breRequestKeyRef.current = requestKey;
 
     const callMe = async () => {
       try {
         const response = await dispatch(
-          breRetriggerThunk({ eventName: "ME", applicationNumber: drsApplicationNumber })
+          breRetriggerThunk({
+            eventName: "ME",
+            applicationNumber: drsApplicationNumber,
+            businessType: safeBusinessType,
+          })
         ).unwrap();
 
         const payload = response.data ?? {};
@@ -715,7 +736,7 @@ const ViewMedical = () => {
     };
 
     void callMe();
-  }, [dispatch, drsApplicationNumber]);
+  }, [dispatch, drsApplicationNumber, safeBusinessType]);
 
   const [activeSubSectionId, setActiveSubSectionId] = useState<string>("");
 
@@ -1206,11 +1227,16 @@ const ViewMedical = () => {
       setSubmitError(null);
 
       await dispatch(
-        breThunk({ applicationNumber: safeApplicationId ,eventName:"ME"})
+        breThunk({
+          applicationNumber: safeApplicationId,
+          eventName: "ME",
+          businessType: safeBusinessType,
+        })
       ).unwrap();
 
       await dispatch(
         completeTaskThunk({
+          businessType: safeBusinessType,
           requestContext: {
             taskId,
             instanceId,

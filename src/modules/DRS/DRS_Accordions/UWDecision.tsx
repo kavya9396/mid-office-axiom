@@ -311,6 +311,10 @@ const UWDecision = () => {
         normalizeBusinessType(businessType) ??
         normalizeBusinessType(localStorage.getItem("businessType")) ??
         "retail";
+    const breEventName =
+        safeBusinessType === "group"
+            ? "BRE-GROUP"
+            : "BRE-RETAIL";
 
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
     const [caseUWDecision, setCaseUWDecision] = useState("");
@@ -817,8 +821,9 @@ const UWDecision = () => {
 
             await dispatch(
                 breThunk({
-                    eventName: "BRE-RETAIL",
+                    eventName: breEventName,
                     applicationNumber: taskContext.appNo,
+                    businessType: safeBusinessType,
                 }),
             ).unwrap();
 
@@ -832,6 +837,7 @@ const UWDecision = () => {
                         localStorage.getItem("roleType") ?? "",
                     ).trim(),
                     sections: ["latestBreDecision"],
+                    businessType: safeBusinessType,
                 }),
             ).unwrap();
 
@@ -872,6 +878,7 @@ const UWDecision = () => {
                                     : undefined;
 
             const completeTaskPayload = {
+                businessType: safeBusinessType,
                 requestContext: {
                     taskId: taskContext.taskId,
                     userId: taskContext.userId,
