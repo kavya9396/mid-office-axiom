@@ -1873,6 +1873,22 @@
     ],
     "misc": [
       {
+        "code": "Y",
+        "description": "Yes",
+        "value": "Yes",
+        "isActive": "Y",
+        "miscMastId": "156",
+        "type": "YESNO"
+      },
+      {
+        "code": "N",
+        "description": "No",
+        "value": "No",
+        "isActive": "Y",
+        "miscMastId": "157",
+        "type": "YESNO"
+      },
+      {
         "code": "Waived",
         "description": "Waived",
         "value": "Waived",
