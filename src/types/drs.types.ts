@@ -790,7 +790,8 @@ export type MasterKey =
   |"decision_master"
   | "requirement_status_master"
   | "reason"
-  | "medical";
+  | "medical"
+  |"sales_channel";
 
 export type MastersData = Partial<
   Record<Exclude<MasterKey, "requirementManagement">, MasterOption[]>
