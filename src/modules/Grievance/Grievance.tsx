@@ -1,4 +1,14 @@
-import { Box, Checkbox, Container, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Checkbox,
+  Container,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../components/layout/BackButton";
@@ -47,6 +57,7 @@ const Grievance = () => {
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [error, setError] = useState("");
   const [remarksErrors, setRemarksErrors] = useState<Set<string>>(new Set());
 
@@ -133,8 +144,14 @@ const Grievance = () => {
     });
   };
 
-  const submit = async () => {
+  const validateAndConfirm = () => {
     const selectedRows = rows.filter((row) => selectedRowIds.has(row.rowId));
+
+    if (selectedRows.length === 0) {
+      setError("Please select at least one requirement.");
+      return;
+    }
+
     const rowsWithoutRemarks = selectedRows
       .filter((row) => !row.remarksByUser.trim())
       .map((row) => row.rowId);
@@ -147,7 +164,11 @@ const Grievance = () => {
 
     setRemarksErrors(new Set());
     setError("");
+    setConfirmOpen(true);
+  };
 
+  const submit = async () => {
+    const selectedRows = rows.filter((row) => selectedRowIds.has(row.rowId));
     const grievanceDetails = selectedRows
       .map((row) => ({
       requirementId: row.requirementId,
@@ -161,6 +182,7 @@ const Grievance = () => {
     console.log("Raise grievance request payload:", payload);
     try {
       setSubmitLoading(true);
+      setConfirmOpen(false);
       setError("");
       const response = await dispatch(raiseGrievanceThunk(payload)).unwrap();
       navigate(getInboxPath(businessType), { state: { snackbarMessage: response.message || "Grievance raised successfully." } });
@@ -218,11 +240,36 @@ const Grievance = () => {
       </Box>
       <Box sx={{ mt: 4 }}>{loading ? <Typography sx={{ color: "#6B7280" }}>Loading reports...</Typography> : <CustomTable<Row> title="Medical Requirements" columns={columns} data={rows} />}</Box>
       <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
-        <CustomButton sx={{ minWidth: 180, borderRadius: "50px" }} onClick={submit} disabled={loading || submitLoading || selectedRowIds.size === 0}>
+        <CustomButton sx={{ minWidth: 180, borderRadius: "50px" }} onClick={validateAndConfirm} disabled={loading || submitLoading || selectedRowIds.size === 0}>
           {submitLoading ? "Submitting..." : "Raise Grievance"}
         </CustomButton>
       </Box>
     </Container>
+    <Dialog
+      open={confirmOpen}
+      onClose={() => !submitLoading && setConfirmOpen(false)}
+      fullWidth
+      maxWidth="xs"
+    >
+      <DialogTitle sx={{ fontWeight: 700 }}>Confirm Raise Grievance</DialogTitle>
+      <DialogContent>
+        <Typography sx={{ fontSize: 14 }}>
+          Do you want to raise a grievance for the selected requirement(s)?
+        </Typography>
+      </DialogContent>
+      <DialogActions sx={{ px: 3, pb: 2 }}>
+        <CustomButton
+          variant="outlined"
+          onClick={() => setConfirmOpen(false)}
+          disabled={submitLoading}
+        >
+          Cancel
+        </CustomButton>
+        <CustomButton onClick={submit} disabled={submitLoading}>
+          {submitLoading ? "Submitting..." : "Yes, Raise Grievance"}
+        </CustomButton>
+      </DialogActions>
+    </Dialog>
   </Box>;
 };
 
