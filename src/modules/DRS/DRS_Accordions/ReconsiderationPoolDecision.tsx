@@ -23,71 +23,71 @@ const ReconsiderationPoolDecision = () => {
   const drsData = useAppSelector((state) => state.drs.data as unknown as Record<string, unknown> | null);
   const masters = useAppSelector((state) => state.drs.masters);
   const reconsiderationDecisionOptions = useMemo(() => {
-  const misc = (masters as Record<string, unknown> | undefined)?.misc;
+    const misc = (masters as Record<string, unknown> | undefined)?.misc;
 
-  const toMasterList = (options?: unknown): unknown[] => {
-    if (Array.isArray(options)) return options;
+    const toMasterList = (options?: unknown): unknown[] => {
+      if (Array.isArray(options)) return options;
 
-    if (!options || typeof options !== "object") {
-      return [];
-    }
+      if (!options || typeof options !== "object") {
+        return [];
+      }
 
-    const record = options as Record<string, unknown>;
+      const record = options as Record<string, unknown>;
 
-    if (Array.isArray(record.data)) return record.data;
-    if (Array.isArray(record.options)) return record.options;
-    if (Array.isArray(record.values)) return record.values;
+      if (Array.isArray(record.data)) return record.data;
+      if (Array.isArray(record.options)) return record.options;
+      if (Array.isArray(record.values)) return record.values;
 
-    return Object.values(record).flatMap((value) =>
-      Array.isArray(value) ? value : []
-    );
-  };
+      return Object.values(record).flatMap((value) =>
+        Array.isArray(value) ? value : []
+      );
+    };
 
-  const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
+    const rawList = toMasterList(misc) as Array<Record<string, unknown>>;
 
-  return rawList
-    .filter(
-      (option) =>
-        String(option?.type ?? "").trim().toUpperCase() === "RECONS"
-    )
-    .map((option) => {
-      const code = String(
-        option.code ?? option.key ?? option.value ?? ""
-      ).trim();
+    return rawList
+      .filter(
+        (option) =>
+          String(option?.type ?? "").trim().toUpperCase() === "RECONS"
+      )
+      .map((option) => {
+        const code = String(
+          option.code ?? option.key ?? option.value ?? ""
+        ).trim();
 
-      const description = String(
-        option.description ?? option.label ?? ""
-      ).trim();
+        const description = String(
+          option.description ?? option.label ?? ""
+        ).trim();
 
-      const disabled = Boolean(
-        option.disabled ??
+        const disabled = Boolean(
+          option.disabled ??
           (
             String(option.isActive ?? "")
               .trim()
               .toUpperCase() === "N"
           )
-      );
+        );
 
-      if (!code || !description) return null;
+        if (!code || !description) return null;
 
-      return {
-        label: description,
-        value: code,
-        code,
-        description,
-        type: String(option.type ?? "").trim(),
-        disabled,
-      };
-    })
-    .filter(Boolean) as Array<{
-      label: string;
-      value: string;
-      code: string;
-      description: string;
-      type: string;
-      disabled?: boolean;
-    }>;
-}, [masters]);
+        return {
+          label: description,
+          value: code,
+          code,
+          description,
+          type: String(option.type ?? "").trim(),
+          disabled,
+        };
+      })
+      .filter(Boolean) as Array<{
+        label: string;
+        value: string;
+        code: string;
+        description: string;
+        type: string;
+        disabled?: boolean;
+      }>;
+  }, [masters]);
 
   const safeBusinessType =
     normalizeBusinessType(businessType) ??
@@ -126,6 +126,7 @@ const ReconsiderationPoolDecision = () => {
 
       const response = await dispatch(
         completeTaskThunk({
+          businessType: safeBusinessType,
           requestContext: {
             taskId: taskContext.taskId,
             userId: taskContext.userId,
@@ -177,137 +178,135 @@ const ReconsiderationPoolDecision = () => {
   };
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ p:1 }}>
-        <CustomAccordion title="Reconsideration Pool Decision" defaultExpanded>
-          <Box
-            sx={{
-              mt: 0.75,
-              p: 1.25,
-              borderRadius: "6px",
-              backgroundColor: "#f6f6f6",
-            }}
-          >
-            <Box sx={{ mb: 1 }}>
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  fontWeight: 400,
-                  color: "#444",
-                  mb: 0.5,
-                }}
-              >
-                Remark
-              </Typography>
-              <CustomTextField
-                fullWidth
-                multiline
-                minRows={2}
-                placeholder="Enter remark..."
-                value={remark}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  if (value.length <= 10000) {
-                    setRemark(value);
-                  }
-                }}
-                variant="outlined"
-                size="small"
-                sx={{
-                  backgroundColor: "#fff",
-                  borderRadius: "6px",
-                }}
-              />
-              <Typography
-                sx={{
-                  display: "flex",
-                  justifyContent: "flex-end",
-                  fontSize: "11px",
-                  color: "#888",
-                  mt: 0.25,
-                }}
-              >
-                {remark.length}/10000
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: { xs: "1fr", md: "minmax(260px, 420px)" },
-                gap: 1,
-              }}
-            >
-              <CustomSelect
-                label="Reconsideration Pool Decision"
-                value={decision}
-                onChange={(value) => {
-                  setDecision(value);
-                  setSubmitMessage(null);
-                  setSubmitStatus(null);
-                }}
-                options={reconsiderationDecisionOptions}
-              />
-            </Box>
-          </Box>
-
-          <Box
-            sx={{
-              display: "flex",
-              gap: 1,
-              mt: 1,
-            }}
-          >
-            <CustomButton
-              variant="contained"
-              disabled={isSubmitDisabled || submitLoading}
-              onClick={handleSubmitIntent}
-              sx={{
-                minWidth: 150,
-                height: 36,
-                borderRadius: "50px",
-                fontWeight: 600,
-                px: 2.5,
-                whiteSpace: "nowrap",
-              }}
-            >
-              {submitLoading ? "Submitting..." : "Submit"}
-            </CustomButton>
-          </Box>
-        </CustomAccordion>
-
-        <ConfirmationDialog
-          open={isConfirmOpen}
-          message={dialogMessage}
-          onClose={() => setIsConfirmOpen(false)}
-          onConfirm={() => {
-            setIsConfirmOpen(false);
-            void handleSubmit();
+    <Box sx={{ p: 1 }}>
+      <CustomAccordion title="Reconsideration Pool Decision" defaultExpanded>
+        <Box
+          sx={{
+            mt: 0.75,
+            p: 1.25,
+            borderRadius: "6px",
+            backgroundColor: "#f6f6f6",
           }}
-        />
-        <Snackbar
-          open={Boolean(submitMessage) && submitStatus === "failure"}
-          autoHideDuration={3000}
+        >
+          <Box sx={{ mb: 1 }}>
+            <Typography
+              sx={{
+                fontSize: "12px",
+                fontWeight: 400,
+                color: "#444",
+                mb: 0.5,
+              }}
+            >
+              Remark
+            </Typography>
+            <CustomTextField
+              fullWidth
+              multiline
+              minRows={2}
+              placeholder="Enter remark..."
+              value={remark}
+              onChange={(event) => {
+                const value = event.target.value;
+                if (value.length <= 10000) {
+                  setRemark(value);
+                }
+              }}
+              variant="outlined"
+              size="small"
+              sx={{
+                backgroundColor: "#fff",
+                borderRadius: "6px",
+              }}
+            />
+            <Typography
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                fontSize: "11px",
+                color: "#888",
+                mt: 0.25,
+              }}
+            >
+              {remark.length}/10000
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", md: "minmax(260px, 420px)" },
+              gap: 1,
+            }}
+          >
+            <CustomSelect
+              label="Reconsideration Pool Decision"
+              value={decision}
+              onChange={(value) => {
+                setDecision(value);
+                setSubmitMessage(null);
+                setSubmitStatus(null);
+              }}
+              options={reconsiderationDecisionOptions}
+            />
+          </Box>
+        </Box>
+
+        <Box
+          sx={{
+            display: "flex",
+            gap: 1,
+            mt: 1,
+          }}
+        >
+          <CustomButton
+            variant="contained"
+            disabled={isSubmitDisabled || submitLoading}
+            onClick={handleSubmitIntent}
+            sx={{
+              minWidth: 150,
+              height: 36,
+              borderRadius: "50px",
+              fontWeight: 600,
+              px: 2.5,
+              whiteSpace: "nowrap",
+            }}
+          >
+            {submitLoading ? "Submitting..." : "Submit"}
+          </CustomButton>
+        </Box>
+      </CustomAccordion>
+
+      <ConfirmationDialog
+        open={isConfirmOpen}
+        message={dialogMessage}
+        onClose={() => setIsConfirmOpen(false)}
+        onConfirm={() => {
+          setIsConfirmOpen(false);
+          void handleSubmit();
+        }}
+      />
+      <Snackbar
+        open={Boolean(submitMessage) && submitStatus === "failure"}
+        autoHideDuration={3000}
+        onClose={() => {
+          setSubmitMessage(null);
+          setSubmitStatus(null);
+        }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert
           onClose={() => {
             setSubmitMessage(null);
             setSubmitStatus(null);
           }}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          severity="error"
+          variant="filled"
+          sx={{ width: "100%" }}
         >
-          <Alert
-            onClose={() => {
-              setSubmitMessage(null);
-              setSubmitStatus(null);
-            }}
-            severity="error"
-            variant="filled"
-            sx={{ width: "100%" }}
-          >
-            {submitMessage}
-          </Alert>
-        </Snackbar>
-      </Box>
-    // </Container>
+          {submitMessage}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 };
 

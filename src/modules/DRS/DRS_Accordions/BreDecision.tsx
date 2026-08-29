@@ -105,13 +105,14 @@ const BreDecision = ({
   const storageBusinessType = (
     businessType ||
     localStorage.getItem("businessType") ||
-    ""
-  ).toLowerCase();
+    "retail"
+  ).trim()
+    .toLowerCase();
 
   const eventName =
-    storageBusinessType === "retail"
-      ? "BRE-RETAIL"
-      : "BRE-GROUP";
+    storageBusinessType === "group"
+      ? "BRE-GROUP"
+      : "BRE-RETAIL";
 
   const handleRefresh = async () => {
     /*
@@ -142,6 +143,7 @@ const BreDecision = ({
         breThunk({
           eventName,
           applicationNumber,
+          businessType: storageBusinessType,
         }),
       ).unwrap();
 
@@ -153,6 +155,7 @@ const BreDecision = ({
           userId,
           roleType,
           sections: ["latestBreDecision"],
+          businessType: storageBusinessType,
         }),
       ).unwrap();
     } catch (error) {

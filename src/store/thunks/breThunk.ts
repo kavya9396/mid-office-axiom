@@ -1,8 +1,15 @@
-import { createApiThunk } from "./createApiThunk";
 import { url } from "../../services/apiConfig";
 import type { BreRequest, BreResponse } from "../../types/drs.types";
+import { createApiThunk } from "./createApiThunk";
 
-export const breThunk = createApiThunk<BreResponse, BreRequest>(
+type BusinessAwareBreRequest = BreRequest & {
+  businessType: string;
+};
+
+export const breThunk = createApiThunk<BreResponse, BusinessAwareBreRequest>(
   "drs/bre",
-  { url: url("bre"), method: "POST" },
+  {
+    url: (request) => url("bre", request.businessType),
+    method: "POST",
+  },
 );

@@ -35,6 +35,7 @@ const auditTrailColumns: Column<AuditTrailRow>[] = [
 
 interface SelectedCaseContext {
   applicationNo?: string;
+  businessType?: string;
   source?: string;
   readOnly?: boolean;
 }
@@ -119,7 +120,16 @@ const AuditTrailPage = () => {
     useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const safeBusinessType = businessType ?? "retail";
+  const safeBusinessType =
+    String(
+      businessType ??
+      selectedCaseContext.businessType ??
+      localStorage.getItem("businessType") ??
+      "retail",
+    )
+      .trim()
+      .toLowerCase() || "retail";
+
   const safeApplicationNumber =
     applicationNumber?.trim() ||
     selectedCaseContext.applicationNo?.trim() ||
@@ -180,8 +190,9 @@ const AuditTrailPage = () => {
             applicationNo: safeApplicationNumber,
             userId,
             roleType,
+            businessType: safeBusinessType,
             sections: ["quickLinks"],
-          }),
+          })
         ).unwrap();
 
         setQuickLinksData(
@@ -202,6 +213,7 @@ const AuditTrailPage = () => {
     dispatch,
     hasCachedSearchAuditTrail,
     hasReduxAuditTrail,
+    safeBusinessType,
     safeApplicationNumber,
   ]);
 

@@ -2482,8 +2482,8 @@
             },
             {
                 "code": "REF_ACU",
-                "description": "Refer to Accuity",
-                "value": "Refer to Accuity",
+                "description": "Refer to Acuity",
+                "value": "Refer to Acuity",
                 "isActive": "Y",
                 "miscMastId": "57",
                 "type": "CUW"
@@ -2823,7 +2823,7 @@
                 "value": "Glycosuria(Presence of sugar in Urine)",
                 "isActive": "Y",
                 "requestId": 895,
-                "requestType": "NON_MEDICAL",
+                "requestType": "MEDICAL",
                 "iibCode": 1621
             },
             {

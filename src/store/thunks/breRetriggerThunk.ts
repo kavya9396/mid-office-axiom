@@ -1,8 +1,18 @@
-import { createApiThunk } from "./createApiThunk";
 import { url } from "../../services/apiConfig";
-import type { BreRetriggerRequest, BreRetriggerResponse } from "../../types/drs.types";
+import type {
+  BreRetriggerRequest,
+  BreRetriggerResponse,
+} from "../../types/drs.types";
+import { createApiThunk } from "./createApiThunk";
 
-export const breRetriggerThunk = createApiThunk<BreRetriggerResponse, BreRetriggerRequest>(
-  "drs/breRetrigger",
-  { url: url("breRetrigger"), method: "POST" },
-);
+type BusinessAwareBreRetriggerRequest = BreRetriggerRequest & {
+  businessType: string;
+};
+
+export const breRetriggerThunk = createApiThunk<
+  BreRetriggerResponse,
+  BusinessAwareBreRetriggerRequest
+>("drs/breRetrigger", {
+  url: (request) => url("breRetrigger", request.businessType),
+  method: "POST",
+});

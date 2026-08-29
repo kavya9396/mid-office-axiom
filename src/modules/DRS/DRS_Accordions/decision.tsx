@@ -36,6 +36,7 @@ interface MiscItem {
 
 interface ApplicationRow {
   applicationNo?: string;
+  businessType?: string;
   taskId?: string;
   instanceId?: string;
   instanceID?: string;
@@ -160,18 +161,19 @@ const Decision = () => {
       "",
   ).trim();
 
-  // const [decisionTimestamp] = useState(() =>
-  //   new Intl.DateTimeFormat("en-GB", {
-  //     day: "2-digit",
-  //     month: "2-digit",
-  //     year: "numeric",
-  //     hour: "2-digit",
-  //     minute: "2-digit",
-  //     second: "2-digit",
-  //     hour12: false,
-  //     timeZone: "Asia/Kolkata",
-  //   }).format(new Date()),
-  // );
+  const businessType = String(
+    application?.businessType ??
+      selectedCaseContext.businessType ??
+      localStorage.getItem("businessType") ??
+      "retail",
+  )
+    .trim()
+    .toLowerCase();
+
+  const eventName =
+    businessType === "group"
+      ? "BRE-GROUP"
+      : "BRE-RETAIL";
 
   // ================= STATE =================
 
@@ -486,8 +488,9 @@ const Decision = () => {
 
       await dispatch(
         breThunk({
-          eventName: "BRE-RETAIL",
+          eventName,
           applicationNumber,
+          businessType,
         }),
       ).unwrap();
 
@@ -498,6 +501,7 @@ const Decision = () => {
       // =====================================================
 
       const payload = {
+        businessType,
         requestContext: {
           taskId,
           userId,

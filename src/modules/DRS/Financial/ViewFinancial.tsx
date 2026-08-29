@@ -2395,7 +2395,14 @@ const ViewFinancial = () => {
     Record<string, string>
   >>(buildInitialFieldValues);
   const [activeSectionId, setActiveSectionId] = useState<string>(financialSections[0]?.key ?? "");
-  const safeBusinessType = businessType ?? "retail";
+  const safeBusinessType =
+    String(
+      businessType ??
+        localStorage.getItem("businessType") ??
+        "retail",
+    )
+      .trim()
+      .toLowerCase() || "retail";
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
   const [editingSectionKey, setEditingSectionKey] = useState<FinancialSectionKey | null>(null);
@@ -2498,6 +2505,7 @@ const ViewFinancial = () => {
             applicationNo: safeApplicationId,
             userId,
             roleType,
+            businessType: safeBusinessType,
             sections: ["breDecision","latestBreDecision","summary"],
           })
         ).unwrap();
@@ -2516,7 +2524,7 @@ const ViewFinancial = () => {
     };
 
     void fetchDrsContext();
-  }, [dispatch, roleType, safeApplicationId, userId]);
+  }, [dispatch, roleType, safeApplicationId, safeBusinessType, userId]);
 
   useEffect(() => {
     const payload: FinancialViewRequest = {
@@ -2565,7 +2573,11 @@ const ViewFinancial = () => {
         setSnackbarSeverity("info");
         setSnackbarOpen(true);
         const response = await dispatch(
-          breThunk({ eventName: "FE", applicationNumber: drsApplicationNumber })
+          breThunk({
+            eventName: "FE",
+            applicationNumber: drsApplicationNumber,
+            businessType: safeBusinessType,
+          })
         ).unwrap();
 
         const payload = response.data ?? {};
@@ -2593,7 +2605,7 @@ const ViewFinancial = () => {
     };
 
     void callFe();
-  }, [dispatch, drsApplicationNumber]);
+  }, [dispatch, drsApplicationNumber, safeBusinessType]);
 
   // Compute showLoader based on loading states and whether all APIs have loaded at least once
   const showLoader = useMemo(() => {

@@ -28,6 +28,7 @@ const riskDetailsColumns: Column<RiskDetailsRow>[] = [
 
 interface SelectedCaseContext {
   applicationNo?: string;
+  businessType?: string;
   source?: string;
   readOnly?: boolean;
 }
@@ -101,7 +102,16 @@ const RiskDetailsPage = () => {
     useState<Record<string, unknown> | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const safeBusinessType = businessType ?? "retail";
+  const safeBusinessType =
+    String(
+      businessType ??
+      selectedCaseContext.businessType ??
+      localStorage.getItem("businessType") ??
+      "retail",
+    )
+      .trim()
+      .toLowerCase() || "retail";
+
   const safeApplicationNumber =
     applicationNumber?.trim() ||
     selectedCaseContext.applicationNo?.trim() ||
@@ -161,8 +171,9 @@ const RiskDetailsPage = () => {
             applicationNo: safeApplicationNumber,
             userId,
             roleType,
+            businessType: safeBusinessType,
             sections: ["quickLinks"],
-          }),
+          })
         ).unwrap();
 
         setQuickLinksData(
@@ -183,6 +194,7 @@ const RiskDetailsPage = () => {
     dispatch,
     hasCachedSearchRiskDetails,
     hasReduxRiskDetails,
+    safeBusinessType,
     safeApplicationNumber,
   ]);
 

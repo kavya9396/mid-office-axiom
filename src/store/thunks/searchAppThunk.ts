@@ -1,14 +1,18 @@
 import { url } from "../../services/apiConfig";
 import type {
-  SearchRequest,
   SearchApiResponse,
+  SearchRequest,
 } from "../../types/search.types";
 import { createApiThunk } from "./createApiThunk";
 
+type BusinessAwareSearchRequest = SearchRequest & {
+  businessType: string;
+};
+
 export const searchThunk = createApiThunk<
   SearchApiResponse,
-  SearchRequest
+  BusinessAwareSearchRequest
 >("inbox/searchApplication", {
-  url: url("searchApplication"),
+  url: (request) => url("searchApplication", request.businessType),
   method: "POST",
 });
