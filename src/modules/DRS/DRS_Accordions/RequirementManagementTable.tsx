@@ -169,6 +169,7 @@ type RowMasterOptions = Partial<Record<AddRowField, string[]>>;
 interface RequirementTableRow extends AdditionalRequirementRow {
   __clientRowId: string;
   __isInitiallyAccepted: boolean;
+  __initialStatus: string;
 }
 
 const createTableRows = (
@@ -184,6 +185,7 @@ const createTableRows = (
         apiRow.profile ?? apiRow.memberType ?? apiRow.member_type,
       ),
       __clientRowId: `existing-${index}`,
+      __initialStatus: getStatusComparableValue(row.status),
       __isInitiallyAccepted: ["ACCEPT", "ACCEPTED"].includes(
         getStatusComparableValue(row.status),
       ),
@@ -197,6 +199,7 @@ const createRequestRows = (
     const requestRow = { ...row } as Record<string, unknown>;
     delete requestRow.__clientRowId;
     delete requestRow.__isInitiallyAccepted;
+    delete requestRow.__initialStatus;
     delete requestRow.requirementId;
 
     return requestRow as AdditionalRequirementRow;
@@ -834,6 +837,8 @@ const RequirementManagementTable = ({
           __isInitiallyAccepted:
             currentRow?.__isInitiallyAccepted ??
             nextRow.__isInitiallyAccepted,
+          __initialStatus:
+            currentRow?.__initialStatus ?? nextRow.__initialStatus,
         };
       }),
     );
@@ -845,6 +850,7 @@ const RequirementManagementTable = ({
     const newRequirement: RequirementTableRow = {
       __clientRowId: clientRowId,
       __isInitiallyAccepted: false,
+      __initialStatus: "PENDING",
       team: getDefaultTeamByRole(normalizedRoleType),
       profile: "",
       category: "",
@@ -1975,6 +1981,22 @@ const RequirementManagementTable = ({
               matchingStatusOption?.code ||
               formatStatus(currentStatus);
 
+            /*
+             * A requirement that has already progressed beyond Pending must
+             * never move backwards to Pending. New/API-Pending rows retain
+             * Pending because that is their valid starting state.
+             */
+            const rowStatusOptions = statusOptions.filter((option) => {
+              const optionStatus = getStatusComparableValue(
+                option.value ?? option.description ?? option.code,
+              );
+
+              return (
+                row.__initialStatus === "PENDING" ||
+                optionStatus !== "PENDING"
+              );
+            });
+
             return (
 
               <Box
@@ -2084,7 +2106,7 @@ const RequirementManagementTable = ({
                       </MenuItem>
                     )}
 
-                    {statusOptions.map((option) => {
+                    {rowStatusOptions.map((option) => {
                       const optionValue =
                         normalizeText(option.value) ||
                         normalizeText(option.description) ||
