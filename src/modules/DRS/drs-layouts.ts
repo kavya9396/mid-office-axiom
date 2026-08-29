@@ -397,7 +397,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "groupPolicyDetails",
     "summary",
     "requirementManagement",
-    "dvtDecision",
+    "decision",
     "quickLinks",
   ],
   GROUP_GUW_POOL: [
