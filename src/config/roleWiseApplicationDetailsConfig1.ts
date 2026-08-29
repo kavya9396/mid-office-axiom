@@ -333,7 +333,7 @@ export const getRoleWiseConfig = (
   businessType: BusinessType = "retail",
 ): RoleField[] => {
   const config =
-    businessType === "group" ? GROUP_ROLE_CONFIG : RETAIL_ROLE_CONFIG;
+    businessType?.toLowerCase().trim() === "group" ? GROUP_ROLE_CONFIG : RETAIL_ROLE_CONFIG;
 
   return config[roleType as RoleType] ?? [];
 };

@@ -1752,6 +1752,7 @@ const ApplicantProfile = ({
   const canShowRiskAnalytics = ![
     "CVT_TASK",
     "PIVV_TASK",
+    "DVT_TASK",
     "CPT_DATA_ENTRY_NMR_TASK",
     "CPT_DATA_ENTRY_MR_TASK",
     "RECONSIDERATION_TASK",
@@ -1770,7 +1771,7 @@ const ApplicantProfile = ({
         title={title.applicantDetails}
         defaultExpanded
         headerActions={
-          !readOnly && roleType === "CVT_TASK" ? (
+          !readOnly && roleType === "CVT_TASK" || roleType === "DVT_TASK" ? (
             <CustomButton
               variant="outlined"
               onClick={(event) => {
