@@ -551,6 +551,7 @@ export type CompleteTaskReq = {
   decision: string;
   fullName?:string;
   ntid?:string;
+  tpaRemarks?:string;
 };
 export type CompleteTaskRequest = {
   requestContext: CompleteTaskReq;
