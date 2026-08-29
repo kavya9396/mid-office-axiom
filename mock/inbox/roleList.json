@@ -589,7 +589,7 @@
         "roleType": "CVT_TASK"
       }
     ],
-    "ACUITY_TASK": [
+    "GRIEVANCE_TASK": [
       {
         "id": 20,
         "applicationNo": "OS90378859",
@@ -605,9 +605,56 @@
         "dueDate": "2026-08-18T12:00:00Z",
         "startTime": "2026-08-17T13:06:33Z",
         "atRiskTime": "2026-08-18T11:59:49Z",
-        "businessType": "GROUP",
-        "role": "GROUP_ACUITY_USER",
-        "roleType": "ACUITY_TASK"
+        "businessType": "RETAIL",
+        "role": "RETAIL_GRIEVANCE_USER",
+        "roleType": "GRIEVANCE_TASK"
+      }
+    ], "RECONSIDERATION_TASK": [
+      {
+        "id": 1,
+        "taskId": "18763",
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "RECONSIDERATION_TASK",
+        "role": "RETAIL_RECONSIDERATION_USER",
+        "businessType": "RETAIL",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "RECONSIDERATION_TASK",
+        "role": "RETAIL_RECONSIDERATION_USER",
+        "businessType": "RETAIL",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
       }
     ]
   }
