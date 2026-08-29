@@ -234,6 +234,8 @@ interface SummaryNominee {
   gender?: string;
   proposerNomineeRelation?: string;
   percentage?: number | string;
+  accountNumber?:number | string;
+  ifsc?:number | string;
 }
 
 interface SummaryAppointee {
@@ -1424,8 +1426,8 @@ const ApplicantProfile = ({
             relationship: toDisplayValue(
               item.proposerNomineeRelation,
             ),
-            accountNumber: "-",
-            ifsc: "-",
+            accountNumber: toDisplayValue(item.accountNumber),
+            ifsc: toDisplayValue(item.ifsc),
             sharePercentage: Number(item.percentage ?? 0),
           }));
 

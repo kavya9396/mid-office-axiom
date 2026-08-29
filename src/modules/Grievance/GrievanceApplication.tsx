@@ -1,12 +1,13 @@
 import {
+  Alert,
   Box,
-  Checkbox,
   Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Paper,
+  Snackbar,
   Table,
   TableBody,
   TableCell,
@@ -124,6 +125,10 @@ const GrievanceApplication = () => {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const areAllTpaRemarksFilled = reports.length > 0 && reports.every(
+    (row) => Boolean(tpaRemarks[String(row.id)]?.trim()),
+  );
+
   useEffect(() => {
     const fetchApplication = async () => {
       try {
@@ -133,6 +138,7 @@ const GrievanceApplication = () => {
         const responseReports = response.reports ?? [];
         setApplicationData(response);
         setReports(responseReports);
+        setSelectedReportIds(new Set(responseReports.map((row) => String(row.id))));
         setTpaRemarks(Object.fromEntries(responseReports.map((row) => [
           String(row.id),
           getValue(row, ["tpaRemarks", "remarksByTPA", "remarksByTpa"]).replace(/^-$|^null$/i, ""),
@@ -157,11 +163,22 @@ const GrievanceApplication = () => {
       return;
     }
 
+    if (!areAllTpaRemarksFilled) {
+      setSubmitError("TPA remarks are mandatory for all grievance records.");
+      return;
+    }
+
     setSubmitError(null);
     setConfirmationOpen(true);
   };
 
   const handleConfirmSubmit = async () => {
+    if (!areAllTpaRemarksFilled) {
+      setConfirmationOpen(false);
+      setSubmitError("TPA remarks are mandatory for all grievance records.");
+      return;
+    }
+
     try {
       setConfirmationOpen(false);
       setSubmitLoading(true);
@@ -190,22 +207,6 @@ const GrievanceApplication = () => {
     }
   };
 
-  const toggleReportSelection = (rowId: string) => {
-    setSelectedReportIds((current) => {
-      const updated = new Set(current);
-      if (updated.has(rowId)) updated.delete(rowId);
-      else updated.add(rowId);
-      return updated;
-    });
-  };
-
-  const toggleAllReports = () => {
-    setSelectedReportIds((current) => {
-      if (current.size === reports.length) return new Set();
-      return new Set(reports.map((row) => String(row.id)));
-    });
-  };
-
   const renderRows = (editable: boolean) => {
     const columnCount = editable ? 7 : 6;
     if (loading) return <TableRow><TableCell colSpan={columnCount} align="center" sx={{ py: 4 }}>Loading reports...</TableCell></TableRow>;
@@ -219,18 +220,18 @@ const GrievanceApplication = () => {
           hover
           sx={{ height: 42 }}
         >
-          {editable && (
+          {/* {editable && (
             <TableCell padding="checkbox" sx={{ width: 42 }}>
               <Checkbox
                 size="small"
-                checked={selectedReportIds.has(rowId)}
-                onChange={() => toggleReportSelection(rowId)}
+                checked
+                disabled
               />
             </TableCell>
-          )}
+          )} */}
           <TableCell>{getValue(row, ["user", "raisedBy", "userName"])}</TableCell>
           <TableCell>{getValue(row, ["fupCode", "fupcode", "reports"])}</TableCell>
-          <TableCell>{getValue(row, ["lProfile", "profile", "lifeAssuredProposer"])}</TableCell>
+          <TableCell>{getValue(row, ["Profile", "profile", "lifeAssuredProposer"])}</TableCell>
           <TableCell>{getValue(row, ["grievanceRaisedRemark", "grievanceRaisedRemarks", "remarksByUser"])}</TableCell>
           <TableCell>{getValue(row, ["grievanceRaisedDate"])}</TableCell>
           <TableCell sx={{ minWidth: 220 }}>
@@ -238,9 +239,12 @@ const GrievanceApplication = () => {
               <CustomTextField
                 fullWidth
                 size="small"
-                placeholder="Enter TPA remarks (optional)"
+                placeholder="Enter TPA remarks *"
                 value={tpaRemarks[rowId] ?? ""}
-                onChange={(event) => setTpaRemarks((current) => ({ ...current, [rowId]: event.target.value }))}
+                onChange={(event) => {
+                  setTpaRemarks((current) => ({ ...current, [rowId]: event.target.value }));
+                  setSubmitError(null);
+                }}
                 sx={{
                   "& .MuiInputBase-root": {
                     height: 32,
@@ -288,17 +292,16 @@ const GrievanceApplication = () => {
         }}
       >
         <TableHead><TableRow>
-          {editable && (
+          {/* {editable && (
             <TableCell padding="checkbox" sx={{ width: 42 }}>
               <Checkbox
                 size="small"
                 checked={reports.length > 0 && selectedReportIds.size === reports.length}
-                indeterminate={selectedReportIds.size > 0 && selectedReportIds.size < reports.length}
-                onChange={toggleAllReports}
+                disabled
               />
             </TableCell>
-          )}
-          <TableCell>User</TableCell><TableCell>FUP Code</TableCell><TableCell>LProfile</TableCell>
+          )} */}
+          <TableCell>User</TableCell><TableCell>FUP Code</TableCell><TableCell>Profile</TableCell>
           <TableCell>Grievance Raised Remark</TableCell><TableCell>Grievance Raised Date</TableCell><TableCell>TPA Remarks</TableCell>
         </TableRow></TableHead>
         <TableBody>{renderRows(editable)}</TableBody>
@@ -310,8 +313,6 @@ const GrievanceApplication = () => {
     <Box sx={{ backgroundColor: "#F0F3F8", minHeight: "90vh", pb: 4 }}>
       <Container disableGutters>
         <Typography sx={{ fontSize: 16, fontWeight: 700, mb: 2 }}>Grievance Application</Typography>
-        {fetchError && <Typography sx={{ color: "#DE2C3B", mb: 1.5, fontSize: 13 }}>{fetchError}</Typography>}
-
         <CustomAccordion title="Application Details" defaultExpanded>
           <Box sx={{ display: "grid", gridTemplateColumns: { xs: "repeat(1, 1fr)", md: "repeat(4, 1fr)" }, gap: 2, backgroundColor: "#F6F6F6", border: "1px solid #E6E6E6", borderRadius: "8px", p: 2 }}>
             {[
@@ -323,16 +324,15 @@ const GrievanceApplication = () => {
         </CustomAccordion>
 
         <Paper sx={{ mt: 1.5, border: "1px solid #D9D9D9", borderRadius: "10px", overflow: "hidden", boxShadow: "none" }}>
-          <Box sx={{ backgroundColor: "#ED5A0A", color: "#fff", px: 2, py: 0.9 }}><Typography sx={{ fontSize: 13, fontWeight: 700 }}>Grievance Raised Details</Typography></Box>
+          <Box sx={{ backgroundColor: "#ED5A0A", color: "#fff", px: 2, py: 0.9 }}><Typography sx={{ fontSize: 13, fontWeight: 700 }}>Grievance History</Typography></Box>
           <Box sx={{ backgroundColor: "#fff" }}>{renderTable(false)}</Box>
         </Paper>
 
         <Paper sx={{ mt: 1.5, border: "1px solid #D9D9D9", borderRadius: "10px", overflow: "hidden", boxShadow: "none" }}>
-          <Box sx={{ backgroundColor: "#ED5A0A", color: "#fff", px: 2, py: 0.9 }}><Typography sx={{ fontSize: 13, fontWeight: 700 }}>TPA Grievance Response</Typography></Box>
+          <Box sx={{ backgroundColor: "#ED5A0A", color: "#fff", px: 2, py: 0.9 }}><Typography sx={{ fontSize: 13, fontWeight: 700 }}>TPA Grievance Details</Typography></Box>
           <Box sx={{ backgroundColor: "#fff" }}>{renderTable(true)}</Box>
         </Paper>
 
-        {submitError && <Typography sx={{ color: "#DE2C3B", mt: 1.5, fontSize: 13 }}>{submitError}</Typography>}
         <Box sx={{ display: "flex", justifyContent: "center", mt: 2 }}>
           <CustomButton sx={{ borderRadius: "50px", minWidth: 180 }} onClick={handleSubmit} disabled={submitLoading || loading}>
             {submitLoading ? "Submitting..." : "Submit"}
@@ -370,6 +370,28 @@ const GrievanceApplication = () => {
             </CustomButton>
           </DialogActions>
         </Dialog>
+
+        <Snackbar
+          open={Boolean(fetchError || submitError)}
+          autoHideDuration={5000}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+          onClose={() => {
+            setFetchError(null);
+            setSubmitError(null);
+          }}
+        >
+          <Alert
+            severity="error"
+            variant="filled"
+            onClose={() => {
+              setFetchError(null);
+              setSubmitError(null);
+            }}
+            sx={{ width: "100%" }}
+          >
+            {submitError ?? fetchError}
+          </Alert>
+        </Snackbar>
       </Container>
     </Box>
   );
