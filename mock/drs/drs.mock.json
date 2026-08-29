@@ -954,8 +954,8 @@
     "requirementManagement": [
       {
         "team": "UW",
-        "profile": "",
-        "category": "Financial",
+        "profile": "lifeassured1",
+        "category": "Medical",
         "subCategory": "Report",
         "document": "Agent report",
         "specialTest": "N",

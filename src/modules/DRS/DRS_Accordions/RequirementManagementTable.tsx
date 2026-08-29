@@ -180,6 +180,9 @@ const createTableRows = (
 
     return {
       ...(apiRow as AdditionalRequirementRow),
+      profile: normalizeText(
+        apiRow.profile ?? apiRow.memberType ?? apiRow.member_type,
+      ),
       __clientRowId: `existing-${index}`,
       __isInitiallyAccepted: ["ACCEPT", "ACCEPTED"].includes(
         getStatusComparableValue(row.status),
