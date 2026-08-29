@@ -2450,8 +2450,8 @@
       },
       {
         "code": "REF_SUW",
-        "description": "Refer to Sr Uw",
-        "value": "Refer to Sr Uw",
+        "description": "Refer to Sr UW",
+        "value": "Refer to Sr UW",
         "isActive": "Y",
         "miscMastId": "53",
         "type": "CUW"
@@ -2482,8 +2482,8 @@
       },
       {
         "code": "REF_ACU",
-        "description": "Refer to Acuity",
-        "value": "Refer to Acuity",
+        "description": "Refer to Accuity",
+        "value": "Refer to Accuity",
         "isActive": "Y",
         "miscMastId": "57",
         "type": "CUW"
@@ -2808,6 +2808,38 @@
         "miscMastId": "99",
         "type": "REINSURER"
       },
+      {
+        "code": "PEP",
+        "description": "PEP Case",
+        "value": "PEP Case",
+        "isActive": "Y",
+        "miscMastId": "111",
+        "type": "REF_HOD_CS_RSN"
+      },
+      {
+        "code": "MED_OP",
+        "description": "Medical Opinion",
+        "value": "Medical Opinion",
+        "isActive": "Y",
+        "miscMastId": "111",
+        "type": "REF_HOD_OP_RSN"
+      },
+      {
+        "code": "ABV_CASE",
+        "description": "Above Limit Case",
+        "value": "Above Limit Case",
+        "isActive": "Y",
+        "miscMastId": "111",
+        "type": "REF_SRUW_CS_RSN"
+      },
+      {
+        "code": "MED_OP",
+        "description": "Medical Opinion",
+        "value": "Medical Opinion",
+        "isActive": "Y",
+        "miscMastId": "111",
+        "type": "REF_SRUW_OP_RSN"
+      },
 
       {
         "code": "CLASS_1",
@@ -3010,7 +3042,7 @@
         "value": "Glycosuria(Presence of sugar in Urine)",
         "isActive": "Y",
         "requestId": 895,
-        "requestType": "MEDICAL",
+        "requestType": "NON_MEDICAL",
         "iibCode": 1621
       },
       {

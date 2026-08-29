@@ -785,6 +785,52 @@ const DynamicRoleTable = ({
       return;
     }
 
+    const instance =
+      row.instance && typeof row.instance === "object"
+        ? (row.instance as Record<string, unknown>)
+        : {};
+
+    const applicationNumber = String(
+      row.applicationNumber ??
+      row.applicationNo ??
+      row.applicationId ??
+      "",
+    );
+
+    const taskId = String(
+      row.taskId ??
+      instance.task ??
+      instance.taskId ??
+      "",
+    );
+
+    const instanceId = String(
+      row.instanceId ??
+      instance.id ??
+      instance.instanceId ??
+      "",
+    );
+
+    const roleType = String(row.roleType ?? row.role ?? "");
+    const businessType = String(row.businessType ?? "retail");
+
+    localStorage.setItem(
+      "selectedCaseContext",
+      JSON.stringify({
+        applicationNumber,
+        taskId,
+        instanceId,
+        roleType,
+        businessType,
+        readOnly: false,
+      }),
+    );
+
+    localStorage.setItem("applicationNumber", applicationNumber);
+    localStorage.setItem("taskId", taskId);
+    localStorage.setItem("instanceId", instanceId);
+    localStorage.setItem("roleType", roleType);
+
     onApplicationClick?.(row);
   };
 
