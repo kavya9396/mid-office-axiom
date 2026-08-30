@@ -147,7 +147,7 @@ export type CounterOfferTableState = Record<
 
 type CounterOfferTableRow = {
     rowKey: CounterOfferRowKey;
-    applicationNo: string;
+    productName: string;
     proposerLifeAssured: string;
     appliedSA: string;
     changedSA: string;
@@ -281,10 +281,12 @@ const CounterOffer = ({ reasonOptions }: CounterOfferProps) => {
         });
     };
 
-    const counterOfferRows: CounterOfferTableRow[] = [
-        {
+    const baseCounterOfferRow: CounterOfferTableRow = {
             rowKey: "baseSumAssured",
-            applicationNo: "Base SA",
+            productName: toDisplayText(
+                baseProductDetail.name ??
+                baseProductDetail.productName,
+            ),
             proposerLifeAssured: "Life Assured",
             appliedSA: toDisplayText(
                 baseProductDetail.sumAssured,
@@ -318,10 +320,14 @@ const CounterOffer = ({ reasonOptions }: CounterOfferProps) => {
             revisedPremium:
                 counterOfferTable.baseSumAssured.revisedPremium,
             reasons: counterOfferTable.baseSumAssured.reasons,
-        },
-        {
+        };
+
+    const riderCounterOfferRow: CounterOfferTableRow = {
             rowKey: "riderSumAssured",
-            applicationNo: "Rider SA",
+            productName: toDisplayText(
+                riderProductDetail.name ??
+                riderProductDetail.productName,
+            ),
             proposerLifeAssured: "Life Assured",
             appliedSA: toDisplayText(
                 riderProductDetail.sumAssured,
@@ -355,8 +361,15 @@ const CounterOffer = ({ reasonOptions }: CounterOfferProps) => {
             revisedPremium:
                 counterOfferTable.riderSumAssured.revisedPremium,
             reasons: counterOfferTable.riderSumAssured.reasons,
-        },
-    ];
+        };
+
+    const hasRiderProduct =
+        Object.keys(riderProductDetail).length > 0;
+
+    const counterOfferRows: CounterOfferTableRow[] =
+        hasRiderProduct
+            ? [baseCounterOfferRow, riderCounterOfferRow]
+            : [baseCounterOfferRow];
 
     const renderDisabledField = (value: string) => (
         <CustomTextField
@@ -548,7 +561,7 @@ const CounterOffer = ({ reasonOptions }: CounterOfferProps) => {
 
     const counterOfferColumns: Column<CounterOfferTableRow>[] = [
         {
-            key: "applicationNo",
+            key: "productName",
             header: "",
             width: "6%",
             render: (value) => (
