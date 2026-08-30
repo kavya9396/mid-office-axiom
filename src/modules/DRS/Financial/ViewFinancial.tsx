@@ -1,5 +1,5 @@
-import { Box, Typography, Snackbar, Alert, CircularProgress } from "@mui/material";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Box, Typography, CircularProgress } from "@mui/material";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import BackButton from "../../../components/layout/BackButton";
@@ -7,6 +7,7 @@ import CustomButton from "../../../components/ui/Button/Button";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import CustomSelect from "../../../components/ui/Select/Select";
+import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
 import { Dialog, DialogTitle, Button, IconButton } from "@mui/material";
 import CustomTable, { type Column } from "../../../components/ui/Table/Table";
 import { useAppContext } from "../../../hooks/useAppContext";
@@ -20,9 +21,8 @@ import { drsThunk } from "../../../store/thunks/drsThunk";
 import { financialThunk } from "../../../store/thunks/financialThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
 import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
-import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest, MasterOption } from "../../../types/drs.types";
+import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest } from "../../../types/drs.types";
 import { applicantTabs, title } from "../../../utils/constant";
-import { getSessionMasters } from "../../../utils/masterDataSession";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
 import { getErrorMessage } from "../../../config/errorMessages";
 import BreDecision from "../DRS_Accordions/BreDecision";
@@ -135,46 +135,65 @@ const asArray = (value: unknown): Record<string, unknown>[] =>
 
 const firstDefined = (...values: unknown[]) => values.find((value) => value !== undefined && value !== null);
 
-// Get masters data from session
-const getMastersData = () => {
-  const masters = getSessionMasters();
-  return masters || {};
+type SelectOption = {
+  label: string;
+  value: string;
 };
 
-// Get display value from code using masters
-const getDisplayValueFromCode = (code: string, masterKey: string): string => {
-  const masters = getMastersData();
-  const masterList = masters[masterKey as keyof typeof masters];
+const getMiscOptionsFromMasters = (
+  masters: unknown,
+  masterType: string,
+): SelectOption[] => {
+  const masterRecord = asRecord(masters) ?? {};
+  const masterData = asRecord(masterRecord.data) ?? {};
+  const misc = masterRecord.misc ?? masterData.misc;
 
-  if (!Array.isArray(masterList)) {
-    return code;
+  if (!Array.isArray(misc)) {
+    return [];
   }
 
-  // Filter to ensure we're working with MasterOption items
-  const option = (masterList as MasterOption[]).find((item) =>
-    String(item.code).toUpperCase() === String(code).toUpperCase()
-  );
-
-  return option?.value || option?.description || code;
+  return misc
+    .map(asRecord)
+    .filter((item): item is Record<string, unknown> => Boolean(item))
+    .filter(
+      (item) =>
+        String(item.type ?? "").trim().toUpperCase() === masterType.trim().toUpperCase() &&
+        String(item.isActive ?? "").trim().toUpperCase() === "Y",
+    )
+    .map((item) => ({
+      label: String(item.description ?? item.value ?? item.code ?? "").trim(),
+      value: String(item.code ?? "").trim(),
+    }))
+    .filter((option) => option.label && option.value);
 };
 
-// Get code from display value using masters
-const getCodeFromDisplayValue = (displayValue: string, masterKey: string): string => {
-  const masters = getMastersData();
-  const masterList = masters[masterKey as keyof typeof masters];
-
-  if (!Array.isArray(masterList)) {
-    return displayValue;
-  }
-
-  // Filter to ensure we're working with MasterOption items
-  const option = (masterList as MasterOption[]).find((item) =>
-    String(item.value).toUpperCase() === String(displayValue).toUpperCase() ||
-    String(item.description).toUpperCase() === String(displayValue).toUpperCase()
+const getCodeFromDisplayValue = (
+  displayValue: string,
+  options: SelectOption[],
+): string => {
+  const normalizedValue = String(displayValue).trim().toUpperCase();
+  const option = options.find(
+    (item) =>
+      item.value.trim().toUpperCase() === normalizedValue ||
+      item.label.trim().toUpperCase() === normalizedValue,
   );
 
-  return option?.code || displayValue;
+  return option?.value ?? displayValue;
 };
+
+const getDisplayValueFromCode = (
+  code: string,
+  options: SelectOption[],
+): string => {
+  const normalizedCode = String(code).trim().toUpperCase();
+  const option = options.find(
+    (item) => item.value.trim().toUpperCase() === normalizedCode,
+  );
+
+  return option?.label ?? code;
+};
+
+const YesNoOptionsContext = createContext<SelectOption[]>([]);
 
 const toDisplay = (value: unknown) => {
   if (value === undefined || value === null) {
@@ -183,13 +202,6 @@ const toDisplay = (value: unknown) => {
 
   if (typeof value === "boolean") {
     return value ? "Y" : "N";
-  }
-
-  const stringValue = String(value).trim();
-
-  // Map Y/N codes to display values from masters
-  if (stringValue === "Y" || stringValue === "N") {
-    return getDisplayValueFromCode(stringValue, "yes_no");
   }
 
   return String(value);
@@ -1298,12 +1310,12 @@ const assignYesNoField = (
   document: Record<string, unknown>,
   targetKey: string,
   value: string | undefined,
+  options: SelectOption[],
 ) => {
   const normalizedValue = getString(value);
 
   if (normalizedValue) {
-    // Convert display value (Yes/No) back to code (Y/N) using masters
-    const code = getCodeFromDisplayValue(normalizedValue, "yes_no");
+    const code = getCodeFromDisplayValue(normalizedValue, options);
     document[targetKey] = code;
   }
 };
@@ -1546,15 +1558,27 @@ const FinancialYearPickerField = ({
   );
 };
 
-const renderFieldValue = (
-  value: string,
-  isEditable: boolean,
-  onChange: (value: string) => void,
+type FinancialFieldValueProps = {
+  value: string;
+  isEditable: boolean;
+  onChange: (value: string) => void;
+  isRequired?: boolean;
+  errorText?: string;
+  fieldRule?: ReturnType<typeof getFinancialFieldRule>;
+  label?: string;
+};
+
+const FinancialFieldValue = ({
+  value,
+  isEditable,
+  onChange,
   isRequired = false,
-  errorText?: string,
-  fieldRule?: ReturnType<typeof getFinancialFieldRule>,
-  label?: string,
-) => {
+  errorText,
+  fieldRule,
+  label,
+}: FinancialFieldValueProps) => {
+  const yesNoOptions = useContext(YesNoOptionsContext);
+
   if (isEditable) {
     const isDateField = fieldRule?.inputType === "dateDDMMYYYY";
     const isYesNoField = fieldRule?.inputType === "yesNo";
@@ -1567,11 +1591,8 @@ const renderFieldValue = (
       return (
         <CustomSelect
           fullWidth
-          options={[
-            { label: "Yes", value: "YES" },
-            { label: "No", value: "NO" },
-          ]}
-          value={value ? value.toUpperCase() : ""}
+          options={yesNoOptions}
+          value={value ? getCodeFromDisplayValue(value, yesNoOptions) : ""}
           onChange={(newValue) => onChange(newValue)}
           error={Boolean(errorText)}
           helperText={errorText}
@@ -1627,15 +1648,33 @@ const renderFieldValue = (
   // Read-only display
   let displayValue = value;
 
-  // Format Yes/No values for better display
   if (fieldRule?.inputType === "yesNo" && value) {
-    const upperValue = value.toUpperCase();
-    if (upperValue === "YES") displayValue = "Yes";
-    if (upperValue === "NO") displayValue = "No";
+    const code = getCodeFromDisplayValue(value, yesNoOptions);
+    displayValue = getDisplayValueFromCode(code, yesNoOptions);
   }
 
   return <Box sx={readOnlyBoxSx}>{displayValue}</Box>;
 };
+
+const renderFieldValue = (
+  value: string,
+  isEditable: boolean,
+  onChange: (value: string) => void,
+  isRequired = false,
+  errorText?: string,
+  fieldRule?: ReturnType<typeof getFinancialFieldRule>,
+  label?: string,
+) => (
+  <FinancialFieldValue
+    value={value}
+    isEditable={isEditable}
+    onChange={onChange}
+    isRequired={isRequired}
+    errorText={errorText}
+    fieldRule={fieldRule}
+    label={label}
+  />
+);
 
 type MultiYearTableRow = {
   label: string;
@@ -2372,6 +2411,11 @@ const ViewFinancial = () => {
   const location = useLocation();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
+  const masters = useSelector((state: RootState) => state.drs.masters);
+  const yesNoOptions = useMemo(
+    () => getMiscOptionsFromMasters(masters, "YESNO"),
+    [masters],
+  );
   const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
 
   const requestedApplicantTab =
@@ -2406,29 +2450,23 @@ const ViewFinancial = () => {
   const safeApplicationId = applicationNumber ?? "";
   const roleType = getRoleType();
   const [editingSectionKey, setEditingSectionKey] = useState<FinancialSectionKey | null>(null);
-  const [messageSectionKey, setMessageSectionKey] = useState<FinancialSectionKey | null>(null);
   const [sectionErrors, setSectionErrors] = useState<Partial<Record<FinancialSectionKey, Record<string, string>>>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
-  const [submitMessage, setSubmitMessage] = useState<string | null>(null);
-  const [submitError, setSubmitError] = useState<string | null>(null);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [snackbarSeverity, setSnackbarSeverity] = useState<"success" | "warning" | "error" | "info">("success");
+  const [snackbarSeverity, setSnackbarSeverity] = useState<
+    "success" | "error" | "warning" | "info"
+  >("success");
   const [showScrollTop, setShowScrollTop] = useState(false);
 
-  useEffect(() => {
-    if (!messageSectionKey) return;
-
-    const msg = submitError ?? submitMessage;
-    if (!msg) return;
-
-    // Use microtask to avoid synchronous setState in effect
-    setTimeout(() => {
-      setSnackbarMessage(msg);
-      setSnackbarSeverity(submitError ? "error" : "success");
-      setSnackbarOpen(true);
-    }, 0);
-  }, [messageSectionKey, submitMessage, submitError]);
+  const showSnackbar = (
+    message: string,
+    severity: "success" | "error" | "warning" | "info",
+  ) => {
+    setSnackbarMessage(message);
+    setSnackbarSeverity(severity);
+    setSnackbarOpen(true);
+  };
 
   useEffect(() => {
     const handlePageScroll = () => {
@@ -2497,9 +2535,6 @@ const ViewFinancial = () => {
       try {
         setDrsContextLoading(true);
         setDrsContextError(null);
-        setSnackbarMessage("Loading financial details...");
-        setSnackbarSeverity("info");
-        setSnackbarOpen(true);
         await dispatch(
           drsThunk({
             applicationNo: safeApplicationId,
@@ -2515,9 +2550,6 @@ const ViewFinancial = () => {
       } catch (err) {
         const message = err instanceof Error ? err.message : "Failed to fetch DRS details.";
         setDrsContextError(message);
-        setSnackbarMessage(message);
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
       } finally {
         setDrsContextLoading(false);
       }
@@ -2539,9 +2571,6 @@ const ViewFinancial = () => {
     const fetchFinancial = async () => {
       try {
         setLoading(true);
-        setSnackbarMessage("Loading financial details...");
-        setSnackbarSeverity("info");
-        setSnackbarOpen(true);
         const response = normalizeFinancialResponse(await dispatch(financialThunk(payload)).unwrap());
         setFinancialData(response);
         const built = buildInitialFieldValues(buildFinancialSectionsFromResponse(response.sections));
@@ -2549,11 +2578,8 @@ const ViewFinancial = () => {
         setOriginalFinancialFieldValues(built);
         // Clear error on success
         setFinancialDataLoaded(true);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to fetch financial details.";
-        setSnackbarMessage(message);
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
+      } catch {
+        setFinancialDataLoaded(false);
       } finally {
         setLoading(false);
       }
@@ -2569,9 +2595,6 @@ const ViewFinancial = () => {
     const callFe = async () => {
       try {
         setBreRetriggerLoading(true);
-        setSnackbarMessage("Loading financial details...");
-        setSnackbarSeverity("info");
-        setSnackbarOpen(true);
         const response = await dispatch(
           breThunk({
             eventName: "FE",
@@ -2589,16 +2612,12 @@ const ViewFinancial = () => {
           })
         );
         setBreRetriggerLoaded(true);
-      } catch (err) {
-        const message = err instanceof Error ? err.message : "Failed to fetch financial details.";
+      } catch {
         dispatch(
           setBreExternalApiOutputs({
             breRetriggerStatus: "failure",
           })
         );
-        setSnackbarMessage(message);
-        setSnackbarSeverity("error");
-        setSnackbarOpen(true);
       } finally {
         setBreRetriggerLoading(false);
       }
@@ -2783,7 +2802,7 @@ const ViewFinancial = () => {
       const doc: Record<string, unknown> = {};
       assignTextField(doc, "companyName", salarySlips["Company Name"]);
       assignTextField(doc, "partyName", salarySlips["Life Assured Name"]);
-      assignYesNoField(doc, "nameMatchInd", salarySlips["Is Life Assured Name Same?"]);
+      assignYesNoField(doc, "nameMatchInd", salarySlips["Is Life Assured Name Same?"], yesNoOptions);
       assignTextField(doc, "pfUan", salarySlips["PF / UAN No"]);
       assignNumberField(doc, "annualBonus", salarySlips["Annual Bonus/Incentive/Reimbursement"]);
 
@@ -2805,14 +2824,14 @@ const ViewFinancial = () => {
     if (bankStatement && Object.keys(bankStatement).length > 0) {
       const doc: Record<string, unknown> = {};
       assignTextField(doc, "fullName", bankStatement["Life Assured Name"]);
-      assignYesNoField(doc, "nameMatchInd", bankStatement["Is LA Name Match with Doc Name?"]);
+      assignYesNoField(doc, "nameMatchInd", bankStatement["Is LA Name Match with Doc Name?"], yesNoOptions);
       assignTextField(doc, "statementPeriod", bankStatement["Statement Period"]);
       assignNumberField(doc, "openingBalance", bankStatement["Opening Balance"]);
-      assignYesNoField(doc, "liPremiumDeductionInd", bankStatement["Life Insurance Premium Deduction Entry"]);
-      assignYesNoField(doc, "wineBeerEntriesInd", bankStatement["Wine Beer_Entries"]);
-      assignYesNoField(doc, "medEntryInd", bankStatement["Med Entry"]);
-      assignYesNoField(doc, "latest6MonthsInd", bankStatement["Latest 6 months statements given"]);
-      assignYesNoField(doc, "overdraftInd", bankStatement["Any Overdraft(Negative/Debit) Balances"]);
+      assignYesNoField(doc, "liPremiumDeductionInd", bankStatement["Life Insurance Premium Deduction Entry"], yesNoOptions);
+      assignYesNoField(doc, "wineBeerEntriesInd", bankStatement["Wine Beer_Entries"], yesNoOptions);
+      assignYesNoField(doc, "medEntryInd", bankStatement["Med Entry"], yesNoOptions);
+      assignYesNoField(doc, "latest6MonthsInd", bankStatement["Latest 6 months statements given"], yesNoOptions);
+      assignYesNoField(doc, "overdraftInd", bankStatement["Any Overdraft(Negative/Debit) Balances"], yesNoOptions);
 
       const months = buildMonthlyEntries(bankStatement, [
         "Monthly Closing Bal 1",
@@ -2832,8 +2851,8 @@ const ViewFinancial = () => {
     if (bankStatementSalaryCredit && Object.keys(bankStatementSalaryCredit).length > 0) {
       const doc: Record<string, unknown> = {};
       assignTextField(doc, "fullName", bankStatementSalaryCredit["Life Assured Name"]);
-      assignYesNoField(doc, "nameMatchInd", bankStatementSalaryCredit["Is LA Name Match with Doc Name?"]);
-      assignYesNoField(doc, "salaryCreditedInd", bankStatementSalaryCredit["Salary Credited"]);
+      assignYesNoField(doc, "nameMatchInd", bankStatementSalaryCredit["Is LA Name Match with Doc Name?"], yesNoOptions);
+      assignYesNoField(doc, "salaryCreditedInd", bankStatementSalaryCredit["Salary Credited"], yesNoOptions);
       assignNumberField(doc, "annualBonus", bankStatementSalaryCredit["Annual Bonus /Incentive /Reimbursement"]);
       assignNumberField(doc, "openingBalance", bankStatementSalaryCredit["Opening Balance"]);
       assignNumberField(doc, "closingBalance", bankStatementSalaryCredit["Closing Balance"]);
@@ -2873,7 +2892,7 @@ const ViewFinancial = () => {
     const formJ = fieldValues.form_j;
     if (formJ && Object.keys(formJ).length > 0) {
       const doc: Record<string, unknown> = {};
-      assignYesNoField(doc, "nameMatchInd", formJ["Is Form J in the name of LA"]);
+      assignYesNoField(doc, "nameMatchInd", formJ["Is Form J in the name of LA"], yesNoOptions);
       const months = buildMonthlyEntries(formJ, [
         "Month1 Receipt1",
         "Month2 Receipt1",
@@ -2891,8 +2910,8 @@ const ViewFinancial = () => {
     const sipStatement = fieldValues.sip_statement;
     if (sipStatement && Object.keys(sipStatement).length > 0) {
       const doc: Record<string, unknown> = {};
-      assignYesNoField(doc, "isLaNameSame", sipStatement["Is SIP Statements in the Name of LA"]);
-      assignYesNoField(doc, "latest6MonthsInd", sipStatement["Latest 6 Months SIP Statements Given"]);
+      assignYesNoField(doc, "isLaNameSame", sipStatement["Is SIP Statements in the Name of LA"], yesNoOptions);
+      assignYesNoField(doc, "latest6MonthsInd", sipStatement["Latest 6 Months SIP Statements Given"], yesNoOptions);
       const months = buildMonthlyEntries(sipStatement, [
         "SIP Per Month 1",
         "SIP Per Month2",
@@ -2911,7 +2930,7 @@ const ViewFinancial = () => {
     if (epfBasic && Object.keys(epfBasic).length > 0) {
       const doc: Record<string, unknown> = {};
       assignTextField(doc, "orgName", epfBasic["Latest Organization Name"]);
-      assignYesNoField(doc, "isOrgNameSame", epfBasic["Is Organization Name Same?"]);
+      assignYesNoField(doc, "isOrgNameSame", epfBasic["Is Organization Name Same?"], yesNoOptions);
       assignNumberField(doc, "income", epfBasic["Income"]);
       if (hasDocumentFields(doc)) documents.epf_basic = doc;
     }
@@ -2921,7 +2940,7 @@ const ViewFinancial = () => {
     if (epfAdvanced && Object.keys(epfAdvanced).length > 0) {
       const doc: Record<string, unknown> = {};
       assignTextField(doc, "orgName", epfAdvanced["Latest Organization Name"]);
-      assignYesNoField(doc, "isOrgNameSame", epfAdvanced["Is Organization Name Same?"]);
+      assignYesNoField(doc, "isOrgNameSame", epfAdvanced["Is Organization Name Same?"], yesNoOptions);
       const months = buildMonthlyEntries(epfAdvanced, [
         "PF Contribution M1",
         "PF Contribution M2",
@@ -2942,7 +2961,7 @@ const ViewFinancial = () => {
       if (getString(form16["Company Name"])) doc.companyName = getString(form16["Company Name"]);
       if (getString(form16["Life Assured Name"])) doc.partyName = getString(form16["Life Assured Name"]);
       const nameMatch = form16["Is Life Assured Name Same With Doc Name?"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
 
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
@@ -2987,7 +3006,7 @@ const ViewFinancial = () => {
     if (propertyPurchase && Object.keys(propertyPurchase).length > 0) {
       const doc: Record<string, unknown> = {};
       const isPurchased = propertyPurchase["Is Property purchased by LA"];
-      if (isPurchased) doc.isPurchasedByLa = getCodeFromDisplayValue(isPurchased, "yes_no");
+      if (isPurchased) doc.isPurchasedByLa = getCodeFromDisplayValue(isPurchased, yesNoOptions);
       if (getNumeric(propertyPurchase["Purchase Price"])) doc.purchasePrice = getNumeric(propertyPurchase["Purchase Price"]);
       if (getString(propertyPurchase["Financial Year of Purchase"])) doc.financialYearOfPurchase = getString(propertyPurchase["Financial Year of Purchase"]);
       if (getNumeric(propertyPurchase["Estimated Market Value of Property"])) doc.estimatedMarketValue = getNumeric(propertyPurchase["Estimated Market Value of Property"]);
@@ -2999,7 +3018,7 @@ const ViewFinancial = () => {
     if (propertyValuation && Object.keys(propertyValuation).length > 0) {
       const doc: Record<string, unknown> = {};
       const nameMatch = propertyValuation["Is Property Valuation Report in the name of LA"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       if (getNumeric(propertyValuation["Estimated Market Value of Property(as per report)"])) doc.estimatedMarketValue = getNumeric(propertyValuation["Estimated Market Value of Property(as per report)"]);
       if (Object.keys(doc).length > 0) documents.property_valuation = doc;
     }
@@ -3012,9 +3031,9 @@ const ViewFinancial = () => {
     if (creditCard && Object.keys(creditCard).length > 0) {
       const doc: Record<string, unknown> = {};
       const nameMatch = creditCard["Is Credit card statement in the name of LA"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       const isDefaulter = creditCard["Is LA Defaulter in the Payment"];
-      if (isDefaulter) doc.isDefaulter = getCodeFromDisplayValue(isDefaulter, "yes_no");
+      if (isDefaulter) doc.isDefaulter = getCodeFromDisplayValue(isDefaulter, yesNoOptions);
       if (getString(creditCard["Type of Card"])) doc.cardType = getString(creditCard["Type of Card"]);
       if (getNumeric(creditCard["Credit Limit"])) doc.creditLimit = getNumeric(creditCard["Credit Limit"]);
       if (getNumeric(creditCard["Points Earned"])) doc.pointsEarned = getNumeric(creditCard["Points Earned"]);
@@ -3055,7 +3074,7 @@ const ViewFinancial = () => {
       if (getString(itrIndividual["Permanent Account Number"])) doc.panNumber = getString(itrIndividual["Permanent Account Number"]);
       if (getString(itrIndividual["Life Assured Name"])) doc.partyName = getString(itrIndividual["Life Assured Name"]);
       const nameMatch = itrIndividual["Is Life Assured Name Same?"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       if (getNumeric(itrIndividual["PF deduction - Salaried customers"])) doc.pfDeduction = getNumeric(itrIndividual["PF deduction - Salaried customers"]);
 
       const years: Array<Record<string, unknown>> = [];
@@ -3064,7 +3083,7 @@ const ViewFinancial = () => {
         const assessment = getString(itrIndividual[`Assessment Year${suffix}`]);
         const ackNumber = getString(itrIndividual[`ITR Acknowledgement Number${suffix}`]);
         const panMatchedWithBarcodeValue = itrIndividual[`Pan Number Matched with Barcode Number${suffix}`];
-        const panMatchedWithBarcode = panMatchedWithBarcodeValue ? getCodeFromDisplayValue(panMatchedWithBarcodeValue, "yes_no") : undefined;
+        const panMatchedWithBarcode = panMatchedWithBarcodeValue ? getCodeFromDisplayValue(panMatchedWithBarcodeValue, yesNoOptions) : undefined;
         const filingDate = getString(itrIndividual[`Date of Filling ITR${suffix}`]);
         const salary = getNumeric(itrIndividual[`Income from Salary(A)${suffix}`]);
         const house = getNumeric(itrIndividual[`Income from House Property${suffix}`]);
@@ -3185,9 +3204,9 @@ const ViewFinancial = () => {
     if (fixedDeposit && Object.keys(fixedDeposit).length > 0) {
       const doc: Record<string, unknown> = {};
       const nameMatch = fixedDeposit["Is Fixed Deposit Receipt in the name of LA"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       const isMatured = fixedDeposit["Is Fixed Deposit Receipts matured"];
-      if (isMatured) doc.isMatured = getCodeFromDisplayValue(isMatured, "yes_no");
+      if (isMatured) doc.isMatured = getCodeFromDisplayValue(isMatured, yesNoOptions);
       if (getNumeric(fixedDeposit["Amount Invested"])) doc.amountInvested = getNumeric(fixedDeposit["Amount Invested"]);
       if (getNumeric(fixedDeposit["Income Earned"])) doc.incomeEarned = getNumeric(fixedDeposit["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.fixed_deposit_receipt = doc;
@@ -3198,9 +3217,9 @@ const ViewFinancial = () => {
     if (govtBonds && Object.keys(govtBonds).length > 0) {
       const doc: Record<string, unknown> = {};
       const nameMatch = govtBonds["Is Bond Certification in the name of LA"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       const isMatured = govtBonds["Is Bond Certificate matured"];
-      if (isMatured) doc.isMatured = getCodeFromDisplayValue(isMatured, "yes_no");
+      if (isMatured) doc.isMatured = getCodeFromDisplayValue(isMatured, yesNoOptions);
       if (getNumeric(govtBonds["Amount Invested or Maturity Value, whichever higher"])) doc.amountInvested = getNumeric(govtBonds["Amount Invested or Maturity Value, whichever higher"]);
       if (getNumeric(govtBonds["Income Earned"])) doc.incomeEarned = getNumeric(govtBonds["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.govt_bonds = doc;
@@ -3211,9 +3230,9 @@ const ViewFinancial = () => {
     if (loanStatement && Object.keys(loanStatement).length > 0) {
       const doc: Record<string, unknown> = {};
       const nameMatch = loanStatement["Is Loan Statements in the name of LA"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       const isDefaulter = loanStatement["Is LA Defaulter in the Payment"];
-      if (isDefaulter) doc.isDefaulter = getCodeFromDisplayValue(isDefaulter, "yes_no");
+      if (isDefaulter) doc.isDefaulter = getCodeFromDisplayValue(isDefaulter, yesNoOptions);
       if (getNumeric(loanStatement["Monthly EMI as per Schedule"])) doc.monthlyEmi = getNumeric(loanStatement["Monthly EMI as per Schedule"]);
       if (getNumeric(loanStatement["Income Earned"])) doc.incomeEarned = getNumeric(loanStatement["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.loan_statement = doc;
@@ -3224,7 +3243,7 @@ const ViewFinancial = () => {
     if (mutualFund && Object.keys(mutualFund).length > 0) {
       const doc: Record<string, unknown> = {};
       const nameMatch = mutualFund["Is Mutual Fund Statement in the name of LA"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       if (getNumeric(mutualFund["Latest Market Value (as per NAV) in Statement"])) doc.latestMarketValue = getNumeric(mutualFund["Latest Market Value (as per NAV) in Statement"]);
       if (getNumeric(mutualFund["Income Earned"])) doc.incomeEarned = getNumeric(mutualFund["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.mutual_fund = doc;
@@ -3259,7 +3278,7 @@ const ViewFinancial = () => {
     if (stockHolding && Object.keys(stockHolding).length > 0) {
       const doc: Record<string, unknown> = {};
       const nameMatch = stockHolding["Is Stock Holding Statement in name of LA/his Business"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, "yes_no");
+      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       if (getNumeric(stockHolding["Gross Total Market Value as per the Stmt"])) doc.estimatedMarketValue = getNumeric(stockHolding["Gross Total Market Value as per the Stmt"]);
       if (getNumeric(stockHolding["Income Earned"])) doc.incomeEarned = getNumeric(stockHolding["Income Earned"]);
       if (Object.keys(doc).length > 0) documents.stock_holding = doc;
@@ -3270,9 +3289,9 @@ const ViewFinancial = () => {
     if (vehicleOwnership && Object.keys(vehicleOwnership).length > 0) {
       const doc: Record<string, unknown> = {};
       const isRegName = vehicleOwnership["Is Registration Papers in the name of LA"];
-      if (isRegName) doc.isRegNameLa = getCodeFromDisplayValue(isRegName, "yes_no");
+      if (isRegName) doc.isRegNameLa = getCodeFromDisplayValue(isRegName, yesNoOptions);
       const isInvoiceName = vehicleOwnership["Is Purchase invoices in the name of LA"];
-      if (isInvoiceName) doc.isInvoiceNameLa = getCodeFromDisplayValue(isInvoiceName, "yes_no");
+      if (isInvoiceName) doc.isInvoiceNameLa = getCodeFromDisplayValue(isInvoiceName, yesNoOptions);
       if (getNumeric(vehicleOwnership["Purchase Price"])) doc.purchasePrice = getNumeric(vehicleOwnership["Purchase Price"]);
       if (getString(vehicleOwnership["Vehicle RC Number"])) doc.vehicleRcNumber = getString(vehicleOwnership["Vehicle RC Number"]);
       if (Object.keys(doc).length > 0) documents.vehicle_ownership = doc;
@@ -3283,9 +3302,9 @@ const ViewFinancial = () => {
     if (vahan && Object.keys(vahan).length > 0) {
       const doc: Record<string, unknown> = {};
       const isRegName = vahan["Is Registration Papers in the Name of LA"];
-      if (isRegName) doc.isRegNameLa = getCodeFromDisplayValue(isRegName, "yes_no");
+      if (isRegName) doc.isRegNameLa = getCodeFromDisplayValue(isRegName, yesNoOptions);
       const isInvoiceName = vahan["Is Purchase Invoices in the Name of LA"];
-      if (isInvoiceName) doc.isInvoiceNameLa = getCodeFromDisplayValue(isInvoiceName, "yes_no");
+      if (isInvoiceName) doc.isInvoiceNameLa = getCodeFromDisplayValue(isInvoiceName, yesNoOptions);
       if (getString(vahan["Car RC Number"])) doc.carRcNumber = getString(vahan["Car RC Number"]);
       if (getNumeric(vahan["IDV"])) doc.idv = getNumeric(vahan["IDV"]);
       if (Object.keys(doc).length > 0) documents.vahan = doc;
@@ -3362,7 +3381,6 @@ const ViewFinancial = () => {
     );
 
     setSectionErrors(fieldErrors);
-    setSubmitMessage(null);
 
     if (Object.keys(fieldErrors).length > 0) {
       const missingFields = displayFinancialSections.flatMap((section) => {
@@ -3376,17 +3394,17 @@ const ViewFinancial = () => {
       const preview = missingFields.slice(0, 4).join(", ");
       const suffix = missingFields.length > 4 ? ` and ${missingFields.length - 4} more.` : "";
 
-      setSubmitError(
+      showSnackbar(
         missingFields.length > 0
           ? `Please correct highlighted fields before saving. Missing mandatory fields: ${preview}${suffix}`
-          : "Please correct highlighted fields before saving."
+          : "Please correct highlighted fields before saving.",
+        "error",
       );
       return;
     }
 
     try {
       setSubmitLoading(true);
-      setSubmitError(null);
 
       const activeSectionValues = {
         [savingSectionKey]: financialFieldValues[savingSectionKey] ?? {},
@@ -3641,15 +3659,18 @@ const ViewFinancial = () => {
         },
       }));
 
-      setSubmitMessage(response.message ?? "Financial details calculated and submitted successfully.");
-      setMessageSectionKey(savingSectionKey);
       setEditingSectionKey(null);
-      setSnackbarMessage("Details saved");
-      setSnackbarSeverity("success");
-      setSnackbarOpen(true);
+      showSnackbar(
+        response.message ?? "Financial details saved successfully.",
+        "success",
+      );
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Failed to calculate and submit financial details.");
-      setMessageSectionKey(savingSectionKey);
+      showSnackbar(
+        err instanceof Error
+          ? err.message
+          : "Failed to calculate and submit financial details.",
+        "error",
+      );
     } finally {
       setSubmitLoading(false);
     }
@@ -3664,16 +3685,10 @@ const ViewFinancial = () => {
 
     setEditingSectionKey(null);
     setSectionErrors((prev) => ({ ...prev, [sectionKey]: {} }));
-    setSubmitMessage(null);
-    setSubmitError(null);
-    setMessageSectionKey(null);
   };
 
   const handleUdsLinkClick = () => {
     if (!udsLink) {
-      setSnackbarMessage("UDS link is not available.");
-      setSnackbarSeverity("warning");
-      setSnackbarOpen(true);
       return;
     }
 
@@ -3681,7 +3696,7 @@ const ViewFinancial = () => {
   };
 
   return (
-    <>
+    <YesNoOptionsContext.Provider value={yesNoOptions}>
       {showLoader && (
         <Box
           sx={{
@@ -3743,27 +3758,12 @@ const ViewFinancial = () => {
         <ApplicantProfile />
       </Box>
 
-      <Snackbar
+      <CustomSnackbar
         open={snackbarOpen}
-        autoHideDuration={3000}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      >
-        <Alert
-          onClose={() => setSnackbarOpen(false)}
-          severity={snackbarSeverity}
-          variant="filled"
-          sx={{
-            width: "100%",
-            ...(snackbarSeverity === "info" && {
-              backgroundColor: "#0f5b92",
-              color: "#ffffff",
-            }),
-          }}
-        >
-          {snackbarMessage}
-        </Alert>
-      </Snackbar>
+      />
 
       {showScrollTop && (
         <IconButton
@@ -3926,9 +3926,6 @@ const ViewFinancial = () => {
                           <CustomButton
                             sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
                             onClick={() => {
-                              setSubmitMessage(null);
-                              setSubmitError(null);
-                              setMessageSectionKey(null);
                               setSectionErrors((prev) => ({ ...prev, [section.key]: {} }));
                               setEditingSectionKey(section.key as FinancialSectionKey);
                             }}
@@ -3954,7 +3951,6 @@ const ViewFinancial = () => {
                           </>
                         )}
                       </Box>
-                      {/* submitMessage/submitError shown via snackbar */}
                     </Box>
                   )}
                 </Box>
@@ -4044,9 +4040,7 @@ const ViewFinancial = () => {
           </CustomButton>
         </Box>
       </Box>
-
-
-    </>
+    </YesNoOptionsContext.Provider>
   );
 };
 
