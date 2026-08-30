@@ -17,7 +17,6 @@ import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
 import { setDrsData } from "../../store/slices/drsSlice";
 import { getSearchApplicationPath } from "../../routes/routes";
 import { searchThunk } from "../../store/thunks/searchAppThunk";
-import type { SearchApiResponse } from "../../types/search.types";
 
 interface RightSideTableProps {
   selectedRole: string | null;
@@ -236,9 +235,9 @@ const RightSideTable = ({
             applicationNo: applicationNumber,
             businessType,
           }),
-        ).unwrap() as SearchApiResponse;
+        ).unwrap();
 
-        dispatch(setDrsData(searchData));
+        dispatch(setDrsData({ ...searchData }));
 
         localStorage.setItem(
           "selectedCaseContext",
