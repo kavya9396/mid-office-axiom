@@ -54,27 +54,43 @@ const USER_HANDLE_ROLES = new Set([
   "LEAVEMANAGEMENT",
 ]);
 
-const DASHBOARD_ROLE_CONFIG: Record<
-  string,
-  { label: string; taskKey: string }
-> = {
-  RETAIL_DASH_MED: { label: "AMR Medical", taskKey: "AMR_MEDICAL_TASK" },
-  GROUP_DASH_MED: { label: "AMR Medical", taskKey: "AMR_MEDICAL_TASK" },
-  RETAIL_DASH_NONMED: { label: "AMR Non Medical", taskKey: "AMR_NON_MEDICAL_TASK" },
-  GROUP_DASH_NONMED: { label: "AMR Non Medical", taskKey: "AMR_NON_MEDICAL_TASK" },
-  RETAIL_DASH_ACCUITY: { label: "Acuity", taskKey: "ACCUITY_TASK" },
-  GROUP_DASH_ACCUITY: { label: "Acuity", taskKey: "ACCUITY_TASK" },
-  RETAIL_DASH_RISK: { label: "Risk", taskKey: "RISK_TASK" },
-  GROUP_DASH_RISK: { label: "Risk", taskKey: "RISK_TASK" },
-  RETAIL_DASH_IIFL: { label: "IIFL", taskKey: "IIFL_TASK" },
-  GROUP_DASH_IIFL: { label: "IIFL", taskKey: "IIFL_TASK" },
-  RETAIL_DASH_PAYATS: { label: "Pay ATS", taskKey: "PAYATS_TASK" },
-  GROUP_DASH_PAYATS: { label: "Pay ATS", taskKey: "PAYATS_TASK" },
+interface DashboardTaskConfig {
+  label: string;
+  taskKey: string;
+}
+
+const DASHBOARD_ROLE_CONFIG: Record<string, DashboardTaskConfig[]> = {
+  RETAIL_DASH_MED: [{ label: "AMR Medical", taskKey: "AMR_MEDICAL_TASK" }],
+  GROUP_DASH_MED: [{ label: "AMR Medical", taskKey: "AMR_MEDICAL_TASK" }],
+  RETAIL_DASH_NONMED: [{ label: "AMR Non Medical", taskKey: "AMR_NON_MEDICAL_TASK" }],
+  GROUP_DASH_NONMED: [{ label: "AMR Non Medical", taskKey: "AMR_NON_MEDICAL_TASK" }],
+  RETAIL_DASH_ACCUITY: [{ label: "Acuity", taskKey: "ACCUITY_TASK" }],
+  GROUP_DASH_ACCUITY: [{ label: "Acuity", taskKey: "ACCUITY_TASK" }],
+  RETAIL_DASH_RISK: [{ label: "Risk", taskKey: "RISK_TASK" }],
+  GROUP_DASH_RISK: [{ label: "Risk", taskKey: "RISK_TASK" }],
+  RETAIL_DASH_IIFL: [{ label: "IIFL", taskKey: "IIFL_TASK" }],
+  GROUP_DASH_IIFL: [{ label: "IIFL", taskKey: "IIFL_TASK" }],
+  RETAIL_DASH_PAYATS: [
+    { label: "Reconsideration", taskKey: "RECONSIDERATION_TASK" },
+    { label: "Hold", taskKey: "HOLD_TASK" },
+    { label: "Payment & ATS", taskKey: "PAYMENT_ATS_TASK" },
+    { label: "Wait for Combo Policy", taskKey: "WAIT_FOR_COMBO_POLICY_TASK" },
+    { label: "Post Issuance Doc Wait", taskKey: "POST_ISSUANCE_DOC_WAIT_TASK" },
+    { label: "Pre Issuance Doc Wait", taskKey: "PRE_ISSUANCE_DOC_WAIT_TASK" },
+    { label: "SPC DE", taskKey: "SPC_DE_TASK" }
+  ],
+  GROUP_DASH_PAYATS: [{ label: "Reconsideration", taskKey: "RECONSIDERATION_TASK" },
+    { label: "Hold", taskKey: "HOLD_TASK" },
+    { label: "Payment & ATS", taskKey: "PAYMENT_ATS_TASK" },
+    { label: "Wait for Combo Policy", taskKey: "WAIT_FOR_COMBO_POLICY_TASK" },
+    { label: "Post Issuance Doc Wait", taskKey: "POST_ISSUANCE_DOC_WAIT_TASK" },
+    { label: "Pre Issuance Doc Wait", taskKey: "PRE_ISSUANCE_DOC_WAIT_TASK" },
+    { label: "SPC DE", taskKey: "SPC_DE_TASK" }],
 };
 
 const getDashboardConfig = (
   role: string,
-): { label: string; taskKey: string } => {
+): DashboardTaskConfig[] => {
   const normalizedRole = role.trim().toUpperCase();
   const configuredRole = DASHBOARD_ROLE_CONFIG[normalizedRole];
 
@@ -91,12 +107,12 @@ const getDashboardConfig = (
     /^(RETAIL|GROUP)_DASH_/.test(normalizedRole) ||
     normalizedRole.startsWith("DASH_");
 
-  return {
+  return [{
     label: toDisplayLabel(dashboardName),
     taskKey: isDashboardPermission
       ? `${dashboardName}_TASK`
       : normalizedRole,
-  };
+  }];
 };
 
 const getTwoCharacterInitials = (value: string): string => {
@@ -159,11 +175,11 @@ const LeftTask = ({
     roles
       .filter((role) => !USER_HANDLE_ROLES.has(normalizeKey(role)))
       .forEach((role) => {
-      const config = getDashboardConfig(role);
-
-      if (!uniqueItems.has(config.taskKey)) {
-        uniqueItems.set(config.taskKey, config);
-      }
+      getDashboardConfig(role).forEach((config) => {
+        if (!uniqueItems.has(config.taskKey)) {
+          uniqueItems.set(config.taskKey, config);
+        }
+      });
     });
 
     return Array.from(uniqueItems.values());
