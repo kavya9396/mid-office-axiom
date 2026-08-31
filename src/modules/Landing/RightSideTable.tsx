@@ -6,7 +6,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import AllocationManagement from "./AllocationManagement";
 import DynamicRoleTable from "./DynamicRoleTable";
@@ -14,15 +13,13 @@ import LeaveManagement from "./LeaveManagement";
 import { useAppDispatch } from "../../store/hooks";
 import { breThunk } from "../../store/thunks/breThunk";
 import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
-import { setDrsData } from "../../store/slices/drsSlice";
-import { getSearchApplicationPath } from "../../routes/routes";
-import { searchThunk } from "../../store/thunks/searchAppThunk";
 
 interface RightSideTableProps {
   selectedRole: string | null;
   selectedTask: string | null;
   selectedTaskData: Record<string, unknown>[];
   selectedApplication: Record<string, unknown> | null;
+  isDashboardTask?: boolean;
   onApplicationClick: (
     application: Record<string, unknown>,
   ) => void;
@@ -44,14 +41,6 @@ const normalizeRoleKey = (value: string) =>
 
 const normalizeTaskKey = (value: string) =>
   value.replace(/_/g, " ");
-
-const DASHBOARD_ROLES = new Set([
-  "AMR_MEDICAL_TASK",
-  "AMR_NON_MEDICAL_TASK",
-  "RECONSIDERATION_TASK",
-  "ACCUITY_TASK",
-  "RISK_TASK"
-]);
 
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -157,7 +146,6 @@ const RightSideTable = ({
   onApplicationClick,
 }: RightSideTableProps) => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
 
   const [claimError, setClaimError] = useState("");
   const [claimLoading, setClaimLoading] = useState(false);
@@ -212,71 +200,6 @@ const RightSideTable = ({
       selectedTask,
       localStorage.getItem("roleType"),
     ).toUpperCase();
-
-    /*
-     * Dashboard roles open the existing Search Application page in read-only
-     * mode. Keep this before task/instance validation so these roles never
-     * enter the claim/BRE flow.
-     */
-    if (DASHBOARD_ROLES.has(roleType)) {
-      if (!applicationNumber) {
-        setClaimError(
-          "Application number is missing. Unable to open dashboard.",
-        );
-        return;
-      }
-
-      try {
-        setClaimLoading(true);
-        setClaimError("");
-
-        const searchData = await dispatch(
-          searchThunk({
-            applicationNo: applicationNumber,
-            businessType,
-          }),
-        ).unwrap();
-
-        dispatch(setDrsData({ ...searchData }));
-
-        localStorage.setItem(
-          "selectedCaseContext",
-          JSON.stringify({
-            ...getStoredCaseContext(),
-            applicationNumber,
-            businessType,
-            roleType,
-            readOnly: true,
-            source: "dashboardRole",
-          }),
-        );
-
-        navigate(
-          getSearchApplicationPath(),
-          {
-            state: {
-              applicationNumber,
-              businessType,
-              roleType,
-              fromDashboardRole: true,
-              searchData,
-            },
-          },
-        );
-      } catch (error) {
-        setClaimError(
-          typeof error === "string"
-            ? error
-            : error instanceof Error
-              ? error.message
-              : "Unable to load application details.",
-        );
-      } finally {
-        setClaimLoading(false);
-      }
-
-      return;
-    }
 
     if (!taskId) {
       setClaimError(
@@ -508,7 +431,7 @@ const RightSideTable = ({
               }}
             >
               <Typography>
-                Loading case details...
+                Claiming task and running BRE...
               </Typography>
             </Box>
           </Box>

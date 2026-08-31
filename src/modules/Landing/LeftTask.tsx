@@ -5,7 +5,7 @@ import {
   Typography,
 } from "@mui/material";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   KeyDownArrowIcon,
@@ -49,6 +49,56 @@ interface LeftTaskProps {
 const normalizeKey = (value: string) =>
   value.replace(/[\s_-]/g, "").toUpperCase();
 
+const USER_HANDLE_ROLES = new Set([
+  "USERMANAGEMENT",
+  "LEAVEMANAGEMENT",
+]);
+
+const DASHBOARD_ROLE_CONFIG: Record<
+  string,
+  { label: string; taskKey: string }
+> = {
+  RETAIL_DASH_MED: { label: "AMR Medical", taskKey: "AMR_MEDICAL_TASK" },
+  GROUP_DASH_MED: { label: "AMR Medical", taskKey: "AMR_MEDICAL_TASK" },
+  RETAIL_DASH_NONMED: { label: "AMR Non Medical", taskKey: "AMR_NON_MEDICAL_TASK" },
+  GROUP_DASH_NONMED: { label: "AMR Non Medical", taskKey: "AMR_NON_MEDICAL_TASK" },
+  RETAIL_DASH_ACCUITY: { label: "Acuity", taskKey: "ACCUITY_TASK" },
+  GROUP_DASH_ACCUITY: { label: "Acuity", taskKey: "ACCUITY_TASK" },
+  RETAIL_DASH_RISK: { label: "Risk", taskKey: "RISK_TASK" },
+  GROUP_DASH_RISK: { label: "Risk", taskKey: "RISK_TASK" },
+  RETAIL_DASH_IIFL: { label: "IIFL", taskKey: "IIFL_TASK" },
+  GROUP_DASH_IIFL: { label: "IIFL", taskKey: "IIFL_TASK" },
+  RETAIL_DASH_PAYATS: { label: "Pay ATS", taskKey: "PAYATS_TASK" },
+  GROUP_DASH_PAYATS: { label: "Pay ATS", taskKey: "PAYATS_TASK" },
+};
+
+const getDashboardConfig = (
+  role: string,
+): { label: string; taskKey: string } => {
+  const normalizedRole = role.trim().toUpperCase();
+  const configuredRole = DASHBOARD_ROLE_CONFIG[normalizedRole];
+
+  if (configuredRole) {
+    return configuredRole;
+  }
+
+  const dashboardName = normalizedRole
+    .replace(/^(RETAIL|GROUP)_DASH_/, "")
+    .replace(/^DASH_/, "")
+    .replace(/_TASK$/, "");
+
+  const isDashboardPermission =
+    /^(RETAIL|GROUP)_DASH_/.test(normalizedRole) ||
+    normalizedRole.startsWith("DASH_");
+
+  return {
+    label: toDisplayLabel(dashboardName),
+    taskKey: isDashboardPermission
+      ? `${dashboardName}_TASK`
+      : normalizedRole,
+  };
+};
+
 const getTwoCharacterInitials = (value: string): string => {
   const words = toDisplayLabel(value)
     .trim()
@@ -89,6 +139,35 @@ const LeftTask = ({
 }: LeftTaskProps) => {
 
   const navigate = useNavigate();
+  const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+
+  const userHandleItems = useMemo(
+    () => roles
+      .filter((role) => USER_HANDLE_ROLES.has(normalizeKey(role)))
+      .map((role) => ({
+        role,
+        label: normalizeKey(role) === "USERMANAGEMENT"
+          ? "User Management"
+          : "Leave Management",
+      })),
+    [roles],
+  );
+
+  const dashboardItems = useMemo(() => {
+    const uniqueItems = new Map<string, { label: string; taskKey: string }>();
+
+    roles
+      .filter((role) => !USER_HANDLE_ROLES.has(normalizeKey(role)))
+      .forEach((role) => {
+      const config = getDashboardConfig(role);
+
+      if (!uniqueItems.has(config.taskKey)) {
+        uniqueItems.set(config.taskKey, config);
+      }
+    });
+
+    return Array.from(uniqueItems.values());
+  }, [roles]);
 
   const handleTaskSelect = useCallback((taskName: string) => {
     localStorage.setItem(SELECTED_TASK_POOL_KEY, taskName);
@@ -100,10 +179,10 @@ const LeftTask = ({
   // ==========================================================
 
   useEffect(() => {
-    if (!selectedTask && menuItems.length > 0) {
+    if (!selectedTask && !selectedRole && menuItems.length > 0) {
       handleTaskSelect("ALL_CASES");
     }
-  }, [selectedTask, menuItems.length, handleTaskSelect]);
+  }, [selectedTask, selectedRole, menuItems.length, handleTaskSelect]);
 
   // ==========================================================
   // TOTAL CASE COUNT
@@ -338,7 +417,7 @@ const LeftTask = ({
               ROLES
              =================================================== */}
 
-          {roles.length > 0 && (
+          {userHandleItems.length > 0 && (
             <Box
               sx={{
                 borderBottom: "1px solid #eeeeee",
@@ -402,7 +481,7 @@ const LeftTask = ({
 
               {!isCollapsed &&
                 isRolesOpen &&
-                roles.map((role) => {
+                userHandleItems.map(({ role, label }) => {
                   const isActive = selectedRole === role;
 
                   return (
@@ -440,11 +519,69 @@ const LeftTask = ({
                           fontWeight: isActive ? 600 : 400,
                         }}
                       >
-                        {toDisplayLabel(role)}
+                        {label}
                       </Typography>
                     </Box>
                   );
                 })}
+            </Box>
+          )}
+
+          {dashboardItems.length > 0 && (
+            <Box sx={{ borderBottom: "1px solid #eeeeee" }}>
+              <Box
+                onClick={() => setIsDashboardOpen((previous) => !previous)}
+                sx={{
+                  height: "38px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: isCollapsed ? "center" : "space-between",
+                  px: 1.5,
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "#f8f8f8" },
+                }}
+              >
+                {isCollapsed ? (
+                  <Tooltip title="Dashboard" placement="right" arrow>
+                    <Typography sx={{ fontSize: "12px", fontWeight: 700 }}>
+                      DB
+                    </Typography>
+                  </Tooltip>
+                ) : (
+                  <>
+                    <Typography sx={{ fontSize: "11px", fontWeight: 700, color: "#333333" }}>
+                      Dashboard
+                    </Typography>
+                    {isDashboardOpen ? <KeyUpArrowIcon /> : <KeyDownArrowIcon />}
+                  </>
+                )}
+              </Box>
+
+              {!isCollapsed && isDashboardOpen && dashboardItems.map((item) => {
+                const isActive = selectedTask === item.taskKey;
+
+                return (
+                  <Box
+                    key={item.taskKey}
+                    onClick={() => handleTaskSelect(item.taskKey)}
+                    sx={{
+                      height: "34px",
+                      display: "flex",
+                      alignItems: "center",
+                      px: 2.5,
+                      cursor: "pointer",
+                      borderLeft: isActive ? "3px solid #9A2529" : "3px solid transparent",
+                      backgroundColor: isActive ? "#fdf2f2" : "transparent",
+                      color: isActive ? "#9A2529" : "#555555",
+                      "&:hover": { backgroundColor: "#f8f8f8" },
+                    }}
+                  >
+                    <Typography sx={{ fontSize: "11px", fontWeight: isActive ? 600 : 400 }}>
+                      {item.label}
+                    </Typography>
+                  </Box>
+                );
+              })}
             </Box>
           )}
 
