@@ -786,7 +786,6 @@ const RequirementManagementTable = ({
     severity: "success",
   });
   const [isSaving, setIsSaving] = useState(false);
-
   const handleViewDocuments = () => {
     if (!proposerFormUrl) {
       setSnackbar({
@@ -2109,6 +2108,7 @@ const RequirementManagementTable = ({
                 {readOnly ? (
                   renderCompactCell(selectedStatus)
                 ) : (
+                  <Box sx={{ display: "grid", gap: 0.5, width: "100%" }}>
                   <Select
                     size="small"
                     value={selectedStatus}
@@ -2177,6 +2177,7 @@ const RequirementManagementTable = ({
                       );
                     })}
                   </Select>
+                  </Box>
                 )}
                 {renderCompactCell(row.ocrStatus)}
 
@@ -2661,6 +2662,7 @@ const RequirementManagementTable = ({
               </Button>
             </DialogActions>
           </Dialog>
+
         </>
       )}
     </Box>
