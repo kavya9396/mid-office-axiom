@@ -13,6 +13,10 @@ import LeaveManagement from "./LeaveManagement";
 import { useAppDispatch } from "../../store/hooks";
 import { breThunk } from "../../store/thunks/breThunk";
 import { claimTaskThunk } from "../../store/thunks/claimTaskThunk";
+import { searchThunk } from "../../store/thunks/searchAppThunk";
+import { getSearchApplicationPath } from "../../routes/routes";
+import { useNavigate } from "react-router-dom";
+import type { SearchApiResponse } from "../../types/search.types";
 
 interface RightSideTableProps {
   selectedRole: string | null;
@@ -143,9 +147,11 @@ const RightSideTable = ({
   selectedTask,
   selectedTaskData,
   selectedApplication,
+  isDashboardTask = false,
   onApplicationClick,
 }: RightSideTableProps) => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
 
   const [claimError, setClaimError] = useState("");
   const [claimLoading, setClaimLoading] = useState(false);
@@ -200,6 +206,61 @@ const RightSideTable = ({
       selectedTask,
       localStorage.getItem("roleType"),
     ).toUpperCase();
+
+    if (isDashboardTask) {
+      if (!applicationNumber) {
+        setClaimError("Application number is missing. Unable to open this case.");
+        return;
+      }
+
+      try {
+        setClaimLoading(true);
+        setClaimError("");
+
+        const searchData = await dispatch(
+          searchThunk({ applicationNo: applicationNumber, businessType }),
+        ).unwrap() as SearchApiResponse;
+
+        if (!searchData?.data) {
+          setClaimError("No data found for this application.");
+          return;
+        }
+
+        localStorage.setItem(
+          "selectedCaseContext",
+          JSON.stringify({
+            ...getStoredCaseContext(),
+            applicationNumber,
+            businessType,
+            roleType,
+            readOnly: true,
+            source: "dashboardRole",
+          }),
+        );
+
+        navigate(getSearchApplicationPath(), {
+          state: {
+            applicationNumber,
+            businessType,
+            roleType,
+            fromDashboardRole: true,
+            searchData,
+          },
+        });
+      } catch (error) {
+        setClaimError(
+          typeof error === "string"
+            ? error
+            : error instanceof Error
+              ? error.message
+              : "Unable to fetch application details.",
+        );
+      } finally {
+        setClaimLoading(false);
+      }
+
+      return;
+    }
 
     if (!taskId) {
       setClaimError(

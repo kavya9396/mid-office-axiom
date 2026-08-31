@@ -182,6 +182,8 @@ const Inbox1 = () => {
     isPageLoading,
     setIsPageLoading,
   ] = useState(true);
+  const [isDashboardTask, setIsDashboardTask] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   // ============================================================
   // LOGIN
@@ -402,6 +404,7 @@ const Inbox1 = () => {
     setSelectedRole(role);
     setSelectedTask(null);
     setSelectedApplication(null);
+    setIsDashboardTask(false);
   };
 
   // ============================================================
@@ -410,10 +413,32 @@ const Inbox1 = () => {
 
   const handleTaskSelect = (
     task: string,
+    fromDashboard = false,
   ) => {
     setSelectedTask(task);
     setSelectedRole(null);
     setSelectedApplication(null);
+    setIsDashboardTask(fromDashboard);
+  };
+
+  const handleRefreshInbox = async () => {
+    if (!effectiveUsername || !effectivePassword) {
+      return;
+    }
+
+    try {
+      setIsRefreshing(true);
+      await dispatch(
+        fetchInboxThunk({
+          username: effectiveUsername,
+          password: effectivePassword,
+        }),
+      ).unwrap();
+    } catch (error) {
+      console.error("Failed to refresh inbox:", error);
+    } finally {
+      setIsRefreshing(false);
+    }
   };
 
   // ============================================================
@@ -579,6 +604,8 @@ const Inbox1 = () => {
           onToggleCollapse={
             handleToggleCollapse
           }
+          onRefresh={handleRefreshInbox}
+          isRefreshing={isRefreshing}
         />
 
         {/* ================================================== */}
@@ -602,7 +629,7 @@ const Inbox1 = () => {
             selectedTaskData={selectedTaskData}
             selectedApplication={selectedApplication}
             isDashboardTask={Boolean(
-              activeTask && authorizedDashboardTaskKeys.has(activeTask),
+              isDashboardTask && activeTask,
             )}
             onApplicationClick={handleApplicationClick}
             onApplicationBack={handleApplicationBack}
