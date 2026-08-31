@@ -19,6 +19,7 @@ import UserManagement from "../modules/DRS/UserManagement";
 import SearchApplication from "../modules/SearchApp/SearchApplication";
 import Inbox from "../modules/Landing/Inbox";
 import MasterDataRoute from "./MasterDataRoute";
+import BulkUpload from "../modules/BulkUpload/BulkUpload";
 
 function BusinessTypeRedirect() {
   return <Navigate to={PATHS.INBOX} replace />;
@@ -59,6 +60,13 @@ export default function AppRoutes() {
             element={<RootLayout />}
           >
             <Route index element={<SearchApplication />} />
+          </Route>
+
+          <Route
+            path={PATHS.BULK_UPLOAD}
+            element={<RootLayout />}
+          >
+            <Route index element={<BulkUpload />} />
           </Route>
 
           <Route element={<BusinessTypeRoute />}>

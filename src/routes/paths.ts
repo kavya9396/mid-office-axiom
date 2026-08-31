@@ -15,5 +15,7 @@ export const PATHS = {
   DRS_PREVIOUS: "app/:applicationNumber/drs/previousPolicies",
 
   USER_MANAGEMENT: "admin/userManagement",
-  SEARCH_APPLICATION: "search/application"
+  SEARCH_APPLICATION: "search/application",
+
+  BULK_UPLOAD: "bulk/upload",
 };

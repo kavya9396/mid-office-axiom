@@ -18,7 +18,7 @@ import LastLogin from "./LastLogin";
 import type { MenuItem } from "../../types/inboxTypes";
 import { toDisplayLabel } from "../../utils/inboxUtils";
 import { useNavigate } from "react-router-dom";
-import { getSearchApplicationPath } from "../../routes/routes";
+import { getBulkUploadPath, getSearchApplicationPath } from "../../routes/routes";
 
 interface LeftTaskProps {
   roles: string[];
@@ -505,6 +505,53 @@ const LeftTask = ({
               />
             </Box>
           </Box>
+
+
+          {/* ===================================================
+            BULK UPLOAD
+          =================================================== */}
+
+           <Box
+            role="button"
+            tabIndex={0}
+            aria-label="Search applications"
+            onClick={() => navigate(getBulkUploadPath())}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                navigate(getSearchApplicationPath());
+              }
+            }}
+            sx={{
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: isCollapsed
+                ? "center"
+                : "space-between",
+              px: 1.5,
+              borderBottom: "1px solid #eeeeee",
+              color: "#333333",
+              cursor: "pointer",
+              "&:hover": { backgroundColor: "#f8f8f8" },
+              "&:focus-visible": {
+                outline: "2px solid #9A2529",
+                outlineOffset: "-2px",
+              },
+            }}
+          >
+            {!isCollapsed && (
+              <Typography
+                sx={{
+                  fontSize: "11px",
+                  fontWeight: 600,
+                }}
+              >
+                Bulk Upload
+              </Typography>
+            )}
+          </Box>
+
 
           {/* ===================================================
               ALL CASES

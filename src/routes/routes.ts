@@ -17,6 +17,8 @@ export const getInboxPath = (businessType?: string) => {
 
 export const getSearchApplicationPath = () => `/${PATHS.SEARCH_APPLICATION}`;
 
+export const getBulkUploadPath = () => `/${PATHS.BULK_UPLOAD}`;
+
 export const getDRSPath = (businessType: string, appNo: string) =>
   `/${normalizeBusinessType(businessType) ?? "retail"}/app/${appNo}/drs`;
 
