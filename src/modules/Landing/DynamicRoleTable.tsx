@@ -32,6 +32,8 @@ import {
   KeyUpArrowIcon,
   SearchIcon,
   SettingsIcon,
+  TickIcon,
+  TimeIcon,
   
 } from "../../icons/Icons";
 import CustomButton from "../../components/ui/Button/Button";
@@ -711,6 +713,37 @@ const DynamicRoleTable = ({
     columns,
     searchText,
   ]);
+
+  const priorityCounts = useMemo<{
+    highPriority: number;
+    atRisk: number;
+    normal: number;
+  }>(() => {
+    return data.reduce<{
+      highPriority: number;
+      atRisk: number;
+      normal: number;
+    }>(
+      (counts, row) => {
+        const timingStatus = getRowTimingStatus(row);
+
+        if (timingStatus === "overdue") {
+          counts.highPriority += 1;
+        } else if (timingStatus === "atRisk") {
+          counts.atRisk += 1;
+        } else {
+          counts.normal += 1;
+        }
+
+        return counts;
+      },
+      {
+        highPriority: 0,
+        atRisk: 0,
+        normal: 0,
+      },
+    );
+  }, [data]);
 
   /* ============================================================
    * SORT
@@ -1428,14 +1461,20 @@ console.log('payload',payload)
                 {
                   label: "High Priority",
                   color: "#D32F2F",
+                  count: priorityCounts.highPriority,
+                  Icon: DangerIcon,
                 },
                 {
                   label: "At Risk",
-                  color: "#C05600",
+                  color: "#ED8A00",
+                  count: priorityCounts.atRisk,
+                  Icon: TimeIcon,
                 },
                 {
                   label: "Normal",
                   color: "#155a87",
+                  count: priorityCounts.normal,
+                  Icon: TickIcon,
                 },
               ].map((indicator) => (
                 <Box
@@ -1447,15 +1486,27 @@ console.log('payload',payload)
                   }}
                 >
                   <Box
-                    component="span"
                     sx={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      backgroundColor: indicator.color,
+                      width: "14px",
+                      height: "14px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
                       flexShrink: 0,
+                      color: indicator.color,
+                      "& svg": {
+                        width: "14px !important",
+                        height: "14px !important",
+                        color: `${indicator.color} !important`,
+                      },
+                      "& svg *": {
+                        fill: `${indicator.color} !important`,
+                        stroke: `${indicator.color} !important`,
+                      },
                     }}
-                  />
+                  >
+                    <indicator.Icon />
+                  </Box>
                   <Typography
                     component="span"
                     sx={{
@@ -1466,6 +1517,25 @@ console.log('payload',payload)
                   >
                     {indicator.label}
                   </Typography>
+                  <Box
+                    component="span"
+                    sx={{
+                      minWidth: "16px",
+                      height: "16px",
+                      px: 0.5,
+                      borderRadius: "8px",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      backgroundColor: `${indicator.color}14`,
+                      color: indicator.color,
+                      fontSize: "10px",
+                      fontWeight: 700,
+                      lineHeight: 1,
+                    }}
+                  >
+                    {indicator.count}
+                  </Box>
                 </Box>
               ))}
             </Box>
