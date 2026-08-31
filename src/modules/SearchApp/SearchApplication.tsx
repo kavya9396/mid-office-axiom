@@ -105,7 +105,7 @@
 
 
 import { useState, type SubmitEvent } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import {
     Box,
     CircularProgress,
@@ -141,6 +141,14 @@ type SnackbarState = {
     severity: SnackbarSeverity;
 };
 
+type SearchLocationState = {
+    applicationNumber?: string;
+    businessType?: string;
+    roleType?: string;
+    fromDashboardRole?: boolean;
+    searchData?: SearchApiResponse;
+};
+
 const initialSnackbarState: SnackbarState = {
     open: false,
     message: "",
@@ -149,11 +157,17 @@ const initialSnackbarState: SnackbarState = {
 
 const SearchApplication = () => {
     const navigate = useNavigate();
+    const location = useLocation();
     const dispatch = useAppDispatch();
     const { businessType } = useAppContext();
 
+    const locationState =
+        (location.state as SearchLocationState | null) ?? null;
+    const isDashboardRole = locationState?.fromDashboardRole === true;
+
     const safeBusinessType =
         String(
+            locationState?.businessType ??
             businessType ??
             localStorage.getItem("businessType") ??
             "retail",
@@ -161,8 +175,12 @@ const SearchApplication = () => {
             .trim()
             .toLowerCase() || "retail";
 
-    const [applicationNumber, setApplicationNumber] = useState("");
-    const [searchData, setSearchData] = useState<SearchApiResponse | null>(null);
+    const [applicationNumber, setApplicationNumber] = useState(
+        locationState?.applicationNumber ?? "",
+    );
+    const [searchData, setSearchData] = useState<SearchApiResponse | null>(
+        locationState?.searchData ?? null,
+    );
     const [isSearching, setIsSearching] = useState(false);
     const [snackbar, setSnackbar] =
         useState<SnackbarState>(initialSnackbarState);
@@ -524,19 +542,20 @@ return (
             }
           />
 
-          <Box
-            component="form"
-            onSubmit={handleSearch}
-            sx={{
-              ...columnFlex,
-              bgcolor: "#fff",
-              p: 2,
-              mb: 1,
-              borderRadius: 2,
-              gap: 1,
-              boxShadow: 2,
-            }}
-          >
+          {!isDashboardRole && (
+            <Box
+              component="form"
+              onSubmit={handleSearch}
+              sx={{
+                ...columnFlex,
+                bgcolor: "#fff",
+                p: 2,
+                mb: 1,
+                borderRadius: 2,
+                gap: 1,
+                boxShadow: 2,
+              }}
+            >
             <Typography
               variant="h6"
               sx={{
@@ -606,7 +625,8 @@ return (
                 )}
               </CustomButton>
             </Box>
-          </Box>
+            </Box>
+          )}
         </Box>
 
         {isSearching && (

@@ -229,7 +229,12 @@ const DEFAULT_COLUMN_WIDTHS = [
 ];
 const MIN_COLUMN_WEIGHT = 30;
 
-type FilterField = "profile" | "category" | "subCategory" | "fupCode";
+type FilterField =
+  | "profile"
+  | "category"
+  | "subCategory"
+  | "fupCode"
+  | "status";
 
 const FILTERABLE_COLUMNS: Partial<Record<(typeof COLUMN_HEADINGS)[number], FilterField>> = {
   Profile: "profile",
@@ -243,6 +248,7 @@ const EMPTY_FILTERS: Record<FilterField, string[]> = {
   category: [],
   subCategory: [],
   fupCode: [],
+  status: [],
 };
 
 const FILTER_LABELS: Array<{ field: FilterField; label: string }> = [
@@ -250,6 +256,7 @@ const FILTER_LABELS: Array<{ field: FilterField; label: string }> = [
   { field: "subCategory", label: "Sub Category" },
   { field: "profile", label: "Profile" },
   { field: "fupCode", label: "FUP Code" },
+  { field: "status", label: "Status" },
 ];
 
 const normalizeText = (value: unknown): string =>
@@ -1096,12 +1103,23 @@ const RequirementManagementTable = ({
   }, [loadMasterOptions, newRowIds, rowMasterOptions, rows]);
 
   const filterOptions = useMemo(() => {
-    const fields = Object.values(FILTERABLE_COLUMNS) as FilterField[];
+    const fields = [
+      ...(Object.values(FILTERABLE_COLUMNS) as FilterField[]),
+      "status" as const,
+    ];
 
     return fields.reduce<Record<FilterField, string[]>>(
       (options, field) => {
         options[field] = Array.from(
-          new Set(rows.map((row) => normalizeText(row[field])).filter(Boolean)),
+          new Set(
+            rows
+              .map((row) =>
+                field === "status"
+                  ? getStatusSummaryLabel(row.status)
+                  : normalizeText(row[field]),
+              )
+              .filter(Boolean),
+          ),
         ).sort((first, second) =>
           first.localeCompare(second, undefined, { sensitivity: "base" }),
         );
@@ -1131,13 +1149,17 @@ const RequirementManagementTable = ({
     const matchingRows = rows.filter((row) =>
         (Object.keys(filters) as FilterField[]).every((field) => {
           const selectedValues = filters[field];
+          const rowValue =
+            field === "status"
+              ? getStatusSummaryLabel(row.status)
+              : normalizeText(row[field]);
 
           return (
             selectedValues.length === 0 ||
             selectedValues.some(
               (value) =>
                 normalizeText(value).toUpperCase() ===
-                normalizeText(row[field]).toUpperCase(),
+                rowValue.toUpperCase(),
             )
           );
         }),
@@ -1237,6 +1259,7 @@ const RequirementManagementTable = ({
       category: [...filters.category],
       subCategory: [...filters.subCategory],
       fupCode: [...filters.fupCode],
+      status: [...filters.status],
     });
     setFilterDialogOpen(true);
   };
@@ -1264,6 +1287,7 @@ const RequirementManagementTable = ({
       category: [...draftFilters.category],
       subCategory: [...draftFilters.subCategory],
       fupCode: [...draftFilters.fupCode],
+      status: [...draftFilters.status],
     });
     setPage(1);
     setFilterDialogOpen(false);
@@ -1272,6 +1296,20 @@ const RequirementManagementTable = ({
   const handleClearAppliedFilters = () => {
     setFilters({ ...EMPTY_FILTERS });
     setDraftFilters({ ...EMPTY_FILTERS });
+    setPage(1);
+  };
+
+  const handleStatusSummaryClick = (status: string) => {
+    const nextStatuses = filters.status.includes(status) ? [] : [status];
+
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      status: nextStatuses,
+    }));
+    setDraftFilters((currentFilters) => ({
+      ...currentFilters,
+      status: nextStatuses,
+    }));
     setPage(1);
   };
 
@@ -1848,21 +1886,35 @@ const RequirementManagementTable = ({
               {statusSummary.map(([status, count]) => (
                 <Box
                   key={status}
+                  component="button"
+                  type="button"
+                  onClick={() => handleStatusSummaryClick(status)}
+                  aria-pressed={filters.status.includes(status)}
                   sx={{
                     display: "inline-flex",
                     alignItems: "center",
                     gap: 0.4,
                     height: 24,
                     px: 0.8,
-                    border: "1px solid #dde2e6",
+                    border: filters.status.includes(status)
+                      ? "1px solid #E45F14"
+                      : "1px solid #dde2e6",
                     borderRadius: "12px",
                     bgcolor:
-                      status === "Pending"
+                      filters.status.includes(status)
+                        ? "#fff1e6"
+                        : status === "Pending"
                         ? "#fff3e8"
                         : status === "Waived"
                           ? "#eef6ff"
                           : "#ffffff",
                     color: status === "Pending" ? "#b54a00" : "#4f4f4f",
+                    cursor: "pointer",
+                    font: "inherit",
+                    "&:hover": {
+                      borderColor: "#E45F14",
+                      bgcolor: "#fff5ee",
+                    },
                   }}
                 >
                   <Typography

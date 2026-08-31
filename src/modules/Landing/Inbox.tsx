@@ -78,6 +78,42 @@ const ROLE_SECTIONS: Record<
   ],
 };
 
+const DASHBOARD_TASK_KEYS = new Set([
+  "AMR_MEDICAL_TASK",
+  "AMR_NON_MEDICAL_TASK",
+  "ACCUITY_TASK",
+  "RISK_TASK",
+  "IIFL_TASK",
+  "PAYATS_TASK",
+]);
+
+const USER_HANDLE_ROLE_KEYS = new Set([
+  "USERMANAGEMENT",
+  "LEAVEMANAGEMENT",
+]);
+
+const getDashboardTaskKey = (role: string): string => {
+  const normalizedRole = role.trim().toUpperCase();
+  const mappedKeys: Record<string, string> = {
+    MED: "AMR_MEDICAL_TASK",
+    NONMED: "AMR_NON_MEDICAL_TASK",
+    ACCUITY: "ACCUITY_TASK",
+    RISK: "RISK_TASK",
+    IIFL: "IIFL_TASK",
+    PAYATS: "PAYATS_TASK",
+  };
+  const dashboardName = normalizedRole
+    .replace(/^(RETAIL|GROUP)_DASH_/, "")
+    .replace(/^DASH_/, "")
+    .replace(/_TASK$/, "");
+
+  return mappedKeys[dashboardName] ?? (
+    /^(RETAIL|GROUP)_DASH_|^DASH_/.test(normalizedRole)
+      ? `${dashboardName}_TASK`
+      : normalizedRole
+  );
+};
+
 const Inbox1 = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -122,7 +158,7 @@ const Inbox1 = () => {
   const [
     isRolesOpen,
     setIsRolesOpen,
-  ] = useState(true);
+  ] = useState(false);
 
   const [
     selectedRole,
@@ -164,6 +200,15 @@ const Inbox1 = () => {
   const lastLoginAt =
     localStorage.getItem("lastLoginAt") ?? "";
 
+  const authorizedDashboardTaskKeys = useMemo(
+    () => new Set(
+      roles
+        .filter((role) => !USER_HANDLE_ROLE_KEYS.has(role.replace(/[\s_-]/g, "").toUpperCase()))
+        .map(getDashboardTaskKey),
+    ),
+    [roles],
+  );
+
   // ============================================================
   // TASK MENU
   // ============================================================
@@ -171,6 +216,11 @@ const Inbox1 = () => {
   const menuItems = useMemo(
     () =>
       Object.keys(poolData)
+        .filter((key) => {
+          const normalizedKey = key.trim().toUpperCase();
+          return !DASHBOARD_TASK_KEYS.has(normalizedKey) &&
+            !authorizedDashboardTaskKeys.has(normalizedKey);
+        })
         .sort((a, b) =>
           a.localeCompare(b),
         )
@@ -178,7 +228,7 @@ const Inbox1 = () => {
           label: key,
           icon: "ðŸ“‚",
         })),
-    [poolData],
+    [poolData, authorizedDashboardTaskKeys],
   );
 
   // ============================================================
@@ -215,11 +265,12 @@ const Inbox1 = () => {
   //
   // ============================================================
 
-  const activeTask =
-    selectedTask ??
-    (menuItems.length > 0
-      ? "ALL_CASES"
-      : null);
+  const activeTask = selectedRole
+    ? null
+    : selectedTask ??
+      (menuItems.length > 0
+        ? "ALL_CASES"
+        : null);
 
   // ============================================================
   // ACTIVE ROLE
@@ -550,6 +601,9 @@ const Inbox1 = () => {
             selectedTask={activeTask}
             selectedTaskData={selectedTaskData}
             selectedApplication={selectedApplication}
+            isDashboardTask={Boolean(
+              activeTask && authorizedDashboardTaskKeys.has(activeTask),
+            )}
             onApplicationClick={handleApplicationClick}
             onApplicationBack={handleApplicationBack}
           />

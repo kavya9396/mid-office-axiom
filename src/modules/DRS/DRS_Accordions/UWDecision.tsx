@@ -402,6 +402,23 @@ const UWDecision = () => {
         toText(selectedCaseContext.instanceID) ||
         storedTask.instanceId;
 
+    const drsRecord = toRecord(drsData);
+    const nestedDrsRecord = toRecord(drsRecord.data);
+    const requirementManagement = Array.isArray(drsRecord.requirementManagement)
+        ? drsRecord.requirementManagement
+        : Array.isArray(nestedDrsRecord.requirementManagement)
+            ? nestedDrsRecord.requirementManagement
+            : [];
+    const requirementStatuses = requirementManagement.map((row) =>
+        toText(toRecord(row).status).toUpperCase(),
+    );
+    const hasPendingRequirement = requirementStatuses.includes("PENDING");
+    const hasOnlyAcceptedRequirements =
+        requirementStatuses.length > 0 &&
+        requirementStatuses.every((status) =>
+            ["ACCEPT", "ACCEPTED"].includes(status),
+        );
+
     const caseUWDecisionOptions = useMemo(() => {
         const masterRecord = toRecord(masters);
         const masterData = toRecord(masterRecord.data);
@@ -481,15 +498,45 @@ const UWDecision = () => {
                 .trim()
                 .replace(/[\s_-]+/g, " ")
                 .toUpperCase();
+            const compactCode = normalizedCode.replace(/[\s_-]+/g, "");
+            const compactLabel = normalizedLabel.replace(/\s+/g, "");
+            const isRaiseRequirementOption =
+                compactCode === "RAISEREQUIREMENT" ||
+                compactCode === "RAISEREQ" ||
+                compactLabel === "RAISEREQUIREMENT";
+            const isAcceptOption =
+                normalizedCode === "ACCEPT" ||
+                normalizedLabel === "ACCEPT";
             const isBorderlineStandardOption =
                 normalizedCode === "BOR_STD" ||
                 normalizedLabel === "BORDERLINE STANDARD";
+
+            // A Pending row makes Raise Requirement the mandatory decision.
+            if (hasPendingRequirement) {
+                return isRaiseRequirementOption;
+            }
+
+            // Hide Raise Requirement only when every row is accepted.
+            if (hasOnlyAcceptedRequirements && isRaiseRequirementOption) {
+                return false;
+            }
+
+            // Accept is allowed only when the latest BRE decision is ST.
+            if (isAcceptOption) {
+                return finalBreDecision === "ST";
+            }
 
             return (
                 !isBorderlineStandardOption || canShowStandardDecision
             );
         });
-    }, [canShowStandardDecision, masters]);
+    }, [
+        canShowStandardDecision,
+        finalBreDecision,
+        hasOnlyAcceptedRequirements,
+        hasPendingRequirement,
+        masters,
+    ]);
 
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision

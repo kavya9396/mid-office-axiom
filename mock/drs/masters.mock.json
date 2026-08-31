@@ -2506,8 +2506,8 @@
       },
       {
         "code": "AMR",
-        "description": "Raise Requirements",
-        "value": "Raise Requirements",
+        "description": "Raise Requirement",
+        "value": "Raise Requirement",
         "isActive": "Y",
         "miscMastId": "58",
         "type": "CUW"

@@ -19,6 +19,7 @@ interface RightSideTableProps {
   selectedTask: string | null;
   selectedTaskData: Record<string, unknown>[];
   selectedApplication: Record<string, unknown> | null;
+  isDashboardTask?: boolean;
   onApplicationClick: (
     application: Record<string, unknown>,
   ) => void;

@@ -56,6 +56,9 @@ interface RequirementManagementRow {
 
 interface DrsData {
   requirementManagement?: RequirementManagementRow[];
+  latestBreDecision?: {
+    decision?: string;
+  };
   summary?: Array<{ memberType?: string }>;
 }
 
@@ -233,10 +236,13 @@ const Decision = () => {
 
   // ================= BRE STATUS =================
 
-  const finalBreStatus =
-    finalBreData?.data?.data?.breOutput?.decisionTypes?.breDecision
-      ?.trim()
-      ?.toUpperCase();
+  const finalBreStatus = String(
+    finalBreData?.data?.data?.breOutput?.decisionTypes?.breDecision ??
+      drsState.data?.latestBreDecision?.decision ??
+      "",
+  )
+    .trim()
+    .toUpperCase();
 
   // ================= ROLE =================
 
@@ -275,15 +281,24 @@ const Decision = () => {
     ? decisionCodeMap[roleType] ?? ""
     : "";
 
-  const hasOutstandingRequirements =
+  const requirementRows =
+    drsState.data?.requirementManagement ?? [];
+
+  const normalizedRequirementStatuses = requirementRows.map((row) =>
+    String(row.status ?? "")
+      .trim()
+      .toUpperCase(),
+  );
+
+  const hasPendingRequirement =
     roleType === "CVT_TASK" &&
-    (drsState.data?.requirementManagement ?? []).some(
-      (row) =>
-        !["ACCEPT", "ACCEPTED"].includes(
-          String(row.status ?? "")
-            .trim()
-            .toUpperCase(),
-        ),
+    normalizedRequirementStatuses.includes("PENDING");
+
+  const hasOnlyAcceptedRequirements =
+    roleType === "CVT_TASK" &&
+    normalizedRequirementStatuses.length > 0 &&
+    normalizedRequirementStatuses.every((status) =>
+      ["ACCEPT", "ACCEPTED"].includes(status),
     );
 
   const hasPivRequirement =
@@ -328,13 +343,15 @@ const Decision = () => {
           "",
         );
 
-        if (roleType === "CVT_TASK" && hasOutstandingRequirements) {
+        // Pending requirements must be resolved before any other decision.
+        if (roleType === "CVT_TASK" && hasPendingRequirement) {
           return normalizedDecisionValue === "raiserequirement";
         }
 
+        // Hide Raise Requirement only when every existing row is accepted.
         if (
           roleType === "CVT_TASK" &&
-          !hasOutstandingRequirements &&
+          hasOnlyAcceptedRequirements &&
           normalizedDecisionValue === "raiserequirement"
         ) {
           return false;
@@ -347,17 +364,17 @@ const Decision = () => {
           return false;
         }
 
-        if (
-          finalBreStatus === "ST" ||
-          finalBreStatus === "STD"
-        ) {
-          return true;
+        // Accept is permitted only for an ST BRE decision.
+        if (normalizedDecisionValue === "accept") {
+          return finalBreStatus === "ST";
         }
 
-        return (
-          decisionValue !== "accept" &&
-          decisionValue !== "standard"
-        );
+        // Preserve the existing Standard decision BRE rule.
+        if (normalizedDecisionValue === "standard") {
+          return finalBreStatus === "ST" || finalBreStatus === "STD";
+        }
+
+        return true;
       })
       ?.map((item) => ({
         label: item.value,
