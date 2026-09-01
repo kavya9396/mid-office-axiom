@@ -385,15 +385,11 @@ const getMasterItems = (
 };
 
 const getDefaultTeamByRole = (roleType: string): string => {
-  if (["CVT_TASK", "CPT_DATA_ENTRY_NMR_TASK", "CPT_DATA_ENTRY_MR_TASK"].includes(roleType)) {
+  if (roleType === "PIVV_TASK") {
     return "COPS";
   }
 
-  if (roleType === "CUW_TASK") {
-    return "UW";
-  }
-
-  return "SYSTEM REQUIREMENT";
+  return "UW";
 };
 
 const getOptionText = (item: Record<string, unknown>, field: AddRowField) => {
@@ -526,38 +522,10 @@ const getStatusSummaryLabel = (status: unknown): string => {
   return formatStatus(normalizedStatus);
 };
 
-const validateRequirementsForSave = (
-  rows: AdditionalRequirementRow[],
-  roleType: string,
-): SaveValidationResult => {
-  switch (roleType) {
-    case "PIVV_TASK": {
-      const hasPendingRequirement = rows.some(
-        (row) => getStatusComparableValue(row.status) === "PENDING",
-      );
-
-      if (hasPendingRequirement) {
-        return {
-          isValid: false,
-          message:
-            "Please take action on all pending requirements before saving.",
-        };
-      }
-
-      return { isValid: true, message: "" };
-    }
-
-    case "CVT_TASK":
-      /*
-       * Saving is mandatory for CVT even when no status was changed.
-       * Therefore this role intentionally has no change-comparison check.
-       */
-      return { isValid: true, message: "" };
-
-    default:
-      return { isValid: true, message: "" };
-  }
-};
+const validateRequirementsForSave = (): SaveValidationResult => ({
+  isValid: true,
+  message: "",
+});
 
 const EyeDetailIcon = () => (
   <Box
@@ -786,7 +754,6 @@ const RequirementManagementTable = ({
     severity: "success",
   });
   const [isSaving, setIsSaving] = useState(false);
-
   const handleViewDocuments = () => {
     if (!proposerFormUrl) {
       setSnackbar({
@@ -1457,7 +1424,7 @@ const RequirementManagementTable = ({
       return;
     }
 
-    const validation = validateRequirementsForSave(rows, normalizedRoleType);
+    const validation = validateRequirementsForSave();
 
     if (!validation.isValid) {
       setSnackbar({
@@ -2109,6 +2076,7 @@ const RequirementManagementTable = ({
                 {readOnly ? (
                   renderCompactCell(selectedStatus)
                 ) : (
+                  <Box sx={{ display: "grid", gap: 0.5, width: "100%" }}>
                   <Select
                     size="small"
                     value={selectedStatus}
@@ -2177,6 +2145,7 @@ const RequirementManagementTable = ({
                       );
                     })}
                   </Select>
+                  </Box>
                 )}
                 {renderCompactCell(row.ocrStatus)}
 
@@ -2661,6 +2630,7 @@ const RequirementManagementTable = ({
               </Button>
             </DialogActions>
           </Dialog>
+
         </>
       )}
     </Box>

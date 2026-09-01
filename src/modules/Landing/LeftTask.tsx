@@ -1,5 +1,6 @@
 import {
   Box,
+  IconButton,
   Paper,
   Tooltip,
   Typography,
@@ -11,6 +12,7 @@ import {
   KeyDownArrowIcon,
   KeyRightArrowIcon,
   KeyUpArrowIcon,
+  RefreshIcon,
   SearchIcon,
 } from "../../icons/Icons";
 
@@ -39,11 +41,15 @@ interface LeftTaskProps {
 
   onRoleSelect: (role: string) => void;
 
-  onTaskSelect: (task: string) => void;
+  onTaskSelect: (task: string, isDashboardTask?: boolean) => void;
 
   onToggleRoles: () => void;
 
   onToggleCollapse: () => void;
+
+  onRefresh: () => void;
+
+  isRefreshing: boolean;
 }
 
 const normalizeKey = (value: string) =>
@@ -152,10 +158,13 @@ const LeftTask = ({
   onTaskSelect,
   onToggleRoles,
   onToggleCollapse,
+  onRefresh,
+  isRefreshing,
 }: LeftTaskProps) => {
 
   const navigate = useNavigate();
   const [isDashboardOpen, setIsDashboardOpen] = useState(false);
+  const [isAllCasesOpen, setIsAllCasesOpen] = useState(true);
 
   const userHandleItems = useMemo(
     () => roles
@@ -185,9 +194,12 @@ const LeftTask = ({
     return Array.from(uniqueItems.values());
   }, [roles]);
 
-  const handleTaskSelect = useCallback((taskName: string) => {
+  const handleTaskSelect = useCallback((
+    taskName: string,
+    isDashboardTask = false,
+  ) => {
     localStorage.setItem(SELECTED_TASK_POOL_KEY, taskName);
-    onTaskSelect(taskName);
+    onTaskSelect(taskName, isDashboardTask);
   }, [onTaskSelect]);
 
   // ==========================================================
@@ -473,24 +485,25 @@ const LeftTask = ({
                     <Typography
                       sx={{
                         fontSize: "11px",
-
                         fontWeight: 700,
-
                         color: "#333333",
                       }}
                     >
                       User Handle
                     </Typography>
 
-                    <Typography
-                      sx={{
-                        fontSize: "10px",
-
-                        color: "#777777",
-                      }}
-                    >
-                      {isRolesOpen ? <KeyUpArrowIcon/> : <KeyDownArrowIcon/>}
-                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      <Typography
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          fontSize: "10px",
+                          color: "#777777",
+                        }}
+                      >
+                        {isRolesOpen ? <KeyUpArrowIcon/> : <KeyDownArrowIcon/>}
+                      </Typography>
+                    </Box>
                   </>
                 )}
               </Box>
@@ -543,69 +556,6 @@ const LeftTask = ({
             </Box>
           )}
 
-          {dashboardItems.length > 0 && (
-            <Box sx={{ borderBottom: "1px solid #eeeeee" }}>
-              <Box
-                onClick={() => setIsDashboardOpen((previous) => !previous)}
-                sx={{
-                  height: "38px",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: isCollapsed ? "center" : "space-between",
-                  px: 1.5,
-                  cursor: "pointer",
-                  "&:hover": { backgroundColor: "#f8f8f8" },
-                }}
-              >
-                {isCollapsed ? (
-                  <Tooltip title="Dashboard" placement="right" arrow>
-                    <Typography sx={{ fontSize: "12px", fontWeight: 700 }}>
-                      DB
-                    </Typography>
-                  </Tooltip>
-                ) : (
-                  <>
-                    <Typography sx={{ fontSize: "11px", fontWeight: 700, color: "#333333" }}>
-                      Dashboard
-                    </Typography>
-                    {isDashboardOpen ? <KeyUpArrowIcon /> : <KeyDownArrowIcon />}
-                  </>
-                )}
-              </Box>
-
-              {!isCollapsed && isDashboardOpen && dashboardItems.map((item) => {
-                const isActive = selectedTask === item.taskKey;
-
-                return (
-                  <Box
-                    key={item.taskKey}
-                    onClick={() => handleTaskSelect(item.taskKey)}
-                    sx={{
-                      height: "34px",
-                      display: "flex",
-                      alignItems: "center",
-                      px: 2.5,
-                      cursor: "pointer",
-                      borderLeft: isActive ? "3px solid #9A2529" : "3px solid transparent",
-                      backgroundColor: isActive ? "#fdf2f2" : "transparent",
-                      color: isActive ? "#9A2529" : "#555555",
-                      "&:hover": { backgroundColor: "#f8f8f8" },
-                    }}
-                  >
-                    <Typography sx={{ fontSize: "11px", fontWeight: isActive ? 600 : 400 }}>
-                      {item.label}
-                    </Typography>
-                  </Box>
-                );
-              })}
-            </Box>
-          )}
-
-
-          {/* ===================================================
-            SEARCH APPLICATIONS
-          =================================================== */}
-
           <Box
             role="button"
             tabIndex={0}
@@ -645,64 +595,19 @@ const LeftTask = ({
                 Search Applications
               </Typography>
             )}
-
             <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
+                justifyContent: "center",
+                width: 32,
+                height: 32,
+                flexShrink: 0,
+                color: "#9A2529",
               }}
             >
-              <SearchIcon
-                width={32}
-                height={32}
-              />
+              <SearchIcon width={30} height={30} />
             </Box>
-          </Box>
-
-
-          {/* ===================================================
-            BULK UPLOAD
-          =================================================== */}
-
-           <Box
-            role="button"
-            tabIndex={0}
-            aria-label="Search applications"
-            onClick={() => navigate(getBulkUploadPath())}
-            onKeyDown={(event) => {
-              if (event.key === "Enter" || event.key === " ") {
-                event.preventDefault();
-                navigate(getSearchApplicationPath());
-              }
-            }}
-            sx={{
-              height: "40px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: isCollapsed
-                ? "center"
-                : "space-between",
-              px: 1.5,
-              borderBottom: "1px solid #eeeeee",
-              color: "#333333",
-              cursor: "pointer",
-              "&:hover": { backgroundColor: "#f8f8f8" },
-              "&:focus-visible": {
-                outline: "2px solid #9A2529",
-                outlineOffset: "-2px",
-              },
-            }}
-          >
-            {!isCollapsed && (
-              <Typography
-                sx={{
-                  fontSize: "11px",
-                  fontWeight: 600,
-                }}
-              >
-                Bulk Upload
-              </Typography>
-            )}
           </Box>
 
 
@@ -772,8 +677,24 @@ const LeftTask = ({
                 </Typography>
 
                 <Box
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setIsAllCasesOpen((previous) => !previous);
+                  }}
                   sx={{
-                    minWidth: "24px",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.25,
+                    pl: 0.75,
+                    py: 0.25,
+                    pr: 0.35,
+                    borderRadius: 1,
+                    bgcolor: selectedTask === "ALL_CASES" ? "rgba(154, 37, 41, 0.1)" : "#f3f4f6",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      minWidth: "24px",
 
                     height: "20px",
 
@@ -802,9 +723,16 @@ const LeftTask = ({
                     fontSize: "10px",
 
                     fontWeight: 600,
-                  }}
-                >
-                  {allCasesCount}
+                    }}
+                  >
+                    {allCasesCount}
+                  </Box>
+
+                  <Box
+                    sx={{ display: "flex", alignItems: "center" }}
+                  >
+                    {isAllCasesOpen ? <KeyUpArrowIcon /> : <KeyDownArrowIcon />}
+                  </Box>
                 </Box>
               </>
             )}
@@ -814,7 +742,116 @@ const LeftTask = ({
               TASKS
              =================================================== */}
 
-          {menuItems.map((item) => renderTaskItem(item.label))}
+          {isAllCasesOpen && menuItems.map((item) => renderTaskItem(item.label))}
+
+          {dashboardItems.length > 0 && (
+            <Box sx={{ borderBottom: "1px solid #eeeeee" }}>
+              <Box
+                onClick={() => setIsDashboardOpen((previous) => !previous)}
+                sx={{
+                  height: "38px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: isCollapsed ? "center" : "space-between",
+                  px: 1.5,
+                  cursor: "pointer",
+                  "&:hover": { backgroundColor: "#f8f8f8" },
+                }}
+              >
+                {isCollapsed ? (
+                  <Tooltip title="Admin Screens Utility" placement="right" arrow>
+                    <Typography sx={{ fontSize: "12px", fontWeight: 700 }}>
+                      AU
+                    </Typography>
+                  </Tooltip>
+                ) : (
+                  <>
+                    <Typography sx={{ fontSize: "11px", fontWeight: 700, color: "#333333" }}>
+                      Admin Screens Utility
+                    </Typography>
+                    <Box sx={{ display: "flex", alignItems: "center", gap: 0.2 }}>
+                      <Tooltip title="Refresh inbox" arrow>
+                        <span>
+                          <IconButton
+                            size="small"
+                            disabled={isRefreshing}
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onRefresh();
+                            }}
+                            sx={{ p: 0, width: 18, height: 18 }}
+                          >
+                            <RefreshIcon sx={{ fontSize: 10 }} />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                      {isDashboardOpen ? <KeyUpArrowIcon /> : <KeyDownArrowIcon />}
+                    </Box>
+                  </>
+                )}
+              </Box>
+
+              {!isCollapsed && isDashboardOpen && dashboardItems.map((item) => {
+                const isActive = selectedTask === item.taskKey;
+
+                return (
+                  <Box
+                    key={item.taskKey}
+                    onClick={() => handleTaskSelect(item.taskKey, true)}
+                    sx={{
+                      height: "34px",
+                      display: "flex",
+                      alignItems: "center",
+                      px: 2.5,
+                      cursor: "pointer",
+                      borderLeft: isActive ? "3px solid #9A2529" : "3px solid transparent",
+                      backgroundColor: isActive ? "#fdf2f2" : "transparent",
+                      color: isActive ? "#9A2529" : "#555555",
+                      "&:hover": { backgroundColor: "#f8f8f8" },
+                    }}
+                  >
+                    <Typography sx={{ fontSize: "11px", fontWeight: isActive ? 600 : 400 }}>
+                      {item.label}
+                    </Typography>
+                  </Box>
+                );
+              })}
+            </Box>
+          )}
+
+          <Box
+            role="button"
+            tabIndex={0}
+            aria-label="Bulk upload"
+            onClick={() => navigate(getBulkUploadPath())}
+            onKeyDown={(event) => {
+              if (event.key === "Enter" || event.key === " ") {
+                event.preventDefault();
+                navigate(getBulkUploadPath());
+              }
+            }}
+            sx={{
+              height: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: isCollapsed ? "center" : "space-between",
+              px: 1.5,
+              borderBottom: "1px solid #eeeeee",
+              color: "#333333",
+              cursor: "pointer",
+              "&:hover": { backgroundColor: "#f8f8f8" },
+              "&:focus-visible": {
+                outline: "2px solid #9A2529",
+                outlineOffset: "-2px",
+              },
+            }}
+          >
+            {!isCollapsed && (
+              <Typography sx={{ fontSize: "11px", fontWeight: 600 }}>
+                Bulk Upload
+              </Typography>
+            )}
+          </Box>
         </Box>
 
         {/* =====================================================

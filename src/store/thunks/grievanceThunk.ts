@@ -1,4 +1,5 @@
 import { url } from "../../services/apiConfig";
+
 import { createApiThunk } from "./createApiThunk";
 
 export type RaiseGrievanceRow = {
@@ -11,17 +12,24 @@ export type RaiseGrievanceRow = {
 };
 
 export type RaiseGrievanceRequest = {
+  grievanceNumber: string;
+  grievanceRemarks: string;
+  grievanceDetails: string;
+  grievanceCreatedBy: string;
+  grievanceResolvedBy: string;
+  grievanceStatus: string;
   applicationNumber: string;
-  userId: string;
-  roleType: string;
-  taskId: string;
-  instanceId: string;
-  grievanceDetails: RaiseGrievanceRow[];
 };
 
-export type RaiseGrievanceResponse = { success: boolean; message?: string };
+export type RaiseGrievanceResponse = {
+  success: boolean;
+  message?: string;
+};
 
-export const raiseGrievanceThunk = createApiThunk<RaiseGrievanceResponse, RaiseGrievanceRequest>(
-  "grievance/raise",
-  { url: url("raiseGrievance"), method: "POST" },
-);
+export const raiseGrievanceThunk = createApiThunk<
+  RaiseGrievanceResponse,
+  RaiseGrievanceRequest
+>("grievance/raise", {
+  url: url("raiseGrievance"),
+  method: "POST",
+});

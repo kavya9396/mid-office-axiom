@@ -1108,7 +1108,7 @@
             {
                 "team": "COPS",
                 "profile": "",
-                "category": "Internal",
+                "category": "Medical",
                 "subCategory": "SPAARC call",
                 "document": "SPAARC call ID",
                 "specialTest": "N",
@@ -1116,7 +1116,7 @@
                 "fupCode": "SCI",
                 "requirementId": 12069,
                 "description": "SPAARC call ID to be raised (related to Name, address, DOB, Pin Code, gender & residential status mismatch as per the IUW form)",
-                "status": "accept",
+                "status": "pending",
                 "isActive": "Y",
                 "raisedDate": "2026-08-24",
                 "raisedBy": "ipru75031",

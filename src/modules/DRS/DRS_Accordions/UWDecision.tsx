@@ -352,6 +352,8 @@ const UWDecision = () => {
     const [parallelRoleUsers, setParallelRoleUsers] = useState<ReferralUser[]>([]);
     const [parallelRoleUsersLoading, setParallelRoleUsersLoading] = useState(false);
     const [holdReasons, setHoldReasons] = useState("");
+    const [waiverJustificationReason, setWaiverJustificationReason] = useState("");
+    const [waiverJustificationRemarks, setWaiverJustificationRemarks] = useState("");
     const [decisionType, setDecisionType] = useState("counterSign");
     const [referralReason, setReferralReason] = useState("");
     const [firstUwDecisionCode, setFirstUwDecisionCode] = useState("");
@@ -413,11 +415,7 @@ const UWDecision = () => {
         toText(toRecord(row).status).toUpperCase(),
     );
     const hasPendingRequirement = requirementStatuses.includes("PENDING");
-    const hasOnlyAcceptedRequirements =
-        requirementStatuses.length > 0 &&
-        requirementStatuses.every((status) =>
-            ["ACCEPT", "ACCEPTED"].includes(status),
-        );
+    const hasWaivedRequirement = requirementStatuses.includes("WAIVED");
 
     const caseUWDecisionOptions = useMemo(() => {
         const masterRecord = toRecord(masters);
@@ -511,13 +509,10 @@ const UWDecision = () => {
                 normalizedCode === "BOR_STD" ||
                 normalizedLabel === "BORDERLINE STANDARD";
 
-            // A Pending row makes Raise Requirement the mandatory decision.
-            if (hasPendingRequirement) {
-                return isRaiseRequirementOption;
-            }
-
-            // Hide Raise Requirement only when every row is accepted.
-            if (hasOnlyAcceptedRequirements && isRaiseRequirementOption) {
+            // Raise Requirement is available only while one or more
+            // requirements are still Pending. All other values remain visible
+            // so the user can see the full decision list.
+            if (!hasPendingRequirement && isRaiseRequirementOption) {
                 return false;
             }
 
@@ -533,7 +528,6 @@ const UWDecision = () => {
     }, [
         canShowStandardDecision,
         finalBreDecision,
-        hasOnlyAcceptedRequirements,
         hasPendingRequirement,
         masters,
     ]);
@@ -824,6 +818,30 @@ const UWDecision = () => {
             .filter((option) => option.label && option.value);
     }, [masters]);
 
+    const waiverJustificationOptions = useMemo(() => {
+        const masterRecord = toRecord(masters);
+        const masterData = toRecord(masterRecord.data);
+        const misc = masterRecord.misc ?? masterData.misc;
+
+        if (!Array.isArray(misc)) return [];
+
+        return misc
+            .map(toRecord)
+            .filter((item) => {
+                const type = toText(item.type).toUpperCase();
+                return (
+                    type.includes("WAIV") &&
+                    (type.includes("RSN") || type.includes("REASON") || type.includes("JUST")) &&
+                    toText(item.isActive).toUpperCase() !== "N"
+                );
+            })
+            .map((item) => ({
+                label: toText(item.description ?? item.label ?? item.value ?? item.code),
+                value: toText(item.code ?? item.value ?? item.key),
+            }))
+            .filter((option) => option.label && option.value);
+    }, [masters]);
+
     const showDecisionCode = [
         "Reject",
         "Decline",
@@ -890,6 +908,19 @@ const UWDecision = () => {
     const isFirstUwDecline = normalizedFirstUwDecisionLabel === "DECLINE";
     const isFirstUwPostpone = normalizedFirstUwDecisionLabel === "POSTPONE";
     const isFirstUwCounterOffer = normalizedFirstUwDecisionLabel === "COUNTER OFFER";
+    const isRaiseRequirementDecision =
+        caseUWDecisionLabel
+            .trim()
+            .replace(/[\\s_-]+/g, "")
+            .toUpperCase() === "RAISEREQUIREMENT" ||
+        effectiveCaseUWDecision
+            .trim()
+            .replace(/[\\s_-]+/g, "")
+            .toUpperCase() === "RAISEREQ";
+    const isPendingRequirementDecisionBlocked =
+        hasPendingRequirement && !isRaiseRequirementDecision;
+    const pendingRequirementDecisionMessage =
+        "Please select Raise Requirement while one or more requirements are Pending.";
     const showFirstUwDecisionCode =
         isFirstUwStandard ||
         isFirstUwBorderlineStandard ||
@@ -964,6 +995,20 @@ const UWDecision = () => {
     const handleSubmit = async () => {
         if (!uwDecisionRemarks.trim()) {
             setSubmitMessage("UW Remarks is mandatory.");
+            setSubmitStatus("failure");
+            return;
+        }
+        if (isPendingRequirementDecisionBlocked) {
+            setSubmitMessage(pendingRequirementDecisionMessage);
+            setSubmitStatus("failure");
+            return;
+        }
+        if (
+            hasWaivedRequirement &&
+            Boolean(effectiveCaseUWDecision) &&
+            (!waiverJustificationReason.trim() || !waiverJustificationRemarks.trim())
+        ) {
+            setSubmitMessage("Select a waiver justification reason and enter waiver justification remarks.");
             setSubmitStatus("failure");
             return;
         }
@@ -1068,6 +1113,12 @@ const UWDecision = () => {
                     remarks: uwDecisionRemarks.trim(),
                     decision: effectiveCaseUWDecision.trim(),
                     ...(outlier.trim() ? { outlier: outlier.trim() } : {}),
+                    ...(hasWaivedRequirement && effectiveCaseUWDecision
+                        ? {
+                            waiverJustificationReason: waiverJustificationReason.trim(),
+                            waiverJustificationRemarks: waiverJustificationRemarks.trim(),
+                        }
+                        : {}),
                     ...(optionalReason !== undefined
                         ? { reason: optionalReason }
                         : {}),
@@ -1165,6 +1216,23 @@ const UWDecision = () => {
     const handleSubmitIntent = () => {
         if (!uwDecisionRemarks.trim()) {
             setSubmitMessage("UW Remarks is mandatory.");
+            setSubmitStatus("failure");
+            return;
+        }
+
+        // This is retained as a submit-time check as well as the dropdown
+        // filtering above, so stale selections cannot bypass the rule.
+        if (isPendingRequirementDecisionBlocked) {
+            setSubmitMessage(pendingRequirementDecisionMessage);
+            setSubmitStatus("failure");
+            return;
+        }
+        if (
+            hasWaivedRequirement &&
+            Boolean(effectiveCaseUWDecision) &&
+            (!waiverJustificationReason.trim() || !waiverJustificationRemarks.trim())
+        ) {
+            setSubmitMessage("Select a waiver justification reason and enter waiver justification remarks.");
             setSubmitStatus("failure");
             return;
         }
@@ -1652,6 +1720,41 @@ const UWDecision = () => {
                                     }}
                                 />
                             </Box>
+                        )}
+
+                        {hasWaivedRequirement && effectiveCaseUWDecision && (
+                            <>
+                                <CustomSelect
+                                    label="Waiver Justification"
+                                    value={waiverJustificationReason}
+                                    onChange={setWaiverJustificationReason}
+                                    options={waiverJustificationOptions}
+                                    placeholder="Select justification"
+                                />
+                                <Box>
+                                    <Typography
+                                        sx={{
+                                            fontSize: "11px",
+                                            fontWeight: 400,
+                                            color: "#444",
+                                            lineHeight: 1.2,
+                                            mb: 0.5,
+                                        }}
+                                    >
+                                        Waiver Justification Remarks
+                                    </Typography>
+                                    <CustomTextField
+                                        fullWidth
+                                        required
+                                        size="small"
+                                        value={waiverJustificationRemarks}
+                                        placeholder="Enter justification"
+                                        onChange={(event) =>
+                                            setWaiverJustificationRemarks(event.target.value)
+                                        }
+                                    />
+                                </Box>
+                            </>
                         )}
 
                         {showDecisionCode && (
