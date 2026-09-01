@@ -204,8 +204,11 @@ const apiUrls = {
   },
 
   // Grievance
-  raiseGrievance: {
-    real: "/api/grievance/view",
+  raiseGrievance: { 
+    real: {
+      retail: "http://172.30.74.182:8166/icic-common-service/v1/grievances",
+      group: "http://172.30.74.182:8167/icic-common-service/v1/grievance",
+    },
     mock: "/mock/drs/grievance.mock.json",
   },
   grievanceSubmit: {
@@ -213,7 +216,10 @@ const apiUrls = {
     mock: "/mock/drs/grievanceSubmit.mock.json",
   },
   grievanceApplicationView: {
-    real: "/api/grievance/application/view",
+    real: {
+      retail: "http://172.30.74.182:8166/icic-common-service/v1/grievances",
+      group: "http://172.30.74.182:8167/icic-common-service/v1/grievance",
+    },
     mock: "/mock/drs/grievanceApplication.mock.json",
   },
   grievanceApplicationSubmit: {

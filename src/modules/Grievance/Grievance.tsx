@@ -57,8 +57,6 @@ const Grievance = () => {
       .toLowerCase() || "retail";
   const roleType = localStorage.getItem("roleType") ?? "";
   const userId = localStorage.getItem("userId") ?? "";
-  const taskId = navState?.taskId ?? localStorage.getItem("taskId") ?? "";
-  const instanceId = navState?.instanceId ?? localStorage.getItem("instanceId") ?? "";
   const [drsData, setDrsData] = useState<RecordValue>({});
   const [editedRemarks, setEditedRemarks] = useState<Record<string, string>>({});
   const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(new Set());
@@ -177,23 +175,21 @@ const Grievance = () => {
 
   const submit = async () => {
     const selectedRows = rows.filter((row) => selectedRowIds.has(row.rowId));
+    const grievanceRemarks = selectedRows
+      .map((row) => row.remarksByUser.trim())
+      .filter(Boolean)
+      .join(" | ");
     const grievanceDetails = selectedRows
-      .map((row) => ({
-      requirementId: row.requirementId,
-      memberType: row.memberType,
-      fupCode: row.fupCode,
-      memberName: row.memberName,
-      remarksByUser: row.remarksByUser.trim(),
-      remarksByTpa: "",
-    }));
+      .map((row) => `FUP Code: ${row.fupCode || "-"}; Profile: ${row.memberName || "-"}`)
+      .join(" | ");
     const payload = {
-      applicationNumber,
-      businessType,
-      userId,
-      roleType,
-      taskId,
-      instanceId,
+      grievanceNumber: "",
+      grievanceRemarks,
       grievanceDetails,
+      grievanceCreatedBy: userId,
+      grievanceResolvedBy: "",
+      grievanceStatus: "OPEN",
+      applicationNumber,
     };
     console.log("Raise grievance request payload:", payload);
     try {
