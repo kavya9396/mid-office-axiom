@@ -157,6 +157,31 @@ const normalizeAccordionId = (value: string): string =>
 const isUwToolkitAccordion = (accordionId: string): boolean =>
   normalizeAccordionId(accordionId) === "uwtoolkit";
 
+const isQuickLinksAccordion = (accordionId: string): boolean =>
+  normalizeAccordionId(accordionId).includes("quicklink");
+
+const SUMMARY_VIEW_ID = "__summary__";
+
+const getAccordionLabel = (accordionId: string): string => {
+  const labels: Record<string, string> = {
+    applicantprofile: "Applicant Profile",
+    applicationoverview: "Application Overview",
+    requirementmanagement: "Requirement Management",
+    requirementcategoryinfo: "Requirement Category Info",
+    latestbredecision: "BRE Decision",
+    uwtoolkit: "Decision",
+    uwdecision: "Decision",
+    riskanalytics: "Risk Analytics",
+    audittrail: "Audit Trail",
+  };
+  const normalizedId = normalizeAccordionId(accordionId);
+
+  return labels[normalizedId] ?? accordionId
+    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+};
+
 const normalizeValue = (value: unknown): string =>
   String(value ?? "").trim().toUpperCase();
 
@@ -197,6 +222,32 @@ const getMiscItems = (value: unknown): Record<string, unknown>[] => {
   return Array.isArray(misc) ? misc.map(toRecord) : [];
 };
 
+const getFirstValue = (
+  value: unknown,
+  keys: string[],
+): string => {
+  const record = getNestedData(value);
+
+  for (const key of keys) {
+    const item = record[key];
+
+    if (item !== undefined && item !== null && String(item).trim()) {
+      return String(item);
+    }
+  }
+
+  return "—";
+};
+
+const getAccordionByName = (
+  accordionIds: string[],
+  normalizedName: string,
+): string | undefined =>
+  accordionIds.find(
+    (accordionId) =>
+      normalizeAccordionId(accordionId) === normalizedName,
+  );
+
 const getActiveCptDecisionCode = (
   miscItems: Record<string, unknown>[],
   codes: string[],
@@ -231,6 +282,10 @@ const DRS = () => {
 
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedAccordionId, setSelectedAccordionId] = useState<string>("");
+  const [expandedSummarySection, setExpandedSummarySection] = useState<
+    "requirements" | "decision" | null
+  >("requirements");
 
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
@@ -665,6 +720,237 @@ const DRS = () => {
   const shouldShowSubmitButton =
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK";
+  const allSections = [
+    SUMMARY_VIEW_ID,
+    ...visibleAccordions,
+  ];
+  const quickLinksAccordion = visibleAccordions.find((accordionId) =>
+    isQuickLinksAccordion(String(accordionId)),
+  );
+  const navigationSections = allSections.filter(
+    (accordionId) =>
+      accordionId === SUMMARY_VIEW_ID ||
+      !isQuickLinksAccordion(String(accordionId)),
+  );
+  const selectedAccordion = allSections.includes(selectedAccordionId)
+    ? selectedAccordionId
+    : SUMMARY_VIEW_ID;
+  const SelectedAccordionComponent = selectedAccordion !== SUMMARY_VIEW_ID
+    ? accordionRegistry[selectedAccordion]
+    : undefined;
+  const requirementRows = getRequirementRows(drsData);
+  const pendingRequirements = requirementRows.filter(
+    (row) => normalizeValue(row.status) === "PENDING",
+  ).length;
+  const acceptedRequirements = requirementRows.filter((row) =>
+    ["ACCEPT", "ACCEPTED", "RECEIVED"].includes(
+      normalizeValue(row.status),
+    ),
+  ).length;
+  const breData = toRecord(getNestedData(drsData).latestBreDecision);
+  const applicationOverview = toRecord(
+    getNestedData(drsData).applicationOverview,
+  );
+  const decisionAccordion =
+    getAccordionByName(visibleAccordions, "uwtoolkit") ??
+    getAccordionByName(visibleAccordions, "uwdecision");
+  const RequirementManagementComponent = getAccordionByName(
+    visibleAccordions,
+    "requirementmanagement",
+  )
+    ? accordionRegistry[
+      getAccordionByName(visibleAccordions, "requirementmanagement")!
+    ]
+    : undefined;
+  const DecisionComponent = decisionAccordion
+    ? accordionRegistry[decisionAccordion]
+    : undefined;
+
+  const renderSummaryWorkSection = (
+    id: "requirements" | "decision",
+    heading: string,
+    description: string,
+    Component: typeof RequirementManagementComponent,
+  ) => {
+    const isExpanded = expandedSummarySection === id;
+
+    return (
+      <Box
+        sx={{
+          mt: 1,
+          overflow: "hidden",
+          border: "1px solid #e2e8f0",
+          borderRadius: 2,
+          backgroundColor: "#fff",
+        }}
+      >
+        <Box
+          component="button"
+          type="button"
+          onClick={() =>
+            setExpandedSummarySection((current) =>
+              current === id ? null : id,
+            )
+          }
+          sx={{
+            width: "100%",
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
+            p: 1.1,
+            border: 0,
+            cursor: "pointer",
+            textAlign: "left",
+            backgroundColor: isExpanded ? "#fff7f5" : "#fff",
+            fontFamily: "inherit",
+            "&:hover": { backgroundColor: "#fff7f5" },
+          }}
+        >
+          <Box>
+            <Typography sx={{ fontSize: 14, fontWeight: 700, color: "#243447" }}>
+              {heading}
+            </Typography>
+            <Typography sx={{ mt: 0.25, fontSize: 12, color: "#64748b" }}>
+              {description}
+            </Typography>
+          </Box>
+          <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#9a2529" }}>
+            {isExpanded ? "−" : "+"}
+          </Typography>
+        </Box>
+
+        {isExpanded && (
+          <Box sx={{ p: { xs: 1, md: 1.5 }, borderTop: "1px solid #e2e8f0" }}>
+            {Component ? (
+              <Component />
+            ) : (
+              <Typography sx={{ py: 2, fontSize: 13, color: "text.secondary" }}>
+                This section is not available for the current task.
+              </Typography>
+            )}
+          </Box>
+        )}
+      </Box>
+    );
+  };
+
+  const renderSummaryCard = (
+    heading: string,
+    fields: Array<{ label: string; value: string }>,
+    accent: string,
+  ) => (
+    <Box
+      sx={{
+        p: 1.25,
+        border: "1px solid #e7ebf0",
+        borderTop: `3px solid ${accent}`,
+        borderRadius: 2,
+        backgroundColor: "#fff",
+        boxShadow: "0 1px 3px rgba(15, 23, 42, 0.04)",
+      }}
+    >
+      <Typography sx={{ fontSize: 13, fontWeight: 700, color: "#243447", mb: 0.75 }}>
+        {heading}
+      </Typography>
+      <Box sx={{ display: "grid", gap: 0.6 }}>
+        {fields.map((field) => (
+          <Box
+            key={field.label}
+            sx={{ display: "flex", justifyContent: "space-between", gap: 1.5 }}
+          >
+            <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
+              {field.label}
+            </Typography>
+            <Typography
+              sx={{ fontSize: 12, fontWeight: 700, color: "#334155", textAlign: "right" }}
+            >
+              {field.value}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
+    </Box>
+  );
+
+  const renderSummaryView = () => (
+    <Box>
+      <Box sx={{ mb: 1 }}>
+        <Typography sx={{ fontSize: 18, fontWeight: 700, color: "#1f2937" }}>
+          Application Summary
+        </Typography>
+      </Box>
+
+      <Box
+        sx={{
+          display: "grid",
+          gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+          gap: 1,
+        }}
+      >
+        {renderSummaryCard(
+          "BRE Decision Summary",
+          [
+            { label: "Initial Decision", value: getFirstValue(breData, ["initialDecision", "initialBreDecision", "initial_decision"]) },
+            { label: "Final Decision", value: getFirstValue(breData, ["finalDecision", "finalBreDecision", "breDecision", "decision"]) },
+          ],
+          "#9a2529",
+        )}
+        {renderSummaryCard(
+          "Application Overview",
+          [
+            { label: "Product", value: getFirstValue(applicationOverview, ["productName", "product", "productType"]) },
+            { label: "Applied Sum Assured", value: getFirstValue(applicationOverview, ["appliedSa", "appliedSA", "sumAssured"]) },
+            { label: "Annual Premium", value: getFirstValue(applicationOverview, ["annualPremium", "premium"]) },
+          ],
+          "#2563eb",
+        )}
+      </Box>
+
+      <Box
+        sx={{
+          mt: 1,
+          display: "flex",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: { xs: 1, md: 2.5 },
+          px: 1.5,
+          py: 1,
+          border: "1px solid #fde1c4",
+          borderLeft: "3px solid #f58220",
+          borderRadius: 1.5,
+          backgroundColor: "#fffaf5",
+        }}
+      >
+        <Typography sx={{ mr: 0.5, fontSize: 13, fontWeight: 700, color: "#4b5563" }}>
+          Requirement Management
+        </Typography>
+        <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
+          Total: <Box component="span" sx={{ fontWeight: 700, color: "#334155" }}>{requirementRows.length}</Box>
+        </Typography>
+        <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
+          Pending: <Box component="span" sx={{ fontWeight: 700, color: "#b45309" }}>{pendingRequirements}</Box>
+        </Typography>
+        <Typography sx={{ fontSize: 12, color: "#6b7280" }}>
+          Accepted / Received: <Box component="span" sx={{ fontWeight: 700, color: "#047857" }}>{acceptedRequirements}</Box>
+        </Typography>
+      </Box>
+
+      {renderSummaryWorkSection(
+        "requirements",
+        "Requirement Management",
+        "Review and update requirement status without leaving the summary.",
+        RequirementManagementComponent,
+      )}
+      {renderSummaryWorkSection(
+        "decision",
+        "Decision",
+        "Select and submit the case decision from this compact workspace.",
+        DecisionComponent,
+      )}
+    </Box>
+  );
+
   return (
     <>
       <BackButton
@@ -725,35 +1011,169 @@ const DRS = () => {
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
-          gap: 1,
+          alignItems: "flex-start",
+          gap: 2,
+          minHeight: "calc(100vh - 126px)",
+          p: { xs: 1, md: 2 },
+          backgroundColor: "#f4f6f9",
         }}
       >
-        {visibleAccordions.map((accordionId) => {
-          const AccordionComponent =
-            accordionRegistry[accordionId];
+        <Box
+          component="nav"
+          aria-label="Application sections"
+          sx={{
+            width: { xs: 210, md: 250 },
+            flexShrink: 0,
+            position: "sticky",
+            top: 12,
+            overflow: "hidden",
+            border: "1px solid #e5e7eb",
+            borderRadius: 2,
+            backgroundColor: "#fff",
+            boxShadow: "0 2px 8px rgba(15, 23, 42, 0.06)",
+          }}
+        >
+          <Typography
+            sx={{
+              px: 2,
+              py: 1.4,
+              fontSize: 12,
+              fontWeight: 700,
+              letterSpacing: 0.5,
+              color: "#6b7280",
+              borderBottom: "1px solid #edf0f3",
+              textTransform: "uppercase",
+            }}
+          >
+            Application sections
+          </Typography>
 
-          if (!AccordionComponent) {
-            return null;
-          }
+          <Box sx={{ p: 0.75 }}>
+            {navigationSections.map((accordionId) => {
+              const isSelected = accordionId === selectedAccordion;
 
-          const showSubmitBeforeAccordion =
-            isUwToolkitAccordion(
-              String(accordionId),
-            );
+              return (
+                <Box
+                  key={accordionId}
+                  component="button"
+                  type="button"
+                  onClick={() => setSelectedAccordionId(accordionId)}
+                  aria-current={isSelected ? "page" : undefined}
+                  sx={{
+                    width: "100%",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    px: 1.25,
+                    py: 1.05,
+                    border: 0,
+                    borderRadius: 1.25,
+                    cursor: "pointer",
+                    fontFamily: "inherit",
+                    fontSize: 13,
+                    fontWeight: isSelected ? 700 : 500,
+                    textAlign: "left",
+                    color: isSelected ? "#9a2529" : "#374151",
+                    backgroundColor: isSelected ? "#fff1f2" : "transparent",
+                    borderLeft: isSelected ? "3px solid #ad252a" : "3px solid transparent",
+                    transition: "background-color 150ms ease, color 150ms ease",
+                    "&:hover": {
+                      backgroundColor: isSelected ? "#fff1f2" : "#f8fafc",
+                    },
+                    "&:focus-visible": {
+                      outline: "2px solid #f58220",
+                      outlineOffset: 2,
+                    },
+                  }}
+                >
+                  <Box
+                    component="span"
+                    sx={{
+                      width: 7,
+                      height: 7,
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      backgroundColor: isSelected ? "#ad252a" : "#cbd5e1",
+                    }}
+                  />
+                  {accordionId === SUMMARY_VIEW_ID
+                    ? "Summary"
+                    : getAccordionLabel(String(accordionId))}
+                </Box>
+              );
+            })}
+          </Box>
+        </Box>
 
-          return (
-            <Box key={accordionId}>
-              {shouldShowSubmitButton && showSubmitBeforeAccordion &&
-                renderSubmitButton()}
+        <Box
+          sx={{
+            flex: 1,
+            minWidth: 0,
+            width: "100%",
+            minHeight: "calc(100vh - 158px)",
+            p: { xs: 1.5, md: 2.5 },
+            border: "1px solid #e5e7eb",
+            borderRadius: 2,
+            backgroundColor: "#fff",
+            boxShadow: "0 2px 8px rgba(15, 23, 42, 0.05)",
+          }}
+        >
+          {shouldShowSubmitButton &&
+            isUwToolkitAccordion(String(selectedAccordion)) &&
+            renderSubmitButton()}
 
-              <AccordionComponent />
+          {selectedAccordion === SUMMARY_VIEW_ID ? (
+            renderSummaryView()
+          ) : SelectedAccordionComponent ? (
+            <SelectedAccordionComponent />
+          ) : (
+            <Box
+              sx={{
+                py: 6,
+                textAlign: "center",
+                border: "1px dashed #cbd5e1",
+                borderRadius: 2,
+                color: "text.secondary",
+              }}
+            >
+              No section is available for this application.
             </Box>
-          );
-        })}
+          )}
 
-        {shouldShowSubmitButton && !hasUwToolkit && renderSubmitButton()}
+          {shouldShowSubmitButton && !hasUwToolkit && renderSubmitButton()}
+        </Box>
       </Box>
+      {quickLinksAccordion && (
+        <Box
+          component="button"
+          type="button"
+          onClick={() => setSelectedAccordionId(quickLinksAccordion)}
+          aria-label="Open Quick Links"
+          sx={{
+            position: "fixed",
+            right: { xs: 16, md: 28 },
+            bottom: { xs: 16, md: 28 },
+            zIndex: 1200,
+            display: "flex",
+            alignItems: "center",
+            gap: 0.8,
+            px: 2,
+            py: 1.15,
+            border: 0,
+            borderRadius: "999px",
+            cursor: "pointer",
+            backgroundColor: "#9a2529",
+            color: "#fff",
+            fontFamily: "inherit",
+            fontSize: 13,
+            fontWeight: 700,
+            boxShadow: "0 8px 22px rgba(122, 37, 41, 0.28)",
+            "&:hover": { backgroundColor: "#7d1e22" },
+          }}
+        >
+          Quick Links
+        </Box>
+      )}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}

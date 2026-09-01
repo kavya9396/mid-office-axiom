@@ -535,6 +535,16 @@ const UWDecision = () => {
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
+    const isReferralDecisionOption = (option: { label: string }) =>
+        canonicalReferralDecisionLabel(option.label).startsWith("Refer to ");
+    const terminalDecisionOptions = useMemo(
+        () => caseUWDecisionOptions.filter((option) => !isReferralDecisionOption(option)),
+        [caseUWDecisionOptions],
+    );
+    const referralDecisionOptions = useMemo(
+        () => caseUWDecisionOptions.filter(isReferralDecisionOption),
+        [caseUWDecisionOptions],
+    );
     const postponementPeriodOptions = useMemo(
         () => getPostponementPeriodOptions(masters),
         [masters],
@@ -1528,6 +1538,117 @@ const UWDecision = () => {
         });
     }, [caseUWDecisionLabel, parallelUWDecisionOptions]);
 
+    const handleCaseDecisionChange = async (value: string) => {
+        const selectedOption = caseUWDecisionOptions.find((option) => option.value === value);
+        const masterDecisionCode = toText(selectedOption?.code ?? selectedOption?.value);
+        const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
+        const normalizedSelectedLabel = selectedLabel.trim().replace(/[\s_-]+/g, " ").toUpperCase();
+        const shouldFetchDecisionCode =
+            normalizedSelectedLabel === "STANDARD" ||
+            normalizedSelectedLabel === "BORDERLINE STANDARD" ||
+            fetchDecisionCodes.has(selectedLabel);
+
+        setCaseUWDecision(value);
+        setOutlier("");
+        fetchUsersForReferralDecision(selectedLabel);
+        setReferralValue("");
+        setParallelDecision("");
+        setParallelReferralValue("");
+        setParallelRoleUsers([]);
+        setBorderlineStandardReasons([]);
+        setCounterOfferReasons([]);
+        setRejectReason([]);
+        setDeclineReasons([]);
+        setPostponeReason("");
+        setPostponementPeriod("");
+        setReferralReason("");
+        setUwDecision("");
+        setFirstUwDecisionCode("");
+        setFirstUwSmokerStatus("");
+        setSubmitMessage(null);
+        setSubmitStatus(null);
+        setDecisionCode("");
+        setSmokerStatus("");
+
+        if (shouldFetchDecisionCode) {
+            try {
+                const response = await dispatch(
+                    decisionCodeThunk({ decision: masterDecisionCode, dataentry: dataEntry } as Parameters<typeof decisionCodeThunk>[0]),
+                ).unwrap();
+                setDecisionCode(toText(findFirstScalarByKey(response, ["decisionCode", "code", "value"])));
+                setSmokerStatus(toText(findFirstScalarByKey(response, ["smokerStatus", "smoker_status"])));
+            } catch (error) {
+                setSubmitMessage(error instanceof Error ? error.message : "Unable to load the decision code.");
+                setSubmitStatus("failure");
+            }
+        }
+
+        if (selectedLabel === "Raise Requirement") openRequirementManagement(true);
+    };
+
+    const handleFirstUwDecisionChange = async (value: string) => {
+        setUwDecision(value);
+        setFirstUwDecisionCode("");
+        setFirstUwSmokerStatus("");
+        setBorderlineStandardReasons([]);
+        setCounterOfferReasons([]);
+        setRejectReason([]);
+        setDeclineReasons([]);
+        setPostponeReason("");
+        setPostponementPeriod("");
+
+        const selectedOption = firstUWDecisionOptions.find((option) => option.value === value);
+        const selectedLabel = toText(selectedOption?.label);
+        const normalizedLabel = selectedLabel.trim().replace(/[\s_-]+/g, " ").toUpperCase();
+        const shouldFetch = ["STANDARD", "BORDERLINE STANDARD", "REJECT", "DECLINE", "POSTPONE", "COUNTER OFFER"].includes(normalizedLabel);
+        if (!shouldFetch) return;
+
+        try {
+            const response = await dispatch(
+                decisionCodeThunk({ decision: value, dataentry: dataEntry } as Parameters<typeof decisionCodeThunk>[0]),
+            ).unwrap();
+            setFirstUwDecisionCode(toText(findFirstScalarByKey(response, ["decisionCode", "code", "value"])));
+            setFirstUwSmokerStatus(toText(findFirstScalarByKey(response, ["smokerStatus", "smoker_status"])));
+        } catch (error) {
+            setSubmitMessage(error instanceof Error ? error.message : "Unable to load the terminal decision details.");
+            setSubmitStatus("failure");
+        }
+    };
+
+    const handleReferralDecisionChange = async (value: string) => {
+        const existingTerminalDecision = isReferralDecisionOption({ label: caseUWDecisionLabel })
+            ? uwDecision
+            : effectiveCaseUWDecision;
+        const existingDecisionCode = decisionCode;
+        const existingSmokerStatus = smokerStatus;
+
+        await handleCaseDecisionChange(value);
+
+        if (existingTerminalDecision) {
+            setUwDecision(existingTerminalDecision);
+            setFirstUwDecisionCode(existingDecisionCode);
+            setFirstUwSmokerStatus(existingSmokerStatus);
+        }
+    };
+
+    const handleRemoveReferral = () => {
+        setCaseUWDecision(uwDecision);
+        setDecisionCode(firstUwDecisionCode);
+        setSmokerStatus(firstUwSmokerStatus);
+        setUwDecision("");
+        setFirstUwDecisionCode("");
+        setFirstUwSmokerStatus("");
+        setReferralValue("");
+        setReferralReason("");
+        setRoleUsers([]);
+        setParallelDecision("");
+        setParallelReferralValue("");
+        setParallelRoleUsers([]);
+        setDecisionType("counterSign");
+        setSubmitMessage(null);
+        setSubmitStatus(null);
+    };
+
     return (
         <Box sx={{ px: 1 }}>
             <CustomAccordion title="UW Decision" defaultExpanded>
@@ -1583,10 +1704,105 @@ const UWDecision = () => {
                     <Box
                         sx={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                            gridTemplateColumns: { xs: "1fr", md: "1fr 1fr" },
+                            gap: 1,
+                            mt: 1,
+                            mb: 1.25,
+                        }}
+                    >
+                        <Box sx={{ p: 1, border: "1px solid #dbe5f0", borderRadius: 1.5, backgroundColor: "#fff" }}>
+                            <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#243b53", mb: 0.5 }}>
+                                Terminal decision
+                            </Typography>
+                            <CustomSelect
+                                label={isReferralDecisionOption({ label: caseUWDecisionLabel }) ? "Terminal decision (required)" : "Select terminal decision"}
+                                value={isReferralDecisionOption({ label: caseUWDecisionLabel }) ? uwDecision : effectiveCaseUWDecision}
+                                onChange={isReferralDecisionOption({ label: caseUWDecisionLabel }) ? handleFirstUwDecisionChange : handleCaseDecisionChange}
+                                options={isReferralDecisionOption({ label: caseUWDecisionLabel }) ? firstUWDecisionOptions : terminalDecisionOptions}
+                                placeholder="Select terminal decision"
+                            />
+                        </Box>
+
+                        <Box sx={{ p: 1, border: "1px solid #d7e8df", borderRadius: 1.5, backgroundColor: "#fbfffc" }}>
+                            <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#24613b", mb: 0.5 }}>
+                                Referral (optional)
+                            </Typography>
+                            <CustomSelect
+                                label="Select referral"
+                                value={isReferralDecisionOption({ label: caseUWDecisionLabel }) ? effectiveCaseUWDecision : ""}
+                                onChange={handleReferralDecisionChange}
+                                options={referralDecisionOptions}
+                                placeholder="Select referral"
+                            />
+                        </Box>
+                    </Box>
+
+                    {effectiveCaseUWDecision && isReferralDecisionOption({ label: caseUWDecisionLabel }) && (
+                        <Box sx={{ mb: 1, px: 1, py: 0.75, borderRadius: 1, backgroundColor: "#eef8f1", border: "1px solid #d7e8df" }}>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexWrap: "wrap" }}>
+                                <Typography sx={{ fontSize: 11, fontWeight: 700, color: "#24613b" }}>
+                                    Referral routing details
+                                </Typography>
+                                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+                                    {showDecisionType && (
+                                        <Box
+                                            sx={{
+                                                px: 0.5,
+                                                py: 0.1,
+                                                border: "1px solid #c8dfd0",
+                                                borderRadius: 5,
+                                                backgroundColor: "#fff",
+                                                "& .MuiFormControlLabel-root": { mr: 0.5, ml: 0, my: 0 },
+                                                "& .MuiRadio-root": { p: 0.3 },
+                                                "& .MuiTypography-root": { fontSize: "10px !important", fontWeight: 600 },
+                                            }}
+                                        >
+                                            <CustomRadioGroup
+                                                row
+                                                value={decisionType}
+                                                onChange={(e) => {
+                                                    setDecisionType(e.target.value);
+                                                    setReferralReason("");
+                                                }}
+                                                options={[
+                                                    { label: "Counter Sign", value: "counterSign" },
+                                                    { label: "Opinion", value: "opinion" },
+                                                ]}
+                                            />
+                                        </Box>
+                                    )}
+                                    <CustomButton
+                                        variant="outlined"
+                                        onClick={handleRemoveReferral}
+                                        sx={{ minWidth: 0, height: 26, px: 1, borderRadius: 4, fontSize: "10px", fontWeight: 700, color: "#a33b3b", borderColor: "#d8a7a7" }}
+                                    >
+                                        Remove referral
+                                    </CustomButton>
+                                </Box>
+                            </Box>
+                            <Typography sx={{ fontSize: 10, color: "#47765a", mt: 0.25 }}>
+                                Choose the required terminal decision above, then select the recipient and referral details below.
+                            </Typography>
+                        </Box>
+                    )}
+
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: isReferralDecisionOption({ label: caseUWDecisionLabel })
+                                ? "repeat(3, minmax(0, 1fr))"
+                                : "repeat(3, minmax(0, 1fr))",
                             alignItems: "end",
                             columnGap: 1,
                             rowGap: 0.75,
+                            ...(isReferralDecisionOption({ label: caseUWDecisionLabel })
+                                ? {
+                                    p: 1,
+                                    border: "1px solid #d7e8df",
+                                    borderRadius: 1.5,
+                                    backgroundColor: "#fbfffc",
+                                }
+                                : {}),
                             "& > *": {
                                 minWidth: 0,
                             },
@@ -1599,19 +1815,25 @@ const UWDecision = () => {
                                 minHeight: 34,
                                 borderRadius: "6px",
                                 backgroundColor: "#fff",
-                                fontSize: "12px",
+                                fontSize: "11px",
                             },
                             "& .MuiInputBase-input, & .MuiSelect-select": {
-                                fontSize: "12px",
+                                fontSize: "11px",
                                 lineHeight: 1.2,
                                 py: "7px !important",
                             },
                             "& .MuiTypography-root": {
-                                fontSize: "11px",
+                                fontSize: "10px",
                                 lineHeight: 1.2,
                             },
                         }}
                     >
+                        {isReferralDecisionOption({ label: caseUWDecisionLabel }) && (
+                            <Typography sx={{ gridColumn: "1 / -1", fontWeight: 700, color: "#24613b" }}>
+                                Referral routing details
+                            </Typography>
+                        )}
+                        {caseUWDecision === "__legacy_case_decision__" && (
                         <CustomSelect
                             label="Case UW Decision"
                             value={effectiveCaseUWDecision}
@@ -1692,6 +1914,7 @@ const UWDecision = () => {
                             }}
                             options={caseUWDecisionOptions}
                         />
+                        )}
 
                         {effectiveCaseUWDecision && (
                             <Box>
@@ -1970,23 +2193,6 @@ const UWDecision = () => {
                             />
                         )}
 
-                        {showDecisionType && (
-                            <Box sx={{ alignSelf: "end" }}>
-                                <CustomRadioGroup
-                                    row
-                                    value={decisionType}
-                                    onChange={(e) => {
-                                        setDecisionType(e.target.value);
-                                        setReferralReason("");
-                                    }}
-                                    options={[
-                                        { label: "Counter Sign", value: "counterSign" },
-                                        { label: "Opinion", value: "opinion" },
-                                    ]}
-                                />
-                            </Box>
-                        )}
-
                         {showReferralDecisionFlow && (
                             <CustomSelect
                                 label={referralReasonLabel}
@@ -1997,7 +2203,7 @@ const UWDecision = () => {
                             />
                         )}
 
-                        {showFirstUWDecision && (
+                        {showFirstUWDecision && !isReferralDecisionOption({ label: caseUWDecisionLabel }) && (
                             <CustomSelect
                                 label="1st UW Decision"
                                 value={uwDecision}
