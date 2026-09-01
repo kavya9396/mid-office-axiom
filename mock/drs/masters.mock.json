@@ -20,125 +20,6 @@
         "isActive": "Y"
       }
     ],
-    "nationality": [
-      {
-        "code": "IND",
-        "description": "Indian",
-        "value": "Indian",
-        "isActive": "Y"
-      },
-      {
-        "code": "NIND",
-        "description": "Non Indian",
-        "value": "Non-Indian",
-        "isActive": "Y"
-      },
-      {
-        "code": "Not Answered",
-        "description": "Not Answered",
-        "value": "Not Answered",
-        "isActive": "Y"
-      }
-    ],
-    "state": {
-      "IND": [
-        {
-          "code": "DL",
-          "description": "Delhi",
-          "value": null,
-          "isActive": "Y",
-          "countryCode": "IND"
-        },
-        {
-          "code": "KA",
-          "description": "Karnataka",
-          "value": null,
-          "isActive": "Y",
-          "countryCode": "IND"
-        },
-        {
-          "code": "MH",
-          "description": "Maharashtra",
-          "value": null,
-          "isActive": "Y",
-          "countryCode": "IND"
-        },
-        {
-          "code": "MP",
-          "description": "Madhya Pradesh",
-          "value": null,
-          "isActive": "Y",
-          "countryCode": "IND"
-        },
-        {
-          "code": "UP",
-          "description": "Uttar Pradesh",
-          "value": null,
-          "isActive": "Y",
-          "countryCode": "IND"
-        }
-      ],
-      "USA": [
-        {
-          "code": "CA",
-          "description": "California",
-          "value": null,
-          "isActive": "Y",
-          "countryCode": "USA"
-        },
-        {
-          "code": "NY",
-          "description": "New York",
-          "value": null,
-          "isActive": "Y",
-          "countryCode": "USA"
-        },
-        {
-          "code": "TX",
-          "description": "Texas",
-          "value": null,
-          "isActive": "Y",
-          "countryCode": "USA"
-        }
-      ]
-    },
-    "country": [
-      {
-        "code": "ARE",
-        "description": "United Arab Emirates",
-        "value": null,
-        "isActive": "Y",
-        "isdCode": "+971"
-      },
-      {
-        "code": "GBR",
-        "description": "United Kingdom",
-        "value": null,
-        "isActive": "Y",
-        "isdCode": "+44"
-      },
-      {
-        "code": "IND",
-        "description": "India",
-        "value": null,
-        "isActive": "Y",
-        "isdCode": "+91"
-      },
-      {
-        "code": "SGP",
-        "description": "Singapore",
-        "value": null,
-        "isActive": "Y",
-        "isdCode": "+65"
-      },
-      {
-        "code": "USA",
-        "description": "United States of America",
-        "value": null,
-        "isActive": "Y",
-        "isdCode": "+1"
-      }
-    ],
     "resident_status": [
       {
         "code": "FN",
@@ -168,6 +49,26 @@
         "code": "PIO",
         "description": "Person of Indian Origin",
         "value": "Person of Indian Origin",
+        "isActive": "Y"
+      }
+    ],
+    "nationality": [
+      {
+        "code": "IND",
+        "description": "Indian",
+        "value": "Indian",
+        "isActive": "Y"
+      },
+      {
+        "code": "NIND",
+        "description": "Non Indian",
+        "value": "Non-Indian",
+        "isActive": "Y"
+      },
+      {
+        "code": "Not Answered",
+        "description": "Not Answered",
+        "value": "Not Answered",
         "isActive": "Y"
       }
     ],
@@ -1057,6 +958,105 @@
         "isTerminal": "Y"
       }
     ],
+    "country": [
+      {
+        "code": "ARE",
+        "description": "United Arab Emirates",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+971"
+      },
+      {
+        "code": "GBR",
+        "description": "United Kingdom",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+44"
+      },
+      {
+        "code": "IND",
+        "description": "India",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+91"
+      },
+      {
+        "code": "SGP",
+        "description": "Singapore",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+65"
+      },
+      {
+        "code": "USA",
+        "description": "United States of America",
+        "value": null,
+        "isActive": "Y",
+        "isdCode": "+1"
+      }
+    ],
+    "state": {
+      "IND": [
+        {
+          "code": "DL",
+          "description": "Delhi",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        },
+        {
+          "code": "KA",
+          "description": "Karnataka",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        },
+        {
+          "code": "MH",
+          "description": "Maharashtra",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        },
+        {
+          "code": "MP",
+          "description": "Madhya Pradesh",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        },
+        {
+          "code": "UP",
+          "description": "Uttar Pradesh",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "IND"
+        }
+      ],
+      "USA": [
+        {
+          "code": "CA",
+          "description": "California",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "USA"
+        },
+        {
+          "code": "NY",
+          "description": "New York",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "USA"
+        },
+        {
+          "code": "TX",
+          "description": "Texas",
+          "value": null,
+          "isActive": "Y",
+          "countryCode": "USA"
+        }
+      ]
+    },
     "policy_decision": [
       {
         "code": "ACC",
@@ -1222,6 +1222,10 @@
         "applicableForm": "SINGLE_LIFE"
       }
     ],
+    "requirement_mst": {
+      "level": "team",
+      "teams": ["COPS", "UW"]
+    },
     "bre": [
       {
         "code": "AGE_CHECK",
@@ -1366,8 +1370,8 @@
         "value": null,
         "isActive": "Y",
         "servicingType": "PRE",
-        "requestCategory": "N/A",
-        "requestType": "Policy related issuance",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in Email",
         "updateLa": "Y",
         "uwRequired": "Y"
       },
@@ -1790,6 +1794,406 @@
         "requestType": "RISK_REASSESSMENT",
         "updateLa": "N",
         "uwRequired": "Y"
+      },
+      {
+        "code": "PRE_ACCT_DTL",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Account details",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_ADDR_PIN",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in Address",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_ADD_RIDER",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Addition of Rider",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_ATS",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "ATS level changes (Branch/FSC code etc)",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_CHG_PTPPT",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Decrease PT/PPT",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_CHG_SA",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in SA",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_CUST_DECL",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Customer Declaration",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_DEC_PTPPT",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Decrease in PT/PPT",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_DEC_SA",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Decrease SA",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_DEL_RIDER",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Rider Deletion",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_DOB_INC",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in DOB Details",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_EMAIL",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Email ID updation / Correction",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_FREQ",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Frequency",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_GENDER",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in Gender",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_INC_PTPPT",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Increase in PT/PPT",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_INC_SA",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Increase SA",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_MOBILE",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in Mobile",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_PAN_AADHAR",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in PAN/Aadhaar",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_POL_ISS",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Policy related issuance",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_PROD_CHG",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in product",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_RES_STAT",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Correction/ Updation of residential status",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PRE_RES_STATUS",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Change in Residential Status",
+        "updateLa": "Y",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PRE_RID_ADD",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Rider Addition",
+        "updateLa": "Y",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PRE_RID_DE",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "PRE",
+        "requestCategory": "Pre -Issuance",
+        "requestType": "Rider Deletion",
+        "updateLa": "Y",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PST_ADD_DEL_LIFE",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Policy Level Changes",
+        "requestType": "Add/ Delete life",
+        "updateLa": "Y",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PST_ASSIGN_CONS",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Policy Level Changes",
+        "requestType": "Assignment with Consideration",
+        "updateLa": "N",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_ASSIGN_WO_CONS",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Policy Level Changes",
+        "requestType": "Assignment w/o consideration",
+        "updateLa": "N",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_DB_PPT_TERM_INC",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Policy Level Changes",
+        "requestType": "Death Benefit/PPT/Policy Term Increase",
+        "updateLa": "N",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_DEC_PREM_SA_TRM",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Freelook Changes",
+        "requestType": "Decrease in prem/SA/Term",
+        "updateLa": "N",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PST_DISCLOSURE",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Client level Changes",
+        "requestType": "Disclosure post issuance",
+        "updateLa": "Y",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PST_DOB",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Client level Changes",
+        "requestType": "LA/Proposer DOB",
+        "updateLa": "Y",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PST_INC_PREM_SA_TRM",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Freelook Changes",
+        "requestType": "Increase in prem/SA/Term",
+        "updateLa": "N",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PST_MISSELL_PROD",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Policy Level Changes",
+        "requestType": "Misselling Product Change/ Alteration",
+        "updateLa": "N",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_NOM_APP",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Policy Level Changes",
+        "requestType": "Nomination / Appointee",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_POLICY_ALT",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Freelook Changes",
+        "requestType": "Policy alteration",
+        "updateLa": "N",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_PRODUCT_CHG",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Freelook Changes",
+        "requestType": "Product change",
+        "updateLa": "N",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_PROP_JL_PAYOR",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Policy Level Changes",
+        "requestType": "Proposer/Joint Life/Payor",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_PROP_RES",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Client level Changes",
+        "requestType": "Proposer Res status",
+        "updateLa": "Y",
+        "uwRequired": "N"
+      },
+      {
+        "code": "PST_RIDER_ADD_CHG",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Freelook Changes",
+        "requestType": "Rider - Addition / Change",
+        "updateLa": "Y",
+        "uwRequired": "Y"
+      },
+      {
+        "code": "PST_TOP_DB_INC",
+        "value": null,
+        "isActive": "Y",
+        "servicingType": "POST",
+        "requestCategory": "Fund Allocation",
+        "requestType": "Top-DB Increase",
+        "updateLa": "N",
+        "uwRequired": "Y"
       }
     ],
     "uw_decision": [
@@ -1872,22 +2276,6 @@
       }
     ],
     "misc": [
-      {
-        "code": "Y",
-        "description": "Yes",
-        "value": "Yes",
-        "isActive": "Y",
-        "miscMastId": "156",
-        "type": "YESNO"
-      },
-      {
-        "code": "N",
-        "description": "No",
-        "value": "No",
-        "isActive": "Y",
-        "miscMastId": "157",
-        "type": "YESNO"
-      },
       {
         "code": "Waived",
         "description": "Waived",
@@ -2145,12 +2533,100 @@
         "type": "REF_IT"
       },
       {
+        "code": "CLASS_1",
+        "description": "Class-1",
+        "value": "Class-1",
+        "isActive": "Y",
+        "miscMastId": "129",
+        "type": "EMR_CLASS"
+      },
+      {
         "code": "RAISE_GRV",
         "description": "Raise Grievance",
         "value": "Raise Grievance",
         "isActive": "Y",
         "miscMastId": "13",
         "type": "CPT"
+      },
+      {
+        "code": "CLASS_2",
+        "description": "Class-2",
+        "value": "Class-2",
+        "isActive": "Y",
+        "miscMastId": "130",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "CLASS_3",
+        "description": "Class-3",
+        "value": "Class-3",
+        "isActive": "Y",
+        "miscMastId": "131",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "CLASS_4",
+        "description": "Class-4",
+        "value": "Class-4",
+        "isActive": "Y",
+        "miscMastId": "132",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "CLASS_5",
+        "description": "Class-5",
+        "value": "Class-5",
+        "isActive": "Y",
+        "miscMastId": "133",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "CLASS_6",
+        "description": "Class-6",
+        "value": "Class-6",
+        "isActive": "Y",
+        "miscMastId": "134",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "CLASS_7",
+        "description": "Class-7",
+        "value": "Class-7",
+        "isActive": "Y",
+        "miscMastId": "135",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "CLASS_8",
+        "description": "Class-8",
+        "value": "Class-8",
+        "isActive": "Y",
+        "miscMastId": "136",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "CLASS_9",
+        "description": "Class-9",
+        "value": "Class-9",
+        "isActive": "Y",
+        "miscMastId": "137",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "DECLINE",
+        "description": "Deny Rider Cover",
+        "value": "Deny Rider Cover",
+        "isActive": "Y",
+        "miscMastId": "138",
+        "type": "EMR_CLASS"
+      },
+      {
+        "code": "FE_SMOKER",
+        "description": "Flat XRT- Smoker",
+        "value": "Flat XRT- Smoker",
+        "isActive": "Y",
+        "miscMastId": "139",
+        "type": "FE_CLASS"
       },
       {
         "code": "REF_IT",
@@ -2161,12 +2637,172 @@
         "type": "CPT"
       },
       {
+        "code": "FE_1_PER_MILE",
+        "description": "Flat XRT- 1 per mile",
+        "value": "Flat XRT- 1 per mile",
+        "isActive": "Y",
+        "miscMastId": "140",
+        "type": "FE_CLASS"
+      },
+      {
+        "code": "FE_2_PER_MILE",
+        "description": "Flat XRT- 2 per mile",
+        "value": "Flat XRT- 2 per mile",
+        "isActive": "Y",
+        "miscMastId": "141",
+        "type": "FE_CLASS"
+      },
+      {
+        "code": "FE_3_PER_MILE",
+        "description": "Flat XRT- 3 per mile",
+        "value": "Flat XRT- 3 per mile",
+        "isActive": "Y",
+        "miscMastId": "142",
+        "type": "FE_CLASS"
+      },
+      {
+        "code": "FE_4_PER_MILE",
+        "description": "Flat XRT- 4 per mile",
+        "value": "Flat XRT- 4 per mile",
+        "isActive": "Y",
+        "miscMastId": "143",
+        "type": "FE_CLASS"
+      },
+      {
+        "code": "FE_5_PER_MILE",
+        "description": "Flat XRT- 5 per mile",
+        "value": "Flat XRT- 5 per mile",
+        "isActive": "Y",
+        "miscMastId": "144",
+        "type": "FE_CLASS"
+      },
+      {
+        "code": "FE_6_PER_MILE",
+        "description": "Flat XRT- 6 per mile",
+        "value": "Flat XRT- 6 per mile",
+        "isActive": "Y",
+        "miscMastId": "145",
+        "type": "FE_CLASS"
+      },
+      {
+        "code": "HP",
+        "description": "HP - Hazardous Pursuits",
+        "value": "HP - Hazardous Pursuits",
+        "isActive": "Y",
+        "miscMastId": "146",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "OCCUPATION_RISK",
+        "description": "OC - Occupation Risk",
+        "value": "OC - Occupation Risk",
+        "isActive": "Y",
+        "miscMastId": "147",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "RE",
+        "description": "RE - Residence Risk",
+        "value": "RE - Residence Risk",
+        "isActive": "Y",
+        "miscMastId": "148",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "OR",
+        "description": "OR - Occupation and Residence Risk",
+        "value": "OR - Occupation and Residence Risk",
+        "isActive": "Y",
+        "miscMastId": "149",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
         "code": "AMR",
         "description": "Raise Requirement",
         "value": "Raise Requirement",
         "isActive": "Y",
         "miscMastId": "15",
         "type": "DVT"
+      },
+      {
+        "code": "OH",
+        "description": "OH - Occupation and Hazardous Risk",
+        "value": "OH - Occupation and Hazardous Risk",
+        "isActive": "Y",
+        "miscMastId": "150",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "RH",
+        "description": "RH - Residence and Hazardous Risk",
+        "value": "RH - Residence and Hazardous Risk",
+        "isActive": "Y",
+        "miscMastId": "151",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "RA",
+        "description": "RA - Occupation and Residence and Hazardous Risk",
+        "value": "RA - Occupation and Residence and Hazardous Risk",
+        "isActive": "Y",
+        "miscMastId": "152",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "HB",
+        "description": "HB - Habits Risk",
+        "value": "HB - Habits Risk",
+        "isActive": "Y",
+        "miscMastId": "153",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "HL",
+        "description": "HL - Health Extra Premium",
+        "value": "HL - Health Extra Premium",
+        "isActive": "Y",
+        "miscMastId": "154",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "FH",
+        "description": "FH - Family History",
+        "value": "FH - Family History",
+        "isActive": "Y",
+        "miscMastId": "155",
+        "type": "COUNTER_OFFER_CODE"
+      },
+      {
+        "code": "Y",
+        "description": "Yes",
+        "value": "Yes",
+        "isActive": "Y",
+        "miscMastId": "156",
+        "type": "YESNO"
+      },
+      {
+        "code": "N",
+        "description": "No",
+        "value": "No",
+        "isActive": "Y",
+        "miscMastId": "157",
+        "type": "YESNO"
+      },
+      {
+        "code": "PEP_CASE",
+        "description": "PEP Case",
+        "value": "PEP Case",
+        "isActive": "Y",
+        "miscMastId": "158",
+        "type": "REF_HOD_CS_RSN"
+      },
+      {
+        "code": "MED_OP",
+        "description": "Medical Opinion",
+        "value": "Medical Opinion",
+        "isActive": "Y",
+        "miscMastId": "159",
+        "type": "REF_HOD_OP_RSN"
       },
       {
         "code": "CLS_TASK",
@@ -2177,12 +2813,172 @@
         "type": "CPT"
       },
       {
+        "code": "ABV_CASE",
+        "description": "Above Limit Case",
+        "value": "Above Limit Case",
+        "isActive": "Y",
+        "miscMastId": "160",
+        "type": "REF_SRUW_CS_RSN"
+      },
+      {
+        "code": "MED_OP",
+        "description": "Medical Opinion",
+        "value": "Medical Opinion",
+        "isActive": "Y",
+        "miscMastId": "161",
+        "type": "REF_SRUW_OP_RSN"
+      },
+      {
+        "code": "CLN",
+        "description": "Clinic",
+        "value": "Clinic",
+        "isActive": "Y",
+        "miscMastId": "162",
+        "type": "EXAM_PL"
+      },
+      {
+        "code": "RES_OFF",
+        "description": "Res/Office",
+        "value": "Res/Office",
+        "isActive": "Y",
+        "miscMastId": "163",
+        "type": "EXAM_PL"
+      },
+      {
+        "code": "PG",
+        "description": "Post Graduate",
+        "value": "Post Graduate",
+        "isActive": "Y",
+        "miscMastId": "164",
+        "type": "EDUCATION"
+      },
+      {
+        "code": "GRAD",
+        "description": "Graduate",
+        "value": "Graduate",
+        "isActive": "Y",
+        "miscMastId": "165",
+        "type": "EDUCATION"
+      },
+      {
+        "code": "DIP",
+        "description": "Diploma",
+        "value": "Diploma",
+        "isActive": "Y",
+        "miscMastId": "166",
+        "type": "EDUCATION"
+      },
+      {
+        "code": "12TH",
+        "description": "12th",
+        "value": "12th",
+        "isActive": "Y",
+        "miscMastId": "167",
+        "type": "EDUCATION"
+      },
+      {
+        "code": "10TH",
+        "description": "10th",
+        "value": "10th",
+        "isActive": "Y",
+        "miscMastId": "168",
+        "type": "EDUCATION"
+      },
+      {
+        "code": "BELOW_10",
+        "description": "Below 10th",
+        "value": "Below 10th",
+        "isActive": "Y",
+        "miscMastId": "169",
+        "type": "EDUCATION"
+      },
+      {
         "code": "CNS",
         "description": "Customer not speaking",
         "value": "Customer not speaking",
         "isActive": "Y",
         "miscMastId": "17",
         "type": "PIVV"
+      },
+      {
+        "code": "SAL",
+        "description": "Salaried",
+        "value": "Salaried",
+        "isActive": "Y",
+        "miscMastId": "170",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "AGRI",
+        "description": "Agriculturalist",
+        "value": "Agriculturalist",
+        "isActive": "Y",
+        "miscMastId": "171",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "ICICI_EMP",
+        "description": "ICICI Group Employee",
+        "value": "ICICI Group Employee",
+        "isActive": "Y",
+        "miscMastId": "172",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "PROF",
+        "description": "Professional",
+        "value": "Professional",
+        "isActive": "Y",
+        "miscMastId": "173",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "RET",
+        "description": "Retired",
+        "value": "Retired",
+        "isActive": "Y",
+        "miscMastId": "174",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "SELF_EMP",
+        "description": "Self Employed",
+        "value": "Self Employed",
+        "isActive": "Y",
+        "miscMastId": "175",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "STU",
+        "description": "Student",
+        "value": "Student",
+        "isActive": "Y",
+        "miscMastId": "176",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "SELF_CA",
+        "description": "Self Employed CA",
+        "value": "Self Employed CA",
+        "isActive": "Y",
+        "miscMastId": "177",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "SELF_DOC",
+        "description": "Self Employed Doctor",
+        "value": "Self Employed Doctor",
+        "isActive": "Y",
+        "miscMastId": "178",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "SELF_ARCH",
+        "description": "Self Employed Architect",
+        "value": "Self Employed Architect",
+        "isActive": "Y",
+        "miscMastId": "179",
+        "type": "OCCUPATION"
       },
       {
         "code": "APS",
@@ -2193,12 +2989,172 @@
         "type": "PIVV"
       },
       {
+        "code": "SELF_BUS",
+        "description": "Self Employed Businessman",
+        "value": "Self Employed Businessman",
+        "isActive": "Y",
+        "miscMastId": "180",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "SELF_CON",
+        "description": "Self Employed Consultant",
+        "value": "Self Employed Consultant",
+        "isActive": "Y",
+        "miscMastId": "181",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "SELF_LAW",
+        "description": "Self Employed Lawyer",
+        "value": "Self Employed Lawyer",
+        "isActive": "Y",
+        "miscMastId": "182",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "SELF_OTH",
+        "description": "Self Employed Other",
+        "value": "Self Employed Other",
+        "isActive": "Y",
+        "miscMastId": "183",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "OTHER",
+        "description": "Other(Specify)",
+        "value": "Other(Specify)",
+        "isActive": "Y",
+        "miscMastId": "184",
+        "type": "OCCUPATION"
+      },
+      {
+        "code": "BRO",
+        "description": "BROTHER",
+        "value": "BROTHER",
+        "isActive": "Y",
+        "miscMastId": "185",
+        "type": "RELATION"
+      },
+      {
+        "code": "SIS",
+        "description": "SISTER",
+        "value": "SISTER",
+        "isActive": "Y",
+        "miscMastId": "186",
+        "type": "RELATION"
+      },
+      {
+        "code": "SPOUSE",
+        "description": "SPOUSE",
+        "value": "SPOUSE",
+        "isActive": "Y",
+        "miscMastId": "187",
+        "type": "RELATION"
+      },
+      {
+        "code": "DEAD",
+        "description": "DEAD",
+        "value": "DEAD",
+        "isActive": "Y",
+        "miscMastId": "188",
+        "type": "DEAD_ALIVE"
+      },
+      {
+        "code": "ALIVE",
+        "description": "ALIVE",
+        "value": "ALIVE",
+        "isActive": "Y",
+        "miscMastId": "189",
+        "type": "DEAD_ALIVE"
+      },
+      {
         "code": "PRV",
         "description": "Pre-recorded video",
         "value": "Pre-recorded video",
         "isActive": "Y",
         "miscMastId": "19",
         "type": "PIVV"
+      },
+      {
+        "code": "PAST_MED",
+        "description": "PAST MEDICAL",
+        "value": "PAST MEDICAL",
+        "isActive": "Y",
+        "miscMastId": "190",
+        "type": "MEDICAL_TYPE"
+      },
+      {
+        "code": "REG_MED",
+        "description": "REGULAR MEDICAL",
+        "value": "REGULAR MEDICAL",
+        "isActive": "Y",
+        "miscMastId": "191",
+        "type": "MEDICAL_TYPE"
+      },
+      {
+        "code": "NEG_NR",
+        "description": "Negative/Non Reactive",
+        "value": "Negative/Non Reactive",
+        "isActive": "Y",
+        "miscMastId": "192",
+        "type": "VALUE"
+      },
+      {
+        "code": "POS_R",
+        "description": "Positive/Reactive",
+        "value": "Positive/Reactive",
+        "isActive": "Y",
+        "miscMastId": "193",
+        "type": "VALUE"
+      },
+      {
+        "code": "NIL_ABS",
+        "description": "Nil/Absent",
+        "value": "Nil/Absent",
+        "isActive": "Y",
+        "miscMastId": "194",
+        "type": "SUGAR_GLYCOSURIA"
+      },
+      {
+        "code": "TRACE",
+        "description": "Trace",
+        "value": "Trace",
+        "isActive": "Y",
+        "miscMastId": "195",
+        "type": "SUGAR_GLYCOSURIA"
+      },
+      {
+        "code": "PLUS_1",
+        "description": "+",
+        "value": "+",
+        "isActive": "Y",
+        "miscMastId": "196",
+        "type": "SUGAR_GLYCOSURIA"
+      },
+      {
+        "code": "PLUS_2",
+        "description": "++",
+        "value": "++",
+        "isActive": "Y",
+        "miscMastId": "197",
+        "type": "SUGAR_GLYCOSURIA"
+      },
+      {
+        "code": "PLUS_3",
+        "description": "+++",
+        "value": "+++",
+        "isActive": "Y",
+        "miscMastId": "198",
+        "type": "SUGAR_GLYCOSURIA"
+      },
+      {
+        "code": "PLUS_4",
+        "description": "++++",
+        "value": "++++",
+        "isActive": "Y",
+        "miscMastId": "199",
+        "type": "SUGAR_GLYCOSURIA"
       },
       {
         "code": "ISS",
@@ -2217,12 +3173,172 @@
         "type": "PIVV"
       },
       {
+        "code": "NIL_ABS",
+        "description": "Nil/Absent",
+        "value": "Nil/Absent",
+        "isActive": "Y",
+        "miscMastId": "200",
+        "type": "ALBUMIN_PROTEINURIA"
+      },
+      {
+        "code": "TRACE_PM",
+        "description": "Trace/+-",
+        "value": "Trace/+-",
+        "isActive": "Y",
+        "miscMastId": "201",
+        "type": "ALBUMIN_PROTEINURIA"
+      },
+      {
+        "code": "MID_PLUS",
+        "description": "Mid/+",
+        "value": "Mid/+",
+        "isActive": "Y",
+        "miscMastId": "202",
+        "type": "ALBUMIN_PROTEINURIA"
+      },
+      {
+        "code": "MOD_PLUS2",
+        "description": "Moderate/++",
+        "value": "Moderate/++",
+        "isActive": "Y",
+        "miscMastId": "203",
+        "type": "ALBUMIN_PROTEINURIA"
+      },
+      {
+        "code": "MARK_PLUS3",
+        "description": "Marked/+++",
+        "value": "Marked/+++",
+        "isActive": "Y",
+        "miscMastId": "204",
+        "type": "ALBUMIN_PROTEINURIA"
+      },
+      {
+        "code": "NIL_OCC",
+        "description": "Nil/Absent/Occ",
+        "value": "Nil/Absent/Occ",
+        "isActive": "Y",
+        "miscMastId": "205",
+        "type": "RBC_HAEMATURIA"
+      },
+      {
+        "code": "TRACE_1_4",
+        "description": "Trace/+-/1-4",
+        "value": "Trace/+-/1-4",
+        "isActive": "Y",
+        "miscMastId": "206",
+        "type": "RBC_HAEMATURIA"
+      },
+      {
+        "code": "MILD_5_9",
+        "description": "Mild/+/5-9",
+        "value": "Mild/+/5-9",
+        "isActive": "Y",
+        "miscMastId": "207",
+        "type": "RBC_HAEMATURIA"
+      },
+      {
+        "code": "MOD_10_19",
+        "description": "Moderate/++/10-19",
+        "value": "Moderate/++/10-19",
+        "isActive": "Y",
+        "miscMastId": "208",
+        "type": "RBC_HAEMATURIA"
+      },
+      {
+        "code": "MARK_20_PLUS",
+        "description": "Marked /+++/>=20",
+        "value": "Marked /+++/>=20",
+        "isActive": "Y",
+        "miscMastId": "209",
+        "type": "RBC_HAEMATURIA"
+      },
+      {
         "code": "APP",
         "description": "a. Application",
         "value": "a. Application",
         "isActive": "Y",
         "miscMastId": "21",
         "type": "PIVV"
+      },
+      {
+        "code": "PRESENT",
+        "description": "Present",
+        "value": "Present",
+        "isActive": "Y",
+        "miscMastId": "210",
+        "type": "KETONE_BODIES"
+      },
+      {
+        "code": "NIL_ABS",
+        "description": "Nil/Absent",
+        "value": "Nil/Absent",
+        "isActive": "Y",
+        "miscMastId": "211",
+        "type": "KETONE_BODIES"
+      },
+      {
+        "code": "PALE_YELLOW",
+        "description": "Pale Yellow",
+        "value": "Pale Yellow",
+        "isActive": "Y",
+        "miscMastId": "212",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "TRANSPARENT",
+        "description": "Transparent",
+        "value": "Transparent",
+        "isActive": "Y",
+        "miscMastId": "213",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "CLEAR",
+        "description": "Clear",
+        "value": "Clear",
+        "isActive": "Y",
+        "miscMastId": "214",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "COLOURLESS",
+        "description": "Colourless",
+        "value": "Colourless",
+        "isActive": "Y",
+        "miscMastId": "215",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "DARK_YELLOW",
+        "description": "Darker yellow",
+        "value": "Darker yellow",
+        "isActive": "Y",
+        "miscMastId": "216",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "DARK_ORANGE",
+        "description": "Dark orange or Brown",
+        "value": "Dark orange or Brown",
+        "isActive": "Y",
+        "miscMastId": "217",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "DARK_BROWN",
+        "description": "Dark brown or Black",
+        "value": "Dark brown or Black",
+        "isActive": "Y",
+        "miscMastId": "218",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "PINK_RED",
+        "description": "Pink or Red",
+        "value": "Pink or Red",
+        "isActive": "Y",
+        "miscMastId": "219",
+        "type": "URINE_COLOUR"
       },
       {
         "code": "PREM",
@@ -2233,12 +3349,172 @@
         "type": "PIVV"
       },
       {
+        "code": "BLUE_GREEN",
+        "description": "Blue or Green",
+        "value": "Blue or Green",
+        "isActive": "Y",
+        "miscMastId": "220",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "CLOUDY",
+        "description": "Cloudy",
+        "value": "Cloudy",
+        "isActive": "Y",
+        "miscMastId": "221",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "WHITE_MILKY",
+        "description": "White or Milky",
+        "value": "White or Milky",
+        "isActive": "Y",
+        "miscMastId": "222",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "OTHER_CLR",
+        "description": "Other colour",
+        "value": "Other colour",
+        "isActive": "Y",
+        "miscMastId": "223",
+        "type": "URINE_COLOUR"
+      },
+      {
+        "code": "CLEAR",
+        "description": "Clear",
+        "value": "Clear",
+        "isActive": "Y",
+        "miscMastId": "224",
+        "type": "URINE_APPEARANCE"
+      },
+      {
+        "code": "CLOUDY",
+        "description": "Cloudy",
+        "value": "Cloudy",
+        "isActive": "Y",
+        "miscMastId": "225",
+        "type": "URINE_APPEARANCE"
+      },
+      {
+        "code": "TURBID",
+        "description": "Turbid",
+        "value": "Turbid",
+        "isActive": "Y",
+        "miscMastId": "226",
+        "type": "URINE_APPEARANCE"
+      },
+      {
+        "code": "DARK_YELLOW",
+        "description": "Dark Yellow",
+        "value": "Dark Yellow",
+        "isActive": "Y",
+        "miscMastId": "227",
+        "type": "URINE_APPEARANCE"
+      },
+      {
+        "code": "ABNORMAL",
+        "description": "Abnormal",
+        "value": "Abnormal",
+        "isActive": "Y",
+        "miscMastId": "228",
+        "type": "FINDINGS"
+      },
+      {
+        "code": "MILD_CHG",
+        "description": "Mild Changes",
+        "value": "Mild Changes",
+        "isActive": "Y",
+        "miscMastId": "229",
+        "type": "FINDINGS"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y",
+        "miscMastId": "264",
+        "type": "SM_FINDINGS"
+      },
+      {
+        "code": "ABNORMAL",
+        "description": "Abnormal",
+        "value": "Abnormal",
+        "isActive": "Y",
+        "miscMastId": "265",
+        "type": "SM_FINDINGS"
+      },
+      {
         "code": "PT",
         "description": "c. Policy term",
         "value": "c. Policy term",
         "isActive": "Y",
         "miscMastId": "23",
         "type": "PIVV"
+      },
+      {
+        "code": "MOD_CHG",
+        "description": "Moderate Changes",
+        "value": "Moderate Changes",
+        "isActive": "Y",
+        "miscMastId": "230",
+        "type": "FINDINGS"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y",
+        "miscMastId": "231",
+        "type": "FINDINGS"
+      },
+      {
+        "code": "SEVERE_CHG",
+        "description": "Severe Changes",
+        "value": "Severe Changes",
+        "isActive": "Y",
+        "miscMastId": "232",
+        "type": "FINDINGS"
+      },
+      {
+        "code": "INDETERMINATE",
+        "description": "Indeterminate",
+        "value": "Indeterminate",
+        "isActive": "Y",
+        "miscMastId": "235",
+        "type": "AXIS"
+      },
+      {
+        "code": "LAD",
+        "description": "LAD",
+        "value": "LAD",
+        "isActive": "Y",
+        "miscMastId": "236",
+        "type": "AXIS"
+      },
+      {
+        "code": "LAHB",
+        "description": "LAHB",
+        "value": "LAHB",
+        "isActive": "Y",
+        "miscMastId": "237",
+        "type": "AXIS"
+      },
+      {
+        "code": "LPHB",
+        "description": "LPHB",
+        "value": "LPHB",
+        "isActive": "Y",
+        "miscMastId": "238",
+        "type": "AXIS"
+      },
+      {
+        "code": "NORMAL",
+        "description": "Normal",
+        "value": "Normal",
+        "isActive": "Y",
+        "miscMastId": "239",
+        "type": "AXIS"
       },
       {
         "code": "PPT",
@@ -2249,12 +3525,204 @@
         "type": "PIVV"
       },
       {
+        "code": "RAD",
+        "description": "RAD",
+        "value": "RAD",
+        "isActive": "Y",
+        "miscMastId": "240",
+        "type": "AXIS"
+      },
+      {
+        "code": "POS",
+        "description": "Positive",
+        "value": "Positive",
+        "isActive": "Y",
+        "miscMastId": "241",
+        "type": "FINDINGS_RESULT"
+      },
+      {
+        "code": "MILD_CHG",
+        "description": "Mild Changes",
+        "value": "Mild Changes",
+        "isActive": "Y",
+        "miscMastId": "242",
+        "type": "FINDINGS_RESULT"
+      },
+      {
+        "code": "MOD_CHG",
+        "description": "Moderate Changes",
+        "value": "Moderate Changes",
+        "isActive": "Y",
+        "miscMastId": "243",
+        "type": "FINDINGS_RESULT"
+      },
+      {
+        "code": "NEG",
+        "description": "Negative",
+        "value": "Negative",
+        "isActive": "Y",
+        "miscMastId": "244",
+        "type": "FINDINGS_RESULT"
+      },
+      {
+        "code": "SEV_CHG",
+        "description": "Severe Changes",
+        "value": "Severe Changes",
+        "isActive": "Y",
+        "miscMastId": "245",
+        "type": "FINDINGS_RESULT"
+      },
+      {
+        "code": "1",
+        "description": "1",
+        "value": "1",
+        "isActive": "Y",
+        "miscMastId": "246",
+        "type": "METS"
+      },
+      {
+        "code": "2",
+        "description": "2",
+        "value": "2",
+        "isActive": "Y",
+        "miscMastId": "247",
+        "type": "METS"
+      },
+      {
+        "code": "3",
+        "description": "3",
+        "value": "3",
+        "isActive": "Y",
+        "miscMastId": "248",
+        "type": "METS"
+      },
+      {
+        "code": "4",
+        "description": "4",
+        "value": "4",
+        "isActive": "Y",
+        "miscMastId": "249",
+        "type": "METS"
+      },
+      {
         "code": "SA",
         "description": "e. Sum assured",
         "value": "e. Sum assured",
         "isActive": "Y",
         "miscMastId": "25",
         "type": "PIVV"
+      },
+      {
+        "code": "5",
+        "description": "5",
+        "value": "5",
+        "isActive": "Y",
+        "miscMastId": "250",
+        "type": "METS"
+      },
+      {
+        "code": "6",
+        "description": "6",
+        "value": "6",
+        "isActive": "Y",
+        "miscMastId": "251",
+        "type": "METS"
+      },
+      {
+        "code": "7",
+        "description": "7",
+        "value": "7",
+        "isActive": "Y",
+        "miscMastId": "252",
+        "type": "METS"
+      },
+      {
+        "code": "8",
+        "description": "8",
+        "value": "8",
+        "isActive": "Y",
+        "miscMastId": "253",
+        "type": "METS"
+      },
+      {
+        "code": "9",
+        "description": "9",
+        "value": "9",
+        "isActive": "Y",
+        "miscMastId": "254",
+        "type": "METS"
+      },
+      {
+        "code": "10",
+        "description": "10",
+        "value": "10",
+        "isActive": "Y",
+        "miscMastId": "255",
+        "type": "METS"
+      },
+      {
+        "code": "11",
+        "description": "11",
+        "value": "11",
+        "isActive": "Y",
+        "miscMastId": "256",
+        "type": "METS"
+      },
+      {
+        "code": "12",
+        "description": "12",
+        "value": "12",
+        "isActive": "Y",
+        "miscMastId": "257",
+        "type": "METS"
+      },
+      {
+        "code": "13",
+        "description": "13",
+        "value": "13",
+        "isActive": "Y",
+        "miscMastId": "258",
+        "type": "METS"
+      },
+      {
+        "code": "14",
+        "description": "14",
+        "value": "14",
+        "isActive": "Y",
+        "miscMastId": "259",
+        "type": "METS"
+      },
+      {
+        "code": "15",
+        "description": "15",
+        "value": "15",
+        "isActive": "Y",
+        "miscMastId": "260",
+        "type": "METS"
+      },
+      {
+        "code": "16",
+        "description": "16",
+        "value": "16",
+        "isActive": "Y",
+        "miscMastId": "261",
+        "type": "METS"
+      },
+      {
+        "code": "17",
+        "description": "17",
+        "value": "17",
+        "isActive": "Y",
+        "miscMastId": "262",
+        "type": "METS"
+      },
+      {
+        "code": "18",
+        "description": "18",
+        "value": "18",
+        "isActive": "Y",
+        "miscMastId": "263",
+        "type": "METS"
       },
       {
         "code": "WT_MIS",
@@ -2823,244 +4291,9 @@
         "isActive": "Y",
         "miscMastId": "99",
         "type": "REINSURER"
-      },
-      {
-        "code": "PEP",
-        "description": "PEP Case",
-        "value": "PEP Case",
-        "isActive": "Y",
-        "miscMastId": "111",
-        "type": "REF_HOD_CS_RSN"
-      },
-      {
-        "code": "MED_OP",
-        "description": "Medical Opinion",
-        "value": "Medical Opinion",
-        "isActive": "Y",
-        "miscMastId": "111",
-        "type": "REF_HOD_OP_RSN"
-      },
-      {
-        "code": "ABV_CASE",
-        "description": "Above Limit Case",
-        "value": "Above Limit Case",
-        "isActive": "Y",
-        "miscMastId": "111",
-        "type": "REF_SRUW_CS_RSN"
-      },
-      {
-        "code": "MED_OP",
-        "description": "Medical Opinion",
-        "value": "Medical Opinion",
-        "isActive": "Y",
-        "miscMastId": "111",
-        "type": "REF_SRUW_OP_RSN"
-      },
-
-      {
-        "code": "CLASS_1",
-        "description": "Class-1",
-        "value": "Class-1",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "CLASS_2",
-        "description": "Class-2",
-        "value": "Class-2",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "CLASS_3",
-        "description": "Class-3",
-        "value": "Class-3",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "CLASS_4",
-        "description": "Class-4",
-        "value": "Class-4",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "CLASS_5",
-        "description": "Class-5",
-        "value": "Class-5",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "CLASS_6",
-        "description": "Class-6",
-        "value": "Class-6",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "CLASS_7",
-        "description": "Class-7",
-        "value": "Class-7",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "CLASS_8",
-        "description": "Class-8",
-        "value": "Class-8",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "CLASS_9",
-        "description": "Class-9",
-        "value": "Class-9",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "DECLINE",
-        "description": "Deny Rider Cover",
-        "value": "Deny Rider Cover",
-        "isActive": "Y",
-        "type": "EMR_CLASS"
-      },
-      {
-        "code": "FE_SMOKER",
-        "description": "Flat XRT- Smoker",
-        "value": "Flat XRT- Smoker",
-        "isActive": "Y",
-        "type": "FE_CLASS"
-      },
-      {
-        "code": "FE_1_PER_MILE",
-        "description": "Flat XRT- 1 per mile",
-        "value": "Flat XRT- 1 per mile",
-        "isActive": "Y",
-        "type": "FE_CLASS"
-      },
-      {
-        "code": "FE_2_PER_MILE",
-        "description": "Flat XRT- 2 per mile",
-        "value": "Flat XRT- 2 per mile",
-        "isActive": "Y",
-        "type": "FE_CLASS"
-      },
-      {
-        "code": "FE_3_PER_MILE",
-        "description": "Flat XRT- 3 per mile",
-        "value": "Flat XRT- 3 per mile",
-        "isActive": "Y",
-        "type": "FE_CLASS"
-      },
-      {
-        "code": "FE_4_PER_MILE",
-        "description": "Flat XRT- 4 per mile",
-        "value": "Flat XRT- 4 per mile",
-        "isActive": "Y",
-        "type": "FE_CLASS"
-      },
-      {
-        "code": "FE_5_PER_MILE",
-        "description": "Flat XRT- 5 per mile",
-        "value": "Flat XRT- 5 per mile",
-        "isActive": "Y",
-        "type": "FE_CLASS"
-      },
-      {
-        "code": "FE_6_PER_MILE",
-        "description": "Flat XRT- 6 per mile",
-        "value": "Flat XRT- 6 per mile",
-        "isActive": "Y",
-        "type": "FE_CLASS"
-      },
-      {
-        "code": "HP",
-        "description": "HP - Hazardous Pursuits",
-        "value": "HP - Hazardous Pursuits",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "OC",
-        "description": "OC - Occupation Risk",
-        "value": "OC - Occupation Risk",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "RE",
-        "description": "RE - Residence Risk",
-        "value": "RE - Residence Risk",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "OR",
-        "description": "OR - Occupation and Residence Risk",
-        "value": "OR - Occupation and Residence Risk",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "OH",
-        "description": "OH - Occupation and Hazardous Risk",
-        "value": "OH - Occupation and Hazardous Risk",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "RH",
-        "description": "RH - Residence and Hazardous Risk",
-        "value": "RH - Residence and Hazardous Risk",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "RA",
-        "description": "RA - Occupation and Residence and Hazardous Risk",
-        "value": "RA - Occupation and Residence and Hazardous Risk",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "HB",
-        "description": "HB - Habits Risk",
-        "value": "HB - Habits Risk",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "HL",
-        "description": "HL - Health Extra Premium",
-        "value": "HL - Health Extra Premium",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
-      },
-      {
-        "code": "FH",
-        "description": "FH - Family History",
-        "value": "FH - Family History",
-        "isActive": "Y",
-        "type": "COUNTER_OFFER_CODE"
       }
     ],
-    "requirement_mst": {
-      "level": "team",
-      "teams": ["COPS", "UW"]
-    },
     "reason": [
-      {
-        "code": "REASON_RMK",
-        "description": "Glycosuria(Presence of sugar in Urine)",
-        "value": "Glycosuria(Presence of sugar in Urine)",
-        "isActive": "Y",
-        "requestId": 895,
-        "requestType": "NON_MEDICAL",
-        "iibCode": 1621
-      },
       {
         "code": "REASON_RMK",
         "description": "High than normal level of sugar as per Hemoglobin A1c test",
@@ -3069,40 +4302,82 @@
         "requestId": 881,
         "requestType": "MEDICAL",
         "iibCode": 1404
+      },
+      {
+        "code": "REASON_RMK",
+        "description": "Glycosuria(Presence of sugar in Urine)",
+        "value": "Glycosuria(Presence of sugar in Urine)",
+        "isActive": "Y",
+        "requestId": 895,
+        "requestType": "MEDICAL",
+        "iibCode": 1621
+      },
+      {
+        "code": "REASON_RMK",
+        "description": "High risk occupation",
+        "value": "High risk occupation",
+        "isActive": "Y",
+        "requestId": 929,
+        "requestType": "NON_MEDICAL",
+        "iibCode": 5007
+      },
+      {
+        "code": "REASON_RMK",
+        "description": "Not eligible as per Internal evaluation criteria",
+        "value": "Not eligible as per Internal evaluation criteria",
+        "isActive": "Y",
+        "requestId": 5283,
+        "requestType": "NON_MEDICAL",
+        "iibCode": 5021
+      },
+      {
+        "code": "REASON_RMK",
+        "description": "Risk Finding",
+        "value": "Risk Finding",
+        "isActive": "Y",
+        "requestId": 5284,
+        "requestType": "NON_MEDICAL",
+        "iibCode": 3001
+      },
+      {
+        "code": "REASON_RMK",
+        "description": "Cancer",
+        "value": "Cancer",
+        "isActive": "Y",
+        "requestId": 5257,
+        "requestType": "MEDICAL",
+        "iibCode": 1906
+      }
+    ],
+    "sales_channel": [
+      {
+        "code": "AGENCY",
+        "description": "Agency channel",
+        "value": "AGENCY",
+        "isActive": "Y",
+        "salesChannelId": 1,
+        "salesChannelType": "DISTRIBUTION",
+        "iibCode": 2001
+      },
+      {
+        "code": "BANCA",
+        "description": "Bancassurance channel",
+        "value": "BANCA",
+        "isActive": "Y",
+        "salesChannelId": 2,
+        "salesChannelType": "DISTRIBUTION",
+        "iibCode": 2002
+      },
+      {
+        "code": "ONLINE",
+        "description": "Online / digital channel",
+        "value": "ONLINE",
+        "isActive": "Y",
+        "salesChannelId": 3,
+        "salesChannelType": "DIRECT",
+        "iibCode": 2003
       }
     ]
   },
-  "unknownTypes": [
-    "title",
-    "idproof",
-    "addressproof",
-    "maritalstatus",
-    "pep",
-    "exceptiondecision",
-    "cvtdecision",
-    "dvtdecision",
-    "caseuwdecision",
-    "firstuwdecision",
-    "paralleluwdecision",
-    "reconsiderationdecision",
-    "riskdecision",
-    "sruwdecision",
-    "hoddecision",
-    "hocmodecision",
-    "reinsurerdecision",
-    "reinsurerdecisionid",
-    "pivvdecision",
-    "rejectreason",
-    "declinereason",
-    "postponereason",
-    "postponementperiod",
-    "riskreferralreason",
-    "accuityreferralreason",
-    "reinsurerreferralreason",
-    "holdreason",
-    "cuwreferralreason",
-    "decision_master",
-    "requirement_status_master",
-    "medical"
-  ]
+  "unknownTypes": []
 }
