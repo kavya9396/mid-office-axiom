@@ -49,7 +49,7 @@
         "status": "DRAFT"
       }
     ],
-    "CPT_TASK": [
+    "CPT_DATA_ENTRY_NMR_TASK": [
       {
         "id": 1,
         "taskId": "18763",
@@ -65,7 +65,7 @@
         "breDecision": "STD",
         "munichReMedicalDecision": "STD",
         "ptlr": "Low",
-        "roleType": "CPT_TASK",
+        "roleType": "CPT_DATA_ENTRY_NMR_TASK",
         "role": "RETAIL_CPT_USER",
         "businessType": "RETAIL",
         "state": "DRAFT",
@@ -88,7 +88,54 @@
         "breDecision": "STD",
         "munichReMedicalDecision": "STD",
         "ptlr": "Low",
-        "roleType": "CPT_TASK",
+        "roleType": "CPT_DATA_ENTRY_NMR_TASK",
+        "role": "RETAIL_CPT_USER",
+        "businessType": "RETAIL",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      }
+    ], "CPT_DATA_ENTRY_MR_TASK": [
+      {
+        "id": 1,
+        "taskId": "18763",
+        "instanceId": "1234",
+        "applicationNo": "NB0000021",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "CPT_DATA_ENTRY_MR_TASK",
+        "role": "RETAIL_CPT_USER",
+        "businessType": "RETAIL",
+        "state": "DRAFT",
+        "dateAndTimeStamp": "2026-06-30T19:45:29.847589",
+        "displayName": "ARYAYAN Khan",
+        "status": "DRAFT"
+      },
+      {
+        "id": 2,
+        "taskId": "18764",
+        "instanceId": "12345",
+        "applicationNo": "NB0000022",
+        "appliedSa": 1000000,
+        "annualPremium": 876863872,
+        "productType": "I19",
+        "isMedical": false,
+        "drc": "Low",
+        "hniFlag": "Yes",
+        "channel": "0TTB",
+        "breDecision": "STD",
+        "munichReMedicalDecision": "STD",
+        "ptlr": "Low",
+        "roleType": "CPT_DATA_ENTRY_MR_TASK",
         "role": "RETAIL_CPT_USER",
         "businessType": "RETAIL",
         "state": "DRAFT",
