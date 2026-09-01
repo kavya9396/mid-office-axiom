@@ -309,9 +309,9 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks",
   ],
   RETAIL_CUW_POOL: [
-    "breDecision",
-    "applicationOverview",
-    "summary",
+    // "breDecision",
+    // "applicationOverview",
+    // "summary",
     "requirementManagement",
     "uwDecision",
     "decisionHistory",

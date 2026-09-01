@@ -1530,7 +1530,7 @@ const UWDecision = () => {
 
     return (
         <Box sx={{ px: 1 }}>
-            <CustomAccordion title="UW Decision" defaultExpanded>
+            <CustomAccordion title="UW Decision" defaultExpanded={false}>
                 <Box
                     sx={{
                         mt: 0.5,

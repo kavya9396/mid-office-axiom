@@ -126,7 +126,7 @@ const RequirementManagement = ({
     <Box sx={{ px: 1}}>
       <CustomAccordion
         title={title.requirementManagement}
-        defaultExpanded
+        defaultExpanded={false}
         headerActions={
           isEditable && !readOnly ? (
             <Button

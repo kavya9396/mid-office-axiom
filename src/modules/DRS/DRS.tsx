@@ -38,6 +38,7 @@ import CustomButton from "../../components/ui/Button/Button";
 import { title } from "../../utils/constant";
 import { getInboxPath } from "../../routes/routes";
 import { preloginThunk } from "../../store/thunks/preloginThunk";
+import ApplicantApplicationSummary from "./ApplicantSummary";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -729,6 +730,7 @@ const DRS = () => {
           gap: 1,
         }}
       >
+        <ApplicantApplicationSummary />
         {visibleAccordions.map((accordionId) => {
           const AccordionComponent =
             accordionRegistry[accordionId];
