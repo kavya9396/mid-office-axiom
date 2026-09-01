@@ -1,104 +1,234 @@
 {
   "response_code": 200,
   "error": false,
-  "message": "32 document(s) fetched successfully",
+  "message": "33 document(s) fetched successfully",
   "data": {
-    "applicationNumber": "NB0000021",
-    "partyId": "735e5edb-2542-4ca6-913e-67c2927f56bc",
+    "applicationNumber": "NB0000037",
+    "partyId": "6b420ceb-d0d4-40c2-b16c-537c36bb7be0",
     "clientType": "LA",
     "documents": {
       "salary_slips": {
         "companyName": "ABCD Company",
         "partyName": "Rajveer Shikhavat",
         "pfUan": "100200300400",
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "annualBonus": 50000,
         "months": [
-          { "periodYear": 2026, "periodMonth": 1, "monthlyGrossSalary": 50000 },
-          { "periodYear": 2026, "periodMonth": 2, "monthlyGrossSalary": 50000 },
-          { "periodYear": 2026, "periodMonth": 3, "monthlyGrossSalary": 50000 }
-        ]
+          {
+            "periodMonth": 1,
+            "monthlyGrossSalary": 50000
+          },
+          {
+            "periodMonth": 2,
+            "monthlyGrossSalary": 50000
+          },
+          {
+            "periodMonth": 3,
+            "monthlyGrossSalary": 50000
+          }
+        ],
+        "avgSalaryPmCalculated": 50000,
+        "grossSalaryPaCalculated": 600000,
+        "avgAnnualIncomeCalculated": 650000
       },
       "bank_statement": {
         "fullName": "Rajveer Shikhavat",
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "statementPeriod": "Jan-2026 to Jun-2026",
         "openingBalance": 250000,
-        "liPremiumDeductionInd": "N",
-        "wineBeerEntriesInd": "N",
-        "medEntryInd": "N",
-        "latest6MonthsInd": "Y",
-        "overdraftInd": "N",
+        "liPremiumDeductionInd": "No",
+        "wineBeerEntriesInd": "No",
+        "medEntryInd": "No",
+        "latest6MonthsInd": "Yes",
+        "overdraftInd": "No",
         "months": [
-          { "periodYear": 2026, "periodMonth": 1, "closingBalance": 600000 },
-          { "periodYear": 2026, "periodMonth": 2, "closingBalance": 550000 },
-          { "periodYear": 2026, "periodMonth": 3, "closingBalance": 480000 },
-          { "periodYear": 2026, "periodMonth": 4, "closingBalance": 620000 },
-          { "periodYear": 2026, "periodMonth": 5, "closingBalance": 500000 },
-          { "periodYear": 2026, "periodMonth": 6, "closingBalance": 530000 }
-        ]
+          {
+            "periodMonth": 1,
+            "closingBalance": 600000
+          },
+          {
+            "periodMonth": 2,
+            "closingBalance": 550000
+          },
+          {
+            "periodMonth": 3,
+            "closingBalance": 480000
+          },
+          {
+            "periodMonth": 4,
+            "closingBalance": 620000
+          },
+          {
+            "periodMonth": 5,
+            "closingBalance": 500000
+          },
+          {
+            "periodMonth": 6,
+            "closingBalance": 530000
+          }
+        ],
+        "avgBankBalanceCalculated": 546666.67,
+        "avgAnnualIncomeCalculated": 3280000.02
       },
       "bank_statement_salary_credit": {
-        "fullName": "Rajveer Shikhavat",
-        "nameMatchInd": "Y",
-        "salaryCreditedInd": "Y",
+        "fullName": "Nitin Upad",
+        "nameMatchInd": "Yes",
+        "salaryCreditedInd": "Yes",
         "annualBonus": 97200,
         "openingBalance": 250000,
         "closingBalance": 310000,
         "statementPeriod": "Jan-2026 to Jun-2026",
         "months": [
-          { "periodYear": 2026, "periodMonth": 1, "netSalaryCredited": 81000 },
-          { "periodYear": 2026, "periodMonth": 2, "netSalaryCredited": 81000 },
-          { "periodYear": 2026, "periodMonth": 3, "netSalaryCredited": 81000 },
-          { "periodYear": 2026, "periodMonth": 4, "netSalaryCredited": 81000 },
-          { "periodYear": 2026, "periodMonth": 5, "netSalaryCredited": 81000 },
-          { "periodYear": 2026, "periodMonth": 6, "netSalaryCredited": 81000 }
+          {
+            "periodMonth": 1,
+            "netSalaryCredited": 81000
+          },
+          {
+            "periodMonth": 2,
+            "netSalaryCredited": 81000
+          },
+          {
+            "periodMonth": 3,
+            "netSalaryCredited": 81000
+          },
+          {
+            "periodMonth": 4,
+            "netSalaryCredited": 81000
+          },
+          {
+            "periodMonth": 5,
+            "netSalaryCredited": 81000
+          },
+          {
+            "periodMonth": 6,
+            "netSalaryCredited": 81000
+          }
         ],
         "avgNetSalaryCreditedPmCalculated": 81000,
         "netSalaryCreditedPaCalculated": 1069200,
         "avgAnnualIncomeCalculated": 1166400
       },
       "commission_statement": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "months": [
-          { "periodYear": 2026, "periodMonth": 1, "commissionAmount": 10000 },
-          { "periodYear": 2026, "periodMonth": 2, "commissionAmount": 12000 },
-          { "periodYear": 2026, "periodMonth": 3, "commissionAmount": 11000 }
+          {
+            "periodMonth": 1,
+            "commissionAmount": 10000
+          },
+          {
+            "periodMonth": 2,
+            "commissionAmount": 12000
+          },
+          {
+            "periodMonth": 3,
+            "commissionAmount": 11000
+          }
         ],
         "avgCommissionPmCalculated": 11000,
         "avgAnnualIncomeCalculated": 132000
       },
       "form_j": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "No",
         "months": [
-          { "periodYear": 2026, "periodMonth": 1, "receiptAmount": 10000 },
-          { "periodYear": 2026, "periodMonth": 2, "receiptAmount": 10000 },
-          { "periodYear": 2026, "periodMonth": 3, "receiptAmount": 10000 }
+          {
+            "periodMonth": 1,
+            "receipts": [
+              10000,
+              2000,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "periodMonth": 2,
+            "receipts": [
+              12000,
+              2000,
+              null,
+              null,
+              null,
+              null
+            ]
+          },
+          {
+            "periodMonth": 3,
+            "receipts": [
+              14000,
+              2000,
+              null,
+              null,
+              null,
+              null
+            ]
+          }
         ],
-        "totalReceiptsCalculated": 30000,
-        "avgMonthlyReceiptsCalculated": 10000,
-        "annualReceiptsCalculated": 120000,
-        "derivedIncomeCalculated": 120000
+        "totalReceiptsCalculated": 42000,
+        "avgMonthlyReceiptsCalculated": 14000,
+        "annualReceiptsCalculated": 168000,
+        "derivedIncomeCalculated": 168000
       },
       "sip_statement": {
         "isLaNameSame": "Y",
-        "latest6MonthsInd": "Y",
+        "latest6MonthsInd": "Yes",
         "months": [
-          { "periodYear": 2026, "periodMonth": 1, "sipAmount": 10000 },
-          { "periodYear": 2026, "periodMonth": 2, "sipAmount": 10000 },
-          { "periodYear": 2026, "periodMonth": 3, "sipAmount": 10000 }
-        ]
-    },
+          {
+            "periodMonth": 1,
+            "sipAmount": 10000
+          },
+          {
+            "periodMonth": 2,
+            "sipAmount": 10000
+          },
+          {
+            "periodMonth": 3,
+            "sipAmount": 10000
+          },
+          {
+            "periodMonth": 4,
+            "sipAmount": 10000
+          },
+          {
+            "periodMonth": 5,
+            "sipAmount": 10000
+          },
+          {
+            "periodMonth": 6,
+            "sipAmount": 10000
+          }
+        ],
+        "avgMonthlySipCalculated": 10000,
+        "avgAnnualIncomeCalculated": 600000
+      },
       "epf_advanced": {
         "orgName": "ABCD Company",
         "isOrgNameSame": "Y",
         "months": [
-          { "periodYear": 2026, "periodMonth": 1, "pfContribution": 5000 },
-          { "periodYear": 2026, "periodMonth": 2, "pfContribution": 5000 },
-          { "periodYear": 2026, "periodMonth": 3, "pfContribution": 5000 },
-          { "periodYear": 2026, "periodMonth": 4, "pfContribution": 5000 },
-          { "periodYear": 2026, "periodMonth": 5, "pfContribution": 5000 },
-          { "periodYear": 2026, "periodMonth": 6, "pfContribution": 5000 }
+          {
+            "periodMonth": 1,
+            "pfContribution": 5000
+          },
+          {
+            "periodMonth": 2,
+            "pfContribution": 5000
+          },
+          {
+            "periodMonth": 3,
+            "pfContribution": 5000
+          },
+          {
+            "periodMonth": 4,
+            "pfContribution": 5000
+          },
+          {
+            "periodMonth": 5,
+            "pfContribution": 5000
+          },
+          {
+            "periodMonth": 6,
+            "pfContribution": 5000
+          }
         ],
         "annualIncomeCalculated": 60000
       },
@@ -108,27 +238,50 @@
         "income": 480000
       },
       "form16": {
-        "companyName": "ABCD Company",
-        "panNumber": "AXXXD1234L",
-        "partyName": "Rajveer Shikhavat",
-        "nameMatchInd": "Y",
         "years": [
-          { "assessmentYear": "AY 23-24", "grossSalaryPa": 420000 },
-          { "assessmentYear": "AY 24-25", "grossSalaryPa": 460000 },
-          { "assessmentYear": "AY 25-26", "grossSalaryPa": 500000 }
+          {
+            "assessmentYear": "AY 23-24",
+            "grossSalaryPa": 420000,
+            "companyName": "ABCD Company",
+            "panNumber": "AXXXD1234L",
+            "partyName": "Rajveer Shikhavat",
+            "nameMatchInd": "Yes"
+          },
+          {
+            "assessmentYear": "AY 24-25",
+            "grossSalaryPa": 460000,
+            "companyName": "3I INFOTECH",
+            "panNumber": "AXXXD1234L",
+            "partyName": "Rajveer Shikhavat",
+            "nameMatchInd": "Yes"
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "grossSalaryPa": 500000,
+            "companyName": "ABCD Company",
+            "panNumber": "AXXXD1234L",
+            "partyName": "Rajveer Shikhavat",
+            "nameMatchInd": "Yes"
+          }
         ],
         "avgAnnualIncomeCalculated": 500000
       },
       "form16a": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "years": [
-          { "assessmentYear": "AY 24-25", "netReceiptPa": 300000 },
-          { "assessmentYear": "AY 25-26", "netReceiptPa": 320000 }
+          {
+            "assessmentYear": "AY 24-25",
+            "netReceiptPa": 300000
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "netReceiptPa": 320000
+          }
         ],
         "avgAnnualIncomeCalculated": 320000
       },
       "gst_income": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "years": [
           {
             "assessmentYear": "AY 22-23",
@@ -161,17 +314,22 @@
       },
       "itr_individual": {
         "panNumber": "AXXXD1234L",
-        "ackNumber": "123456789012345",
-        "partyName": "Rajveer Shikhavat",
-        "nameMatchInd": "Y",
-        "pfDeduction": 21600,
-        "itrFilingDt": "2026-06-15",
-        "panBarcodeMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "years": [
           {
             "assessmentYear": "AY 24-25",
             "incomeFromSalary": 450000,
             "exemptIncome": 0,
+            "partyName": "Rajveer Shikhavat",
+            "incomeFromHouseProperty": null,
+            "incomeFromBusiness": null,
+            "shortTermCapitalGains": null,
+            "incomeFromOtherSources": null,
+            "agriculturalIncome": null,
+            "ackNumber": "123456789012345",
+            "itrFilingDt": "2026-06-15",
+            "pfDeduction": 21600,
+            "panBarcodeMatchInd": "Yes",
             "grossTotalIncomeCalculated": 450000
           },
           {
@@ -182,7 +340,12 @@
             "shortTermCapitalGains": 0,
             "incomeFromOtherSources": 15000,
             "agriculturalIncome": 0,
+            "partyName": "Rajveer Shikhavat",
             "exemptIncome": 0,
+            "ackNumber": "123456789012345",
+            "itrFilingDt": "2026-06-15",
+            "pfDeduction": 21600,
+            "panBarcodeMatchInd": "Yes",
             "grossTotalIncomeCalculated": 700000
           }
         ],
@@ -192,16 +355,36 @@
       "itr_non_individual": {
         "orgName": "Shikhavat Traders LLP",
         "panNumber": "AAXXX9999L",
+        "partyName": "Nitin Upad",
         "years": [
           {
             "assessmentYear": "AY 24-25",
             "incomeFromBusiness": 800000,
+            "incomeFromSalary": null,
+            "incomeFromHouseProperty": null,
+            "shortTermCapitalGains": null,
+            "incomeFromOtherSources": null,
+            "agriculturalIncome": null,
+            "exemptIncome": null,
+            "ackNumber": null,
+            "itrFilingDt": null,
+            "pfDeduction": null,
+            "panBarcodeMatchInd": null,
             "grossTotalIncomeCalculated": 800000
           },
           {
             "assessmentYear": "AY 25-26",
             "incomeFromBusiness": 900000,
             "incomeFromOtherSources": 50000,
+            "incomeFromSalary": null,
+            "incomeFromHouseProperty": null,
+            "shortTermCapitalGains": null,
+            "agriculturalIncome": null,
+            "exemptIncome": null,
+            "ackNumber": null,
+            "itrFilingDt": null,
+            "pfDeduction": null,
+            "panBarcodeMatchInd": null,
             "grossTotalIncomeCalculated": 950000
           }
         ],
@@ -213,12 +396,23 @@
           {
             "assessmentYear": "AY 24-25",
             "incomeFromSalary": 550000,
+            "incomeFromHouseProperty": null,
+            "incomeFromBusiness": null,
+            "shortTermCapitalGains": null,
+            "incomeFromOtherSources": null,
+            "agriculturalIncome": null,
+            "exemptIncome": null,
             "grossTotalIncomeCalculated": 550000
           },
           {
             "assessmentYear": "AY 25-26",
             "incomeFromSalary": 600000,
             "exemptIncome": 50000,
+            "incomeFromHouseProperty": null,
+            "incomeFromBusiness": null,
+            "shortTermCapitalGains": null,
+            "incomeFromOtherSources": null,
+            "agriculturalIncome": null,
             "grossTotalIncomeCalculated": 650000
           }
         ],
@@ -237,23 +431,40 @@
             "pbt": 400000,
             "tax": 100000,
             "profitAfterTax": 300000,
-            "sales": 2500000
+            "sales": 2500000,
+            "totalShareholdersFunds": null
           },
           {
             "assessmentYear": "AY 24-25",
             "profitAfterTax": 400000,
-            "sales": 2800000
+            "sales": 2800000,
+            "shareCapital": null,
+            "reservesSurplus": null,
+            "totalShareholdersFunds": null,
+            "pbdt": null,
+            "depreciation": null,
+            "pbt": null,
+            "tax": null
           },
           {
             "assessmentYear": "AY 25-26",
             "profitAfterTax": 500000,
-            "sales": 3200000
+            "sales": 3200000,
+            "shareCapital": null,
+            "reservesSurplus": null,
+            "totalShareholdersFunds": null,
+            "pbdt": null,
+            "depreciation": null,
+            "pbt": null,
+            "tax": null
           }
         ],
-        "avgGrossIncomeCalculated": 400000
+        "avgGrossIncomeCalculated": 400000,
+        "avgProfitBeforeTaxCalculated": 400000,
+        "avgProfitAfterTaxCalculated": 400000
       },
       "credit_card": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "isDefaulter": "N",
         "cardType": "VISA Platinum",
         "creditLimit": 50000,
@@ -263,7 +474,7 @@
         "avgIncomeCalculated": 100000
       },
       "fixed_deposit_receipt": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "isMatured": "N",
         "amountInvested": 100000,
         "incomeEarned": 8000,
@@ -271,7 +482,7 @@
         "avgIncomeCalculated": 50000
       },
       "govt_bonds": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "isMatured": "N",
         "amountInvested": 200000,
         "incomeEarned": 15000,
@@ -279,7 +490,7 @@
         "avgIncomeCalculated": 100000
       },
       "loan_statement": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "isDefaulter": "N",
         "monthlyEmi": 15000,
         "incomeEarned": 360000,
@@ -287,7 +498,7 @@
         "avgIncomeCalculated": 360000
       },
       "mutual_fund": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "latestMarketValue": 400000,
         "incomeEarned": 200000,
         "derivedIncomeCalculated": 200000,
@@ -305,7 +516,7 @@
         "derivedIncomeCalculated": 500000
       },
       "property_valuation": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "estimatedMarketValue": 3000000,
         "derivedIncomeCalculated": 600000
       },
@@ -318,7 +529,7 @@
         "derivedIncomeCalculated": 900000
       },
       "stock_holding": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "estimatedMarketValue": 250000,
         "incomeEarned": 25000,
         "derivedIncomeCalculated": 250000,
@@ -352,14 +563,14 @@
         "derivedIncome": 1000000
       },
       "ca_networth": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "isCertifiedByCa": "Y",
         "netWorth": 5000000,
         "incomeEarned": 800000,
         "derivedIncome": 800000
       },
       "ca_balance_sheet": {
-        "nameMatchInd": "Y",
+        "nameMatchInd": "Yes",
         "fixedAssets": 3500000,
         "otherInvestments": 1200000,
         "cash": 300000,
@@ -367,6 +578,12 @@
         "securedLoans": 500000,
         "netWorth": 5000000,
         "derivedIncome": 750000
+      },
+      "employee_id_card": {
+        "companyName": "Acme Ltd",
+        "employeeName": "Ravi Kumar",
+        "employeeNumber": 123456,
+        "photoAvailableInd": "Yes"
       }
     }
   }

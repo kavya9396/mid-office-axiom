@@ -52,7 +52,6 @@ export const MER_PRIMARY_SUBSECTION_FORM_FIELDS: MerSubSectionFieldConfig[] = [
   { id: "examineeEducationSd", label: "Examinee Education SD", type: "dropdown", required: false, editable: true, masterKey: "mer_education_sd" },
   { id: "examineeOccupationSd", label: "Examinee Occupation SD", type: "dropdown", required: false, editable: true, masterKey: "mer_occupation_sd" },
   { id: "examineeIncomeSd", label: "Examinee Income SD", type: "number", required: false, editable: true, validation: "numeric" },
-  { id: "anyPreviousLifeInsurancePolicyDeclinePostponeOrIssuedOnRevisedTermSd", label: "Any previous life Insurance policy decline/Postpone/issued on revised term SD", type: "dropdown", required: false, editable: true, masterKey: "yes_no" },
   { id: "examineePhotoIdProof", label: "Examinee Photo ID Proof", type: "text", required: true, editable: true },
   { id: "examineeContactNo", label: "Examinee Contact No", type: "text", required: false, editable: true, validation: "numeric" },
   { id: "faceMatchScore", label: "Face match Score", type: "text", required: false, editable: true },
@@ -60,6 +59,7 @@ export const MER_PRIMARY_SUBSECTION_FORM_FIELDS: MerSubSectionFieldConfig[] = [
   { id: "diagnosticCentreAddress", label: "Diagnostic Centre Address", type: "text", required: false, editable: true },
   { id: "diagnosticCentrePincode", label: "Diagnostic Centre Pincode", type: "text", required: false, editable: true, validation: "numeric" },
   { id: "dateOfExamination", label: "Date of Examination", type: "date", required: true, editable: true },
+  { id: "anyPreviousLifeInsurancePolicyDeclinePostponeOrIssuedOnRevisedTermSd", label: "Any previous life Insurance policy decline/Postpone/issued on revised term SD", type: "dropdown", required: false, editable: true, masterKey: "yes_no" },
 ];
 
 export const MER_HABIT_AND_ADDICTIONS_SUBSECTION_FORM_FIELDS: MerSubSectionFieldConfig[] = [

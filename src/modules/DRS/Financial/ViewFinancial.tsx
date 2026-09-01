@@ -339,8 +339,18 @@ const mapDocumentsToFinancialSections = (
         ["Gross Salary PA Year 2", years[1]?.grossSalaryPa],
         ["Gross Salary PA Year 3", years[2]?.grossSalaryPa],
         ["Average Annual Income", form16.avgAnnualIncomeCalculated],
-        ["Life Assured Pan No", form16.panNumber],
-        ["Life Assured Name", form16.partyName],
+        ["Life Assured Pan No", firstDefined(years[0]?.panNumber, form16.panNumber)],
+        ["Life Assured Pan No Year 2", years[1]?.panNumber],
+        ["Life Assured Pan No Year 3", years[2]?.panNumber],
+        ["Life Assured Name", firstDefined(years[0]?.partyName, form16.partyName)],
+        ["Life Assured Name Year 2", years[1]?.partyName],
+        ["Life Assured Name Year 3", years[2]?.partyName],
+        ["Company Name", firstDefined(years[0]?.companyName, form16.companyName)],
+        ["Company Name Year 2", years[1]?.companyName],
+        ["Company Name Year 3", years[2]?.companyName],
+        ["Is Life Assured Name Same With Doc Name?", firstDefined(years[0]?.nameMatchInd, form16.nameMatchInd)],
+        ["Is Life Assured Name Same With Doc Name? Year 2", years[1]?.nameMatchInd],
+        ["Is Life Assured Name Same With Doc Name? Year 3", years[2]?.nameMatchInd],
       ]))
     );
   }
@@ -364,12 +374,26 @@ const mapDocumentsToFinancialSections = (
   const formJ = asRecord(documents.form_j);
   if (formJ) {
     const months = getMonthRows(formJ);
+    const receiptEntries: Array<[string, unknown]> = [];
+
+    months.slice(0, 3).forEach((month, monthIndex) => {
+      const receipts = Array.isArray(month.receipts) ? month.receipts : [];
+
+      for (let receiptIndex = 0; receiptIndex < 6; receiptIndex += 1) {
+        receiptEntries.push([
+          `Month${monthIndex + 1} Receipt${receiptIndex + 1}`,
+          firstDefined(
+            receipts[receiptIndex],
+            receiptIndex === 0 ? month.receiptAmount : undefined,
+          ),
+        ]);
+      }
+    });
+
     sections.push(
       buildSectionFromItems("form_j", createItems([
         ["Is Form J in the name of LA", formJ.nameMatchInd],
-        ["Month1 Receipt1", months[0]?.receiptAmount],
-        ["Month2 Receipt1", months[1]?.receiptAmount],
-        ["Month3 Receipt1", months[2]?.receiptAmount],
+        ...receiptEntries,
         ["Total Receipts Receipt1", formJ.totalReceiptsCalculated],
         ["Average Monthly Receipts Receipt1", formJ.avgMonthlyReceiptsCalculated],
         ["Annual Receipts Receipt1", formJ.annualReceiptsCalculated],
@@ -402,7 +426,12 @@ const mapDocumentsToFinancialSections = (
         ["Assessment Year", years[0]?.assessmentYear],
         ["Assessment Year Year 2", years[1]?.assessmentYear],
         ["Assessment Year Year 3", years[2]?.assessmentYear],
-        ["ITR Acknowledgement Number", itrNonIndividual.ackNumber],
+        ["ITR Acknowledgement Number", firstDefined(years[0]?.ackNumber, itrNonIndividual.ackNumber)],
+        ["ITR Acknowledgement Number Year 2", years[1]?.ackNumber],
+        ["ITR Acknowledgement Number Year 3", years[2]?.ackNumber],
+        ["Date of Filling ITR", firstDefined(years[0]?.itrFilingDt, itrNonIndividual.itrFilingDt)],
+        ["Date of Filling ITR Year 2", years[1]?.itrFilingDt],
+        ["Date of Filling ITR Year 3", years[2]?.itrFilingDt],
         ["Income from Salary", years[0]?.incomeFromSalary],
         ["Income from Salary Year 2", years[1]?.incomeFromSalary],
         ["Income from Salary Year 3", years[2]?.incomeFromSalary],
@@ -429,9 +458,14 @@ const mapDocumentsToFinancialSections = (
         ["Gross Total Income Year 3", years[2]?.grossTotalIncomeCalculated],
         ["Total Gross Total Income", itrNonIndividual.totalGrossTotalIncomeCalculated],
         ["Average Gross Total Income", itrNonIndividual.avgGrossTotalIncomeCalculated],
-        ["Pan Number Matched with Barcode Number", years[0]?.panNumberMatchedWithBarcodeNumber],
-        ["Pan Number Matched with Barcode Number Year 2", years[1]?.panNumberMatchedWithBarcodeNumber],
-        ["Pan Number Matched with Barcode Number Year 3", years[2]?.panNumberMatchedWithBarcodeNumber],
+        ["PF deduction - Salaried customers", firstDefined(years[0]?.pfDeduction, itrNonIndividual.pfDeduction)],
+        ["PF deduction - Salaried customers Year 2", years[1]?.pfDeduction],
+        ["PF deduction - Salaried customers Year 3", years[2]?.pfDeduction],
+        ["Life Assured Name", itrNonIndividual.partyName],
+        ["Is Life Assured Name Same?", itrNonIndividual.nameMatchInd],
+        ["Pan Number Matched with Barcode Number", firstDefined(years[0]?.panBarcodeMatchInd, years[0]?.panNumberMatchedWithBarcodeNumber, itrNonIndividual.panBarcodeMatchInd)],
+        ["Pan Number Matched with Barcode Number Year 2", firstDefined(years[1]?.panBarcodeMatchInd, years[1]?.panNumberMatchedWithBarcodeNumber)],
+        ["Pan Number Matched with Barcode Number Year 3", firstDefined(years[2]?.panBarcodeMatchInd, years[2]?.panNumberMatchedWithBarcodeNumber)],
       ]))
     );
   }
@@ -446,8 +480,10 @@ const mapDocumentsToFinancialSections = (
         ["Assessment Year", years[0]?.assessmentYear],
         ["Assessment Year Year 2", years[1]?.assessmentYear],
         ["Assessment Year Year 3", years[2]?.assessmentYear],
-        ["ITR Acknowledgement Number", itrIndividual.ackNumber],
-        ["Date of Filling ITR", itrIndividual.itrFilingDt],
+        ["ITR Acknowledgement Number", firstDefined(years[0]?.ackNumber, itrIndividual.ackNumber)],
+        ["ITR Acknowledgement Number Year 2", years[1]?.ackNumber],
+        ["ITR Acknowledgement Number Year 3", years[2]?.ackNumber],
+        ["Date of Filling ITR", firstDefined(years[0]?.itrFilingDt, itrIndividual.itrFilingDt)],
         ["Date of Filling ITR Year 2", years[1]?.itrFilingDt],
         ["Date of Filling ITR Year 3", years[2]?.itrFilingDt],
         ["Income from Salary(A)", years[0]?.incomeFromSalary],
@@ -476,12 +512,16 @@ const mapDocumentsToFinancialSections = (
         ["Gross Total Income(A+B+C) Year 3", years[2]?.grossTotalIncomeCalculated],
         ["Total Gross Total Income", itrIndividual.totalGrossTotalIncomeCalculated],
         ["Average Gross Total Income", itrIndividual.avgGrossTotalIncomeCalculated],
-        ["PF deduction - Salaried customers", itrIndividual.pfDeduction],
-        ["Life Assured Name", itrIndividual.partyName],
+        ["PF deduction - Salaried customers", firstDefined(years[0]?.pfDeduction, itrIndividual.pfDeduction)],
+        ["PF deduction - Salaried customers Year 2", years[1]?.pfDeduction],
+        ["PF deduction - Salaried customers Year 3", years[2]?.pfDeduction],
+        ["Life Assured Name", firstDefined(years[0]?.partyName, itrIndividual.partyName)],
+        ["Life Assured Name Year 2", years[1]?.partyName],
+        ["Life Assured Name Year 3", years[2]?.partyName],
         ["Is Life Assured Name Same?", itrIndividual.nameMatchInd],
-        ["Pan Number Matched with Barcode Number", years[0]?.panNumberMatchedWithBarcodeNumber],
-        ["Pan Number Matched with Barcode Number Year 2", years[1]?.panNumberMatchedWithBarcodeNumber],
-        ["Pan Number Matched with Barcode Number Year 3", years[2]?.panNumberMatchedWithBarcodeNumber],
+        ["Pan Number Matched with Barcode Number", firstDefined(years[0]?.panBarcodeMatchInd, years[0]?.panNumberMatchedWithBarcodeNumber, itrIndividual.panBarcodeMatchInd)],
+        ["Pan Number Matched with Barcode Number Year 2", firstDefined(years[1]?.panBarcodeMatchInd, years[1]?.panNumberMatchedWithBarcodeNumber)],
+        ["Pan Number Matched with Barcode Number Year 3", firstDefined(years[2]?.panBarcodeMatchInd, years[2]?.panNumberMatchedWithBarcodeNumber)],
       ]))
     );
   }
@@ -538,6 +578,9 @@ const mapDocumentsToFinancialSections = (
         ["Reserves & Surplus", years[0]?.reservesSurplus],
         ["Reserves & Surplus Year 2", years[1]?.reservesSurplus],
         ["Reserves & Surplus Year 3", years[2]?.reservesSurplus],
+        ["Total Shareholders Funds or Partner's Fund", years[0]?.totalShareholdersFunds],
+        ["Total Shareholders Funds or Partner's Fund Year 2", years[1]?.totalShareholdersFunds],
+        ["Total Shareholders Funds or Partner's Fund Year 3", years[2]?.totalShareholdersFunds],
         ["Profit Before Depreciation & Tax (PBDT)", years[0]?.pbdt],
         ["Profit Before Depreciation & Tax (PBDT) Year 2", years[1]?.pbdt],
         ["Profit Before Depreciation & Tax (PBDT) Year 3", years[2]?.pbdt],
@@ -557,6 +600,8 @@ const mapDocumentsToFinancialSections = (
         ["Sales Year 2", years[1]?.sales],
         ["Sales Year 3", years[2]?.sales],
         ["Average Gross Income", profitAndLoss.avgGrossIncomeCalculated],
+        ["Average Profit Before Tax", profitAndLoss.avgProfitBeforeTaxCalculated],
+        ["Average Profit After Tax", profitAndLoss.avgProfitAfterTaxCalculated],
       ]))
     );
   }
@@ -589,7 +634,8 @@ const mapDocumentsToFinancialSections = (
   if (salaryCertificate) {
     sections.push(
       buildSectionFromItems("salary_certificate", createItems([
-        ["Gross Salary PA", firstDefined(salaryCertificate.derivedIncomeCalculated, salaryCertificate.grossSalaryPa)],
+        ["Gross Salary PA", salaryCertificate.grossSalaryPa],
+        ["Derived Income", salaryCertificate.derivedIncomeCalculated],
       ]))
     );
   }
@@ -598,7 +644,8 @@ const mapDocumentsToFinancialSections = (
   if (salaryRevisionLetter) {
     sections.push(
       buildSectionFromItems("salary_revision_letter", createItems([
-        ["Gross Salary PA", firstDefined(salaryRevisionLetter.derivedIncomeCalculated, salaryRevisionLetter.grossSalaryPa)],
+        ["Gross Salary PA", salaryRevisionLetter.grossSalaryPa],
+        ["Derived Income", salaryRevisionLetter.derivedIncomeCalculated],
       ]))
     );
   }
@@ -657,7 +704,7 @@ const mapDocumentsToFinancialSections = (
   if (stockHolding) {
     sections.push(
       buildSectionFromItems("stock_holding", createItems([
-        ["Is Stock Holding Statement in name of LA/his Business", stockHolding.nameMatchInd],
+        ["Is Stock Holding Stmt in name of LA/his Business", stockHolding.nameMatchInd],
         ["Gross Total Market Value as per the Stmt", stockHolding.estimatedMarketValue],
         ["Income Earned", stockHolding.incomeEarned],
         ["Derived Income", stockHolding.derivedIncomeCalculated],
@@ -806,6 +853,18 @@ const mapDocumentsToFinancialSections = (
     );
   }
 
+  const employeeIdCard = asRecord(documents.employee_id_card);
+  if (employeeIdCard) {
+    sections.push(
+      buildSectionFromItems("employee_id_card", createItems([
+        ["Name of the company", employeeIdCard.companyName],
+        ["Name of the employee", employeeIdCard.employeeName],
+        ["Employee number", firstDefined(employeeIdCard.employeeNumber, employeeIdCard.employeeId)],
+        ["Photo available", employeeIdCard.photoAvailableInd],
+      ]))
+    );
+  }
+
   return sections;
 };
 
@@ -893,17 +952,23 @@ const getFieldValue = (
 const FORM_16_TABLE_LABELS = [
   "ASSESSMENT",
   "Gross Salary PA",
-  "Average Annual Income",
   "Life Assured Pan No",
   "Life Assured Name",
   "Is Life Assured Name Same With Doc Name?",
   "Company Name",
 ];
 
+const FORM_16_SINGLE_FIELDS = [
+  { label: "Average Annual Income" },
+];
+
 const FORM_16A_TABLE_LABELS = [
   "Assessment Year",
   "Net Receipt pa",
-  "Average Annual Income",
+];
+
+const FORM_16A_SINGLE_FIELDS = [
+  { label: "Average Annual Income" },
 ];
 
 const COMPUTATION_OF_INCOME_TABLE_LABELS = [
@@ -916,8 +981,11 @@ const COMPUTATION_OF_INCOME_TABLE_LABELS = [
   "Agricultural Income",
   "Exempt Income(C)",
   "Gross Total Income",
-  "Total Gross Total Income",
-  "Average Gross Total Income",
+];
+
+const COMPUTATION_OF_INCOME_SINGLE_FIELDS = [
+  { label: "Total Gross Total Income" },
+  { label: "Average Gross Total Income" },
 ];
 
 const ITR_NON_INDIVIDUAL_TABLE_LABELS = [
@@ -931,9 +999,12 @@ const ITR_NON_INDIVIDUAL_TABLE_LABELS = [
   "Agricultural Income",
   "Exempt Income",
   "Gross Total Income",
-  "Total Gross Total Income",
-  "Average Gross Total Income",
   "Pan Number Matched with Barcode Number",
+];
+
+const ITR_NON_INDIVIDUAL_SINGLE_FIELDS = [
+  { label: "Total Gross Total Income" },
+  { label: "Average Gross Total Income" },
 ];
 
 const ITR_INDIVIDUAL_TABLE_LABELS = [
@@ -948,16 +1019,18 @@ const ITR_INDIVIDUAL_TABLE_LABELS = [
   "Agricultural Income",
   "Exempt Income(C)",
   "Gross Total Income(A+B+C)",
-  "Total Gross Total Income",
-  "Average Gross Total Income",
   "PF deduction - Salaried customers",
   "Life Assured Name",
   "Is Life Assured Name Same?",
   "Pan Number Matched with Barcode Number",
 ];
 
+const ITR_INDIVIDUAL_SINGLE_FIELDS = [
+  { label: "Total Gross Total Income" },
+  { label: "Average Gross Total Income" },
+];
+
 const PROFIT_AND_LOSS_TABLE_LABELS = [
-  "As Per Accounts of Proposer Co.",
   "Assessment Year",
   "Shareholders Funds / Partners Capital",
   "Share Capital or Fixed/Fluctuating Capital",
@@ -977,9 +1050,12 @@ const PROFIT_AND_LOSS_TABLE_LABELS = [
   "Sales of Last Year",
   "Rise In Sales as compared to Last Year",
   "% Rise In Sales as compared to Last Year",
-  "Average Gross Income",
-  "Average Profit Before Tax",
-  "Average Profit After Tax",
+];
+
+const PROFIT_AND_LOSS_SINGLE_FIELDS = [
+  { label: "Average Gross Income" },
+  { label: "Average Profit Before Tax" },
+  { label: "Average Profit After Tax" },
 ];
 
 const GST_INCOME_TABLE_LABELS = [
@@ -987,9 +1063,12 @@ const GST_INCOME_TABLE_LABELS = [
   "Gross Sales",
   "Gross Purchases",
   "Profit After GST",
-  "Total of Gross Sales",
-  "Average Gross Sales",
-  "Average Annual Income",
+];
+
+const GST_INCOME_SINGLE_FIELDS = [
+  { label: "Total of Gross Sales" },
+  { label: "Average Gross Sales" },
+  { label: "Average Annual Income" },
 ];
 
 const ITR_NON_INDIVIDUAL_TOP_FIELDS = ["Name of Organisation/Firm", "Permanent Account Number"];
@@ -1000,10 +1079,13 @@ const FORM_J_ROW_LABELS = [
   "Month1",
   "Month2",
   "Month3",
-  "Total Receipts",
-  "Average Monthly Receipts",
-  "Annual Receipts",
-  "Derived Income",
+];
+
+const FORM_J_SINGLE_FIELDS = [
+  { label: "Total Receipts", fieldLabel: "Total Receipts Receipt1" },
+  { label: "Average Monthly Receipts", fieldLabel: "Average Monthly Receipts Receipt1" },
+  { label: "Annual Receipt", fieldLabel: "Annual Receipts Receipt1" },
+  { label: "Derived Income", fieldLabel: "Derived Income Receipt1" },
 ];
 
 const COMMISSION_MONTH_LABELS = ["Month 1", "Month 2", "Month 3", "Month 4", "Month 5", "Month 6"] as const;
@@ -1058,19 +1140,33 @@ type SubmitResponse = {
         avgAnnualIncomeCalculated?: number | string;
       };
       itr_individual?: {
+        years?: Array<{
+          grossTotalIncomeCalculated?: number | string;
+        }>;
         totalGrossTotalIncomeCalculated?: number | string;
         avgGrossTotalIncomeCalculated?: number | string;
       };
       itr_non_individual?: {
+        years?: Array<{
+          grossTotalIncomeCalculated?: number | string;
+        }>;
         totalGrossTotalIncomeCalculated?: number | string;
         avgGrossTotalIncomeCalculated?: number | string;
       };
       computation_of_income?: {
+        years?: Array<{
+          grossTotalIncomeCalculated?: number | string;
+        }>;
         totalGrossTotalIncomeCalculated?: number | string;
         avgGrossTotalIncomeCalculated?: number | string;
       };
       profit_and_loss?: {
+        years?: Array<{
+          totalShareholdersFunds?: number | string;
+        }>;
         avgGrossIncomeCalculated?: number | string;
+        avgProfitBeforeTaxCalculated?: number | string;
+        avgProfitAfterTaxCalculated?: number | string;
       };
       credit_card?: {
         derivedIncomeCalculated?: number | string;
@@ -1148,69 +1244,41 @@ const ALWAYS_READ_ONLY_FINANCIAL_FIELDS = new Set([
   "computation_of_income:Gross Total Income Year 2",
   "computation_of_income:Gross Total Income Year 3",
   "computation_of_income:Total Gross Total Income",
-  "computation_of_income:Total Gross Total Income Year 2",
-  "computation_of_income:Total Gross Total Income Year 3",
   "computation_of_income:Average Gross Total Income",
-  "computation_of_income:Average Gross Total Income Year 2",
-  "computation_of_income:Average Gross Total Income Year 3",
   "credit_card:Derived Income",
   "credit_card:Average Income",
   "fixed_deposit_receipt:Derived Income",
   "fixed_deposit_receipt:Average Income",
   "form16:Average Annual Income",
-  "form16:Average Annual Income Year 2",
-  "form16:Average Annual Income Year 3",
   "form16a:Average Annual Income",
-  "form16a:Average Annual Income Year 2",
-  "form16a:Average Annual Income Year 3",
+  "form_j:Total Receipts Receipt1",
   "form_j:Average Monthly Receipts Receipt1",
-  "form_j:Average Monthly Receipts Receipt2",
-  "form_j:Average Monthly Receipts Receipt3",
-  "form_j:Average Monthly Receipts Receipt4",
-  "form_j:Average Monthly Receipts Receipt5",
-  "form_j:Average Monthly Receipts Receipt6",
   "form_j:Annual Receipts Receipt1",
-  "form_j:Annual Receipts Receipt2",
-  "form_j:Annual Receipts Receipt3",
-  "form_j:Annual Receipts Receipt4",
-  "form_j:Annual Receipts Receipt5",
-  "form_j:Annual Receipts Receipt6",
   "form_j:Derived Income Receipt1",
-  "form_j:Derived Income Receipt2",
-  "form_j:Derived Income Receipt3",
-  "form_j:Derived Income Receipt4",
-  "form_j:Derived Income Receipt5",
-  "form_j:Derived Income Receipt6",
   "govt_bonds:Derived Income",
   "govt_bonds:Average Income",
   "itr_non_individual:Gross Total Income",
   "itr_non_individual:Gross Total Income Year 2",
   "itr_non_individual:Gross Total Income Year 3",
   "itr_non_individual:Total Gross Total Income",
-  "itr_non_individual:Total Gross Total Income Year 2",
-  "itr_non_individual:Total Gross Total Income Year 3",
   "itr_non_individual:Average Gross Total Income",
-  "itr_non_individual:Average Gross Total Income Year 2",
-  "itr_non_individual:Average Gross Total Income Year 3",
   "itr_individual:Gross Total Income(A+B+C)",
   "itr_individual:Gross Total Income(A+B+C) Year 2",
   "itr_individual:Gross Total Income(A+B+C) Year 3",
   "itr_individual:Total Gross Total Income",
-  "itr_individual:Total Gross Total Income Year 2",
-  "itr_individual:Total Gross Total Income Year 3",
   "itr_individual:Average Gross Total Income",
-  "itr_individual:Average Gross Total Income Year 2",
-  "itr_individual:Average Gross Total Income Year 3",
   "loan_statement:Derived Income",
   "loan_statement:Average Income",
   "mutual_fund:Derived Income",
   "mutual_fund:Average Income",
   "pension_statement:Pension Received pa",
   "profit_and_loss:Average Gross Income",
-  "profit_and_loss:Average Gross Income Year 2",
-  "profit_and_loss:Average Gross Income Year 3",
+  "profit_and_loss:Average Profit Before Tax",
+  "profit_and_loss:Average Profit After Tax",
   "property_purchase:Derived Income",
   "property_valuation:Derived Income",
+  "salary_certificate:Derived Income",
+  "salary_revision_letter:Derived Income",
   "salary_slips:Average Salary pm",
   "salary_slips:Gross Salary pa",
   "salary_slips:Average Annual Income",
@@ -1223,17 +1291,8 @@ const ALWAYS_READ_ONLY_FINANCIAL_FIELDS = new Set([
   "sip_statement:Average Monthly SIP",
   "sip_statement:Average Annual Income",
   "gst_income:Total of Gross Sales",
-  "gst_income:Total of Gross Sales Year 2",
-  "gst_income:Total of Gross Sales Year 3",
-  "gst_income:Total of Gross Sales Year 4",
   "gst_income:Average Gross Sales",
-  "gst_income:Average Gross Sales Year 2",
-  "gst_income:Average Gross Sales Year 3",
-  "gst_income:Average Gross Sales Year 4",
   "gst_income:Average Annual Income",
-  "gst_income:Average Annual Income Year 2",
-  "gst_income:Average Annual Income Year 3",
-  "gst_income:Average Annual Income Year 4",
   "bank_statement_salary_credit:Average Net Salary Credited PM",
   "bank_statement_salary_credit:Net Salary Credited PA",
   "bank_statement_salary_credit:Average Annual Income",
@@ -1306,6 +1365,29 @@ const assignNumberField = (
   }
 };
 
+const assignNumberOrTextField = (
+  document: Record<string, unknown>,
+  targetKey: string,
+  value: string | undefined,
+) => {
+  const normalizedValue = getString(value);
+
+  if (!normalizedValue) {
+    return;
+  }
+
+  if (/^(0|[1-9]\d*)$/.test(normalizedValue)) {
+    const numericValue = Number(normalizedValue);
+
+    if (Number.isSafeInteger(numericValue)) {
+      document[targetKey] = numericValue;
+      return;
+    }
+  }
+
+  document[targetKey] = normalizedValue;
+};
+
 const assignYesNoField = (
   document: Record<string, unknown>,
   targetKey: string,
@@ -1325,14 +1407,11 @@ const buildMonthlyEntries = (
   labels: readonly string[],
   valueKey: string,
 ) => {
-  const currentYear = new Date().getFullYear();
-
   return labels.reduce<Array<Record<string, unknown>>>((months, label, index) => {
     const amount = getNumeric(values[label]);
 
     if (amount != null) {
       months.push({
-        periodYear: currentYear,
         periodMonth: index + 1,
         [valueKey]: amount,
       });
@@ -1369,12 +1448,12 @@ const getFinancialFieldValidationError = (sectionKey: FinancialSectionKey, field
     return "";
   }
 
-  if (isSecondaryRepeatedField(field.label)) {
-    return "";
-  }
-
   if (isFieldMandatory(field)) {
     return getErrorMessage("financialFieldMandatory");
+  }
+
+  if (isSecondaryRepeatedField(field.label)) {
+    return "";
   }
 
   if (rule) {
@@ -1676,6 +1755,62 @@ const renderFieldValue = (
   />
 );
 
+type SingleFinancialField = {
+  label: string;
+  fieldLabel?: string;
+};
+
+const renderSingleFields = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  isEditable: boolean,
+  sectionErrors: Record<string, string>,
+  fields: SingleFinancialField[],
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) => {
+  const byLabel = section.items.reduce<Record<string, FinancialField>>((accumulator, item) => {
+    accumulator[item.label.toLowerCase()] = item;
+    return accumulator;
+  }, {});
+
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: "repeat(3, 1fr)",
+        gap: 1.25,
+      }}
+    >
+      {fields.map(({ label, fieldLabel = label }) => {
+        const item = byLabel[fieldLabel.toLowerCase()];
+        const resolvedFieldLabel = item?.label ?? fieldLabel;
+        const required = isFieldMandatory(item);
+        const value = getFieldValue(values, section.key, resolvedFieldLabel, item?.value);
+
+        return (
+          <Box key={fieldLabel}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
+              <Typography sx={{ fontSize: 12, color: "#475467" }}>{label}</Typography>
+              {required && (
+                <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>
+              )}
+            </Box>
+            {renderFieldValue(
+              value,
+              isEditable && !isAlwaysReadOnlyFinancialField(section.key, resolvedFieldLabel),
+              (nextValue) => onFieldValueChange(section.key, resolvedFieldLabel, nextValue),
+              required,
+              sectionErrors[resolvedFieldLabel],
+              getFinancialFieldRule(section.key, resolvedFieldLabel),
+              resolvedFieldLabel,
+            )}
+          </Box>
+        );
+      })}
+    </Box>
+  );
+};
+
 type MultiYearTableRow = {
   label: string;
   year1: string;
@@ -1684,7 +1819,9 @@ type MultiYearTableRow = {
   year1FieldLabel: string;
   year2FieldLabel: string;
   year3FieldLabel: string;
-  required: boolean;
+  year1Required: boolean;
+  year2Required: boolean;
+  year3Required: boolean;
 };
 
 type FourYearTableRow = {
@@ -1732,20 +1869,24 @@ const renderMultiYearTableSection = (
   }, {});
 
   const tableRows: MultiYearTableRow[] = tableLabels.map((label) => {
-    const item = byLabel[label.toLowerCase()];
-    const year1FieldLabel = item?.label ?? label;
+    const year1Item = byLabel[label.toLowerCase()];
+    const year1FieldLabel = year1Item?.label ?? label;
     const year2FieldLabel = `${label} Year 2`;
     const year3FieldLabel = `${label} Year 3`;
+    const year2Item = byLabel[year2FieldLabel.toLowerCase()];
+    const year3Item = byLabel[year3FieldLabel.toLowerCase()];
 
     return {
       label,
-      year1: getFieldValue(values, section.key, year1FieldLabel, item?.value),
-      year2: getFieldValue(values, section.key, year2FieldLabel, " "),
-      year3: getFieldValue(values, section.key, year3FieldLabel, " "),
+      year1: getFieldValue(values, section.key, year1FieldLabel, year1Item?.value),
+      year2: getFieldValue(values, section.key, year2FieldLabel, year2Item?.value),
+      year3: getFieldValue(values, section.key, year3FieldLabel, year3Item?.value),
       year1FieldLabel,
       year2FieldLabel,
       year3FieldLabel,
-      required: isFieldMandatory(item),
+      year1Required: isFieldMandatory(year1Item),
+      year2Required: isFieldMandatory(year2Item),
+      year3Required: isFieldMandatory(year3Item),
     };
   });
 
@@ -1757,7 +1898,9 @@ const renderMultiYearTableSection = (
       render: (_, row) => (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
           <Typography sx={{ fontSize: 13, color: "#475467" }}>{row.label}</Typography>
-          {row.required && <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>}
+          {(row.year1Required || row.year2Required || row.year3Required) && (
+            <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>
+          )}
         </Box>
       ),
     },
@@ -1770,7 +1913,7 @@ const renderMultiYearTableSection = (
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year1FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.year1FieldLabel, nextValue),
-          row.required,
+          row.year1Required,
           sectionErrors[row.year1FieldLabel],
           getFinancialFieldRule(section.key, row.year1FieldLabel),
           row.year1FieldLabel
@@ -1785,8 +1928,8 @@ const renderMultiYearTableSection = (
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year2FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.year2FieldLabel, nextValue),
-          false,
-          undefined,
+          row.year2Required,
+          sectionErrors[row.year2FieldLabel],
           getFinancialFieldRule(section.key, row.year2FieldLabel),
           row.year2FieldLabel
         ),
@@ -1800,8 +1943,8 @@ const renderMultiYearTableSection = (
           String(value ?? ""),
           isEditable && !isAlwaysReadOnlyFinancialField(section.key, row.year3FieldLabel),
           (nextValue) => onFieldValueChange(section.key, row.year3FieldLabel, nextValue),
-          false,
-          undefined,
+          row.year3Required,
+          sectionErrors[row.year3FieldLabel],
           getFinancialFieldRule(section.key, row.year3FieldLabel),
           row.year3FieldLabel
         ),
@@ -1832,6 +1975,14 @@ const renderForm16Section = (
         FORM_16_TABLE_LABELS,
         "Form 16",
         onFieldValueChange
+      )}
+      {renderSingleFields(
+        section,
+        values,
+        isEditable,
+        sectionErrors,
+        FORM_16_SINGLE_FIELDS,
+        onFieldValueChange,
       )}
     </Box>
   );
@@ -1955,16 +2106,27 @@ const renderForm16ASection = (
   isEditable: boolean,
   sectionErrors: Record<string, string>,
   onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
-) =>
-  renderMultiYearTableSection(
-    section,
-    values,
-    isEditable,
-    sectionErrors,
-    FORM_16A_TABLE_LABELS,
-    section.title,
-    onFieldValueChange
-  );
+) => (
+  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+    {renderMultiYearTableSection(
+      section,
+      values,
+      isEditable,
+      sectionErrors,
+      FORM_16A_TABLE_LABELS,
+      section.title,
+      onFieldValueChange
+    )}
+    {renderSingleFields(
+      section,
+      values,
+      isEditable,
+      sectionErrors,
+      FORM_16A_SINGLE_FIELDS,
+      onFieldValueChange,
+    )}
+  </Box>
+);
 
 const renderComputationOfIncomeSection = (
   section: FinancialSectionConfig,
@@ -1972,16 +2134,27 @@ const renderComputationOfIncomeSection = (
   isEditable: boolean,
   sectionErrors: Record<string, string>,
   onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
-) =>
-  renderMultiYearTableSection(
-    section,
-    values,
-    isEditable,
-    sectionErrors,
-    COMPUTATION_OF_INCOME_TABLE_LABELS,
-    section.title,
-    onFieldValueChange
-  );
+) => (
+  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+    {renderMultiYearTableSection(
+      section,
+      values,
+      isEditable,
+      sectionErrors,
+      COMPUTATION_OF_INCOME_TABLE_LABELS,
+      section.title,
+      onFieldValueChange
+    )}
+    {renderSingleFields(
+      section,
+      values,
+      isEditable,
+      sectionErrors,
+      COMPUTATION_OF_INCOME_SINGLE_FIELDS,
+      onFieldValueChange,
+    )}
+  </Box>
+);
 
 const renderITRNonIndividualSection = (
   section: FinancialSectionConfig,
@@ -2037,6 +2210,14 @@ const renderITRNonIndividualSection = (
         ITR_NON_INDIVIDUAL_TABLE_LABELS,
         section.title,
         onFieldValueChange
+      )}
+      {renderSingleFields(
+        section,
+        values,
+        isEditable,
+        sectionErrors,
+        ITR_NON_INDIVIDUAL_SINGLE_FIELDS,
+        onFieldValueChange,
       )}
     </Box>
   );
@@ -2097,6 +2278,14 @@ const renderITRIndividualSection = (
         section.title,
         onFieldValueChange
       )}
+      {renderSingleFields(
+        section,
+        values,
+        isEditable,
+        sectionErrors,
+        ITR_INDIVIDUAL_SINGLE_FIELDS,
+        onFieldValueChange,
+      )}
     </Box>
   );
 };
@@ -2156,6 +2345,14 @@ const renderProfitAndLossSection = (
         section.title,
         onFieldValueChange
       )}
+      {renderSingleFields(
+        section,
+        values,
+        isEditable,
+        sectionErrors,
+        PROFIT_AND_LOSS_SINGLE_FIELDS,
+        onFieldValueChange,
+      )}
     </Box>
   );
 };
@@ -2166,16 +2363,27 @@ const renderGstIncomeSection = (
   isEditable: boolean,
   sectionErrors: Record<string, string>,
   onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
-) =>
-  renderFourYearTableSection(
-    section,
-    values,
-    isEditable,
-    sectionErrors,
-    GST_INCOME_TABLE_LABELS,
-    section.title,
-    onFieldValueChange
-  );
+) => (
+  <Box sx={{ display: "flex", flexDirection: "column", gap: 1.5 }}>
+    {renderFourYearTableSection(
+      section,
+      values,
+      isEditable,
+      sectionErrors,
+      GST_INCOME_TABLE_LABELS,
+      section.title,
+      onFieldValueChange
+    )}
+    {renderSingleFields(
+      section,
+      values,
+      isEditable,
+      sectionErrors,
+      GST_INCOME_SINGLE_FIELDS,
+      onFieldValueChange,
+    )}
+  </Box>
+);
 
 const renderFormJSection = (
   section: FinancialSectionConfig,
@@ -2355,6 +2563,14 @@ const renderFormJSection = (
       )}
 
       <CustomTable title="FORM J" columns={tableColumns} data={tableRows} />
+      {renderSingleFields(
+        section,
+        values,
+        isEditable,
+        sectionErrors,
+        FORM_J_SINGLE_FIELDS,
+        onFieldValueChange,
+      )}
     </Box>
   );
 };
@@ -2893,14 +3109,20 @@ const ViewFinancial = () => {
     if (formJ && Object.keys(formJ).length > 0) {
       const doc: Record<string, unknown> = {};
       assignYesNoField(doc, "nameMatchInd", formJ["Is Form J in the name of LA"], yesNoOptions);
-      const months = buildMonthlyEntries(formJ, [
-        "Month1 Receipt1",
-        "Month2 Receipt1",
-        "Month3 Receipt1",
-        "Month4 Receipt1",
-        "Month5 Receipt1",
-        "Month6 Receipt1",
-      ], "receiptAmount");
+      const months: Array<Record<string, unknown>> = [];
+
+      for (let monthIndex = 1; monthIndex <= 3; monthIndex += 1) {
+        const receipts = Array.from({ length: 6 }, (_, receiptIndex) =>
+          getNumeric(formJ[`Month${monthIndex} Receipt${receiptIndex + 1}`]) ?? null
+        );
+
+        if (receipts.some((receipt) => receipt != null)) {
+          months.push({
+            periodMonth: monthIndex,
+            receipts,
+          });
+        }
+      }
 
       if (months.length > 0) doc.months = months;
       if (hasDocumentFields(doc)) documents.form_j = doc;
@@ -2958,27 +3180,29 @@ const ViewFinancial = () => {
     const form16 = fieldValues.form16;
     if (form16 && Object.keys(form16).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(form16["Company Name"])) doc.companyName = getString(form16["Company Name"]);
-      if (getString(form16["Life Assured Name"])) doc.partyName = getString(form16["Life Assured Name"]);
-      const nameMatch = form16["Is Life Assured Name Same With Doc Name?"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
 
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
-        const assessment = getString(form16[`ASSESSMENT${suffix}`]);
-        const salary = getNumeric(form16[`Gross Salary PA${suffix}`]);
-        const pan = getString(form16[`Life Assured Pan No${suffix}`]);
-        if (assessment || salary || pan) {
-          const yearObj: Record<string, unknown> = {};
-          if (assessment) yearObj.assessmentYear = assessment;
-          if (salary) yearObj.grossSalaryPa = salary;
-          if (pan) yearObj.panNumber = pan;
+        const yearObj: Record<string, unknown> = {};
+        assignTextField(yearObj, "assessmentYear", form16[`ASSESSMENT${suffix}`]);
+        assignNumberField(yearObj, "grossSalaryPa", form16[`Gross Salary PA${suffix}`]);
+        assignTextField(yearObj, "panNumber", form16[`Life Assured Pan No${suffix}`]);
+        assignTextField(yearObj, "partyName", form16[`Life Assured Name${suffix}`]);
+        assignTextField(yearObj, "companyName", form16[`Company Name${suffix}`]);
+        assignYesNoField(
+          yearObj,
+          "nameMatchInd",
+          form16[`Is Life Assured Name Same With Doc Name?${suffix}`],
+          yesNoOptions,
+        );
+
+        if (hasDocumentFields(yearObj)) {
           years.push(yearObj);
         }
       }
       if (years.length > 0) doc.years = years;
-      if (Object.keys(doc).length > 0) documents.form16 = doc;
+      if (hasDocumentFields(doc)) documents.form16 = doc;
     }
 
     // form16a
@@ -3071,72 +3295,78 @@ const ViewFinancial = () => {
     const itrIndividual = fieldValues.itr_individual;
     if (itrIndividual && Object.keys(itrIndividual).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(itrIndividual["Permanent Account Number"])) doc.panNumber = getString(itrIndividual["Permanent Account Number"]);
-      if (getString(itrIndividual["Life Assured Name"])) doc.partyName = getString(itrIndividual["Life Assured Name"]);
-      const nameMatch = itrIndividual["Is Life Assured Name Same?"];
-      if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
-      if (getNumeric(itrIndividual["PF deduction - Salaried customers"])) doc.pfDeduction = getNumeric(itrIndividual["PF deduction - Salaried customers"]);
+      assignTextField(doc, "orgName", itrIndividual["Name of Organisation/Firm"]);
+      assignTextField(doc, "panNumber", itrIndividual["Permanent Account Number"]);
+      assignYesNoField(doc, "nameMatchInd", itrIndividual["Is Life Assured Name Same?"], yesNoOptions);
 
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
-        const assessment = getString(itrIndividual[`Assessment Year${suffix}`]);
-        const ackNumber = getString(itrIndividual[`ITR Acknowledgement Number${suffix}`]);
-        const panMatchedWithBarcodeValue = itrIndividual[`Pan Number Matched with Barcode Number${suffix}`];
-        const panMatchedWithBarcode = panMatchedWithBarcodeValue ? getCodeFromDisplayValue(panMatchedWithBarcodeValue, yesNoOptions) : undefined;
-        const filingDate = getString(itrIndividual[`Date of Filling ITR${suffix}`]);
-        const salary = getNumeric(itrIndividual[`Income from Salary(A)${suffix}`]);
-        const house = getNumeric(itrIndividual[`Income from House Property${suffix}`]);
-        const business = getNumeric(itrIndividual[`Income from Business or Profession(B)${suffix}`]);
-        const capital = getNumeric(itrIndividual[`Short term & Capital Gains${suffix}`]);
-        const other = getNumeric(itrIndividual[`Income from Other Sources${suffix}`]);
-        const agri = getNumeric(itrIndividual[`Agricultural Income${suffix}`]);
-        const exempt = getNumeric(itrIndividual[`Exempt Income(C)${suffix}`]);
+        const yearObj: Record<string, unknown> = {};
+        assignTextField(yearObj, "assessmentYear", itrIndividual[`Assessment Year${suffix}`]);
+        assignTextField(yearObj, "ackNumber", itrIndividual[`ITR Acknowledgement Number${suffix}`]);
+        assignTextField(yearObj, "itrFilingDt", formatDdMmYyyyToIsoDate(itrIndividual[`Date of Filling ITR${suffix}`]));
+        assignTextField(yearObj, "partyName", itrIndividual[`Life Assured Name${suffix}`]);
+        assignNumberField(yearObj, "pfDeduction", itrIndividual[`PF deduction - Salaried customers${suffix}`]);
+        assignYesNoField(
+          yearObj,
+          "panBarcodeMatchInd",
+          itrIndividual[`Pan Number Matched with Barcode Number${suffix}`],
+          yesNoOptions,
+        );
+        assignNumberField(yearObj, "incomeFromSalary", itrIndividual[`Income from Salary(A)${suffix}`]);
+        assignNumberField(yearObj, "incomeFromHouseProperty", itrIndividual[`Income from House Property${suffix}`]);
+        assignNumberField(yearObj, "incomeFromBusiness", itrIndividual[`Income from Business or Profession(B)${suffix}`]);
+        assignNumberField(yearObj, "shortTermCapitalGains", itrIndividual[`Short term & Capital Gains${suffix}`]);
+        assignNumberField(yearObj, "incomeFromOtherSources", itrIndividual[`Income from Other Sources${suffix}`]);
+        assignNumberField(yearObj, "agriculturalIncome", itrIndividual[`Agricultural Income${suffix}`]);
+        assignNumberField(yearObj, "exemptIncome", itrIndividual[`Exempt Income(C)${suffix}`]);
 
-        if (assessment || salary || business || panMatchedWithBarcode) {
-          const yearObj: Record<string, unknown> = {};
-          if (assessment) yearObj.assessmentYear = assessment;
-          if (ackNumber) yearObj.ackNumber = ackNumber;
-          if (panMatchedWithBarcode) yearObj.panNumberMatchedWithBarcodeNumber = panMatchedWithBarcode;
-          if (filingDate) yearObj.itrFilingDt = filingDate;
-          if (salary) yearObj.incomeFromSalary = salary;
-          if (house) yearObj.incomeFromHouseProperty = house;
-          if (business) yearObj.incomeFromBusiness = business;
-          if (capital) yearObj.shortTermCapitalGains = capital;
-          if (other) yearObj.incomeFromOtherSources = other;
-          if (agri) yearObj.agriculturalIncome = agri;
-          if (exempt) yearObj.exemptIncome = exempt;
+        if (hasDocumentFields(yearObj)) {
           years.push(yearObj);
         }
       }
       if (years.length > 0) doc.years = years;
-      if (Object.keys(doc).length > 0) documents.itr_individual = doc;
+      if (hasDocumentFields(doc)) documents.itr_individual = doc;
     }
 
     // itr_non_individual
     const itrNonIndividual = fieldValues.itr_non_individual;
     if (itrNonIndividual && Object.keys(itrNonIndividual).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(itrNonIndividual["Name of Organisation/Firm"])) doc.orgName = getString(itrNonIndividual["Name of Organisation/Firm"]);
-      if (getString(itrNonIndividual["Permanent Account Number"])) doc.panNumber = getString(itrNonIndividual["Permanent Account Number"]);
+      assignTextField(doc, "orgName", itrNonIndividual["Name of Organisation/Firm"]);
+      assignTextField(doc, "panNumber", itrNonIndividual["Permanent Account Number"]);
+      assignTextField(doc, "partyName", itrNonIndividual["Life Assured Name"]);
+      assignYesNoField(doc, "nameMatchInd", itrNonIndividual["Is Life Assured Name Same?"], yesNoOptions);
 
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
-        const assessment = getString(itrNonIndividual[`Assessment Year${suffix}`]);
-        const business = getNumeric(itrNonIndividual[`Income from Business or Profession${suffix}`]);
-        const other = getNumeric(itrNonIndividual[`Income from Other Sources${suffix}`]);
+        const yearObj: Record<string, unknown> = {};
+        assignTextField(yearObj, "assessmentYear", itrNonIndividual[`Assessment Year${suffix}`]);
+        assignTextField(yearObj, "ackNumber", itrNonIndividual[`ITR Acknowledgement Number${suffix}`]);
+        assignTextField(yearObj, "itrFilingDt", formatDdMmYyyyToIsoDate(itrNonIndividual[`Date of Filling ITR${suffix}`]));
+        assignNumberField(yearObj, "pfDeduction", itrNonIndividual[`PF deduction - Salaried customers${suffix}`]);
+        assignYesNoField(
+          yearObj,
+          "panBarcodeMatchInd",
+          itrNonIndividual[`Pan Number Matched with Barcode Number${suffix}`],
+          yesNoOptions,
+        );
+        assignNumberField(yearObj, "incomeFromSalary", itrNonIndividual[`Income from Salary${suffix}`]);
+        assignNumberField(yearObj, "incomeFromHouseProperty", itrNonIndividual[`Income from House Property${suffix}`]);
+        assignNumberField(yearObj, "incomeFromBusiness", itrNonIndividual[`Income from Business or Profession${suffix}`]);
+        assignNumberField(yearObj, "shortTermCapitalGains", itrNonIndividual[`Short term & Capital Gains${suffix}`]);
+        assignNumberField(yearObj, "incomeFromOtherSources", itrNonIndividual[`Income from Other Sources${suffix}`]);
+        assignNumberField(yearObj, "agriculturalIncome", itrNonIndividual[`Agricultural Income${suffix}`]);
+        assignNumberField(yearObj, "exemptIncome", itrNonIndividual[`Exempt Income${suffix}`]);
 
-        if (assessment || business) {
-          const yearObj: Record<string, unknown> = {};
-          if (assessment) yearObj.assessmentYear = assessment;
-          if (business) yearObj.incomeFromBusiness = business;
-          if (other) yearObj.exemptIncome = other;
+        if (hasDocumentFields(yearObj)) {
           years.push(yearObj);
         }
       }
       if (years.length > 0) doc.years = years;
-      if (Object.keys(doc).length > 0) documents.itr_non_individual = doc;
+      if (hasDocumentFields(doc)) documents.itr_non_individual = doc;
     }
 
     // computation_of_income
@@ -3146,20 +3376,22 @@ const ViewFinancial = () => {
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
-        const assessment = getString(computationOfIncome[`Assessment Year${suffix}`]);
-        const salary = getNumeric(computationOfIncome[`Income from Salary(A)${suffix}`]);
-        const exempt = getNumeric(computationOfIncome[`Exempt Income(C)${suffix}`]);
+        const yearObj: Record<string, unknown> = {};
+        assignTextField(yearObj, "assessmentYear", computationOfIncome[`Assessment Year${suffix}`]);
+        assignNumberField(yearObj, "incomeFromSalary", computationOfIncome[`Income from Salary(A)${suffix}`]);
+        assignNumberField(yearObj, "incomeFromHouseProperty", computationOfIncome[`Income from House Property${suffix}`]);
+        assignNumberField(yearObj, "incomeFromBusiness", computationOfIncome[`Income from Business or Profession (B)${suffix}`]);
+        assignNumberField(yearObj, "shortTermCapitalGains", computationOfIncome[`Short term & Capital Gains${suffix}`]);
+        assignNumberField(yearObj, "incomeFromOtherSources", computationOfIncome[`Income from Other Sources${suffix}`]);
+        assignNumberField(yearObj, "agriculturalIncome", computationOfIncome[`Agricultural Income${suffix}`]);
+        assignNumberField(yearObj, "exemptIncome", computationOfIncome[`Exempt Income(C)${suffix}`]);
 
-        if (assessment || salary) {
-          const yearObj: Record<string, unknown> = {};
-          if (assessment) yearObj.assessmentYear = assessment;
-          if (salary) yearObj.incomeFromSalary = salary;
-          if (exempt) yearObj.exemptIncome = exempt;
+        if (hasDocumentFields(yearObj)) {
           years.push(yearObj);
         }
       }
       if (years.length > 0) doc.years = years;
-      if (Object.keys(doc).length > 0) documents.computation_of_income = doc;
+      if (hasDocumentFields(doc)) documents.computation_of_income = doc;
     }
 
     // profit_and_loss
@@ -3171,32 +3403,24 @@ const ViewFinancial = () => {
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
         const suffix = i === 1 ? "" : ` Year ${i}`;
-        const assessment = getString(profitAndLoss[`Assessment Year${suffix}`]);
-        const shareCapital = getNumeric(profitAndLoss[`Share Capital or Fixed/Fluctuating Capital${suffix}`]);
-        const reserves = getNumeric(profitAndLoss[`Reserves & Surplus${suffix}`]);
-        const pbdt = getNumeric(profitAndLoss[`Profit Before Depreciation & Tax (PBDT)${suffix}`]);
-        const depreciation = getNumeric(profitAndLoss[`Less : Depreciation${suffix}`]);
-        const pbt = getNumeric(profitAndLoss[`Profit Before Tax (PBT)${suffix}`]);
-        const tax = getNumeric(profitAndLoss[`Tax${suffix}`]);
-        const pat = getNumeric(profitAndLoss[`Profit After Tax (PAT)${suffix}`]);
-        const sales = getNumeric(profitAndLoss[`Sales${suffix}`]);
+        const yearObj: Record<string, unknown> = {};
+        assignTextField(yearObj, "assessmentYear", profitAndLoss[`Assessment Year${suffix}`]);
+        assignNumberField(yearObj, "shareCapital", profitAndLoss[`Share Capital or Fixed/Fluctuating Capital${suffix}`]);
+        assignNumberField(yearObj, "reservesSurplus", profitAndLoss[`Reserves & Surplus${suffix}`]);
+        assignNumberField(yearObj, "totalShareholdersFunds", profitAndLoss[`Total Shareholders Funds or Partner's Fund${suffix}`]);
+        assignNumberField(yearObj, "pbdt", profitAndLoss[`Profit Before Depreciation & Tax (PBDT)${suffix}`]);
+        assignNumberField(yearObj, "depreciation", profitAndLoss[`Less : Depreciation${suffix}`]);
+        assignNumberField(yearObj, "pbt", profitAndLoss[`Profit Before Tax (PBT)${suffix}`]);
+        assignNumberField(yearObj, "tax", profitAndLoss[`Tax${suffix}`]);
+        assignNumberField(yearObj, "profitAfterTax", profitAndLoss[`Profit After Tax (PAT)${suffix}`]);
+        assignNumberField(yearObj, "sales", profitAndLoss[`Sales${suffix}`]);
 
-        if (assessment || pat || sales) {
-          const yearObj: Record<string, unknown> = {};
-          if (assessment) yearObj.assessmentYear = assessment;
-          if (shareCapital) yearObj.shareCapital = shareCapital;
-          if (reserves) yearObj.reservesSurplus = reserves;
-          if (pbdt) yearObj.pbdt = pbdt;
-          if (depreciation) yearObj.depreciation = depreciation;
-          if (pbt) yearObj.pbt = pbt;
-          if (tax) yearObj.tax = tax;
-          if (pat) yearObj.profitAfterTax = pat;
-          if (sales) yearObj.sales = sales;
+        if (hasDocumentFields(yearObj)) {
           years.push(yearObj);
         }
       }
       if (years.length > 0) doc.years = years;
-      if (Object.keys(doc).length > 0) documents.profit_and_loss = doc;
+      if (hasDocumentFields(doc)) documents.profit_and_loss = doc;
     }
 
     // fixed_deposit_receipt
@@ -3277,7 +3501,9 @@ const ViewFinancial = () => {
     const stockHolding = fieldValues.stock_holding;
     if (stockHolding && Object.keys(stockHolding).length > 0) {
       const doc: Record<string, unknown> = {};
-      const nameMatch = stockHolding["Is Stock Holding Statement in name of LA/his Business"];
+      const nameMatch =
+        stockHolding["Is Stock Holding Stmt in name of LA/his Business"] ??
+        stockHolding["Is Stock Holding Statement in name of LA/his Business"];
       if (nameMatch) doc.nameMatchInd = getCodeFromDisplayValue(nameMatch, yesNoOptions);
       if (getNumeric(stockHolding["Gross Total Market Value as per the Stmt"])) doc.estimatedMarketValue = getNumeric(stockHolding["Gross Total Market Value as per the Stmt"]);
       if (getNumeric(stockHolding["Income Earned"])) doc.incomeEarned = getNumeric(stockHolding["Income Earned"]);
@@ -3338,10 +3564,11 @@ const ViewFinancial = () => {
     const employeeIdCard = fieldValues.employee_id_card;
     if (employeeIdCard && Object.keys(employeeIdCard).length > 0) {
       const doc: Record<string, unknown> = {};
-      if (getString(employeeIdCard["Company Name"])) doc.companyName = getString(employeeIdCard["Company Name"]);
-      if (getString(employeeIdCard["Employee ID"])) doc.employeeId = getString(employeeIdCard["Employee ID"]);
-      if (getString(employeeIdCard["Designation"])) doc.designation = getString(employeeIdCard["Designation"]);
-      if (Object.keys(doc).length > 0) documents.employee_id_card = doc;
+      assignTextField(doc, "companyName", employeeIdCard["Name of the company"] ?? employeeIdCard["Company Name"]);
+      assignTextField(doc, "employeeName", employeeIdCard["Name of the employee"]);
+      assignNumberOrTextField(doc, "employeeNumber", employeeIdCard["Employee number"] ?? employeeIdCard["Employee ID"]);
+      assignYesNoField(doc, "photoAvailableInd", employeeIdCard["Photo available"], yesNoOptions);
+      if (hasDocumentFields(doc)) documents.employee_id_card = doc;
     }
 
     return documents;
@@ -3417,6 +3644,7 @@ const ViewFinancial = () => {
         documents: transformFinancialFieldValuesToApiFormat(activeSectionValues),
       };
 
+      console.log("requestPayload", requestPayload);
 
       const response = await apiRequest<SubmitResponse, unknown>({
         url: url("financialSaveAndCalculate" as ApiKey),
@@ -3530,6 +3758,15 @@ const ViewFinancial = () => {
         },
         computation_of_income: {
           ...currentValues.computation_of_income,
+          ...(toStringField(calculatedDocuments?.computation_of_income?.years?.[0]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income": toStringField(calculatedDocuments?.computation_of_income?.years?.[0]?.grossTotalIncomeCalculated) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.computation_of_income?.years?.[1]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income Year 2": toStringField(calculatedDocuments?.computation_of_income?.years?.[1]?.grossTotalIncomeCalculated) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.computation_of_income?.years?.[2]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income Year 3": toStringField(calculatedDocuments?.computation_of_income?.years?.[2]?.grossTotalIncomeCalculated) as string }
+            : {}),
           ...(toStringField(calculatedDocuments?.computation_of_income?.totalGrossTotalIncomeCalculated) != null
             ? { "Total Gross Total Income": toStringField(calculatedDocuments?.computation_of_income?.totalGrossTotalIncomeCalculated) as string }
             : {}),
@@ -3539,6 +3776,15 @@ const ViewFinancial = () => {
         },
         itr_individual: {
           ...currentValues.itr_individual,
+          ...(toStringField(calculatedDocuments?.itr_individual?.years?.[0]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income(A+B+C)": toStringField(calculatedDocuments?.itr_individual?.years?.[0]?.grossTotalIncomeCalculated) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.itr_individual?.years?.[1]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income(A+B+C) Year 2": toStringField(calculatedDocuments?.itr_individual?.years?.[1]?.grossTotalIncomeCalculated) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.itr_individual?.years?.[2]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income(A+B+C) Year 3": toStringField(calculatedDocuments?.itr_individual?.years?.[2]?.grossTotalIncomeCalculated) as string }
+            : {}),
           ...(toStringField(calculatedDocuments?.itr_individual?.totalGrossTotalIncomeCalculated) != null
             ? { "Total Gross Total Income": toStringField(calculatedDocuments?.itr_individual?.totalGrossTotalIncomeCalculated) as string }
             : {}),
@@ -3548,6 +3794,15 @@ const ViewFinancial = () => {
         },
         itr_non_individual: {
           ...currentValues.itr_non_individual,
+          ...(toStringField(calculatedDocuments?.itr_non_individual?.years?.[0]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income": toStringField(calculatedDocuments?.itr_non_individual?.years?.[0]?.grossTotalIncomeCalculated) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.itr_non_individual?.years?.[1]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income Year 2": toStringField(calculatedDocuments?.itr_non_individual?.years?.[1]?.grossTotalIncomeCalculated) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.itr_non_individual?.years?.[2]?.grossTotalIncomeCalculated) != null
+            ? { "Gross Total Income Year 3": toStringField(calculatedDocuments?.itr_non_individual?.years?.[2]?.grossTotalIncomeCalculated) as string }
+            : {}),
           ...(toStringField(calculatedDocuments?.itr_non_individual?.totalGrossTotalIncomeCalculated) != null
             ? { "Total Gross Total Income": toStringField(calculatedDocuments?.itr_non_individual?.totalGrossTotalIncomeCalculated) as string }
             : {}),
@@ -3557,8 +3812,23 @@ const ViewFinancial = () => {
         },
         profit_and_loss: {
           ...currentValues.profit_and_loss,
+          ...(toStringField(calculatedDocuments?.profit_and_loss?.years?.[0]?.totalShareholdersFunds) != null
+            ? { "Total Shareholders Funds or Partner's Fund": toStringField(calculatedDocuments?.profit_and_loss?.years?.[0]?.totalShareholdersFunds) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.profit_and_loss?.years?.[1]?.totalShareholdersFunds) != null
+            ? { "Total Shareholders Funds or Partner's Fund Year 2": toStringField(calculatedDocuments?.profit_and_loss?.years?.[1]?.totalShareholdersFunds) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.profit_and_loss?.years?.[2]?.totalShareholdersFunds) != null
+            ? { "Total Shareholders Funds or Partner's Fund Year 3": toStringField(calculatedDocuments?.profit_and_loss?.years?.[2]?.totalShareholdersFunds) as string }
+            : {}),
           ...(toStringField(calculatedDocuments?.profit_and_loss?.avgGrossIncomeCalculated) != null
             ? { "Average Gross Income": toStringField(calculatedDocuments?.profit_and_loss?.avgGrossIncomeCalculated) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.profit_and_loss?.avgProfitBeforeTaxCalculated) != null
+            ? { "Average Profit Before Tax": toStringField(calculatedDocuments?.profit_and_loss?.avgProfitBeforeTaxCalculated) as string }
+            : {}),
+          ...(toStringField(calculatedDocuments?.profit_and_loss?.avgProfitAfterTaxCalculated) != null
+            ? { "Average Profit After Tax": toStringField(calculatedDocuments?.profit_and_loss?.avgProfitAfterTaxCalculated) as string }
             : {}),
         },
         credit_card: {
@@ -3627,13 +3897,13 @@ const ViewFinancial = () => {
         salary_certificate: {
           ...currentValues.salary_certificate,
           ...(toStringField(calculatedDocuments?.salary_certificate?.derivedIncomeCalculated) != null
-            ? { "Gross Salary PA": toStringField(calculatedDocuments?.salary_certificate?.derivedIncomeCalculated) as string }
+            ? { "Derived Income": toStringField(calculatedDocuments?.salary_certificate?.derivedIncomeCalculated) as string }
             : {}),
         },
         salary_revision_letter: {
           ...currentValues.salary_revision_letter,
           ...(toStringField(calculatedDocuments?.salary_revision_letter?.derivedIncomeCalculated) != null
-            ? { "Gross Salary PA": toStringField(calculatedDocuments?.salary_revision_letter?.derivedIncomeCalculated) as string }
+            ? { "Derived Income": toStringField(calculatedDocuments?.salary_revision_letter?.derivedIncomeCalculated) as string }
             : {}),
         },
         stock_holding: {

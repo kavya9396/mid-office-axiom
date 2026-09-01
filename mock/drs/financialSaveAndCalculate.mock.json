@@ -1,23 +1,33 @@
 {
   "response_code": 200,
   "error": false,
-  "message": "32 document(s) saved successfully (0 row(s) inserted, 90 row(s) updated)",
+  "message": "33 document(s) saved successfully (94 row(s) inserted, 91 row(s) updated)",
   "data": {
+    "applicationNumber": "NB0000037",
+    "partyId": "6b420ceb-d0d4-40c2-b16c-537c36bb7be0",
+    "clientType": "LA",
     "documents": {
       "salary_slips": {
         "finDocId": 102,
         "headerStatus": "REUSED",
-        "rowsInserted": 0,
+        "rowsInserted": 3,
         "rowsUpdated": 3,
-        "avgSalaryPmCalculated": 50000,
-        "grossSalaryPaCalculated": 600000,
-        "avgAnnualIncomeCalculated": 650000
+        "nameMatchInd": "Yes",
+        "avgSalaryPmCalculated": 51000,
+        "grossSalaryPaCalculated": 612000,
+        "avgAnnualIncomeCalculated": 662000
       },
       "bank_statement": {
         "finDocId": 103,
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 6,
+        "nameMatchInd": "Yes",
+        "liPremiumDeductionInd": "No",
+        "wineBeerEntriesInd": "No",
+        "medEntryInd": "No",
+        "latest6MonthsInd": "Yes",
+        "overdraftInd": "No",
         "avgBankBalanceCalculated": 546666.67,
         "avgAnnualIncomeCalculated": 3280000.02
       },
@@ -26,6 +36,8 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 6,
+        "nameMatchInd": "Yes",
+        "salaryCreditedInd": "Yes",
         "avgNetSalaryCreditedPmCalculated": 81000,
         "netSalaryCreditedPaCalculated": 1069200,
         "avgAnnualIncomeCalculated": 1166400
@@ -33,8 +45,9 @@
       "commission_statement": {
         "finDocId": 105,
         "headerStatus": "REUSED",
-        "rowsInserted": 0,
+        "rowsInserted": 3,
         "rowsUpdated": 3,
+        "nameMatchInd": "Yes",
         "avgCommissionPmCalculated": 11000,
         "avgAnnualIncomeCalculated": 132000
       },
@@ -43,16 +56,18 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 3,
-        "totalReceiptsCalculated": 30000,
-        "avgMonthlyReceiptsCalculated": 10000,
-        "annualReceiptsCalculated": 120000,
-        "derivedIncomeCalculated": 120000
+        "nameMatchInd": "Yes",
+        "totalReceiptsCalculated": 96000,
+        "avgMonthlyReceiptsCalculated": 32000,
+        "annualReceiptsCalculated": 384000,
+        "derivedIncomeCalculated": 384000
       },
       "sip_statement": {
         "finDocId": 107,
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 6,
+        "latest6MonthsInd": "Yes",
         "avgMonthlySipCalculated": 10000,
         "avgAnnualIncomeCalculated": 600000
       },
@@ -74,13 +89,48 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 3,
+        "years": [
+          {
+            "assessmentYear": "AY 23-24",
+            "grossSalaryPa": 420000,
+            "companyName": "ABCD Company",
+            "nameMatchInd": "Yes"
+          },
+          {
+            "assessmentYear": "AY 24-25",
+            "grossSalaryPa": 460000,
+            "companyName": "ABCD Company",
+            "nameMatchInd": "Yes"
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "grossSalaryPa": 500000,
+            "companyName": "ABCD Company Pvt Ltd",
+            "nameMatchInd": "Yes"
+          }
+        ],
         "avgAnnualIncomeCalculated": 500000
       },
       "form16a": {
         "finDocId": 111,
         "headerStatus": "REUSED",
-        "rowsInserted": 0,
+        "rowsInserted": 1,
         "rowsUpdated": 2,
+        "years": [
+          {
+            "assessmentYear": "AY 23-24",
+            "netReceiptPa": 280000
+          },
+          {
+            "assessmentYear": "AY 24-25",
+            "netReceiptPa": 300000
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "netReceiptPa": 320000
+          }
+        ],
+        "nameMatchInd": "Yes",
         "avgAnnualIncomeCalculated": 320000
       },
       "gst_income": {
@@ -88,6 +138,33 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 4,
+        "years": [
+          {
+            "assessmentYear": "AY 22-23",
+            "grossSales": 800000,
+            "grossPurchases": 550000,
+            "profitAfterGst": 250000
+          },
+          {
+            "assessmentYear": "AY 23-24",
+            "grossSales": 900000,
+            "grossPurchases": 600000,
+            "profitAfterGst": 300000
+          },
+          {
+            "assessmentYear": "AY 24-25",
+            "grossSales": 1000000,
+            "grossPurchases": 650000,
+            "profitAfterGst": 350000
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "grossSales": 1100000,
+            "grossPurchases": 700000,
+            "profitAfterGst": 400000
+          }
+        ],
+        "nameMatchInd": "Yes",
         "totalGrossSalesCalculated": 3800000,
         "avgGrossSalesCalculated": 1000000,
         "avgAnnualIncomeCalculated": 200000
@@ -95,39 +172,211 @@
       "itr_individual": {
         "finDocId": 113,
         "headerStatus": "REUSED",
-        "rowsInserted": 0,
+        "rowsInserted": 24,
         "rowsUpdated": 10,
-        "totalGrossTotalIncomeCalculated": 1150000,
-        "avgGrossTotalIncomeCalculated": 575000
+        "years": [
+          {
+            "assessmentYear": "AY 23-24",
+            "ackNumber": "123456789012300",
+            "itrFilingDt": "2024-07-31",
+            "pfDeduction": 18000,
+            "panBarcodeMatchInd": "Yes",
+            "incomeFromSalary": 400000,
+            "incomeFromHouseProperty": 0,
+            "incomeFromBusiness": 100000,
+            "shortTermCapitalGains": 0,
+            "incomeFromOtherSources": 0,
+            "agriculturalIncome": 0,
+            "exemptIncome": 0,
+            "grossTotalIncomeCalculated": 500000
+          },
+          {
+            "assessmentYear": "AY 24-25",
+            "incomeFromSalary": 450000,
+            "exemptIncome": 0,
+            "ackNumber": "123456789012344",
+            "itrFilingDt": "2025-07-31",
+            "pfDeduction": 20000,
+            "panBarcodeMatchInd": "Yes",
+            "incomeFromHouseProperty": 0,
+            "incomeFromBusiness": 150000,
+            "shortTermCapitalGains": 0,
+            "incomeFromOtherSources": 0,
+            "agriculturalIncome": 0,
+            "grossTotalIncomeCalculated": 600000
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "incomeFromSalary": 500000,
+            "incomeFromHouseProperty": 0,
+            "incomeFromBusiness": 200000,
+            "shortTermCapitalGains": 0,
+            "incomeFromOtherSources": 15000,
+            "agriculturalIncome": 0,
+            "exemptIncome": 0,
+            "ackNumber": "123456789012345",
+            "itrFilingDt": "2026-06-15",
+            "pfDeduction": 21600,
+            "panBarcodeMatchInd": "Yes",
+            "grossTotalIncomeCalculated": 700000
+          }
+        ],
+        "nameMatchInd": "Yes",
+        "totalGrossTotalIncomeCalculated": 1800000,
+        "avgGrossTotalIncomeCalculated": 600000
       },
       "itr_non_individual": {
         "finDocId": 114,
         "headerStatus": "REUSED",
-        "rowsInserted": 0,
+        "rowsInserted": 30,
         "rowsUpdated": 4,
-        "totalGrossTotalIncomeCalculated": 1750000,
-        "avgGrossTotalIncomeCalculated": 875000
+        "years": [
+          {
+            "assessmentYear": "AY 23-24",
+            "ackNumber": "123456789012310",
+            "itrFilingDt": "2024-09-30",
+            "pfDeduction": 0,
+            "panBarcodeMatchInd": "Yes",
+            "incomeFromSalary": 0,
+            "incomeFromHouseProperty": 0,
+            "incomeFromBusiness": 700000,
+            "shortTermCapitalGains": 0,
+            "incomeFromOtherSources": 30000,
+            "agriculturalIncome": 0,
+            "exemptIncome": 0,
+            "grossTotalIncomeCalculated": 730000
+          },
+          {
+            "assessmentYear": "AY 24-25",
+            "incomeFromBusiness": 800000,
+            "ackNumber": "123456789012320",
+            "itrFilingDt": "2025-09-30",
+            "pfDeduction": 0,
+            "panBarcodeMatchInd": "Yes",
+            "incomeFromSalary": 0,
+            "incomeFromHouseProperty": 0,
+            "shortTermCapitalGains": 0,
+            "incomeFromOtherSources": 40000,
+            "agriculturalIncome": 0,
+            "exemptIncome": 0,
+            "grossTotalIncomeCalculated": 840000
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "incomeFromBusiness": 900000,
+            "incomeFromOtherSources": 50000,
+            "ackNumber": "123456789012399",
+            "itrFilingDt": "2026-06-20",
+            "pfDeduction": 10000,
+            "panBarcodeMatchInd": "Yes",
+            "incomeFromSalary": 0,
+            "incomeFromHouseProperty": 0,
+            "shortTermCapitalGains": 0,
+            "agriculturalIncome": 0,
+            "exemptIncome": 0,
+            "grossTotalIncomeCalculated": 950000
+          }
+        ],
+        "nameMatchInd": "Yes",
+        "totalGrossTotalIncomeCalculated": 2520000,
+        "avgGrossTotalIncomeCalculated": 840000
       },
       "computation_of_income": {
         "finDocId": 115,
         "headerStatus": "REUSED",
-        "rowsInserted": 0,
+        "rowsInserted": 18,
         "rowsUpdated": 3,
-        "totalGrossTotalIncomeCalculated": 1200000,
-        "avgGrossTotalIncomeCalculated": 600000
+        "years": [
+          {
+            "assessmentYear": "AY 23-24",
+            "incomeFromSalary": 500000,
+            "incomeFromHouseProperty": 0,
+            "incomeFromBusiness": 0,
+            "shortTermCapitalGains": 0,
+            "incomeFromOtherSources": 0,
+            "agriculturalIncome": 0,
+            "exemptIncome": 2000,
+            "grossTotalIncomeCalculated": 502000
+          },
+          {
+            "assessmentYear": "AY 24-25",
+            "incomeFromSalary": 650000,
+            "incomeFromHouseProperty": 0,
+            "incomeFromBusiness": 0,
+            "shortTermCapitalGains": 0,
+            "incomeFromOtherSources": 0,
+            "agriculturalIncome": 0,
+            "exemptIncome": 3448,
+            "grossTotalIncomeCalculated": 653448
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "incomeFromSalary": 45566,
+            "exemptIncome": 3440,
+            "incomeFromHouseProperty": 0,
+            "incomeFromBusiness": 0,
+            "shortTermCapitalGains": 0,
+            "incomeFromOtherSources": 0,
+            "agriculturalIncome": 0,
+            "grossTotalIncomeCalculated": 49006
+          }
+        ],
+        "totalGrossTotalIncomeCalculated": 1204454,
+        "avgGrossTotalIncomeCalculated": 401484.67
       },
       "profit_and_loss": {
         "finDocId": 116,
         "headerStatus": "REUSED",
-        "rowsInserted": 0,
+        "rowsInserted": 15,
         "rowsUpdated": 13,
-        "avgGrossIncomeCalculated": 400000
+        "years": [
+          {
+            "assessmentYear": "AY 23-24",
+            "shareCapital": 500000,
+            "reservesSurplus": 200000,
+            "pbdt": 450000,
+            "depreciation": 50000,
+            "pbt": 400000,
+            "tax": 100000,
+            "profitAfterTax": 300000,
+            "sales": 2500000,
+            "totalShareholdersFunds": "700000"
+          },
+          {
+            "assessmentYear": "AY 24-25",
+            "profitAfterTax": 400000,
+            "sales": 2800000,
+            "shareCapital": 550000,
+            "reservesSurplus": 250000,
+            "totalShareholdersFunds": "800000",
+            "pbdt": 560000,
+            "depreciation": 60000,
+            "pbt": 500000,
+            "tax": 100000
+          },
+          {
+            "assessmentYear": "AY 25-26",
+            "profitAfterTax": 500000,
+            "sales": 3200000,
+            "shareCapital": 600000,
+            "reservesSurplus": 300000,
+            "totalShareholdersFunds": "900000",
+            "pbdt": 680000,
+            "depreciation": 80000,
+            "pbt": 600000,
+            "tax": 100000
+          }
+        ],
+        "avgGrossIncomeCalculated": 400000,
+        "avgProfitBeforeTaxCalculated": 500000,
+        "avgProfitAfterTaxCalculated": 400000
       },
       "credit_card": {
         "finDocId": 117,
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 1,
+        "nameMatchInd": "Yes",
         "derivedIncomeCalculated": 100000,
         "avgIncomeCalculated": 100000
       },
@@ -136,6 +385,7 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 1,
+        "nameMatchInd": "Yes",
         "derivedIncomeCalculated": 50000,
         "avgIncomeCalculated": 50000
       },
@@ -144,6 +394,7 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 1,
+        "nameMatchInd": "Yes",
         "derivedIncomeCalculated": 100000,
         "avgIncomeCalculated": 100000
       },
@@ -152,6 +403,7 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 1,
+        "nameMatchInd": "Yes",
         "derivedIncomeCalculated": 360000,
         "avgIncomeCalculated": 360000
       },
@@ -160,6 +412,7 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 1,
+        "nameMatchInd": "Yes",
         "derivedIncomeCalculated": 200000,
         "avgIncomeCalculated": 200000
       },
@@ -182,6 +435,7 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 1,
+        "nameMatchInd": "Yes",
         "derivedIncomeCalculated": 600000
       },
       "salary_certificate": {
@@ -203,6 +457,7 @@
         "headerStatus": "REUSED",
         "rowsInserted": 0,
         "rowsUpdated": 1,
+        "nameMatchInd": "Yes",
         "derivedIncomeCalculated": 250000,
         "avgIncomeCalculated": 250000
       },
@@ -226,6 +481,13 @@
         "rowsInserted": 0,
         "rowsUpdated": 1
       },
+      "employee_id_card": {
+        "finDocId": 288,
+        "headerStatus": "REUSED",
+        "rowsInserted": 0,
+        "rowsUpdated": 1,
+        "photoAvailableInd": "Yes"
+      },
       "advance_tax": {
         "finDocId": 131,
         "headerStatus": "REUSED",
@@ -236,13 +498,15 @@
         "finDocId": 132,
         "headerStatus": "REUSED",
         "rowsInserted": 0,
-        "rowsUpdated": 1
+        "rowsUpdated": 1,
+        "nameMatchInd": "Yes"
       },
       "ca_balance_sheet": {
         "finDocId": 133,
         "headerStatus": "REUSED",
         "rowsInserted": 0,
-        "rowsUpdated": 1
+        "rowsUpdated": 1,
+        "nameMatchInd": "Yes"
       }
     }
   }
