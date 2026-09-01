@@ -22,12 +22,6 @@ import type { BreResponse } from "../../../types/drs.types";
 import { title } from "../../../utils/constant";
 import { formatDate } from "../../../utils/dataFormat";
 
-type BRERow = {
-  bre?: string;
-  initialBre?: string;
-  finalBre?: string;
-};
-
 interface BreDecisionProps {
   readOnly?: boolean;
 }
@@ -76,7 +70,7 @@ const BreDecision = ({
    * In that case, show breDecision as both initial and final.
    */
   const latestBreDecisionData = readOnly
-    ? 
+    ?
     searchData?.latestBreDecision ??
       searchData?.breDecision
     : drsState.data?.latestBreDecision ??
@@ -283,136 +277,35 @@ const renderDiscrepancy = (
     roleType !== "AMR_MEDICAL_TASK" &&
     roleType !== "AMR_NON_MEDICAL_TASK" && roleType !== "CPT_DATA_ENTRY_NMR_TASK" && roleType !== "CPT_DATA_ENTRY_MR_TASK";
 
-  const breColumns: Column<BRERow>[] = [
+  const breComparisonRows = [
     {
-      key: "bre",
-      header: "BRE",
-      width: "8%",
+      label: "Status",
+      initial: isInitialBreSuccess ? "Success" : "-",
+      final: isFinalBreSuccess ? "Success" : "-",
     },
     {
-      key: "initialBre",
-      header: "Initial BRE",
-      render: (value, row) => {
-        if (
-          row.bre === "BRE Discrepancy"
-        ) {
-          return renderDiscrepancy(
-            value,
-            row.finalBre,
-          );
-        }
-
-        if (row.bre === "BRE Decision") {
-          return renderDifference(
-            value,
-            row.finalBre,
-          );
-        }
-
-        return value;
-      },
+      label: "Decision",
+      initial: breDecisionData?.decision ?? "-",
+      final: finalBreDecision || "-",
+      renderInitial: () => renderDifference(breDecisionData?.decision ?? "-", finalBreDecision || "-"),
+      renderFinal: () => renderDifference(finalBreDecision || "-", breDecisionData?.decision ?? "-"),
     },
     {
-      key: "finalBre",
-      header: "Final BRE",
-      render: (value, row) => {
-        if (
-          row.bre === "BRE Discrepancy"
-        ) {
-          return renderDiscrepancy(
-            value,
-            row.initialBre,
-          );
-        }
-
-        if (row.bre === "BRE Decision") {
-          return renderDifference(
-            value,
-            row.initialBre,
-          );
-        }
-
-        return value;
-      },
-      headerRender: () => (
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent:
-              "space-between",
-            width: "100%",
-          }}
-        >
-          <Typography
-            sx={{
-              fontSize: "12px",
-              fontWeight: 600,
-            }}
-          >
-            Final BRE
-          </Typography>
-
-          {showRefreshButton && (
-            <CustomButton
-              size="small"
-              variant="outlined"
-              sx={{
-                minWidth: "auto",
-                width: 24,
-                height: 24,
-                p: 0.5,
-                bgcolor: "#fff",
-                "&:hover": {
-                  bgcolor: "#fff",
-                },
-              }}
-              onClick={handleRefresh}
-            >
-              <RefreshIcon />
-            </CustomButton>
-          )}
-        </Box>
-      ),
-    },
-  ];
-
-  const breTableData: BRERow[] = [
-    {
-      bre: "BRE Status",
-      initialBre: isInitialBreSuccess
-        ? "Success"
-        : "-",
-      finalBre: isFinalBreSuccess
-        ? "Success"
-        : "-",
+      label: "Remarks",
+      initial: breDecisionData?.remarks ?? "-",
+      final: finalBreRemarks || "-",
     },
     {
-      bre: "BRE Decision",
-      initialBre:
-        breDecisionData?.decision ?? "",
-      finalBre: finalBreDecision,
+      label: "Discrepancy",
+      initial: breDecisionData?.discrepancy ?? "-",
+      final: finalBreDiscrepancy || "-",
+      renderInitial: () => renderDiscrepancy(breDecisionData?.discrepancy ?? undefined, finalBreDiscrepancy ?? undefined),
+      renderFinal: () => renderDiscrepancy(finalBreDiscrepancy ?? undefined, breDecisionData?.discrepancy ?? undefined),
     },
     {
-      bre: "BRE Remarks",
-      initialBre:
-        breDecisionData?.remarks ?? "",
-      finalBre: finalBreRemarks,
-    },
-    {
-      bre: "BRE Discrepancy",
-      initialBre:
-        breDecisionData?.discrepancy ?? "",
-      finalBre: finalBreDiscrepancy,
-    },
-    {
-      bre: "BRE Timestamp",
-      initialBre:
-        formatDate(
-          breDecisionData?.timestamp,
-        ) ?? "",
-      finalBre:
-        formatDate(finalBreTimestamp) ?? "",
+      label: "Timestamp",
+      initial: formatDate(breDecisionData?.timestamp) ?? "-",
+      final: formatDate(finalBreTimestamp) ?? "-",
     },
   ];
 
@@ -433,11 +326,67 @@ const renderDiscrepancy = (
         }
         defaultExpanded
       >
-        <CustomTable
-          title=""
-          columns={breColumns}
-          data={breTableData}
-        />
+        <Box
+          sx={{
+            border: "1px solid #E3E7EB",
+            borderRadius: "8px",
+            overflow: "hidden",
+            backgroundColor: "#FFFFFF",
+          }}
+        >
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: "minmax(120px, 0.85fr) minmax(0, 1fr) minmax(0, 1fr)",
+              backgroundColor: "#FFF0E2",
+              borderBottom: "1px solid #E3E7EB",
+            }}
+          >
+            <Typography sx={{ p: 1, fontSize: 11, fontWeight: 700, color: "#5C2B1A" }}>
+              BRE CHECK
+            </Typography>
+            <Typography sx={{ p: 1, fontSize: 11, fontWeight: 700, color: "#5C2B1A" }}>
+              Initial BRE
+            </Typography>
+            <Box sx={{ p: 0.5, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1 }}>
+              <Typography sx={{ p: 0.5, fontSize: 11, fontWeight: 700, color: "#5C2B1A" }}>
+                Final BRE
+              </Typography>
+              {showRefreshButton && (
+                <CustomButton
+                  aria-label="Refresh BRE"
+                  size="small"
+                  variant="outlined"
+                  onClick={handleRefresh}
+                  sx={{ minWidth: 30, width: 30, height: 30, p: 0, borderRadius: "6px", borderColor: "#A92129", color: "#A92129", backgroundColor: "#FFFFFF" }}
+                >
+                  <RefreshIcon />
+                </CustomButton>
+              )}
+            </Box>
+          </Box>
+          {breComparisonRows.map((row) => (
+            <Box
+              key={row.label}
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "minmax(120px, 0.85fr) minmax(0, 1fr) minmax(0, 1fr)",
+                borderBottom: "1px solid #E3E7EB",
+                "&:last-child": { borderBottom: 0 },
+              }}
+            >
+              <Typography sx={{ p: 1, fontSize: 11, fontWeight: 700, color: "#25313C", backgroundColor: "#F7F9FA" }}>
+                {row.label}
+              </Typography>
+              <Box sx={{ p: 1, minWidth: 0, fontSize: 11, color: "#46515B", overflowWrap: "anywhere" }}>
+                {row.renderInitial ? row.renderInitial() : row.initial}
+              </Box>
+              <Box sx={{ p: 1, minWidth: 0, fontSize: 11, color: "#46515B", overflowWrap: "anywhere" }}>
+                {row.renderFinal ? row.renderFinal() : row.final}
+              </Box>
+            </Box>
+          ))}
+        </Box>
       </CustomAccordion>
 
       <CustomDialog

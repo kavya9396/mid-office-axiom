@@ -41,6 +41,7 @@ const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
 interface QuickLinksProps {
     applicationNo?: string;
     hideSearchApplication?: boolean;
+    embedded?: boolean;
 }
 
 interface QuickLinkItem {
@@ -196,11 +197,12 @@ const getSelectedCaseContext = (): SelectedCaseContext => {
 const QuickLinks = ({
     applicationNo,
     hideSearchApplication = false,
+    embedded = false,
 }: QuickLinksProps) => {
     const navigate = useNavigate();
     const location = useLocation();
     const dispatch = useAppDispatch();
-    const [isOpen, setIsOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(embedded);
     const [openReferToItDialog, setOpenReferToItDialog] = useState(false);
     const [referToItLoading, setReferToItLoading] = useState(false);
     const [referToItError, setReferToItError] = useState<string | null>(null);
@@ -526,10 +528,11 @@ const QuickLinks = ({
         <Box
             data-drs-quick-links="true"
             sx={{
-                position: "fixed",
-                bottom: "10%",
-                right: "3%",
-                zIndex: 1000,
+                position: embedded ? "relative" : "fixed",
+                bottom: embedded ? "auto" : "10%",
+                right: embedded ? "auto" : "3%",
+                zIndex: embedded ? "auto" : 1000,
+                width: embedded ? "100%" : "auto",
             }}
         >
             {isOpen && (
@@ -537,7 +540,7 @@ const QuickLinks = ({
                     sx={{
                         ...columnFlex,
                         gap: 2,
-                        width: 276,
+                        width: embedded ? "100%" : 276,
                         mb: 2,
                     }}
                 >
@@ -599,7 +602,7 @@ const QuickLinks = ({
                 </Box>
             )}
 
-            <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+            {!embedded && <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
                 <Box
                     onClick={toggleQuickLinks}
                     sx={{
@@ -645,7 +648,7 @@ const QuickLinks = ({
                         ))}
                     </Box>
                 </Box>
-            </Box>
+            </Box>}
 
             <CustomSnackbar
                 open={quickLinkSnackbar.open}

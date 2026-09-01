@@ -1,17 +1,6 @@
-import {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
-import {
-  useLocation,
-  useNavigate,
-} from "react-router-dom";
-import {
-  useDispatch,
-  useSelector,
-} from "react-redux";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 import {
   Alert,
   Box,
@@ -29,15 +18,13 @@ import {
 import { drsThunk } from "../../store/thunks/drsThunk";
 import { breThunk } from "../../store/thunks/breThunk";
 import { completeTaskThunk } from "../../store/thunks/completeTaskThunk";
-import type {
-  AppDispatch,
-  RootState,
-} from "../../store/store";
+import type { AppDispatch, RootState } from "../../store/store";
 import BackButton from "../../components/layout/BackButton";
 import CustomButton from "../../components/ui/Button/Button";
 import { title } from "../../utils/constant";
 import { getInboxPath } from "../../routes/routes";
 import { preloginThunk } from "../../store/thunks/preloginThunk";
+import QuickLinks from "./QuickLinks";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -77,12 +64,10 @@ const mapper = {
   HOD_TASK: "RETAIL_HOD_POOL",
   SR_UW_TASK: "RETAIL_SR_UW_POOL",
   READY_FOR_ISSUANCE_TASK: "RETAIL_READY_FOR_ISSUANCE_POOL",
-  SYSTEM_WAIT_POOL_AMR_NON_MEDICAL:
-    "RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
+  SYSTEM_WAIT_POOL_AMR_NON_MEDICAL: "RETAIL_SYSTEM_WAIT_POOL_NON_MEDICAL",
   AMR_NON_MEDICAL_TASK: "RETAIL_AMR_NON_MEDICAL",
   RECONSIDERATION_TASK: "RETAIL_RECONSIDERATION_POOL",
-  PRE_ISSUANCE_SERVICING_TASK:
-    "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
+  PRE_ISSUANCE_SERVICING_TASK: "RETAIL_PRE_ISSUANCE_SERVICING_POOL",
   POST_ISSUANCE_TASK: "POST_ISSUANCE_TASK",
   EXCEPTIONAL_TASK: "RETAIL_EXCEPTIONAL_POOL",
   PIVV_TASK: "PIVV_TASK",
@@ -93,8 +78,7 @@ const mapper = {
   VENDOR_CMO_TASK: "RETAIL_VENDOR_CMO_POOL",
   COPS_TASK: "RETAIL_COPS_POOL",
   IT_TASK: "RETAIL_IT_POOL",
-  SYSTEM_WAIT_POOL_AMR_MEDICAL:
-    "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
+  SYSTEM_WAIT_POOL_AMR_MEDICAL: "RETAIL_SYSTEM_WAIT_POOL_AMR_MEDICAL",
   RI_TASK: "RETAIL_REINSURER_POOL",
   REQUIREMENT_POOL: "RETAIL_REQUIREMENT_REVIEW_POOL",
   CUW_CLAIM_AUDIT_TASK: "RETAIL_CUW_CLAIM_AUDIT",
@@ -124,9 +108,7 @@ const getSelectedCaseContext = (): SelectedCaseContext => {
   try {
     const value = localStorage.getItem("selectedCaseContext");
 
-    return value
-      ? (JSON.parse(value) as SelectedCaseContext)
-      : {};
+    return value ? (JSON.parse(value) as SelectedCaseContext) : {};
   } catch {
     return {};
   }
@@ -158,7 +140,9 @@ const isUwToolkitAccordion = (accordionId: string): boolean =>
   normalizeAccordionId(accordionId) === "uwtoolkit";
 
 const normalizeValue = (value: unknown): string =>
-  String(value ?? "").trim().toUpperCase();
+  String(value ?? "")
+    .trim()
+    .toUpperCase();
 
 const toRecord = (value: unknown): Record<string, unknown> =>
   value && typeof value === "object" && !Array.isArray(value)
@@ -185,9 +169,7 @@ const getRequirementRows = (value: unknown): Record<string, unknown>[] => {
   const payload = getNestedData(value);
   const requirements = payload.requirementManagement;
 
-  return Array.isArray(requirements)
-    ? requirements.map(toRecord)
-    : [];
+  return Array.isArray(requirements) ? requirements.map(toRecord) : [];
 };
 
 const getMiscItems = (value: unknown): Record<string, unknown>[] => {
@@ -217,17 +199,11 @@ const DRS = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch<AppDispatch>();
 
-  const application = location.state?.application as
-    | ApplicationRow
-    | undefined;
+  const application = location.state?.application as ApplicationRow | undefined;
 
-  const drsData = useSelector(
-    (state: RootState) => state.drs.data,
-  );
+  const drsData = useSelector((state: RootState) => state.drs.data);
 
-  const masterData = useSelector(
-    (state: RootState) => state.masterData,
-  );
+  const masterData = useSelector((state: RootState) => state.masterData);
 
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -241,13 +217,9 @@ const DRS = () => {
   const lastRequestKeyRef = useRef<string | null>(null);
   const isBrowserRefreshRef = useRef(isBrowserRefresh());
 
-  const selectedCaseContext = useMemo(
-    () => getSelectedCaseContext(),
-    [],
-  );
+  const selectedCaseContext = useMemo(() => getSelectedCaseContext(), []);
 
-  const storedRoleType =
-    localStorage.getItem("roleType")?.trim() ?? "";
+  const storedRoleType = localStorage.getItem("roleType")?.trim() ?? "";
 
   const roleType =
     application?.roleType?.trim() ||
@@ -278,7 +250,7 @@ const DRS = () => {
   }, [application]);
 
   const layoutAccordions = useMemo(
-    () => (layout ? DRS_LAYOUTS[layout] ?? [] : []),
+    () => (layout ? (DRS_LAYOUTS[layout] ?? []) : []),
     [layout],
   );
 
@@ -299,40 +271,33 @@ const DRS = () => {
 
   const applicationNo = String(
     application?.applicationNo ??
-    selectedCaseContext.applicationNo ??
-    localStorage.getItem("applicationNo") ??
-    "",
+      selectedCaseContext.applicationNo ??
+      localStorage.getItem("applicationNo") ??
+      "",
   ).trim();
 
   const userId = String(
     application?.userId ??
-    selectedCaseContext.userId ??
-    localStorage.getItem("userId") ??
-    localStorage.getItem("username") ??
-    "",
+      selectedCaseContext.userId ??
+      localStorage.getItem("userId") ??
+      localStorage.getItem("username") ??
+      "",
   ).trim();
 
   const businessType = String(
     application?.businessType ??
-    selectedCaseContext.businessType ??
-    localStorage.getItem("businessType") ??
-    "retail",
+      selectedCaseContext.businessType ??
+      localStorage.getItem("businessType") ??
+      "retail",
   )
     .trim()
     .toLowerCase();
 
-  const eventName =
-    businessType === "group"
-      ? "BRE-GROUP"
-      : "BRE-RETAIL";
-      console.log('eventName',businessType,eventName)
+  const eventName = businessType === "group" ? "BRE-GROUP" : "BRE-RETAIL";
+  console.log("eventName", businessType, eventName);
 
   useEffect(() => {
-    if (
-      !applicationNo ||
-      !userId ||
-      !roleType
-    ) {
+    if (!applicationNo || !userId || !roleType) {
       void Promise.resolve().then(() => {
         setIsPageLoading(false);
       });
@@ -398,9 +363,7 @@ const DRS = () => {
       } catch (error) {
         console.error("Failed to load application details:", error);
       } finally {
-        if (
-          lastRequestKeyRef.current === requestKey
-        ) {
+        if (lastRequestKeyRef.current === requestKey) {
           setIsPageLoading(false);
         }
       }
@@ -418,11 +381,7 @@ const DRS = () => {
   ]);
 
   const visibleAccordions = useMemo(
-    () =>
-      getPoolWiseAvailableAccordions(
-        layout,
-        drsData,
-      ),
+    () => getPoolWiseAvailableAccordions(layout, drsData),
     [layout, drsData],
   );
 
@@ -433,20 +392,20 @@ const DRS = () => {
 
     const rawTaskId = String(
       application?.taskId ??
-      selectedCaseContext.taskId ??
-      selectedCaseContext.taskCompositeId ??
-      localStorage.getItem("taskId") ??
-      localStorage.getItem("taskCompositeId") ??
-      "",
+        selectedCaseContext.taskId ??
+        selectedCaseContext.taskCompositeId ??
+        localStorage.getItem("taskId") ??
+        localStorage.getItem("taskCompositeId") ??
+        "",
     ).trim();
 
     const taskId = normalizeTaskId(rawTaskId);
 
     const instanceId = String(
       application?.instanceId ??
-      selectedCaseContext.instanceId ??
-      localStorage.getItem("instanceId") ??
-      "",
+        selectedCaseContext.instanceId ??
+        localStorage.getItem("instanceId") ??
+        "",
     ).trim();
 
     if (!applicationNo || !userId) {
@@ -471,15 +430,11 @@ const DRS = () => {
 
     if (roleType === "CPT_DATA_ENTRY_NMR_TASK") {
       const requirementRows = getRequirementRows(drsData);
-      const statuses = requirementRows.map((row) =>
-        normalizeValue(row.status),
-      );
+      const statuses = requirementRows.map((row) => normalizeValue(row.status));
       const hasPendingRequirement = statuses.includes("PENDING");
       const areAllRequirementsAccepted =
         statuses.length > 0 &&
-        statuses.every((status) =>
-          ["ACCEPT", "ACCEPTED"].includes(status),
-        );
+        statuses.every((status) => ["ACCEPT", "ACCEPTED"].includes(status));
       const miscItems = getMiscItems(masterData);
 
       if (hasPendingRequirement) {
@@ -541,9 +496,7 @@ const DRS = () => {
         }),
       ).unwrap();
 
-      await dispatch(
-        completeTaskThunk(payload),
-      ).unwrap();
+      await dispatch(completeTaskThunk(payload)).unwrap();
 
       setSnackbar({
         open: true,
@@ -555,10 +508,7 @@ const DRS = () => {
         navigate(getInboxPath());
       }, 800);
     } catch (error) {
-      console.error(
-        "Failed to submit application:",
-        error,
-      );
+      console.error("Failed to submit application:", error);
 
       setSnackbar({
         open: true,
@@ -598,7 +548,7 @@ const DRS = () => {
           "&:hover": {
             bgcolor: "#941f24",
             boxShadow: "none",
-          }
+          },
         }}
       >
         <Box
@@ -639,11 +589,7 @@ const DRS = () => {
           backgroundColor: "#f5f7fa",
         }}
       >
-        <CircularProgress
-          size={42}
-          thickness={4}
-          sx={{ color: "#f58220" }}
-        />
+        <CircularProgress size={42} thickness={4} sx={{ color: "#f58220" }} />
 
         <Typography
           variant="body2"
@@ -658,13 +604,62 @@ const DRS = () => {
     );
   }
 
-  const hasUwToolkit = visibleAccordions.some(
-    (accordionId) =>
-      isUwToolkitAccordion(String(accordionId)),
+  const hasUwToolkit = visibleAccordions.some((accordionId) =>
+    isUwToolkitAccordion(String(accordionId)),
   );
   const shouldShowSubmitButton =
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK";
+  const decisionAccordions = new Set([
+    "decision",
+    "uwDecision",
+    "pivvDecision",
+    "riskDecision",
+    "reconsiderationPoolDecision",
+    "exceptionDecision",
+    "hodDecision",
+    "sruwDecision",
+    "hoCMODecision",
+    "reinsurerDecision",
+  ]);
+  const leftAccordions = new Set(["breDecision"]);
+  const fullWidthAccordions = new Set([
+    "requirementManagement",
+    "decisionHistory",
+  ]);
+  const renderAccordion = (accordionId: string) => {
+    const AccordionComponent =
+      accordionRegistry[accordionId as keyof typeof accordionRegistry];
+
+    if (!AccordionComponent) {
+      return null;
+    }
+
+    return (
+      <Box key={accordionId} sx={{ minWidth: 0 }}>
+        {shouldShowSubmitButton &&
+          isUwToolkitAccordion(accordionId) &&
+          renderSubmitButton()}
+        <AccordionComponent />
+      </Box>
+    );
+  };
+  const leftSections = visibleAccordions.filter((id) =>
+    leftAccordions.has(String(id)),
+  );
+  const decisionSections = visibleAccordions.filter((id) =>
+    decisionAccordions.has(String(id)),
+  );
+  const centerSections = visibleAccordions.filter(
+    (id) =>
+      !leftAccordions.has(String(id)) &&
+      !decisionAccordions.has(String(id)) &&
+      !fullWidthAccordions.has(String(id)) &&
+      String(id) !== "quickLinks",
+  );
+  const fullWidthSections = visibleAccordions.filter((id) =>
+    fullWidthAccordions.has(String(id)),
+  );
   return (
     <>
       <BackButton
@@ -718,41 +713,102 @@ const DRS = () => {
                 {applicationNo}
               </Typography>
             </Box>
-
           </Box>
         }
       />
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
+          px: { xs: 1, md: 2 },
+          pb: 3,
+          backgroundColor: "#f4f6f8",
+          minHeight: "calc(100vh - 64px)",
         }}
       >
-        {visibleAccordions.map((accordionId) => {
-          const AccordionComponent =
-            accordionRegistry[accordionId];
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: "minmax(250px, 0.85fr) minmax(420px, 1.65fr) minmax(270px, 0.9fr)",
+            },
+            alignItems: "start",
+            gap: { xs: 1, md: 1.5 },
+            maxWidth: 1800,
+            mx: "auto",
+          }}
+        >
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              position: { lg: "sticky" },
+              top: { lg: 8 },
+              maxHeight: { lg: "calc(100vh - 80px)" },
+              overflow: { lg: "auto" },
+              scrollbarWidth: "thin",
+            }}
+          >
+            {leftSections.map((accordionId) =>
+              renderAccordion(String(accordionId)),
+            )}
+          </Box>
 
-          if (!AccordionComponent) {
-            return null;
-          }
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              minWidth: 0,
+              maxHeight: { lg: "calc(100vh - 80px)" },
+              overflowY: { lg: "auto" },
+              scrollbarWidth: "thin",
+              pr: { lg: 0.5 },
+            }}
+          >
+            {centerSections.map((accordionId) =>
+              renderAccordion(String(accordionId)),
+            )}
+            {shouldShowSubmitButton && !hasUwToolkit && renderSubmitButton()}
+          </Box>
 
-          const showSubmitBeforeAccordion =
-            isUwToolkitAccordion(
-              String(accordionId),
-            );
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              position: { lg: "sticky" },
+              top: { lg: 8 },
+              maxHeight: { lg: "calc(100vh - 80px)" },
+              overflow: { lg: "auto" },
+              scrollbarWidth: "thin",
+            }}
+          >
+            {decisionSections.map((accordionId) =>
+              renderAccordion(String(accordionId)),
+            )}
+            {visibleAccordions.includes("quickLinks") && (
+              <QuickLinks applicationNo={applicationNo} embedded />
+            )}
+          </Box>
+        </Box>
 
-          return (
-            <Box key={accordionId}>
-              {shouldShowSubmitButton && showSubmitBeforeAccordion &&
-                renderSubmitButton()}
-
-              <AccordionComponent />
-            </Box>
-          );
-        })}
-
-        {shouldShowSubmitButton && !hasUwToolkit && renderSubmitButton()}
+        {fullWidthSections.length > 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              gap: 1,
+              maxWidth: 1800,
+              mx: "auto",
+              mt: 1.5,
+            }}
+          >
+            {fullWidthSections.map((accordionId) =>
+              renderAccordion(String(accordionId)),
+            )}
+          </Box>
+        )}
       </Box>
       <Snackbar
         open={snackbar.open}
