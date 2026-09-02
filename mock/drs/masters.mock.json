@@ -2530,6 +2530,13 @@
         "value": "Refer to IT",
         "isActive": "Y",
         "miscMastId": "128",
+        "type": "CUW"
+      },{
+        "code": "REF_IT",
+        "description": "Refer to IT",
+        "value": "Refer to IT",
+        "isActive": "Y",
+        "miscMastId": "128",
         "type": "REF_IT"
       },
       {

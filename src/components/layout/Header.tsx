@@ -12,11 +12,12 @@ import {
   useState,
   type MouseEvent,
 } from "react";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import Logo from "../../assets/ICICI Logo.svg";
 import {
   KeyDownArrowIcon,
+  KeyLeftArrowIcon,
   KeyRightArrowIcon,
   KeyUpArrowIcon,
   LogoutIcon,
@@ -37,6 +38,11 @@ type MiscMaster = {
   description?: unknown;
   isActive?: unknown;
 };
+
+interface HeaderProps {
+  inboxPath?: string;
+  onBackToInbox?: () => void;
+}
 
 const getSessionTimeoutMs = () => {
   try {
@@ -105,8 +111,19 @@ const formatSessionTime = (remainingMs: number) => {
   return `${minutes}:${seconds}`;
 };
 
-const Header = () => {
+const Header = ({
+  inboxPath = "/inbox",
+  onBackToInbox,
+}: HeaderProps) => {
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const normalizedPathname =
+    location.pathname.replace(/\/+$/, "") || "/";
+  const showBackToInbox = ![
+    "/login",
+    "/inbox",
+  ].includes(normalizedPathname.toLowerCase());
 
   const sessionTimeoutMsRef = useRef<number | null>(null);
   const sessionDeadlineRef = useRef<number | null>(null);
@@ -251,6 +268,15 @@ const Header = () => {
     navigate("/login");
   };
 
+  const handleBackToInbox = () => {
+    if (onBackToInbox) {
+      onBackToInbox();
+      return;
+    }
+
+    navigate(inboxPath);
+  };
+
   return (
     <>
       <Box
@@ -262,11 +288,49 @@ const Header = () => {
           background: "linear-gradient(to bottom,#F58220 0%,#E65318 42%,#C92E27 72%,#98252B 100%)",
           boxShadow:
             "0 3px 12px rgba(111, 24, 24, 0.25)",
-          position: "relative",
-          // zIndex: 1100,
+          position: "sticky",
+          top: 0,
+          zIndex: 1200,
+          flexShrink: 0,
           overflow: "hidden",
         }}
       >
+        {/* BACK TO INBOX */}
+        {showBackToInbox && (
+          <Button
+            onClick={handleBackToInbox}
+            aria-label="Back to Inbox"
+            disableRipple
+            startIcon={<KeyLeftArrowIcon />}
+            sx={{
+              minWidth: { xs: 10, sm: 10 },
+              height: HEADER_HEIGHT,
+              flexShrink: 0,
+              color: "#FFFFFF",
+              backgroundColor: "rgba(126, 22, 31, 0.42)",
+              borderRadius: 0,
+              borderRight: "1px solid rgba(255,255,255,0.25)",
+              textTransform: "none",
+              fontSize: 12,
+              fontWeight: 700,
+              whiteSpace: "nowrap",
+              "& .MuiButton-startIcon": {
+                m: { xs: 0, sm: "0 6px 0 0" },
+              },
+              "&:hover": {
+                backgroundColor: "rgba(126, 22, 31, 0.62)",
+              },
+            }}
+          >
+            {/* <Box
+              component="span"
+              sx={{ display: { xs: "none", sm: "inline" } }}
+            >
+              Back to Inbox
+            </Box> */}
+          </Button>
+        )}
+
         {/* LOGO SECTION */}
         <Box
           sx={{

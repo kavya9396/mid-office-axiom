@@ -16,6 +16,9 @@ interface RequirementManagementProps {
   requirements?: AdditionalRequirementRow[];
   onAddRequirement?: () => void;
   readOnly?: boolean;
+  embedded?: boolean;
+  statusFilter?: string;
+  statusFilterSignal?: number;
 }
 
 type DrsRequirementData = DRSUpdateRequest & {
@@ -33,6 +36,9 @@ const RequirementManagement = ({
   requirements,
   onAddRequirement,
   readOnly = false,
+  embedded = false,
+  statusFilter = "All",
+  statusFilterSignal = 0,
 }: RequirementManagementProps) => {
   const dispatch = useAppDispatch();
   const [addRowSignal, setAddRowSignal] = useState(0);
@@ -40,148 +46,125 @@ const RequirementManagement = ({
   const drsData = useAppSelector(
     (state: RootState) => state.drs.data,
   ) as DrsRequirementData | undefined;
-
   const searchData = useAppSelector(
-    (state: RootState) =>
-      state.searchApplication.response?.data,
+    (state: RootState) => state.searchApplication.response?.data,
   ) as DrsRequirementData | null | undefined;
 
-   /*
-   * In Search Application, always use search response.
-   * Otherwise, use DRS data and fall back to search data.
-   */
-  const selectedData = readOnly
-    ? searchData
-    : drsData ?? searchData;
-
+  const selectedData = readOnly ? searchData : drsData ?? searchData;
   const roleType = normalizeText(
-    selectedData?.roleType ||
-      localStorage.getItem("roleType"),
+    selectedData?.roleType || localStorage.getItem("roleType"),
   ).toUpperCase();
-
   const requirementRows =
-    requirements ??
-    selectedData?.requirementManagement ??
-    [];
-
-  console.log("requirement rows", requirementRows)
+    requirements ?? selectedData?.requirementManagement ?? [];
 
   const isEditable = ![
     "AMR_MEDICAL_TASK",
     "AMR_NON_MEDICAL_TASK",
     "RECONSIDERATION_TASK",
-    "ACCUITY_TASK"
+    "ACCUITY_TASK",
   ].includes(roleType);
+
+  const handleAdd = () => {
+    setAddRowSignal((currentSignal) => currentSignal + 1);
+    onAddRequirement?.();
+  };
 
   const handleSaveRequirements = async (
     updatedRows: AdditionalRequirementRow[],
   ): Promise<void> => {
-     if (readOnly) {
-      return;
-    }
-
+    if (readOnly) return;
     if (!drsData) {
       throw new Error("DRS data is unavailable. Please reopen the case.");
     }
 
     const applicationNo = normalizeText(
       drsData.applicationNo ||
-      drsData.applicationNumber ||
-      localStorage.getItem("applicationNumber") ||
-      localStorage.getItem("applicationNo"),
+        drsData.applicationNumber ||
+        localStorage.getItem("applicationNumber") ||
+        localStorage.getItem("applicationNo"),
     );
-
     const userId = normalizeText(
       localStorage.getItem("userId") || drsData.userId,
     );
 
-    if (!applicationNo) {
-      throw new Error("Application number is unavailable.");
-    }
+    if (!applicationNo) throw new Error("Application number is unavailable.");
+    if (!userId) throw new Error("User ID is unavailable.");
+    if (!roleType) throw new Error("Role type is unavailable.");
 
-    if (!userId) {
-      throw new Error("User ID is unavailable.");
-    }
-
-    if (!roleType) {
-      throw new Error("Role type is unavailable.");
-    }
-
-    /*
-     * state.drs.data is already the inner DRS object from the API response.
-     * Send the complete object and replace only requirementManagement with
-     * the latest rows from the table.
-     */
-    const updatedDrsPayload: DrsRequirementData = {
-      ...drsData,
-      requirementManagement: updatedRows,
-      roleType,
-      userId,
-    };
-
-    await dispatch(updateDrsThunk(updatedDrsPayload)).unwrap();
+    await dispatch(
+      updateDrsThunk({
+        ...drsData,
+        requirementManagement: updatedRows,
+        roleType,
+        userId,
+      }),
+    ).unwrap();
   };
 
+  const addButton =
+    isEditable && !readOnly ? (
+      <Button
+        type="button"
+        variant="outlined"
+        onClick={(event) => {
+          event.stopPropagation();
+          handleAdd();
+        }}
+        sx={{
+          minWidth: 20,
+          height: 25,
+          px: 3,
+          border: "1px solid #A92129",
+          borderRadius: "22px",
+          bgcolor: "#FFFFFF",
+          color: "#A92129",
+          fontSize: "12px",
+          fontWeight: 400,
+          lineHeight: 1,
+          textTransform: "none",
+          boxShadow: "none",
+          "&:hover": {
+            borderColor: "#A92129",
+            bgcolor: "#FFF5F5",
+            boxShadow: "none",
+          },
+        }}
+      >
+        Add
+      </Button>
+    ) : null;
+
+  const table = (
+    <Box sx={{ width: "100%", minWidth: 0, overflowX: "auto" }}>
+      {embedded && addButton ? (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", mb: 1 }}>
+          {addButton}
+        </Box>
+      ) : null}
+
+      <RequirementManagementTable
+        requirements={requirementRows}
+        onSave={readOnly ? undefined : handleSaveRequirements}
+        addRowSignal={readOnly ? 0 : addRowSignal}
+        readOnly={readOnly}
+        statusFilter={statusFilter}
+        statusFilterSignal={statusFilterSignal}
+      />
+    </Box>
+  );
+
+  if (embedded) {
+    return <Box sx={{ width: "100%", minWidth: 0 }}>{table}</Box>;
+  }
+
   return (
-    <Box sx={{ px: 1}}>
+    <Box sx={{ px: 1 }}>
       <CustomAccordion
         title={title.requirementManagement}
         defaultExpanded={false}
-        headerActions={
-          isEditable && !readOnly ? (
-            <Button
-              type="button"
-              variant="outlined"
-              onClick={(event) => {
-                event.stopPropagation();
-                setAddRowSignal((currentSignal) => currentSignal + 1);
-                onAddRequirement?.();
-              }}
-              sx={{
-                minWidth: 20,
-                height: 25,
-                px: 3,
-                border: "1px solid #A92129",
-                borderRadius: "22px",
-                bgcolor: "#FFFFFF",
-                color: "#A92129",
-                fontSize: "12px",
-                fontWeight: 400,
-                lineHeight: 1,
-                textTransform: "none",
-                boxShadow: "none",
-                "&:hover": {
-                  borderColor: "#A92129",
-                  bgcolor: "#FFF5F5",
-                  boxShadow: "none",
-                },
-              }}
-            >
-              Add
-            </Button>
-          ) : null
-        }
+        headerActions={addButton}
       >
-        <Box
-          sx={{
-            width: "100%",
-            minWidth: 0,
-            overflow: "hidden",
-          }}
-        >
-          <RequirementManagementTable
-            requirements={requirementRows}
-            onSave={
-              readOnly
-                ? undefined
-                : handleSaveRequirements
-            }
-            addRowSignal={
-              readOnly ? 0 : addRowSignal
-            }
-            readOnly={readOnly}
-          />
-        </Box>
+        {table}
       </CustomAccordion>
     </Box>
   );

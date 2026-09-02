@@ -1,9 +1,10 @@
 import { Box } from "@mui/material";
 import { useMemo } from "react";
 import { useSelector } from "react-redux";
-import type { Column } from "../../../components/ui/Table/Table";
+
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomTable from "../../../components/ui/Table/Table";
+import type { Column } from "../../../components/ui/Table/Table";
 import type { RootState } from "../../../store/store";
 import { formatDateForUI } from "../../../utils/helpers";
 
@@ -20,6 +21,10 @@ type DecisionHistoryRow = {
   stage: DecisionStage;
 };
 
+interface DecisionHistoryProps {
+  embedded?: boolean;
+}
+
 const decisionHistoryColumns: Column<DecisionHistoryRow>[] = [
   { key: "dateTime", header: "Date", width: "20%" },
   { key: "decision", header: "Decision", width: "20%" },
@@ -34,24 +39,14 @@ const stageDisplayLabel: Record<DecisionStage, string> = {
   uw: "UW",
 };
 
-const toRecord = (value: unknown): Record<string, unknown> | null => {
-  if (!value || typeof value !== "object" || Array.isArray(value)) {
-    return null;
-  }
-
-  return value as Record<string, unknown>;
-};
+const toRecord = (value: unknown): Record<string, unknown> | null =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null;
 
 const toText = (value: unknown, fallback = "-"): string => {
-  if (typeof value === "string") {
-    const trimmed = value.trim();
-    return trimmed === "" ? fallback : trimmed;
-  }
-
-  if (typeof value === "number") {
-    return String(value);
-  }
-
+  if (typeof value === "string") return value.trim() || fallback;
+  if (typeof value === "number") return String(value);
   return fallback;
 };
 
@@ -61,53 +56,30 @@ const pickValue = (record: Record<string, unknown>, keys: string[]): unknown => 
       return record[key];
     }
   }
-
   return undefined;
 };
 
 const detectStage = (value: unknown): DecisionStage | undefined => {
-  const text = String(value ?? "").toUpperCase();
-
-  if (text.includes("HO CMO") || text.includes("HOCMO")) {
-    return "hoCmo";
-  }
-
-  if (text.includes("HOD") || text.includes("HO D")) {
-    return "hod";
-  }
-
-  if (
-    text.includes("SR UW") ||
-    text.includes("SR.UW") ||
-    text.includes("SR_UW") ||
-    text.includes("SRUW") ||
-    text.includes("SENIOR UW")
-  ) {
+  const valueText = String(value ?? "").toUpperCase();
+  if (valueText.includes("HO CMO") || valueText.includes("HOCMO")) return "hoCmo";
+  if (valueText.includes("HOD") || valueText.includes("HO D")) return "hod";
+  if (["SR UW", "SR.UW", "SR_UW", "SRUW", "SENIOR UW"].some((item) => valueText.includes(item))) {
     return "srUw";
   }
-
-  if (text.includes("UW") || text.includes("CUW") || text.includes("SR UW") || text.includes("UNDERWRITER")) {
-    return "uw";
-  }
-
+  if (["UW", "CUW", "UNDERWRITER"].some((item) => valueText.includes(item))) return "uw";
   return undefined;
 };
 
 const parseDateTime = (value: string): number => {
-  const time = Date.parse(value);
-  return Number.isNaN(time) ? 0 : time;
+  const parsed = Date.parse(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
 };
 
 const formatDateTime = (value: unknown): string => {
-  const text = toText(value, "-");
-  if (text === "-") return text;
-
-  const parsed = Date.parse(text);
-  if (Number.isNaN(parsed)) {
-    return text;
-  }
-
-  return formatDateForUI(new Date(parsed));
+  const valueText = toText(value);
+  if (valueText === "-") return valueText;
+  const parsed = Date.parse(valueText);
+  return Number.isNaN(parsed) ? valueText : formatDateForUI(new Date(parsed));
 };
 
 const mapHistoryRecord = (
@@ -117,119 +89,91 @@ const mapHistoryRecord = (
   const decisionRaw = pickValue(record, ["decision", "uwDecision", "caseUWDecision", "action"]);
   const toRoleRaw = pickValue(record, ["toRole", "toPool", "referredTo", "targetRole"]);
   const fromRoleRaw = pickValue(record, ["fromRole", "fromPool", "sourceRole"]);
-
+  const decisionByRaw = pickValue(record, ["decisionBy", "fromPoolUser", "updatedBy", "userId"]);
   const stage =
     forcedStage ??
     detectStage(pickValue(record, ["stage", "decisionStage"])) ??
-    detectStage(pickValue(record, ["decisionBy", "fromPoolUser", "updatedBy", "userId"])) ??
+    detectStage(decisionByRaw) ??
     detectStage(fromRoleRaw) ??
     detectStage(toRoleRaw) ??
     detectStage(decisionRaw) ??
     "uw";
-
-  const decisionByRaw = toText(
-    pickValue(record, ["decisionBy", "fromPoolUser", "updatedBy", "userId"]),
-  );
-  const fromRoleText = toText(fromRoleRaw);
-  const resolvedDecisionBy =
-    fromRoleText !== "-"
-      ? fromRoleText
-      : decisionByRaw !== "-"
-        ? decisionByRaw
-        : stageDisplayLabel[stage];
+  const fromRole = toText(fromRoleRaw);
+  const decisionBy = toText(decisionByRaw);
 
   return {
     stage,
     dateTime: formatDateTime(pickValue(record, ["dateTime", "timestamp", "decisionDate", "createdAt", "updatedAt"])),
-    fromRole: toText(fromRoleRaw),
+    fromRole,
     toRole: toText(toRoleRaw),
     decision: toText(decisionRaw),
     decisionCode: toText(pickValue(record, ["decisionCode", "code", "decisionCd"])),
-    decisionBy: resolvedDecisionBy,
+    decisionBy: fromRole !== "-" ? fromRole : decisionBy !== "-" ? decisionBy : stageDisplayLabel[stage],
     remarks: toText(pickValue(record, ["remarks", "userRemarks", "uwDecisionRemarks", "comment", "notes"])),
   };
 };
 
-const toRows = (value: unknown, forcedStage?: DecisionStage): DecisionHistoryRow[] => {
-  if (!Array.isArray(value)) {
-    return [];
-  }
+const toRows = (value: unknown, forcedStage?: DecisionStage): DecisionHistoryRow[] =>
+  Array.isArray(value)
+    ? value
+        .map(toRecord)
+        .filter((item): item is Record<string, unknown> => Boolean(item))
+        .map((record) => mapHistoryRecord(record, forcedStage))
+        .filter((row) => row.decision !== "-" || row.remarks !== "-")
+    : [];
 
-  return value
-    .map((item) => toRecord(item))
-    .filter((item): item is Record<string, unknown> => Boolean(item))
-    .map((record) => mapHistoryRecord(record, forcedStage))
-    .filter((row) => row.decision !== "-" || row.remarks !== "-");
-};
-
-const DecisionHistory = () => {
+const DecisionHistory = ({ embedded = false }: DecisionHistoryProps) => {
   const historyRows = useSelector((state: RootState) => {
     const drsData = state.drs.data as unknown as Record<string, unknown> | null;
     if (!drsData) return [] as DecisionHistoryRow[];
 
     const historyRoot = drsData.decisionHistory;
-
     if (Array.isArray(historyRoot)) {
       const rows = toRows(historyRoot);
-      if (rows.length > 0) {
-        return rows;
-      }
+      if (rows.length) return rows;
     }
 
     const historyRecord = toRecord(historyRoot);
     if (historyRecord) {
-      const objectRows = Object.entries(historyRecord).flatMap(([key, value]) => {
-        const stageFromKey = detectStage(key);
-        return toRows(value, stageFromKey);
-      });
-
-      if (objectRows.length > 0) {
-        return objectRows;
-      }
+      const rows = Object.entries(historyRecord).flatMap(([key, value]) =>
+        toRows(value, detectStage(key)),
+      );
+      if (rows.length) return rows;
     }
 
     const quickLinks = toRecord(drsData.quickLinks);
-    const auditTrail = quickLinks?.auditTrail ?? drsData.auditTrail;
-
-    return toRows(auditTrail);
+    return toRows(quickLinks?.auditTrail ?? drsData.auditTrail);
   });
 
-  const sortedRows = useMemo(() => {
-    return [...historyRows].sort(
-      (left, right) => parseDateTime(right.dateTime) - parseDateTime(left.dateTime),
-    );
-  }, [historyRows]);
+  const sortedRows = useMemo(
+    () => [...historyRows].sort((left, right) => parseDateTime(right.dateTime) - parseDateTime(left.dateTime)),
+    [historyRows],
+  );
+
+  const content = (
+    <Box sx={{ width: "100%", minWidth: 0, overflowX: "auto", p: embedded ? 0 : 1 }}>
+      {sortedRows.length ? (
+        <CustomTable<DecisionHistoryRow>
+          title="Decision History Table"
+          columns={decisionHistoryColumns}
+          data={sortedRows}
+        />
+      ) : (
+        <Box sx={{ border: "1px dashed #d9d9d9", borderRadius: "12px", p: 2, textAlign: "center", color: "#6F6F6F", fontSize: "13px" }}>
+          No decision records available.
+        </Box>
+      )}
+    </Box>
+  );
+
+  if (embedded) return content;
 
   return (
-    // <Container disableGutters>
-      <Box sx={{ p:1 }}>
-        <CustomAccordion title="Decision History" defaultExpanded={false}>
-          <Box sx={{ p: 1 }}>
-            {sortedRows.length > 0 ? (
-              <CustomTable<DecisionHistoryRow>
-                title="Decision History Table"
-                columns={decisionHistoryColumns}
-                data={sortedRows}
-              />
-            ) : (
-              <Box
-                sx={{
-                  mt: 2,
-                  border: "1px dashed #d9d9d9",
-                  borderRadius: "12px",
-                  p: 2,
-                  textAlign: "center",
-                  color: "#6F6F6F",
-                  fontSize: "13px",
-                }}
-              >
-                No decision records available.
-              </Box>
-            )}
-          </Box>
-        </CustomAccordion>
-      </Box>
-    // </Container>
+    <Box sx={{ px: 1 }}>
+      <CustomAccordion title="Decision History" defaultExpanded={false}>
+        {content}
+      </CustomAccordion>
+    </Box>
   );
 };
 

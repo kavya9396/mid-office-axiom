@@ -1,5 +1,5 @@
 import { Alert, Box, Snackbar, Typography } from "@mui/material"
-import CustomAccordion from "../../../components/ui/Accordion/Accordion"
+//import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomRadioGroup from "../../../components/ui/Radio/Radio";
@@ -1530,66 +1530,27 @@ const UWDecision = () => {
 
     return (
         <Box sx={{ px: 1 }}>
-            <CustomAccordion title="UW Decision" defaultExpanded={false}>
+            {/* <CustomAccordion title="UW Decision" defaultExpanded> */}
                 <Box
                     sx={{
                         mt: 0.5,
                         p: 1,
                         borderRadius: "6px",
-                        backgroundColor: "#f6f6f6",
+                        backgroundColor: "transparent",
                     }}
                 >
-                    <Typography
-                        sx={{
-                            fontSize: "11px",
-                            fontWeight: 400,
-                            color: "#444",
-                            mb: 0.5,
-                        }}
-                    >
-                        UW Remarks
-                    </Typography>
-
-                    <CustomTextField
-                        fullWidth
-                        required
-                        multiline
-                        minRows={1}
-                        placeholder="Enter remarks..."
-                        value={uwDecisionRemarks}
-                        onChange={(e) => {
-                            const value = e.target.value;
-                            if (value.length <= 10000) {
-                                setUwDecisionRemarks(value);
-                            }
-                        }} variant="outlined"
-                        size="small"
-                        sx={{
-                            backgroundColor: "#fff",
-                            borderRadius: "6px",
-                            "& .MuiInputBase-root": {
-                                minHeight: 48,
-                                fontSize: "12px",
-                            },
-                            "& .MuiInputBase-input": {
-                                py: 0.75,
-                            },
-                        }}
-                    />
-                    <Typography sx={{ display: "flex", justifyContent: "flex-end", fontSize: "10px", lineHeight: 1.2, color: "#888", mt: 0.2 }}>
-                        {uwDecisionRemarks.length}/10000
-                    </Typography>
-
                     <Box
                         sx={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-                            alignItems: "end",
+                            gridTemplateColumns: {
+                                xs: "1fr",
+                                md: "repeat(2, minmax(0, 1fr))",
+                            },
+                            alignItems: "start",
                             columnGap: 1,
                             rowGap: 0.75,
-                            "& > *": {
-                                minWidth: 0,
-                            },
+                            mb: 0.75,
+                            "& > *": { minWidth: 0 },
                             "& .MuiFormControl-root": {
                                 width: "100%",
                                 minWidth: 0,
@@ -1612,6 +1573,59 @@ const UWDecision = () => {
                             },
                         }}
                     >
+                        
+<Box>
+                            <Typography
+                                sx={{
+                                    fontSize: "11px",
+                                    fontWeight: 400,
+                                    color: "#444",
+                                    lineHeight: 1.2,
+                                    mb: 0.5,
+                                }}
+                            >
+                                UW Remarks
+                            </Typography>
+
+                            <CustomTextField
+                                fullWidth
+                                required
+                                multiline
+                                placeholder="Enter remarks..."
+                                value={uwDecisionRemarks}
+                                onChange={(event) => {
+                                    const value = event.target.value;
+                                    if (value.length <= 10000) {
+                                        setUwDecisionRemarks(value);
+                                    }
+                                }}
+                                variant="outlined"
+                                size="small"
+                                  sx={{
+                            backgroundColor: "#fff",
+                            borderRadius: "6px",
+                            "& .MuiInputBase-root": {
+                                minHeight: 48,
+                                fontSize: "12px",
+                            },
+                            "& .MuiInputBase-input": {
+                                py: 0.75,
+                            },
+                        }}
+                            />
+                            <Typography
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    fontSize: "10px !important",
+                                    lineHeight: 1.2,
+                                    color: "#888",
+                                    mt: 0.2,
+                                }}
+                            >
+                                {uwDecisionRemarks.length}/10000
+                            </Typography>
+                        </Box>
                         <CustomSelect
                             label="Case UW Decision"
                             value={effectiveCaseUWDecision}
@@ -1653,10 +1667,8 @@ const UWDecision = () => {
                                 setUwDecision("");
                                 setFirstUwDecisionCode("");
                                 setFirstUwSmokerStatus("");
-                                // setCounterOfferTable(createCounterOfferTableState());
                                 setSubmitMessage(null);
                                 setSubmitStatus(null);
-
                                 setDecisionCode("");
                                 setSmokerStatus("");
 
@@ -1665,7 +1677,7 @@ const UWDecision = () => {
                                         decisionCodeThunk({
                                             decision: masterDecisionCode,
                                             dataentry: dataEntry,
-                                        } as Parameters<typeof decisionCodeThunk>[0])
+                                        } as Parameters<typeof decisionCodeThunk>[0]),
                                     ).unwrap();
 
                                     setDecisionCode(toText(
@@ -1681,9 +1693,6 @@ const UWDecision = () => {
                                             "smoker_status",
                                         ]),
                                     ));
-                                } else {
-                                    setDecisionCode("");
-                                    setSmokerStatus("");
                                 }
 
                                 if (selectedLabel === "Raise Requirement") {
@@ -1692,7 +1701,41 @@ const UWDecision = () => {
                             }}
                             options={caseUWDecisionOptions}
                         />
+                        
+                    </Box>
 
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                            alignItems: "end",
+                            columnGap: 1,
+                            rowGap: 0.75,
+                            "& > *": {
+                                minWidth: 0,
+                            },
+                            "& .MuiFormControl-root": {
+                                width: "100%",
+                                minWidth: 0,
+                            },
+                            "& .MuiInputBase-root": {
+                                height: 34,
+                                minHeight: 34,
+                                borderRadius: "6px",
+                                backgroundColor: "#fff",
+                                fontSize: "12px",
+                            },
+                            "& .MuiInputBase-input, & .MuiSelect-select": {
+                                fontSize: "12px",
+                                lineHeight: 1.2,
+                                py: "7px !important",
+                            },
+                            "& .MuiTypography-root": {
+                                fontSize: "11px",
+                                lineHeight: 1.2,
+                            },
+                        }}
+                    >
                         {effectiveCaseUWDecision && (
                             <Box>
                                 <Typography
@@ -2262,6 +2305,7 @@ const UWDecision = () => {
                             display: "flex",
                             gap: 1,
                             mt: 1,
+                            justifyContent:"center"
                         }}
                     >
                         <CustomButton
@@ -2276,6 +2320,7 @@ const UWDecision = () => {
                             fontSize: "12px",
                             px: 2,
                                 whiteSpace: "nowrap",
+                                justifyContent:"center"
                             }}
                         >
                             {submitLoading ? "Submitting..." : "Submit"}
@@ -2286,7 +2331,7 @@ const UWDecision = () => {
                 {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
                     <UWReinsurer onOpenConfirmation={handleSubmitIntent} />
                 )}
-            </CustomAccordion>
+            {/* </CustomAccordion> */}
 
             {/* Confirmation Dialog */}
             <ConfirmationDialog

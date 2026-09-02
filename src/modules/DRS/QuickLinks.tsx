@@ -22,6 +22,7 @@ import CustomButton from "../../components/ui/Button/Button";
 import CustomSnackbar from "../../components/ui/SnackBar/Snackbar";
 import CustomTextField from "../../components/ui/TextField/TextField";
 import { modalTitleStyles } from "../../utils/styles";
+import ApplicantProfile from "./DRS_Accordions/ApplicantProfile";
 
 const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
     if (Array.isArray(value)) {
@@ -41,12 +42,16 @@ const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
 interface QuickLinksProps {
     applicationNo?: string;
     hideSearchApplication?: boolean;
+    onApplicantInformationClick?: () => void;
+    onRequirementManagementClick?: () => void;
+    onDecisionHistoryClick?: () => void;
 }
 
 interface QuickLinkItem {
     label: string;
     path: string;
     unavailableMessage?: string;
+    onClick?: () => void;
 }
 
 interface DrsQuickLinksData {
@@ -201,6 +206,7 @@ const QuickLinks = ({
     const location = useLocation();
     const dispatch = useAppDispatch();
     const [isOpen, setIsOpen] = useState(false);
+    const [openSummaryDialog, setOpenSummaryDialog] = useState(false);
     const [openReferToItDialog, setOpenReferToItDialog] = useState(false);
     const [referToItLoading, setReferToItLoading] = useState(false);
     const [referToItError, setReferToItError] = useState<string | null>(null);
@@ -340,6 +346,25 @@ const QuickLinks = ({
     ).trim();
 
     const quickLinks: QuickLinkItem[] = [
+        {
+            label: "Summary",
+            path: "",
+            onClick: () => setOpenSummaryDialog(true),
+        },
+        // {
+        //     label: "Requirement Management",
+        //     path: "",
+        //     onClick:
+        //         onRequirementManagementClick ??
+        //         (() => window.dispatchEvent(new CustomEvent("open-requirement-management"))),
+        // },
+        // {
+        //     label: "Decision History",
+        //     path: "",
+        //     onClick:
+        //         onDecisionHistoryClick ??
+        //         (() => window.dispatchEvent(new CustomEvent("open-decision-history"))),
+        // },
         ...(roleType !== 'DVT_FORMAL_TASK' ? [
             {
                 label: "Proposal Form & Documents",
@@ -383,7 +408,7 @@ const QuickLinks = ({
                 "There is no audit trail found.",
             ),
         },
-        { label: "Refer to IT", path: "" },
+        // { label: "Refer to IT", path: "" },
         ...(isPoolRole
             ? [
                 { label: "View Medical", path: safeApplicationNumber ? getMedicalPath(safeBusinessType, safeApplicationNumber) : "" },
@@ -476,7 +501,13 @@ const QuickLinks = ({
     ]);
 
     const handleNavigate = useCallback(
-        (label: string, path: string, unavailableMessage?: string) => {
+        (label: string, path: string, unavailableMessage?: string, onClick?: () => void) => {
+            if (onClick) {
+                onClick();
+                setIsOpen(false);
+                return;
+            }
+
             if (label === "Refer to IT") {
                 setReferToItError(null);
                 setReferToItRemarks("");
@@ -564,11 +595,11 @@ const QuickLinks = ({
 
                         <Divider />
 
-                        {quickLinks.map(({ label, path, unavailableMessage }, index) => (
+                        {quickLinks.map(({ label, path, unavailableMessage, onClick }, index) => (
                             <Box key={label}>
                                 <Box
                                     onClick={() =>
-                                        handleNavigate(label, path, unavailableMessage)
+                                        handleNavigate(label, path, unavailableMessage, onClick)
                                     }
                                     sx={{
                                         px: 2,
@@ -577,7 +608,8 @@ const QuickLinks = ({
                                         alignItems: "center",
                                         justifyContent: "space-between",
                                         cursor:
-                                            path ||
+                                            onClick ||
+                                                path ||
                                                 unavailableMessage ||
                                                 label === "Refer to IT" ||
                                                 label === "Proposal Form & Documents"
@@ -658,6 +690,25 @@ const QuickLinks = ({
                     }))
                 }
             />
+
+            <CustomDialog
+                open={openSummaryDialog}
+                showCloseIcon={true}
+                onClose={() => setOpenSummaryDialog(false)}
+                title={
+                    <Typography sx={{ ...modalTitleStyles }}>
+                        Summary
+                    </Typography>
+                }
+                maxWidth="xl"
+                contentSx={{
+                    p: 1,
+                    maxHeight: "calc(100vh - 150px)",
+                    overflowY: "auto",
+                }}
+            >
+                <ApplicantProfile />
+            </CustomDialog>
 
             <CustomDialog
                 open={openReferToItDialog}

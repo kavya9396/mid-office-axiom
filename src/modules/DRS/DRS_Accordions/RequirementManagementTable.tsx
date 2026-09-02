@@ -97,6 +97,8 @@ interface RequirementManagementTableProps {
   onAddRequirement?: () => void;
   addRowSignal?: number;
   readOnly?: boolean;
+  statusFilter?: string;
+  statusFilterSignal?: number;
 }
 
 interface MiscMasterItem {
@@ -486,27 +488,38 @@ const getFupDescription = (
 };
 
 const formatStatus = (status: unknown): string => {
-  const value = normalizeText(status);
+  const value = normalizeText(status).replace(/[_-]+/g, " ");
 
   if (!value) {
     return "";
   }
 
-  return value.charAt(0).toUpperCase() + value.slice(1).toLowerCase();
+  return value
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
 };
 
 const getStatusComparableValue = (value: unknown): string =>
-  normalizeText(value).toUpperCase();
+  normalizeText(value).toUpperCase().replace(/[\s_-]+/g, "");
 
 const STATUS_PRIORITY: Record<string, number> = {
-  PENDING: 0,
-  WAIVED: 1,
-  ACCEPT: 2,
-  ACCEPTED: 2,
+  ACCEPT: 0,
+  ACCEPTED: 0,
+  REJECT: 1,
+  REJECTED: 1,
+  CANCEL: 2,
+  CANCELED: 2,
+  CANCELLED: 2,
+  WAIVE: 3,
+  WAIVED: 3,
+  RECEIVE: 4,
+  RECEIVED: 4,
+  PENDING: 5,
+  NOTREQUIRED: 6,
 };
 
 const getStatusPriority = (status: unknown): number =>
-  STATUS_PRIORITY[getStatusComparableValue(status)] ?? 3;
+  STATUS_PRIORITY[getStatusComparableValue(status)] ?? 7;
 
 const getStatusSummaryLabel = (status: unknown): string => {
   const normalizedStatus = getStatusComparableValue(status);
@@ -515,11 +528,17 @@ const getStatusSummaryLabel = (status: unknown): string => {
     return "Not Set";
   }
 
-  if (["ACCEPT", "ACCEPTED"].includes(normalizedStatus)) {
-    return "Accepted";
+  if (["ACCEPT", "ACCEPTED"].includes(normalizedStatus)) return "Accept";
+  if (["REJECT", "REJECTED"].includes(normalizedStatus)) return "Reject";
+  if (["CANCEL", "CANCELED", "CANCELLED"].includes(normalizedStatus)) {
+    return "Cancelled";
   }
+  if (["WAIVE", "WAIVED"].includes(normalizedStatus)) return "Waived";
+  if (["RECEIVE", "RECEIVED"].includes(normalizedStatus)) return "Received";
+  if (normalizedStatus === "PENDING") return "Pending";
+  if (normalizedStatus === "NOTREQUIRED") return "Not Required";
 
-  return formatStatus(normalizedStatus);
+  return formatStatus(status);
 };
 
 const validateRequirementsForSave = (): SaveValidationResult => ({
@@ -607,6 +626,8 @@ const RequirementManagementTable = ({
   onAddRequirement,
   addRowSignal = 0,
   readOnly = false,
+  statusFilter = "All",
+  statusFilterSignal = 0,
 }: RequirementManagementTableProps) => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -743,6 +764,24 @@ const RequirementManagementTable = ({
     useState<FilterField>("category");
   const [draftFilters, setDraftFilters] = useState(EMPTY_FILTERS);
   const [columnWidths, setColumnWidths] = useState(DEFAULT_COLUMN_WIDTHS);
+
+  useEffect(() => {
+    const normalizedFilter = normalizeText(statusFilter);
+    const nextStatuses =
+      !normalizedFilter || normalizedFilter.toUpperCase() === "ALL"
+        ? []
+        : [normalizedFilter];
+
+    setFilters((currentFilters) => ({
+      ...currentFilters,
+      status: nextStatuses,
+    }));
+    setDraftFilters((currentFilters) => ({
+      ...currentFilters,
+      status: nextStatuses,
+    }));
+    setPage(1);
+  }, [statusFilter, statusFilterSignal]);
 
   const [selectedDetail, setSelectedDetail] = useState<{
     title: string;
@@ -1873,9 +1912,26 @@ const RequirementManagementTable = ({
                         : status === "Pending"
                         ? "#fff3e8"
                         : status === "Waived"
-                          ? "#eef6ff"
-                          : "#ffffff",
-                    color: status === "Pending" ? "#b54a00" : "#4f4f4f",
+                          ? "#f3eeff"
+                          : status === "Received"
+                            ? "#eef6ff"
+                            : status === "Accept"
+                              ? "#eef8f1"
+                              : status === "Reject"
+                                ? "#fdebec"
+                                : "#f5f3f2",
+                    color:
+                      status === "Pending"
+                        ? "#b54a00"
+                        : status === "Received"
+                          ? "#2F668F"
+                          : status === "Waived"
+                            ? "#6C4AA0"
+                            : status === "Accept"
+                              ? "#28743C"
+                              : status === "Reject"
+                                ? "#B3262E"
+                                : "#514A46",
                     cursor: "pointer",
                     font: "inherit",
                     "&:hover": {
@@ -1897,7 +1953,18 @@ const RequirementManagementTable = ({
                       height: 17,
                       px: 0.4,
                       borderRadius: "9px",
-                      bgcolor: status === "Pending" ? "#E45F14" : "#697780",
+                      bgcolor:
+                        status === "Pending"
+                          ? "#E45F14"
+                          : status === "Received"
+                            ? "#46799F"
+                            : status === "Waived"
+                              ? "#6C4AA0"
+                              : status === "Accept"
+                                ? "#28743C"
+                                : status === "Reject"
+                                  ? "#B3262E"
+                                  : "#697780",
                       color: "#ffffff",
                       fontSize: "9.5px",
                       fontWeight: 700,

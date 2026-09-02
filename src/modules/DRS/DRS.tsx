@@ -33,12 +33,11 @@ import type {
   AppDispatch,
   RootState,
 } from "../../store/store";
-import BackButton from "../../components/layout/BackButton";
 import CustomButton from "../../components/ui/Button/Button";
-import { title } from "../../utils/constant";
 import { getInboxPath } from "../../routes/routes";
 import { preloginThunk } from "../../store/thunks/preloginThunk";
 import ApplicantApplicationSummary from "./ApplicantSummary";
+import type { ComponentType } from "react";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -120,6 +119,8 @@ const SUMMARY_SECTION_ROLES = new Set([
   "CPT_DATA_ENTRY_MR_TASK",
   "PIVV_TASK",
 ]);
+
+const APP_HEADER_HEIGHT = 57;
 
 const getSelectedCaseContext = (): SelectedCaseContext => {
   try {
@@ -427,6 +428,42 @@ const DRS = () => {
     [layout, drsData],
   );
 
+  const movedAccordionIds = useMemo(
+    () =>
+      visibleAccordions.filter((accordionId) => {
+        const normalizedId = normalizeAccordionId(String(accordionId));
+        return (
+          normalizedId === "requirementmanagement" ||
+          normalizedId === "decisionhistory"
+        );
+      }),
+    [visibleAccordions],
+  );
+
+  const pageAccordionIds = useMemo(
+    () =>
+      visibleAccordions.filter(
+        (accordionId) => !movedAccordionIds.includes(accordionId),
+      ),
+    [movedAccordionIds, visibleAccordions],
+  );
+
+  const getRegisteredAccordion = (normalizedName: string) => {
+    const registryEntry = Object.entries(accordionRegistry).find(
+      ([accordionId]) =>
+        normalizeAccordionId(String(accordionId)) === normalizedName,
+    );
+
+    return registryEntry
+      ? (registryEntry[1] as ComponentType<{ embedded?: boolean }>)
+      : null;
+  };
+
+  const RequirementManagementPanel = getRegisteredAccordion(
+    "requirementmanagement",
+  );
+  const DecisionHistoryPanel = getRegisteredAccordion("decisionhistory");
+
   const handleSubmit = async () => {
     if (isSubmitting) {
       return;
@@ -631,13 +668,14 @@ const DRS = () => {
       <Box
         sx={{
           width: "100%",
-          height: "91vh",
+          height: `calc(100dvh - ${APP_HEADER_HEIGHT}px)`,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
           gap: 1.5,
           backgroundColor: "#f5f7fa",
+          overflow: "hidden",
         }}
       >
         <CircularProgress
@@ -659,102 +697,77 @@ const DRS = () => {
     );
   }
 
-  const hasUwToolkit = visibleAccordions.some(
+  const hasUwToolkit = pageAccordionIds.some(
     (accordionId) =>
       isUwToolkitAccordion(String(accordionId)),
   );
   const shouldShowSubmitButton =
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK";
+
   return (
     <>
-      <BackButton
-        label={title.backToInbox}
-        onClick={() => navigate(getInboxPath())}
-        rightSlot={
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              gap: 2,
-              whiteSpace: "nowrap",
-            }}
-          >
-            {/* Application Number */}
-            <Box
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 0.75,
-                px: 1.5,
-                py: 0.65,
-                borderRadius: "20px",
-                backgroundColor:
-                  businessType === "retail" ? "#FFEAD7" : "#9A2529",
-                border:
-                  businessType === "retail"
-                    ? "1px solid rgba(228, 95, 20, 0.25)"
-                    : "1px solid #9A2529",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "12px",
-                  fontWeight: 500,
-                  color: businessType === "retail" ? "#7A4A35" : "#FFEAD7",
-                  letterSpacing: "0.2px",
-                }}
-              >
-                Application No. :
-              </Typography>
-
-              <Typography
-                sx={{
-                  fontSize: "14px",
-                  fontWeight: 700,
-                  color: businessType === "retail" ? "#9A2529" : "#FFEAD7",
-                  letterSpacing: "0.3px",
-                }}
-              >
-                {applicationNo}
-              </Typography>
-            </Box>
-
-          </Box>
-        }
-      />
       <Box
+        component="main"
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
+          width: "100%",
+          height: `calc(100dvh - ${APP_HEADER_HEIGHT}px)`,
+          minHeight: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
+          overscrollBehavior: "contain",
+          scrollbarGutter: "stable",
         }}
       >
-        <ApplicantApplicationSummary />
-        {visibleAccordions.map((accordionId) => {
-          const AccordionComponent =
-            accordionRegistry[accordionId];
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+            pb: 1,
+          }}
+        >
+          <ApplicantApplicationSummary
+            stickyTop={0}
+            onBackToInbox={() => navigate(getInboxPath())}
+            requirementManagement={
+              RequirementManagementPanel ? (
+                <RequirementManagementPanel embedded />
+              ) : null
+            }
+            decisionHistory={
+              DecisionHistoryPanel ? (
+                <DecisionHistoryPanel embedded />
+              ) : null
+            }
+          />
 
-          if (!AccordionComponent) {
-            return null;
-          }
+          {pageAccordionIds.map((accordionId) => {
+            const AccordionComponent =
+              accordionRegistry[accordionId];
 
-          const showSubmitBeforeAccordion =
-            isUwToolkitAccordion(
-              String(accordionId),
+            if (!AccordionComponent) {
+              return null;
+            }
+
+            const showSubmitBeforeAccordion =
+              isUwToolkitAccordion(
+                String(accordionId),
+              );
+
+            return (
+              <Box key={accordionId}>
+                {shouldShowSubmitButton && showSubmitBeforeAccordion &&
+                  renderSubmitButton()}
+
+                <AccordionComponent />
+              </Box>
             );
+          })}
 
-          return (
-            <Box key={accordionId}>
-              {shouldShowSubmitButton && showSubmitBeforeAccordion &&
-                renderSubmitButton()}
-
-              <AccordionComponent />
-            </Box>
-          );
-        })}
-
-        {shouldShowSubmitButton && !hasUwToolkit && renderSubmitButton()}
+          {shouldShowSubmitButton && !hasUwToolkit &&
+            renderSubmitButton()}
+        </Box>
       </Box>
       <Snackbar
         open={snackbar.open}
