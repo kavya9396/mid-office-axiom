@@ -20,6 +20,7 @@ import type { RootState } from "../../../store/store";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import { financialThunk } from "../../../store/thunks/financialThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
+import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
 import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest } from "../../../types/drs.types";
 import { applicantTabs, title } from "../../../utils/constant";
@@ -35,6 +36,24 @@ import {
 import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
 
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
+
+type SelectedCaseContext = {
+  taskId?: string;
+  instanceId?: string;
+};
+
+const getSelectedCaseContext = (): SelectedCaseContext => {
+  try {
+    const rawValue = localStorage.getItem("selectedCaseContext");
+    const parsedValue: unknown = rawValue ? JSON.parse(rawValue) : null;
+
+    return parsedValue && typeof parsedValue === "object" && !Array.isArray(parsedValue)
+      ? (parsedValue as SelectedCaseContext)
+      : {};
+  } catch {
+    return {};
+  }
+};
 
 type DRSViewTab = "medical" | "financial";
 
@@ -518,7 +537,9 @@ const mapDocumentsToFinancialSections = (
         ["Life Assured Name", firstDefined(years[0]?.partyName, itrIndividual.partyName)],
         ["Life Assured Name Year 2", years[1]?.partyName],
         ["Life Assured Name Year 3", years[2]?.partyName],
-        ["Is Life Assured Name Same?", itrIndividual.nameMatchInd],
+        ["Is Life Assured Name Same?", firstDefined(years[0]?.nameMatchInd, itrIndividual.nameMatchInd)],
+        ["Is Life Assured Name Same? Year 2", years[1]?.nameMatchInd],
+        ["Is Life Assured Name Same? Year 3", years[2]?.nameMatchInd],
         ["Pan Number Matched with Barcode Number", firstDefined(years[0]?.panBarcodeMatchInd, years[0]?.panNumberMatchedWithBarcodeNumber, itrIndividual.panBarcodeMatchInd)],
         ["Pan Number Matched with Barcode Number Year 2", firstDefined(years[1]?.panBarcodeMatchInd, years[1]?.panNumberMatchedWithBarcodeNumber)],
         ["Pan Number Matched with Barcode Number Year 3", firstDefined(years[2]?.panBarcodeMatchInd, years[2]?.panNumberMatchedWithBarcodeNumber)],
@@ -2633,6 +2654,7 @@ const ViewFinancial = () => {
     [masters],
   );
   const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+  const selectedCaseContext = useMemo(() => getSelectedCaseContext(), []);
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
@@ -3297,7 +3319,6 @@ const ViewFinancial = () => {
       const doc: Record<string, unknown> = {};
       assignTextField(doc, "orgName", itrIndividual["Name of Organisation/Firm"]);
       assignTextField(doc, "panNumber", itrIndividual["Permanent Account Number"]);
-      assignYesNoField(doc, "nameMatchInd", itrIndividual["Is Life Assured Name Same?"], yesNoOptions);
 
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
@@ -3307,6 +3328,12 @@ const ViewFinancial = () => {
         assignTextField(yearObj, "ackNumber", itrIndividual[`ITR Acknowledgement Number${suffix}`]);
         assignTextField(yearObj, "itrFilingDt", formatDdMmYyyyToIsoDate(itrIndividual[`Date of Filling ITR${suffix}`]));
         assignTextField(yearObj, "partyName", itrIndividual[`Life Assured Name${suffix}`]);
+        assignYesNoField(
+          yearObj,
+          "nameMatchInd",
+          itrIndividual[`Is Life Assured Name Same?${suffix}`],
+          yesNoOptions,
+        );
         assignNumberField(yearObj, "pfDeduction", itrIndividual[`PF deduction - Salaried customers${suffix}`]);
         assignYesNoField(
           yearObj,
@@ -3957,6 +3984,51 @@ const ViewFinancial = () => {
     setSectionErrors((prev) => ({ ...prev, [sectionKey]: {} }));
   };
 
+  const handleSubmit = async () => {
+    const taskId = String(selectedCaseContext.taskId ?? "").trim();
+    const instanceId = String(selectedCaseContext.instanceId ?? "").trim();
+
+    if (!safeApplicationId || !taskId) {
+      showSnackbar("Application number or task ID is unavailable.", "error");
+      return;
+    }
+
+    try {
+      setSubmitLoading(true);
+
+      await dispatch(
+        breThunk({
+          applicationNumber: safeApplicationId,
+          eventName: "FE",
+          businessType: safeBusinessType,
+        })
+      ).unwrap();
+
+      await dispatch(
+        completeTaskThunk({
+          businessType: safeBusinessType,
+          requestContext: {
+            taskId,
+            instanceId,
+            userId,
+            appNo: safeApplicationId,
+            remarks: "Financial details submitted",
+            decision: "CLOSE_TASK",
+          },
+        })
+      ).unwrap();
+
+      navigate(getDRSPath(safeBusinessType, safeApplicationId));
+    } catch (error) {
+      showSnackbar(
+        error instanceof Error ? error.message : "Unable to submit financial details.",
+        "error",
+      );
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
   const handleUdsLinkClick = () => {
     if (!udsLink) {
       return;
@@ -4305,8 +4377,12 @@ const ViewFinancial = () => {
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2, bgcolor: "#fff", mt: 1, borderRadius: 2 }}>
-          <CustomButton sx={{ width: 100, py: 0.5, fontSize: 13, borderRadius: "50px" }}>
-            Submit
+          <CustomButton
+            sx={{ width: 110, py: 0.5, fontSize: 13, borderRadius: "50px" }}
+            disabled={submitLoading || !safeApplicationId}
+            onClick={handleSubmit}
+          >
+            {submitLoading ? "Submitting..." : "Submit"}
           </CustomButton>
         </Box>
       </Box>
