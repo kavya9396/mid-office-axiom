@@ -314,7 +314,6 @@
       },
       "itr_individual": {
         "panNumber": "AXXXD1234L",
-        "nameMatchInd": "Yes",
         "years": [
           {
             "assessmentYear": "AY 24-25",
@@ -326,6 +325,7 @@
             "shortTermCapitalGains": null,
             "incomeFromOtherSources": null,
             "agriculturalIncome": null,
+            "nameMatchInd": "Yes",
             "ackNumber": "123456789012345",
             "itrFilingDt": "2026-06-15",
             "pfDeduction": 21600,
@@ -345,6 +345,7 @@
             "ackNumber": "123456789012345",
             "itrFilingDt": "2026-06-15",
             "pfDeduction": 21600,
+            "nameMatchInd": "Yes",
             "panBarcodeMatchInd": "Yes",
             "grossTotalIncomeCalculated": 700000
           }

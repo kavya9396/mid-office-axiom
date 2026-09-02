@@ -518,7 +518,9 @@ const mapDocumentsToFinancialSections = (
         ["Life Assured Name", firstDefined(years[0]?.partyName, itrIndividual.partyName)],
         ["Life Assured Name Year 2", years[1]?.partyName],
         ["Life Assured Name Year 3", years[2]?.partyName],
-        ["Is Life Assured Name Same?", itrIndividual.nameMatchInd],
+        ["Is Life Assured Name Same?", firstDefined(years[0]?.nameMatchInd, itrIndividual.nameMatchInd)],
+        ["Is Life Assured Name Same? Year 2", years[1]?.nameMatchInd],
+        ["Is Life Assured Name Same? Year 3", years[2]?.nameMatchInd],
         ["Pan Number Matched with Barcode Number", firstDefined(years[0]?.panBarcodeMatchInd, years[0]?.panNumberMatchedWithBarcodeNumber, itrIndividual.panBarcodeMatchInd)],
         ["Pan Number Matched with Barcode Number Year 2", firstDefined(years[1]?.panBarcodeMatchInd, years[1]?.panNumberMatchedWithBarcodeNumber)],
         ["Pan Number Matched with Barcode Number Year 3", firstDefined(years[2]?.panBarcodeMatchInd, years[2]?.panNumberMatchedWithBarcodeNumber)],
@@ -3297,7 +3299,6 @@ const ViewFinancial = () => {
       const doc: Record<string, unknown> = {};
       assignTextField(doc, "orgName", itrIndividual["Name of Organisation/Firm"]);
       assignTextField(doc, "panNumber", itrIndividual["Permanent Account Number"]);
-      assignYesNoField(doc, "nameMatchInd", itrIndividual["Is Life Assured Name Same?"], yesNoOptions);
 
       const years: Array<Record<string, unknown>> = [];
       for (let i = 1; i <= 3; i++) {
@@ -3307,6 +3308,12 @@ const ViewFinancial = () => {
         assignTextField(yearObj, "ackNumber", itrIndividual[`ITR Acknowledgement Number${suffix}`]);
         assignTextField(yearObj, "itrFilingDt", formatDdMmYyyyToIsoDate(itrIndividual[`Date of Filling ITR${suffix}`]));
         assignTextField(yearObj, "partyName", itrIndividual[`Life Assured Name${suffix}`]);
+        assignYesNoField(
+          yearObj,
+          "nameMatchInd",
+          itrIndividual[`Is Life Assured Name Same?${suffix}`],
+          yesNoOptions,
+        );
         assignNumberField(yearObj, "pfDeduction", itrIndividual[`PF deduction - Salaried customers${suffix}`]);
         assignYesNoField(
           yearObj,
