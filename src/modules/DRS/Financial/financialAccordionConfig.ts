@@ -38,9 +38,7 @@ export type FinancialSectionKey =
   | "epf_basic"
   | "epf_advanced"
   | "employee_id_card"
-  | "advance_tax"
-  | "ca_networth"
-  | "ca_balance_sheet";
+  | "advance_tax";
 
 export type FinancialSectionConfig = {
   key: FinancialSectionKey;

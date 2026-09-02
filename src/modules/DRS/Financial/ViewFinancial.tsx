@@ -20,6 +20,7 @@ import type { RootState } from "../../../store/store";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import { financialThunk } from "../../../store/thunks/financialThunk";
 import { breThunk } from "../../../store/thunks/breThunk";
+import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { setBreExternalApiOutputs } from "../../../store/slices/drsSlice";
 import type { ApplicantTab, FinancialResponse, FinancialResponseSection, FinancialViewRequest } from "../../../types/drs.types";
 import { applicantTabs, title } from "../../../utils/constant";
@@ -35,6 +36,24 @@ import {
 import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
 
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
+
+type SelectedCaseContext = {
+  taskId?: string;
+  instanceId?: string;
+};
+
+const getSelectedCaseContext = (): SelectedCaseContext => {
+  try {
+    const rawValue = localStorage.getItem("selectedCaseContext");
+    const parsedValue: unknown = rawValue ? JSON.parse(rawValue) : null;
+
+    return parsedValue && typeof parsedValue === "object" && !Array.isArray(parsedValue)
+      ? (parsedValue as SelectedCaseContext)
+      : {};
+  } catch {
+    return {};
+  }
+};
 
 type DRSViewTab = "medical" | "financial";
 
@@ -2635,6 +2654,7 @@ const ViewFinancial = () => {
     [masters],
   );
   const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+  const selectedCaseContext = useMemo(() => getSelectedCaseContext(), []);
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
@@ -3964,6 +3984,51 @@ const ViewFinancial = () => {
     setSectionErrors((prev) => ({ ...prev, [sectionKey]: {} }));
   };
 
+  const handleSubmit = async () => {
+    const taskId = String(selectedCaseContext.taskId ?? "").trim();
+    const instanceId = String(selectedCaseContext.instanceId ?? "").trim();
+
+    if (!safeApplicationId || !taskId) {
+      showSnackbar("Application number or task ID is unavailable.", "error");
+      return;
+    }
+
+    try {
+      setSubmitLoading(true);
+
+      await dispatch(
+        breThunk({
+          applicationNumber: safeApplicationId,
+          eventName: "FE",
+          businessType: safeBusinessType,
+        })
+      ).unwrap();
+
+      await dispatch(
+        completeTaskThunk({
+          businessType: safeBusinessType,
+          requestContext: {
+            taskId,
+            instanceId,
+            userId,
+            appNo: safeApplicationId,
+            remarks: "Financial details submitted",
+            decision: "CLOSE_TASK",
+          },
+        })
+      ).unwrap();
+
+      navigate(getDRSPath(safeBusinessType, safeApplicationId));
+    } catch (error) {
+      showSnackbar(
+        error instanceof Error ? error.message : "Unable to submit financial details.",
+        "error",
+      );
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
   const handleUdsLinkClick = () => {
     if (!udsLink) {
       return;
@@ -4312,8 +4377,12 @@ const ViewFinancial = () => {
         </Box>
 
         <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2, bgcolor: "#fff", mt: 1, borderRadius: 2 }}>
-          <CustomButton sx={{ width: 100, py: 0.5, fontSize: 13, borderRadius: "50px" }}>
-            Submit
+          <CustomButton
+            sx={{ width: 110, py: 0.5, fontSize: 13, borderRadius: "50px" }}
+            disabled={submitLoading || !safeApplicationId}
+            onClick={handleSubmit}
+          >
+            {submitLoading ? "Submitting..." : "Submit"}
           </CustomButton>
         </Box>
       </Box>
