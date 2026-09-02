@@ -5,7 +5,7 @@
 //  When USE_MOCK = true  → every thunk hits its mock JSON file.
 //  When USE_MOCK = false → every thunk hits the real API URL.
 // ============================================================
-export const USE_MOCK = true; // <-- flip this one flag to switch modes
+export const USE_MOCK = false; // <-- flip this one flag to switch modes
 
 export type BusinessType = "retail" | "group";
 
