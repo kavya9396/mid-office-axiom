@@ -4,7 +4,7 @@ import { useState, type KeyboardEvent, type ReactNode } from "react";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 import { KeyRightArrowIcon } from "../../icons/Icons";
 //import Decision from "./DRS_Accordions/decision";
-import UWDecision from "./DRS_Accordions/UWDecision";
+//import UWDecision from "./DRS_Accordions/UWDecision";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -223,7 +223,6 @@ const MemberSelection = ({
   uwDecision,
 }: MemberSelectionProps) => {
   const [riderDialogOpen, setRiderDialogOpen] = useState(false);
-  const uwDecisionContent = uwDecision ?? <UWDecision />;
   const data = toRecord(source);
   const applicationOverview = toRecord(data.applicationOverview);
   const products = Array.isArray(applicationOverview.productDetail)
@@ -552,7 +551,7 @@ const MemberSelection = ({
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            lg: "minmax(0, 1fr) 300px",
+            lg: uwDecision ? "minmax(0, 1fr) 300px" : "1fr",
           },
           gap: 1,
           alignItems: "start",
@@ -719,39 +718,41 @@ const MemberSelection = ({
         })}
       </Box>
 
-      <Box
-        component="aside"
-        sx={{
-          minWidth: 0,
-          overflow: "hidden",
-          border: "1px solid #DED8D5",
-          borderRadius: 1.5,
-          bgcolor: "#FFFFFF",
-          boxShadow: "0 2px 7px rgba(60, 42, 35, 0.07)",
-        }}
-      >
+      {uwDecision && (
         <Box
+          component="aside"
           sx={{
-            px: 1.15,
-            py: 0.75,
-            borderBottom: "1px solid #E9E3E0",
-            bgcolor: "#E45F14",
+            minWidth: 0,
+            overflow: "hidden",
+            border: "1px solid #DED8D5",
+            borderRadius: 1.5,
+            bgcolor: "#FFFFFF",
+            boxShadow: "0 2px 7px rgba(60, 42, 35, 0.07)",
           }}
         >
-          <Typography
+          <Box
             sx={{
-              color: "#FFFFFF",
-              fontSize: 12,
-              fontWeight: 900,
-              lineHeight: 1.2,
+              px: 1.15,
+              py: 0.75,
+              borderBottom: "1px solid #E9E3E0",
+              bgcolor: "#E45F14",
             }}
           >
-            UW Decision
-          </Typography>
-        </Box>
+            <Typography
+              sx={{
+                color: "#FFFFFF",
+                fontSize: 12,
+                fontWeight: 900,
+                lineHeight: 1.2,
+              }}
+            >
+              UW Decision
+            </Typography>
+          </Box>
 
-        {uwDecisionContent}
-      </Box>
+          {uwDecision}
+        </Box>
+      )}
       </Box>
 
       <CustomDialog
