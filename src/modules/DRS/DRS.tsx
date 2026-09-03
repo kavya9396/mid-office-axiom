@@ -38,6 +38,7 @@ import { getInboxPath } from "../../routes/routes";
 import { preloginThunk } from "../../store/thunks/preloginThunk";
 import ApplicantApplicationSummary from "./ApplicantSummary";
 import type { ComponentType } from "react";
+import MemberSelection from "./MemberSeclection";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -233,6 +234,9 @@ const DRS = () => {
 
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedMemberIndex, setSelectedMemberIndex] = useState<number | null>(
+    null,
+  );
 
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
@@ -327,7 +331,10 @@ const DRS = () => {
     businessType === "group"
       ? "BRE-GROUP"
       : "BRE-RETAIL";
-      console.log('eventName',businessType,eventName)
+
+  useEffect(() => {
+    setSelectedMemberIndex(null);
+  }, [applicationNo]);
 
   useEffect(() => {
     if (
@@ -705,6 +712,35 @@ const DRS = () => {
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK";
 
+  const drsRecord = toRecord(drsData);
+  const summaryMembers = Array.isArray(drsRecord.summary)
+    ? drsRecord.summary
+    : [];
+  const shouldShowMemberSelection =
+    summaryMembers.length > 1 && selectedMemberIndex === null;
+
+  if (shouldShowMemberSelection) {
+    return (
+      <Box
+        component="main"
+        sx={{
+          width: "100%",
+          height: `calc(100dvh - ${APP_HEADER_HEIGHT}px)`,
+          minHeight: 0,
+          overflowY: "auto",
+          overflowX: "hidden",
+          bgcolor: "#F8F6F5",
+        }}
+      >
+        <MemberSelection
+          applicationNumber={applicationNo}
+          source={drsData}
+          onMemberSelect={setSelectedMemberIndex}
+        />
+      </Box>
+    );
+  }
+
   return (
     <>
       <Box
@@ -726,8 +762,25 @@ const DRS = () => {
             gap: 1,
             pb: 1,
           }}
-        >
+        > {normalizeValue(roleType) === "VENDOR_CMO_TASK" ? (
+            <VendorCMOApplicationSummary
+              stickyTop={0}
+              onBackToInbox={() => navigate(getInboxPath())}
+              requirementManagement={
+                RequirementManagementPanel ? (
+                  <RequirementManagementPanel embedded />
+                ) : null
+              }
+              decisionHistory={
+                DecisionHistoryPanel ? (
+                  <DecisionHistoryPanel embedded />
+                ) : null
+              }
+            />
+          ):(
           <ApplicantApplicationSummary
+            key={`applicant-summary-${selectedMemberIndex ?? 0}`}
+            initialMemberIndex={selectedMemberIndex ?? 0}
             stickyTop={0}
             onBackToInbox={() => navigate(getInboxPath())}
             requirementManagement={
@@ -740,7 +793,7 @@ const DRS = () => {
                 <DecisionHistoryPanel embedded />
               ) : null
             }
-          />
+          />)}
 
           {pageAccordionIds.map((accordionId) => {
             const AccordionComponent =

@@ -15,6 +15,7 @@ import RequirementManagementTable from "./RequirementManagementTable";
 interface RequirementManagementProps {
   requirements?: AdditionalRequirementRow[];
   onAddRequirement?: () => void;
+  addRowSignal?: number;
   readOnly?: boolean;
   embedded?: boolean;
   statusFilter?: string;
@@ -35,13 +36,14 @@ const normalizeText = (value: unknown): string =>
 const RequirementManagement = ({
   requirements,
   onAddRequirement,
+  addRowSignal: externalAddRowSignal = 0,
   readOnly = false,
   embedded = false,
   statusFilter = "All",
   statusFilterSignal = 0,
 }: RequirementManagementProps) => {
   const dispatch = useAppDispatch();
-  const [addRowSignal, setAddRowSignal] = useState(0);
+  const [internalAddRowSignal, setInternalAddRowSignal] = useState(0);
 
   const drsData = useAppSelector(
     (state: RootState) => state.drs.data,
@@ -65,7 +67,7 @@ const RequirementManagement = ({
   ].includes(roleType);
 
   const handleAdd = () => {
-    setAddRowSignal((currentSignal) => currentSignal + 1);
+    setInternalAddRowSignal((currentSignal) => currentSignal + 1);
     onAddRequirement?.();
   };
 
@@ -145,7 +147,11 @@ const RequirementManagement = ({
       <RequirementManagementTable
         requirements={requirementRows}
         onSave={readOnly ? undefined : handleSaveRequirements}
-        addRowSignal={readOnly ? 0 : addRowSignal}
+        addRowSignal={
+          readOnly
+            ? 0
+            : externalAddRowSignal + internalAddRowSignal
+        }
         readOnly={readOnly}
         statusFilter={statusFilter}
         statusFilterSignal={statusFilterSignal}

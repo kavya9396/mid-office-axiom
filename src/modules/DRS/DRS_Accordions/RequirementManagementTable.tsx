@@ -1152,6 +1152,7 @@ const RequirementManagementTable = ({
   }, [rows]);
 
   const filteredRows = useMemo(() => {
+    const newRowIdSet = new Set(newRowIds);
     const matchingRows = rows.filter((row) =>
         (Object.keys(filters) as FilterField[]).every((field) => {
           const selectedValues = filters[field];
@@ -1174,6 +1175,13 @@ const RequirementManagementTable = ({
     return matchingRows
       .map((row, originalIndex) => ({ row, originalIndex }))
       .sort((first, second) => {
+        const firstIsNew = newRowIdSet.has(first.row.__clientRowId);
+        const secondIsNew = newRowIdSet.has(second.row.__clientRowId);
+
+        if (firstIsNew !== secondIsNew) {
+          return firstIsNew ? -1 : 1;
+        }
+
         const priorityDifference =
           getStatusPriority(first.row.status) -
           getStatusPriority(second.row.status);
@@ -1181,7 +1189,7 @@ const RequirementManagementTable = ({
         return priorityDifference || first.originalIndex - second.originalIndex;
       })
       .map(({ row }) => row);
-  }, [filters, rows]);
+  }, [filters, newRowIds, rows]);
 
   const pageCount = Math.max(
     1,

@@ -36,6 +36,8 @@ const referralRoleMap: Record<string, "hod" | "sruw" | "cmo"> = {
     "Refer to HO CMO": "cmo",
 };
 
+const CLEAR_CASE_UW_DECISION_VALUE = "__CLEAR_CASE_UW_DECISION__";
+
 const canonicalReferralDecisionLabel = (value: string) => {
     const normalized = value
         .trim()
@@ -68,6 +70,10 @@ type TaskApplication = {
 type LocationState = {
     application?: TaskApplication;
 };
+
+interface UWDecisionProps {
+    memberLabel?: string;
+}
 
 // type CounterOfferRowKey = "baseSumAssured" | "riderSumAssured";
 // type CounterOfferFieldKey =
@@ -261,7 +267,7 @@ const getPostponementPeriodOptions = (
         .filter((option) => option.label && option.value);
 };
 
-const UWDecision = () => {
+const UWDecision = ({ memberLabel }: UWDecisionProps) => {
     const decisionCodes = useSelector((state: RootState) => state.decisionCodes.decisionCodes)
     const masters = useSelector((state: RootState) => state.drs.masters);
     const dispatch = useDispatch<AppDispatch>();
@@ -535,6 +541,18 @@ const UWDecision = () => {
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
+    const caseUWDecisionSelectOptions = useMemo(
+        () => effectiveCaseUWDecision
+            ? [
+                {
+                    label: "Clear Case UW Decision",
+                    value: CLEAR_CASE_UW_DECISION_VALUE,
+                },
+                ...caseUWDecisionOptions,
+            ]
+            : caseUWDecisionOptions,
+        [caseUWDecisionOptions, effectiveCaseUWDecision],
+    );
     const postponementPeriodOptions = useMemo(
         () => getPostponementPeriodOptions(masters),
         [masters],
@@ -856,7 +874,6 @@ const UWDecision = () => {
         "Refer to CMO",
         "Refer to Risk",
         "Refer to Accuity",
-        "Raise Requirement",
     ].includes(caseUWDecisionLabel);
 
     const firstUwReferralLabels = [
@@ -908,15 +925,20 @@ const UWDecision = () => {
     const isFirstUwDecline = normalizedFirstUwDecisionLabel === "DECLINE";
     const isFirstUwPostpone = normalizedFirstUwDecisionLabel === "POSTPONE";
     const isFirstUwCounterOffer = normalizedFirstUwDecisionLabel === "COUNTER OFFER";
-    const isRaiseRequirementDecision =
-        caseUWDecisionLabel
-            .trim()
-            .replace(/[\\s_-]+/g, "")
-            .toUpperCase() === "RAISEREQUIREMENT" ||
-        effectiveCaseUWDecision
-            .trim()
-            .replace(/[\\s_-]+/g, "")
-            .toUpperCase() === "RAISEREQ";
+    const normalizedCaseDecision = caseUWDecisionLabel
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+    const normalizedCaseDecisionValue = effectiveCaseUWDecision
+        .trim()
+        .toUpperCase()
+        .replace(/[^A-Z0-9]/g, "");
+    const isRaiseRequirementDecision = [
+        normalizedCaseDecision,
+        normalizedCaseDecisionValue,
+    ].some((decision) =>
+        ["RAISEREQUIREMENT", "RAISEREQ"].includes(decision),
+    );
     const isPendingRequirementDecisionBlocked =
         hasPendingRequirement && !isRaiseRequirementDecision;
     const pendingRequirementDecisionMessage =
@@ -1112,7 +1134,9 @@ const UWDecision = () => {
                     instanceId: taskContext.instanceId,
                     remarks: uwDecisionRemarks.trim(),
                     decision: effectiveCaseUWDecision.trim(),
-                    ...(outlier.trim() ? { outlier: outlier.trim() } : {}),
+                    ...(!isRaiseRequirementDecision && outlier.trim()
+                        ? { outlier: outlier.trim() }
+                        : {}),
                     ...(hasWaivedRequirement && effectiveCaseUWDecision
                         ? {
                             waiverJustificationReason: waiverJustificationReason.trim(),
@@ -1140,16 +1164,18 @@ const UWDecision = () => {
                     ...(selectedReferralConfig && !selectedReferralUser && referralValue.trim()
                         ? { referralValue: referralValue.trim() }
                         : {}),
-                    ...(parallelDecision.trim()
+                    ...(showParallelDecision && parallelDecision.trim()
                         ? { parallelDecision: parallelDecision.trim() }
                         : {}),
-                    ...(selectedParallelReferralUser?.fullName?.trim()
+                    ...(showParallelDecision && selectedParallelReferralUser?.fullName?.trim()
                         ? { parallelFullName: selectedParallelReferralUser.fullName.trim() }
                         : {}),
-                    ...(selectedParallelReferralUser?.ntid?.trim()
+                    ...(showParallelDecision && selectedParallelReferralUser?.ntid?.trim()
                         ? { parallelNtid: selectedParallelReferralUser.ntid.trim() }
                         : {}),
-                    ...(!selectedParallelReferralUser && parallelReferralValue.trim()
+                    ...(showParallelDecision &&
+                    !selectedParallelReferralUser &&
+                    parallelReferralValue.trim()
                         ? { parallelReferralReason: parallelReferralValue.trim() }
                         : {}),
                     ...(showReferralDecisionFlow && referralReason.trim()
@@ -1357,13 +1383,18 @@ const UWDecision = () => {
             return;
         }
 
-        if (referralRoleMap[parallelDecisionLabel] && !selectedParallelReferralUser) {
+        if (
+            showParallelDecision &&
+            referralRoleMap[parallelDecisionLabel] &&
+            !selectedParallelReferralUser
+        ) {
             setSubmitMessage("Please select a user for the parallel UW decision.");
             setSubmitStatus("failure");
             return;
         }
 
         if (
+            showParallelDecision &&
             selectedParallelReferralConfig &&
             !referralRoleMap[parallelDecisionLabel] &&
             !parallelReferralValue.trim()
@@ -1514,6 +1545,44 @@ const UWDecision = () => {
             .finally(() => setParallelRoleUsersLoading(false));
     };
 
+    const resetCaseUWDecisionDependentFields = () => {
+        setOutlier("");
+        setDecisionCode("");
+        setSmokerStatus("");
+        setBorderlineStandardReasons([]);
+        setCounterOfferReasons([]);
+        setRejectReason([]);
+        setDeclineReasons([]);
+        setPostponeReason("");
+        setPostponementPeriod("");
+        setReferralValue("");
+        setReferralReason("");
+        setRoleUsers([]);
+        setRoleUsersLoading(false);
+        setExcludedReferralNtids([]);
+        setParallelDecision("");
+        setParallelReferralValue("");
+        setParallelRoleUsers([]);
+        setParallelRoleUsersLoading(false);
+        setHoldReasons("");
+        setWaiverJustificationReason("");
+        setWaiverJustificationRemarks("");
+        setDecisionType("counterSign");
+        setUwDecision("");
+        setFirstUwDecisionCode("");
+        setFirstUwSmokerStatus("");
+        setThresholdUserNtid("");
+        setThresholdDialogOpen(false);
+        setConfirmationDialogOpen(false);
+        setSubmitMessage(null);
+        setSubmitStatus(null);
+    };
+
+    const clearCaseUWDecision = () => {
+        setCaseUWDecision("");
+        resetCaseUWDecisionDependentFields();
+    };
+
     const filteredParallelOptions = useMemo(() => {
         const normalizeDecisionLabel = (value: string) =>
             value.trim().replace(/[\s_-]+/g, " ").toUpperCase();
@@ -1627,9 +1696,16 @@ const UWDecision = () => {
                             </Typography>
                         </Box>
                         <CustomSelect
-                            label="Case UW Decision"
+                            label={memberLabel
+                                ? `UW Decision - ${memberLabel}`
+                                : "Case UW Decision"}
                             value={effectiveCaseUWDecision}
                             onChange={async (value: string) => {
+                                if (value === CLEAR_CASE_UW_DECISION_VALUE) {
+                                    clearCaseUWDecision();
+                                    return;
+                                }
+
                                 const selectedOption = caseUWDecisionOptions.find(
                                     (option) => option.value === value,
                                 );
@@ -1651,26 +1727,8 @@ const UWDecision = () => {
                                     fetchDecisionCodes.has(selectedLabel);
 
                                 setCaseUWDecision(value);
-                                setOutlier("");
+                                resetCaseUWDecisionDependentFields();
                                 fetchUsersForReferralDecision(selectedLabel);
-                                setReferralValue("");
-                                setParallelDecision("");
-                                setParallelReferralValue("");
-                                setParallelRoleUsers([]);
-                                setBorderlineStandardReasons([]);
-                                setCounterOfferReasons([]);
-                                setRejectReason([]);
-                                setDeclineReasons([]);
-                                setPostponeReason("");
-                                setPostponementPeriod("");
-                                setReferralReason("");
-                                setUwDecision("");
-                                setFirstUwDecisionCode("");
-                                setFirstUwSmokerStatus("");
-                                setSubmitMessage(null);
-                                setSubmitStatus(null);
-                                setDecisionCode("");
-                                setSmokerStatus("");
 
                                 if (shouldFetchDecisionCode) {
                                     const response = await dispatch(
@@ -1699,7 +1757,7 @@ const UWDecision = () => {
                                     openRequirementManagement(true);
                                 }
                             }}
-                            options={caseUWDecisionOptions}
+                            options={caseUWDecisionSelectOptions}
                         />
                         
                     </Box>
@@ -1736,7 +1794,7 @@ const UWDecision = () => {
                             },
                         }}
                     >
-                        {effectiveCaseUWDecision && (
+                        {effectiveCaseUWDecision && !isRaiseRequirementDecision && (
                             <Box>
                                 <Typography
                                     sx={{
@@ -1765,7 +1823,7 @@ const UWDecision = () => {
                             </Box>
                         )}
 
-                        {hasWaivedRequirement && effectiveCaseUWDecision && (
+                        {/* {hasWaivedRequirement && effectiveCaseUWDecision && (
                             <>
                                 <CustomSelect
                                     label="Waiver Justification"
@@ -1798,7 +1856,7 @@ const UWDecision = () => {
                                     />
                                 </Box>
                             </>
-                        )}
+                        )} */}
 
                         {showDecisionCode && (
                             (isStandardDecision || isBorderlineStandardDecision || isRejectDecision || isDeclineDecision || isPostponeDecision || isCounterOfferDecision) ? (
@@ -2299,7 +2357,7 @@ const UWDecision = () => {
 
                 </Box>
                 {/* Submit Button */}
-                {caseUWDecision && caseUWDecisionLabel !== "Refer to Reinsurer" && (
+                {/* {caseUWDecision && caseUWDecisionLabel !== "Refer to Reinsurer" && ( */}
                     <Box
                         sx={{
                             display: "flex",
@@ -2326,7 +2384,8 @@ const UWDecision = () => {
                             {submitLoading ? "Submitting..." : "Submit"}
                         </CustomButton>
                     </Box>
-                )}
+                    
+                 {/* )} */}
 
                 {selectedReferralConfig && caseUWDecisionLabel === "Refer to Reinsurer" && (
                     <UWReinsurer onOpenConfirmation={handleSubmitIntent} />

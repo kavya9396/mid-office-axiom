@@ -7,14 +7,26 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 // import CustomAccordion from "../../components/ui/Accordion/Accordion";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
-import { KeyRightArrowIcon, UserProfileIcon } from "../../icons/Icons";
+import { useAppContext } from "../../hooks/useAppContext";
+import {
+  KeyRightArrowIcon,
+  RefreshIcon,
+  UserProfileIcon,
+} from "../../icons/Icons";
+import { getInboxPath } from "../../routes/routes";
 import { useAppSelector } from "../../store/hooks";
-import type { RootState } from "../../store/store";
+import type { AppDispatch, RootState } from "../../store/store";
+import { breThunk } from "../../store/thunks/breThunk";
+import { drsThunk } from "../../store/thunks/drsThunk";
+import type { BreResponse } from "../../types/drs.types";
 //import { formatDate } from "../../utils/dataFormat";
 import BreDecision from "./DRS_Accordions/BreDecision";
+import MemberSelection from "./MemberSeclection";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
@@ -22,6 +34,8 @@ import BreDecision from "./DRS_Accordions/BreDecision";
 
 interface ApplicantApplicationSummaryProps {
   onBackToInbox?: () => void;
+  onBackToSummary?: () => void;
+  initialMemberIndex?: number;
   readOnly?: boolean;
   showRiskAnalytics?: boolean;
   uwDecision?: ReactNode;
@@ -241,6 +255,31 @@ const text = (value: unknown): string => {
   }
 
   return String(value);
+};
+
+const formatMemberType = (value: unknown, index: number): string => {
+  const memberType = String(value ?? "").trim();
+
+  if (!memberType) {
+    return `Member ${index + 1}`;
+  }
+
+  const lifeAssuredMatch =
+    memberType.match(/^life\s*assured\s*(\d+)$/i) ??
+    memberType.match(/^lifeassured(\d+)$/i);
+
+  if (lifeAssuredMatch) {
+    return `Life Assured ${lifeAssuredMatch[1]}`;
+  }
+
+  if (/^proposer$/i.test(memberType)) {
+    return "Proposer";
+  }
+
+  return memberType
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 };
 
 const firstValue = (...values: unknown[]): unknown =>
@@ -683,11 +722,13 @@ interface ApplicationSummaryBannerProps {
 const ApplicationSummaryBanner = ({
   image,
   name,
+  appNo,
   personalSummary,
   productName,
   policyTerm,
   premiumTerm,
   sumAssured,
+  tsa,
   tfsa,
   tssa,
   tpsa,
@@ -696,7 +737,7 @@ const ApplicationSummaryBanner = ({
 }: ApplicationSummaryBannerProps) => {
   const coverageItems = [
     `SA - ${sumAssured}`,
-    `TSA - ₹15,00,000`,
+    tsa !== "-" ? `TSA - ${tsa}` : null,
     tfsa !== "-" ? `TFSA - ${tfsa}` : null,
     tssa !== "-" ? `TSSA - ${tssa}` : null,
     tpsa !== "-" ? `TPSA - ${tpsa}` : null,
@@ -750,7 +791,7 @@ const ApplicationSummaryBanner = ({
               lineHeight: 1,
             }}
           >
-            Ã¢â€ Â
+            ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬ Ãƒâ€šÃ‚Â
           </Box>
         )} */}
         <Avatar
@@ -818,7 +859,7 @@ const ApplicationSummaryBanner = ({
             whiteSpace: "nowrap",
           }}
         >
-          App No. - OB90377122 
+          App No. - OB90377122
         </Typography>
       </Box>
 
@@ -1117,6 +1158,7 @@ const RiskAnalyticsCard = ({
 
 const ApplicantApplicationSummary = ({
   onBackToInbox,
+  initialMemberIndex = 0,
   readOnly = false,
   showRiskAnalytics = true,
   uwDecision,
@@ -1125,6 +1167,17 @@ const ApplicantApplicationSummary = ({
   decisionHistory,
   stickyTop = 72,
 }: ApplicantApplicationSummaryProps) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const navigate = useNavigate();
+
+  const {
+    applicationNumber,
+    businessType,
+  } = useAppContext();
+
+  const roleType = localStorage.getItem("roleType") ?? "";
+  const userId = localStorage.getItem("username") ?? "";
+
   const drsData = useAppSelector(
     (state: RootState) => state.drs.data,
   );
@@ -1136,7 +1189,13 @@ const ApplicantApplicationSummary = ({
   const [selectedRiskCard, setSelectedRiskCard] =
     useState<RiskCard | null>(null);
 
-  const [selectedMemberIndex, setSelectedMemberIndex] = useState(0);
+  const [selectedMemberIndex, setSelectedMemberIndex] = useState(() =>
+    Math.max(0, initialMemberIndex),
+  );
+
+  // Multi-member cases must open on member selection even when summary data
+  // arrives after the component's first render.
+  const [showMemberSelection, setShowMemberSelection] = useState(true);
 
   const [detailTab, setDetailTab] =
     useState<ApplicantDetailTab>("personal");
@@ -1144,10 +1203,20 @@ const ApplicantApplicationSummary = ({
   const [breDetailDialogOpen, setBreDetailDialogOpen] =
     useState(false);
 
+  const [breResponse, setBreResponse] =
+    useState<BreResponse | null>(null);
+
+  const [breRetriggering, setBreRetriggering] =
+    useState(false);
+
+  const [breRetriggerLimitOpen, setBreRetriggerLimitOpen] =
+    useState(false);
+
   const [requirementStatusFilter, setRequirementStatusFilter] =
     useState<RequirementStatusFilter>("All");
   const [requirementStatusFilterSignal, setRequirementStatusFilterSignal] =
     useState(0);
+  const [requirementAddRowSignal, setRequirementAddRowSignal] = useState(0);
 
   const [riderDialogOpen, setRiderDialogOpen] = useState(false);
   const [activeQuickLinkPanel, setActiveQuickLinkPanel] =
@@ -1155,12 +1224,23 @@ const ApplicantApplicationSummary = ({
   const quickLinkDialogOpen = activeQuickLinkPanel !== null;
   const closeQuickLinkPanel = () => setActiveQuickLinkPanel(null);
 
+  useEffect(() => {
+    setSelectedMemberIndex(Math.max(0, initialMemberIndex));
+    setSelectedRiskCard(null);
+  }, [initialMemberIndex]);
+
   const openRequirementManagementPanel = (
     status: RequirementStatusFilter = "All",
   ) => {
     setRequirementStatusFilter(status);
     setRequirementStatusFilterSignal((currentSignal) => currentSignal + 1);
     setActiveQuickLinkPanel("requirementManagement");
+  };
+
+  const handleAddRequirementRow = () => {
+    setRequirementStatusFilter("All");
+    setRequirementStatusFilterSignal((currentSignal) => currentSignal + 1);
+    setRequirementAddRowSignal((currentSignal) => currentSignal + 1);
   };
 
   useEffect(() => {
@@ -1229,6 +1309,92 @@ const ApplicantApplicationSummary = ({
     ? latestBreCandidate
     : initialBre;
 
+  const finalBreResponseData = readOnly
+    ? undefined
+    : breResponse?.data;
+
+  const hasBreApiResponse =
+    !readOnly && Boolean(finalBreResponseData?.breOutput);
+
+  const storageBusinessType = (
+    businessType ||
+    localStorage.getItem("businessType") ||
+    "retail"
+  )
+    .trim()
+    .toLowerCase();
+
+  const eventName =
+    storageBusinessType === "group"
+      ? "BRE-GROUP"
+      : "BRE-RETAIL";
+
+  const showBreRetriggerButton =
+    !readOnly &&
+    roleType !== "AMR_MEDICAL_TASK" &&
+    roleType !== "AMR_NON_MEDICAL_TASK" &&
+    roleType !== "CPT_DATA_ENTRY_NMR_TASK" &&
+    roleType !== "CPT_DATA_ENTRY_MR_TASK";
+
+  const handleBreRetrigger = async () => {
+    if (readOnly || breRetriggering) {
+      return;
+    }
+
+    const reTriggerCount = Number(
+      finalBre.reTriggerCount ?? 0,
+    );
+
+    if (reTriggerCount > 3) {
+      setBreRetriggerLimitOpen(true);
+      return;
+    }
+
+    if (!applicationNumber) {
+      console.error("Application number is missing.");
+      return;
+    }
+
+    setBreRetriggering(true);
+
+    try {
+      const response = await dispatch(
+        breThunk({
+          eventName,
+          applicationNumber,
+          businessType: storageBusinessType,
+        }),
+      ).unwrap();
+
+      setBreResponse(response);
+
+      await dispatch(
+        drsThunk({
+          applicationNo: applicationNumber,
+          userId,
+          roleType,
+          sections: ["latestBreDecision"],
+          businessType: storageBusinessType,
+        }),
+      ).unwrap();
+    } catch (error) {
+      console.error("BRE API failed:", error);
+    } finally {
+      setBreRetriggering(false);
+    }
+  };
+
+  const referBreToIT = () => {
+    setBreRetriggerLimitOpen(false);
+    navigate(getInboxPath());
+  };
+
+  const handleBackToSummary = () => {
+    setSelectedRiskCard(null);
+    setActiveQuickLinkPanel(null);
+    setShowMemberSelection(true);
+  };
+
   const members = Array.isArray(source.summary)
     ? source.summary.map(toRecord)
     : [];
@@ -1239,6 +1405,23 @@ const ApplicantApplicationSummary = ({
       : 0;
 
   const applicant = members[activeMemberIndex] ?? {};
+
+  const activeMemberLabel = formatMemberType(
+    applicant.memberType,
+    activeMemberIndex,
+  );
+
+  const selectedMemberLabel =
+    members.length > 1 && !showMemberSelection
+      ? activeMemberLabel
+      : undefined;
+
+  const uwDecisionForActiveMember = isValidElement(uwDecision)
+    ? cloneElement(
+        uwDecision as ReactElement<{ memberLabel?: string }>,
+        { memberLabel: selectedMemberLabel },
+      )
+    : uwDecision;
 
   const applicantDetails = toRecord(
     applicant.applicantDetails,
@@ -2026,6 +2209,10 @@ const ApplicantApplicationSummary = ({
 
   const finalBreDecision = text(
     firstValue(
+      hasBreApiResponse
+        ? finalBreResponseData?.breOutput
+            ?.decisionTypes?.breDecision
+        : undefined,
       finalBre.decision,
       initialBre.decision,
     ),
@@ -2044,6 +2231,10 @@ const ApplicantApplicationSummary = ({
 
   const finalDiscrepancies = splitBreCodes(
     firstValue(
+      hasBreApiResponse
+        ? finalBreResponseData?.breOutput
+            ?.decisionTypes?.breRequirement
+        : undefined,
       finalBre.discrepancy,
       initialBre.discrepancy,
     ),
@@ -2130,10 +2321,12 @@ const ApplicantApplicationSummary = ({
         requirementManagement as ReactElement<{
           statusFilter?: RequirementStatusFilter;
           statusFilterSignal?: number;
+          addRowSignal?: number;
         }>,
         {
           statusFilter: requirementStatusFilter,
           statusFilterSignal: requirementStatusFilterSignal,
+          addRowSignal: requirementAddRowSignal,
         },
       )
     : requirementManagement;
@@ -2141,6 +2334,23 @@ const ApplicantApplicationSummary = ({
   /* ------------------------------------------------------------------------ */
   /* RENDER                                                                   */
   /* ------------------------------------------------------------------------ */
+
+  if (showMemberSelection && members.length > 1) {
+    return (
+      <MemberSelection
+        applicationNumber={appNo}
+        source={source}
+        stickyTop={stickyTop}
+        uwDecision={uwDecision}
+        onMemberSelect={(memberIndex) => {
+          setSelectedMemberIndex(memberIndex);
+          setSelectedRiskCard(null);
+          setDetailTab("personal");
+          setShowMemberSelection(false);
+        }}
+      />
+    );
+  }
 
   return (
     <>
@@ -2201,6 +2411,61 @@ const ApplicantApplicationSummary = ({
         </Box>
       </Box>
 
+      {members.length > 1 && (
+        <Box
+          sx={{
+            width: "100%",
+            px: 0.5,
+            pb: 0.75,
+            display: "flex",
+            alignItems: "center",
+          }}
+        >
+          <Button
+            type="button"
+            variant="outlined"
+            aria-label="Back to member summary"
+            onClick={handleBackToSummary}
+            startIcon={
+              <Box
+                component="span"
+                aria-hidden="true"
+                sx={{ fontSize: 16, fontWeight: 900, lineHeight: 1 }}
+              >
+                &#8592;
+              </Box>
+            }
+            sx={{
+              minWidth: "auto",
+              px: 1.4,
+              py: 0.55,
+              border: "1px solid #E45F14",
+              borderRadius: "18px",
+              bgcolor: "#FFF4EC",
+              color: "#A92129",
+              fontSize: { xs: 10, sm: 11 },
+              fontWeight: 900,
+              lineHeight: 1.2,
+              textTransform: "none",
+              whiteSpace: "nowrap",
+              boxShadow: "0 2px 7px rgba(169,33,41,.12)",
+              "& .MuiButton-startIcon": {
+                mr: 0.55,
+                ml: 0,
+              },
+              "&:hover": {
+                borderColor: "#C83C2F",
+                bgcolor: "#FFEAD7",
+                boxShadow: "0 3px 9px rgba(169,33,41,.18)",
+                transform: "translateY(-1px)",
+              },
+            }}
+          >
+            Back to Summary
+          </Button>
+        </Box>
+      )}
+
       {/* BRE, risk analytics and the remaining case snapshot scroll normally. */}
       <Box
         sx={{
@@ -2260,11 +2525,70 @@ const ApplicantApplicationSummary = ({
                 open={quickLinkDialogOpen}
                 onClose={closeQuickLinkPanel}
                 title={
-                  activeQuickLinkPanel === "requirementManagement"
-                    ? "Requirement Management"
-                    : activeQuickLinkPanel === "decisionHistory"
-                      ? "Decision History"
-                      : "Applicant Details"
+                  activeQuickLinkPanel === "requirementManagement" ? (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 1.25,
+                        pr: 5,
+                      }}
+                    >
+                      <Box component="span">Requirement Management</Box>
+                      {/* {Boolean(requirementManagement) &&
+                        !readOnly &&
+                        ![
+                          "AMR_MEDICAL_TASK",
+                          "AMR_NON_MEDICAL_TASK",
+                          "RECONSIDERATION_TASK",
+                          "ACCUITY_TASK",
+                        ].includes(roleType.trim().toUpperCase()) && (
+                          <Button
+                            variant="contained"
+                            size="small"
+                            onClick={handleAddRequirementRow}
+                            startIcon={
+                              <Box
+                                component="span"
+                                aria-hidden="true"
+                                sx={{
+                                  fontSize: 18,
+                                  fontWeight: 800,
+                                  lineHeight: 1,
+                                }}
+                              >
+                                +
+                              </Box>
+                            }
+                            sx={{
+                              minWidth: 72,
+                              height: 30,
+                              px: 1.5,
+                              borderRadius: "6px",
+                              bgcolor: "#E45F14",
+                              color: "#FFFFFF",
+                              fontSize: 12,
+                              fontWeight: 700,
+                              textTransform: "none",
+                              boxShadow: "none",
+                              "& .MuiButton-startIcon": {
+                                mr: 0.5,
+                              },
+                              "&:hover": {
+                                bgcolor: "#C94F0D",
+                                boxShadow: "none",
+                              },
+                            }}
+                          >
+                            Add
+                          </Button>
+                        )} */}
+                    </Box>
+                  ) : activeQuickLinkPanel === "decisionHistory" ? (
+                    "Decision History"
+                  ) : (
+                    "Applicant Details"
+                  )
                 }
                 maxWidth="lg"
                 fullWidth
@@ -2637,6 +2961,7 @@ const ApplicantApplicationSummary = ({
                       "space-between",
                     gap: 0.6,
                     mb: 0.8,
+                    flexWrap: "wrap",
                   }}
                 >
                   <Box
@@ -2657,35 +2982,82 @@ const ApplicantApplicationSummary = ({
                     </Typography>
                   </Box>
 
-                  <Button
-                    type="button"
-                    variant="outlined"
-                    size="small"
-                    onClick={() =>
-                      setBreDetailDialogOpen(true)
-                    }
+                  <Box
                     sx={{
-                      minWidth: 0,
-                      px: 1.15,
-                      py: 0.35,
-                      borderRadius: 4,
-                      bgcolor: "#FFF8F3",
-                      borderColor: "#E45F14",
-                      color: "#E45F14",
-                      fontSize: 9,
-                      fontWeight: 900,
-                      lineHeight: 1.4,
-                      textTransform: "none",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 0.5,
                       flexShrink: 0,
-                      "&:hover": {
-                        bgcolor: "#E45F14",
-                        borderColor: "#E45F14",
-                        color: "#FFFFFF",
-                      },
                     }}
                   >
-                    View Detail
-                  </Button>
+                    <Button
+                      type="button"
+                      variant="outlined"
+                      size="small"
+                      onClick={() =>
+                        setBreDetailDialogOpen(true)
+                      }
+                      sx={{
+                        minWidth: 0,
+                        px: 1.15,
+                        py: 0.35,
+                        borderRadius: 4,
+                        bgcolor: "#FFF8F3",
+                        borderColor: "#E45F14",
+                        color: "#E45F14",
+                        fontSize: 9,
+                        fontWeight: 900,
+                        lineHeight: 1.4,
+                        textTransform: "none",
+                        "&:hover": {
+                          bgcolor: "#E45F14",
+                          borderColor: "#E45F14",
+                          color: "#FFFFFF",
+                        },
+                      }}
+                    >
+                      View Detail
+                    </Button>
+
+                    {showBreRetriggerButton && (
+                      <Button
+                        type="button"
+                        variant="outlined"
+                        size="small"
+                        disabled={breRetriggering}
+                        onClick={handleBreRetrigger}
+                        startIcon={<RefreshIcon />}
+                        sx={{
+                          minWidth: 0,
+                          px: 1.15,
+                          py: 0.35,
+                          borderRadius: 4,
+                          bgcolor: "#FFFFFF",
+                          borderColor: "#A92129",
+                          color: "#A92129",
+                          fontSize: 9,
+                          fontWeight: 900,
+                          lineHeight: 1.4,
+                          textTransform: "none",
+                          whiteSpace: "nowrap",
+                          "& .MuiButton-startIcon": {
+                            mr: 0.45,
+                            "& svg": {
+                              width: 12,
+                              height: 12,
+                            },
+                          },
+                          "&:hover": {
+                            bgcolor: "#A92129",
+                            borderColor: "#A92129",
+                            color: "#FFFFFF",
+                          },
+                        }}
+                      >
+                       
+                      </Button>
+                    )}
+                  </Box>
                 </Box>
                    {/* DISCREPANCY CHANGE */}
 
@@ -2768,20 +3140,29 @@ const ApplicantApplicationSummary = ({
                             </Box>
                           ))}
 
-                        {initialDiscrepancies.length >
-                          3 && (
-                          <Typography
+                        {initialDiscrepancies.length > 3 && (
+                          <Button
+                            type="button"
+                            variant="text"
+                            size="small"
+                            aria-label={`View all ${initialDiscrepancies.length} initial BRE discrepancies`}
+                            onClick={() =>
+                              setBreDetailDialogOpen(true)
+                            }
                             sx={{
-                              color:
-                                "#8B4E1B",
+                              minWidth: 0,
+                              p: 0,
+                              color: "#8B4E1B",
                               fontSize: 7.5,
                               fontWeight: 900,
+                              lineHeight: 1.4,
+                              textTransform: "none",
                             }}
                           >
                             +
                             {initialDiscrepancies.length -
                               3}
-                          </Typography>
+                          </Button>
                         )}
 
                         {!initialDiscrepancies.length && (
@@ -2827,53 +3208,49 @@ const ApplicantApplicationSummary = ({
                           mt: 0.3,
                         }}
                       >
-                        {finalDiscrepancies
-                          .slice(0, 3)
-                          .map((code) => {
-                            const isNew =
-                              newDiscrepancies.includes(
-                                code,
-                              );
-
-                            return (
-                              <Box
-                                key={code}
-                                sx={{
-                                  px: 0.45,
-                                  py: 0.2,
-                                  borderRadius: 3,
-                                  bgcolor: isNew
-                                    ? "#FFF0E0"
-                                    : "#E8F5EC",
-                                  color: isNew
-                                    ? "#A35E00"
-                                    : "#28743C",
-                                  fontSize: 7,
-                                  fontWeight: 900,
-                                }}
-                              >
-                                {code}
-                              </Box>
-                            );
-                          })}
-
-                        {finalDiscrepancies.length >
-                          3 && (
-                          <Typography
+                        {newDiscrepancies.slice(0, 3).map((code) => (
+                          <Box
+                            key={code}
                             sx={{
-                              color:
-                                "#28743C",
-                              fontSize: 7.5,
+                              px: 0.45,
+                              py: 0.2,
+                              borderRadius: 3,
+                              bgcolor: "#FFF0E0",
+                              color: "#A35E00",
+                              fontSize: 7,
                               fontWeight: 900,
                             }}
                           >
+                            {code}
+                          </Box>
+                        ))}
+
+                        {newDiscrepancies.length > 3 && (
+                          <Button
+                            type="button"
+                            variant="text"
+                            size="small"
+                            aria-label={`View all ${newDiscrepancies.length} updated final BRE discrepancies`}
+                            onClick={() =>
+                              setBreDetailDialogOpen(true)
+                            }
+                            sx={{
+                              minWidth: 0,
+                              p: 0,
+                              color: "#A35E00",
+                              fontSize: 7.5,
+                              fontWeight: 900,
+                              lineHeight: 1.4,
+                              textTransform: "none",
+                            }}
+                          >
                             +
-                            {finalDiscrepancies.length -
+                            {newDiscrepancies.length -
                               3}
-                          </Typography>
+                          </Button>
                         )}
 
-                        {!finalDiscrepancies.length && (
+                        {!newDiscrepancies.length && (
                           <Typography
                             sx={{
                               color:
@@ -2881,7 +3258,7 @@ const ApplicantApplicationSummary = ({
                               fontSize: 7.5,
                             }}
                           >
-                            None
+                            No updated discrepancy
                           </Typography>
                         )}
                       </Box>
@@ -2899,38 +3276,54 @@ const ApplicantApplicationSummary = ({
                         flexWrap: "wrap",
                       }}
                     >
-                      {newDiscrepancies.length >
-                        0 && (
-                        <Typography
+                      {newDiscrepancies.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="text"
+                          size="small"
+                          aria-label={`View ${newDiscrepancies.length} new BRE discrepancies`}
+                          onClick={() =>
+                            setBreDetailDialogOpen(true)
+                          }
                           sx={{
+                            minWidth: 0,
+                            p: 0,
                             color: "#A35E00",
                             fontSize: 7.5,
                             fontWeight: 900,
+                            lineHeight: 1.4,
+                            textTransform: "none",
                           }}
                         >
                           +{" "}
-                          {
-                            newDiscrepancies.length
-                          }{" "}
+                          {newDiscrepancies.length}{" "}
                           new
-                        </Typography>
+                        </Button>
                       )}
 
-                      {resolvedDiscrepancies.length >
-                        0 && (
-                        <Typography
+                      {resolvedDiscrepancies.length > 0 && (
+                        <Button
+                          type="button"
+                          variant="text"
+                          size="small"
+                          aria-label={`View ${resolvedDiscrepancies.length} resolved BRE discrepancies`}
+                          onClick={() =>
+                            setBreDetailDialogOpen(true)
+                          }
                           sx={{
+                            minWidth: 0,
+                            p: 0,
                             color: "#28743C",
                             fontSize: 7.5,
                             fontWeight: 900,
+                            lineHeight: 1.4,
+                            textTransform: "none",
                           }}
                         >
-                          ÃƒÆ’Ã‚Â¢Ãƒâ€¹Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢{" "}
-                          {
-                            resolvedDiscrepancies.length
-                          }{" "}
+                          -{" "}
+                          {resolvedDiscrepancies.length}{" "}
                           resolved
-                        </Typography>
+                        </Button>
                       )}
                     </Box>
                   )}
@@ -3249,6 +3642,50 @@ const ApplicantApplicationSummary = ({
             <BreDecision readOnly={readOnly} />
           </CustomDialog>
 
+          <CustomDialog
+            open={breRetriggerLimitOpen}
+            showCloseIcon
+            onClose={() =>
+              setBreRetriggerLimitOpen(false)
+            }
+            title="BRE Retriggered"
+          >
+            <Typography
+              sx={{
+                fontSize: "14px",
+                color: "#161616",
+              }}
+            >
+              You have exhausted the BRE retrigger limit. Kindly refer this
+              ticket to the IT Team.
+            </Typography>
+
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                mt: 2,
+              }}
+            >
+              <Button
+                type="button"
+                variant="contained"
+                onClick={referBreToIT}
+                sx={{
+                  borderRadius: "50px",
+                  px: "40px",
+                  bgcolor: "#A92129",
+                  textTransform: "none",
+                  "&:hover": {
+                    bgcolor: "#86191F",
+                  },
+                }}
+              >
+                Refer to IT
+              </Button>
+            </Box>
+          </CustomDialog>
+
           {/* ============================================================ */}
           {/* RISK DETAILS DIALOG                                         */}
           {/* ============================================================ */}
@@ -3432,7 +3869,7 @@ const ApplicantApplicationSummary = ({
                 eyebrow="Underwriter"
                 title="UW Decision"
               >
-                {uwDecision}
+                {uwDecisionForActiveMember}
               </DashboardCard>
             )}
 

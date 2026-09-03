@@ -695,11 +695,7 @@ const QuickLinks = ({
                 open={openSummaryDialog}
                 showCloseIcon={true}
                 onClose={() => setOpenSummaryDialog(false)}
-                title={
-                    <Typography sx={{ ...modalTitleStyles }}>
-                        Summary
-                    </Typography>
-                }
+               title=""
                 maxWidth="xl"
                 contentSx={{
                     p: 1,
