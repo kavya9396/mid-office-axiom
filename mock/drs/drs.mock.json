@@ -18,7 +18,7 @@
       "isInitial": "Y",
       "isLatest": "N",
       "remarks": "Product Non Eligible",
-      "discrepancy": "ACR#OCD#PAN#ADP#AGE#IDM#KYP",
+      "discrepancy": "ACR#OCD#PAN#ADP#AGE#IDM#KYP#NYC",
       "timestamp": "14/08/2026, 1108hrs",
       "action": "Decline",
       "reTriggerCount": 2
@@ -181,6 +181,396 @@
         "policyDetails": {
           "proposerName": "",
           "lifeAssuredName": "SOHEL FDSDFS",
+          "productName": "ICICI Pru GIFT Pro",
+          "modalPremium": 0,
+          "paymentMode": "",
+          "channel": "Agency"
+        },
+        "underwriting": {
+          "remarks": "Product Non Eligible",
+          "breDecision": {
+            "status": "DC",
+            "category": "Refer to Approver",
+            "coverage": "Product Non Eligible"
+          }
+        },
+        "kycDetails": {
+          "panNumber": "",
+          "identityProofType": "Aadhaar",
+          "identityProofNumber": "AAAAA1111A",
+          "addressProof": "Aadhaar",
+          "incomeProof": "Aadhaar",
+          "ageProof": "Aadhaar",
+          "existingCkycNumber": "NA",
+          "pep": "No",
+          "criminalProceedings": "No",
+          "panFlag": "Verified",
+          "panAadharSeedingStatus": "Y",
+          "identityProofExpiryDate": "2099-12-31T00:00",
+          "pranNo": "123456789012",
+          "pranNoVerification": "Verified",
+          "udsLink": ""
+        },
+        "address": [
+          {
+            "type": "communication",
+            "addressLine1": "",
+            "addressLine2": "",
+            "addressLine3": "",
+            "landmark": "",
+            "city": "",
+            "state": "",
+            "pinCode": "",
+            "residingCountry": "",
+            "topCity": "",
+            "negativePinCode": ""
+          },
+          {
+            "type": "permanent",
+            "addressLine1": "RFRF",
+            "addressLine2": "FGHJK",
+            "addressLine3": "FGHJKL",
+            "landmark": "",
+            "city": "THANE",
+            "state": "Maharashtra",
+            "pinCode": "400709",
+            "residingCountry": "India",
+            "topCity": "N",
+            "negativePinCode": "N"
+          }
+        ],
+        "communicationAddressDetails": {
+          "addressLine1": "",
+          "addressLine2": "",
+          "addressLine3": "",
+          "landmark": "",
+          "city": "",
+          "state": "",
+          "country": "",
+          "pincode": "",
+          "topCity": "",
+          "negativePinCode": ""
+        },
+        "permanentAddressDetails": {
+          "addressLine1": "RFRF",
+          "addressLine2": "FGHJK",
+          "addressLine3": "FGHJKL",
+          "landmark": "",
+          "city": "THANE",
+          "state": "Maharashtra",
+          "country": "India",
+          "pincode": "400709",
+          "topCity": "N",
+          "negativePinCode": "N"
+        },
+        "contactDetails": {
+          "mobileNo": "9878716726",
+          "alternateMobileNo": "",
+          "alternateMobile": "",
+          "std": "",
+          "landlineNo": "",
+          "landlineNumber": "",
+          "emailId": "TRSTR@GMAIL.COM",
+          "emailPref": "Y",
+          "smsPref": "Y"
+        },
+        "applicantFinancialDetails": {
+          "occupation": "SPVT",
+          "annualIncome": 5000000,
+          "gstin": "",
+          "lastIncomeYear": 2026,
+          "organisationType": "PVT",
+          "organisationName": "3I INFOTECH"
+        },
+        "healthDetail": {
+          "height": "165.1",
+          "weight": "67",
+          "bmi": "25.0",
+          "avgSystolic": "",
+          "avgDiastolic": "",
+          "heightFeet": "",
+          "heightInches": "0",
+          "hazardousOccupation": "",
+          "isDisabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": "",
+          "smokerStatus": "Non Smoker",
+          "illnessOrImpairment": [],
+          "substanceConsumption": [
+            {
+              "substance": "",
+              "consumedAs": "",
+              "quantity": {
+                "amount": "",
+                "unit": "day/week"
+              },
+              "noOfYears": null,
+              "advisedByDoctorForAbstinence": ""
+            }
+          ],
+          "medicalQuestionnaire": [
+            {
+              "qtid": "ILLIMPAIRMENT",
+              "value": "no",
+              "remar": "",
+              "subQts": []
+            }
+          ]
+        },
+        "nominee": [
+          {
+            "relationWithLA": "",
+            "relationship": "",
+            "firstName": "TRSTR",
+            "lastName": "FDSDFS",
+            "dob": "1991-03-12T00:00",
+            "gender": "Female",
+            "percentage": 0,
+            "proposerNomineeRelation": "",
+            "accountNumber": "123445",
+            "ifsc": ""
+          }
+        ],
+        "appointee": [],
+        "genericDetails": {
+          "existingPolicyNumber": "NA",
+          "clientId": "NA",
+          "selfProposed": "Yes",
+          "typeOfProposer": "Individual",
+          "relationshipWithLifeAssured": "Self",
+          "typeOfProposal": "Retail New Business"
+        },
+        "eiaDetails": {
+          "openEIA": "No",
+          "existingEIANumber": "NA",
+          "preferredRepository": "",
+          "convertPolicies": "No"
+        },
+        "fundDetails": {
+          "allocationStrategy": "",
+          "totalAllocation": "",
+          "atpOpted": "",
+          "fundDetail": []
+        },
+        "paymentDetails": {
+          "isThirdPartyPayment": false
+        },
+        "payoutDetails": {},
+        "advisorDetails": {
+          "relationWithAdvisor": "others",
+          "acquaintanceDuration": 0,
+          "fileSentToCopsDate": "",
+          "branchUWDate": "",
+          "decalarationDate": "",
+          "declarationPlace": ""
+        },
+        "questions": [
+          {
+            "quesCode": "ILLIMPAIRMENT",
+            "quesFor": "LA",
+            "quesType": "HEALTH",
+            "quesAns": "no"
+          }
+        ],
+        "producerDetails": {
+          "perfiosBank": "No",
+          "premiumPaymentOption": "",
+          "isecExperianCategory": "",
+          "gstInNumber": "",
+          "pasaSegmentCitiesFlag": "",
+          "productSource": "standalone",
+          "imputedMarker": "",
+          "imputedIncome": "0",
+          "prePopulatedValueEdited": "NA",
+          "fnaSumAssured": "0",
+          "componentCode": "",
+          "cdfWaiverFlag": "No",
+          "youthExpressFlag": "N",
+          "atsSource": "",
+          "ipsDiscountFlag": "FALSE",
+          "lumpSumPercentage": "0",
+          "accuityRiskIndicator": "",
+          "primaryLASumAssured": ""
+        },
+        "documentDetails": [
+          {
+            "documentType": "AGE_PROOF",
+            "documentName": "Aadhaar",
+            "documentId": "AAAAA1111A",
+            "validityDate": "2099-12-31T00:00"
+          }
+        ],
+        "bureauDetails": {
+          "cibilScore": "",
+          "cibilIncomeSegment": "",
+          "cibilEligibilityStatus": "N",
+          "cibilServiceStatus": "N",
+          "experianScore": "",
+          "experianIncomeSegment": "",
+          "experianEligibilityStatus": "N",
+          "experianServiceStatus": "N",
+          "payuScore": "",
+          "payuIncomeSegment": "",
+          "payuEligibilityStatus": "N",
+          "payuServiceStatus": "N"
+        }
+      }, {
+        "memberType": "lifeassured2",
+        "lifeType": "LA",
+        "customerType": "SHNI",
+        "partyId": "502a6119-6d1b-455a-9e59-7100f4c92967",
+        "jontFlag": false,
+        "lifeNumber": "",
+        "clientId": "NA",
+        "proposerLaRelation": "Self",
+        "jointLARelation": "",
+        "jointPRRelation": "",
+        "nriFlag": false,
+        "fatfFlag": false,
+        "riskAnalytics": [
+          {
+            "medicalRisk": {
+              "isMedical": true,
+              "brePhysicalMedicalDecision": "STP",
+              "brePhysicalMedicalRemark": "",
+              "breTeleVideoMerDecision": "",
+              "breTeleVideoMerRemark": "",
+              "teleMerPrompting": false,
+              "videoMerPrompting": false,
+              "tuwStatus": "",
+              "tuwReason": "",
+              "cotTest": {
+                "received": false,
+                "discrepancyStatus": "",
+                "result": "",
+                "mandatoryFieldsComplete": false
+              },
+              "merHabits": {
+                "cigarettesOrBeedisOrCigar": false,
+                "gutkaSnuffPaan": false
+              },
+              "teleMerHabits": {
+                "cigarettesOrBeedisOrCigar": false,
+                "gutkaSnuffPaan": false
+              },
+              "munichReMedicalDecision": "",
+              "munichReRating": "",
+              "biuMedicalStatus": ""
+            },
+            "financialRisk": {
+              "isFinancial": true,
+              "breFinancialDecision": "NON-FSTP",
+              "breRemark": "",
+              "financialEligibility": "4.8E7",
+              "derivedIncome": "1600000.0",
+              "counterOfferValue": "5000000.0",
+              "additionalSA": "0.0",
+              "biuFinancialStatus": ""
+            },
+            "biuModelResponse": {
+              "model": "",
+              "predict": "",
+              "action": "",
+              "modelOutput": "",
+              "modelName": ""
+            },
+            "otherRisk": {
+              "isOthers": true,
+              "ptlrResponse": "",
+              "drcResponse": "Y",
+              "adverseIIB": "",
+              "criminalQuestionResponseLA": "No",
+              "pepQuestionResponseLA": "No",
+              "criminalQuestionResponsePR": "No",
+              "pepQuestionResponsePR": "No",
+              "previousPolicySubstandard": "No",
+              "avocationRelatedDisclosure": "",
+              "healthQuestionPositive": "Yes",
+              "employmentInRiskyIndustry": "LowRiskPremium",
+              "fatfOfacCountryLogin": "No",
+              "hazardousOccupation": "",
+              "eddFlag": "Yes",
+              "claimRiskIndicator": "",
+              "faceMatchScore": "",
+              "smokerIndicator": "",
+              "tobaccoIndicator": "",
+              "narcoticIndicator": "",
+              "tobacco": "",
+              "narcotics": "",
+              "covidAdverseReply": "No",
+              "accuityTransactionStatus": ""
+            }
+          }
+        ],
+        "faceMatchDetails": {
+          "document": "",
+          "faceMatchScore": null,
+          "imageQuality": null,
+          "remarks": ""
+        },
+        "proposerSummary": {
+          "title": "",
+          "firstName": "Neha",
+          "middleName": "Rudra",
+          "lastName": "Sangha",
+          "gender": "Female",
+          "maritalStatus": "",
+          "dob": "1988-08-09T00:00",
+          "age": {
+            "years": 35,
+            "days": 8
+          },
+          "profileImage": "",
+          "caseStatus": "DRAFT",
+          "nationality": "India",
+          "countryOfResidence": "India",
+          "residentStatus": "IND",
+          "education": "Graduate",
+          "pioStatus": "0",
+          "highestQualification": "Graduate",
+          "graduationFlag": "",
+          "orgName": "3I INFOTECH",
+          "yearsInServiceOrBusiness": null,
+          "industryType": "",
+          "birthCountry": "",
+          "occupationType": "SPVT",
+          "netIncomeAmt": null,
+          "immigrationStatus": "Indian Resident",
+          "orgType": "PVT",
+          "latestIncYear": 2026,
+          "isPEP": false,
+          "panNo": "",
+          "remarks": "",
+          "ckycNumber": "",
+          "criminalProceeding": "No",
+          "incomeProof": "Aadhaar",
+          "designation": "Manager",
+          "disabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": "",
+          "udidNumber": "UDID-98765"
+        },
+        "applicantDetails": {
+          "dateOfBirth": "1988-08-09",
+          "gender": "Male",
+          "maritalStatus": "",
+          "nationality": "India",
+          "countryOfResidence": "India",
+          "education": "Graduate",
+          "designation": "Manager",
+          "disabled": "",
+          "percentageOfImpairment": "",
+          "typeOfImpairment": ""
+        },
+        "financialDetails": {
+          "annualIncome": 5000000,
+          "appliedSumAssured": 1068000,
+          "trsa": 0.0,
+          "tfsa": "Infinity"
+        },
+        "policyDetails": {
+          "proposerName": "",
+          "lifeAssuredName": "Smeet",
           "productName": "ICICI Pru GIFT Pro",
           "modalPremium": 0,
           "paymentMode": "",
@@ -511,14 +901,14 @@
         },
         "proposerSummary": {
           "title": "",
-          "firstName": "SOHEL",
-          "middleName": "",
-          "lastName": "FDSDFS",
+          "firstName": "Smeet",
+          "middleName": "Rudra",
+          "lastName": "Sangha",
           "gender": "Male",
           "maritalStatus": "",
           "dob": "1988-08-09T00:00",
           "age": {
-            "years": 38,
+            "years": 21,
             "days": 8
           },
           "profileImage": "",
@@ -580,8 +970,8 @@
         "underwriting": {
           "remarks": "Product Non Eligible",
           "breDecision": {
-            "status": "DC",
-            "category": "Decline",
+            "status": "ST",
+            "category": "Accept",
             "coverage": "Product Non Eligible"
           }
         },

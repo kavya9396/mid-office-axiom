@@ -1,14 +1,15 @@
 import {
   Dialog,
-  DialogTitle,
-  DialogContent,
   DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   type DialogProps,
   type SxProps,
   type Theme,
 } from "@mui/material";
 import type { ReactNode } from "react";
+
 import { CloseIcon } from "../../../icons/Icons";
 
 interface CustomDialogProps extends Omit<DialogProps, "title"> {
@@ -22,7 +23,6 @@ interface CustomDialogProps extends Omit<DialogProps, "title"> {
   contentSx?: SxProps<Theme>;
   paperSx?: SxProps<Theme>;
   backdropSx?: SxProps<Theme>;
-
   titleSx?: SxProps<Theme>;
   actionsSx?: SxProps<Theme>;
 }
@@ -34,17 +34,17 @@ const CustomDialog = ({
   children,
   actions,
   showCloseIcon = true,
-
   contentSx,
   paperSx,
   backdropSx,
   titleSx,
   actionsSx,
-
   maxWidth = "sm",
   fullWidth = true,
   ...rest
 }: CustomDialogProps) => {
+  const hasTitle = Boolean(title);
+
   return (
     <Dialog
       open={open}
@@ -54,6 +54,7 @@ const CustomDialog = ({
       slotProps={{
         paper: {
           sx: {
+            position: "relative",
             borderRadius: "16px",
             ...paperSx,
           },
@@ -66,27 +67,44 @@ const CustomDialog = ({
       }}
       {...rest}
     >
-      {(title || showCloseIcon) && (
+      {showCloseIcon && (
+        <IconButton
+          aria-label="Close dialog"
+          onClick={onClose}
+          sx={{
+            position: "absolute",
+            top: 6,
+            right: 6,
+            zIndex: 2,
+            color: "#9A2529",
+          }}
+        >
+          <CloseIcon />
+        </IconButton>
+      )}
+
+      {hasTitle && (
         <DialogTitle
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
+            pr: showCloseIcon ? 7 : 3,
+            pb: 1,
             fontWeight: 700,
             ...titleSx,
           }}
         >
           {title}
-
-          {showCloseIcon && (
-            <IconButton onClick={onClose} sx={{ color: "#9A2529" }}>
-              <CloseIcon />
-            </IconButton>
-          )}
         </DialogTitle>
       )}
 
-      <DialogContent sx={{ ...contentSx }}>{children}</DialogContent>
+      <DialogContent
+        sx={{
+          pt: hasTitle ? 1 : 0.5,
+          pr: showCloseIcon ? 6 : 3,
+          ...contentSx,
+        }}
+      >
+        {children}
+      </DialogContent>
 
       {actions && (
         <DialogActions sx={{ ...actionsSx }}>{actions}</DialogActions>
