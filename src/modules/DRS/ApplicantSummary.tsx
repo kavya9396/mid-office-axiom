@@ -13,7 +13,7 @@ import CustomDialog from "../../components/ui/Dialog/Dialog";
 import { KeyRightArrowIcon, UserProfileIcon } from "../../icons/Icons";
 import { useAppSelector } from "../../store/hooks";
 import type { RootState } from "../../store/store";
-import { formatDate } from "../../utils/dataFormat";
+//import { formatDate } from "../../utils/dataFormat";
 import BreDecision from "./DRS_Accordions/BreDecision";
 
 /* -------------------------------------------------------------------------- */
@@ -750,7 +750,7 @@ const ApplicationSummaryBanner = ({
               lineHeight: 1,
             }}
           >
-            â†
+            Ã¢â€ Â
           </Box>
         )} */}
         <Avatar
@@ -1043,8 +1043,8 @@ const RiskAnalyticsCard = ({
         p: 1.25,
         display: "flex",
         flexDirection: "column",
-        border: "1px solid #E6DED9",
-        borderTop: "5px solid #A92129",
+        border: `1px solid ${tone.border}`,
+        borderTop: `5px solid ${tone.text}`,
         borderRadius: "12px",
         bgcolor: "#FFFFFF",
         cursor: "pointer",
@@ -2022,7 +2022,7 @@ const ApplicantApplicationSummary = ({
   /* BRE                                                                      */
   /* ------------------------------------------------------------------------ */
 
-  const initialBreDecision = text(initialBre.decision);
+  // const initialBreDecision = text(initialBre.decision);
 
   const finalBreDecision = text(
     firstValue(
@@ -2031,12 +2031,12 @@ const ApplicantApplicationSummary = ({
     ),
   );
 
-  const breRemarks = text(
-    firstValue(
-      finalBre.remarks,
-      initialBre.remarks,
-    ),
-  );
+  // const breRemarks = text(
+  //   firstValue(
+  //     finalBre.remarks,
+  //     initialBre.remarks,
+  //   ),
+  // );
 
   const initialDiscrepancies = splitBreCodes(
     initialBre.discrepancy,
@@ -2058,29 +2058,29 @@ const ApplicantApplicationSummary = ({
       (code) => !finalDiscrepancies.includes(code),
     );
 
-  const reTriggerCount = text(
-    firstValue(
-      finalBre.reTriggerCount,
-      initialBre.reTriggerCount,
-      0,
-    ),
-  );
+  // const reTriggerCount = text(
+  //   firstValue(
+  //     finalBre.reTriggerCount,
+  //     initialBre.reTriggerCount,
+  //     0,
+  //   ),
+  // );
 
-  const rawBreTimestamp = firstValue(
-    finalBre.timestamp,
-    initialBre.timestamp,
-  );
+  // const rawBreTimestamp = firstValue(
+  //   finalBre.timestamp,
+  //   initialBre.timestamp,
+  // );
 
-  const breTimestamp = rawBreTimestamp
-    ? formatDate(String(rawBreTimestamp)) ??
-      text(rawBreTimestamp)
-    : "-";
+  // const breTimestamp = rawBreTimestamp
+  //   ? formatDate(String(rawBreTimestamp)) ??
+  //     text(rawBreTimestamp)
+  //   : "-";
 
-  const breChanged =
-    initialBreDecision !== "-" &&
-    finalBreDecision !== "-" &&
-    initialBreDecision.toUpperCase() !==
-      finalBreDecision.toUpperCase();
+  // const breChanged =
+  //   initialBreDecision !== "-" &&
+  //   finalBreDecision !== "-" &&
+  //   initialBreDecision.toUpperCase() !==
+  //     finalBreDecision.toUpperCase();
 
   const decisionTone = getDecisionTone(
     finalBreDecision,
@@ -2092,16 +2092,16 @@ const ApplicantApplicationSummary = ({
 
   const riskCards = buildRiskCards(applicant);
 
-  const attentionCount = riskCards.filter(
-    (card) => card.status === "attention",
-  ).length;
+  // const attentionCount = riskCards.filter(
+  //   (card) => card.status === "attention",
+  // ).length;
 
-  const riskSummary =
-    attentionCount > 0
-      ? `${attentionCount} alert${
-          attentionCount > 1 ? "s" : ""
-        }`
-      : "All clear";
+  // const riskSummary =
+  //   attentionCount > 0
+  //     ? `${attentionCount} alert${
+  //         attentionCount > 1 ? "s" : ""
+  //       }`
+  //     : "All clear";
 
   const hasStickyRail = Boolean(
     uwDecision || quickLinks,
@@ -2264,7 +2264,7 @@ const ApplicantApplicationSummary = ({
                     ? "Requirement Management"
                     : activeQuickLinkPanel === "decisionHistory"
                       ? "Decision History"
-                      : "Summary"
+                      : "Applicant Details"
                 }
                 maxWidth="lg"
                 fullWidth
@@ -2925,7 +2925,7 @@ const ApplicantApplicationSummary = ({
                             fontWeight: 900,
                           }}
                         >
-                          ÃƒÂ¢Ã‹â€ Ã¢â‚¬â„¢{" "}
+                          ÃƒÆ’Ã‚Â¢Ãƒâ€¹Ã¢â‚¬ ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢{" "}
                           {
                             resolvedDiscrepancies.length
                           }{" "}

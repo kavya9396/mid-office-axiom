@@ -1769,7 +1769,7 @@ const ApplicantProfile = ({
 
   return (
     <Box sx={{ px: 1 }}>
-      <CustomAccordion
+      {/* <CustomAccordion
         title={title.applicantDetails}
         defaultExpanded
         headerActions={
@@ -1786,16 +1786,16 @@ const ApplicantProfile = ({
             </CustomButton>
           ) : null
         }
-      >
+      > */}
 
         {/* ==================== RISK ANALYTICS ==================== */}
 
-        {!readOnly && canShowRiskAnalytics && (
+        {/* {!readOnly && canShowRiskAnalytics && (
   <RiskAnalytics
     memberIndex={selectedMemberTab}
     memberType={selectedApplicant?.memberType}
   />
-)}
+)} */}
         
 
         <Box sx={{ width: "100%" }}>
@@ -2102,7 +2102,7 @@ const ApplicantProfile = ({
             </Box>
           )}
         </Box>
-      </CustomAccordion>
+      {/* </CustomAccordion> */}
 
       {!readOnly && (
         <EditApplicantProfile
