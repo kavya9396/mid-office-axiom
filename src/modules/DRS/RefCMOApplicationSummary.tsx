@@ -19,7 +19,7 @@ import RefCMODecisionTable from "./RefCMODecisionTable";
 import CustomTextField from "../../components/ui/TextField/TextField";
 import CustomButton from "../../components/ui/Button/Button";
 import CustomSelect from "../../components/ui/Select/Select";
-import type { CMODecision } from "./CMOMedicalDecisionTable";
+// import type { CMODecision } from "./CMOMedicalDecisionTable";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
@@ -760,160 +760,63 @@ const ApplicationSummaryBanner = ({
       </Box>
 
       <Box sx={{ minWidth: 0, px: { xs: 1.2, sm: 2.2 }, py: { xs: 1, sm: 1.45 } }}>
-      {/* ================================================================ */}
-      {/* NAME + APPLICATION NUMBER                                        */}
-      {/* ================================================================ */}
+        {/* ================================================================ */}
+        {/* NAME + APPLICATION NUMBER                                        */}
+        {/* ================================================================ */}
 
-      <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 0.4,
-        }}
-      >
-        <Typography
-          title={name}
-          sx={{
-            minWidth: 0,
-            color: "#000",
-            fontSize: {
-              xs: 14,
-              sm: 16,
-            },
-            fontWeight: 900,
-            lineHeight: 1.25,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {name}
-        </Typography>
-
-        <Typography
-          sx={{
-            flexShrink: 0,
-            px: 1.1,
-            py: 0.45,
-            borderRadius: "16px",
-            bgcolor: "#FFFFFF",
-            border: "1px solid rgba(169,33,41,.18)",
-            color: "#A92129",
-            fontSize: {
-              xs: 11,
-              sm: 13,
-            },
-            fontWeight: 900,
-            whiteSpace: "nowrap",
-          }}
-        >
-          App No. - OB90377122 
-        </Typography>
-      </Box>
-
-      {/* ================================================================ */}
-      {/* PERSONAL SUMMARY                                                  */}
-      {/* ================================================================ */}
-
-      <Typography
-        sx={{
-          color: "#000",
-          fontSize: {
-            xs: 10,
-            sm: 11.5,
-          },
-          lineHeight: 1.6,
-          fontWeight: 500,
-          overflowWrap: "anywhere",
-        }}
-      >
-        {personalSummary || "-"}
-      </Typography>
-
-      {/* ================================================================ */}
-      {/* PRODUCT / POLICY / COVERAGE                                      */}
-      {/* ================================================================ */}
-
-      <Typography
-        sx={{
-          mt: 0.5,
-          color: "#000",
-          fontSize: {
-            xs: 10,
-            sm: 11.5,
-          },
-          lineHeight: 1.65,
-          fontWeight: 800,
-          overflowWrap: "anywhere",
-        }}
-      >
-        Product:{" "}
         <Box
-          component="span"
           sx={{
-            color: "#000",
-            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            mb: 0.4,
           }}
         >
-          {productName}
-        </Box>
-
-        {" / "}
-
-        Policy Term:{" "}
-        <Box
-          component="span"
-          sx={{
-            color: "#000",
-            fontWeight: 700,
-          }}
-        >
-          {policyTerm}
-        </Box>
-
-        {" / "}
-
-        Premium Term:{" "}
-        <Box
-          component="span"
-          sx={{
-            color: "#000",
-            fontWeight: 700,
-          }}
-        >
-          {premiumTerm}
-        </Box>
-
-        {coverageItems.map((item) => (
-          <Box
-            component="span"
-            key={item}
+          <Typography
+            title={name}
             sx={{
+              minWidth: 0,
               color: "#000",
-              fontWeight: 700,
+              fontSize: {
+                xs: 14,
+                sm: 16,
+              },
+              fontWeight: 900,
+              lineHeight: 1.25,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
-            {" / "}
-            {item}
-          </Box>
-        ))}
-      </Typography>
+            {name}
+          </Typography>
 
-      {/* ================================================================ */}
-      {/* RIDERS                                                            */}
-      {/* ================================================================ */}
+          <Typography
+            sx={{
+              flexShrink: 0,
+              px: 1.1,
+              py: 0.45,
+              borderRadius: "16px",
+              bgcolor: "#FFFFFF",
+              border: "1px solid rgba(169,33,41,.18)",
+              color: "#A92129",
+              fontSize: {
+                xs: 11,
+                sm: 13,
+              },
+              fontWeight: 900,
+              whiteSpace: "nowrap",
+            }}
+          >
+            App No. - OB90377122
+          </Typography>
+        </Box>
 
-      <Box
-        sx={{
-          mt: 0.45,
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 0.35,
-          flexWrap: "wrap",
-        }}
-      >
+        {/* ================================================================ */}
+        {/* PERSONAL SUMMARY                                                  */}
+        {/* ================================================================ */}
+
         <Typography
           sx={{
             color: "#000",
@@ -921,82 +824,179 @@ const ApplicationSummaryBanner = ({
               xs: 10,
               sm: 11.5,
             },
-            lineHeight: 1.65,
-            fontWeight: 800,
+            lineHeight: 1.6,
+            fontWeight: 500,
+            overflowWrap: "anywhere",
           }}
         >
-          Riders:
+          {personalSummary || "-"}
         </Typography>
 
-        {riderSummaries.length > 0 ? (
-          <Typography
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              color: "#000",
-              fontSize: {
-                xs: 10,
-                sm: 11.5,
-              },
-              lineHeight: 1.65,
-              fontWeight: 600,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {riderSummaries.map((rider, index) => (
-              <Box
-                component="span"
-                key={`${rider.name}-${index}`}
-              >
-                {rider.name} - SA ₹{rider.sumAssured}
-                {index < riderSummaries.length - 1
-                  ? " / "
-                  : ""}
-              </Box>
-            ))}
-          </Typography>
-        ) : (
-          <Typography
-            sx={{
-              color: "#000",
-              fontSize: {
-                xs: 10,
-                sm: 11.5,
-              },
-              lineHeight: 1.65,
-              fontWeight: 600,
-            }}
-          >
-            No riders
-          </Typography>
-        )}
+        {/* ================================================================ */}
+        {/* PRODUCT / POLICY / COVERAGE                                      */}
+        {/* ================================================================ */}
 
-        {riderSummaries.length > 0 && (
+        <Typography
+          sx={{
+            mt: 0.5,
+            color: "#000",
+            fontSize: {
+              xs: 10,
+              sm: 11.5,
+            },
+            lineHeight: 1.65,
+            fontWeight: 800,
+            overflowWrap: "anywhere",
+          }}
+        >
+          Product:{" "}
           <Box
-            component="button"
-            type="button"
-            onClick={onViewRiders}
+            component="span"
             sx={{
-              border: 0,
-              p: 0,
-              ml: 0.5,
-              mt: 0.15,
-              bgcolor: "transparent",
-              color: "#FFEAD7",
-              fontSize: 9,
-              fontWeight: 900,
-              cursor: "pointer",
-              fontFamily: "inherit",
-              whiteSpace: "nowrap",
-              "&:hover": {
-                textDecoration: "underline",
-              },
+              color: "#000",
+              fontWeight: 700,
             }}
           >
-            View details <KeyRightArrowIcon/>
+            {productName}
           </Box>
-        )}
-      </Box>
+
+          {" / "}
+
+          Policy Term:{" "}
+          <Box
+            component="span"
+            sx={{
+              color: "#000",
+              fontWeight: 700,
+            }}
+          >
+            {policyTerm}
+          </Box>
+
+          {" / "}
+
+          Premium Term:{" "}
+          <Box
+            component="span"
+            sx={{
+              color: "#000",
+              fontWeight: 700,
+            }}
+          >
+            {premiumTerm}
+          </Box>
+
+          {coverageItems.map((item) => (
+            <Box
+              component="span"
+              key={item}
+              sx={{
+                color: "#000",
+                fontWeight: 700,
+              }}
+            >
+              {" / "}
+              {item}
+            </Box>
+          ))}
+        </Typography>
+
+        {/* ================================================================ */}
+        {/* RIDERS                                                            */}
+        {/* ================================================================ */}
+
+        <Box
+          sx={{
+            mt: 0.45,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 0.35,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#000",
+              fontSize: {
+                xs: 10,
+                sm: 11.5,
+              },
+              lineHeight: 1.65,
+              fontWeight: 800,
+            }}
+          >
+            Riders:
+          </Typography>
+
+          {riderSummaries.length > 0 ? (
+            <Typography
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                color: "#000",
+                fontSize: {
+                  xs: 10,
+                  sm: 11.5,
+                },
+                lineHeight: 1.65,
+                fontWeight: 600,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {riderSummaries.map((rider, index) => (
+                <Box
+                  component="span"
+                  key={`${rider.name}-${index}`}
+                >
+                  {rider.name} - SA ₹{rider.sumAssured}
+                  {index < riderSummaries.length - 1
+                    ? " / "
+                    : ""}
+                </Box>
+              ))}
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                color: "#000",
+                fontSize: {
+                  xs: 10,
+                  sm: 11.5,
+                },
+                lineHeight: 1.65,
+                fontWeight: 600,
+              }}
+            >
+              No riders
+            </Typography>
+          )}
+
+          {riderSummaries.length > 0 && (
+            <Box
+              component="button"
+              type="button"
+              onClick={onViewRiders}
+              sx={{
+                border: 0,
+                p: 0,
+                ml: 0.5,
+                mt: 0.15,
+                bgcolor: "transparent",
+                color: "#FFEAD7",
+                fontSize: 9,
+                fontWeight: 900,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                whiteSpace: "nowrap",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              View details <KeyRightArrowIcon />
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );
@@ -1014,7 +1014,7 @@ const RiskAnalyticsCard = ({
   onClick: () => void;
 }) => {
   const tone = RISK_TONES[card.status];
-  const icon ='';
+  const icon = '';
   const visibleDetails = card.details
     .filter((detail) => text(detail.value) !== "-")
     .slice(0, 3);
@@ -1092,7 +1092,7 @@ const RiskAnalyticsCard = ({
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.7, mt: 1 }}>
         <Box sx={{ width: 34, height: 28, display: "grid", placeItems: "center", border: "1px solid #E1D8D2", borderRadius: "14px", bgcolor: "#FFF8F3", color: "#A92129", fontSize: 13 }}>
-          <KeyRightArrowIcon/>
+          <KeyRightArrowIcon />
         </Box>
         <Box sx={{ px: 1.2, py: 0.65, border: "1px solid #E1D8D2", borderRadius: "16px", bgcolor: "#FFF8F3", color: "#5B302A", fontSize: 9.5, fontWeight: 800 }}>
           View {card.id === "other" ? "Risk" : card.label}
@@ -1279,14 +1279,14 @@ const RefCMOApplicationSummary = ({
 
   const nomineeDetails = toRecord(
     applicant.nomineeDetails ??
-      applicant.nominee ??
-      applicant.nomineeSummary,
+    applicant.nominee ??
+    applicant.nomineeSummary,
   );
 
   const medicalDetails = toRecord(
     applicant.medicalDetails ??
-      applicant.medicalSummary ??
-      applicant.medical,
+    applicant.medicalSummary ??
+    applicant.medical,
   );
 
   /* ------------------------------------------------------------------------ */
@@ -1312,9 +1312,9 @@ const RefCMOApplicationSummary = ({
   )
     ? applicationOverview.riderDetails.map(toRecord)
     : products.filter(
-        (product) =>
-          String(product.type ?? "").toLowerCase() === "rider",
-      );
+      (product) =>
+        String(product.type ?? "").toLowerCase() === "rider",
+    );
 
   const productName = text(
     firstValue(
@@ -1462,7 +1462,7 @@ const RefCMOApplicationSummary = ({
 
   const age = firstValue(
     personal.age &&
-      toRecord(personal.age).years,
+    toRecord(personal.age).years,
     applicantDetails.age,
   );
 
@@ -1484,7 +1484,7 @@ const RefCMOApplicationSummary = ({
       label: "Marital status",
       value: text(
         personal.maritalStatus ??
-          applicantDetails.maritalStatus,
+        applicantDetails.maritalStatus,
       ),
     },
 
@@ -1497,7 +1497,7 @@ const RefCMOApplicationSummary = ({
       label: "Gender",
       value: text(
         personal.gender ??
-          applicantDetails.gender,
+        applicantDetails.gender,
       ),
     },
 
@@ -1505,7 +1505,7 @@ const RefCMOApplicationSummary = ({
       label: "Education",
       value: text(
         personal.education ??
-          applicantDetails.education,
+        applicantDetails.education,
       ),
     },
 
@@ -1529,7 +1529,7 @@ const RefCMOApplicationSummary = ({
       label: "Nationality",
       value: text(
         personal.nationality ??
-          applicantDetails.nationality,
+        applicantDetails.nationality,
       ),
     },
 
@@ -1537,7 +1537,7 @@ const RefCMOApplicationSummary = ({
       label: "Residence",
       value: text(
         personal.residentStatus ??
-          personal.countryOfResidence,
+        personal.countryOfResidence,
       ),
     },
 
@@ -1568,19 +1568,19 @@ const RefCMOApplicationSummary = ({
   const personalSummary = [
     text(
       personal.maritalStatus ??
-        applicantDetails.maritalStatus,
+      applicantDetails.maritalStatus,
     ),
 
     age ? text(age) : "-",
 
     text(
       personal.gender ??
-        applicantDetails.gender,
+      applicantDetails.gender,
     ),
 
     text(
       personal.education ??
-        applicantDetails.education,
+      applicantDetails.education,
     ),
 
     annualIncomeForBanner !== "-"
@@ -1591,12 +1591,12 @@ const RefCMOApplicationSummary = ({
 
     text(
       personal.nationality ??
-        applicantDetails.nationality,
+      applicantDetails.nationality,
     ),
 
     text(
       personal.residentStatus ??
-        personal.countryOfResidence,
+      personal.countryOfResidence,
     ),
   ]
     .filter((value) => value !== "-")
@@ -2114,33 +2114,33 @@ const RefCMOApplicationSummary = ({
 
   const quickLinksWithApplicantAction = isValidElement(quickLinks)
     ? cloneElement(
-        quickLinks as ReactElement<{
-          onApplicantInformationClick?: () => void;
-          onRequirementManagementClick?: () => void;
-          onDecisionHistoryClick?: () => void;
-        }>,
-        {
-          onApplicantInformationClick: () => setActiveQuickLinkPanel("summary"),
-          onRequirementManagementClick: () =>
-            openRequirementManagementPanel("All"),
-          onDecisionHistoryClick: () => setActiveQuickLinkPanel("decisionHistory"),
-        },
-      )
+      quickLinks as ReactElement<{
+        onApplicantInformationClick?: () => void;
+        onRequirementManagementClick?: () => void;
+        onDecisionHistoryClick?: () => void;
+      }>,
+      {
+        onApplicantInformationClick: () => setActiveQuickLinkPanel("summary"),
+        onRequirementManagementClick: () =>
+          openRequirementManagementPanel("All"),
+        onDecisionHistoryClick: () => setActiveQuickLinkPanel("decisionHistory"),
+      },
+    )
     : quickLinks;
 
   const requirementManagementWithStatusFilter = isValidElement(
     requirementManagement,
   )
     ? cloneElement(
-        requirementManagement as ReactElement<{
-          statusFilter?: RequirementStatusFilter;
-          statusFilterSignal?: number;
-        }>,
-        {
-          statusFilter: requirementStatusFilter,
-          statusFilterSignal: requirementStatusFilterSignal,
-        },
-      )
+      requirementManagement as ReactElement<{
+        statusFilter?: RequirementStatusFilter;
+        statusFilterSignal?: number;
+      }>,
+      {
+        statusFilter: requirementStatusFilter,
+        statusFilterSignal: requirementStatusFilterSignal,
+      },
+    )
     : requirementManagement;
 
   /* ------------------------------------------------------------------------ */
@@ -2156,7 +2156,7 @@ const RefCMOApplicationSummary = ({
           minWidth: 0,
           px: 0.5,
           pb: 0.75,
-          pt:0.75,
+          pt: 0.75,
           position: {
             xs: "static",
             lg: "sticky",
@@ -2214,424 +2214,423 @@ const RefCMOApplicationSummary = ({
           px: 0.5,
         }}
       >
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            lg: hasStickyRail
-              ? "minmax(0,1fr) 300px"
-              : "minmax(0,1fr)",
-          },
-          gap: 1,
-          alignItems: "start",
-        }}
-      >
-        <Box sx={{ minWidth: 0 }}>
-          {/* <CustomAccordion
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: hasStickyRail
+                ? "minmax(0,1fr) 300px"
+                : "minmax(0,1fr)",
+            },
+            gap: 1,
+            alignItems: "start",
+          }}
+        >
+          <Box sx={{ minWidth: 0 }}>
+            {/* <CustomAccordion
             title="Application Summary"
             defaultExpanded
           > */}
 
-          <Box
-            sx={{
-              p: 0.75,
-              bgcolor: "#FFF8F3",
-              border: "1px solid #F1D8C8",
-              borderRadius: 1.5,
-            }}
-          >
-            {/* ========================================================== */}
-            {/* TOP ROW                                                     */}
-            {/* BRE decision | Risk analytics                              */}
-            {/* ========================================================== */}
-
             <Box
               sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "minmax(245px, 1fr) minmax(0, 3fr)",
-                },
-                gap: 0.75,
-                alignItems: "stretch",
+                p: 0.75,
+                bgcolor: "#FFF8F3",
+                border: "1px solid #F1D8C8",
+                borderRadius: 1.5,
               }}
             >
-              {/* ====================================================== */}
-              {/* APPLICANT INFORMATION                                  */}
-              {/* ====================================================== */}
+              {/* ========================================================== */}
+              {/* TOP ROW                                                     */}
+              {/* BRE decision | Risk analytics                              */}
+              {/* ========================================================== */}
 
-              <CustomDialog
-                open={quickLinkDialogOpen}
-                onClose={closeQuickLinkPanel}
-                title={
-                  activeQuickLinkPanel === "requirementManagement"
-                    ? "Requirement Management"
-                    : activeQuickLinkPanel === "decisionHistory"
-                      ? "Decision History"
-                      : "Applicant Details"
-                }
-                maxWidth="lg"
-                fullWidth
-                keepMounted
-                paperSx={{
-                  width: {
-                    xs: "calc(100vw - 16px)",
-                    sm: "calc(100vw - 48px)",
-                  },
-                  height: {
-                    xs: "calc(100vh - 16px)",
-                    sm: "min(86vh, 820px)",
-                  },
-                  maxHeight: {
-                    xs: "calc(100vh - 16px)",
-                    sm: "calc(100vh - 48px)",
-                  },
-                  bgcolor: "#F5F6F7",
-                  overflow: "hidden",
-                  boxShadow: "0 18px 54px rgba(45, 35, 30, 0.24)",
-                }}
-                backdropSx={{
-                  bgcolor: "rgba(28, 22, 19, 0.48)",
-                  backdropFilter: "blur(2px)",
-                }}
-                titleSx={{
-                  minHeight: 56,
-                  px: { xs: 1.5, sm: 2.5 },
-                  py: 1,
-                  color: "#292421",
-                  bgcolor: "#FFF3E9",
-                  borderBottom: "1px solid #E5DAD2",
-                  fontSize: 17,
-                  fontWeight: 900,
-                }}
-                contentSx={{
-                  p: { xs: 1.25, sm: 2 },
-                  overflowY: "auto",
-                  overscrollBehavior: "contain",
-                }}
-              >
-                <Box sx={{ minWidth: 0 }}>
-
-                  {activeQuickLinkPanel === "requirementManagement" ? (
-                    <Box sx={{ minWidth: 0 }}>
-                      {requirementManagementWithStatusFilter}
-                    </Box>
-                  ) : activeQuickLinkPanel === "decisionHistory" ? (
-                    <Box sx={{ minWidth: 0 }}>{decisionHistory}</Box>
-                  ) : (
-                  <DashboardCard
-                eyebrow=""
-                title="Applicant Information"
+              <Box
                 sx={{
-                  minHeight: 0,
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    md: "minmax(245px, 1fr) minmax(0, 3fr)",
+                  },
+                  gap: 0.75,
+                  alignItems: "stretch",
                 }}
               >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.8,
+                {/* ====================================================== */}
+                {/* APPLICANT INFORMATION                                  */}
+                {/* ====================================================== */}
+
+                <CustomDialog
+                  open={quickLinkDialogOpen}
+                  onClose={closeQuickLinkPanel}
+                  title={
+                    activeQuickLinkPanel === "requirementManagement"
+                      ? "Requirement Management"
+                      : activeQuickLinkPanel === "decisionHistory"
+                        ? "Decision History"
+                        : "Applicant Details"
+                  }
+                  maxWidth="lg"
+                  fullWidth
+                  keepMounted
+                  paperSx={{
+                    width: {
+                      xs: "calc(100vw - 16px)",
+                      sm: "calc(100vw - 48px)",
+                    },
+                    height: {
+                      xs: "calc(100vh - 16px)",
+                      sm: "min(86vh, 820px)",
+                    },
+                    maxHeight: {
+                      xs: "calc(100vh - 16px)",
+                      sm: "calc(100vh - 48px)",
+                    },
+                    bgcolor: "#F5F6F7",
+                    overflow: "hidden",
+                    boxShadow: "0 18px 54px rgba(45, 35, 30, 0.24)",
+                  }}
+                  backdropSx={{
+                    bgcolor: "rgba(28, 22, 19, 0.48)",
+                    backdropFilter: "blur(2px)",
+                  }}
+                  titleSx={{
+                    minHeight: 56,
+                    px: { xs: 1.5, sm: 2.5 },
+                    py: 1,
+                    color: "#292421",
+                    bgcolor: "#FFF3E9",
+                    borderBottom: "1px solid #E5DAD2",
+                    fontSize: 17,
+                    fontWeight: 900,
+                  }}
+                  contentSx={{
+                    p: { xs: 1.25, sm: 2 },
+                    overflowY: "auto",
+                    overscrollBehavior: "contain",
                   }}
                 >
-                  <Avatar
-                    src={image || undefined}
-                    alt={
-                      name === "-"
-                        ? "Applicant"
-                        : name
-                    }
-                    sx={{
-                      width: 42,
-                      height: 42,
-                      flexShrink: 0,
-                      bgcolor: "#FFF3E9",
-                      color: "#A92129",
-                      border: "2px solid #FFFFFF",
-                      boxShadow:
-                        "0 2px 7px rgba(169,33,41,.15)",
-                    }}
-                  >
-                    <UserProfileIcon
-                      sx={{
-                        fontSize: 25,
-                      }}
-                    />
-                  </Avatar>
+                  <Box sx={{ minWidth: 0 }}>
 
-                  <Box
-                    sx={{
-                      minWidth: 0,
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: "#817773",
-                        fontSize: 7.5,
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                      }}
-                    >
-                      Applicant
-                    </Typography>
-
-                    <Typography
-                      title={name}
-                      sx={{
-                        mt: 0.15,
-                        color: "#292421",
-                        fontSize: 12,
-                        fontWeight: 900,
-                        lineHeight: 1.15,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {name}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* MEMBER SWITCHER */}
-
-                {members.length > 1 && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 0.4,
-                      mt: 0.8,
-                      pb: 0.7,
-                      borderBottom:
-                        "1px solid #EAE4E1",
-                      overflowX: "auto",
-                      scrollbarWidth: "thin",
-
-                      "&::-webkit-scrollbar": {
-                        height: 3,
-                      },
-                    }}
-                  >
-                    {members.map(
-                      (member, index) => {
-                        const memberPersonal = {
-                          ...toRecord(
-                            member.applicantDetails,
-                          ),
-                          ...toRecord(
-                            member.personalDetails,
-                          ),
-                          ...toRecord(
-                            member.personalSummary,
-                          ),
-                          ...toRecord(
-                            member.proposerSummary,
-                          ),
-                        };
-
-                        const memberName =
-                          getFullName({
-                            ...member,
-                            ...memberPersonal,
-                          });
-
-                        const memberType =
-                          text(
-                            member.memberType,
-                          ) === "-"
-                            ? `Member ${
-                                index + 1
-                              }`
-                            : text(
-                                member.memberType,
-                              );
-
-                        const selected =
-                          index ===
-                          activeMemberIndex;
-
-                        return (
-                          <Box
-                            key={`${memberType}-${index}`}
-                            component="button"
-                            type="button"
-                            onClick={() => {
-                              setSelectedMemberIndex(
-                                index,
-                              );
-
-                              setSelectedRiskCard(
-                                null,
-                              );
-                            }}
+                    {activeQuickLinkPanel === "requirementManagement" ? (
+                      <Box sx={{ minWidth: 0 }}>
+                        {requirementManagementWithStatusFilter}
+                      </Box>
+                    ) : activeQuickLinkPanel === "decisionHistory" ? (
+                      <Box sx={{ minWidth: 0 }}>{decisionHistory}</Box>
+                    ) : (
+                      <DashboardCard
+                        eyebrow=""
+                        title="Applicant Information"
+                        sx={{
+                          minHeight: 0,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.8,
+                          }}
+                        >
+                          <Avatar
+                            src={image || undefined}
+                            alt={
+                              name === "-"
+                                ? "Applicant"
+                                : name
+                            }
                             sx={{
+                              width: 42,
+                              height: 42,
                               flexShrink: 0,
-                              px: 0.65,
-                              py: 0.35,
-                              border: selected
-                                ? "1px solid #A92129"
-                                : "1px solid #DED8D5",
-                              borderRadius: 5,
-                              bgcolor: selected
-                                ? "#FFF1E9"
-                                : "#FAF9F8",
-                              color: selected
-                                ? "#A02128"
-                                : "#665D58",
-                              cursor: "pointer",
-                              fontFamily:
-                                "inherit",
+                              bgcolor: "#FFF3E9",
+                              color: "#A92129",
+                              border: "2px solid #FFFFFF",
+                              boxShadow:
+                                "0 2px 7px rgba(169,33,41,.15)",
+                            }}
+                          >
+                            <UserProfileIcon
+                              sx={{
+                                fontSize: 25,
+                              }}
+                            />
+                          </Avatar>
+
+                          <Box
+                            sx={{
+                              minWidth: 0,
                             }}
                           >
                             <Typography
                               sx={{
-                                fontSize: 8,
-                                fontWeight: 900,
+                                color: "#817773",
+                                fontSize: 7.5,
+                                fontWeight: 800,
+                                textTransform: "uppercase",
+                                letterSpacing: 0.5,
                               }}
                             >
-                              {memberType}
+                              Applicant
                             </Typography>
 
                             <Typography
+                              title={name}
                               sx={{
-                                maxWidth: 90,
-                                fontSize: 7.5,
-                                overflow:
-                                  "hidden",
-                                textOverflow:
-                                  "ellipsis",
-                                whiteSpace:
-                                  "nowrap",
+                                mt: 0.15,
+                                color: "#292421",
+                                fontSize: 12,
+                                fontWeight: 900,
+                                lineHeight: 1.15,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
-                              {memberName}
+                              {name}
                             </Typography>
                           </Box>
-                        );
-                      },
-                    )}
-                  </Box>
-                )}
+                        </Box>
 
-                {/* INTERNAL SCROLLABLE TABS */}
+                        {/* MEMBER SWITCHER */}
 
-                <Box
-                  sx={{
-                    mt: 0.9,
-                    p: 0.25,
-                    bgcolor: "#F1EFED",
-                    borderRadius: 0.8,
-                    overflowX: "auto",
-                    scrollbarWidth: "thin",
+                        {members.length > 1 && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 0.4,
+                              mt: 0.8,
+                              pb: 0.7,
+                              borderBottom:
+                                "1px solid #EAE4E1",
+                              overflowX: "auto",
+                              scrollbarWidth: "thin",
 
-                    "&::-webkit-scrollbar": {
-                      height: 3,
-                    },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      minWidth: "max-content",
-                      gap: 0.25,
-                    }}
-                  >
-                    {(
-                      [
-                        ["personal", "Personal"],
-                        ["kyc", "KYC"],
-                        ["financial", "Financial"],
-                        ["nominee", "Nominee"],
-                        ["medical", "Medical"],
-                        ["address", "Address"],
-                        ["contact", "Contact"],
-                      ] as Array<
-                        [
-                          ApplicantDetailTab,
-                          string,
-                        ]
-                      >
-                    ).map(([tab, label]) => {
-                      const active =
-                        detailTab === tab;
+                              "&::-webkit-scrollbar": {
+                                height: 3,
+                              },
+                            }}
+                          >
+                            {members.map(
+                              (member, index) => {
+                                const memberPersonal = {
+                                  ...toRecord(
+                                    member.applicantDetails,
+                                  ),
+                                  ...toRecord(
+                                    member.personalDetails,
+                                  ),
+                                  ...toRecord(
+                                    member.personalSummary,
+                                  ),
+                                  ...toRecord(
+                                    member.proposerSummary,
+                                  ),
+                                };
 
-                      return (
+                                const memberName =
+                                  getFullName({
+                                    ...member,
+                                    ...memberPersonal,
+                                  });
+
+                                const memberType =
+                                  text(
+                                    member.memberType,
+                                  ) === "-"
+                                    ? `Member ${index + 1
+                                    }`
+                                    : text(
+                                      member.memberType,
+                                    );
+
+                                const selected =
+                                  index ===
+                                  activeMemberIndex;
+
+                                return (
+                                  <Box
+                                    key={`${memberType}-${index}`}
+                                    component="button"
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedMemberIndex(
+                                        index,
+                                      );
+
+                                      setSelectedRiskCard(
+                                        null,
+                                      );
+                                    }}
+                                    sx={{
+                                      flexShrink: 0,
+                                      px: 0.65,
+                                      py: 0.35,
+                                      border: selected
+                                        ? "1px solid #A92129"
+                                        : "1px solid #DED8D5",
+                                      borderRadius: 5,
+                                      bgcolor: selected
+                                        ? "#FFF1E9"
+                                        : "#FAF9F8",
+                                      color: selected
+                                        ? "#A02128"
+                                        : "#665D58",
+                                      cursor: "pointer",
+                                      fontFamily:
+                                        "inherit",
+                                    }}
+                                  >
+                                    <Typography
+                                      sx={{
+                                        fontSize: 8,
+                                        fontWeight: 900,
+                                      }}
+                                    >
+                                      {memberType}
+                                    </Typography>
+
+                                    <Typography
+                                      sx={{
+                                        maxWidth: 90,
+                                        fontSize: 7.5,
+                                        overflow:
+                                          "hidden",
+                                        textOverflow:
+                                          "ellipsis",
+                                        whiteSpace:
+                                          "nowrap",
+                                      }}
+                                    >
+                                      {memberName}
+                                    </Typography>
+                                  </Box>
+                                );
+                              },
+                            )}
+                          </Box>
+                        )}
+
+                        {/* INTERNAL SCROLLABLE TABS */}
+
                         <Box
-                          key={tab}
-                          component="button"
-                          type="button"
-                          onClick={() =>
-                            setDetailTab(tab)
-                          }
                           sx={{
-                            flexShrink: 0,
-                            border: 0,
-                            borderRadius: 0.7,
-                            px: 1,
-                            py: 0.4,
-                            bgcolor: active
-                              ? "#FFFFFF"
-                              : "transparent",
-                            color: active
-                              ? "#A02128"
-                              : "#776D68",
-                            fontFamily:
-                              "inherit",
-                            fontSize: 8.5,
-                            fontWeight: 900,
-                            cursor: "pointer",
-                            whiteSpace:
-                              "nowrap",
+                            mt: 0.9,
+                            p: 0.25,
+                            bgcolor: "#F1EFED",
+                            borderRadius: 0.8,
+                            overflowX: "auto",
+                            scrollbarWidth: "thin",
+
+                            "&::-webkit-scrollbar": {
+                              height: 3,
+                            },
                           }}
                         >
-                          {label}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              minWidth: "max-content",
+                              gap: 0.25,
+                            }}
+                          >
+                            {(
+                              [
+                                ["personal", "Personal"],
+                                ["kyc", "KYC"],
+                                ["financial", "Financial"],
+                                ["nominee", "Nominee"],
+                                ["medical", "Medical"],
+                                ["address", "Address"],
+                                ["contact", "Contact"],
+                              ] as Array<
+                                [
+                                  ApplicantDetailTab,
+                                  string,
+                                ]
+                              >
+                            ).map(([tab, label]) => {
+                              const active =
+                                detailTab === tab;
+
+                              return (
+                                <Box
+                                  key={tab}
+                                  component="button"
+                                  type="button"
+                                  onClick={() =>
+                                    setDetailTab(tab)
+                                  }
+                                  sx={{
+                                    flexShrink: 0,
+                                    border: 0,
+                                    borderRadius: 0.7,
+                                    px: 1,
+                                    py: 0.4,
+                                    bgcolor: active
+                                      ? "#FFFFFF"
+                                      : "transparent",
+                                    color: active
+                                      ? "#A02128"
+                                      : "#776D68",
+                                    fontFamily:
+                                      "inherit",
+                                    fontSize: 8.5,
+                                    fontWeight: 900,
+                                    cursor: "pointer",
+                                    whiteSpace:
+                                      "nowrap",
+                                  }}
+                                >
+                                  {label}
+                                </Box>
+                              );
+                            })}
+                          </Box>
                         </Box>
-                      );
-                    })}
+
+                        {/* TAB CONTENT */}
+
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns:
+                              "repeat(3,minmax(0,1fr))",
+                            gap: "7px 10px",
+                            mt: 0.75,
+                            pt: 0.75,
+                            borderTop:
+                              "1px solid #EAE4E1",
+                            minHeight: 58,
+                          }}
+                        >
+                          {activeDetailFields
+                            .slice(0, 6)
+                            .map((field) => (
+                              <CompactField
+                                key={field.label}
+                                label={field.label}
+                                value={field.value}
+                              />
+                            ))}
+                        </Box>
+                      </DashboardCard>
+                    )}
                   </Box>
-                </Box>
+                </CustomDialog>
 
-                {/* TAB CONTENT */}
+                {/* ====================================================== */}
+                {/* BRE DECISION                                           */}
+                {/* ====================================================== */}
 
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(3,minmax(0,1fr))",
-                    gap: "7px 10px",
-                    mt: 0.75,
-                    pt: 0.75,
-                    borderTop:
-                      "1px solid #EAE4E1",
-                    minHeight: 58,
-                  }}
-                >
-                  {activeDetailFields
-                    .slice(0, 6)
-                    .map((field) => (
-                      <CompactField
-                        key={field.label}
-                        label={field.label}
-                        value={field.value}
-                      />
-                    ))}
-                </Box>
-                  </DashboardCard>
-                  )}
-                </Box>
-              </CustomDialog>
 
-              {/* ====================================================== */}
-              {/* BRE DECISION                                           */}
-              {/* ====================================================== */}
+                {/* ====================================================== */}
+                {/* RISK ANALYTICS                                         */}
+                {/* ====================================================== */}
 
-             
-              {/* ====================================================== */}
-              {/* RISK ANALYTICS                                         */}
-              {/* ====================================================== */}
-
-            </Box>
+              </Box>
               {showRiskAnalytics && (
                 <DashboardCard
                   eyebrow=""
@@ -2681,285 +2680,302 @@ const RefCMOApplicationSummary = ({
                   </Box>
                 </DashboardCard>
               )}
-            
+
               <RefCMODecisionTable />
 
-                    <Box
-      sx={{
-        display: "grid",
-        gridTemplateColumns: {
-          xs: "1fr",
-          md: "minmax(0, 1fr) minmax(0, 1fr) auto",
-        },
-        gap: 1.5,
-        alignItems: "end",
-        width: "100%",
-        p: 1.5,
-        border: "1px solid #D8D8D8",
-        borderRadius: "14px",
-        backgroundColor: "#FFFFFF",
-      }}
-    >
-      <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: "12px", color: "#5B5B5B", mb: 0.5 }}>
-          Ref CMO Remarks
-        </Typography>
+              <Box sx={{ minWidth: 0 }}>
+                <Typography sx={{ fontSize: "12px", color: "#5B5B5B", mb: 0.5 }}>
+                  UW Remarks
+                </Typography>
 
-        <CustomTextField
-          fullWidth
-          required
-          multiline
-          // value={refCmoRemarks}
-          // disabled={disabled || isSubmitting}
-          placeholder="Enter Ref CMO remarks"
-          // onChange={(event) => onRefCmoRemarksChange(event.target.value)}
-        />
-      </Box>
+                <CustomTextField
+                  fullWidth
+                  required
+                  multiline
+                  value={"Applicant has history of poorly controlled type 2 diabetes paired with recent abnormal EKG findings on paramed exam. Manual guidelines insufficient for rating. Requesting CMO guidance on mortality risk and policy loading"}
+                  disabled={true}
+                  placeholder="Enter Ref CMO remarks"
+                // onChange={(event) => onRefCmoRemarksChange(event.target.value)}
+                />
+              </Box>
 
-      <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: "12px", color: "#5B5B5B", mb: 0.5 }}>
-          CMO Decision
-        </Typography>
-
-        <CustomSelect
-  value={cmoDecision}
-  options={cmoDecisionOptions}
-  placeholder="Select decision"
-  disabled={readOnly}
-  onChange={(value) => setCmoDecision(value as CMODecision)}
-/>
-      </Box>
-
-      <CustomButton
-        type="button"
-        variant="contained"
-        // disabled={disabled || isSubmitting}
-        // onClick={() => void onSubmit()}
-        sx={{
-          minWidth: 100,
-          height: 40,
-          borderRadius: "10px",
-          px: 2.5,
-        }}
-      >
-        { "Submit"}
-      </CustomButton>
-    </Box>
-
-          </Box>
-
-          {/* </CustomAccordion> */}
-
-          {/* ============================================================ */}
-          {/* BRE DECISION DETAILS DIALOG                                 */}
-          {/* ============================================================ */}
-
-          <CustomDialog
-            open={breDetailDialogOpen}
-            onClose={() =>
-              setBreDetailDialogOpen(false)
-            }
-            title="BRE Decision"
-            maxWidth="lg"
-            fullWidth
-            contentSx={{
-              p: { xs: 1, sm: 1.5 },
-              overflowY: "auto",
-            }}
-          >
-            <BreDecision readOnly={readOnly} />
-          </CustomDialog>
-
-          {/* ============================================================ */}
-          {/* RISK DETAILS DIALOG                                         */}
-          {/* ============================================================ */}
-
-          <CustomDialog
-            open={Boolean(selectedRiskCard)}
-            onClose={() =>
-              setSelectedRiskCard(null)
-            }
-            title={
-              selectedRiskCard
-                ? `${selectedRiskCard.label} Risk Details`
-                : "Risk Details"
-            }
-            maxWidth="lg"
-          >
-            {selectedRiskCard && (
               <Box
                 sx={{
                   display: "grid",
                   gridTemplateColumns: {
                     xs: "1fr",
-                    sm: "repeat(2,1fr)",
-                    md: "repeat(3,1fr)",
-                    lg: "repeat(4,1fr)",
+                    md: "minmax(0, 1fr) minmax(0, 1fr) auto",
                   },
-                  gap: 0.75,
+                  gap: 1.5,
+                  alignItems: "end",
+                  width: "100%",
+                  p: 1.5,
+                  mt: 1,
+                  border: "1px solid #D8D8D8",
+                  borderRadius: "14px",
+                  backgroundColor: "#FFFFFF",
+                }}
+              >
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography sx={{ fontSize: "12px", color: "#5B5B5B", mb: 0.5 }}>
+                    CMO Remarks
+                  </Typography>
+
+                  <CustomTextField
+                    fullWidth
+                    required
+                    multiline
+                    // value={refCmoRemarks}
+                    // disabled={disabled || isSubmitting}
+                    placeholder="Enter Ref CMO remarks"
+                  // onChange={(event) => onRefCmoRemarksChange(event.target.value)}
+                  />
+                </Box>
+
+                <Box sx={{ minWidth: 0 }}>
+                  <Typography sx={{ fontSize: "12px", color: "#5B5B5B", mb: 0.5 }}>
+                    CMO Decision
+                  </Typography>
+
+                  <CustomSelect
+                    value={cmoDecision}
+                    options={cmoDecisionOptions}
+                    placeholder="Select decision"
+                    disabled={readOnly}
+                    onChange={(value) => setCmoDecision(value as CMODecision)}
+                  />
+                </Box>
+
+                <CustomButton
+                  type="button"
+                  variant="contained"
+                  // disabled={disabled || isSubmitting}
+                  // onClick={() => void onSubmit()}
+                  sx={{
+                    minWidth: 100,
+                    height: 40,
+                    borderRadius: "10px",
+                    px: 2.5,
+                  }}
+                >
+                  {"Submit"}
+                </CustomButton>
+              </Box>
+
+            </Box>
+
+            {/* </CustomAccordion> */}
+
+            {/* ============================================================ */}
+            {/* BRE DECISION DETAILS DIALOG                                 */}
+            {/* ============================================================ */}
+
+            <CustomDialog
+              open={breDetailDialogOpen}
+              onClose={() =>
+                setBreDetailDialogOpen(false)
+              }
+              title="BRE Decision"
+              maxWidth="lg"
+              fullWidth
+              contentSx={{
+                p: { xs: 1, sm: 1.5 },
+                overflowY: "auto",
+              }}
+            >
+              <BreDecision readOnly={readOnly} />
+            </CustomDialog>
+
+            {/* ============================================================ */}
+            {/* RISK DETAILS DIALOG                                         */}
+            {/* ============================================================ */}
+
+            <CustomDialog
+              open={Boolean(selectedRiskCard)}
+              onClose={() =>
+                setSelectedRiskCard(null)
+              }
+              title={
+                selectedRiskCard
+                  ? `${selectedRiskCard.label} Risk Details`
+                  : "Risk Details"
+              }
+              maxWidth="lg"
+            >
+              {selectedRiskCard && (
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      sm: "repeat(2,1fr)",
+                      md: "repeat(3,1fr)",
+                      lg: "repeat(4,1fr)",
+                    },
+                    gap: 0.75,
+                    minWidth: {
+                      xs: "auto",
+                      md: 760,
+                    },
+                  }}
+                >
+                  {selectedRiskCard.details.map(
+                    (detail) => (
+                      <Box
+                        key={detail.key}
+                        sx={{
+                          p: 0.8,
+                          border:
+                            "1px solid #E3DEDB",
+                          borderRadius: 1,
+                          bgcolor: "#F8F7F6",
+                        }}
+                      >
+                        <Typography
+                          sx={{
+                            color: "#827671",
+                            fontSize: 9,
+                          }}
+                        >
+                          {detail.label}
+                        </Typography>
+
+                        <Typography
+                          sx={{
+                            mt: 0.25,
+                            color: "#332D2A",
+                            fontSize: 11,
+                            fontWeight: 800,
+                            overflowWrap:
+                              "anywhere",
+                          }}
+                        >
+                          {text(detail.value)}
+                        </Typography>
+                      </Box>
+                    ),
+                  )}
+                </Box>
+              )}
+            </CustomDialog>
+
+            {/* ============================================================ */}
+            {/* RIDER DETAILS DIALOG                                        */}
+            {/* ============================================================ */}
+
+            <CustomDialog
+              open={riderDialogOpen}
+              onClose={() =>
+                setRiderDialogOpen(false)
+              }
+              title="Rider Details"
+              maxWidth="lg"
+            >
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    md: "repeat(2,1fr)",
+                  },
+                  gap: 0.8,
                   minWidth: {
                     xs: "auto",
-                    md: 760,
+                    md: 720,
                   },
                 }}
               >
-                {selectedRiskCard.details.map(
-                  (detail) => (
+                {riderSummaries.map(
+                  (rider) => (
                     <Box
-                      key={detail.key}
+                      key={rider.id}
                       sx={{
-                        p: 0.8,
+                        p: 0.9,
                         border:
-                          "1px solid #E3DEDB",
-                        borderRadius: 1,
-                        bgcolor: "#F8F7F6",
+                          "1px solid #E4DEDB",
+                        borderLeft:
+                          "4px solid #A92129",
+                        borderRadius: 1.1,
+                        bgcolor: "#FAF8F7",
                       }}
                     >
                       <Typography
                         sx={{
-                          color: "#827671",
-                          fontSize: 9,
+                          color: "#332D2A",
+                          fontSize: 12,
+                          fontWeight: 900,
                         }}
                       >
-                        {detail.label}
+                        {rider.name}
                       </Typography>
 
-                      <Typography
+                      <Box
                         sx={{
-                          mt: 0.25,
-                          color: "#332D2A",
-                          fontSize: 11,
-                          fontWeight: 800,
-                          overflowWrap:
-                            "anywhere",
+                          display: "grid",
+                          gridTemplateColumns:
+                            "1fr 1fr",
+                          gap: 0.7,
+                          mt: 0.75,
                         }}
                       >
-                        {text(detail.value)}
-                      </Typography>
+                        <CompactField
+                          label="Sum assured"
+                          value={
+                            rider.sumAssured
+                          }
+                        />
+
+                        <CompactField
+                          label="Premium"
+                          value={rider.premium}
+                        />
+
+                        <CompactField
+                          label="Policy term"
+                          value={
+                            rider.policyTerm
+                          }
+                        />
+
+                        <CompactField
+                          label="Premium term"
+                          value={
+                            rider.premiumTerm
+                          }
+                        />
+                      </Box>
                     </Box>
                   ),
                 )}
               </Box>
-            )}
-          </CustomDialog>
+            </CustomDialog>
+          </Box>
 
-          {/* ============================================================ */}
-          {/* RIDER DETAILS DIALOG                                        */}
-          {/* ============================================================ */}
+          {/* ================================================================ */}
+          {/* RIGHT RAIL                                                       */}
+          {/* ================================================================ */}
 
-          <CustomDialog
-            open={riderDialogOpen}
-            onClose={() =>
-              setRiderDialogOpen(false)
-            }
-            title="Rider Details"
-            maxWidth="lg"
-          >
+          {hasStickyRail && (
             <Box
+              component="aside"
               sx={{
                 display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "repeat(2,1fr)",
-                },
                 gap: 0.8,
-                minWidth: {
-                  xs: "auto",
-                  md: 720,
-                },
+                minWidth: 0,
               }}
             >
-              {riderSummaries.map(
-                (rider) => (
-                  <Box
-                    key={rider.id}
-                    sx={{
-                      p: 0.9,
-                      border:
-                        "1px solid #E4DEDB",
-                      borderLeft:
-                        "4px solid #A92129",
-                      borderRadius: 1.1,
-                      bgcolor: "#FAF8F7",
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: "#332D2A",
-                        fontSize: 12,
-                        fontWeight: 900,
-                      }}
-                    >
-                      {rider.name}
-                    </Typography>
-
-                    <Box
-                      sx={{
-                        display: "grid",
-                        gridTemplateColumns:
-                          "1fr 1fr",
-                        gap: 0.7,
-                        mt: 0.75,
-                      }}
-                    >
-                      <CompactField
-                        label="Sum assured"
-                        value={
-                          rider.sumAssured
-                        }
-                      />
-
-                      <CompactField
-                        label="Premium"
-                        value={rider.premium}
-                      />
-
-                      <CompactField
-                        label="Policy term"
-                        value={
-                          rider.policyTerm
-                        }
-                      />
-
-                      <CompactField
-                        label="Premium term"
-                        value={
-                          rider.premiumTerm
-                        }
-                      />
-                    </Box>
-                  </Box>
-                ),
+              {quickLinks && (
+                <DashboardCard
+                  eyebrow="Navigation"
+                  title="Quick Links"
+                >
+                  {quickLinksWithApplicantAction}
+                </DashboardCard>
               )}
             </Box>
-          </CustomDialog>
+          )}
         </Box>
-
-        {/* ================================================================ */}
-        {/* RIGHT RAIL                                                       */}
-        {/* ================================================================ */}
-
-        {hasStickyRail && (
-          <Box
-            component="aside"
-            sx={{
-              display: "grid",
-              gap: 0.8,
-              minWidth: 0,
-            }}
-          >
-            {quickLinks && (
-              <DashboardCard
-                eyebrow="Navigation"
-                title="Quick Links"
-              >
-                {quickLinksWithApplicantAction}
-              </DashboardCard>
-            )}
-          </Box>
-        )}
       </Box>
-    </Box>
     </>
   );
 };

@@ -32,7 +32,7 @@ export const REF_CMO_HARDCODED_ROWS: RefCMODecisionRow[] = [
     vendorCmoOpinion: "STD",
     vendorCmoRemarks: "All medical parameters are within acceptable limits.",
     hoCmoDecision: "STD",
-    hoCmoRemarks: "Applicant has history of poorly controlled type 2 diabetes paired with recent abnormal EKG findings on paramed exam. Manual guidelines insufficient for rating. Requesting CMO guidance on mortality risk and policy loading",
+    hoCmoRemarks: "Vendor CMO opinion reviewed and accepted.",
   },
   {
     id: 2,
@@ -158,10 +158,10 @@ export default function RefCMODecisionTable({
                 Vendor CMO Remarks
               </TableCell>
               <TableCell sx={{ ...headerCellSx, width: "14%" }}>
-                1st UW Decision
+                HO CMO Decision
               </TableCell>
               <TableCell sx={{ ...headerCellSx, width: "15%" }}>
-                1st UW Remarks
+                HO CMO Remarks
               </TableCell>
             </TableRow>
           </TableHead>
