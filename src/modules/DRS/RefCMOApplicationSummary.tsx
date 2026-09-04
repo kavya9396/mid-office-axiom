@@ -18,6 +18,8 @@ import BreDecision from "./DRS_Accordions/BreDecision";
 import RefCMODecisionTable from "./RefCMODecisionTable";
 import CustomTextField from "../../components/ui/TextField/TextField";
 import CustomButton from "../../components/ui/Button/Button";
+import CustomSelect from "../../components/ui/Select/Select";
+import type { CMODecision } from "./CMOMedicalDecisionTable";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
@@ -1104,6 +1106,22 @@ const RiskAnalyticsCard = ({
 /* MAIN COMPONENT                                                             */
 /* -------------------------------------------------------------------------- */
 
+export const CMO_DECISION_OPTIONS = [
+  "STD",
+  "Sub STD",
+  "Cannot Opine",
+  "Refer to 2nd Opinion",
+  "Do not pay to TPA",
+] as const;
+
+export type CMODecision =
+  (typeof CMO_DECISION_OPTIONS)[number];
+
+const cmoDecisionOptions = CMO_DECISION_OPTIONS.map((option) => ({
+  label: option,
+  value: option,
+}));
+
 const RefCMOApplicationSummary = ({
   onBackToInbox,
   readOnly = false,
@@ -1125,6 +1143,7 @@ const RefCMOApplicationSummary = ({
     useState<RiskCard | null>(null);
 
   const [selectedMemberIndex, setSelectedMemberIndex] = useState(0);
+  const [cmoDecision, setCmoDecision] = useState<CMODecision | "">("");
 
   const [detailTab, setDetailTab] =
     useState<ApplicantDetailTab>("personal");
@@ -2665,7 +2684,7 @@ const RefCMOApplicationSummary = ({
             
               <RefCMODecisionTable />
 
-                  <Box
+                    <Box
       sx={{
         display: "grid",
         gridTemplateColumns: {
@@ -2683,22 +2702,6 @@ const RefCMOApplicationSummary = ({
     >
       <Box sx={{ minWidth: 0 }}>
         <Typography sx={{ fontSize: "12px", color: "#5B5B5B", mb: 0.5 }}>
-          UW Remarks
-        </Typography>
-
-        <CustomTextField
-          fullWidth
-          disabled
-          multiline
-        //   minRows={2}
-        //   maxRows={4}
-          value={"Applicant has history of poorly controlled type 2 diabetes paired with recent abnormal EKG findings on paramed exam. Manual guidelines insufficient for rating. Requesting CMO guidance on mortality risk and policy loading"}
-          placeholder="No UW remarks available"
-        />
-      </Box>
-
-      <Box sx={{ minWidth: 0 }}>
-        <Typography sx={{ fontSize: "12px", color: "#5B5B5B", mb: 0.5 }}>
           Ref CMO Remarks
         </Typography>
 
@@ -2706,20 +2709,32 @@ const RefCMOApplicationSummary = ({
           fullWidth
           required
           multiline
-          minRows={4}
-        //   maxRows={4}
-          value={""}
-        //   disabled={disabled || isSubmitting}
-          placeholder="Enter remarks..."
-        //   onChange={(event) => onRefCmoRemarksChange(event.target.value)}
+          // value={refCmoRemarks}
+          // disabled={disabled || isSubmitting}
+          placeholder="Enter Ref CMO remarks"
+          // onChange={(event) => onRefCmoRemarksChange(event.target.value)}
         />
+      </Box>
+
+      <Box sx={{ minWidth: 0 }}>
+        <Typography sx={{ fontSize: "12px", color: "#5B5B5B", mb: 0.5 }}>
+          CMO Decision
+        </Typography>
+
+        <CustomSelect
+  value={cmoDecision}
+  options={cmoDecisionOptions}
+  placeholder="Select decision"
+  disabled={readOnly}
+  onChange={(value) => setCmoDecision(value as CMODecision)}
+/>
       </Box>
 
       <CustomButton
         type="button"
         variant="contained"
         // disabled={disabled || isSubmitting}
-        // onClick={() => void)}
+        // onClick={() => void onSubmit()}
         sx={{
           minWidth: 100,
           height: 40,
@@ -2727,7 +2742,7 @@ const RefCMOApplicationSummary = ({
           px: 2.5,
         }}
       >
-       Submit
+        { "Submit"}
       </CustomButton>
     </Box>
 
