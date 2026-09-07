@@ -847,6 +847,8 @@ import type { ComponentType } from "react";
 import MemberSelection from "./MemberSeclection";
 import HOCMOApplicationSummary from "./HOCMOApplicationSummary";
 import RefCMOApplicationSummary from "./RefCMOApplicationSummary";
+import Grievance from "./Grievance";
+import RaiseGrievance from "./RaiseGrievance";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -880,6 +882,7 @@ interface SnackbarState {
 
 const mapper = {
   CMO_TASK: "RETAIL_CMO_POOL",
+  REF_CMO_TASK: "REF_CMO_TASK",
   CUW_TASK: "RETAIL_CUW_POOL",
   CVT_TASK: "CVT_TASK",
   CPT_TASK: "RETAIL_CPT_POOL",
@@ -1570,71 +1573,79 @@ const DRS = () => {
             gap: 1,
             pb: 1,
           }}
-        > 
-                  {
-            normalizeValue(roleType) === "CMO_TASK" ? (
-            <HOCMOApplicationSummary
-              stickyTop={0}
-              onBackToInbox={() => navigate(getInboxPath())}
-              requirementManagement={
-                RequirementManagementPanel ? (
-                  <RequirementManagementPanel embedded />
-                ) : null
-              }
-              decisionHistory={
-                DecisionHistoryPanel ? (
-                  <DecisionHistoryPanel embedded />
-                ) : null
-              }
-            />
-          ) :
-            normalizeValue(roleType) === "REF_CMO_TASK" ? (
-            <RefCMOApplicationSummary
-              stickyTop={0}
-              onBackToInbox={() => navigate(getInboxPath())}
-              requirementManagement={
-                RequirementManagementPanel ? (
-                  <RequirementManagementPanel embedded />
-                ) : null
-              }
-              decisionHistory={
-                DecisionHistoryPanel ? (
-                  <DecisionHistoryPanel embedded />
-                ) : null
-              }
-            />
-          ) :
-          normalizeValue(roleType) === "VENDOR_CMO_TASK" ? (
-            <VendorCMOApplicationSummary
-              stickyTop={0}
-              onBackToInbox={() => navigate(getInboxPath())}
-              requirementManagement={
-                RequirementManagementPanel ? (
-                  <RequirementManagementPanel embedded />
-                ) : null
-              }
-              decisionHistory={
-                DecisionHistoryPanel ? (
-                  <DecisionHistoryPanel embedded />
-                ) : null
-              }
-            />
-          ) : (
-            <ApplicantApplicationSummary
-              stickyTop={0}
-              onBackToInbox={() => navigate(getInboxPath())}
-              requirementManagement={
-                RequirementManagementPanel ? (
-                  <RequirementManagementPanel embedded />
-                ) : null
-              }
-              decisionHistory={
-                DecisionHistoryPanel ? (
-                  <DecisionHistoryPanel embedded />
-                ) : null
-              }
-            />
-          )}
+        >
+          {
+            normalizeValue(roleType) === "RAISE_GRIEVANCE_TASK" ? (
+              <RaiseGrievance />
+            ) :
+            normalizeValue(roleType) === "GRIEVANCE_TASK" ? (
+              <Grievance
+              />
+            ) :
+
+              normalizeValue(roleType) === "CMO_TASK" ? (
+                <HOCMOApplicationSummary
+                  stickyTop={0}
+                  onBackToInbox={() => navigate(getInboxPath())}
+                  requirementManagement={
+                    RequirementManagementPanel ? (
+                      <RequirementManagementPanel embedded />
+                    ) : null
+                  }
+                  decisionHistory={
+                    DecisionHistoryPanel ? (
+                      <DecisionHistoryPanel embedded />
+                    ) : null
+                  }
+                />
+              ) :
+                normalizeValue(roleType) === "REF_CMO_TASK" ? (
+                  <RefCMOApplicationSummary
+                    stickyTop={0}
+                    onBackToInbox={() => navigate(getInboxPath())}
+                    requirementManagement={
+                      RequirementManagementPanel ? (
+                        <RequirementManagementPanel embedded />
+                      ) : null
+                    }
+                    decisionHistory={
+                      DecisionHistoryPanel ? (
+                        <DecisionHistoryPanel embedded />
+                      ) : null
+                    }
+                  />
+                ) :
+                  normalizeValue(roleType) === "VENDOR_CMO_TASK" ? (
+                    <VendorCMOApplicationSummary
+                      stickyTop={0}
+                      onBackToInbox={() => navigate(getInboxPath())}
+                      requirementManagement={
+                        RequirementManagementPanel ? (
+                          <RequirementManagementPanel embedded />
+                        ) : null
+                      }
+                      decisionHistory={
+                        DecisionHistoryPanel ? (
+                          <DecisionHistoryPanel embedded />
+                        ) : null
+                      }
+                    />
+                  ) : (
+                    <ApplicantApplicationSummary
+                      stickyTop={0}
+                      onBackToInbox={() => navigate(getInboxPath())}
+                      requirementManagement={
+                        RequirementManagementPanel ? (
+                          <RequirementManagementPanel embedded />
+                        ) : null
+                      }
+                      decisionHistory={
+                        DecisionHistoryPanel ? (
+                          <DecisionHistoryPanel embedded />
+                        ) : null
+                      }
+                    />
+                  )}
 
           {pageAccordionIds.map((accordionId) => {
             const AccordionComponent =

@@ -340,6 +340,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks",
   ],
   RETAIL_RISK_POOL: ["quickLinks"],
+  REF_CMO_TASK: ["quickLinks"],
   RETAIL_CMO_POOL: [
     // "breDecision",
     // "applicationOverview",
@@ -347,7 +348,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     // "requirementManagement",
     // "decision",
     // "decisionHistory",
-    // "quickLinks",
+    "quickLinks",
   ],
   RETAIL_ACCUITY_POOL: ["quickLinks"],
   RETAIL_REINSURER_POOL: [
@@ -368,12 +369,12 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     // "summary",
     // "requirementManagement",
     // "decision",
-    // "quickLinks",
+    "quickLinks",
   ],
 
   RETAIL_ECG_POOL: ["quickLinks"],
   RETAIL_TMT_POOL: ["quickLinks"],
-  RETAIL_GRIEVANCE_POOL: ["greivance"],
+  VENDOR_CMO_TASK: ["quickLinks"],
   PRE_LOGIN_CUW_TASK: [
     "breDecision",
     "preLogin",

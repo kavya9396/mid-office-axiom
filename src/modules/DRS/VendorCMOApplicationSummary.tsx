@@ -2591,7 +2591,7 @@ import CMOMedicalDecisionTable, {
   CMO_DECISION_OPTIONS,
   type CMODecision,
   type CMOMedicalDecisionRow,
-} from "./CMOMedicalDecisionTable";
+} from "./VendorCMOMedicalDecisionTable";
 import ViewMedical from "./Medical Final/ViewMedical";
 
 /* -------------------------------------------------------------------------- */

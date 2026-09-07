@@ -347,7 +347,7 @@ const QuickLinks = ({
 
     const quickLinks: QuickLinkItem[] = [
         {
-            label: "Summary",
+            label: "Applicant Profile",
             path: "",
             onClick: () => setOpenSummaryDialog(true),
         },
@@ -373,6 +373,8 @@ const QuickLinks = ({
                     ? "There is no document link found."
                     : undefined,
             },
+        ] : []),
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" ? [
             {
                 label: "Previous Policies",
                 path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "",
@@ -381,6 +383,8 @@ const QuickLinks = ({
                     "There are no previous policies found.",
                 ),
             },
+        ] : []),
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" ? [
             {
                 label: "Open Tasks",
                 path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "",
@@ -390,7 +394,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' ? [
+        ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" ? [
             {
                 label: "Risk Details",
                 path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "",
@@ -400,14 +404,17 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        {
-            label: "Audit Trail",
-            path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "",
-            unavailableMessage: getEmptyArrayMessage(
-                drsQuickLinks?.auditTrail,
-                "There is no audit trail found.",
-            ),
-        },
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" ? [
+
+            {
+                label: "Audit Trail",
+                path: safeApplicationNumber ? getAuditTrailPath(safeBusinessType, safeApplicationNumber) : "",
+                unavailableMessage: getEmptyArrayMessage(
+                    drsQuickLinks?.auditTrail,
+                    "There is no audit trail found.",
+                ),
+            },
+        ] : []),
         // { label: "Refer to IT", path: "" },
         ...(isPoolRole
             ? [
@@ -417,14 +424,14 @@ const QuickLinks = ({
         ...(roleType == 'CPT_DATA_ENTRY_NMR_TASK' || roleType == 'GUW_FORMAL_TASK' ? [
             { label: "View Financial", path: safeApplicationNumber ? getFinancialPath(safeBusinessType, safeApplicationNumber) : "" },
         ] : []),
-        ...(hideSearchApplication
-            ? []
-            : [
+        ...(hideSearchApplication && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK"
+            ? [
                 {
                     label: "Search Application",
                     path: getSearchApplicationPath(),
                 },
-            ]),
+            ]
+            : []),
     ];
 
     const toggleQuickLinks = useCallback(() => {
@@ -695,7 +702,7 @@ const QuickLinks = ({
                 open={openSummaryDialog}
                 showCloseIcon={true}
                 onClose={() => setOpenSummaryDialog(false)}
-               title=""
+                title=""
                 maxWidth="xl"
                 contentSx={{
                     p: 1,

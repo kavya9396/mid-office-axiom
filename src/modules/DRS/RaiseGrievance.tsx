@@ -1,0 +1,934 @@
+import {
+  Avatar,
+  Box,
+  Checkbox,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+import CustomButton from "../../components/ui/Button/Button";
+import CustomDialog from "../../components/ui/Dialog/Dialog";
+import CustomTable, {
+  type Column,
+} from "../../components/ui/Table/Table";
+import { KeyRightArrowIcon, UserProfileIcon } from "../../icons/Icons";
+import { getInboxPath } from "../../routes/routes";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
+import type { RootState } from "../../store/store";
+import { raiseGrievanceThunk } from "../../store/thunks/grievanceThunk";
+
+type UnknownRecord = Record<string, unknown>;
+
+interface RiderSummary {
+  id: string;
+  name: string;
+  sumAssured: string;
+  policyTerm: string;
+  premiumTerm: string;
+  premium: string;
+}
+
+interface RaiseGrievanceTableRow {
+  rowId: string;
+  requirementId: string | number;
+  memberType: string;
+  fupCode: string;
+  memberName: string;
+  remarksByUser: string;
+  remarksByTpa: string;
+}
+
+interface ApplicationSummaryBannerProps {
+  image?: string;
+  name: string;
+  appNo: string;
+  personalSummary: string;
+  productName: string;
+  policyTerm: string;
+  premiumTerm: string;
+  sumAssured: string;
+  tsa: string;
+  tfsa: string;
+  tssa: string;
+  tpsa: string;
+  riderSummaries: RiderSummary[];
+  onViewRiders: () => void;
+}
+
+const toRecord = (value: unknown): UnknownRecord =>
+  value && typeof value === "object" && !Array.isArray(value)
+    ? (value as UnknownRecord)
+    : {};
+
+const firstValue = (...values: unknown[]): unknown =>
+  values.find(
+    (value) => value !== null && value !== undefined && value !== "",
+  );
+
+const text = (value: unknown): string => {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  return String(value);
+};
+
+const normalize = (value: unknown): string =>
+  String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_-]+/g, "");
+
+const currency = (value: unknown): string => {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  const numericValue = Number(value);
+
+  return Number.isFinite(numericValue)
+    ? `₹${new Intl.NumberFormat("en-IN").format(numericValue)}`
+    : text(value);
+};
+
+const getFullName = (person: UnknownRecord): string =>
+  [person.firstName, person.middleName, person.lastName]
+    .filter(Boolean)
+    .map(String)
+    .join(" ") || "-";
+
+const getAddress = (member: UnknownRecord): string => {
+  const addresses = Array.isArray(member.address)
+    ? member.address
+    : Object.keys(toRecord(member.address)).length > 0
+      ? [member.address]
+      : [];
+
+  const address = toRecord(addresses[0]);
+
+  return (
+    [address.city, address.state, address.residingCountry, address.pinCode]
+      .filter(Boolean)
+      .map(String)
+      .join(" - ") || "-"
+  );
+};
+
+const CompactField = ({ label, value }: { label: string; value: string }) => (
+  <Box sx={{ minWidth: 0 }}>
+    <Typography sx={{ color: "#8B807B", fontSize: 8.5, lineHeight: 1.15 }}>
+      {label}
+    </Typography>
+
+    <Typography
+      title={value}
+      sx={{
+        mt: 0.2,
+        color: "#302A27",
+        fontSize: 10.5,
+        fontWeight: 800,
+        lineHeight: 1.25,
+        overflow: "hidden",
+        textOverflow: "ellipsis",
+        whiteSpace: "nowrap",
+      }}
+    >
+      {value}
+    </Typography>
+  </Box>
+);
+
+const ApplicationSummaryBanner = ({
+  image,
+  name,
+  personalSummary,
+  productName,
+  policyTerm,
+  premiumTerm,
+  sumAssured,
+  tsa,
+  tfsa,
+  tssa,
+  tpsa,
+  riderSummaries,
+  onViewRiders,
+}: ApplicationSummaryBannerProps) => {
+  const coverageItems = [
+    sumAssured !== "-" ? `SA - ${sumAssured}` : null,
+    tsa !== "-" ? `TSA - ${tsa}` : null,
+    tfsa !== "-" ? `TFSA - ${tfsa}` : null,
+    tssa !== "-" ? `TSSA - ${tssa}` : null,
+    tpsa !== "-" ? `TPSA - ${tpsa}` : null,
+  ].filter(Boolean) as string[];
+
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "84px minmax(0, 1fr)",
+          sm: "150px minmax(0, 1fr)",
+        },
+        bgcolor: "#FFEAD7",
+        color: "#000000",
+        borderRadius: "12px",
+        overflow: "hidden",
+        boxShadow: "0 3px 10px rgba(169, 33, 41, 0.16)",
+      }}
+    >
+      <Box
+        sx={{
+          minHeight: { xs: 112, sm: 138 },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(145deg, #E45F14 0%, #C83C2F 100%)",
+        }}
+      >
+        <Avatar
+          src={image || undefined}
+          alt={name === "-" ? "Applicant" : name}
+          sx={{
+            width: { xs: 54, sm: 76 },
+            height: { xs: 54, sm: 76 },
+            bgcolor: "rgba(255, 255, 255, 0.18)",
+            color: "#000000",
+            border: "2px solid rgba(255, 255, 255, 0.45)",
+          }}
+        >
+          <UserProfileIcon sx={{ fontSize: { xs: 30, sm: 44 } }} />
+        </Avatar>
+      </Box>
+
+      <Box
+        sx={{
+          minWidth: 0,
+          px: { xs: 1.2, sm: 2.2 },
+          py: { xs: 1, sm: 1.45 },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            mb: 0.4,
+          }}
+        >
+          <Typography
+            title={name}
+            sx={{
+              minWidth: 0,
+              color: "#000000",
+              fontSize: { xs: 14, sm: 16 },
+              fontWeight: 900,
+              lineHeight: 1.25,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {name}
+          </Typography>
+
+          <Typography
+            sx={{
+              flexShrink: 0,
+              px: 1.1,
+              py: 0.45,
+              borderRadius: "16px",
+              bgcolor: "#FFFFFF",
+              border: "1px solid rgba(169, 33, 41, 0.18)",
+              color: "#A92129",
+              fontSize: { xs: 11, sm: 13 },
+              fontWeight: 900,
+              whiteSpace: "nowrap",
+            }}
+          >
+            App No. - OB90377122
+          </Typography>
+        </Box>
+
+        <Typography
+          sx={{
+            color: "#000000",
+            fontSize: { xs: 10, sm: 11.5 },
+            lineHeight: 1.6,
+            fontWeight: 500,
+            overflowWrap: "anywhere",
+          }}
+        >
+          {personalSummary || "-"}
+        </Typography>
+
+        <Typography
+          sx={{
+            mt: 0.5,
+            color: "#000000",
+            fontSize: { xs: 10, sm: 11.5 },
+            lineHeight: 1.65,
+            fontWeight: 800,
+            overflowWrap: "anywhere",
+          }}
+        >
+          Product: <Box component="span">{productName}</Box>
+          {" / "}Policy Term: <Box component="span">{policyTerm}</Box>
+          {" / "}Premium Term: <Box component="span">{premiumTerm}</Box>
+          {coverageItems.map((item) => (
+            <Box component="span" key={item} sx={{ fontWeight: 700 }}>
+              {" / "}
+              {item}
+            </Box>
+          ))}
+        </Typography>
+
+        <Box
+          sx={{
+            mt: 0.45,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 0.35,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#000000",
+              fontSize: { xs: 10, sm: 11.5 },
+              lineHeight: 1.65,
+              fontWeight: 800,
+            }}
+          >
+            Riders:
+          </Typography>
+
+          {riderSummaries.length > 0 ? (
+            <Typography
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                color: "#000000",
+                fontSize: { xs: 10, sm: 11.5 },
+                lineHeight: 1.65,
+                fontWeight: 600,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {riderSummaries.map((rider, index) => (
+                <Box component="span" key={rider.id}>
+                  {rider.name} - SA {rider.sumAssured}
+                  {index < riderSummaries.length - 1 ? " / " : ""}
+                </Box>
+              ))}
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                color: "#000000",
+                fontSize: { xs: 10, sm: 11.5 },
+                lineHeight: 1.65,
+                fontWeight: 600,
+              }}
+            >
+              No riders
+            </Typography>
+          )}
+
+          {riderSummaries.length > 0 && (
+            <Box
+              component="button"
+              type="button"
+              onClick={onViewRiders}
+              sx={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.25,
+                border: 0,
+                p: 0,
+                ml: 0.5,
+                mt: 0.15,
+                bgcolor: "transparent",
+                color: "#A92129",
+                fontSize: 9,
+                fontWeight: 900,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                whiteSpace: "nowrap",
+                "&:hover": { textDecoration: "underline" },
+              }}
+            >
+              View details <KeyRightArrowIcon />
+            </Box>
+          )}
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+const RaiseGrievance = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+  const drsData = useAppSelector((state: RootState) => state.drs.data);
+  const [riderDialogOpen, setRiderDialogOpen] = useState(false);
+  const [editedRemarks, setEditedRemarks] = useState<Record<string, string>>(
+    {},
+  );
+  const [selectedRowIds, setSelectedRowIds] = useState<Set<string>>(
+    new Set(),
+  );
+  const [submitLoading, setSubmitLoading] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [error, setError] = useState("");
+  const [remarksErrors, setRemarksErrors] = useState<Set<string>>(new Set());
+
+  const source = toRecord(drsData);
+  const applicationNumber = text(
+    firstValue(
+      source.applicationNumber,
+      source.applicationNo,
+      toRecord(source.applicationOverview).applicationNumber,
+      toRecord(source.applicationOverview).applicationNo,
+    ),
+  );
+  const businessType =
+    String(localStorage.getItem("businessType") ?? "retail")
+      .trim()
+      .toLowerCase() || "retail";
+  const userId = localStorage.getItem("userId") ?? "";
+
+  const grievanceRows = useMemo<RaiseGrievanceTableRow[]>(() => {
+    const requirements = Array.isArray(source.requirementManagement)
+      ? source.requirementManagement.map(toRecord)
+      : [];
+
+    return requirements
+      .filter((requirement) =>
+        ["medical", "medicals"].includes(normalize(requirement.category)),
+      )
+      .map((requirement, index) => {
+        const profile = text(
+          firstValue(
+            requirement.profile,
+            requirement.memberType,
+            requirement.member_type,
+            requirement.lifeMemberType,
+          ),
+        );
+        const requirementId = firstValue(requirement.requirementId, index);
+        const rowId = `${String(requirementId)}-${profile}-${index}`;
+
+        return {
+          rowId,
+          requirementId:
+            typeof requirementId === "number"
+              ? requirementId
+              : String(requirementId),
+          memberType: profile,
+          fupCode: text(requirement.fupCode),
+          memberName: profile,
+          remarksByUser:
+            editedRemarks[rowId] ??
+            text(
+              firstValue(
+                requirement.remarksByUser,
+                requirement.remarksUser,
+              ),
+            ),
+          remarksByTpa: text(
+            firstValue(requirement.remarksByTpa, requirement.remarksTpa),
+          ),
+        };
+      });
+  }, [editedRemarks, source.requirementManagement]);
+
+  const changeRemarks = (rowId: string, remarksByUser: string) => {
+    setEditedRemarks((current) => ({
+      ...current,
+      [rowId]: remarksByUser,
+    }));
+
+    if (remarksByUser.trim()) {
+      setRemarksErrors((current) => {
+        const next = new Set(current);
+        next.delete(rowId);
+        return next;
+      });
+    }
+  };
+
+  const allSelected =
+    grievanceRows.length > 0 &&
+    grievanceRows.every((row) => selectedRowIds.has(row.rowId));
+  const partiallySelected =
+    grievanceRows.some((row) => selectedRowIds.has(row.rowId)) && !allSelected;
+
+  const toggleAll = () => {
+    setSelectedRowIds(
+      allSelected
+        ? new Set()
+        : new Set(grievanceRows.map((row) => row.rowId)),
+    );
+  };
+
+  const toggleRow = (rowId: string) => {
+    setSelectedRowIds((current) => {
+      const next = new Set(current);
+
+      if (next.has(rowId)) {
+        next.delete(rowId);
+      } else {
+        next.add(rowId);
+      }
+
+      return next;
+    });
+  };
+
+  const validateAndConfirm = () => {
+    const selectedRows = grievanceRows.filter((row) =>
+      selectedRowIds.has(row.rowId),
+    );
+
+    if (selectedRows.length === 0) {
+      setError("Please select at least one requirement.");
+      return;
+    }
+
+    const rowsWithoutRemarks = selectedRows
+      .filter(
+        (row) =>
+          !row.remarksByUser.trim() || row.remarksByUser.trim() === "-",
+      )
+      .map((row) => row.rowId);
+
+    if (rowsWithoutRemarks.length > 0) {
+      setRemarksErrors(new Set(rowsWithoutRemarks));
+      setError("Remarks By User is mandatory for every selected requirement.");
+      return;
+    }
+
+    setRemarksErrors(new Set());
+    setError("");
+    setConfirmOpen(true);
+  };
+
+  const submitGrievance = async () => {
+    const selectedRows = grievanceRows.filter((row) =>
+      selectedRowIds.has(row.rowId),
+    );
+    const grievanceRemarks = selectedRows
+      .map((row) => row.remarksByUser.trim())
+      .filter(Boolean)
+      .join(" | ");
+    const grievanceDetails = selectedRows
+      .map(
+        (row) =>
+          `FUP Code: ${row.fupCode || "-"}; Profile: ${row.memberName || "-"}`,
+      )
+      .join(" | ");
+
+    try {
+      setSubmitLoading(true);
+      setConfirmOpen(false);
+      setError("");
+
+      const response = await dispatch(
+        raiseGrievanceThunk({
+          grievanceNumber: "",
+          grievanceRemarks,
+          grievanceDetails,
+          grievanceCreatedBy: userId,
+          grievanceResolvedBy: "",
+          grievanceStatus: "OPEN",
+          applicationNumber: applicationNumber === "-" ? "" : applicationNumber,
+        }),
+      ).unwrap();
+
+      navigate(getInboxPath(businessType), {
+        state: {
+          snackbarMessage:
+            response.message || "Grievance raised successfully.",
+        },
+      });
+    } catch (caught) {
+      setError(
+        caught instanceof Error
+          ? caught.message
+          : "Failed to raise grievance.",
+      );
+    } finally {
+      setSubmitLoading(false);
+    }
+  };
+
+  const grievanceColumns: Column<RaiseGrievanceTableRow>[] = [
+    {
+      key: "rowId",
+      width: "5%",
+      headerRender: () => (
+        <Checkbox
+          size="small"
+          checked={allSelected}
+          indeterminate={partiallySelected}
+          onChange={toggleAll}
+          sx={{ p: 0 }}
+        />
+      ),
+      render: (_value, row) => (
+        <Checkbox
+          size="small"
+          checked={selectedRowIds.has(row.rowId)}
+          onChange={() => toggleRow(row.rowId)}
+          sx={{ p: 0 }}
+        />
+      ),
+    },
+    {
+      key: "fupCode",
+      header: "FUP Code",
+      width: "20%",
+      render: (value) => (
+        <Typography sx={{ fontSize: 12 }}>{text(value)}</Typography>
+      ),
+    },
+    {
+      key: "memberName",
+      header: "Profile",
+      width: "20%",
+      render: (value) => (
+        <Typography sx={{ fontSize: 12 }}>{text(value)}</Typography>
+      ),
+    },
+    {
+      key: "remarksByUser",
+      header: "Remarks By User *",
+      width: "30%",
+      render: (_value, row) => {
+        const hasError = remarksErrors.has(row.rowId);
+
+        return (
+          <TextField
+            fullWidth
+            required
+            size="small"
+            value={row.remarksByUser === "-" ? "" : row.remarksByUser}
+            error={hasError}
+            helperText={hasError ? "Remarks are mandatory." : ""}
+            placeholder="Enter remarks..."
+            slotProps={{ htmlInput: { maxLength: 1000 } }}
+            onChange={(event) =>
+              changeRemarks(row.rowId, event.target.value)
+            }
+            sx={{
+              "& .MuiInputBase-root": {
+                bgcolor: "#FFFFFF",
+                fontSize: 12,
+              },
+              "& .MuiFormHelperText-root": {
+                mx: 0,
+                fontSize: 10,
+              },
+            }}
+          />
+        );
+      },
+    },
+    {
+      key: "remarksByTpa",
+      header: "Remarks By TPA",
+      width: "25%",
+      render: (value) => (
+        <Typography sx={{ fontSize: 12 }}>{text(value)}</Typography>
+      ),
+    },
+  ];
+
+  const applicationOverview = toRecord(source.applicationOverview);
+  const members = Array.isArray(source.summary)
+    ? source.summary.map(toRecord)
+    : [];
+  const applicant = members[0] ?? {};
+  const applicantDetails = toRecord(applicant.applicantDetails);
+  const personalDetails = toRecord(applicant.personalDetails);
+  const personal = {
+    ...applicantDetails,
+    ...personalDetails,
+    ...toRecord(applicant.personalSummary),
+    ...toRecord(applicant.proposerSummary),
+  };
+  const financialDetails = {
+    ...toRecord(applicant.applicantFinancialDetails),
+    ...toRecord(applicant.financialDetails),
+  };
+
+  const products = Array.isArray(applicationOverview.productDetail)
+    ? applicationOverview.productDetail.map(toRecord)
+    : [];
+  const baseProduct =
+    products.find(
+      (product) => String(product.type ?? "").toLowerCase() === "base",
+    ) ??
+    products[0] ??
+    applicationOverview;
+  const riderDetails = Array.isArray(applicationOverview.riderDetails)
+    ? applicationOverview.riderDetails.map(toRecord)
+    : products.filter(
+        (product) => String(product.type ?? "").toLowerCase() === "rider",
+      );
+
+  const riderSummaries: RiderSummary[] = riderDetails
+    .map((rider, index) => ({
+      id: String(firstValue(rider.id, rider.productCode, index)),
+      name: text(firstValue(rider.name, rider.riderName, rider.productName)),
+      sumAssured: currency(
+        firstValue(rider.sumAssured, rider.tsa, rider.appliedSA),
+      ),
+      policyTerm: text(firstValue(rider.policyTerm, rider.term)),
+      premiumTerm: text(
+        firstValue(rider.premiumPaymentTerm, rider.ppt),
+      ),
+      premium: currency(firstValue(rider.premium, rider.annualPremium)),
+    }))
+    .filter((rider) => rider.name !== "-");
+
+  const age = firstValue(
+    toRecord(personal.age).years,
+    personal.age,
+    applicantDetails.age,
+  );
+  const address = getAddress({
+    ...applicant,
+    address: firstValue(
+      applicant.address,
+      personal.address,
+      applicantDetails.address,
+    ),
+  });
+  const annualIncome = currency(
+    firstValue(
+      financialDetails.annualIncome,
+      personalDetails.netIncomeAmt,
+    ),
+  );
+  const personalSummary = [
+    text(firstValue(personal.maritalStatus, applicantDetails.maritalStatus)),
+    age ? `${text(age)} years` : "-",
+    text(firstValue(personal.gender, applicantDetails.gender)),
+    text(firstValue(personal.education, applicantDetails.education)),
+    annualIncome !== "-" ? `${annualIncome} p.a.` : "-",
+    address,
+    text(firstValue(personal.nationality, applicantDetails.nationality)),
+    text(firstValue(personal.residentStatus, personal.countryOfResidence)),
+  ]
+    .filter((value) => value !== "-")
+    .join(" / ");
+
+  return (
+    <Box sx={{ width: "100%", minWidth: 0, px: 0.5, py: 0.75 }}>
+      <ApplicationSummaryBanner
+        image={String(firstValue(applicant.profileImage, personal.profileImage) ?? "")}
+        name={getFullName({ ...applicant, ...personal })}
+        appNo={text(
+          firstValue(
+            source.applicationNumber,
+            source.applicationNo,
+            applicationOverview.applicationNumber,
+            applicationOverview.applicationNo,
+          ),
+        )}
+        personalSummary={personalSummary}
+        productName={text(
+          firstValue(
+            baseProduct.productName,
+            baseProduct.name,
+            applicationOverview.productName,
+            applicationOverview.product,
+          ),
+        )}
+        policyTerm={text(
+          firstValue(
+            baseProduct.policyTerm,
+            baseProduct.term,
+            applicationOverview.policyTerm,
+          ),
+        )}
+        premiumTerm={text(
+          firstValue(
+            baseProduct.premiumPaymentTerm,
+            baseProduct.ppt,
+            applicationOverview.premiumPaymentTerm,
+          ),
+        )}
+        sumAssured={currency(
+          firstValue(
+            baseProduct.sumAssured,
+            baseProduct.appliedSA,
+            applicationOverview.sumAssured,
+            applicationOverview.appliedSa,
+          ),
+        )}
+        tsa={currency(
+          firstValue(
+            baseProduct.tsa,
+            baseProduct.totalSumAssured,
+            applicationOverview.tsa,
+            applicationOverview.totalSumAssured,
+          ),
+        )}
+        tfsa={currency(
+          firstValue(
+            baseProduct.tfsa,
+            baseProduct.totalFaceSumAssured,
+            applicationOverview.tfsa,
+            applicationOverview.totalFaceSumAssured,
+          ),
+        )}
+        tssa={currency(
+          firstValue(
+            baseProduct.tssa,
+            baseProduct.totalSumAssuredAdditional,
+            applicationOverview.tssa,
+            applicationOverview.totalSumAssuredAdditional,
+          ),
+        )}
+        tpsa={currency(
+          firstValue(
+            baseProduct.tpsa,
+            baseProduct.totalPremiumSumAssured,
+            applicationOverview.tpsa,
+            applicationOverview.totalPremiumSumAssured,
+          ),
+        )}
+        riderSummaries={riderSummaries}
+        onViewRiders={() => setRiderDialogOpen(true)}
+      />
+
+      {error && (
+        <Typography
+          role="alert"
+          sx={{ mt: 1, color: "#DE2C3B", fontSize: 12 }}
+        >
+          {error}
+        </Typography>
+      )}
+
+      <Box sx={{ mt: 1.25 }}>
+        <CustomTable<RaiseGrievanceTableRow>
+          title="Medical Requirements"
+          columns={grievanceColumns}
+          data={grievanceRows}
+        />
+      </Box>
+
+      <Box sx={{ mt: 1.25, display: "flex", justifyContent: "center" }}>
+        <CustomButton
+          type="button"
+          variant="contained"
+          onClick={validateAndConfirm}
+          disabled={submitLoading || grievanceRows.length === 0}
+          sx={{ minWidth: 180, borderRadius: "50px" }}
+        >
+          {submitLoading ? "Submitting..." : "Raise Grievance"}
+        </CustomButton>
+      </Box>
+
+      <CustomDialog
+        open={riderDialogOpen}
+        onClose={() => setRiderDialogOpen(false)}
+        title="Rider Details"
+        maxWidth="lg"
+      >
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: { xs: "1fr", md: "repeat(2, 1fr)" },
+            gap: 0.8,
+            minWidth: { xs: "auto", md: 720 },
+          }}
+        >
+          {riderSummaries.map((rider) => (
+            <Box
+              key={rider.id}
+              sx={{
+                p: 0.9,
+                border: "1px solid #E4DEDB",
+                borderLeft: "4px solid #A92129",
+                borderRadius: 1.1,
+                bgcolor: "#FAF8F7",
+              }}
+            >
+              <Typography
+                sx={{ color: "#332D2A", fontSize: 12, fontWeight: 900 }}
+              >
+                {rider.name}
+              </Typography>
+
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 0.7,
+                  mt: 0.75,
+                }}
+              >
+                <CompactField label="Sum assured" value={rider.sumAssured} />
+                <CompactField label="Premium" value={rider.premium} />
+                <CompactField label="Policy term" value={rider.policyTerm} />
+                <CompactField label="Premium term" value={rider.premiumTerm} />
+              </Box>
+            </Box>
+          ))}
+        </Box>
+      </CustomDialog>
+
+      <Dialog
+        open={confirmOpen}
+        onClose={() => !submitLoading && setConfirmOpen(false)}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle sx={{ fontWeight: 700 }}>
+          Confirm Raise Grievance
+        </DialogTitle>
+
+        <DialogContent>
+          <Typography sx={{ fontSize: 14 }}>
+            Do you want to raise a grievance for the selected requirement(s)?
+          </Typography>
+        </DialogContent>
+
+        <DialogActions sx={{ px: 3, pb: 2 }}>
+          <CustomButton
+            variant="outlined"
+            onClick={() => setConfirmOpen(false)}
+            disabled={submitLoading}
+          >
+            Cancel
+          </CustomButton>
+
+          <CustomButton
+            onClick={() => void submitGrievance()}
+            disabled={submitLoading}
+          >
+            {submitLoading ? "Submitting..." : "Yes, Raise Grievance"}
+          </CustomButton>
+        </DialogActions>
+      </Dialog>
+    </Box>
+  );
+};
+
+export default RaiseGrievance;

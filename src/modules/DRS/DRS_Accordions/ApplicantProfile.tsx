@@ -1748,7 +1748,8 @@ const ApplicantProfile = ({
     "DVT_TASK",
     "DVT_FORMAL_TASK",
     "GUW_FORMAL_TASK",
-    "RISK_TASK"
+    "RISK_TASK",
+    "VENDOR_CMO_TASK"
   ].includes(roleType);
 
   const canShowRiskAnalytics = ![

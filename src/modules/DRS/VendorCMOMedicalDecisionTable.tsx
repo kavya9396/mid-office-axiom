@@ -657,7 +657,6 @@ export const CMO_DECISION_OPTIONS = [
   "Sub STD",
   "Cannot Opine",
   "Refer to 2nd Opinion",
-  "Do not pay to TPA",
 ] as const;
 
 export type CMODecision = (typeof CMO_DECISION_OPTIONS)[number];
@@ -764,7 +763,7 @@ export default function CMOMedicalDecisionTable({
 
   const shouldUseHardcodedRows =
     controlledRows === undefined || controlledRows.length === 0;
-  const rows = shouldUseHardcodedRows ? internalRows : controlledRows;
+  const rows = internalRows;
 
   const updateRow = (
     rowIndex: number,
@@ -835,6 +834,9 @@ export default function CMOMedicalDecisionTable({
         >
           <TableHead>
             <TableRow>
+               <TableCell sx={{ ...headerCellSx, width: "5%" }}>
+                Action
+              </TableCell>
               <TableCell sx={{ ...headerCellSx, width: "11%" }}>
                 FUP Code
               </TableCell>
@@ -853,9 +855,7 @@ export default function CMOMedicalDecisionTable({
               <TableCell sx={{ ...headerCellSx, width: "25%" }}>
                 Remarks
               </TableCell>
-              <TableCell sx={{ ...headerCellSx, width: "5%" }}>
-                Action
-              </TableCell>
+             
             </TableRow>
           </TableHead>
 
@@ -874,6 +874,30 @@ export default function CMOMedicalDecisionTable({
 
                 return (
                 <TableRow key={rowKey}>
+                     <TableCell sx={bodyCellSx} align="center">
+                    <Tooltip title="Edit">
+                      <span>
+                        <IconButton
+                          type="button"
+                          size="small"
+                          aria-label={`Edit ${row.medicalType || row.fupCode}`}
+                          disabled={readOnly}
+                          onClick={() => setSelectedRow(row)}
+                          sx={{
+                            color: "#9A2529",
+                            border: "1px solid #9A2529",
+                            p: 0.55,
+                            "&:hover": {
+                              backgroundColor: "rgba(154,37,41,0.08)",
+                            },
+                          }}
+                        >
+                          <EditIcon width={15} height={15} />
+                        </IconButton>
+                      </span>
+                    </Tooltip>
+                  </TableCell>
+                  
                   <TableCell sx={bodyCellSx}>{row.fupCode || "-"}</TableCell>
                   <TableCell sx={bodyCellSx}>{row.medicalType || "-"}</TableCell>
                   <TableCell sx={bodyCellSx}>{row.raisedDate || "-"}</TableCell>
@@ -959,29 +983,7 @@ export default function CMOMedicalDecisionTable({
                     />
                   </TableCell>
 
-                  <TableCell sx={bodyCellSx} align="center">
-                    <Tooltip title="Edit">
-                      <span>
-                        <IconButton
-                          type="button"
-                          size="small"
-                          aria-label={`Edit ${row.medicalType || row.fupCode}`}
-                          disabled={readOnly}
-                          onClick={() => setSelectedRow(row)}
-                          sx={{
-                            color: "#9A2529",
-                            border: "1px solid #9A2529",
-                            p: 0.55,
-                            "&:hover": {
-                              backgroundColor: "rgba(154,37,41,0.08)",
-                            },
-                          }}
-                        >
-                          <EditIcon width={15} height={15} />
-                        </IconButton>
-                      </span>
-                    </Tooltip>
-                  </TableCell>
+               
                 </TableRow>
                 );
               })
