@@ -5,7 +5,7 @@
 //   useState,
 // } from "react";
 // import {
-//   useLocation,
+//   useLocation,A
 //   useNavigate,
 // } from "react-router-dom";
 // import {
@@ -842,13 +842,13 @@ import CustomButton from "../../components/ui/Button/Button";
 import { getInboxPath } from "../../routes/routes";
 import { preloginThunk } from "../../store/thunks/preloginThunk";
 import ApplicantApplicationSummary from "./ApplicantSummary";
-import VendorCMOApplicationSummary from "./VendorCMOApplicationSummary";
 import type { ComponentType } from "react";
 import MemberSelection from "./MemberSeclection";
-import HOCMOApplicationSummary from "./HOCMOApplicationSummary";
-import RefCMOApplicationSummary from "./RefCMOApplicationSummary";
 import Grievance from "./Grievance";
 import RaiseGrievance from "./RaiseGrievance";
+import VendorCMOApplicationSummary from "./VendorCMOApplicationSummary";
+import RefCMOApplicationSummary from "./RefCMOApplicationSummary";
+import HOCMOApplicationSummary from "./HOCMOApplicationSummary";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -968,6 +968,31 @@ const isBrowserRefresh = (): boolean => {
 const normalizeAccordionId = (value: string): string =>
   value.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
+type EmbeddedAccordionComponent = ComponentType<{
+  embedded?: boolean;
+}>;
+
+const getRegisteredAccordion = (
+  normalizedName: string,
+): EmbeddedAccordionComponent | null => {
+  const registryEntry = Object.entries(accordionRegistry).find(
+    ([accordionId]) =>
+      normalizeAccordionId(String(accordionId)) === normalizedName,
+  );
+
+  return registryEntry
+    ? (registryEntry[1] as EmbeddedAccordionComponent)
+    : null;
+};
+
+const RequirementManagementPanel = getRegisteredAccordion(
+  "requirementmanagement",
+);
+
+const DecisionHistoryPanel = getRegisteredAccordion(
+  "decisionhistory",
+);
+
 const isUwToolkitAccordion = (accordionId: string): boolean =>
   normalizeAccordionId(accordionId) === "uwtoolkit";
 
@@ -1045,9 +1070,13 @@ const DRS = () => {
 
   const [isPageLoading, setIsPageLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [selectedMemberIndex, setSelectedMemberIndex] = useState<number | null>(
-    null,
-  );
+  const [memberSelection, setMemberSelection] = useState<{
+    applicationNo: string;
+    memberIndex: number | null;
+  }>({
+    applicationNo: "",
+    memberIndex: null,
+  });
 
   const [snackbar, setSnackbar] = useState<SnackbarState>({
     open: false,
@@ -1143,9 +1172,10 @@ const DRS = () => {
       ? "BRE-GROUP"
       : "BRE-RETAIL";
 
-  useEffect(() => {
-    setSelectedMemberIndex(null);
-  }, [applicationNo]);
+  const selectedMemberIndex =
+    memberSelection.applicationNo === applicationNo
+      ? memberSelection.memberIndex
+      : null;
 
   useEffect(() => {
     if (
@@ -1265,22 +1295,6 @@ const DRS = () => {
       ),
     [movedAccordionIds, visibleAccordions],
   );
-
-  const getRegisteredAccordion = (normalizedName: string) => {
-    const registryEntry = Object.entries(accordionRegistry).find(
-      ([accordionId]) =>
-        normalizeAccordionId(String(accordionId)) === normalizedName,
-    );
-
-    return registryEntry
-      ? (registryEntry[1] as ComponentType<{ embedded?: boolean }>)
-      : null;
-  };
-
-  const RequirementManagementPanel = getRegisteredAccordion(
-    "requirementmanagement",
-  );
-  const DecisionHistoryPanel = getRegisteredAccordion("decisionhistory");
 
   const handleSubmit = async () => {
     if (isSubmitting) {
@@ -1546,7 +1560,12 @@ const DRS = () => {
         <MemberSelection
           applicationNumber={applicationNo}
           source={drsData}
-          onMemberSelect={setSelectedMemberIndex}
+          onMemberSelect={(memberIndex) => {
+            setMemberSelection({
+              applicationNo,
+              memberIndex,
+            });
+          }}
         />
       </Box>
     );

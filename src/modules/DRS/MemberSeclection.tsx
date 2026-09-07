@@ -2,7 +2,7 @@ import { Box, Typography } from "@mui/material";
 import { useState, type KeyboardEvent, type ReactNode } from "react";
 
 import CustomDialog from "../../components/ui/Dialog/Dialog";
-import { KeyRightArrowIcon } from "../../icons/Icons";
+//import { KeyRightArrowIcon } from "../../icons/Icons";
 //import Decision from "./DRS_Accordions/decision";
 //import UWDecision from "./DRS_Accordions/UWDecision";
 
@@ -216,7 +216,6 @@ const CompactField = ({ label, value }: { label: string; value: string }) => (
 );
 
 const MemberSelection = ({
-  applicationNumber,
   source,
   onMemberSelect,
   stickyTop = 0,
@@ -291,13 +290,13 @@ const MemberSelection = ({
     };
   });
 
-  const resolvedApplicationNumber = displayText(
-    applicationNumber,
-    data.applicationNumber,
-    data.applicationNo,
-    applicationOverview.applicationNumber,
-    applicationOverview.applicationNo,
-  );
+//   const resolvedApplicationNumber = displayText(
+//     applicationNumber,
+//     data.applicationNumber,
+//     data.applicationNo,
+//     applicationOverview.applicationNumber,
+//     applicationOverview.applicationNo,
+//   );
   const productName = displayText(
     baseProduct.productName,
     baseProduct.name,

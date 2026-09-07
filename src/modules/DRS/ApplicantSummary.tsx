@@ -722,7 +722,6 @@ interface ApplicationSummaryBannerProps {
 const ApplicationSummaryBanner = ({
   image,
   name,
-  appNo,
   personalSummary,
   productName,
   policyTerm,
@@ -1186,12 +1185,44 @@ const ApplicantApplicationSummary = ({
     (state: RootState) => state.searchApplication.response?.data,
   );
 
-  const [selectedRiskCard, setSelectedRiskCard] =
-    useState<RiskCard | null>(null);
+  const normalizedInitialMemberIndex = Math.max(0, initialMemberIndex);
 
-  const [selectedMemberIndex, setSelectedMemberIndex] = useState(() =>
-    Math.max(0, initialMemberIndex),
-  );
+  const [memberSelection, setMemberSelection] = useState(() => ({
+    initialMemberIndex: normalizedInitialMemberIndex,
+    memberIndex: normalizedInitialMemberIndex,
+  }));
+
+  const selectedMemberIndex =
+    memberSelection.initialMemberIndex === normalizedInitialMemberIndex
+      ? memberSelection.memberIndex
+      : normalizedInitialMemberIndex;
+
+  const setSelectedMemberIndex = (memberIndex: number) => {
+    setMemberSelection({
+      initialMemberIndex: normalizedInitialMemberIndex,
+      memberIndex,
+    });
+  };
+
+  const [riskCardSelection, setRiskCardSelection] = useState<{
+    initialMemberIndex: number;
+    card: RiskCard | null;
+  }>(() => ({
+    initialMemberIndex: normalizedInitialMemberIndex,
+    card: null,
+  }));
+
+  const selectedRiskCard =
+    riskCardSelection.initialMemberIndex === normalizedInitialMemberIndex
+      ? riskCardSelection.card
+      : null;
+
+  const setSelectedRiskCard = (card: RiskCard | null) => {
+    setRiskCardSelection({
+      initialMemberIndex: normalizedInitialMemberIndex,
+      card,
+    });
+  };
 
   // Multi-member cases must open on member selection even when summary data
   // arrives after the component's first render.
@@ -1216,18 +1247,13 @@ const ApplicantApplicationSummary = ({
     useState<RequirementStatusFilter>("All");
   const [requirementStatusFilterSignal, setRequirementStatusFilterSignal] =
     useState(0);
-  const [requirementAddRowSignal, setRequirementAddRowSignal] = useState(0);
+  const [requirementAddRowSignal] = useState(0);
 
   const [riderDialogOpen, setRiderDialogOpen] = useState(false);
   const [activeQuickLinkPanel, setActiveQuickLinkPanel] =
     useState<QuickLinkPanel | null>(null);
   const quickLinkDialogOpen = activeQuickLinkPanel !== null;
   const closeQuickLinkPanel = () => setActiveQuickLinkPanel(null);
-
-  useEffect(() => {
-    setSelectedMemberIndex(Math.max(0, initialMemberIndex));
-    setSelectedRiskCard(null);
-  }, [initialMemberIndex]);
 
   const openRequirementManagementPanel = (
     status: RequirementStatusFilter = "All",
@@ -1237,11 +1263,11 @@ const ApplicantApplicationSummary = ({
     setActiveQuickLinkPanel("requirementManagement");
   };
 
-  const handleAddRequirementRow = () => {
-    setRequirementStatusFilter("All");
-    setRequirementStatusFilterSignal((currentSignal) => currentSignal + 1);
-    setRequirementAddRowSignal((currentSignal) => currentSignal + 1);
-  };
+  // const handleAddRequirementRow = () => {
+  //   setRequirementStatusFilter("All");
+  //   setRequirementStatusFilterSignal((currentSignal) => currentSignal + 1);
+  //   setRequirementAddRowSignal((currentSignal) => currentSignal + 1);
+  // };
 
   useEffect(() => {
     const openApplicantSummary = () => setActiveQuickLinkPanel("summary");
@@ -2461,7 +2487,7 @@ const ApplicantApplicationSummary = ({
               },
             }}
           >
-            Back to Summary
+            Summary
           </Button>
         </Box>
       )}

@@ -836,29 +836,29 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
             .filter((option) => option.label && option.value);
     }, [masters]);
 
-    const waiverJustificationOptions = useMemo(() => {
-        const masterRecord = toRecord(masters);
-        const masterData = toRecord(masterRecord.data);
-        const misc = masterRecord.misc ?? masterData.misc;
+    // const waiverJustificationOptions = useMemo(() => {
+    //     const masterRecord = toRecord(masters);
+    //     const masterData = toRecord(masterRecord.data);
+    //     const misc = masterRecord.misc ?? masterData.misc;
 
-        if (!Array.isArray(misc)) return [];
+    //     if (!Array.isArray(misc)) return [];
 
-        return misc
-            .map(toRecord)
-            .filter((item) => {
-                const type = toText(item.type).toUpperCase();
-                return (
-                    type.includes("WAIV") &&
-                    (type.includes("RSN") || type.includes("REASON") || type.includes("JUST")) &&
-                    toText(item.isActive).toUpperCase() !== "N"
-                );
-            })
-            .map((item) => ({
-                label: toText(item.description ?? item.label ?? item.value ?? item.code),
-                value: toText(item.code ?? item.value ?? item.key),
-            }))
-            .filter((option) => option.label && option.value);
-    }, [masters]);
+    //     return misc
+    //         .map(toRecord)
+    //         .filter((item) => {
+    //             const type = toText(item.type).toUpperCase();
+    //             return (
+    //                 type.includes("WAIV") &&
+    //                 (type.includes("RSN") || type.includes("REASON") || type.includes("JUST")) &&
+    //                 toText(item.isActive).toUpperCase() !== "N"
+    //             );
+    //         })
+    //         .map((item) => ({
+    //             label: toText(item.description ?? item.label ?? item.value ?? item.code),
+    //             value: toText(item.code ?? item.value ?? item.key),
+    //         }))
+    //         .filter((option) => option.label && option.value);
+    // }, [masters]);
 
     const showDecisionCode = [
         "Reject",
