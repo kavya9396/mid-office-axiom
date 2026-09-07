@@ -15,7 +15,7 @@ export default function RootLayout() {
                 <Header />
             </header>
 
-            <main style={{backgroundColor: "#F0F3F8", minHeight: "calc(100dvh - 57px)"}}>
+            <main style={{backgroundColor: "#FFF8F3", minHeight: "calc(100dvh - 57px)"}}>
                 <Outlet />
                 {/* {shouldShowQuickLinks && <QuickLinks />} */}
             </main>

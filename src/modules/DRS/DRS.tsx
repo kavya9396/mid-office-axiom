@@ -844,6 +844,7 @@ import { preloginThunk } from "../../store/thunks/preloginThunk";
 import ApplicantApplicationSummary from "./ApplicantSummary";
 import type { ComponentType } from "react";
 import MemberSelection from "./MemberSeclection";
+import UWDecision from "./DRS_Accordions/UWDecision";
 import Grievance from "./Grievance";
 import RaiseGrievance from "./RaiseGrievance";
 import VendorCMOApplicationSummary from "./VendorCMOApplicationSummary";
@@ -1567,6 +1568,10 @@ const DRS = () => {
             });
           }}
         />
+
+        <Box sx={{ mx: 0.5, mt: 1, pb: 1 }}>
+          <UWDecision />
+        </Box>
       </Box>
     );
   }
@@ -1652,6 +1657,8 @@ const DRS = () => {
                   ) : (
                     <ApplicantApplicationSummary
                       stickyTop={0}
+                      initialMemberIndex={selectedMemberIndex ?? 0}
+                      showMemberSelectionInitially={false}
                       onBackToInbox={() => navigate(getInboxPath())}
                       requirementManagement={
                         RequirementManagementPanel ? (

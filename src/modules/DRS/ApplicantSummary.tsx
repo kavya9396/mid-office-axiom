@@ -36,6 +36,7 @@ interface ApplicantApplicationSummaryProps {
   onBackToInbox?: () => void;
   onBackToSummary?: () => void;
   initialMemberIndex?: number;
+  showMemberSelectionInitially?: boolean;
   readOnly?: boolean;
   showRiskAnalytics?: boolean;
   uwDecision?: ReactNode;
@@ -45,10 +46,7 @@ interface ApplicantApplicationSummaryProps {
   stickyTop?: number | string;
 }
 
-type QuickLinkPanel =
-  | "summary"
-  | "requirementManagement"
-  | "decisionHistory";
+type QuickLinkPanel = "summary" | "requirementManagement" | "decisionHistory";
 
 type RequirementStatusFilter =
   | "All"
@@ -155,6 +153,11 @@ interface RiskCard {
   value: string;
   status: RiskStatus;
   details: RiskDetail[];
+}
+
+interface SdtReadonlyRowProps {
+  decision: ReactNode;
+  remarks: ReactNode;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -283,9 +286,7 @@ const formatMemberType = (value: unknown, index: number): string => {
 };
 
 const firstValue = (...values: unknown[]): unknown =>
-  values.find(
-    (value) => value !== null && value !== undefined && value !== "",
-  );
+  values.find((value) => value !== null && value !== undefined && value !== "");
 
 const currency = (value: unknown): string => {
   if (value === null || value === undefined || value === "") {
@@ -338,12 +339,7 @@ const getAddress = (member: UnknownRecord): string => {
   const address = toRecord(addresses[0]);
 
   return (
-    [
-      address.city,
-      address.state,
-      address.residingCountry,
-      address.pinCode,
-    ]
+    [address.city, address.state, address.residingCountry, address.pinCode]
       .filter(Boolean)
       .map(String)
       .join(" - ") || "-"
@@ -359,7 +355,9 @@ const splitBreCodes = (value: unknown): string[] =>
 const getRequirementStatusFilter = (
   value: unknown,
 ): Exclude<RequirementStatusFilter, "All"> | null => {
-  const normalizedStatus = String(value ?? "").trim().toUpperCase();
+  const normalizedStatus = String(value ?? "")
+    .trim()
+    .toUpperCase();
 
   if (normalizedStatus === "PENDING") {
     return "Pending";
@@ -463,8 +461,7 @@ const getMedicalRiskStatus = (risk: UnknownRecord): RiskStatus => {
   const needsAttention =
     (physical !== "" && physical !== "stp") ||
     (teleVideo !== "" && teleVideo !== "stp") ||
-    (munichRe !== "" &&
-      !["standard1", "standard2"].includes(munichRe)) ||
+    (munichRe !== "" && !["standard1", "standard2"].includes(munichRe)) ||
     biu === "y";
 
   return needsAttention ? "attention" : "clear";
@@ -590,13 +587,7 @@ const buildRiskCards = (applicant: UnknownRecord): RiskCard[] => {
 /* COMMON UI                                                                  */
 /* -------------------------------------------------------------------------- */
 
-const CompactField = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: string;
-}) => (
+const CompactField = ({ label, value }: { label: string; value: string }) => (
   <Box sx={{ minWidth: 0 }}>
     <Typography
       sx={{
@@ -688,6 +679,93 @@ const DashboardCard = ({
     )}
 
     <Box sx={{ minWidth: 0, p: 1 }}>{children}</Box>
+  </Box>
+);
+
+const SdtReadonlyRow = ({ decision, remarks }: SdtReadonlyRowProps) => (
+  <Box
+    role="group"
+    aria-label="SDT decision details"
+    sx={{
+      display: "grid",
+      gridTemplateColumns: {
+        xs: "1fr",
+        sm: "minmax(160px, 0.31fr) minmax(0, 1fr)",
+      },
+      gap: { xs: 0.8, sm: 1.5 },
+      width: "100%",
+      minWidth: 0,
+      p: 1,
+      border: "1px solid #E4DEDB",
+      borderLeft: "4px solid #E45F14",
+      borderRadius: 1.25,
+      bgcolor: "#FCFAF9",
+      boxShadow: "0 2px 7px rgba(60, 42, 35, 0.06)",
+    }}
+  >
+    <Box sx={{ minWidth: 0 }}>
+      <Typography
+        sx={{
+          color: "#8B807B",
+          fontSize: 8.5,
+          fontWeight: 800,
+          textTransform: "uppercase",
+          letterSpacing: 0.45,
+        }}
+      >
+        SDT Decision
+      </Typography>
+
+      <Typography
+        sx={{
+          mt: 0.25,
+          color: "#302A27",
+          fontSize: 11,
+          fontWeight: 900,
+          lineHeight: 1.3,
+          overflowWrap: "anywhere",
+        }}
+      >
+        {decision}
+      </Typography>
+    </Box>
+
+    <Box
+      sx={{
+        minWidth: 0,
+        pl: { xs: 0, sm: 1.5 },
+        borderLeft: {
+          xs: 0,
+          sm: "1px solid #E8E1DE",
+        },
+      }}
+    >
+      <Typography
+        sx={{
+          color: "#8B807B",
+          fontSize: 8.5,
+          fontWeight: 800,
+          textTransform: "uppercase",
+          letterSpacing: 0.45,
+        }}
+      >
+        SDT Remarks
+      </Typography>
+
+      <Typography
+        sx={{
+          mt: 0.25,
+          color: "#4B433F",
+          fontSize: 10.5,
+          fontWeight: 700,
+          lineHeight: 1.4,
+          whiteSpace: "pre-wrap",
+          overflowWrap: "anywhere",
+        }}
+      >
+        {remarks}
+      </Typography>
+    </Box>
   </Box>
 );
 
@@ -790,7 +868,7 @@ const ApplicationSummaryBanner = ({
               lineHeight: 1,
             }}
           >
-            ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬ Ãƒâ€šÃ‚Â
+            ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
           </Box>
         )} */}
         <Avatar
@@ -808,161 +886,66 @@ const ApplicationSummaryBanner = ({
         </Avatar>
       </Box>
 
-      <Box sx={{ minWidth: 0, px: { xs: 1.2, sm: 2.2 }, py: { xs: 1, sm: 1.45 } }}>
-      {/* ================================================================ */}
-      {/* NAME + APPLICATION NUMBER                                        */}
-      {/* ================================================================ */}
-
       <Box
-        sx={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 2,
-          mb: 0.4,
-        }}
+        sx={{ minWidth: 0, px: { xs: 1.2, sm: 2.2 }, py: { xs: 1, sm: 1.45 } }}
       >
-        <Typography
-          title={name}
-          sx={{
-            minWidth: 0,
-            color: "#000",
-            fontSize: {
-              xs: 14,
-              sm: 16,
-            },
-            fontWeight: 900,
-            lineHeight: 1.25,
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-          }}
-        >
-          {name}
-        </Typography>
+        {/* ================================================================ */}
+        {/* NAME + APPLICATION NUMBER                                        */}
+        {/* ================================================================ */}
 
-        <Typography
-          sx={{
-            flexShrink: 0,
-            px: 1.1,
-            py: 0.45,
-            borderRadius: "16px",
-            bgcolor: "#FFFFFF",
-            border: "1px solid rgba(169,33,41,.18)",
-            color: "#A92129",
-            fontSize: {
-              xs: 11,
-              sm: 13,
-            },
-            fontWeight: 900,
-            whiteSpace: "nowrap",
-          }}
-        >
-          App No. - OB90377122
-        </Typography>
-      </Box>
-
-      {/* ================================================================ */}
-      {/* PERSONAL SUMMARY                                                  */}
-      {/* ================================================================ */}
-
-      <Typography
-        sx={{
-          color: "#000",
-          fontSize: {
-            xs: 10,
-            sm: 11.5,
-          },
-          lineHeight: 1.6,
-          fontWeight: 500,
-          overflowWrap: "anywhere",
-        }}
-      >
-        {personalSummary || "-"}
-      </Typography>
-
-      {/* ================================================================ */}
-      {/* PRODUCT / POLICY / COVERAGE                                      */}
-      {/* ================================================================ */}
-
-      <Typography
-        sx={{
-          mt: 0.5,
-          color: "#000",
-          fontSize: {
-            xs: 10,
-            sm: 11.5,
-          },
-          lineHeight: 1.65,
-          fontWeight: 800,
-          overflowWrap: "anywhere",
-        }}
-      >
-        Product:{" "}
         <Box
-          component="span"
           sx={{
-            color: "#000",
-            fontWeight: 700,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            mb: 0.4,
           }}
         >
-          {productName}
-        </Box>
-
-        {" / "}
-
-        Policy Term:{" "}
-        <Box
-          component="span"
-          sx={{
-            color: "#000",
-            fontWeight: 700,
-          }}
-        >
-          {policyTerm}
-        </Box>
-
-        {" / "}
-
-        Premium Term:{" "}
-        <Box
-          component="span"
-          sx={{
-            color: "#000",
-            fontWeight: 700,
-          }}
-        >
-          {premiumTerm}
-        </Box>
-
-        {coverageItems.map((item) => (
-          <Box
-            component="span"
-            key={item}
+          <Typography
+            title={name}
             sx={{
+              minWidth: 0,
               color: "#000",
-              fontWeight: 700,
+              fontSize: {
+                xs: 14,
+                sm: 16,
+              },
+              fontWeight: 900,
+              lineHeight: 1.25,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
-            {" / "}
-            {item}
-          </Box>
-        ))}
-      </Typography>
+            {name}
+          </Typography>
 
-      {/* ================================================================ */}
-      {/* RIDERS                                                            */}
-      {/* ================================================================ */}
+          <Typography
+            sx={{
+              flexShrink: 0,
+              px: 1.1,
+              py: 0.45,
+              borderRadius: "16px",
+              bgcolor: "#FFFFFF",
+              border: "1px solid rgba(169,33,41,.18)",
+              color: "#A92129",
+              fontSize: {
+                xs: 11,
+                sm: 13,
+              },
+              fontWeight: 900,
+              whiteSpace: "nowrap",
+            }}
+          >
+            App No. - OB90377122
+          </Typography>
+        </Box>
 
-      <Box
-        sx={{
-          mt: 0.45,
-          display: "flex",
-          alignItems: "flex-start",
-          gap: 0.35,
-          flexWrap: "wrap",
-        }}
-      >
+        {/* ================================================================ */}
+        {/* PERSONAL SUMMARY                                                  */}
+        {/* ================================================================ */}
+
         <Typography
           sx={{
             color: "#000",
@@ -970,82 +953,169 @@ const ApplicationSummaryBanner = ({
               xs: 10,
               sm: 11.5,
             },
-            lineHeight: 1.65,
-            fontWeight: 800,
+            lineHeight: 1.6,
+            fontWeight: 500,
+            overflowWrap: "anywhere",
           }}
         >
-          Riders:
+          {personalSummary || "-"}
         </Typography>
 
-        {riderSummaries.length > 0 ? (
-          <Typography
-            sx={{
-              flex: 1,
-              minWidth: 0,
-              color: "#000",
-              fontSize: {
-                xs: 10,
-                sm: 11.5,
-              },
-              lineHeight: 1.65,
-              fontWeight: 600,
-              overflowWrap: "anywhere",
-            }}
-          >
-            {riderSummaries.map((rider, index) => (
-              <Box
-                component="span"
-                key={`${rider.name}-${index}`}
-              >
-                {rider.name} - SA ₹{rider.sumAssured}
-                {index < riderSummaries.length - 1
-                  ? " / "
-                  : ""}
-              </Box>
-            ))}
-          </Typography>
-        ) : (
-          <Typography
-            sx={{
-              color: "#000",
-              fontSize: {
-                xs: 10,
-                sm: 11.5,
-              },
-              lineHeight: 1.65,
-              fontWeight: 600,
-            }}
-          >
-            No riders
-          </Typography>
-        )}
+        {/* ================================================================ */}
+        {/* PRODUCT / POLICY / COVERAGE                                      */}
+        {/* ================================================================ */}
 
-        {riderSummaries.length > 0 && (
+        <Typography
+          sx={{
+            mt: 0.5,
+            color: "#000",
+            fontSize: {
+              xs: 10,
+              sm: 11.5,
+            },
+            lineHeight: 1.65,
+            fontWeight: 800,
+            overflowWrap: "anywhere",
+          }}
+        >
+          Product:{" "}
           <Box
-            component="button"
-            type="button"
-            onClick={onViewRiders}
+            component="span"
             sx={{
-              border: 0,
-              p: 0,
-              ml: 0.5,
-              mt: 0.15,
-              bgcolor: "transparent",
-              color: "#FFEAD7",
-              fontSize: 9,
-              fontWeight: 900,
-              cursor: "pointer",
-              fontFamily: "inherit",
-              whiteSpace: "nowrap",
-              "&:hover": {
-                textDecoration: "underline",
-              },
+              color: "#000",
+              fontWeight: 700,
             }}
           >
-            View details <KeyRightArrowIcon/>
+            {productName}
           </Box>
-        )}
-      </Box>
+          {" / "}
+          Policy Term:{" "}
+          <Box
+            component="span"
+            sx={{
+              color: "#000",
+              fontWeight: 700,
+            }}
+          >
+            {policyTerm}
+          </Box>
+          {" / "}
+          Premium Term:{" "}
+          <Box
+            component="span"
+            sx={{
+              color: "#000",
+              fontWeight: 700,
+            }}
+          >
+            {premiumTerm}
+          </Box>
+          {coverageItems.map((item) => (
+            <Box
+              component="span"
+              key={item}
+              sx={{
+                color: "#000",
+                fontWeight: 700,
+              }}
+            >
+              {" / "}
+              {item}
+            </Box>
+          ))}
+        </Typography>
+
+        {/* ================================================================ */}
+        {/* RIDERS                                                            */}
+        {/* ================================================================ */}
+
+        <Box
+          sx={{
+            mt: 0.45,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 0.35,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#000",
+              fontSize: {
+                xs: 10,
+                sm: 11.5,
+              },
+              lineHeight: 1.65,
+              fontWeight: 800,
+            }}
+          >
+            Riders:
+          </Typography>
+
+          {riderSummaries.length > 0 ? (
+            <Typography
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                color: "#000",
+                fontSize: {
+                  xs: 10,
+                  sm: 11.5,
+                },
+                lineHeight: 1.65,
+                fontWeight: 600,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {riderSummaries.map((rider, index) => (
+                <Box component="span" key={`${rider.name}-${index}`}>
+                  {rider.name} - SA ₹{rider.sumAssured}
+                  {index < riderSummaries.length - 1 ? " / " : ""}
+                </Box>
+              ))}
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                color: "#000",
+                fontSize: {
+                  xs: 10,
+                  sm: 11.5,
+                },
+                lineHeight: 1.65,
+                fontWeight: 600,
+              }}
+            >
+              No riders
+            </Typography>
+          )}
+
+          {riderSummaries.length > 0 && (
+            <Box
+              component="button"
+              type="button"
+              onClick={onViewRiders}
+              sx={{
+                border: 0,
+                p: 0,
+                ml: 0.5,
+                mt: 0.15,
+                bgcolor: "transparent",
+                color: "#FFEAD7",
+                fontSize: 9,
+                fontWeight: 900,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                whiteSpace: "nowrap",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              View details <KeyRightArrowIcon />
+            </Box>
+          )}
+        </Box>
       </Box>
     </Box>
   );
@@ -1063,7 +1133,7 @@ const RiskAnalyticsCard = ({
   onClick: () => void;
 }) => {
   const tone = RISK_TONES[card.status];
-  const icon ='';
+  const icon = "";
   const visibleDetails = card.details
     .filter((detail) => text(detail.value) !== "-")
     .slice(0, 3);
@@ -1121,18 +1191,30 @@ const RiskAnalyticsCard = ({
         </Box>
 
         <Box sx={{ mt: 1 }}>
-          {visibleDetails.length > 0 ? visibleDetails.map((detail) => (
+          {visibleDetails.length > 0 ? (
+            visibleDetails.map((detail) => (
+              <Typography
+                key={detail.key}
+                sx={{
+                  color: "#403936",
+                  fontSize: 10.5,
+                  lineHeight: 1.35,
+                  overflowWrap: "anywhere",
+                }}
+              >
+                {detail.label}:{" "}
+                <Box
+                  component="span"
+                  sx={{ color: tone.text, fontWeight: 900 }}
+                >
+                  {text(detail.value)}
+                </Box>
+              </Typography>
+            ))
+          ) : (
             <Typography
-              key={detail.key}
-              sx={{ color: "#403936", fontSize: 10.5, lineHeight: 1.35, overflowWrap: "anywhere" }}
+              sx={{ color: tone.text, fontSize: 11, fontWeight: 900 }}
             >
-              {detail.label}: {" "}
-              <Box component="span" sx={{ color: tone.text, fontWeight: 900 }}>
-                {text(detail.value)}
-              </Box>
-            </Typography>
-          )) : (
-            <Typography sx={{ color: tone.text, fontSize: 11, fontWeight: 900 }}>
               {card.value}
             </Typography>
           )}
@@ -1140,10 +1222,33 @@ const RiskAnalyticsCard = ({
       </Box>
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.7, mt: 1 }}>
-        <Box sx={{ width: 34, height: 28, display: "grid", placeItems: "center", border: "1px solid #E1D8D2", borderRadius: "14px", bgcolor: "#FFF8F3", color: "#A92129", fontSize: 13 }}>
-          <KeyRightArrowIcon/>
+        <Box
+          sx={{
+            width: 34,
+            height: 28,
+            display: "grid",
+            placeItems: "center",
+            border: "1px solid #E1D8D2",
+            borderRadius: "14px",
+            bgcolor: "#FFF8F3",
+            color: "#A92129",
+            fontSize: 13,
+          }}
+        >
+          <KeyRightArrowIcon />
         </Box>
-        <Box sx={{ px: 1.2, py: 0.65, border: "1px solid #E1D8D2", borderRadius: "16px", bgcolor: "#FFF8F3", color: "#5B302A", fontSize: 9.5, fontWeight: 800 }}>
+        <Box
+          sx={{
+            px: 1.2,
+            py: 0.65,
+            border: "1px solid #E1D8D2",
+            borderRadius: "16px",
+            bgcolor: "#FFF8F3",
+            color: "#5B302A",
+            fontSize: 9.5,
+            fontWeight: 800,
+          }}
+        >
           View {card.id === "other" ? "Risk" : card.label}
         </Box>
       </Box>
@@ -1158,6 +1263,7 @@ const RiskAnalyticsCard = ({
 const ApplicantApplicationSummary = ({
   onBackToInbox,
   initialMemberIndex = 0,
+  showMemberSelectionInitially = true,
   readOnly = false,
   showRiskAnalytics = true,
   uwDecision,
@@ -1169,17 +1275,12 @@ const ApplicantApplicationSummary = ({
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
-  const {
-    applicationNumber,
-    businessType,
-  } = useAppContext();
+  const { applicationNumber, businessType } = useAppContext();
 
   const roleType = localStorage.getItem("roleType") ?? "";
   const userId = localStorage.getItem("username") ?? "";
 
-  const drsData = useAppSelector(
-    (state: RootState) => state.drs.data,
-  );
+  const drsData = useAppSelector((state: RootState) => state.drs.data);
 
   const searchData = useAppSelector(
     (state: RootState) => state.searchApplication.response?.data,
@@ -1224,24 +1325,19 @@ const ApplicantApplicationSummary = ({
     });
   };
 
-  // Multi-member cases must open on member selection even when summary data
-  // arrives after the component's first render.
-  const [showMemberSelection, setShowMemberSelection] = useState(true);
+  const [showMemberSelection, setShowMemberSelection] = useState(
+    showMemberSelectionInitially,
+  );
 
-  const [detailTab, setDetailTab] =
-    useState<ApplicantDetailTab>("personal");
+  const [detailTab, setDetailTab] = useState<ApplicantDetailTab>("personal");
 
-  const [breDetailDialogOpen, setBreDetailDialogOpen] =
-    useState(false);
+  const [breDetailDialogOpen, setBreDetailDialogOpen] = useState(false);
 
-  const [breResponse, setBreResponse] =
-    useState<BreResponse | null>(null);
+  const [breResponse, setBreResponse] = useState<BreResponse | null>(null);
 
-  const [breRetriggering, setBreRetriggering] =
-    useState(false);
+  const [breRetriggering, setBreRetriggering] = useState(false);
 
-  const [breRetriggerLimitOpen, setBreRetriggerLimitOpen] =
-    useState(false);
+  const [breRetriggerLimitOpen, setBreRetriggerLimitOpen] = useState(false);
 
   const [requirementStatusFilter, setRequirementStatusFilter] =
     useState<RequirementStatusFilter>("All");
@@ -1280,12 +1376,21 @@ const ApplicantApplicationSummary = ({
       setActiveQuickLinkPanel("decisionHistory");
 
     window.addEventListener("open-applicant-summary", openApplicantSummary);
-    window.addEventListener("open-requirement-management", openRequirementManagement);
+    window.addEventListener(
+      "open-requirement-management",
+      openRequirementManagement,
+    );
     window.addEventListener("open-decision-history", openDecisionHistory);
 
     return () => {
-      window.removeEventListener("open-applicant-summary", openApplicantSummary);
-      window.removeEventListener("open-requirement-management", openRequirementManagement);
+      window.removeEventListener(
+        "open-applicant-summary",
+        openApplicantSummary,
+      );
+      window.removeEventListener(
+        "open-requirement-management",
+        openRequirementManagement,
+      );
       window.removeEventListener("open-decision-history", openDecisionHistory);
     };
   }, []);
@@ -1321,23 +1426,17 @@ const ApplicantApplicationSummary = ({
     },
   );
 
-  const applicationOverview = toRecord(
-    source.applicationOverview,
-  );
+  const applicationOverview = toRecord(source.applicationOverview);
 
   const initialBre = toRecord(source.breDecision);
 
-  const latestBreCandidate = toRecord(
-    source.latestBreDecision,
-  );
+  const latestBreCandidate = toRecord(source.latestBreDecision);
 
   const finalBre = isNonEmptyRecord(latestBreCandidate)
     ? latestBreCandidate
     : initialBre;
 
-  const finalBreResponseData = readOnly
-    ? undefined
-    : breResponse?.data;
+  const finalBreResponseData = readOnly ? undefined : breResponse?.data;
 
   const hasBreApiResponse =
     !readOnly && Boolean(finalBreResponseData?.breOutput);
@@ -1351,9 +1450,7 @@ const ApplicantApplicationSummary = ({
     .toLowerCase();
 
   const eventName =
-    storageBusinessType === "group"
-      ? "BRE-GROUP"
-      : "BRE-RETAIL";
+    storageBusinessType === "group" ? "BRE-GROUP" : "BRE-RETAIL";
 
   const showBreRetriggerButton =
     !readOnly &&
@@ -1367,9 +1464,7 @@ const ApplicantApplicationSummary = ({
       return;
     }
 
-    const reTriggerCount = Number(
-      finalBre.reTriggerCount ?? 0,
-    );
+    const reTriggerCount = Number(finalBre.reTriggerCount ?? 0);
 
     if (reTriggerCount > 3) {
       setBreRetriggerLimitOpen(true);
@@ -1426,11 +1521,46 @@ const ApplicantApplicationSummary = ({
     : [];
 
   const activeMemberIndex =
-    selectedMemberIndex < members.length
-      ? selectedMemberIndex
-      : 0;
+    selectedMemberIndex < members.length ? selectedMemberIndex : 0;
 
   const applicant = members[activeMemberIndex] ?? {};
+
+  const sdtDetails = toRecord(
+    firstValue(
+      source.sdtDetails,
+      source.sdtDecisionDetails,
+      source.sdt,
+      typeof source.sdtDecision === "object" ? source.sdtDecision : undefined,
+    ),
+  );
+
+  const sdtDecision = text(
+    firstValue(
+      sdtDetails.decision,
+      sdtDetails.sdtDecision,
+      typeof source.sdtDecision === "object" ? undefined : source.sdtDecision,
+      finalBre.sdtDecision,
+      initialBre.sdtDecision,
+      applicant.sdtDecision,
+    ),
+  );
+
+  const sdtRemarks = text(
+    firstValue(
+      sdtDetails.remarks,
+      sdtDetails.remark,
+      sdtDetails.sdtRemarks,
+      sdtDetails.sdtRemark,
+      source.sdtRemarks,
+      source.sdtRemark,
+      finalBre.sdtRemarks,
+      finalBre.sdtRemark,
+      initialBre.sdtRemarks,
+      initialBre.sdtRemark,
+      applicant.sdtRemarks,
+      applicant.sdtRemark,
+    ),
+  );
 
   const activeMemberLabel = formatMemberType(
     applicant.memberType,
@@ -1438,24 +1568,17 @@ const ApplicantApplicationSummary = ({
   );
 
   const selectedMemberLabel =
-    members.length > 1 && !showMemberSelection
-      ? activeMemberLabel
-      : undefined;
+    members.length > 1 && !showMemberSelection ? activeMemberLabel : undefined;
 
   const uwDecisionForActiveMember = isValidElement(uwDecision)
-    ? cloneElement(
-        uwDecision as ReactElement<{ memberLabel?: string }>,
-        { memberLabel: selectedMemberLabel },
-      )
+    ? cloneElement(uwDecision as ReactElement<{ memberLabel?: string }>, {
+        memberLabel: selectedMemberLabel,
+      })
     : uwDecision;
 
-  const applicantDetails = toRecord(
-    applicant.applicantDetails,
-  );
+  const applicantDetails = toRecord(applicant.applicantDetails);
 
-  const personalDetails = toRecord(
-    applicant.personalDetails,
-  );
+  const personalDetails = toRecord(applicant.personalDetails);
 
   const personal = {
     ...applicantDetails,
@@ -1471,51 +1594,37 @@ const ApplicantApplicationSummary = ({
     ...toRecord(personal.kycDetails),
   };
 
-  const finance = toRecord(
-    applicant.applicantFinancialDetails,
-  );
+  const finance = toRecord(applicant.applicantFinancialDetails);
 
-  const financialDetails = toRecord(
-    applicant.financialDetails,
-  );
+  const financialDetails = toRecord(applicant.financialDetails);
 
   const nomineeDetails = toRecord(
-    applicant.nomineeDetails ??
-      applicant.nominee ??
-      applicant.nomineeSummary,
+    applicant.nomineeDetails ?? applicant.nominee ?? applicant.nomineeSummary,
   );
 
   const medicalDetails = toRecord(
-    applicant.medicalDetails ??
-      applicant.medicalSummary ??
-      applicant.medical,
+    applicant.medicalDetails ?? applicant.medicalSummary ?? applicant.medical,
   );
 
   /* ------------------------------------------------------------------------ */
   /* PRODUCT                                                                  */
   /* ------------------------------------------------------------------------ */
 
-  const products = Array.isArray(
-    applicationOverview.productDetail,
-  )
+  const products = Array.isArray(applicationOverview.productDetail)
     ? applicationOverview.productDetail.map(toRecord)
     : [];
 
   const baseProduct =
     products.find(
-      (product) =>
-        String(product.type ?? "").toLowerCase() === "base",
+      (product) => String(product.type ?? "").toLowerCase() === "base",
     ) ??
     products[0] ??
     applicationOverview;
 
-  const riderDetails = Array.isArray(
-    applicationOverview.riderDetails,
-  )
+  const riderDetails = Array.isArray(applicationOverview.riderDetails)
     ? applicationOverview.riderDetails.map(toRecord)
     : products.filter(
-        (product) =>
-          String(product.type ?? "").toLowerCase() === "rider",
+        (product) => String(product.type ?? "").toLowerCase() === "rider",
       );
 
   const productName = text(
@@ -1590,50 +1699,19 @@ const ApplicantApplicationSummary = ({
 
   const riderSummaries = riderDetails
     .map((rider, index) => ({
-      id: String(
-        firstValue(
-          rider.id,
-          rider.productCode,
-          index,
-        ),
-      ),
+      id: String(firstValue(rider.id, rider.productCode, index)),
 
-      name: text(
-        firstValue(
-          rider.name,
-          rider.riderName,
-          rider.productName,
-        ),
-      ),
+      name: text(firstValue(rider.name, rider.riderName, rider.productName)),
 
       sumAssured: currency(
-        firstValue(
-          rider.sumAssured,
-          rider.tsa,
-          rider.appliedSA,
-        ),
+        firstValue(rider.sumAssured, rider.tsa, rider.appliedSA),
       ),
 
-      policyTerm: text(
-        firstValue(
-          rider.policyTerm,
-          rider.term,
-        ),
-      ),
+      policyTerm: text(firstValue(rider.policyTerm, rider.term)),
 
-      premiumTerm: text(
-        firstValue(
-          rider.premiumPaymentTerm,
-          rider.ppt,
-        ),
-      ),
+      premiumTerm: text(firstValue(rider.premiumPaymentTerm, rider.ppt)),
 
-      premium: currency(
-        firstValue(
-          rider.premium,
-          rider.annualPremium,
-        ),
-      ),
+      premium: currency(firstValue(rider.premium, rider.annualPremium)),
     }))
     .filter((rider) => rider.name !== "-");
 
@@ -1647,10 +1725,7 @@ const ApplicantApplicationSummary = ({
   });
 
   const image = String(
-    firstValue(
-      applicant.profileImage,
-      personal.profileImage,
-    ) ?? "",
+    firstValue(applicant.profileImage, personal.profileImage) ?? "",
   );
 
   const appNo = text(
@@ -1663,8 +1738,7 @@ const ApplicantApplicationSummary = ({
   );
 
   const age = firstValue(
-    personal.age &&
-      toRecord(personal.age).years,
+    personal.age && toRecord(personal.age).years,
     applicantDetails.age,
   );
 
@@ -1684,10 +1758,7 @@ const ApplicantApplicationSummary = ({
   const personalFields = [
     {
       label: "Marital status",
-      value: text(
-        personal.maritalStatus ??
-          applicantDetails.maritalStatus,
-      ),
+      value: text(personal.maritalStatus ?? applicantDetails.maritalStatus),
     },
 
     {
@@ -1697,28 +1768,18 @@ const ApplicantApplicationSummary = ({
 
     {
       label: "Gender",
-      value: text(
-        personal.gender ??
-          applicantDetails.gender,
-      ),
+      value: text(personal.gender ?? applicantDetails.gender),
     },
 
     {
       label: "Education",
-      value: text(
-        personal.education ??
-          applicantDetails.education,
-      ),
+      value: text(personal.education ?? applicantDetails.education),
     },
 
     {
       label: "Date of birth",
       value: text(
-        firstValue(
-          personal.dateOfBirth,
-          personal.dob,
-          applicantDetails.dob,
-        ),
+        firstValue(personal.dateOfBirth, personal.dob, applicantDetails.dob),
       ),
     },
 
@@ -1729,18 +1790,12 @@ const ApplicantApplicationSummary = ({
 
     {
       label: "Nationality",
-      value: text(
-        personal.nationality ??
-          applicantDetails.nationality,
-      ),
+      value: text(personal.nationality ?? applicantDetails.nationality),
     },
 
     {
       label: "Residence",
-      value: text(
-        personal.residentStatus ??
-          personal.countryOfResidence,
-      ),
+      value: text(personal.residentStatus ?? personal.countryOfResidence),
     },
 
     {
@@ -1768,38 +1823,21 @@ const ApplicantApplicationSummary = ({
   );
 
   const personalSummary = [
-    text(
-      personal.maritalStatus ??
-        applicantDetails.maritalStatus,
-    ),
+    text(personal.maritalStatus ?? applicantDetails.maritalStatus),
 
     age ? text(age) : "-",
 
-    text(
-      personal.gender ??
-        applicantDetails.gender,
-    ),
+    text(personal.gender ?? applicantDetails.gender),
 
-    text(
-      personal.education ??
-        applicantDetails.education,
-    ),
+    text(personal.education ?? applicantDetails.education),
 
-    annualIncomeForBanner !== "-"
-      ? `${annualIncomeForBanner} p.a.`
-      : "-",
+    annualIncomeForBanner !== "-" ? `${annualIncomeForBanner} p.a.` : "-",
 
     address,
 
-    text(
-      personal.nationality ??
-        applicantDetails.nationality,
-    ),
+    text(personal.nationality ?? applicantDetails.nationality),
 
-    text(
-      personal.residentStatus ??
-        personal.countryOfResidence,
-    ),
+    text(personal.residentStatus ?? personal.countryOfResidence),
   ]
     .filter((value) => value !== "-")
     .join(" / ");
@@ -1811,94 +1849,55 @@ const ApplicantApplicationSummary = ({
   const kycFields = [
     {
       label: "KYC status",
-      value: text(
-        firstValue(
-          kycDetails.kycStatus,
-          kycDetails.status,
-        ),
-      ),
+      value: text(firstValue(kycDetails.kycStatus, kycDetails.status)),
     },
 
     {
       label: "PAN",
       value: text(
-        firstValue(
-          kycDetails.panNumber,
-          kycDetails.pan,
-          personal.panNumber,
-        ),
+        firstValue(kycDetails.panNumber, kycDetails.pan, personal.panNumber),
       ),
     },
 
     {
       label: "CKYC number",
-      value: text(
-        firstValue(
-          kycDetails.ckycNumber,
-          kycDetails.ckycNo,
-        ),
-      ),
+      value: text(firstValue(kycDetails.ckycNumber, kycDetails.ckycNo)),
     },
 
     {
       label: "Aadhaar",
       value: text(
-        firstValue(
-          kycDetails.aadhaarNumber,
-          kycDetails.aadharNumber,
-        ),
+        firstValue(kycDetails.aadhaarNumber, kycDetails.aadharNumber),
       ),
     },
 
     {
       label: "Identity proof",
-      value: text(
-        firstValue(
-          kycDetails.identityProof,
-          kycDetails.idProofType,
-        ),
-      ),
+      value: text(firstValue(kycDetails.identityProof, kycDetails.idProofType)),
     },
 
     {
       label: "Address proof",
       value: text(
-        firstValue(
-          kycDetails.addressProof,
-          kycDetails.addressProofType,
-        ),
+        firstValue(kycDetails.addressProof, kycDetails.addressProofType),
       ),
     },
 
     {
       label: "Mobile",
-      value: text(
-        firstValue(
-          kycDetails.mobileNumber,
-          personal.mobileNumber,
-        ),
-      ),
+      value: text(firstValue(kycDetails.mobileNumber, personal.mobileNumber)),
     },
 
     {
       label: "Email",
       value: text(
-        firstValue(
-          kycDetails.emailId,
-          personal.emailId,
-          personal.email,
-        ),
+        firstValue(kycDetails.emailId, personal.emailId, personal.email),
       ),
     },
 
     {
       label: "KYC mode",
-      value: text(
-        firstValue(
-          kycDetails.kycMode,
-          kycDetails.verificationMode,
-        ),
-      ),
+      value: text(firstValue(kycDetails.kycMode, kycDetails.verificationMode)),
     },
   ];
 
@@ -1933,70 +1932,47 @@ const ApplicantApplicationSummary = ({
     {
       label: "Income source",
       value: text(
-        firstValue(
-          finance.incomeSource,
-          financialDetails.incomeSource,
-        ),
+        firstValue(finance.incomeSource, financialDetails.incomeSource),
       ),
     },
 
     {
       label: "Net worth",
-      value: currency(
-        firstValue(
-          finance.netWorth,
-          financialDetails.netWorth,
-        ),
-      ),
+      value: currency(firstValue(finance.netWorth, financialDetails.netWorth)),
     },
 
     {
       label: "Employer",
       value: text(
-        firstValue(
-          finance.employerName,
-          financialDetails.employerName,
-        ),
+        firstValue(finance.employerName, financialDetails.employerName),
       ),
     },
 
     {
       label: "Industry",
       value: text(
-        firstValue(
-          finance.industryType,
-          financialDetails.industryType,
-        ),
+        firstValue(finance.industryType, financialDetails.industryType),
       ),
     },
 
     {
       label: "Income proof",
       value: text(
-        firstValue(
-          finance.incomeProof,
-          financialDetails.incomeProof,
-        ),
+        firstValue(finance.incomeProof, financialDetails.incomeProof),
       ),
     },
 
     {
       label: "Financial need",
       value: currency(
-        firstValue(
-          finance.financialNeed,
-          financialDetails.financialNeed,
-        ),
+        firstValue(finance.financialNeed, financialDetails.financialNeed),
       ),
     },
 
     {
       label: "Existing cover",
       value: currency(
-        firstValue(
-          finance.existingCover,
-          financialDetails.existingCover,
-        ),
+        firstValue(finance.existingCover, financialDetails.existingCover),
       ),
     },
   ];
@@ -2029,31 +2005,18 @@ const ApplicantApplicationSummary = ({
 
     {
       label: "Date of birth",
-      value: text(
-        firstValue(
-          nomineeDetails.dateOfBirth,
-          nomineeDetails.dob,
-        ),
-      ),
+      value: text(firstValue(nomineeDetails.dateOfBirth, nomineeDetails.dob)),
     },
 
     {
       label: "Share",
-      value: text(
-        firstValue(
-          nomineeDetails.share,
-          nomineeDetails.percentage,
-        ),
-      ),
+      value: text(firstValue(nomineeDetails.share, nomineeDetails.percentage)),
     },
 
     {
       label: "Mobile",
       value: text(
-        firstValue(
-          nomineeDetails.mobile,
-          nomineeDetails.mobileNumber,
-        ),
+        firstValue(nomineeDetails.mobile, nomineeDetails.mobileNumber),
       ),
     },
 
@@ -2071,31 +2034,20 @@ const ApplicantApplicationSummary = ({
     {
       label: "Medical status",
       value: text(
-        firstValue(
-          medicalDetails.status,
-          medicalDetails.medicalStatus,
-        ),
+        firstValue(medicalDetails.status, medicalDetails.medicalStatus),
       ),
     },
 
     {
       label: "Medical decision",
       value: text(
-        firstValue(
-          medicalDetails.decision,
-          medicalDetails.medicalDecision,
-        ),
+        firstValue(medicalDetails.decision, medicalDetails.medicalDecision),
       ),
     },
 
     {
       label: "Medical remark",
-      value: text(
-        firstValue(
-          medicalDetails.remark,
-          medicalDetails.remarks,
-        ),
-      ),
+      value: text(firstValue(medicalDetails.remark, medicalDetails.remarks)),
     },
 
     {
@@ -2126,42 +2078,22 @@ const ApplicantApplicationSummary = ({
 
     {
       label: "City",
-      value: text(
-        firstValue(
-          personal.city,
-          applicant.city,
-        ),
-      ),
+      value: text(firstValue(personal.city, applicant.city)),
     },
 
     {
       label: "State",
-      value: text(
-        firstValue(
-          personal.state,
-          applicant.state,
-        ),
-      ),
+      value: text(firstValue(personal.state, applicant.state)),
     },
 
     {
       label: "Country",
-      value: text(
-        firstValue(
-          personal.country,
-          personal.residingCountry,
-        ),
-      ),
+      value: text(firstValue(personal.country, personal.residingCountry)),
     },
 
     {
       label: "PIN code",
-      value: text(
-        firstValue(
-          personal.pinCode,
-          applicant.pinCode,
-        ),
-      ),
+      value: text(firstValue(personal.pinCode, applicant.pinCode)),
     },
   ];
 
@@ -2172,42 +2104,27 @@ const ApplicantApplicationSummary = ({
   const contactFields = [
     {
       label: "Mobile",
-      value: text(
-        firstValue(
-          personal.mobileNumber,
-          kycDetails.mobileNumber,
-        ),
-      ),
+      value: text(firstValue(personal.mobileNumber, kycDetails.mobileNumber)),
     },
 
     {
       label: "Email",
       value: text(
-        firstValue(
-          personal.emailId,
-          personal.email,
-          kycDetails.emailId,
-        ),
+        firstValue(personal.emailId, personal.email, kycDetails.emailId),
       ),
     },
 
     {
       label: "Alternate mobile",
       value: text(
-        firstValue(
-          personal.alternateMobile,
-          personal.alternateMobileNumber,
-        ),
+        firstValue(personal.alternateMobile, personal.alternateMobileNumber),
       ),
     },
 
     {
       label: "Preferred contact",
       value: text(
-        firstValue(
-          personal.preferredContactMode,
-          personal.contactMode,
-        ),
+        firstValue(personal.preferredContactMode, personal.contactMode),
       ),
     },
   ];
@@ -2236,8 +2153,7 @@ const ApplicantApplicationSummary = ({
   const finalBreDecision = text(
     firstValue(
       hasBreApiResponse
-        ? finalBreResponseData?.breOutput
-            ?.decisionTypes?.breDecision
+        ? finalBreResponseData?.breOutput?.decisionTypes?.breDecision
         : undefined,
       finalBre.decision,
       initialBre.decision,
@@ -2251,15 +2167,12 @@ const ApplicantApplicationSummary = ({
   //   ),
   // );
 
-  const initialDiscrepancies = splitBreCodes(
-    initialBre.discrepancy,
-  );
+  const initialDiscrepancies = splitBreCodes(initialBre.discrepancy);
 
   const finalDiscrepancies = splitBreCodes(
     firstValue(
       hasBreApiResponse
-        ? finalBreResponseData?.breOutput
-            ?.decisionTypes?.breRequirement
+        ? finalBreResponseData?.breOutput?.decisionTypes?.breRequirement
         : undefined,
       finalBre.discrepancy,
       initialBre.discrepancy,
@@ -2270,10 +2183,9 @@ const ApplicantApplicationSummary = ({
     (code) => !initialDiscrepancies.includes(code),
   );
 
-  const resolvedDiscrepancies =
-    initialDiscrepancies.filter(
-      (code) => !finalDiscrepancies.includes(code),
-    );
+  const resolvedDiscrepancies = initialDiscrepancies.filter(
+    (code) => !finalDiscrepancies.includes(code),
+  );
 
   // const reTriggerCount = text(
   //   firstValue(
@@ -2299,9 +2211,7 @@ const ApplicantApplicationSummary = ({
   //   initialBreDecision.toUpperCase() !==
   //     finalBreDecision.toUpperCase();
 
-  const decisionTone = getDecisionTone(
-    finalBreDecision,
-  );
+  const decisionTone = getDecisionTone(finalBreDecision);
 
   /* ------------------------------------------------------------------------ */
   /* RISK                                                                     */
@@ -2320,9 +2230,7 @@ const ApplicantApplicationSummary = ({
   //       }`
   //     : "All clear";
 
-  const hasStickyRail = Boolean(
-    uwDecision || quickLinks,
-  );
+  const hasStickyRail = Boolean(uwDecision || quickLinks);
 
   const quickLinksWithApplicantAction = isValidElement(quickLinks)
     ? cloneElement(
@@ -2335,7 +2243,8 @@ const ApplicantApplicationSummary = ({
           onApplicantInformationClick: () => setActiveQuickLinkPanel("summary"),
           onRequirementManagementClick: () =>
             openRequirementManagementPanel("All"),
-          onDecisionHistoryClick: () => setActiveQuickLinkPanel("decisionHistory"),
+          onDecisionHistoryClick: () =>
+            setActiveQuickLinkPanel("decisionHistory"),
         },
       )
     : quickLinks;
@@ -2363,18 +2272,34 @@ const ApplicantApplicationSummary = ({
 
   if (showMemberSelection && members.length > 1) {
     return (
-      <MemberSelection
-        applicationNumber={appNo}
-        source={source}
-        stickyTop={stickyTop}
-        uwDecision={uwDecision}
-        onMemberSelect={(memberIndex) => {
-          setSelectedMemberIndex(memberIndex);
-          setSelectedRiskCard(null);
-          setDetailTab("personal");
-          setShowMemberSelection(false);
+      <Box
+        sx={{
+          width: "100%",
+          minWidth: 0,
+          display: "grid",
+          gap: 0.8,
+          px: 0.5,
         }}
-      />
+      >
+        <MemberSelection
+          applicationNumber={appNo}
+          source={source}
+          stickyTop={stickyTop}
+          uwDecision={undefined}
+          onMemberSelect={(memberIndex) => {
+            setSelectedMemberIndex(memberIndex);
+            setSelectedRiskCard(null);
+            setDetailTab("personal");
+            setShowMemberSelection(false);
+          }}
+        />
+
+        {uwDecision && (
+          <DashboardCard eyebrow="Underwriter" title="UW Decision">
+            {uwDecision}
+          </DashboardCard>
+        )}
+      </Box>
     );
   }
 
@@ -2386,8 +2311,7 @@ const ApplicantApplicationSummary = ({
           width: "100%",
           minWidth: 0,
           px: 0.5,
-          pb: 0.75,
-          pt:0.75,
+          pt: 0.75,
           position: {
             xs: "static",
             lg: "sticky",
@@ -2408,9 +2332,7 @@ const ApplicantApplicationSummary = ({
             display: "grid",
             gridTemplateColumns: {
               xs: "1fr",
-              lg: hasStickyRail
-                ? "minmax(0,1fr) 300px"
-                : "minmax(0,1fr)",
+              lg: hasStickyRail ? "minmax(0,1fr) 300px" : "minmax(0,1fr)",
             },
             gap: 1,
           }}
@@ -2430,9 +2352,7 @@ const ApplicantApplicationSummary = ({
             tssa={tssa}
             tpsa={tpsa}
             riderSummaries={riderSummaries}
-            onViewRiders={() =>
-              setRiderDialogOpen(true)
-            }
+            onViewRiders={() => setRiderDialogOpen(true)}
           />
         </Box>
       </Box>
@@ -2442,7 +2362,6 @@ const ApplicantApplicationSummary = ({
           sx={{
             width: "100%",
             px: 0.5,
-            pb: 0.75,
             display: "flex",
             alignItems: "center",
           }}
@@ -2500,68 +2419,68 @@ const ApplicantApplicationSummary = ({
           px: 0.5,
         }}
       >
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "1fr",
-            lg: hasStickyRail
-              ? "minmax(0,1fr) 300px"
-              : "minmax(0,1fr)",
-          },
-          gap: 1,
-          alignItems: "start",
-        }}
-      >
-        <Box sx={{ minWidth: 0 }}>
-          {/* <CustomAccordion
+        <Box
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              lg: hasStickyRail ? "minmax(0,1fr) 300px" : "minmax(0,1fr)",
+            },
+            gap: 1,
+            alignItems: "start",
+          }}
+        >
+          <Box sx={{ minWidth: 0 }}>
+            {/* <CustomAccordion
             title="Application Summary"
             defaultExpanded
           > */}
 
-          <Box
-            sx={{
-              p: 0.75,
-              bgcolor: "#FFF8F3",
-              border: "1px solid #F1D8C8",
-              borderRadius: 1.5,
-            }}
-          >
-            {/* ========================================================== */}
-            {/* TOP ROW                                                     */}
-            {/* BRE decision | Risk analytics                              */}
-            {/* ========================================================== */}
-
             <Box
               sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "minmax(245px, 1fr) minmax(0, 3fr)",
-                },
-                gap: 0.75,
-                alignItems: "stretch",
+                p: 0.75,
+                bgcolor: "#FFF8F3",
+                border: "1px solid #F1D8C8",
+                borderRadius: 1.5,
               }}
             >
-              {/* ====================================================== */}
-              {/* APPLICANT INFORMATION                                  */}
-              {/* ====================================================== */}
+              {/* ========================================================== */}
+              {/* TOP ROW                                                     */}
+              {/* Risk analytics | BRE decision                              */}
+              {/* ========================================================== */}
 
-              <CustomDialog
-                open={quickLinkDialogOpen}
-                onClose={closeQuickLinkPanel}
-                title={
-                  activeQuickLinkPanel === "requirementManagement" ? (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1.25,
-                        pr: 5,
-                      }}
-                    >
-                      <Box component="span">Requirement Management</Box>
-                      {/* {Boolean(requirementManagement) &&
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    md: showRiskAnalytics
+                      ? "minmax(0, 3fr) minmax(245px, 1fr)"
+                      : "minmax(245px, 1fr) minmax(0, 3fr)",
+                  },
+                  gap: 0.75,
+                  alignItems: "stretch",
+                }}
+              >
+                {/* ====================================================== */}
+                {/* APPLICANT INFORMATION                                  */}
+                {/* ====================================================== */}
+
+                <CustomDialog
+                  open={quickLinkDialogOpen}
+                  onClose={closeQuickLinkPanel}
+                  title={
+                    activeQuickLinkPanel === "requirementManagement" ? (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: 1.25,
+                          pr: 5,
+                        }}
+                      >
+                        <Box component="span">Requirement Management</Box>
+                        {/* {Boolean(requirementManagement) &&
                         !readOnly &&
                         ![
                           "AMR_MEDICAL_TASK",
@@ -2609,555 +2528,532 @@ const ApplicantApplicationSummary = ({
                             Add
                           </Button>
                         )} */}
-                    </Box>
-                  ) : activeQuickLinkPanel === "decisionHistory" ? (
-                    "Decision History"
-                  ) : (
-                    "Applicant Details"
-                  )
-                }
-                maxWidth="lg"
-                fullWidth
-                keepMounted
-                paperSx={{
-                  width: {
-                    xs: "calc(100vw - 16px)",
-                    sm: "calc(100vw - 48px)",
-                  },
-                  height: {
-                    xs: "calc(100vh - 16px)",
-                    sm: "min(86vh, 820px)",
-                  },
-                  maxHeight: {
-                    xs: "calc(100vh - 16px)",
-                    sm: "calc(100vh - 48px)",
-                  },
-                  bgcolor: "#F5F6F7",
-                  overflow: "hidden",
-                  boxShadow: "0 18px 54px rgba(45, 35, 30, 0.24)",
-                }}
-                backdropSx={{
-                  bgcolor: "rgba(28, 22, 19, 0.48)",
-                  backdropFilter: "blur(2px)",
-                }}
-                titleSx={{
-                  minHeight: 56,
-                  px: { xs: 1.5, sm: 2.5 },
-                  py: 1,
-                  color: "#292421",
-                  bgcolor: "#FFF3E9",
-                  borderBottom: "1px solid #E5DAD2",
-                  fontSize: 17,
-                  fontWeight: 900,
-                }}
-                contentSx={{
-                  p: { xs: 1.25, sm: 2 },
-                  overflowY: "auto",
-                  overscrollBehavior: "contain",
-                }}
-              >
-                <Box sx={{ minWidth: 0 }}>
-
-                  {activeQuickLinkPanel === "requirementManagement" ? (
-                    <Box sx={{ minWidth: 0 }}>
-                      {requirementManagementWithStatusFilter}
-                    </Box>
-                  ) : activeQuickLinkPanel === "decisionHistory" ? (
-                    <Box sx={{ minWidth: 0 }}>{decisionHistory}</Box>
-                  ) : (
-                  <DashboardCard
-                eyebrow=""
-                title="Applicant Information"
-                sx={{
-                  minHeight: 0,
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.8,
+                      </Box>
+                    ) : activeQuickLinkPanel === "decisionHistory" ? (
+                      "Decision History"
+                    ) : (
+                      "Applicant Details"
+                    )
+                  }
+                  maxWidth="lg"
+                  fullWidth
+                  keepMounted
+                  paperSx={{
+                    width: {
+                      xs: "calc(100vw - 16px)",
+                      sm: "calc(100vw - 48px)",
+                    },
+                    height: {
+                      xs: "calc(100vh - 16px)",
+                      sm: "min(86vh, 820px)",
+                    },
+                    maxHeight: {
+                      xs: "calc(100vh - 16px)",
+                      sm: "calc(100vh - 48px)",
+                    },
+                    bgcolor: "#F5F6F7",
+                    overflow: "hidden",
+                    boxShadow: "0 18px 54px rgba(45, 35, 30, 0.24)",
+                  }}
+                  backdropSx={{
+                    bgcolor: "rgba(28, 22, 19, 0.48)",
+                    backdropFilter: "blur(2px)",
+                  }}
+                  titleSx={{
+                    minHeight: 56,
+                    px: { xs: 1.5, sm: 2.5 },
+                    py: 1,
+                    color: "#292421",
+                    bgcolor: "#FFF3E9",
+                    borderBottom: "1px solid #E5DAD2",
+                    fontSize: 17,
+                    fontWeight: 900,
+                  }}
+                  contentSx={{
+                    p: { xs: 1.25, sm: 2 },
+                    overflowY: "auto",
+                    overscrollBehavior: "contain",
                   }}
                 >
-                  <Avatar
-                    src={image || undefined}
-                    alt={
-                      name === "-"
-                        ? "Applicant"
-                        : name
-                    }
-                    sx={{
-                      width: 42,
-                      height: 42,
-                      flexShrink: 0,
-                      bgcolor: "#FFF3E9",
-                      color: "#A92129",
-                      border: "2px solid #FFFFFF",
-                      boxShadow:
-                        "0 2px 7px rgba(169,33,41,.15)",
-                    }}
-                  >
-                    <UserProfileIcon
-                      sx={{
-                        fontSize: 25,
-                      }}
-                    />
-                  </Avatar>
-
-                  <Box
-                    sx={{
-                      minWidth: 0,
-                    }}
-                  >
-                    <Typography
-                      sx={{
-                        color: "#817773",
-                        fontSize: 7.5,
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                        letterSpacing: 0.5,
-                      }}
-                    >
-                      Applicant
-                    </Typography>
-
-                    <Typography
-                      title={name}
-                      sx={{
-                        mt: 0.15,
-                        color: "#292421",
-                        fontSize: 12,
-                        fontWeight: 900,
-                        lineHeight: 1.15,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {name}
-                    </Typography>
-                  </Box>
-                </Box>
-
-                {/* MEMBER SWITCHER */}
-
-                {members.length > 1 && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      gap: 0.4,
-                      mt: 0.8,
-                      pb: 0.7,
-                      borderBottom:
-                        "1px solid #EAE4E1",
-                      overflowX: "auto",
-                      scrollbarWidth: "thin",
-
-                      "&::-webkit-scrollbar": {
-                        height: 3,
-                      },
-                    }}
-                  >
-                    {members.map(
-                      (member, index) => {
-                        const memberPersonal = {
-                          ...toRecord(
-                            member.applicantDetails,
-                          ),
-                          ...toRecord(
-                            member.personalDetails,
-                          ),
-                          ...toRecord(
-                            member.personalSummary,
-                          ),
-                          ...toRecord(
-                            member.proposerSummary,
-                          ),
-                        };
-
-                        const memberName =
-                          getFullName({
-                            ...member,
-                            ...memberPersonal,
-                          });
-
-                        const memberType =
-                          text(
-                            member.memberType,
-                          ) === "-"
-                            ? `Member ${
-                                index + 1
-                              }`
-                            : text(
-                                member.memberType,
-                              );
-
-                        const selected =
-                          index ===
-                          activeMemberIndex;
-
-                        return (
-                          <Box
-                            key={`${memberType}-${index}`}
-                            component="button"
-                            type="button"
-                            onClick={() => {
-                              setSelectedMemberIndex(
-                                index,
-                              );
-
-                              setSelectedRiskCard(
-                                null,
-                              );
-                            }}
+                  <Box sx={{ minWidth: 0 }}>
+                    {activeQuickLinkPanel === "requirementManagement" ? (
+                      <Box sx={{ minWidth: 0 }}>
+                        {requirementManagementWithStatusFilter}
+                      </Box>
+                    ) : activeQuickLinkPanel === "decisionHistory" ? (
+                      <Box sx={{ minWidth: 0 }}>{decisionHistory}</Box>
+                    ) : (
+                      <DashboardCard
+                        eyebrow=""
+                        title="Applicant Information"
+                        sx={{
+                          minHeight: 0,
+                        }}
+                      >
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.8,
+                          }}
+                        >
+                          <Avatar
+                            src={image || undefined}
+                            alt={name === "-" ? "Applicant" : name}
                             sx={{
+                              width: 42,
+                              height: 42,
                               flexShrink: 0,
-                              px: 0.65,
-                              py: 0.35,
-                              border: selected
-                                ? "1px solid #A92129"
-                                : "1px solid #DED8D5",
-                              borderRadius: 5,
-                              bgcolor: selected
-                                ? "#FFF1E9"
-                                : "#FAF9F8",
-                              color: selected
-                                ? "#A02128"
-                                : "#665D58",
-                              cursor: "pointer",
-                              fontFamily:
-                                "inherit",
+                              bgcolor: "#FFF3E9",
+                              color: "#A92129",
+                              border: "2px solid #FFFFFF",
+                              boxShadow: "0 2px 7px rgba(169,33,41,.15)",
+                            }}
+                          >
+                            <UserProfileIcon
+                              sx={{
+                                fontSize: 25,
+                              }}
+                            />
+                          </Avatar>
+
+                          <Box
+                            sx={{
+                              minWidth: 0,
                             }}
                           >
                             <Typography
                               sx={{
-                                fontSize: 8,
-                                fontWeight: 900,
+                                color: "#817773",
+                                fontSize: 7.5,
+                                fontWeight: 800,
+                                textTransform: "uppercase",
+                                letterSpacing: 0.5,
                               }}
                             >
-                              {memberType}
+                              Applicant
                             </Typography>
 
                             <Typography
+                              title={name}
                               sx={{
-                                maxWidth: 90,
-                                fontSize: 7.5,
-                                overflow:
-                                  "hidden",
-                                textOverflow:
-                                  "ellipsis",
-                                whiteSpace:
-                                  "nowrap",
+                                mt: 0.15,
+                                color: "#292421",
+                                fontSize: 12,
+                                fontWeight: 900,
+                                lineHeight: 1.15,
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "nowrap",
                               }}
                             >
-                              {memberName}
+                              {name}
                             </Typography>
                           </Box>
-                        );
-                      },
-                    )}
-                  </Box>
-                )}
+                        </Box>
 
-                {/* INTERNAL SCROLLABLE TABS */}
+                        {/* MEMBER SWITCHER */}
 
-                <Box
-                  sx={{
-                    mt: 0.9,
-                    p: 0.25,
-                    bgcolor: "#F1EFED",
-                    borderRadius: 0.8,
-                    overflowX: "auto",
-                    scrollbarWidth: "thin",
+                        {members.length > 1 && (
+                          <Box
+                            sx={{
+                              display: "flex",
+                              gap: 0.4,
+                              mt: 0.8,
+                              borderBottom: "1px solid #EAE4E1",
+                              overflowX: "auto",
+                              scrollbarWidth: "thin",
 
-                    "&::-webkit-scrollbar": {
-                      height: 3,
-                    },
-                  }}
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      minWidth: "max-content",
-                      gap: 0.25,
-                    }}
-                  >
-                    {(
-                      [
-                        ["personal", "Personal"],
-                        ["kyc", "KYC"],
-                        ["financial", "Financial"],
-                        ["nominee", "Nominee"],
-                        ["medical", "Medical"],
-                        ["address", "Address"],
-                        ["contact", "Contact"],
-                      ] as Array<
-                        [
-                          ApplicantDetailTab,
-                          string,
-                        ]
-                      >
-                    ).map(([tab, label]) => {
-                      const active =
-                        detailTab === tab;
+                              "&::-webkit-scrollbar": {
+                                height: 3,
+                              },
+                            }}
+                          >
+                            {members.map((member, index) => {
+                              const memberPersonal = {
+                                ...toRecord(member.applicantDetails),
+                                ...toRecord(member.personalDetails),
+                                ...toRecord(member.personalSummary),
+                                ...toRecord(member.proposerSummary),
+                              };
 
-                      return (
+                              const memberName = getFullName({
+                                ...member,
+                                ...memberPersonal,
+                              });
+
+                              const memberType =
+                                text(member.memberType) === "-"
+                                  ? `Member ${index + 1}`
+                                  : text(member.memberType);
+
+                              const selected = index === activeMemberIndex;
+
+                              return (
+                                <Box
+                                  key={`${memberType}-${index}`}
+                                  component="button"
+                                  type="button"
+                                  onClick={() => {
+                                    setSelectedMemberIndex(index);
+
+                                    setSelectedRiskCard(null);
+                                  }}
+                                  sx={{
+                                    flexShrink: 0,
+                                    px: 0.65,
+                                    py: 0.35,
+                                    border: selected
+                                      ? "1px solid #A92129"
+                                      : "1px solid #DED8D5",
+                                    borderRadius: 5,
+                                    bgcolor: selected ? "#FFF1E9" : "#FAF9F8",
+                                    color: selected ? "#A02128" : "#665D58",
+                                    cursor: "pointer",
+                                    fontFamily: "inherit",
+                                  }}
+                                >
+                                  <Typography
+                                    sx={{
+                                      fontSize: 8,
+                                      fontWeight: 900,
+                                    }}
+                                  >
+                                    {memberType}
+                                  </Typography>
+
+                                  <Typography
+                                    sx={{
+                                      maxWidth: 90,
+                                      fontSize: 7.5,
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      whiteSpace: "nowrap",
+                                    }}
+                                  >
+                                    {memberName}
+                                  </Typography>
+                                </Box>
+                              );
+                            })}
+                          </Box>
+                        )}
+
+                        {/* INTERNAL SCROLLABLE TABS */}
+
                         <Box
-                          key={tab}
-                          component="button"
-                          type="button"
-                          onClick={() =>
-                            setDetailTab(tab)
-                          }
                           sx={{
-                            flexShrink: 0,
-                            border: 0,
-                            borderRadius: 0.7,
-                            px: 1,
-                            py: 0.4,
-                            bgcolor: active
-                              ? "#FFFFFF"
-                              : "transparent",
-                            color: active
-                              ? "#A02128"
-                              : "#776D68",
-                            fontFamily:
-                              "inherit",
-                            fontSize: 8.5,
-                            fontWeight: 900,
-                            cursor: "pointer",
-                            whiteSpace:
-                              "nowrap",
+                            mt: 0.9,
+                            p: 0.25,
+                            bgcolor: "#F1EFED",
+                            borderRadius: 0.8,
+                            overflowX: "auto",
+                            scrollbarWidth: "thin",
+
+                            "&::-webkit-scrollbar": {
+                              height: 3,
+                            },
                           }}
                         >
-                          {label}
+                          <Box
+                            sx={{
+                              display: "flex",
+                              minWidth: "max-content",
+                              gap: 0.25,
+                            }}
+                          >
+                            {(
+                              [
+                                ["personal", "Personal"],
+                                ["kyc", "KYC"],
+                                ["financial", "Financial"],
+                                ["nominee", "Nominee"],
+                                ["medical", "Medical"],
+                                ["address", "Address"],
+                                ["contact", "Contact"],
+                              ] as Array<[ApplicantDetailTab, string]>
+                            ).map(([tab, label]) => {
+                              const active = detailTab === tab;
+
+                              return (
+                                <Box
+                                  key={tab}
+                                  component="button"
+                                  type="button"
+                                  onClick={() => setDetailTab(tab)}
+                                  sx={{
+                                    flexShrink: 0,
+                                    border: 0,
+                                    borderRadius: 0.7,
+                                    px: 1,
+                                    py: 0.4,
+                                    bgcolor: active ? "#FFFFFF" : "transparent",
+                                    color: active ? "#A02128" : "#776D68",
+                                    fontFamily: "inherit",
+                                    fontSize: 8.5,
+                                    fontWeight: 900,
+                                    cursor: "pointer",
+                                    whiteSpace: "nowrap",
+                                  }}
+                                >
+                                  {label}
+                                </Box>
+                              );
+                            })}
+                          </Box>
                         </Box>
-                      );
-                    })}
+
+                        {/* TAB CONTENT */}
+
+                        <Box
+                          sx={{
+                            display: "grid",
+                            gridTemplateColumns: "repeat(3,minmax(0,1fr))",
+                            gap: "7px 10px",
+                            mt: 0.75,
+                            pt: 0.75,
+                            borderTop: "1px solid #EAE4E1",
+                            minHeight: 58,
+                          }}
+                        >
+                          {activeDetailFields.slice(0, 6).map((field) => (
+                            <CompactField
+                              key={field.label}
+                              label={field.label}
+                              value={field.value}
+                            />
+                          ))}
+                        </Box>
+                      </DashboardCard>
+                    )}
                   </Box>
-                </Box>
+                </CustomDialog>
 
-                {/* TAB CONTENT */}
+                {/* ====================================================== */}
+                {/* RISK ANALYTICS                                         */}
+                {/* ====================================================== */}
 
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns:
-                      "repeat(3,minmax(0,1fr))",
-                    gap: "7px 10px",
-                    mt: 0.75,
-                    pt: 0.75,
-                    borderTop:
-                      "1px solid #EAE4E1",
-                    minHeight: 58,
-                  }}
-                >
-                  {activeDetailFields
-                    .slice(0, 6)
-                    .map((field) => (
-                      <CompactField
-                        key={field.label}
-                        label={field.label}
-                        value={field.value}
-                      />
-                    ))}
-                </Box>
-                  </DashboardCard>
-                  )}
-                </Box>
-              </CustomDialog>
-
-              {/* ====================================================== */}
-              {/* BRE DECISION                                           */}
-              {/* ====================================================== */}
-
-              <DashboardCard
-                eyebrow=""
-                title=""
-                sx={{
-                  background:
-                    "linear-gradient(180deg,#FFFFFF 0%,#FCFAF9 100%)",
-                }}
-              >
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent:
-                      "space-between",
-                    gap: 0.6,
-                    mb: 0.8,
-                    flexWrap: "wrap",
-                  }}
-                >
-                  <Box
-                    sx={{
-                      minWidth: 0,
-                    }}
-                  >
-                    <Typography
+                {showRiskAnalytics && (
+                  <DashboardCard eyebrow="" title="">
+                    <Box
                       sx={{
-                        mt: 0.2,
-                        color: decisionTone.text,
-                        fontSize: 18,
-                        fontWeight: 950,
-                        lineHeight: 1,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        mb: 0.7,
                       }}
                     >
-                      {finalBreDecision}
-                    </Typography>
-                  </Box>
+                      {/* <Typography
+                      sx={{
+                        color: "#8B807B",
+                        fontSize: 7.5,
+                      }}
+                    >
+                      Click for details
+                    </Typography> */}
+                    </Box>
 
+                    <Box
+                      sx={{
+                        display: "grid",
+                        gridTemplateColumns: {
+                          xs: "1fr",
+                          sm: "repeat(2,minmax(0,1fr))",
+                          lg: "repeat(3,minmax(0,1fr))",
+                        },
+                        gap: 0.75,
+                      }}
+                    >
+                      {riskCards.map((card) => (
+                        <RiskAnalyticsCard
+                          key={card.id}
+                          card={card}
+                          onClick={() => setSelectedRiskCard(card)}
+                        />
+                      ))}
+                    </Box>
+                  </DashboardCard>
+                )}
+
+                {/* ====================================================== */}
+                {/* BRE DECISION                                           */}
+                {/* ====================================================== */}
+
+                <DashboardCard
+                  eyebrow=""
+                  title=""
+                  sx={{
+                    background:
+                      "linear-gradient(180deg,#FFFFFF 0%,#FCFAF9 100%)",
+                  }}
+                >
                   <Box
                     sx={{
                       display: "flex",
                       alignItems: "center",
-                      gap: 0.5,
-                      flexShrink: 0,
+                      justifyContent: "space-between",
+                      gap: 0.6,
+                      mb: 0.8,
+                      flexWrap: "wrap",
                     }}
                   >
-                    <Button
-                      type="button"
-                      variant="outlined"
-                      size="small"
-                      onClick={() =>
-                        setBreDetailDialogOpen(true)
-                      }
+                    <Box
                       sx={{
                         minWidth: 0,
-                        px: 1.15,
-                        py: 0.35,
-                        borderRadius: 4,
-                        bgcolor: "#FFF8F3",
-                        borderColor: "#E45F14",
-                        color: "#E45F14",
-                        fontSize: 9,
-                        fontWeight: 900,
-                        lineHeight: 1.4,
-                        textTransform: "none",
-                        "&:hover": {
-                          bgcolor: "#E45F14",
-                          borderColor: "#E45F14",
-                          color: "#FFFFFF",
-                        },
                       }}
                     >
-                      View Detail
-                    </Button>
+                      <Typography
+                        sx={{
+                          mt: 0.2,
+                          color: decisionTone.text,
+                          fontSize: 18,
+                          fontWeight: 950,
+                          lineHeight: 1,
+                        }}
+                      >
+                        {finalBreDecision}
+                      </Typography>
+                    </Box>
 
-                    {showBreRetriggerButton && (
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        flexShrink: 0,
+                      }}
+                    >
                       <Button
                         type="button"
                         variant="outlined"
                         size="small"
-                        disabled={breRetriggering}
-                        onClick={handleBreRetrigger}
-                        startIcon={<RefreshIcon />}
+                        onClick={() => setBreDetailDialogOpen(true)}
                         sx={{
                           minWidth: 0,
                           px: 1.15,
                           py: 0.35,
                           borderRadius: 4,
-                          bgcolor: "#FFFFFF",
-                          borderColor: "#A92129",
-                          color: "#A92129",
+                          bgcolor: "#FFF8F3",
+                          borderColor: "#E45F14",
+                          color: "#E45F14",
                           fontSize: 9,
                           fontWeight: 900,
                           lineHeight: 1.4,
                           textTransform: "none",
-                          whiteSpace: "nowrap",
-                          "& .MuiButton-startIcon": {
-                            mr: 0.45,
-                            "& svg": {
-                              width: 12,
-                              height: 12,
-                            },
-                          },
                           "&:hover": {
-                            bgcolor: "#A92129",
-                            borderColor: "#A92129",
+                            bgcolor: "#E45F14",
+                            borderColor: "#E45F14",
                             color: "#FFFFFF",
                           },
                         }}
                       >
-                       
+                        View Detail
                       </Button>
-                    )}
-                  </Box>
-                </Box>
-                   {/* DISCREPANCY CHANGE */}
 
-                <Box
-                  sx={{
-                    mt: 0.7,
-                    p: 0.65,
-                    borderRadius: 0.9,
-                    bgcolor: "#FFF9F4",
-                    border:
-                      "1px solid #F0E0D2",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      color: "#8B7C73",
-                      fontSize: 8,
-                      fontWeight: 900,
-                    }}
-                  >
-                    BRE Discrepancy Change
-                  </Typography>
+                      {showBreRetriggerButton && (
+                        <Button
+                          type="button"
+                          variant="outlined"
+                          size="small"
+                          disabled={breRetriggering}
+                          onClick={handleBreRetrigger}
+                          startIcon={<RefreshIcon />}
+                          sx={{
+                            minWidth: 0,
+                            px: 1.15,
+                            py: 0.35,
+                            borderRadius: 4,
+                            bgcolor: "#FFFFFF",
+                            borderColor: "#A92129",
+                            color: "#A92129",
+                            fontSize: 9,
+                            fontWeight: 900,
+                            lineHeight: 1.4,
+                            textTransform: "none",
+                            whiteSpace: "nowrap",
+                            "& .MuiButton-startIcon": {
+                              mr: 0.45,
+                              "& svg": {
+                                width: 12,
+                                height: 12,
+                              },
+                            },
+                            "&:hover": {
+                              bgcolor: "#A92129",
+                              borderColor: "#A92129",
+                              color: "#FFFFFF",
+                            },
+                          }}
+                        ></Button>
+                      )}
+                    </Box>
+                  </Box>
+                  {/* DISCREPANCY CHANGE */}
 
                   <Box
                     sx={{
-                      display: "grid",
-                      gridTemplateColumns:
-                        "1fr 1fr",
-                      gap: 0.55,
-                      mt: 0.45,
+                      mt: 0.7,
+                      p: 0.65,
+                      borderRadius: 0.9,
+                      bgcolor: "#FFF9F4",
+                      border: "1px solid #F0E0D2",
                     }}
                   >
-                    {/* INITIAL */}
+                    <Typography
+                      sx={{
+                        color: "#8B7C73",
+                        fontSize: 8,
+                        fontWeight: 900,
+                      }}
+                    >
+                      BRE Discrepancy Change
+                    </Typography>
 
                     <Box
                       sx={{
-                        p: 0.5,
-                        border:
-                          "1px solid #E8DED7",
-                        borderRadius: 0.7,
-                        bgcolor: "#FFFFFF",
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 0.55,
+                        mt: 0.45,
                       }}
                     >
-                      <Typography
-                        sx={{
-                          color: "#80746E",
-                          fontSize: 7.5,
-                          fontWeight: 900,
-                        }}
-                      >
-                        Initial
-                      </Typography>
+                      {/* INITIAL */}
 
                       <Box
                         sx={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 0.25,
-                          mt: 0.3,
+                          p: 0.5,
+                          border: "1px solid #E8DED7",
+                          borderRadius: 0.7,
+                          bgcolor: "#FFFFFF",
                         }}
                       >
-                        {initialDiscrepancies
-                          .slice(0, 3)
-                          .map((code) => (
+                        <Typography
+                          sx={{
+                            color: "#80746E",
+                            fontSize: 7.5,
+                            fontWeight: 900,
+                          }}
+                        >
+                          Initial
+                        </Typography>
+
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 0.25,
+                            mt: 0.3,
+                          }}
+                        >
+                          {initialDiscrepancies.slice(0, 3).map((code) => (
                             <Box
                               key={code}
                               sx={{
                                 px: 0.45,
                                 py: 0.2,
                                 borderRadius: 3,
-                                bgcolor:
-                                  "#FFF0E0",
-                                color:
-                                  "#8B4E1B",
+                                bgcolor: "#FFF0E0",
+                                color: "#8B4E1B",
                                 fontSize: 7,
                                 fontWeight: 900,
                               }}
@@ -3166,100 +3062,137 @@ const ApplicantApplicationSummary = ({
                             </Box>
                           ))}
 
-                        {initialDiscrepancies.length > 3 && (
-                          <Button
-                            type="button"
-                            variant="text"
-                            size="small"
-                            aria-label={`View all ${initialDiscrepancies.length} initial BRE discrepancies`}
-                            onClick={() =>
-                              setBreDetailDialogOpen(true)
-                            }
-                            sx={{
-                              minWidth: 0,
-                              p: 0,
-                              color: "#8B4E1B",
-                              fontSize: 7.5,
-                              fontWeight: 900,
-                              lineHeight: 1.4,
-                              textTransform: "none",
-                            }}
-                          >
-                            +
-                            {initialDiscrepancies.length -
-                              3}
-                          </Button>
-                        )}
+                          {initialDiscrepancies.length > 3 && (
+                            <Button
+                              type="button"
+                              variant="text"
+                              size="small"
+                              aria-label={`View all ${initialDiscrepancies.length} initial BRE discrepancies`}
+                              onClick={() => setBreDetailDialogOpen(true)}
+                              sx={{
+                                minWidth: 0,
+                                p: 0,
+                                color: "#8B4E1B",
+                                fontSize: 7.5,
+                                fontWeight: 900,
+                                lineHeight: 1.4,
+                                textTransform: "none",
+                              }}
+                            >
+                              +{initialDiscrepancies.length - 3}
+                            </Button>
+                          )}
 
-                        {!initialDiscrepancies.length && (
-                          <Typography
-                            sx={{
-                              color:
-                                "#746B66",
-                              fontSize: 7.5,
-                            }}
-                          >
-                            None
-                          </Typography>
-                        )}
+                          {!initialDiscrepancies.length && (
+                            <Typography
+                              sx={{
+                                color: "#746B66",
+                                fontSize: 7.5,
+                              }}
+                            >
+                              None
+                            </Typography>
+                          )}
+                        </Box>
                       </Box>
-                    </Box>
 
-                    {/* FINAL */}
-
-                    <Box
-                      sx={{
-                        p: 0.5,
-                        border:
-                          "1px solid #D9E8DD",
-                        borderRadius: 0.7,
-                        bgcolor: "#F6FBF7",
-                      }}
-                    >
-                      <Typography
-                        sx={{
-                          color: "#28743C",
-                          fontSize: 7.5,
-                          fontWeight: 900,
-                        }}
-                      >
-                        Final
-                      </Typography>
+                      {/* FINAL */}
 
                       <Box
                         sx={{
-                          display: "flex",
-                          flexWrap: "wrap",
-                          gap: 0.25,
-                          mt: 0.3,
+                          p: 0.5,
+                          border: "1px solid #D9E8DD",
+                          borderRadius: 0.7,
+                          bgcolor: "#F6FBF7",
                         }}
                       >
-                        {newDiscrepancies.slice(0, 3).map((code) => (
-                          <Box
-                            key={code}
-                            sx={{
-                              px: 0.45,
-                              py: 0.2,
-                              borderRadius: 3,
-                              bgcolor: "#FFF0E0",
-                              color: "#A35E00",
-                              fontSize: 7,
-                              fontWeight: 900,
-                            }}
-                          >
-                            {code}
-                          </Box>
-                        ))}
+                        <Typography
+                          sx={{
+                            color: "#28743C",
+                            fontSize: 7.5,
+                            fontWeight: 900,
+                          }}
+                        >
+                          Final
+                        </Typography>
 
-                        {newDiscrepancies.length > 3 && (
+                        <Box
+                          sx={{
+                            display: "flex",
+                            flexWrap: "wrap",
+                            gap: 0.25,
+                            mt: 0.3,
+                          }}
+                        >
+                          {newDiscrepancies.slice(0, 3).map((code) => (
+                            <Box
+                              key={code}
+                              sx={{
+                                px: 0.45,
+                                py: 0.2,
+                                borderRadius: 3,
+                                bgcolor: "#FFF0E0",
+                                color: "#A35E00",
+                                fontSize: 7,
+                                fontWeight: 900,
+                              }}
+                            >
+                              {code}
+                            </Box>
+                          ))}
+
+                          {newDiscrepancies.length > 3 && (
+                            <Button
+                              type="button"
+                              variant="text"
+                              size="small"
+                              aria-label={`View all ${newDiscrepancies.length} updated final BRE discrepancies`}
+                              onClick={() => setBreDetailDialogOpen(true)}
+                              sx={{
+                                minWidth: 0,
+                                p: 0,
+                                color: "#A35E00",
+                                fontSize: 7.5,
+                                fontWeight: 900,
+                                lineHeight: 1.4,
+                                textTransform: "none",
+                              }}
+                            >
+                              +{newDiscrepancies.length - 3}
+                            </Button>
+                          )}
+
+                          {!newDiscrepancies.length && (
+                            <Typography
+                              sx={{
+                                color: "#28743C",
+                                fontSize: 7.5,
+                              }}
+                            >
+                              No updated discrepancy
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    </Box>
+
+                    {(newDiscrepancies.length > 0 ||
+                      resolvedDiscrepancies.length > 0) && (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          gap: 0.8,
+                          mt: 0.45,
+                          flexWrap: "wrap",
+                        }}
+                      >
+                        {newDiscrepancies.length > 0 && (
                           <Button
                             type="button"
                             variant="text"
                             size="small"
-                            aria-label={`View all ${newDiscrepancies.length} updated final BRE discrepancies`}
-                            onClick={() =>
-                              setBreDetailDialogOpen(true)
-                            }
+                            aria-label={`View ${newDiscrepancies.length} new BRE discrepancies`}
+                            onClick={() => setBreDetailDialogOpen(true)}
                             sx={{
                               minWidth: 0,
                               p: 0,
@@ -3270,197 +3203,141 @@ const ApplicantApplicationSummary = ({
                               textTransform: "none",
                             }}
                           >
-                            +
-                            {newDiscrepancies.length -
-                              3}
+                            + {newDiscrepancies.length} new
                           </Button>
                         )}
 
-                        {!newDiscrepancies.length && (
-                          <Typography
+                        {resolvedDiscrepancies.length > 0 && (
+                          <Button
+                            type="button"
+                            variant="text"
+                            size="small"
+                            aria-label={`View ${resolvedDiscrepancies.length} resolved BRE discrepancies`}
+                            onClick={() => setBreDetailDialogOpen(true)}
                             sx={{
-                              color:
-                                "#28743C",
+                              minWidth: 0,
+                              p: 0,
+                              color: "#28743C",
                               fontSize: 7.5,
+                              fontWeight: 900,
+                              lineHeight: 1.4,
+                              textTransform: "none",
                             }}
                           >
-                            No updated discrepancy
-                          </Typography>
+                            - {resolvedDiscrepancies.length} resolved
+                          </Button>
                         )}
                       </Box>
-                    </Box>
+                    )}
                   </Box>
 
-                  {(newDiscrepancies.length > 0 ||
-                    resolvedDiscrepancies.length >
-                      0) && (
-                    <Box
-                      sx={{
-                        display: "flex",
-                        gap: 0.8,
-                        mt: 0.45,
-                        flexWrap: "wrap",
-                      }}
-                    >
-                      {newDiscrepancies.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="text"
-                          size="small"
-                          aria-label={`View ${newDiscrepancies.length} new BRE discrepancies`}
-                          onClick={() =>
-                            setBreDetailDialogOpen(true)
-                          }
-                          sx={{
-                            minWidth: 0,
-                            p: 0,
-                            color: "#A35E00",
-                            fontSize: 7.5,
-                            fontWeight: 900,
-                            lineHeight: 1.4,
-                            textTransform: "none",
-                          }}
-                        >
-                          +{" "}
-                          {newDiscrepancies.length}{" "}
-                          new
-                        </Button>
-                      )}
-
-                      {resolvedDiscrepancies.length > 0 && (
-                        <Button
-                          type="button"
-                          variant="text"
-                          size="small"
-                          aria-label={`View ${resolvedDiscrepancies.length} resolved BRE discrepancies`}
-                          onClick={() =>
-                            setBreDetailDialogOpen(true)
-                          }
-                          sx={{
-                            minWidth: 0,
-                            p: 0,
-                            color: "#28743C",
-                            fontSize: 7.5,
-                            fontWeight: 900,
-                            lineHeight: 1.4,
-                            textTransform: "none",
-                          }}
-                        >
-                          -{" "}
-                          {resolvedDiscrepancies.length}{" "}
-                          resolved
-                        </Button>
-                      )}
-                    </Box>
-                  )}
-                </Box>
-
-                {/* REQUIREMENT MANAGEMENT SUMMARY */}
-
-                <Box
-                  sx={{
-                    mb: 0.8,
-                    p: 0.6,
-                    border: "1px solid #E8E1DE",
-                    borderRadius: 1,
-                    bgcolor: "#FFFFFF",
-                  }}
-                >
-                  <Typography
-                    sx={{
-                      mb: 0.5,
-                      color: "#80746E",
-                      fontSize: 8,
-                      fontWeight: 900,
-                    }}
-                  >
-                    Requirement Management
-                  </Typography>
+                  {/* REQUIREMENT MANAGEMENT SUMMARY */}
 
                   <Box
                     sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      flexWrap: "wrap",
-                      gap: 0.45,
+                      mb: 0.8,
+                      p: 0.6,
+                      border: "1px solid #E8E1DE",
+                      borderRadius: 1,
+                      bgcolor: "#FFFFFF",
                     }}
                   >
-                    {REQUIREMENT_STATUS_FILTERS.map((status) => {
-                      const tone = REQUIREMENT_STATUS_TONES[status];
+                    <Typography
+                      sx={{
+                        mb: 0.5,
+                        color: "#80746E",
+                        fontSize: 8,
+                        fontWeight: 900,
+                      }}
+                    >
+                      Requirement Management
+                    </Typography>
 
-                      return (
-                        <Box
-                          key={status}
-                          component="button"
-                          type="button"
-                          onClick={() =>
-                            openRequirementManagementPanel(status)
-                          }
-                          aria-label={`View ${status.toLowerCase()} requirements`}
-                          aria-pressed={requirementStatusFilter === status}
-                          sx={{
-                            display: "inline-flex",
-                            alignItems: "center",
-                            gap: 0.35,
-                            minHeight: 24,
-                            px: 0.7,
-                            border:
-                              requirementStatusFilter === status
-                                ? "1px solid #E45F14"
-                                : `1px solid ${tone.border}`,
-                            borderRadius: "12px",
-                            bgcolor: tone.background,
-                            color: tone.text,
-                            cursor: "pointer",
-                            font: "inherit",
-                            transition: "transform 120ms ease, box-shadow 120ms ease",
-                            "&:hover": {
-                              transform: "translateY(-1px)",
-                              boxShadow: "0 3px 8px rgba(55, 42, 35, 0.12)",
-                            },
-                            "&:focus-visible": {
-                              outline: "2px solid #E45F14",
-                              outlineOffset: "1px",
-                            },
-                          }}
-                        >
-                          <Typography
-                            component="span"
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: 0.45,
+                      }}
+                    >
+                      {REQUIREMENT_STATUS_FILTERS.map((status) => {
+                        const tone = REQUIREMENT_STATUS_TONES[status];
+
+                        return (
+                          <Box
+                            key={status}
+                            component="button"
+                            type="button"
+                            onClick={() =>
+                              openRequirementManagementPanel(status)
+                            }
+                            aria-label={`View ${status.toLowerCase()} requirements`}
+                            aria-pressed={requirementStatusFilter === status}
                             sx={{
-                              fontSize: 9,
-                              fontWeight: 800,
-                              lineHeight: 1,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              gap: 0.35,
+                              minHeight: 24,
+                              px: 0.7,
+                              border:
+                                requirementStatusFilter === status
+                                  ? "1px solid #E45F14"
+                                  : `1px solid ${tone.border}`,
+                              borderRadius: "12px",
+                              bgcolor: tone.background,
+                              color: tone.text,
+                              cursor: "pointer",
+                              font: "inherit",
+                              transition:
+                                "transform 120ms ease, box-shadow 120ms ease",
+                              "&:hover": {
+                                transform: "translateY(-1px)",
+                                boxShadow: "0 3px 8px rgba(55, 42, 35, 0.12)",
+                              },
+                              "&:focus-visible": {
+                                outline: "2px solid #E45F14",
+                                outlineOffset: "1px",
+                              },
                             }}
                           >
-                            {status}
-                          </Typography>
+                            <Typography
+                              component="span"
+                              sx={{
+                                fontSize: 9,
+                                fontWeight: 800,
+                                lineHeight: 1,
+                              }}
+                            >
+                              {status}
+                            </Typography>
 
-                          <Typography
-                            component="span"
-                            sx={{
-                              minWidth: 17,
-                              height: 17,
-                              px: 0.35,
-                              borderRadius: "9px",
-                              bgcolor: tone.count,
-                              color: "#FFFFFF",
-                              fontSize: 9,
-                              fontWeight: 900,
-                              lineHeight: "17px",
-                              textAlign: "center",
-                            }}
-                          >
-                            {requirementStatusCounts[status]}
-                          </Typography>
-                        </Box>
-                      );
-                    })}
+                            <Typography
+                              component="span"
+                              sx={{
+                                minWidth: 17,
+                                height: 17,
+                                px: 0.35,
+                                borderRadius: "9px",
+                                bgcolor: tone.count,
+                                color: "#FFFFFF",
+                                fontSize: 9,
+                                fontWeight: 900,
+                                lineHeight: "17px",
+                                textAlign: "center",
+                              }}
+                            >
+                              {requirementStatusCounts[status]}
+                            </Typography>
+                          </Box>
+                        );
+                      })}
+                    </Box>
                   </Box>
-                </Box>
 
-                {/* DECISION FLOW */}
+                  {/* DECISION FLOW */}
 
-                {/* <Box
+                  {/* <Box
                   sx={{
                     display: "grid",
                     gridTemplateColumns:
@@ -3522,9 +3399,9 @@ const ApplicantApplicationSummary = ({
                   </Box>
                 </Box> */}
 
-                {/* METRICS */}
+                  {/* METRICS */}
 
-                {/* <Box
+                  {/* <Box
                   sx={{
                     display: "grid",
                     gridTemplateColumns:
@@ -3564,11 +3441,9 @@ const ApplicantApplicationSummary = ({
                   </Box>
                 </Box> */}
 
-             
+                  {/* REMARKS */}
 
-                {/* REMARKS */}
-
-                {/* <Typography
+                  {/* <Typography
                   sx={{
                     mt: 0.65,
                     color: "#625852",
@@ -3588,171 +3463,116 @@ const ApplicantApplicationSummary = ({
 
                   {breRemarks}
                 </Typography> */}
-              </DashboardCard>
-
-              {/* ====================================================== */}
-              {/* RISK ANALYTICS                                         */}
-              {/* ====================================================== */}
-
-              {showRiskAnalytics && (
-                <DashboardCard
-                  eyebrow=""
-                  title=""
-                >
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent:
-                        "space-between",
-                      mb: 0.7,
-                    }}
-                  >
-                    {/* <Typography
-                      sx={{
-                        color: "#8B807B",
-                        fontSize: 7.5,
-                      }}
-                    >
-                      Click for details
-                    </Typography> */}
-                  </Box>
-
-                  <Box
-                    sx={{
-                      display: "grid",
-                      gridTemplateColumns: {
-                        xs: "1fr",
-                        sm: "repeat(2,minmax(0,1fr))",
-                        lg: "repeat(3,minmax(0,1fr))",
-                      },
-                      gap: 0.75,
-                    }}
-                  >
-                    {riskCards.map((card) => (
-                      <RiskAnalyticsCard
-                        key={card.id}
-                        card={card}
-                        onClick={() =>
-                          setSelectedRiskCard(
-                            card,
-                          )
-                        }
-                      />
-                    ))}
-                  </Box>
                 </DashboardCard>
-              )}
+              </Box>
+
+              <Box sx={{ mt: 0.75 }}>
+                <SdtReadonlyRow
+                  decision={sdtDecision}
+                  remarks={sdtRemarks}
+                />
+              </Box>
             </Box>
-          </Box>
 
-          {/* </CustomAccordion> */}
+            {/* </CustomAccordion> */}
 
-          {/* ============================================================ */}
-          {/* BRE DECISION DETAILS DIALOG                                 */}
-          {/* ============================================================ */}
+            {/* ============================================================ */}
+            {/* BRE DECISION DETAILS DIALOG                                 */}
+            {/* ============================================================ */}
 
-          <CustomDialog
-            open={breDetailDialogOpen}
-            onClose={() =>
-              setBreDetailDialogOpen(false)
-            }
-            title="BRE Decision"
-            maxWidth="lg"
-            fullWidth
-            contentSx={{
-              p: { xs: 1, sm: 1.5 },
-              overflowY: "auto",
-            }}
-          >
-            <BreDecision readOnly={readOnly} />
-          </CustomDialog>
-
-          <CustomDialog
-            open={breRetriggerLimitOpen}
-            showCloseIcon
-            onClose={() =>
-              setBreRetriggerLimitOpen(false)
-            }
-            title="BRE Retriggered"
-          >
-            <Typography
-              sx={{
-                fontSize: "14px",
-                color: "#161616",
+            <CustomDialog
+              open={breDetailDialogOpen}
+              onClose={() => setBreDetailDialogOpen(false)}
+              title="BRE Decision"
+              maxWidth="lg"
+              fullWidth
+              contentSx={{
+                p: { xs: 1, sm: 1.5 },
+                overflowY: "auto",
               }}
             >
-              You have exhausted the BRE retrigger limit. Kindly refer this
-              ticket to the IT Team.
-            </Typography>
+              <BreDecision readOnly={readOnly} />
+            </CustomDialog>
 
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                mt: 2,
-              }}
+            <CustomDialog
+              open={breRetriggerLimitOpen}
+              showCloseIcon
+              onClose={() => setBreRetriggerLimitOpen(false)}
+              title="BRE Retriggered"
             >
-              <Button
-                type="button"
-                variant="contained"
-                onClick={referBreToIT}
+              <Typography
                 sx={{
-                  borderRadius: "50px",
-                  px: "40px",
-                  bgcolor: "#A92129",
-                  textTransform: "none",
-                  "&:hover": {
-                    bgcolor: "#86191F",
-                  },
+                  fontSize: "14px",
+                  color: "#161616",
                 }}
               >
-                Refer to IT
-              </Button>
-            </Box>
-          </CustomDialog>
+                You have exhausted the BRE retrigger limit. Kindly refer this
+                ticket to the IT Team.
+              </Typography>
 
-          {/* ============================================================ */}
-          {/* RISK DETAILS DIALOG                                         */}
-          {/* ============================================================ */}
-
-          <CustomDialog
-            open={Boolean(selectedRiskCard)}
-            onClose={() =>
-              setSelectedRiskCard(null)
-            }
-            title={
-              selectedRiskCard
-                ? `${selectedRiskCard.label} Risk Details`
-                : "Risk Details"
-            }
-            maxWidth="lg"
-          >
-            {selectedRiskCard && (
               <Box
                 sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr",
-                    sm: "repeat(2,1fr)",
-                    md: "repeat(3,1fr)",
-                    lg: "repeat(4,1fr)",
-                  },
-                  gap: 0.75,
-                  minWidth: {
-                    xs: "auto",
-                    md: 760,
-                  },
+                  display: "flex",
+                  justifyContent: "center",
+                  mt: 2,
                 }}
               >
-                {selectedRiskCard.details.map(
-                  (detail) => (
+                <Button
+                  type="button"
+                  variant="contained"
+                  onClick={referBreToIT}
+                  sx={{
+                    borderRadius: "50px",
+                    px: "40px",
+                    bgcolor: "#A92129",
+                    textTransform: "none",
+                    "&:hover": {
+                      bgcolor: "#86191F",
+                    },
+                  }}
+                >
+                  Refer to IT
+                </Button>
+              </Box>
+            </CustomDialog>
+
+            {/* ============================================================ */}
+            {/* RISK DETAILS DIALOG                                         */}
+            {/* ============================================================ */}
+
+            <CustomDialog
+              open={Boolean(selectedRiskCard)}
+              onClose={() => setSelectedRiskCard(null)}
+              title={
+                selectedRiskCard
+                  ? `${selectedRiskCard.label} Risk Details`
+                  : "Risk Details"
+              }
+              maxWidth="lg"
+            >
+              {selectedRiskCard && (
+                <Box
+                  sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                      xs: "1fr",
+                      sm: "repeat(2,1fr)",
+                      md: "repeat(3,1fr)",
+                      lg: "repeat(4,1fr)",
+                    },
+                    gap: 0.75,
+                    minWidth: {
+                      xs: "auto",
+                      md: 760,
+                    },
+                  }}
+                >
+                  {selectedRiskCard.details.map((detail) => (
                     <Box
                       key={detail.key}
                       sx={{
                         p: 0.8,
-                        border:
-                          "1px solid #E3DEDB",
+                        border: "1px solid #E3DEDB",
                         borderRadius: 1,
                         bgcolor: "#F8F7F6",
                       }}
@@ -3772,55 +3592,48 @@ const ApplicantApplicationSummary = ({
                           color: "#332D2A",
                           fontSize: 11,
                           fontWeight: 800,
-                          overflowWrap:
-                            "anywhere",
+                          overflowWrap: "anywhere",
                         }}
                       >
                         {text(detail.value)}
                       </Typography>
                     </Box>
-                  ),
-                )}
-              </Box>
-            )}
-          </CustomDialog>
+                  ))}
+                </Box>
+              )}
+            </CustomDialog>
 
-          {/* ============================================================ */}
-          {/* RIDER DETAILS DIALOG                                        */}
-          {/* ============================================================ */}
+            {/* ============================================================ */}
+            {/* RIDER DETAILS DIALOG                                        */}
+            {/* ============================================================ */}
 
-          <CustomDialog
-            open={riderDialogOpen}
-            onClose={() =>
-              setRiderDialogOpen(false)
-            }
-            title="Rider Details"
-            maxWidth="lg"
-          >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  md: "repeat(2,1fr)",
-                },
-                gap: 0.8,
-                minWidth: {
-                  xs: "auto",
-                  md: 720,
-                },
-              }}
+            <CustomDialog
+              open={riderDialogOpen}
+              onClose={() => setRiderDialogOpen(false)}
+              title="Rider Details"
+              maxWidth="lg"
             >
-              {riderSummaries.map(
-                (rider) => (
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr",
+                    md: "repeat(2,1fr)",
+                  },
+                  gap: 0.8,
+                  minWidth: {
+                    xs: "auto",
+                    md: 720,
+                  },
+                }}
+              >
+                {riderSummaries.map((rider) => (
                   <Box
                     key={rider.id}
                     sx={{
                       p: 0.9,
-                      border:
-                        "1px solid #E4DEDB",
-                      borderLeft:
-                        "4px solid #A92129",
+                      border: "1px solid #E4DEDB",
+                      borderLeft: "4px solid #A92129",
                       borderRadius: 1.1,
                       bgcolor: "#FAF8F7",
                     }}
@@ -3838,79 +3651,62 @@ const ApplicantApplicationSummary = ({
                     <Box
                       sx={{
                         display: "grid",
-                        gridTemplateColumns:
-                          "1fr 1fr",
+                        gridTemplateColumns: "1fr 1fr",
                         gap: 0.7,
                         mt: 0.75,
                       }}
                     >
                       <CompactField
                         label="Sum assured"
-                        value={
-                          rider.sumAssured
-                        }
+                        value={rider.sumAssured}
                       />
 
-                      <CompactField
-                        label="Premium"
-                        value={rider.premium}
-                      />
+                      <CompactField label="Premium" value={rider.premium} />
 
                       <CompactField
                         label="Policy term"
-                        value={
-                          rider.policyTerm
-                        }
+                        value={rider.policyTerm}
                       />
 
                       <CompactField
                         label="Premium term"
-                        value={
-                          rider.premiumTerm
-                        }
+                        value={rider.premiumTerm}
                       />
                     </Box>
                   </Box>
-                ),
+                ))}
+              </Box>
+            </CustomDialog>
+          </Box>
+
+          {/* ================================================================ */}
+          {/* RIGHT RAIL                                                       */}
+          {/* ================================================================ */}
+
+          {hasStickyRail && (
+            <Box
+              component="aside"
+              sx={{
+                display: "grid",
+                gap: 0.8,
+                minWidth: 0,
+              }}
+            >
+              {uwDecision && (
+                <DashboardCard eyebrow="Underwriter" title="UW Decision">
+                  {uwDecisionForActiveMember}
+                </DashboardCard>
+              )}
+
+              {quickLinks && (
+                <DashboardCard eyebrow="Navigation" title="Quick Links">
+                  {quickLinksWithApplicantAction}
+                </DashboardCard>
               )}
             </Box>
-          </CustomDialog>
+          )}
         </Box>
-
-        {/* ================================================================ */}
-        {/* RIGHT RAIL                                                       */}
-        {/* ================================================================ */}
-
-        {hasStickyRail && (
-          <Box
-            component="aside"
-            sx={{
-              display: "grid",
-              gap: 0.8,
-              minWidth: 0,
-            }}
-          >
-            {uwDecision && (
-              <DashboardCard
-                eyebrow="Underwriter"
-                title="UW Decision"
-              >
-                {uwDecisionForActiveMember}
-              </DashboardCard>
-            )}
-
-            {quickLinks && (
-              <DashboardCard
-                eyebrow="Navigation"
-                title="Quick Links"
-              >
-                {quickLinksWithApplicantAction}
-              </DashboardCard>
-            )}
-          </Box>
-        )}
       </Box>
-    </Box>
     </>
   );
 };
@@ -3929,9 +3725,7 @@ export const CaseSnapshotRow = ({
   uwDecision,
   quickLinks,
 }: CaseSnapshotRowProps) => {
-  const hasStickyRail = Boolean(
-    uwDecision || quickLinks,
-  );
+  const hasStickyRail = Boolean(uwDecision || quickLinks);
 
   return (
     <Box
@@ -3940,9 +3734,7 @@ export const CaseSnapshotRow = ({
         display: "grid",
         gridTemplateColumns: {
           xs: "1fr",
-          lg: hasStickyRail
-            ? "minmax(0,1fr) 300px"
-            : "1fr",
+          lg: hasStickyRail ? "minmax(0,1fr) 300px" : "1fr",
         },
         gap: 1,
         alignItems: "start",
@@ -3953,28 +3745,30 @@ export const CaseSnapshotRow = ({
           display: "grid",
           gridTemplateColumns: {
             xs: "1fr",
-            md:
-              "minmax(300px,38%) minmax(270px,32%) minmax(240px,30%)",
+            md: "minmax(240px,30%) minmax(270px,32%) minmax(300px,38%)",
           },
           gap: 0.75,
           minWidth: 0,
         }}
       >
-        {/* BRE FIRST */}
+        {/* RISK FIRST */}
 
-        <DashboardCard
-          eyebrow="Assessment"
-          title="BRE Decision"
-        >
-          {breDecision}
+        <DashboardCard eyebrow="Signals" title="Risk Analytics">
+          {riskAnalytics ?? (
+            <Typography
+              sx={{
+                color: "#817773",
+                fontSize: 10,
+              }}
+            >
+              Risk analytics are not available.
+            </Typography>
+          )}
         </DashboardCard>
 
         {/* APPLICATION SECOND */}
 
-        <DashboardCard
-          eyebrow="Application"
-          title="Application & Applicant"
-        >
+        <DashboardCard eyebrow="Application" title="Application & Applicant">
           <Box
             sx={{
               display: "grid",
@@ -3993,8 +3787,7 @@ export const CaseSnapshotRow = ({
                     fontSize: 10,
                   }}
                 >
-                  Applicant details are not
-                  available.
+                  Applicant details are not available.
                 </Typography>
               )}
             </Box>
@@ -4012,24 +3805,12 @@ export const CaseSnapshotRow = ({
           </Box>
         </DashboardCard>
 
-        {/* RISK THIRD */}
+        {/* BRE THIRD */}
 
-        <DashboardCard
-          eyebrow="Signals"
-          title="Risk Analytics"
-        >
-          {riskAnalytics ?? (
-            <Typography
-              sx={{
-                color: "#817773",
-                fontSize: 10,
-              }}
-            >
-              Risk analytics are not
-              available.
-            </Typography>
-          )}
+        <DashboardCard eyebrow="Assessment" title="BRE Decision">
+          {breDecision}
         </DashboardCard>
+
       </Box>
 
       {/* RIGHT RAIL */}
@@ -4044,19 +3825,13 @@ export const CaseSnapshotRow = ({
           }}
         >
           {uwDecision && (
-            <DashboardCard
-              eyebrow="Underwriter"
-              title="UW Decision"
-            >
+            <DashboardCard eyebrow="Underwriter" title="UW Decision">
               {uwDecision}
             </DashboardCard>
           )}
 
           {quickLinks && (
-            <DashboardCard
-              eyebrow="Navigation"
-              title="Quick Links"
-            >
+            <DashboardCard eyebrow="Navigation" title="Quick Links">
               {quickLinks}
             </DashboardCard>
           )}
