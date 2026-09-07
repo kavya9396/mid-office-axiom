@@ -565,7 +565,7 @@
 // export default Grievance;
 
 
-import { Avatar, Box, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Pagination, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 
 import CustomButton from "../../components/ui/Button/Button";
@@ -590,12 +590,16 @@ interface RiderSummary {
 }
 
 interface GrievanceRow {
-  user: string;
+  userName: string;
+  userRole: string;
   fupCode: string;
-  profile: string;
   grievanceRaisedRemark: string;
   grievanceRaisedDate: string;
   tpaRemarks: string;
+}
+
+interface GrievanceProps {
+  paginationDisabled?: boolean;
 }
 
 interface ApplicationSummaryBannerProps {
@@ -617,44 +621,31 @@ interface ApplicationSummaryBannerProps {
 
 const STATIC_GRIEVANCE_ROWS: GrievanceRow[] = [
   {
-    user: "RI943678",
-    fupCode: "Report 1",
-    profile: "Proposer",
-    grievanceRaisedRemark: "KYC Accepted",
-    grievanceRaisedDate: "9 Jan 2026",
-    tpaRemarks: "-",
-  },
-  {
-    user: "RI943678",
-    fupCode: "Report 2",
-    profile: "Proposer",
-    grievanceRaisedRemark: "Address document accepted",
-    grievanceRaisedDate: "10 Jan 2026",
-    tpaRemarks: "-",
-  },
-  {
-    user: "RI943678",
-    fupCode: "Report 3",
-    profile: "Life Assured",
-    grievanceRaisedRemark: "Pending TPA review",
-    grievanceRaisedDate: "11 Jan 2026",
-    tpaRemarks: "-",
+    userName: "Premanand Sawant",
+    userRole: "UW",
+    fupCode: "ECG",
+    grievanceRaisedRemark: "ECG graph is blurry",
+    grievanceRaisedDate: "7 Sep 2026",
+    tpaRemarks: "",
   },
 ];
 
+const STATIC_GRIEVANCE_HISTORY_ROWS: GrievanceRow[] = [];
+const ROWS_PER_PAGE = 5;
+
 const GRIEVANCE_HISTORY_COLUMNS: Column<GrievanceRow>[] = [
-  { key: "user", header: "User", width: "16%" },
-  { key: "fupCode", header: "FUP Code", width: "16%" },
-  { key: "profile", header: "Profile", width: "16%" },
+  { key: "userName", header: "User Name", width: "8%" },
+  { key: "userRole", header: "User Role", width: "8%" },
+  { key: "fupCode", header: "FUP Code", width: "8%" },
   {
     key: "grievanceRaisedRemark",
     header: "Grievance Raised Remark",
-    width: "22%",
+    width: "12%",
   },
   {
     key: "grievanceRaisedDate",
     header: "Grievance Raised Date",
-    width: "16%",
+    width: "8%",
   },
   { key: "tpaRemarks", header: "TPA Remarks", width: "14%" },
 ];
@@ -970,9 +961,11 @@ const ApplicationSummaryBanner = ({
   );
 };
 
-const Grievance = () => {
+const Grievance = ({ paginationDisabled = true }: GrievanceProps) => {
   const drsData = useAppSelector((state: RootState) => state.drs.data);
   const [riderDialogOpen, setRiderDialogOpen] = useState(false);
+  const [historyPage, setHistoryPage] = useState(1);
+  const [tpaPage, setTpaPage] = useState(1);
   const [tpaRemarks, setTpaRemarks] = useState<string[]>(
     STATIC_GRIEVANCE_ROWS.map(() => ""),
   );
@@ -992,31 +985,54 @@ const Grievance = () => {
       key: "tpaRemarks",
       header: "TPA Remarks",
       width: "14%",
-      render: (_value, _row, rowIndex) => (
-        <TextField
-          fullWidth
-          size="small"
-          required
-          placeholder="Enter TPA remarks *"
-          value={tpaRemarks[rowIndex] ?? ""}
-          error={submitAttempted && !tpaRemarks[rowIndex]?.trim()}
-          onChange={(event) => updateTpaRemark(rowIndex, event.target.value)}
-          sx={{
-            "& .MuiOutlinedInput-root": {
-              height: 32,
-              borderRadius: "10px",
-              bgcolor: "#FFFFFF",
-              fontSize: "10px",
-            },
-            "& .MuiOutlinedInput-input": {
-              px: 1.2,
-              py: 0.7,
-            },
-          }}
-        />
-      ),
+      render: (_value, _row, rowIndex) => {
+        const absoluteRowIndex = (tpaPage - 1) * ROWS_PER_PAGE + rowIndex;
+
+        return (
+          <TextField
+            fullWidth
+            size="small"
+            required
+            placeholder="Enter TPA remarks *"
+            value={tpaRemarks[absoluteRowIndex] ?? ""}
+            error={submitAttempted && !tpaRemarks[absoluteRowIndex]?.trim()}
+            onChange={(event) =>
+              updateTpaRemark(absoluteRowIndex, event.target.value)
+            }
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                height: 32,
+                borderRadius: "10px",
+                bgcolor: "#FFFFFF",
+                fontSize: "10px",
+              },
+              "& .MuiOutlinedInput-input": {
+                px: 1.2,
+                py: 0.7,
+              },
+            }}
+          />
+        );
+      },
     },
   ];
+
+  const historyPageCount = Math.max(
+    1,
+    Math.ceil(STATIC_GRIEVANCE_HISTORY_ROWS.length / ROWS_PER_PAGE),
+  );
+  const tpaPageCount = Math.max(
+    1,
+    Math.ceil(STATIC_GRIEVANCE_ROWS.length / ROWS_PER_PAGE),
+  );
+  const visibleHistoryRows = STATIC_GRIEVANCE_HISTORY_ROWS.slice(
+    (historyPage - 1) * ROWS_PER_PAGE,
+    historyPage * ROWS_PER_PAGE,
+  );
+  const visibleTpaRows = STATIC_GRIEVANCE_ROWS.slice(
+    (tpaPage - 1) * ROWS_PER_PAGE,
+    tpaPage * ROWS_PER_PAGE,
+  );
 
   const handleSubmit = () => {
     setSubmitAttempted(true);
@@ -1196,19 +1212,57 @@ const Grievance = () => {
           gap: 1.25,
         }}
       >
-        <CustomAccordion title="Decision History">
+        <CustomAccordion title="Decision History" defaultExpanded>
             <CustomTable
             title="Grievance History"
             columns={GRIEVANCE_HISTORY_COLUMNS}
-            data={STATIC_GRIEVANCE_ROWS}
+            data={visibleHistoryRows}
             />
+
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+              <Pagination
+                count={historyPageCount}
+                page={historyPage}
+                onChange={(_, nextPage) => setHistoryPage(nextPage)}
+                disabled={paginationDisabled}
+                shape="rounded"
+                size="small"
+                sx={{
+                  "& .MuiPaginationItem-root": { color: "#555555" },
+                  "& .MuiPaginationItem-root.Mui-selected": {
+                    color: "#ffffff",
+                    bgcolor: "#E45F14",
+                    "&:hover": { bgcolor: "#E45F14" },
+                  },
+                }}
+              />
+            </Box>
           </CustomAccordion>
 
         <CustomTable
           title="TPA Grievance Details"
           columns={tpaGrievanceColumns}
-          data={STATIC_GRIEVANCE_ROWS}
+          data={visibleTpaRows}
         />
+
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+          <Pagination
+            count={tpaPageCount}
+            page={tpaPage}
+            onChange={(_, nextPage) => setTpaPage(nextPage)}
+            disabled={paginationDisabled}
+            shape="rounded"
+            size="small"
+            sx={{
+              "& .MuiPaginationItem-root": { color: "#555555" },
+              "& .MuiPaginationItem-root.Mui-selected": {
+                color: "#ffffff",
+                bgcolor: "#E45F14",
+                "&:hover": { bgcolor: "#E45F14" },
+              },
+            }}
+          />
+        </Box>
 
         <Box sx={{ display: "flex", justifyContent: "center", pt: 0.35 }}>
           <CustomButton

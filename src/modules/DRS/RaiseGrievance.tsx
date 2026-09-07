@@ -645,15 +645,7 @@ const RaiseGrievance = () => {
           />
         );
       },
-    },
-    {
-      key: "remarksByTpa",
-      header: "Remarks By TPA",
-      width: "25%",
-      render: (value) => (
-        <Typography sx={{ fontSize: 12 }}>{text(value)}</Typography>
-      ),
-    },
+    }
   ];
 
   const applicationOverview = toRecord(source.applicationOverview);
@@ -738,93 +730,6 @@ const RaiseGrievance = () => {
 
   return (
     <Box sx={{ width: "100%", minWidth: 0, px: 0.5, py: 0.75 }}>
-      <ApplicationSummaryBanner
-        image={String(firstValue(applicant.profileImage, personal.profileImage) ?? "")}
-        name={getFullName({ ...applicant, ...personal })}
-        appNo={text(
-          firstValue(
-            source.applicationNumber,
-            source.applicationNo,
-            applicationOverview.applicationNumber,
-            applicationOverview.applicationNo,
-          ),
-        )}
-        personalSummary={personalSummary}
-        productName={text(
-          firstValue(
-            baseProduct.productName,
-            baseProduct.name,
-            applicationOverview.productName,
-            applicationOverview.product,
-          ),
-        )}
-        policyTerm={text(
-          firstValue(
-            baseProduct.policyTerm,
-            baseProduct.term,
-            applicationOverview.policyTerm,
-          ),
-        )}
-        premiumTerm={text(
-          firstValue(
-            baseProduct.premiumPaymentTerm,
-            baseProduct.ppt,
-            applicationOverview.premiumPaymentTerm,
-          ),
-        )}
-        sumAssured={currency(
-          firstValue(
-            baseProduct.sumAssured,
-            baseProduct.appliedSA,
-            applicationOverview.sumAssured,
-            applicationOverview.appliedSa,
-          ),
-        )}
-        tsa={currency(
-          firstValue(
-            baseProduct.tsa,
-            baseProduct.totalSumAssured,
-            applicationOverview.tsa,
-            applicationOverview.totalSumAssured,
-          ),
-        )}
-        tfsa={currency(
-          firstValue(
-            baseProduct.tfsa,
-            baseProduct.totalFaceSumAssured,
-            applicationOverview.tfsa,
-            applicationOverview.totalFaceSumAssured,
-          ),
-        )}
-        tssa={currency(
-          firstValue(
-            baseProduct.tssa,
-            baseProduct.totalSumAssuredAdditional,
-            applicationOverview.tssa,
-            applicationOverview.totalSumAssuredAdditional,
-          ),
-        )}
-        tpsa={currency(
-          firstValue(
-            baseProduct.tpsa,
-            baseProduct.totalPremiumSumAssured,
-            applicationOverview.tpsa,
-            applicationOverview.totalPremiumSumAssured,
-          ),
-        )}
-        riderSummaries={riderSummaries}
-        onViewRiders={() => setRiderDialogOpen(true)}
-      />
-
-      {error && (
-        <Typography
-          role="alert"
-          sx={{ mt: 1, color: "#DE2C3B", fontSize: 12 }}
-        >
-          {error}
-        </Typography>
-      )}
-
       <Box sx={{ mt: 1.25 }}>
         <CustomTable<RaiseGrievanceTableRow>
           title="Medical Requirements"

@@ -23,6 +23,7 @@ import CustomSnackbar from "../../components/ui/SnackBar/Snackbar";
 import CustomTextField from "../../components/ui/TextField/TextField";
 import { modalTitleStyles } from "../../utils/styles";
 import ApplicantProfile from "./DRS_Accordions/ApplicantProfile";
+import RaiseGrievance from "./RaiseGrievance";
 
 const toSummaryEntries = (value: unknown): Array<Record<string, unknown>> => {
     if (Array.isArray(value)) {
@@ -207,6 +208,7 @@ const QuickLinks = ({
     const dispatch = useAppDispatch();
     const [isOpen, setIsOpen] = useState(false);
     const [openSummaryDialog, setOpenSummaryDialog] = useState(false);
+    const [openRaiseGrievanceDialog, setOpenRaiseGrievanceDialog] = useState(false);
     const [openReferToItDialog, setOpenReferToItDialog] = useState(false);
     const [referToItLoading, setReferToItLoading] = useState(false);
     const [referToItError, setReferToItError] = useState<string | null>(null);
@@ -351,6 +353,7 @@ const QuickLinks = ({
             path: "",
             onClick: () => setOpenSummaryDialog(true),
         },
+      
         // {
         //     label: "Requirement Management",
         //     path: "",
@@ -432,6 +435,11 @@ const QuickLinks = ({
                 },
             ]
             : []),
+              {
+            label: "Raise Grievance",
+            path: "",
+            onClick: () => setOpenRaiseGrievanceDialog(true),
+        },
     ];
 
     const toggleQuickLinks = useCallback(() => {
@@ -711,6 +719,21 @@ const QuickLinks = ({
                 }}
             >
                 <ApplicantProfile />
+            </CustomDialog>
+
+            <CustomDialog
+                open={openRaiseGrievanceDialog}
+                showCloseIcon={true}
+                onClose={() => setOpenRaiseGrievanceDialog(false)}
+                title="Raise Grievance"
+                maxWidth="xl"
+                contentSx={{
+                    p: 1,
+                    maxHeight: "calc(100vh - 150px)",
+                    overflowY: "auto",
+                }}
+            >
+                <RaiseGrievance />
             </CustomDialog>
 
             <CustomDialog
