@@ -172,6 +172,7 @@ interface GrievanceHistoryRow {
 interface SdtReadonlyRowProps {
   decision: ReactNode;
   remarks: ReactNode;
+  timestamp: ReactNode;
 }
 
 /* -------------------------------------------------------------------------- */
@@ -726,90 +727,71 @@ const DashboardCard = ({
   </Box>
 );
 
-const SdtReadonlyRow = ({ decision, remarks }: SdtReadonlyRowProps) => (
+const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) => (
   <Box
     role="group"
     aria-label="SDT decision details"
     sx={{
       display: "grid",
       gridTemplateColumns: {
-        xs: "1fr",
-        sm: "minmax(160px, 0.31fr) minmax(0, 1fr)",
+        xs: "minmax(0, 1fr)",
+        md: "minmax(130px, 0.65fr) minmax(0, 2fr) minmax(175px, 0.9fr)",
       },
-      gap: { xs: 0.8, sm: 1.5 },
+      alignItems: "stretch",
       width: "100%",
       minWidth: 0,
-      p: 1,
+      boxSizing: "border-box",
       border: "1px solid #E4DEDB",
       borderLeft: "4px solid #E45F14",
-      borderRadius: 1.25,
+      borderRadius: "8px",
       bgcolor: "#FCFAF9",
-      boxShadow: "0 2px 7px rgba(60, 42, 35, 0.06)",
+      overflow: "hidden",
+      boxShadow: "0 2px 7px rgba(60, 42, 35, 0.04)",
     }}
   >
-    <Box sx={{ minWidth: 0 }}>
-      <Typography
+    {[
+      { label: "SDT Decision", value: decision },
+      { label: "SDT Remarks", value: remarks },
+      { label: "SDT Timestamp", value: timestamp },
+    ].map(({ label, value }, index) => (
+      <Box
+        key={label}
         sx={{
-          color: "#8B807B",
-          fontSize: 8.5,
-          fontWeight: 800,
-          textTransform: "uppercase",
-          letterSpacing: 0.45,
+          minWidth: 0,
+          px: 1.5,
+          py: 1,
+          borderLeft: { xs: "none", md: index > 0 ? "1px solid #E8E1DE" : "none" },
+          borderTop: { xs: index > 0 ? "1px solid #E8E1DE" : "none", md: "none" },
         }}
       >
-        SDT Decision
-      </Typography>
-
-      <Typography
-        sx={{
-          mt: 0.25,
-          color: "#302A27",
-          fontSize: 11,
-          fontWeight: 900,
-          lineHeight: 1.3,
-          overflowWrap: "anywhere",
-        }}
-      >
-        {decision}
-      </Typography>
-    </Box>
-
-    <Box
-      sx={{
-        minWidth: 0,
-        pl: { xs: 0, sm: 1.5 },
-        borderLeft: {
-          xs: 0,
-          sm: "1px solid #E8E1DE",
-        },
-      }}
-    >
-      <Typography
-        sx={{
-          color: "#8B807B",
-          fontSize: 8.5,
-          fontWeight: 800,
-          textTransform: "uppercase",
-          letterSpacing: 0.45,
-        }}
-      >
-        SDT Remarks
-      </Typography>
-
-      <Typography
-        sx={{
-          mt: 0.25,
-          color: "#4B433F",
-          fontSize: 10.5,
-          fontWeight: 700,
-          lineHeight: 1.4,
-          whiteSpace: "pre-wrap",
-          overflowWrap: "anywhere",
-        }}
-      >
-        {remarks}
-      </Typography>
-    </Box>
+        <Typography
+          sx={{
+            color: "#8B807B",
+            fontSize: 9,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: 0.45,
+            lineHeight: 1.4,
+            mb: 0.4,
+          }}
+        >
+          {label}
+        </Typography>
+        <Typography
+          sx={{
+            color: index === 0 ? "#302A27" : "#4B433F",
+            fontSize: 11,
+            fontWeight: index === 0 ? 800 : 600,
+            lineHeight: 1.5,
+            whiteSpace: "pre-wrap",
+            overflowWrap: "anywhere",
+            fontVariantNumeric: index === 2 ? "tabular-nums" : "normal",
+          }}
+        >
+          {value || "—"}
+        </Typography>
+      </Box>
+    ))}
   </Box>
 );
 
@@ -1620,6 +1602,20 @@ const ApplicantApplicationSummary = ({
       initialBre.sdtRemark,
       applicant.sdtRemarks,
       applicant.sdtRemark,
+    ),
+  );
+
+  const sdtTimestamp = text(
+    firstValue(
+      sdtDetails.timestamp,
+      sdtDetails.timeStamp,
+      sdtDetails.sdtTimestamp,
+      sdtDetails.sdtTimeStamp,
+      source.sdtTimestamp,
+      source.sdtTimeStamp,
+      finalBre.sdtTimestamp,
+      initialBre.sdtTimestamp,
+      applicant.sdtTimestamp,
     ),
   );
 
@@ -3597,6 +3593,7 @@ const ApplicantApplicationSummary = ({
                 <SdtReadonlyRow
                   decision={sdtDecision}
                   remarks={sdtRemarks}
+                  timestamp={sdtTimestamp}
                 />
               </Box>
             </Box>

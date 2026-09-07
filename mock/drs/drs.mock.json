@@ -1,8 +1,9 @@
 {
   "success": true,
   "data": {
-    "sdtDecision": "Refer to Underwriter",
-    "sdtRemarks": "Case referred for manual underwriting review due to BRE discrepancies.",
+    "sdtDecision": "",
+    "sdtRemarks": "",
+    "sdtTimeStamp":"",
     "breDecision": {
       "decision": "DC",
       "initialDecision": "Non-STP",
