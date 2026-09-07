@@ -2,7 +2,6 @@ import { Box, Typography, CircularProgress } from "@mui/material";
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
-import BackButton from "../../../components/layout/BackButton";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
@@ -2642,7 +2641,13 @@ const renderStandardSection = (
   );
 };
 
-const ViewFinancial = () => {
+interface ViewFinancialProps {
+  onBack?: () => void;
+  backLabel?: string;
+  onViewMedical?: () => void;
+}
+
+const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const location = useLocation();
@@ -2967,6 +2972,12 @@ const ViewFinancial = () => {
     if (!safeApplicationId) {
       return;
     }
+
+    if (value === "medical" && onViewMedical) {
+      onViewMedical();
+      return;
+    }
+    if (value === "financial" && onBack) return;
 
     if (value === "medical") {
       navigate(getMedicalPath(safeBusinessType, safeApplicationId), {
@@ -4018,7 +4029,11 @@ const ViewFinancial = () => {
         })
       ).unwrap();
 
-      navigate(getDRSPath(safeBusinessType, safeApplicationId));
+      if (onBack) {
+        onBack();
+      } else {
+        navigate(getDRSPath(safeBusinessType, safeApplicationId));
+      }
     } catch (error) {
       showSnackbar(
         error instanceof Error ? error.message : "Unable to submit financial details.",
@@ -4061,10 +4076,45 @@ const ViewFinancial = () => {
           justifyContent: "space-between",
         }}
       >
-        <BackButton
-          label={roleType === "CPT_DATA_ENTRY_NMR_TASK" ? title.backToCPT : title.backToDRS}
-          onClick={() => navigate(getDRSPath(safeBusinessType, safeApplicationId))}
-        />
+        <CustomButton
+          type="button"
+          variant="outlined"
+          sx={{
+              minWidth: "auto",
+              px: 1.4,
+              py: 0.55,
+              border: "1px solid #E45F14",
+              borderRadius: "18px",
+              bgcolor: "#FFF4EC",
+              color: "#A92129",
+              fontSize: { xs: 10, sm: 11 },
+              fontWeight: 900,
+              lineHeight: 1.2,
+              textTransform: "none",
+              whiteSpace: "nowrap",
+              boxShadow: "0 2px 7px rgba(169,33,41,.12)",
+              "& .MuiButton-startIcon": {
+                mr: 0.55,
+                ml: 0,
+              },
+              "&:hover": {
+                borderColor: "#C83C2F",
+                bgcolor: "#FFEAD7",
+                boxShadow: "0 3px 9px rgba(169,33,41,.18)",
+                transform: "translateY(-1px)",
+              },
+            }}
+          onClick={() => {
+            if (onBack) {
+              onBack();
+              return;
+            }
+            navigate(getDRSPath(safeBusinessType, safeApplicationId));
+          }}
+        >
+          <Box component="span" aria-hidden="true" sx={{ mr: 0.55 }}>←</Box>
+          {backLabel ?? (roleType === "CPT_DATA_ENTRY_NMR_TASK" ? title.backToCPT : title.backToDRS)}
+        </CustomButton>
 
         <CustomButton
           variant="text"
@@ -4082,7 +4132,7 @@ const ViewFinancial = () => {
         </CustomButton>
       </Box>
 
-      {roleType !== "CPT_DATA_ENTRY_NMR_TASK" && (
+      {/* {roleType !== "CPT_DATA_ENTRY_NMR_TASK" && (
         <Box sx={{ mt: 1, mb: 1, display: "flex", justifyContent: "center" }}>
           <CustomTabs
             tabs={drsViewTabs}
@@ -4090,15 +4140,15 @@ const ViewFinancial = () => {
             onChange={(value: DRSViewTab) => handleDRSViewTabChange(value)}
           />
         </Box>
-      )}
+      )} */}
 
-      <Box sx={{ mb: 1 }}>
+      {/* <Box sx={{ mb: 1 }}>
         <BreDecision />
       </Box>
 
       <Box sx={{ mb: 1 }}>
         <ApplicantProfile />
-      </Box>
+      </Box> */}
 
       <CustomSnackbar
         open={snackbarOpen}

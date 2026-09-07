@@ -358,7 +358,7 @@
         "paymentDetails": {
           "isThirdPartyPayment": false
         },
-        "payoutDetails": {},
+        "payoutDetails": {"accountType":"Savings","bankType":"","brnach":"Malad","micrCode":"1234","ifscCode":"ABKV998","accountNumber":"129894543"},
         "advisorDetails": {
           "relationWithAdvisor": "others",
           "acquaintanceDuration": 0,

@@ -1,8 +1,8 @@
 import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { useEffect, useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import CustomAccordion from "../../../components/ui/Accordion/Accordion";
-import { title } from "../../../utils/constant";
+//import CustomAccordion from "../../../components/ui/Accordion/Accordion";
+//import { title } from "../../../utils/constant";
 import type { AppDispatch, RootState } from "../../../store/store";
 import EditApplicantProfile from "./EditApplicantProfile";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
@@ -17,7 +17,7 @@ import { drsThunk } from "../../../store/thunks/drsThunk";
 import { useNavigate, useParams } from "react-router-dom";
 import CustomButton from "../../../components/ui/Button/Button";
 import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
-import RiskAnalytics from "./RiskAnalytics";
+//import RiskAnalytics from "./RiskAnalytics";
 import { markApplicantTabVisited } from "../../../validations/drsApplicantTabValidation";
 import { formatDate } from "../../../utils/dataFormat";
 
@@ -517,25 +517,37 @@ const ExpandableDetailField = ({
 const DetailsCard = ({
   title: cardTitle,
   fields,
+  orangeHeader = false,
 }: {
   title: string;
   fields: { label: string; value: unknown }[];
+  orangeHeader?: boolean;
 }) => (
   <Box
     sx={{
       minWidth: 0,
-      p: 2,
+      p: orangeHeader ? 0 : 2,
       backgroundColor: "#F6F6F6",
       borderRadius: "8px",
+      overflow: "hidden",
     }}
   >
     <Typography
-      sx={{ mb: 2, fontSize: "12px", fontWeight: 700, color: "#161616" }}
+      sx={{
+        mb: orangeHeader ? 0 : 2,
+        px: orangeHeader ? 2 : 0,
+        py: orangeHeader ? 1.25 : 0,
+        fontSize: "12px",
+        fontWeight: 700,
+        color: orangeHeader ? "#FFFFFF" : "#161616",
+        backgroundColor: orangeHeader ? "#E45F14" : "transparent",
+      }}
     >
       {cardTitle}
     </Typography>
     <Box
       sx={{
+        p: orangeHeader ? 2 : 0,
         display: "grid",
         gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
         columnGap: 2,
@@ -875,7 +887,7 @@ const ApplicantProfile = ({
 
             <Box sx={{ borderTop: "1px solid #AFAFAF", my: 2 }} />
 
-            <Typography
+            {/* <Typography
               sx={{
                 mb: 1.5,
                 fontSize: "12px",
@@ -884,7 +896,7 @@ const ApplicantProfile = ({
               }}
             >
               KYC
-            </Typography>
+            </Typography> */}
             <GridSection
               columns={8}
               items={kycFields}
@@ -939,14 +951,16 @@ const ApplicantProfile = ({
             }}
           >
             <DetailsCard
+              orangeHeader
               title="Communication Address"
               fields={getAddressFields(communicationAddress)}
             />
             <DetailsCard
+              orangeHeader
               title="Permanent Address"
               fields={getAddressFields(permanentAddress)}
             />
-            <DetailsCard title="Contact Details" fields={contactFields} />
+            <DetailsCard orangeHeader title="Contact Details" fields={contactFields} />
           </Box>
         );
       }
@@ -1697,8 +1711,8 @@ const ApplicantProfile = ({
               alignItems: "stretch",
             }}
           >
-            <DetailsCard title="Payment Details" fields={paymentFields} />
-            <DetailsCard title="Payout Details" fields={payoutFields} />
+            <DetailsCard orangeHeader title="Payment Details" fields={paymentFields} />
+            <DetailsCard orangeHeader title="Payout Details" fields={payoutFields} />
           </Box>
         );
       }
@@ -1742,6 +1756,7 @@ const ApplicantProfile = ({
   };
 
   const canShowApplicantActions = ![
+    "CUW_TASK",
     "CVT_TASK",
     "CPT_DATA_ENTRY_NMR_TASK",
     "CPT_DATA_ENTRY_MR_TASK",
@@ -1752,17 +1767,17 @@ const ApplicantProfile = ({
     "VENDOR_CMO_TASK"
   ].includes(roleType);
 
-  const canShowRiskAnalytics = ![
-    "CVT_TASK",
-    "PIVV_TASK",
-    "DVT_TASK",
-    "CPT_DATA_ENTRY_NMR_TASK",
-    "CPT_DATA_ENTRY_MR_TASK",
-    "RECONSIDERATION_TASK",
-    "AMR_NON_MEDICAL_TASK",
-    "AMR_MEDICAL_TASK",
-    "RISK_TASK"
-  ].includes(roleType);
+  // const canShowRiskAnalytics = ![
+  //   "CVT_TASK",
+  //   "PIVV_TASK",
+  //   "DVT_TASK",
+  //   "CPT_DATA_ENTRY_NMR_TASK",
+  //   "CPT_DATA_ENTRY_MR_TASK",
+  //   "RECONSIDERATION_TASK",
+  //   "AMR_NON_MEDICAL_TASK",
+  //   "AMR_MEDICAL_TASK",
+  //   "RISK_TASK"
+  // ].includes(roleType);
 
   /* ------------------------------------------------------------------------ */
   /*                                   UI                                     */
@@ -2008,7 +2023,49 @@ const ApplicantProfile = ({
               {/*                         TAB CONTENT                            */}
               {/* ============================================================= */}
 
-              <Box sx={{ mt: 1 }}>{renderDetailContent()}</Box>
+              {["Contact & Address", "Medical & Lifestyle", "Nominee", "Payment & Payout"].includes(
+                innerTabs[safeDetailTab],
+              ) ? (
+                <Box sx={{ mt: 1.5 }}>{renderDetailContent()}</Box>
+              ) : (
+              <Box
+                sx={{
+                  mt: 1.5,
+                  border: "1px solid #E5E0DD",
+                  borderRadius: "8px",
+                  overflow: "hidden",
+                  backgroundColor: "#FFFFFF",
+                }}
+              >
+                <Box
+                  sx={{
+                    backgroundColor: "#E45F14",
+                    color: "#FFFFFF",
+                    px: 2,
+                    py: 1.25,
+                    minHeight: "42px",
+                    display: "flex",
+                    alignItems: "center",
+                  }}
+                >
+                  <Typography
+                    component="h3"
+                    sx={{
+                      m: 0,
+                      fontSize: "14px",
+                      fontWeight: 700,
+                      lineHeight: 1.4,
+                      color: "inherit",
+                    }}
+                  >
+                    {innerTabs[safeDetailTab]}
+                  </Typography>
+                </Box>
+                <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
+                  {renderDetailContent()}
+                </Box>
+              </Box>
+              )}
             </Box>
           )}
 

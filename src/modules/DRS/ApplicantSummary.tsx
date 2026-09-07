@@ -31,10 +31,38 @@ import type { BreResponse } from "../../types/drs.types";
 //import { formatDate } from "../../utils/dataFormat";
 import BreDecision from "./DRS_Accordions/BreDecision";
 import MemberSelection from "./MemberSeclection";
+import ViewMedical from "./Medical Final/ViewMedical";
+import ViewFinancial from "./Financial/ViewFinancial";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
 /* -------------------------------------------------------------------------- */
+
+const summaryActionSx = {
+              minWidth: "auto",
+              px: 1.4,
+              py: 0.55,
+              border: "1px solid #E45F14",
+              borderRadius: "18px",
+              bgcolor: "#FFF4EC",
+              color: "#A92129",
+              fontSize: { xs: 10, sm: 11 },
+              fontWeight: 900,
+              lineHeight: 1.2,
+              textTransform: "none",
+              whiteSpace: "nowrap",
+              boxShadow: "0 2px 7px rgba(169,33,41,.12)",
+              "& .MuiButton-startIcon": {
+                mr: 0.55,
+                ml: 0,
+              },
+              "&:hover": {
+                borderColor: "#C83C2F",
+                bgcolor: "#FFEAD7",
+                boxShadow: "0 3px 9px rgba(169,33,41,.18)",
+                transform: "translateY(-1px)",
+              },
+            } as const;
 
 interface ApplicantApplicationSummaryProps {
   onBackToInbox?: () => void;
@@ -1372,6 +1400,7 @@ const ApplicantApplicationSummary = ({
     useState(0);
   const [requirementAddRowSignal] = useState(0);
 
+  const [activeDetailView, setActiveDetailView] = useState<"medical" | "financial" | null>(null);
   const [riderDialogOpen, setRiderDialogOpen] = useState(false);
   const [grievanceHistoryDialogOpen, setGrievanceHistoryDialogOpen] =
     useState(false);
@@ -1554,6 +1583,7 @@ const ApplicantApplicationSummary = ({
   };
 
   const handleBackToSummary = () => {
+    setActiveDetailView(null);
     setSelectedRiskCard(null);
     setActiveQuickLinkPanel(null);
     setShowMemberSelection(true);
@@ -2414,15 +2444,20 @@ const ApplicantApplicationSummary = ({
         </Box>
       </Box>
 
-      {members.length > 1 && (
-        <Box
-          sx={{
-            width: "100%",
-            px: 0.5,
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
+      {!activeDetailView && (
+      <Box
+        sx={{
+          width: "100%",
+          px: 0.5,
+          py: 0.75,
+          display: "flex",
+          alignItems: "center",
+          gap: 1,
+          overflowX: "auto",
+          "& .MuiButton-root": { flexShrink: 0 },
+        }}
+      >
+        {members.length > 1 && (
           <Button
             type="button"
             variant="outlined"
@@ -2465,25 +2500,36 @@ const ApplicantApplicationSummary = ({
           >
             Summary
           </Button>
+        )}
+        <Button
+          type="button"
+          variant="outlined"
+          onClick={() => setGrievanceHistoryDialogOpen(true)}
+          sx={{ ...summaryActionSx, ml: "auto" }}
+        >
+          Grievance History
+        </Button>
+      </Box>
+      )}
+
+      {activeDetailView === "medical" && (
+        <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
+          <ViewMedical
+            onBack={() => setActiveDetailView(null)}
+            backLabel="Back to DRS"
+          />
         </Box>
       )}
 
-      <Box
-        sx={{
-          width: "100%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "flex-end",
-        }}
-      >
-        <CustomButton
-          type="button"
-          onClick={() => setGrievanceHistoryDialogOpen(true)}
-          sx={{ borderRadius: "50px", fontSize: "10px" }}
-        >
-          Grievance History
-        </CustomButton>
-      </Box>
+      {activeDetailView === "financial" && (
+        <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
+          <ViewFinancial
+            onBack={() => setActiveDetailView(null)}
+            backLabel="Back to DRS"
+            onViewMedical={() => setActiveDetailView("medical")}
+          />
+        </Box>
+      )}
 
       <CustomDialog
         open={grievanceHistoryDialogOpen}
@@ -2534,6 +2580,7 @@ const ApplicantApplicationSummary = ({
         </Box>
       </CustomDialog>
 
+      <Box sx={{ display: activeDetailView ? "none" : "block" }}>
       {/* BRE, risk analytics and the remaining case snapshot scroll normally. */}
       <Box
         sx={{
@@ -2991,7 +3038,15 @@ const ApplicantApplicationSummary = ({
                         <RiskAnalyticsCard
                           key={card.id}
                           card={card}
-                          onClick={() => setSelectedRiskCard(card)}
+                          onClick={() => {
+                            if ((card.id === "medical" || card.id === "financial") && !readOnly) {
+                              setActiveQuickLinkPanel(null);
+                              setSelectedRiskCard(null);
+                              setActiveDetailView(card.id);
+                              return;
+                            }
+                            setSelectedRiskCard(card);
+                          }}
                         />
                       ))}
                     </Box>
@@ -3830,6 +3885,7 @@ const ApplicantApplicationSummary = ({
             </Box>
           )}
         </Box>
+      </Box>
       </Box>
     </>
   );
