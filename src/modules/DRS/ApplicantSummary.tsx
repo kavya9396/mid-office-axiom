@@ -780,7 +780,7 @@ const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) =
     {[
       { label: "SDT Decision", value: decision },
       { label: "SDT Remarks", value: remarks },
-      { label: "SDT Timestamp", value: timestamp },
+      // { label: "SDT Timestamp", value: timestamp },
     ].map(({ label, value }, index) => (
       <Box
         key={label}

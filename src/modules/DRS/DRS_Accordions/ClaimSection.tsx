@@ -2,7 +2,6 @@ import { Box, Typography } from "@mui/material";
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import type { Column } from "../../../components/ui/Table/Table";
-import CustomAccordion from "../../../components/ui/Accordion/Accordion";
 import CustomButton from "../../../components/ui/Button/Button";
 import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import CustomTable from "../../../components/ui/Table/Table";
@@ -52,9 +51,44 @@ const claimsColumns: Column<ClaimRow>[] = [
   { key: "ailmentForCommunication", header: "Ailment For Communication", width: "20%" },
   { key: "claimType", header: "Claim Type", width: "10%" },
   { key: "subType", header: "Sub Type", width: "8%" },
+  { key: "intimationDate", header: "Intimation Date", width: "11%" },
+  { key: "doa", header: "DOA", width: "10%" },
+  { key: "dod", header: "DOD", width: "10%" },
+  { key: "decisionStatus", header: "Decision Status", width: "11%" },
 ];
 
-const emptyClaimForm: AddClaimForm = {
+const SAMPLE_CLAIM_ROWS: ClaimRow[] = [
+  {
+    policyNumber: "POL12345678",
+    productCode: "AG",
+    claimKey: "CLM1001",
+    canonicalId: "CANON001",
+    patientName: "Rudra Sangha",
+    ailmentForCommunication: "Cardiac evaluation",
+    claimType: "Health",
+    subType: "Hospitalisation",
+    intimationDate: "2026-07-01",
+    doa: "2026-07-02",
+    dod: "2026-07-05",
+    decisionStatus: "Approved",
+  },
+  {
+    policyNumber: "POL98765432",
+    productCode: "IP",
+    claimKey: "CLM1002",
+    canonicalId: "CANON002",
+    patientName: "Kavya Mehta",
+    ailmentForCommunication: "Dengue fever",
+    claimType: "Reimbursement",
+    subType: "Medical",
+    intimationDate: "2026-08-10",
+    doa: "2026-08-11",
+    dod: "2026-08-16",
+    decisionStatus: "Under Review",
+  },
+];
+
+const DEFAULT_CLAIM_FORM: AddClaimForm = {
   policyNumber: "",
   productCode: "",
   claimKey: "",
@@ -68,6 +102,20 @@ const emptyClaimForm: AddClaimForm = {
   dod: "",
   decisionStatus: "",
 };
+// const DEFAULT_CLAIM_FORM: AddClaimForm = {
+//   policyNumber: "POL45678901",
+//   productCode: "ULIP",
+//   claimKey: "CLM1003",
+//   canonicalId: "CANON003",
+//   patientName: "Aarav Shah",
+//   ailmentForCommunication: "Accidental injury",
+//   claimType: "Cashless",
+//   subType: "Accident",
+//   intimationDate: "2026-09-01",
+//   doa: "2026-09-02",
+//   dod: "2026-09-06",
+//   decisionStatus: "Pending",
+// };
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -118,18 +166,6 @@ const toDateInputValue = (value: unknown): string => {
 
 const getTextOrFallback = (value: string, fallback = "NA"): string =>
   value.trim() !== "" ? value : fallback;
-
-const DUMMY_READONLY_FIELDS = {
-  policyNumber: "POL12345678",
-  productCode: "AG",
-  canonicalId: "CANON001",
-  patientName: "John Doe",
-  ailmentForCommunication: "Non HNI",
-  subType: "General",
-  intimationDate: "2026-07-01",
-  doa: "2026-07-02",
-  dod: "2026-07-05",
-} as const;
 
 const mapClaimRow = (value: unknown): ClaimRow | null => {
   const record = toRecord(value);
@@ -196,19 +232,19 @@ const buildClaimRowFromForm = (form: AddClaimForm): ClaimRow => ({
   decisionStatus: form.decisionStatus.trim(),
 });
 
-const formFields: Array<{ key: keyof AddClaimForm; label: string; type?: string; editable: boolean }> = [
-  { key: "policyNumber", label: "Policy Number", editable: false },
-  { key: "productCode", label: "Product Code", editable: false },
-  { key: "claimKey", label: "Claim Key", editable: true },
-  { key: "canonicalId", label: "Canonical ID", editable: false },
-  { key: "patientName", label: "Patient Name", editable: false },
-  { key: "ailmentForCommunication", label: "Ailment For Communication", editable: false },
-  { key: "claimType", label: "Claim Type", editable: true },
-  { key: "subType", label: "Sub Type", editable: false },
-  { key: "intimationDate", label: "Intimation Date", type: "date", editable: false },
-  { key: "doa", label: "DOA", type: "date", editable: false },
-  { key: "dod", label: "DOD", type: "date", editable: false },
-  { key: "decisionStatus", label: "Decision Status", editable: true },
+const formFields: Array<{ key: keyof AddClaimForm; label: string; type?: string }> = [
+  { key: "policyNumber", label: "Policy Number" },
+  { key: "productCode", label: "Product Code" },
+  { key: "claimKey", label: "Claim Key" },
+  { key: "canonicalId", label: "Canonical ID" },
+  { key: "patientName", label: "Patient Name" },
+  { key: "ailmentForCommunication", label: "Ailment For Communication" },
+  { key: "claimType", label: "Claim Type" },
+  { key: "subType", label: "Sub Type" },
+  { key: "intimationDate", label: "Intimation Date", type: "date" },
+  { key: "doa", label: "DOA", type: "date" },
+  { key: "dod", label: "DOD", type: "date" },
+  { key: "decisionStatus", label: "Decision Status" },
 ];
 
 const ClaimSection = () => {
@@ -217,19 +253,20 @@ const ClaimSection = () => {
   );
 
   const baseRows = useMemo(() => {
-    if (!dataRecord) return [] as ClaimRow[];
+    if (!dataRecord) return SAMPLE_CLAIM_ROWS;
 
     const fromClaimSection = extractClaimRows(dataRecord.claimSection);
     if (fromClaimSection.length > 0) {
       return fromClaimSection;
     }
 
-    return extractClaimRows(dataRecord);
+    const rowsFromRoot = extractClaimRows(dataRecord);
+    return rowsFromRoot.length > 0 ? rowsFromRoot : SAMPLE_CLAIM_ROWS;
   }, [dataRecord]);
 
   const autoFormDefaults = useMemo<AddClaimForm>(() => {
     if (!dataRecord) {
-      return emptyClaimForm;
+      return { ...DEFAULT_CLAIM_FORM };
     }
 
     const firstRow = baseRows[0];
@@ -256,45 +293,48 @@ const ClaimSection = () => {
           firstRow?.policyNumber ||
             pickValue(applicationInfo ?? {}, ["policyNumber", "policyNo", "policy_number"]) ||
             toText(dataRecord.applicationNumber),
-          DUMMY_READONLY_FIELDS.policyNumber,
+          DEFAULT_CLAIM_FORM.policyNumber,
         ),
       productCode:
         getTextOrFallback(
           firstRow?.productCode ||
             pickValue(firstProduct ?? {}, ["productCode", "code", "product_code"]),
-          DUMMY_READONLY_FIELDS.productCode,
+          DEFAULT_CLAIM_FORM.productCode,
         ),
-      claimKey: "",
+      claimKey: getTextOrFallback(firstRow?.claimKey || "", DEFAULT_CLAIM_FORM.claimKey),
       canonicalId: getTextOrFallback(
         firstRow?.canonicalId || toText(dataRecord.applicationNumber),
-        DUMMY_READONLY_FIELDS.canonicalId,
+        DEFAULT_CLAIM_FORM.canonicalId,
       ),
       patientName: getTextOrFallback(
         firstRow?.patientName || derivedPatientName,
-        DUMMY_READONLY_FIELDS.patientName,
+        DEFAULT_CLAIM_FORM.patientName,
       ),
       ailmentForCommunication: getTextOrFallback(
         firstRow?.ailmentForCommunication || "",
-        DUMMY_READONLY_FIELDS.ailmentForCommunication,
+        DEFAULT_CLAIM_FORM.ailmentForCommunication,
       ),
-      claimType: "",
-      subType: getTextOrFallback(firstRow?.subType || "", DUMMY_READONLY_FIELDS.subType),
+      claimType: getTextOrFallback(firstRow?.claimType || "", DEFAULT_CLAIM_FORM.claimType),
+      subType: getTextOrFallback(firstRow?.subType || "", DEFAULT_CLAIM_FORM.subType),
       intimationDate:
         toDateInputValue(firstRow?.intimationDate || dataRecord.submitDate) ||
-        DUMMY_READONLY_FIELDS.intimationDate,
+        DEFAULT_CLAIM_FORM.intimationDate,
       doa:
         toDateInputValue(firstRow?.doa || dataRecord.submitDate) ||
-        DUMMY_READONLY_FIELDS.doa,
+        DEFAULT_CLAIM_FORM.doa,
       dod:
         toDateInputValue(firstRow?.dod || dataRecord.submitDate) ||
-        DUMMY_READONLY_FIELDS.dod,
-      decisionStatus: "",
+        DEFAULT_CLAIM_FORM.dod,
+      decisionStatus: getTextOrFallback(
+        firstRow?.decisionStatus || "",
+        DEFAULT_CLAIM_FORM.decisionStatus,
+      ),
     };
   }, [baseRows, dataRecord]);
 
   const [addedRows, setAddedRows] = useState<ClaimRow[]>([]);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [form, setForm] = useState<AddClaimForm>(emptyClaimForm);
+  const [form, setForm] = useState<AddClaimForm>({ ...DEFAULT_CLAIM_FORM });
 
   const rows = useMemo(() => [...addedRows, ...baseRows], [addedRows, baseRows]);
 
@@ -323,9 +363,9 @@ const ClaimSection = () => {
 
   return (
      <>
-      <Box sx={{ mt: 2,p:1 }}>
-        <CustomAccordion title="Claims Section" defaultExpanded>
-          <Box sx={{ p: 1 }}>
+      <Box sx={{ mt: 1 }}>
+        {/* <CustomAccordion title="Claims Section" defaultExpanded> */}
+          <Box>
             <CustomTable<ClaimRow>
               title="Claims Section"
               columns={claimsColumns}
@@ -371,7 +411,7 @@ const ClaimSection = () => {
               </Box>
             )}
           </Box>
-        </CustomAccordion>
+        {/* </CustomAccordion> */}
       </Box>
 
       <CustomDialog
@@ -418,12 +458,11 @@ const ClaimSection = () => {
                 fullWidth
                 size="small"
                 type={field.type}
-                value={form[field.key]}
+                // value={form[field.key]}
                 onChange={(event) => handleFormChange(field.key, event.target.value)}
-                disabled={!field.editable}
-                placeholder={field.editable ? "Enter value" : ""}
+                placeholder="Enter value"
                 sx={{
-                  backgroundColor: field.editable ? "#f8f8f8" : "#f0f0f0",
+                  backgroundColor: "#f8f8f8",
                   "& .MuiInputBase-input": {
                     fontSize: "12px",
                     py: 0.8,

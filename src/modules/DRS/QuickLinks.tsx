@@ -353,7 +353,7 @@ const QuickLinks = ({
             path: "",
             onClick: () => setOpenSummaryDialog(true),
         },
-      
+
         // {
         //     label: "Requirement Management",
         //     path: "",
@@ -368,7 +368,7 @@ const QuickLinks = ({
         //         onDecisionHistoryClick ??
         //         (() => window.dispatchEvent(new CustomEvent("open-decision-history"))),
         // },
-        ...(roleType !== 'DVT_FORMAL_TASK' ? [
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== 'PIVV_TASK' ? [
             {
                 label: "Proposal Form & Documents",
                 path: proposerFormLink,
@@ -377,7 +377,7 @@ const QuickLinks = ({
                     : undefined,
             },
         ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" ? [
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' ? [
             {
                 label: "Previous Policies",
                 path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "",
@@ -387,7 +387,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" ? [
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' ? [
             {
                 label: "Open Tasks",
                 path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "",
@@ -397,7 +397,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" ? [
+        ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' ? [
             {
                 label: "Risk Details",
                 path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "",
@@ -407,7 +407,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" ? [
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "VENDOR_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' ? [
 
             {
                 label: "Audit Trail",
@@ -435,11 +435,14 @@ const QuickLinks = ({
                 },
             ]
             : []),
-              {
-            label: "Raise Grievance",
-            path: "",
-            onClick: () => setOpenRaiseGrievanceDialog(true),
-        },
+
+        ...(roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' ? [
+            {
+                label: "Raise Grievance",
+                path: "",
+                onClick: () => setOpenRaiseGrievanceDialog(true),
+            },
+        ] : []),
     ];
 
     const toggleQuickLinks = useCallback(() => {

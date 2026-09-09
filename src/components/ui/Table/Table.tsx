@@ -59,7 +59,6 @@ export default function CustomTable<T extends object>({
           <Typography sx={{ fontSize: "12px", fontWeight: 700 }}>
             {title}
           </Typography>
-          {headerAction}
           {headerAction && <Box>{headerAction}</Box>}
         </Box>
       )}

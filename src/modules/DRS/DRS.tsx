@@ -850,6 +850,11 @@ import RaiseGrievance from "./RaiseGrievance";
 import VendorCMOApplicationSummary from "./VendorCMOApplicationSummary";
 import RefCMOApplicationSummary from "./RefCMOApplicationSummary";
 import HOCMOApplicationSummary from "./HOCMOApplicationSummary";
+import PIVVDrs from "./PIVVDrs";
+import ClaimAudit from "./ClaimAudit";
+import SrUWDrs from "./SrUWDrs";
+import HodDrs from "./HodDrs";
+import MAS from "./MAS";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -1594,11 +1599,26 @@ const DRS = () => {
           sx={{
             display: "flex",
             flexDirection: "column",
-            gap: 1,
+            // gap: 1,
             pb: 1,
           }}
         >
           {
+            normalizeValue(roleType) === "MAS_TASK" ? (
+              <MAS />
+            ) :
+            normalizeValue(roleType) === "HOD_TASK" ? (
+              <HodDrs />
+            ) :
+            normalizeValue(roleType) === "SR_UW_TASK" ? (
+              <SrUWDrs />
+            ) :
+            normalizeValue(roleType) === "CUW_CLAIM_AUDIT_TASK" ? (
+              <ClaimAudit />
+            ) :
+            normalizeValue(roleType) === "PIVV_TASK" ? (
+              <PIVVDrs />
+            ) :
             normalizeValue(roleType) === "RAISE_GRIEVANCE_TASK" ? (
               <RaiseGrievance />
             ) :
