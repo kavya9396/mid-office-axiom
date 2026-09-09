@@ -833,6 +833,7 @@ interface ApplicationSummaryBannerProps {
   name: string;
   appNo: string;
   personalSummary: string;
+  parameters: string;
   productName: string;
   policyTerm: string;
   premiumTerm: string;
@@ -855,6 +856,7 @@ const ApplicationSummaryBanner = ({
   image,
   name,
   personalSummary,
+  parameters,
   productName,
   policyTerm,
   premiumTerm,
@@ -972,7 +974,7 @@ const ApplicationSummaryBanner = ({
               whiteSpace: "nowrap",
             }}
           >
-            {name}
+            Rudra Prakash Sangha
           </Typography>
 
           <Typography
@@ -1169,6 +1171,50 @@ const ApplicationSummaryBanner = ({
               View details <KeyRightArrowIcon />
             </Box>
           )}
+        </Box>
+
+        {/* ================================================================ */}
+        {/* ELIGIBILTY PARAMETERS                                            */}
+        {/* ================================================================ */}
+
+        <Box
+          sx={{
+            mt: 0.45,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 0.35,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#000",
+              fontSize: {
+                xs: 10,
+                sm: 11.5,
+              },
+              lineHeight: 1.65,
+              fontWeight: 800,
+            }}
+          >
+            Eligibility Parameters:
+              <Typography
+              component="span"
+          sx={{
+            color: "#000",
+            fontSize: {
+              xs: 10,
+              sm: 11.5,
+            },
+            lineHeight: 1.6,
+            fontWeight: 500,
+            overflowWrap: "anywhere",
+            ml:1
+          }}
+        >
+          {parameters || "-"}
+        </Typography>
+          </Typography>
         </Box>
       </Box>
     </Box>
@@ -1910,21 +1956,46 @@ const ApplicantApplicationSummary = ({
   );
 
   const personalSummary = [
-    text(personal.maritalStatus ?? applicantDetails.maritalStatus),
+    // text(personal.maritalStatus ?? applicantDetails.maritalStatus),
 
-    age ? text(age) : "-",
+    // age ? text(age) : "-",
+    "Married",
+    "Male",
+    "40",
+    "Graduate",
+    "Salaried",
+    "₹10,00,000",
+    "Pune, Maharashtra",
+    "Indian",
+    "India",
 
-    text(personal.gender ?? applicantDetails.gender),
+    // text(personal.gender ?? applicantDetails.gender),
 
-    text(personal.education ?? applicantDetails.education),
+    // text(personal.education ?? applicantDetails.education),
 
-    annualIncomeForBanner !== "-" ? `${annualIncomeForBanner} p.a.` : "-",
+    // annualIncomeForBanner !== "-" ? `${annualIncomeForBanner} p.a.` : "-",
 
-    address,
+    // address,
 
-    text(personal.nationality ?? applicantDetails.nationality),
+    // text(personal.nationality ?? applicantDetails.nationality),
 
-    text(personal.residentStatus ?? personal.countryOfResidence),
+    // text(personal.residentStatus ?? personal.countryOfResidence),
+  ]
+    .filter((value) => value !== "-")
+    .join(" / ");
+
+  const parameters = [
+    "TSA - ₹10,00,000",
+    "TRSA - ₹5,00,000",
+    "TPSA - ₹10,00,000",
+    "TFSA - ₹10,00,000",
+    "TSSA - ₹10,00,000",
+    "ADBR TSA - ₹5,00,000",
+    "ATPD TSA - ₹5,00,000",
+    "CI Rider TSA - ₹3,00,000",
+    "CI Rider TRSA - ₹3,00,000",
+    "WOP TSA - ₹10,00,000",
+    "BTBB TSA - ₹5,00,000",
   ]
     .filter((value) => value !== "-")
     .join(" / ");
@@ -2430,6 +2501,7 @@ const ApplicantApplicationSummary = ({
             name={name}
             appNo={appNo}
             personalSummary={personalSummary}
+            parameters={parameters}
             productName={productName}
             policyTerm={policyTerm}
             premiumTerm={premiumTerm}
