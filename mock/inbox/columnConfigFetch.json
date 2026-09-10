@@ -17,6 +17,27 @@
     "atRiskTime",
     "businessType",
     "role",
-    "roleType"
+    "roleType",
+    "appliedSa",
+    "annualPremium",
+    "productType",
+    "isMedical",
+     "drc",
+        "hniFlag",
+        "channel",
+        "breDecision",
+        "munichReMedicalDecision",
+        "ptlr",
+        "roleType",
+        "role",
+        "businessType",
+        "state",
+        "dateAndTimeStamp",
+        "displayName",
+        "tsa",
+        "productCode",
+        "breOverallDecision",
+        "policyType",
+        "priorityFlag"
   ]
 }
