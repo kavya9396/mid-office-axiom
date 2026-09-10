@@ -1,4 +1,4 @@
-import { Alert, Box, Snackbar, Typography } from "@mui/material"
+import { Alert, Box, Snackbar, TextField, Typography } from "@mui/material"
 //import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -370,8 +370,6 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
             : "BRE-RETAIL";
 
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
-    const [financialDecision, setFinancialDecision] = useState("");
-    const [medicalDecision, setMedicalDecision] = useState("");
     const [caseUWDecision, setCaseUWDecision] = useState("");
     const [uwDecisionDialogOpen, setUwDecisionDialogOpen] = useState(false);
     const [outlier, setOutlier] = useState("");
@@ -570,30 +568,23 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
         masters,
     ]);
 
-    // Keep the two permitted labels while preserving configured API codes.
-    const buildAssessmentOptions = (types: string[]) => {
-        const configured = getDecisionOptionsByType(masters, types);
-        return ["Standard", "Non Standard"].map((label) => {
-            const normalize = (value: string) => value.replace(/[\s_-]+/g, "").toUpperCase();
-            const match = configured.find((option) => normalize(option.label) === normalize(label));
-            return { label, value: match?.value ?? label };
-        });
+    const financialDecisionLabel = "Financially Eligible";
+    const medicalDecisionLabel = "Standard";
+
+    // Preserve configured API codes for the fixed, read-only decisions.
+    const getAssessmentValue = (label: string, types: string[]) => {
+        const normalize = (value: string) =>
+            value.replace(/[\s_-]+/g, "").toUpperCase();
+        return getDecisionOptionsByType(masters, types).find(
+            (option) => normalize(option.label) === normalize(label),
+        )?.value ?? label;
     };
-    const financialDecisionOptions = buildAssessmentOptions([
+    const financialDecision = getAssessmentValue(financialDecisionLabel, [
         "FIN_DEC", "FINANCIAL_DEC", "FINANCIAL_DECISION", "FIN_UW_DEC",
     ]);
-    const medicalDecisionOptions = buildAssessmentOptions([
+    const medicalDecision = getAssessmentValue(medicalDecisionLabel, [
         "MED_DEC", "MEDICAL_DEC", "MEDICAL_DECISION", "MED_UW_DEC",
     ]);
-
-    const financialDecisionLabel = toMasterLabel(
-        financialDecision,
-        financialDecisionOptions,
-    );
-    const medicalDecisionLabel = toMasterLabel(
-        medicalDecision,
-        medicalDecisionOptions,
-    );
 
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
@@ -1469,8 +1460,6 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
     );
 
     const clearUnsavedDecisionFlow = () => {
-        setFinancialDecision("");
-        setMedicalDecision("");
         setCaseUWDecision("");
         setUwDecisionRemarks("");
         resetCaseUWDecisionDependentFields();
@@ -1603,18 +1592,30 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                     },
                 }}
             >
-                <CustomSelect
-                    label="Financial Decision"
-                    value={financialDecision}
-                    onChange={setFinancialDecision}
-                    options={financialDecisionOptions}
-                />
-                <CustomSelect
-                    label="Medical Decision"
-                    value={medicalDecision}
-                    onChange={setMedicalDecision}
-                    options={medicalDecisionOptions}
-                />
+                <Box>
+                    <Typography component="label" htmlFor="financial-decision" sx={{ display: "block", mb: 0.5 }}>
+                        Financial Decision
+                    </Typography>
+                    <TextField
+                        id="financial-decision"
+                        value={financialDecisionLabel}
+                        size="small"
+                        fullWidth
+                        slotProps={{ input: { readOnly: true } }}
+                    />
+                </Box>
+                <Box>
+                    <Typography component="label" htmlFor="medical-decision" sx={{ display: "block", mb: 0.5 }}>
+                        Medical Decision
+                    </Typography>
+                    <TextField
+                        id="medical-decision"
+                        value={medicalDecisionLabel}
+                        size="small"
+                        fullWidth
+                        slotProps={{ input: { readOnly: true } }}
+                    />
+                </Box>
                 <CustomSelect
                     label={memberLabel
                         ? `Case UW Decision - ${memberLabel}`

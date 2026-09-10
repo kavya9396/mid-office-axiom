@@ -1,4 +1,4 @@
-import { Box, Typography } from "@mui/material";
+import { Box, IconButton, SvgIcon, Tooltip, Typography } from "@mui/material";
 import { useState, type KeyboardEvent, type ReactNode } from "react";
 
 import CustomDialog from "../../components/ui/Dialog/Dialog";
@@ -22,6 +22,8 @@ interface DisplayMember {
   name: string;
   demographics: string[];
   decision: string;
+  decisionCode: string;
+  reason: string;
 }
 
 interface RiderSummary {
@@ -219,6 +221,7 @@ const MemberSelection = ({
   onMemberSelect,
   stickyTop = 0,
 }: MemberSelectionProps) => {
+  const [selectedDecision, setSelectedDecision] = useState<DisplayMember | null>(null);
   const [riderDialogOpen, setRiderDialogOpen] = useState(false);
   const data = toRecord(source);
   const applicationOverview = toRecord(data.applicationOverview);
@@ -285,6 +288,18 @@ const MemberSelection = ({
       name: getFullName(member),
       demographics,
       decision: getMemberDecision(member),
+      decisionCode: displayText(
+        toRecord(member.uwDecision).decisionCode,
+        member.decisionCode,
+        toRecord(member.underwriting).decisionCode,
+      ),
+      reason: displayText(
+        toRecord(member.uwDecision).reason,
+        toRecord(member.uwDecision).decisionReason,
+        member.reason,
+        member.decisionReason,
+        toRecord(member.underwriting).reason,
+      ),
     };
   });
 
@@ -301,53 +316,30 @@ const MemberSelection = ({
     applicationOverview.productName,
     applicationOverview.product,
   );
-  const policyTerm = displayText(
-    baseProduct.policyTerm,
-    baseProduct.term,
-    applicationOverview.policyTerm,
-  );
-  const premiumTerm = displayText(
-    baseProduct.premiumPaymentTerm,
-    baseProduct.ppt,
-    applicationOverview.premiumPaymentTerm,
-  );
   const sumAssured = currency(
     baseProduct.sumAssured,
     baseProduct.appliedSA,
     applicationOverview.sumAssured,
     applicationOverview.appliedSa,
   );
-  const tsa = currency(
-    baseProduct.tsa,
-    baseProduct.totalSumAssured,
-    applicationOverview.tsa,
-    applicationOverview.totalSumAssured,
-  );
-  const tfsa = currency(
-    baseProduct.tfsa,
-    baseProduct.totalFaceSumAssured,
-    applicationOverview.tfsa,
-    applicationOverview.totalFaceSumAssured,
-  );
-  const tssa = currency(
-    baseProduct.tssa,
-    baseProduct.totalSumAssuredAdditional,
-    applicationOverview.tssa,
-    applicationOverview.totalSumAssuredAdditional,
-  );
-  const tpsa = currency(
-    baseProduct.tpsa,
-    baseProduct.totalPremiumSumAssured,
-    applicationOverview.tpsa,
-    applicationOverview.totalPremiumSumAssured,
-  );
-  const coverageItems = [
-    `SA - ${sumAssured}`,
-    tsa !== "-" ? `TSA - ${tsa}` : null,
-    tfsa !== "-" ? `TFSA - ${tfsa}` : null,
-    tssa !== "-" ? `TSSA - ${tssa}` : null,
-    tpsa !== "-" ? `TPSA - ${tpsa}` : null,
-  ].filter(Boolean) as string[];
+  const channel = displayText(applicationOverview.channel, data.channel, "Agency");
+
+  const parameters = [
+    "TSA - ₹10,00,000",
+    "TRSA - ₹5,00,000",
+    "TPSA - ₹10,00,000",
+    "TFSA - ₹10,00,000",
+    "TSSA - ₹10,00,000",
+    "ADBR TSA - ₹5,00,000",
+    "ATPD TSA - ₹5,00,000",
+    "CI Rider TSA - ₹3,00,000",
+    "CI Rider TRSA - ₹3,00,000",
+    "WOP TSA - ₹10,00,000",
+    "BTBB TSA - ₹5,00,000",
+    "Total Premium - ₹10,000"
+  ]
+    .filter((value) => value !== "-")
+    .join(" / ");
 
   const handleRowKeyDown = (
     event: KeyboardEvent<HTMLElement>,
@@ -385,159 +377,55 @@ const MemberSelection = ({
         <Box
           sx={{
             width: "100%",
+            boxSizing: "border-box",
             bgcolor: "#FFEAD7",
             color: "#000000",
-            borderRadius: "12px",
-            overflow: "hidden",
-            boxShadow: "0 3px 10px rgba(169, 33, 41, 0.16)",
+            borderLeft: "1px solid #E45F14",
+            borderRadius: "0 0 12px 0",
+            px: { xs: 1.5, sm: 2.2 },
+            py: 0.5,
           }}
         >
-          <Box
+          <Typography
             sx={{
-              minWidth: 0,
-              px: { xs: 1.2, sm: 2.2 },
-              py: { xs: 1, sm: 1.45 },
+              fontSize: { xs: 10, sm: 11.5 },
+              lineHeight: 1.65,
+              fontWeight: 700,
+              overflowWrap: "anywhere",
             }}
           >
-            <Box
-              sx={{
-                display: "grid",
-                gridTemplateColumns: "minmax(0, 1fr) auto",
-                alignItems: "start",
-                gap: { xs: 0.75, sm: 1.25 },
-              }}
-            >
-              <Typography
-                sx={{
-                  minWidth: 0,
-                  color: "#000000",
-                  fontSize: { xs: 10, sm: 11.5 },
-                  lineHeight: 1.65,
-                  fontWeight: 800,
-                  overflowWrap: "anywhere",
-                }}
-              >
-                Product:{" "}
-                <Box component="span" sx={{ color: "#000000", fontWeight: 700 }}>
-                  {productName}
-                </Box>
-                {" / "}
-                Policy Term:{" "}
-                <Box component="span" sx={{ color: "#000000", fontWeight: 700 }}>
-                  {policyTerm}
-                </Box>
-                {" / "}
-                Premium Term:{" "}
-                <Box component="span" sx={{ color: "#000000", fontWeight: 700 }}>
-                  {premiumTerm}
-                </Box>
-                {coverageItems.map((item) => (
-                  <Box
-                    component="span"
-                    key={item}
-                    sx={{ color: "#000000", fontWeight: 700 }}
-                  >
-                    {" / "}
-                    {item}
-                  </Box>
-                ))}
-              </Typography>
-
-              <Typography
-                sx={{
-                  flexShrink: 0,
-                  px: 1.1,
-                  py: 0.45,
-                  borderRadius: "16px",
-                  bgcolor: "#FFFFFF",
-                  border: "1px solid rgba(169,33,41,.18)",
-                  color: "#A92129",
-                  fontSize: { xs: 11, sm: 13 },
-                  fontWeight: 900,
-                  whiteSpace: "nowrap",
-                }}
-              >
-                App No. - OB90377122
-              </Typography>
+            <Box component="span" sx={{ fontWeight: 800 }}>Product:</Box>{" "}
+            {productName} / <Box component="span" sx={{ fontWeight: 800 }}>Channel:</Box>{" "}
+            {channel} / SA - {sumAssured}
+          </Typography>
+          <Typography
+            sx={{
+              mt: 0.45,
+              fontSize: { xs: 10, sm: 11.5 },
+              lineHeight: 1.65,
+              fontWeight: 500,
+              overflowWrap: "anywhere",
+            }}
+          >
+            <Box component="span" sx={{ fontWeight: 800 }}>Riders:</Box>{" "}
+            {riders.length > 0
+              ? riders.map((rider) => `${rider.name} - SA ${rider.sumAssured}`).join(" / ")
+              : "No riders"}
+          </Typography>
+          <Typography
+            sx={{
+              mt: 0.45,
+              fontSize: { xs: 10, sm: 11.5 },
+              lineHeight: 1.65,
+              fontWeight: 500,
+              overflowWrap: "anywhere",
+            }}
+          >
+            <Box component="span" sx={{ fontWeight: 800, mr: 1 }}>
+              Eligibility Parameters:
             </Box>
-
-            <Box
-              sx={{
-                mt: 0.45,
-                display: "flex",
-                alignItems: "flex-start",
-                gap: 0.35,
-                flexWrap: "wrap",
-              }}
-            >
-              <Typography
-                sx={{
-                  color: "#000000",
-                  fontSize: { xs: 10, sm: 11.5 },
-                  lineHeight: 1.65,
-                  fontWeight: 800,
-                }}
-              >
-                Riders:
-              </Typography>
-
-              {riders.length > 0 ? (
-                <Typography
-                  sx={{
-                    flex: 1,
-                    minWidth: 0,
-                    color: "#000000",
-                    fontSize: { xs: 10, sm: 11.5 },
-                    lineHeight: 1.65,
-                    fontWeight: 600,
-                    overflowWrap: "anywhere",
-                  }}
-                >
-                  {riders.map((rider, index) => (
-                    <Box component="span" key={rider.key}>
-                      {rider.name} - SA {rider.sumAssured}
-                      {index < riders.length - 1 ? " / " : ""}
-                    </Box>
-                  ))}
-                </Typography>
-              ) : (
-                <Typography
-                  sx={{
-                    color: "#000000",
-                    fontSize: { xs: 10, sm: 11.5 },
-                    lineHeight: 1.65,
-                    fontWeight: 600,
-                  }}
-                >
-                  No riders
-                </Typography>
-              )}
-
-              {/* {riders.length > 0 && (
-                <Box
-                  component="button"
-                  type="button"
-                  onClick={() => setRiderDialogOpen(true)}
-                  sx={{
-                    border: 0,
-                    p: 0,
-                    ml: 0.5,
-                    mt: 0.15,
-                    bgcolor: "transparent",
-                    color: "#A92129",
-                    fontSize: 9,
-                    fontWeight: 900,
-                    cursor: "pointer",
-                    fontFamily: "inherit",
-                    whiteSpace: "nowrap",
-                    "&:hover": { textDecoration: "underline" },
-                  }}
-                >
-                  View details <KeyRightArrowIcon />
-                </Box>
-              )} */}
-            </Box>
-          </Box>
+            {parameters}
+          </Typography>
         </Box>
       </Box>
 
@@ -600,16 +488,11 @@ const MemberSelection = ({
           return (
             <Box
               key={member.key}
-              role="button"
-              tabIndex={0}
-              aria-label={`Open ${member.type} ${member.name}`}
-              onClick={() => onMemberSelect(member.index)}
-              onKeyDown={(event) => handleRowKeyDown(event, member.index)}
               sx={{
                 display: "grid",
                 gridTemplateColumns: {
-                  xs: "minmax(0,1fr) auto",
-                  md: "150px 220px minmax(0,1fr) 150px 34px",
+                  xs: "minmax(0,1fr) 34px",
+                  md: "minmax(0,1fr) 150px 34px",
                 },
                 gap: { xs: 0.75, md: 1 },
                 alignItems: "center",
@@ -617,7 +500,7 @@ const MemberSelection = ({
                 py: 1,
                 borderBottom:
                   rowIndex < members.length - 1 ? "1px solid #EEE9E6" : 0,
-                cursor: "pointer",
+                cursor: "default",
                 transition: "background-color .15s ease, transform .15s ease",
                 outline: "none",
                 "&:hover": { bgcolor: "#FFF9F5" },
@@ -627,6 +510,25 @@ const MemberSelection = ({
                 },
               }}
             >
+              <Box
+              role="button"
+              tabIndex={0}
+              aria-label={`Open ${member.type} ${member.name}`}
+              onClick={() => onMemberSelect(member.index)}
+              onKeyDown={(event) => handleRowKeyDown(event, member.index)}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: { xs: "1fr", md: "150px 220px minmax(0,1fr)" },
+                  gridColumn: { xs: "1 / -1", md: "auto" },
+                  gap: 1,
+                  alignItems: "center",
+                  minWidth: 0,
+                  alignSelf: "stretch",
+                  cursor: "pointer",
+                  borderRadius: 1,
+                  "&:focus-visible": { outline: "2px solid #E45F14", outlineOffset: 2 },
+                }}
+              >
               <Box
                 sx={{
                   width: "fit-content",
@@ -678,6 +580,8 @@ const MemberSelection = ({
                 {member.demographics.join(" / ") || "Details unavailable"}
               </Typography>
 
+              </Box>
+
               <Box
                 sx={{
                   width: "fit-content",
@@ -704,18 +608,50 @@ const MemberSelection = ({
                 </Typography>
               </Box>
 
-              <Typography
-                aria-hidden="true"
-                sx={{ color: "#A92129", fontSize: 22, fontWeight: 700, textAlign: "center" }}
-              >
-                ›
-              </Typography>
+              <Tooltip title="View UW decision details">
+                <IconButton
+                  size="small"
+                  aria-label={`View UW decision details for ${member.type} ${member.name}`}
+                  aria-haspopup="dialog"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    setSelectedDecision(member);
+                  }}
+                  sx={{ color: "#A92129", "&:hover": { bgcolor: "#FFEAD7" } }}
+                >
+                  <SvgIcon fontSize="small">
+                    <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5C21.27 7.61 17 4.5 12 4.5zm0 12.5a5 5 0 1 1 0-10 5 5 0 0 1 0 10zm0-8a3 3 0 1 0 0 6 3 3 0 0 0 0-6z" />
+                  </SvgIcon>
+                </IconButton>
+              </Tooltip>
             </Box>
           );
         })}
       </Box>
 
       </Box>
+
+      <CustomDialog
+        open={selectedDecision !== null}
+        onClose={() => setSelectedDecision(null)}
+        title="UW Decision Details"
+        maxWidth="sm"
+        fullWidth
+      >
+        {selectedDecision && (
+          <Box sx={{ display: "grid", gap: 1 }}>
+            <Typography sx={{ bgcolor: "#E45F14", color: "#FFFFFF", p: 1, borderRadius: 1, fontSize: 13, fontWeight: 800 }}>
+              UW Decision — {selectedDecision.type}
+            </Typography>
+            <Typography sx={{ color: "#5C514C", fontSize: 12 }}>
+              {selectedDecision.name}
+            </Typography>
+            <CompactField label="UW Decision" value={selectedDecision.decision} />
+            <CompactField label="Decision Code" value={selectedDecision.decisionCode} />
+            <CompactField label="Reason" value={selectedDecision.reason} />
+          </Box>
+        )}
+      </CustomDialog>
 
       <CustomDialog
         open={riderDialogOpen}

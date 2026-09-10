@@ -857,8 +857,6 @@ const ApplicationSummaryBanner = ({
   personalSummary,
   parameters,
   productName,
-  policyTerm,
-  premiumTerm,
   sumAssured,
   tsa,
   tfsa,
