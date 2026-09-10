@@ -855,6 +855,10 @@ import ClaimAudit from "./ClaimAudit";
 import SrUWDrs from "./SrUWDrs";
 import HodDrs from "./HodDrs";
 import MAS from "./MAS";
+import GroupVendorCMOApplicationSummary from "./Group/GroupVendorCMOApplicationSummary";
+import GroupHOCMOApplicationSummary from "./Group/GroupHOCMOApplicationSummary";
+import GroupRefCMOApplicationSummary from "./Group/GroupRefCMOApplicationSummary";
+import GroupGrievance from "./Group/GroupGrievance";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -1604,6 +1608,18 @@ const DRS = () => {
           }}
         >
           {
+            normalizeValue(roleType) === "GROUP_GRIEVANCE_TASK" ? (
+              <GroupGrievance />
+            ) :
+            normalizeValue(roleType) === "GROUP_REF_CMO_TASK" ? (
+              <GroupRefCMOApplicationSummary />
+            ) :
+            normalizeValue(roleType) === "GROUP_CMO_TASK" ? (
+              <GroupHOCMOApplicationSummary />
+            ) :
+            normalizeValue(roleType) === "GROUP_VENDOR_CMO_TASK" ? (
+              <GroupVendorCMOApplicationSummary />
+            ) :
             normalizeValue(roleType) === "MAS_TASK" ? (
               <MAS />
             ) :

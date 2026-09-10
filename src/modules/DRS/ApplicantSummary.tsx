@@ -778,8 +778,8 @@ const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) =
     }}
   >
     {[
-      { label: "SDT Decision", value: decision },
-      { label: "SDT Remarks", value: remarks },
+      { label: "BRE Overall Decision", value: decision },
+      { label: "BRE Overall Remarks", value: remarks },
       // { label: "SDT Timestamp", value: timestamp },
     ].map(({ label, value }, index) => (
       <Box
@@ -1045,7 +1045,7 @@ const ApplicationSummaryBanner = ({
             {productName}
           </Box>
           {" / "}
-          Policy Term:{" "}
+          Channel:{" "}
           <Box
             component="span"
             sx={{
@@ -1053,18 +1053,7 @@ const ApplicationSummaryBanner = ({
               fontWeight: 700,
             }}
           >
-            {policyTerm}
-          </Box>
-          {" / "}
-          Premium Term:{" "}
-          <Box
-            component="span"
-            sx={{
-              color: "#000",
-              fontWeight: 700,
-            }}
-          >
-            {premiumTerm}
+            Agency
           </Box>
           {coverageItems.map((item) => (
             <Box
@@ -1996,6 +1985,7 @@ const ApplicantApplicationSummary = ({
     "CI Rider TRSA - ₹3,00,000",
     "WOP TSA - ₹10,00,000",
     "BTBB TSA - ₹5,00,000",
+    "Total Premium - ₹10,000"
   ]
     .filter((value) => value !== "-")
     .join(" / ");
