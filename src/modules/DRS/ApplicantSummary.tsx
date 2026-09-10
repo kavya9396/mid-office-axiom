@@ -12,7 +12,6 @@ import { useNavigate } from "react-router-dom";
 
 // import CustomAccordion from "../../components/ui/Accordion/Accordion";
 import CustomDialog from "../../components/ui/Dialog/Dialog";
-import CustomButton from "../../components/ui/Button/Button";
 import CustomTable, {
   type Column,
 } from "../../components/ui/Table/Table";
@@ -755,7 +754,7 @@ const DashboardCard = ({
   </Box>
 );
 
-const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) => (
+const SdtReadonlyRow = ({ decision, remarks }: SdtReadonlyRowProps) => (
   <Box
     role="group"
     aria-label="SDT decision details"
@@ -1947,13 +1946,13 @@ const ApplicantApplicationSummary = ({
   /* PERSONAL SUMMARY FOR BANNER                                             */
   /* ------------------------------------------------------------------------ */
 
-  const annualIncomeForBanner = currency(
-    firstValue(
-      finance.annualIncome,
-      financialDetails.annualIncome,
-      personalDetails.netIncomeAmt,
-    ),
-  );
+  // const annualIncomeForBanner = currency(
+  //   firstValue(
+  //     finance.annualIncome,
+  //     financialDetails.annualIncome,
+  //     personalDetails.netIncomeAmt,
+  //   ),
+  // );
 
   const personalSummary = [
     // text(personal.maritalStatus ?? applicantDetails.maritalStatus),
