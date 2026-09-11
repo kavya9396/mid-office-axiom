@@ -25,37 +25,10 @@ type ClaimRow = {
 
 type AddClaimForm = ClaimRow;
 
-const claimsColumns: Column<ClaimRow>[] = [
-  {
-    key: "policyNumber",
-    header: "Policy Number",
-    width: "12%",
-    render: (value) => (
-      <Typography
-        sx={{
-          color: "#004A80",
-          textDecoration: "underline",
-          fontSize: "12px",
-          fontWeight: 500,
-          cursor: "pointer",
-        }}
-      >
-        {String(value || "-")}
-      </Typography>
-    ),
-  },
-  { key: "productCode", header: "Product Code", width: "8%" },
-  { key: "claimKey", header: "Claim Key", width: "10%" },
-  { key: "canonicalId", header: "Canonical ID", width: "12%" },
-  { key: "patientName", header: "Patient Name", width: "12%" },
-  { key: "ailmentForCommunication", header: "Ailment For Communication", width: "20%" },
-  { key: "claimType", header: "Claim Type", width: "10%" },
-  { key: "subType", header: "Sub Type", width: "8%" },
-  { key: "intimationDate", header: "Intimation Date", width: "11%" },
-  { key: "doa", header: "DOA", width: "10%" },
-  { key: "dod", header: "DOD", width: "10%" },
-  { key: "decisionStatus", header: "Decision Status", width: "11%" },
-];
+type EditTarget =
+  | { source: "added"; index: number }
+  | { source: "base"; index: number }
+  | null;
 
 const SAMPLE_CLAIM_ROWS: ClaimRow[] = [
   {
@@ -89,33 +62,19 @@ const SAMPLE_CLAIM_ROWS: ClaimRow[] = [
 ];
 
 const DEFAULT_CLAIM_FORM: AddClaimForm = {
-  policyNumber: "",
-  productCode: "",
-  claimKey: "",
-  canonicalId: "",
-  patientName: "",
-  ailmentForCommunication: "",
-  claimType: "",
-  subType: "",
-  intimationDate: "",
-  doa: "",
-  dod: "",
-  decisionStatus: "",
+  policyNumber: "POL45678901",
+  productCode: "ULIP",
+  claimKey: "CLM1003",
+  canonicalId: "CANON003",
+  patientName: "Aarav Shah",
+  ailmentForCommunication: "Accidental injury",
+  claimType: "Cashless",
+  subType: "Accident",
+  intimationDate: "2026-09-01",
+  doa: "2026-09-02",
+  dod: "2026-09-06",
+  decisionStatus: "Pending",
 };
-// const DEFAULT_CLAIM_FORM: AddClaimForm = {
-//   policyNumber: "POL45678901",
-//   productCode: "ULIP",
-//   claimKey: "CLM1003",
-//   canonicalId: "CANON003",
-//   patientName: "Aarav Shah",
-//   ailmentForCommunication: "Accidental injury",
-//   claimType: "Cashless",
-//   subType: "Accident",
-//   intimationDate: "2026-09-01",
-//   doa: "2026-09-02",
-//   dod: "2026-09-06",
-//   decisionStatus: "Pending",
-// };
 
 const toRecord = (value: unknown): Record<string, unknown> | null => {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -333,22 +292,47 @@ const ClaimSection = () => {
   }, [baseRows, dataRecord]);
 
   const [addedRows, setAddedRows] = useState<ClaimRow[]>([]);
-  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [editedBaseRows, setEditedBaseRows] = useState<Record<number, ClaimRow>>({});
+  const [isClaimDialogOpen, setIsClaimDialogOpen] = useState(false);
+  const [editTarget, setEditTarget] = useState<EditTarget>(null);
   const [form, setForm] = useState<AddClaimForm>({ ...DEFAULT_CLAIM_FORM });
 
-  const rows = useMemo(() => [...addedRows, ...baseRows], [addedRows, baseRows]);
+  const rows = useMemo(
+    () => [
+      ...addedRows,
+      ...baseRows.map((row, index) => editedBaseRows[index] ?? row),
+    ],
+    [addedRows, baseRows, editedBaseRows],
+  );
 
   const isSaveDisabled = useMemo(() => {
     return !(form.claimKey.trim() && form.claimType.trim() && form.decisionStatus.trim());
   }, [form.claimKey, form.claimType, form.decisionStatus]);
 
   const handleOpenAddDialog = () => {
+    setEditTarget(null);
     setForm(autoFormDefaults);
-    setIsAddDialogOpen(true);
+    setIsClaimDialogOpen(true);
   };
 
-  const handleCloseAddDialog = () => {
-    setIsAddDialogOpen(false);
+  const handleOpenEditDialog = (row: ClaimRow, rowIndex: number) => {
+    setEditTarget(
+      rowIndex < addedRows.length
+        ? { source: "added", index: rowIndex }
+        : { source: "base", index: rowIndex - addedRows.length },
+    );
+    setForm({
+      ...row,
+      intimationDate: toDateInputValue(row.intimationDate),
+      doa: toDateInputValue(row.doa),
+      dod: toDateInputValue(row.dod),
+    });
+    setIsClaimDialogOpen(true);
+  };
+
+  const handleCloseClaimDialog = () => {
+    setIsClaimDialogOpen(false);
+    setEditTarget(null);
   };
 
   const handleFormChange = (key: keyof AddClaimForm, value: string) => {
@@ -357,9 +341,68 @@ const ClaimSection = () => {
 
   const handleSaveClaim = () => {
     const nextRow = buildClaimRowFromForm(form);
-    setAddedRows((prev) => [nextRow, ...prev]);
-    setIsAddDialogOpen(false);
+
+    if (editTarget?.source === "added") {
+      setAddedRows((currentRows) =>
+        currentRows.map((row, index) =>
+          index === editTarget.index ? nextRow : row,
+        ),
+      );
+    } else if (editTarget?.source === "base") {
+      setEditedBaseRows((currentRows) => ({
+        ...currentRows,
+        [editTarget.index]: nextRow,
+      }));
+    } else {
+      setAddedRows((currentRows) => [nextRow, ...currentRows]);
+    }
+
+    setIsClaimDialogOpen(false);
+    setEditTarget(null);
   };
+
+  const claimsColumns: Column<ClaimRow>[] = [
+    {
+      key: "policyNumber",
+      header: "Policy Number",
+      width: "12%",
+      render: (value, row, rowIndex) => (
+        <Typography
+          component="button"
+          type="button"
+          onClick={() => handleOpenEditDialog(row, rowIndex)}
+          sx={{
+            p: 0,
+            border: 0,
+            bgcolor: "transparent",
+            color: "#004A80",
+            textDecoration: "underline",
+            fontFamily: "inherit",
+            fontSize: "12px",
+            fontWeight: 500,
+            cursor: "pointer",
+          }}
+        >
+          {String(value || "-")}
+        </Typography>
+      ),
+    },
+    { key: "productCode", header: "Product Code", width: "8%" },
+    { key: "claimKey", header: "Claim Key", width: "10%" },
+    { key: "canonicalId", header: "Canonical ID", width: "12%" },
+    { key: "patientName", header: "Patient Name", width: "12%" },
+    {
+      key: "ailmentForCommunication",
+      header: "Ailment For Communication",
+      width: "20%",
+    },
+    { key: "claimType", header: "Claim Type", width: "10%" },
+    { key: "subType", header: "Sub Type", width: "8%" },
+    { key: "intimationDate", header: "Intimation Date", width: "11%" },
+    { key: "doa", header: "DOA", width: "10%" },
+    { key: "dod", header: "DOD", width: "10%" },
+    { key: "decisionStatus", header: "Decision Status", width: "11%" },
+  ];
 
   return (
      <>
@@ -415,9 +458,13 @@ const ClaimSection = () => {
       </Box>
 
       <CustomDialog
-        open={isAddDialogOpen}
-        onClose={handleCloseAddDialog}
-        title={<Typography sx={{ color: "#0A3E6B", fontSize: "20px", fontWeight: 700 }}>ADD CLAIMS</Typography>}
+        open={isClaimDialogOpen}
+        onClose={handleCloseClaimDialog}
+        title={
+          <Typography sx={{ color: "#0A3E6B", fontSize: "20px", fontWeight: 700 }}>
+            {editTarget ? "EDIT CLAIM" : "ADD CLAIMS"}
+          </Typography>
+        }
         maxWidth="md"
         paperSx={{ backgroundColor: "#f5f5f5" }}
         contentSx={{ pt: 1, pb: 1 }}
@@ -434,7 +481,7 @@ const ClaimSection = () => {
               textTransform: "none",
             }}
           >
-            Save
+            {editTarget ? "Update" : "Save"}
           </CustomButton>
         }
         actionsSx={{ justifyContent: "center", pb: 3 }}
@@ -458,7 +505,7 @@ const ClaimSection = () => {
                 fullWidth
                 size="small"
                 type={field.type}
-                // value={form[field.key]}
+                value={form[field.key]}
                 onChange={(event) => handleFormChange(field.key, event.target.value)}
                 placeholder="Enter value"
                 sx={{

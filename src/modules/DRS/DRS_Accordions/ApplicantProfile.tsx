@@ -1764,7 +1764,9 @@ const ApplicantProfile = ({
     "RISK_TASK",
     "VENDOR_CMO_TASK",
     "PIVV_TASK",
-    "CUW_CLAIM_AUDIT_TASK"
+    "CUW_CLAIM_AUDIT_TASK",
+    "GROUP_VENDOR_CMO_TASK",
+    "GROUP_REF_CMO_TASK"
   ].includes(roleType);
 
   // const canShowRiskAnalytics = ![

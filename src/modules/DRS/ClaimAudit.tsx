@@ -1896,6 +1896,8 @@ import ClaimSection from "./DRS_Accordions/ClaimSection";
 import MemberSelection from "./MemberSeclection";
 import ViewMedical from "./Medical Final/ViewMedical";
 import ViewFinancial from "./Financial/ViewFinancial";
+import { centerFlex } from "../../utils/styles";
+import CustomButton from "../../components/ui/Button/Button";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
@@ -2613,8 +2615,8 @@ const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) =
         }}
     >
         {[
-            { label: "SDT Decision", value: decision },
-            { label: "SDT Remarks", value: remarks },
+            { label: "BRE Overall Decision", value: decision },
+            { label: "BRE Overall Remarks", value: remarks },
             // { label: "SDT Timestamp", value: timestamp },
         ].map(({ label, value }, index) => (
             <Box
@@ -2668,6 +2670,7 @@ interface ApplicationSummaryBannerProps {
     name: string;
     appNo: string;
     personalSummary: string;
+    parameters: string;
     productName: string;
     policyTerm: string;
     premiumTerm: string;
@@ -2689,17 +2692,16 @@ interface ApplicationSummaryBannerProps {
 const ApplicationSummaryBanner = ({
     image,
     name,
+    appNo,
     personalSummary,
+    parameters,
     productName,
-    policyTerm,
-    premiumTerm,
     sumAssured,
     tsa,
     tfsa,
     tssa,
     tpsa,
     riderSummaries,
-    onViewRiders,
 }: ApplicationSummaryBannerProps) => {
     const coverageItems = [
         `SA - ${sumAssured}`,
@@ -2855,156 +2857,50 @@ const ApplicationSummaryBanner = ({
                 {/* ================================================================ */}
 
                 <Typography
+                    component="div"
                     sx={{
                         mt: 0.5,
                         color: "#000",
-                        fontSize: {
-                            xs: 10,
-                            sm: 11.5,
-                        },
+                        fontSize: { xs: 10, sm: 11.5 },
                         lineHeight: 1.65,
                         fontWeight: 800,
                         overflowWrap: "anywhere",
                     }}
                 >
-                    Product:{" "}
-                    <Box
-                        component="span"
-                        sx={{
-                            color: "#000",
-                            fontWeight: 700,
-                        }}
-                    >
+                    <Box component="span" sx={{ fontWeight: 700 }}>
                         {productName}
                     </Box>
-                    {" / "}
-                    Policy Term:{" "}
-                    <Box
-                        component="span"
-                        sx={{
-                            color: "#000",
-                            fontWeight: 700,
-                        }}
-                    >
-                        {policyTerm}
-                    </Box>
-                    {" / "}
-                    Premium Term:{" "}
-                    <Box
-                        component="span"
-                        sx={{
-                            color: "#000",
-                            fontWeight: 700,
-                        }}
-                    >
-                        {premiumTerm}
+                    {" / "}Channel:{" "}
+                    <Box component="span" sx={{ fontWeight: 700 }}>
+                        Agency
                     </Box>
                     {coverageItems.map((item) => (
-                        <Box
-                            component="span"
-                            key={item}
-                            sx={{
-                                color: "#000",
-                                fontWeight: 700,
-                            }}
-                        >
+                        <Box component="span" key={item} sx={{ fontWeight: 700 }}>
                             {" / "}
                             {item}
                         </Box>
                     ))}
+                    {riderSummaries.map((rider, index) => (
+                        <Box component="span" key={`${rider.name}-${index}`}>
+                            {" / "}
+                            {rider.name} - SA {rider.sumAssured}
+                        </Box>
+                    ))}
                 </Typography>
 
-                {/* ================================================================ */}
-                {/* RIDERS                                                            */}
-                {/* ================================================================ */}
-
-                <Box
+                <Typography
+                    component="div"
                     sx={{
                         mt: 0.45,
-                        display: "flex",
-                        alignItems: "flex-start",
-                        gap: 0.35,
-                        flexWrap: "wrap",
+                        color: "#000",
+                        fontSize: { xs: 10, sm: 11.5 },
+                        lineHeight: 1.6,
+                        fontWeight: 500,
+                        overflowWrap: "anywhere",
                     }}
                 >
-                    <Typography
-                        sx={{
-                            color: "#000",
-                            fontSize: {
-                                xs: 10,
-                                sm: 11.5,
-                            },
-                            lineHeight: 1.65,
-                            fontWeight: 800,
-                        }}
-                    >
-                        Riders:
-                    </Typography>
-
-                    {riderSummaries.length > 0 ? (
-                        <Typography
-                            sx={{
-                                flex: 1,
-                                minWidth: 0,
-                                color: "#000",
-                                fontSize: {
-                                    xs: 10,
-                                    sm: 11.5,
-                                },
-                                lineHeight: 1.65,
-                                fontWeight: 600,
-                                overflowWrap: "anywhere",
-                            }}
-                        >
-                            {riderSummaries.map((rider, index) => (
-                                <Box component="span" key={`${rider.name}-${index}`}>
-                                    {rider.name} - SA ₹{rider.sumAssured}
-                                    {index < riderSummaries.length - 1 ? " / " : ""}
-                                </Box>
-                            ))}
-                        </Typography>
-                    ) : (
-                        <Typography
-                            sx={{
-                                color: "#000",
-                                fontSize: {
-                                    xs: 10,
-                                    sm: 11.5,
-                                },
-                                lineHeight: 1.65,
-                                fontWeight: 600,
-                            }}
-                        >
-                            No riders
-                        </Typography>
-                    )}
-
-                    {riderSummaries.length > 0 && (
-                        <Box
-                            component="button"
-                            type="button"
-                            onClick={onViewRiders}
-                            sx={{
-                                border: 0,
-                                p: 0,
-                                ml: 0.5,
-                                mt: 0.15,
-                                bgcolor: "transparent",
-                                color: "#FFEAD7",
-                                fontSize: 9,
-                                fontWeight: 900,
-                                cursor: "pointer",
-                                fontFamily: "inherit",
-                                whiteSpace: "nowrap",
-                                "&:hover": {
-                                    textDecoration: "underline",
-                                },
-                            }}
-                        >
-                            View details <KeyRightArrowIcon />
-                        </Box>
-                    )}
-                </Box>
+                    {parameters || "-"}
+                </Typography>
             </Box>
         </Box>
     );
@@ -3723,6 +3619,7 @@ const ClaimAudit = ({
     );
 
     const personalSummary = [
+        text(firstValue(applicant.memberType, applicant.proposerType)),
         text(personal.maritalStatus ?? applicantDetails.maritalStatus),
 
         age ? text(age) : "-",
@@ -3741,6 +3638,21 @@ const ClaimAudit = ({
     ]
         .filter((value) => value !== "-")
         .join(" / ");
+
+    const parameters = [
+        "TSA - ₹10,00,000",
+        "TRSA - ₹5,00,000",
+        "TPSA - ₹10,00,000",
+        "TFSA - ₹10,00,000",
+        "TSSA - ₹10,00,000",
+        "ADBR TSA - ₹5,00,000",
+        "ATPD TSA - ₹5,00,000",
+        "CI Rider TSA - ₹3,00,000",
+        "CI Rider TRSA - ₹3,00,000",
+        "WOP TSA - ₹10,00,000",
+        "BTBB TSA - ₹5,00,000",
+        "Total Premium - ₹10,000",
+    ].join(" / ");
 
     /* ------------------------------------------------------------------------ */
     /* KYC FIELDS                                                               */
@@ -4219,6 +4131,7 @@ const ClaimAudit = ({
                         name={name}
                         appNo={appNo}
                         personalSummary={personalSummary}
+                        parameters={parameters}
                         productName={productName}
                         policyTerm={policyTerm}
                         premiumTerm={premiumTerm}
@@ -4233,7 +4146,7 @@ const ClaimAudit = ({
                 </Box>
             </Box>
 
-            {!activeDetailView && (
+            {/* {!activeDetailView && (
                 <Box
                     sx={{
                         width: "100%",
@@ -4299,7 +4212,7 @@ const ClaimAudit = ({
                         Grievance History
                     </Button>
                 </Box>
-            )}
+            )} */}
 
             {activeDetailView === "medical" && (
                 <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
@@ -5440,6 +5353,11 @@ const ClaimAudit = ({
                                 <Box sx={{ mt: 0.75 }}>
                                     <ClaimSection />
                                 </Box>
+                                 <Box sx={{...centerFlex}}>
+                                          <CustomButton variant="contained" sx={{mt:1, borderRadius: "50px"}}>
+                                            Submit
+                                          </CustomButton>
+                                        </Box>
                             </Box>
 
                             {/* </CustomAccordion> */}

@@ -6,7 +6,7 @@ import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import CustomTable, {
   type Column,
 } from "../../../components/ui/Table/Table";
-import { UserProfileIcon } from "../../../icons/Icons";
+import {  UserProfileIcon } from "../../../icons/Icons";
 import { useAppSelector } from "../../../store/hooks";
 import type { RootState } from "../../../store/store";
 import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -51,6 +51,14 @@ interface ApplicationSummaryBannerProps {
   tfsa: string;
   tssa: string;
   tpsa: string;
+  loanSummaryItems: Array<{
+    label: string;
+    value: string;
+  }>;
+  coverageSummaryItems: Array<{
+    label: string;
+    value: string;
+  }>;
   riderSummaries: RiderSummary[];
   onViewRiders: () => void;
 }
@@ -176,6 +184,7 @@ const CompactField = ({ label, value }: { label: string; value: string }) => (
 const ApplicationSummaryBanner = ({
   image,
   name,
+  // appNo,
   personalSummary,
   productName,
   policyTerm,
@@ -185,12 +194,14 @@ const ApplicationSummaryBanner = ({
   tfsa,
   tssa,
   tpsa,
+  loanSummaryItems,
+  coverageSummaryItems,
   riderSummaries,
   // onViewRiders,
 }: ApplicationSummaryBannerProps) => {
   const coverageItems = [
-    sumAssured !== "-" ? `SA - ${sumAssured}` : null,
-    tsa !== "-" ? `TSA - ${tsa}` : null,
+    `SA - ${sumAssured}`,
+    `TSA - ${tsa}`,
     tfsa !== "-" ? `TFSA - ${tfsa}` : null,
     tssa !== "-" ? `TSSA - ${tssa}` : null,
     tpsa !== "-" ? `TPSA - ${tpsa}` : null,
@@ -323,6 +334,36 @@ const ApplicationSummaryBanner = ({
           sx={{
             mt: 0.45,
             display: "flex",
+            alignItems: "center",
+            columnGap: 0.75,
+            rowGap: 0.2,
+            flexWrap: "wrap",
+            color: "#000000",
+            fontSize: { xs: 10, sm: 11 },
+            lineHeight: 1.65,
+          }}
+        >
+          {[...loanSummaryItems, ...coverageSummaryItems].map((item, index) => (
+            <Box
+              component="span"
+              key={item.label}
+              sx={{ display: "inline-flex", gap: 0.35 }}
+            >
+              {index > 0 && <Box component="span">/</Box>}
+              <Box component="span" sx={{ fontWeight: 800 }}>
+                {item.label}:
+              </Box>
+              <Box component="span" sx={{ fontWeight: 600 }}>
+                {item.value}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+
+        <Box
+          sx={{
+            mt: 0.45,
+            display: "flex",
             alignItems: "flex-start",
             gap: 0.35,
             flexWrap: "wrap",
@@ -370,6 +411,35 @@ const ApplicationSummaryBanner = ({
               No riders
             </Typography>
           )}
+
+          {/* {riderSummaries.length > 0 && (
+            <Box
+              component="button"
+              type="button"
+              onClick={onViewRiders}
+              sx={{
+                border: 0,
+                p: 0,
+                ml: 0.5,
+                mt: 0.15,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.25,
+                bgcolor: "transparent",
+                color: "#A92129",
+                fontSize: 9,
+                fontWeight: 900,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                whiteSpace: "nowrap",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              View details <KeyRightArrowIcon />
+            </Box>
+          )} */}
         </Box>
       </Box>
     </Box>
@@ -510,6 +580,36 @@ const GroupGrievance = ({ paginationDisabled = true }: GrievanceProps) => {
     }))
     .filter((rider) => rider.name !== "-");
 
+  const loanSummaryItems = [
+    { label: "MPH Name", value: "ICICI" },
+    { label: "PAD", value: "9 Sept 2026" },
+    { label: "Date of loan disbursement", value: "9 Sept 2026" },
+    { label: "Coverage option", value: "Life" },
+    { label: "Loan type", value: "Personal Loan" },
+    { label: "Bank type", value: "Private" },
+    { label: "Loan term", value: "60" },
+    { label: "Loan Account No.", value: "12345678" },
+    { label: "Share of loan", value: "50%" },
+    { label: "Applicant status", value: "Active" },
+    { label: "Loan amount", value: "₹50,00,000" },
+    { label: "Master policy holder code", value: "MPH123" },
+    { label: "Type of loan", value: "Unsecured" },
+  ];
+
+  const coverageSummaryItems = [
+    { label: "TSA", value: "₹10,00,000" },
+    { label: "TRSA", value: "₹5,00,000" },
+    { label: "TPSA", value: "₹10,00,000" },
+    { label: "TFSA", value: "₹10,00,000" },
+    { label: "TSSA", value: "₹10,00,000" },
+    { label: "ADBR TSA", value: "₹5,00,000" },
+    { label: "ATPD TSA", value: "₹5,00,000" },
+    { label: "CI Rider TSA", value: "₹3,00,000" },
+    { label: "CI Rider TRSA", value: "₹3,00,000" },
+    { label: "WOP TSA", value: "₹10,00,000" },
+    { label: "BTBB TSA", value: "₹5,00,000" },
+  ];
+
   const age = firstValue(
     toRecord(personal.age).years,
     personal.age,
@@ -618,6 +718,8 @@ const GroupGrievance = ({ paginationDisabled = true }: GrievanceProps) => {
             applicationOverview.totalPremiumSumAssured,
           ),
         )}
+        loanSummaryItems={loanSummaryItems}
+        coverageSummaryItems={coverageSummaryItems}
         riderSummaries={riderSummaries}
         onViewRiders={() => setRiderDialogOpen(true)}
       />

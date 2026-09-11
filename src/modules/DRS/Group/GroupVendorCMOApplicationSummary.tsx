@@ -6536,7 +6536,7 @@ const ApplicationSummaryBanner = ({
             whiteSpace: "nowrap",
           }}
         >
-          App No. - {appNo}
+          App No. - OB90377122
         </Typography>
       </Box>
 

@@ -253,6 +253,15 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     // "applicationOverview", 
     // "claimSection", 
     "quickLinks"],
+  GROUP_VENDOR_CMO_TASK:[
+    "quickLinks"
+  ],
+  GROUP_CMO_TASK:[
+    "quickLinks"
+  ],
+  GROUP_REF_CMO_TASK:[
+    "quickLinks"
+  ],
   RETAIL_REINSTATEMENT_SUW: [
     "applicationOverview",
     "postIssuanceServicing",
