@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import {
   Box,
+  Button,
   Container,
   Pagination,
   Accordion,
@@ -27,6 +28,7 @@ import { drsThunk } from "../../store/thunks/drsThunk";
 type PreviousPolicyItem = Record<string, unknown>;
 import type { RootState } from "../../store/store";
 import { formatDate } from "../../utils/dataFormat";
+import CustomDialog from "../../components/ui/Dialog/Dialog";
 
 const defaultRowsPerPage = 3;
 
@@ -62,7 +64,7 @@ const tableBodyCellSx = {
   textOverflow: "ellipsis",
 };
 
-type TableKey = "ipru" | "iibNonIpru" | "applicationForm";
+type TableKey = "ipru" | "ipruDetails" | "iibNonIpru" | "applicationForm";
 
 type PaginationState = Record<
   TableKey,
@@ -74,6 +76,7 @@ type PaginationState = Record<
 
 const initialPagination: PaginationState = {
   ipru: { page: 0, rowsPerPage: defaultRowsPerPage },
+  ipruDetails: { page: 0, rowsPerPage: defaultRowsPerPage },
   iibNonIpru: { page: 0, rowsPerPage: defaultRowsPerPage },
   applicationForm: { page: 0, rowsPerPage: defaultRowsPerPage },
 };
@@ -150,6 +153,20 @@ const IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Fund Value", keys: ["fundValue", "fund_value"], formatter: formatCurrency },
 ];
 
+const IPRU_DETAIL_COLUMNS: ColumnSpec[] = [
+  { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
+  { header: "Rider Code", keys: ["riderCode"] },
+  { header: "Rider Name", keys: ["riderName"] },
+  { header: "Rider Sub type", keys: ["riderSubType"] },
+  { header: "Face Value", keys: ["faceValue"], formatter: formatCurrency },
+  { header: "Mortality Class", keys: ["mortalityClass"] },
+  { header: "UW_Mortality Class-Base", keys: ["uwMortalityClassBase"] },
+  { header: "Sum assured", keys: ["sumAssured"], formatter: formatCurrency },
+  { header: "Rating", keys: ["rating"] },
+  { header: "SAR Consideration", keys: ["sarConsideration"] },
+  { header: "Client Role", keys: ["clientRole"] },
+];
+
 const IIB_NON_IPRU_COLUMNS: ColumnSpec[] = [
   { header: "IIB Match", keys: ["iibMatch", "iib_match"] },
   { header: "QUESTDBNO", keys: ["questDbNo", "quest_db_no", "QUESTDBNO", "questDBNO"] },
@@ -223,6 +240,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
   "ipru": [
     {
       "policyNumber": "DEMO-IPRU-001",
+      "riderDetails": [{"riderCode": "DEMO-R001", "riderName": "Accidental Death Benefit", "riderSubType": "Accidental Death", "faceValue": 500000, "mortalityClass": "Standard", "uwMortalityClassBase": "Standard", "sumAssured": 500000, "rating": "Standard", "sarConsideration": "Yes"}],
       "productName": "Sample Term Plan",
       "productType": "Term",
       "dateOfIssuance": "2024-04-12",
@@ -237,6 +255,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
     },
     {
       "policyNumber": "DEMO-IPRU-002",
+      "riderDetails": [{"riderCode": "DEMO-R002", "riderName": "Critical Illness Benefit", "riderSubType": "Critical Illness", "faceValue": 300000, "mortalityClass": "Substandard", "uwMortalityClassBase": "Standard", "sumAssured": 300000, "rating": "+25%", "sarConsideration": "Yes"}],
       "productName": "Sample Savings Plan",
       "productType": "Savings",
       "dateOfIssuance": "2024-02-12",
@@ -251,6 +270,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
     },
     {
       "policyNumber": "DEMO-IPRU-003",
+      "riderDetails": [{"riderCode": "DEMO-R003", "riderName": "Waiver of Premium", "riderSubType": "Premium Waiver", "faceValue": 200000, "mortalityClass": "Standard", "uwMortalityClassBase": "Standard", "sumAssured": 200000, "rating": "Standard", "sarConsideration": "Yes"}],
       "productName": "Sample ULIP Plan",
       "productType": "ULIP",
       "dateOfIssuance": "2024-03-12",
@@ -265,6 +285,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
     },
     {
       "policyNumber": "DEMO-IPRU-004",
+      "riderDetails": [{"riderCode": "DEMO-R004", "riderName": "Accidental Disability Benefit", "riderSubType": "Permanent Disability", "faceValue": 400000, "mortalityClass": "Substandard", "uwMortalityClassBase": "Standard", "sumAssured": 400000, "rating": "+50%", "sarConsideration": "Yes"}],
       "productName": "Sample Whole Life Plan",
       "productType": "Whole Life",
       "dateOfIssuance": "2024-04-12",
@@ -279,6 +300,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
     },
     {
       "policyNumber": "DEMO-IPRU-005",
+      "riderDetails": [{"riderCode": "DEMO-R005", "riderName": "Income Benefit", "riderSubType": "Monthly Income", "faceValue": 600000, "mortalityClass": "Standard", "uwMortalityClassBase": "Standard", "sumAssured": 600000, "rating": "Standard", "sarConsideration": "Yes"}],
       "productName": "Sample Endowment Plan",
       "productType": "Endowment",
       "dateOfIssuance": "2024-05-12",
@@ -570,6 +592,7 @@ const MemberPolicyTables = ({
   roleType: string;
   memberKey: string;
 }) => {
+  const [ipruDetailsOpen, setIpruDetailsOpen] = useState(false);
   const [pagination, setPagination] = useState<PaginationState>(initialPagination);
   const ipruRows = useMemo(() => {
     return getFirstSectionRows(effectiveQuickLinksData, [
@@ -581,6 +604,15 @@ const MemberPolicyTables = ({
       "policies",
     ]);
   }, [effectiveQuickLinksData]);
+
+  const ipruDetailRows = useMemo(() => ipruRows.flatMap((policy) => {
+    const riders = getFirstSectionRows(policy, ["riderDetails"]);
+    return (riders.length ? riders : [policy]).map((rider) => ({
+      ...rider,
+      policyNumber: getValueFromKeys(policy, IPRU_DETAIL_COLUMNS[0].keys),
+      clientRole: rider.clientRole ?? memberKey,
+    }));
+  }), [ipruRows, memberKey]);
 
   const iibNonIpruRows = useMemo(
     () =>
@@ -734,6 +766,8 @@ const MemberPolicyTables = ({
           sx={{
             display: "flex",
             justifyContent: "center",
+            gap: 1.5,
+            flexWrap: "wrap",
             alignItems: "center",
             width: "100%",
             minHeight: 14,
@@ -775,6 +809,27 @@ const MemberPolicyTables = ({
                 },
               }}
             />
+            {tableKey === "ipru" && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  setPagination((current) => ({
+                    ...current,
+                    ipruDetails: { ...current.ipruDetails, page: 0 },
+                  }));
+                  setIpruDetailsOpen(true);
+                }}
+                sx={{
+                  textTransform: "none", fontWeight: 600, borderRadius: 1.5,
+                  color: "#E45F14", borderColor: "#E45F14",
+                  py: 0.25, px: 1.5,
+                  "&:hover": { borderColor: "#D95400", bgcolor: "#FFF3EB" },
+                }}
+              >
+                Show More
+              </Button>
+            )}
         </Box>
       </Box>
     );
@@ -782,6 +837,16 @@ const MemberPolicyTables = ({
 
   return (
     <Box sx={{ minWidth: 0 }}>
+      <CustomDialog
+        open={ipruDetailsOpen}
+        onClose={() => setIpruDetailsOpen(false)}
+        title={`IPRU Details - ${MEMBER_DEFINITIONS.find((member) => member.key === memberKey)?.label ?? memberKey}`}
+        fullWidth
+        maxWidth="xl"
+        paperSx={{ borderRadius: 2 }}
+      >
+        {renderPolicyTable("ipruDetails", IPRU_DETAIL_COLUMNS, ipruDetailRows)}
+      </CustomDialog>
           {(
             <>
               <Typography sx={{ fontSize: 14, fontWeight: 700, mb: 1.25, color: "#0E3762" }}>
@@ -813,6 +878,116 @@ const MemberPolicyTables = ({
             </>
           )}
     </Box>
+  );
+};
+
+const FAMILY_POLICY_COLUMNS: ColumnSpec[] = [
+  { header: "Insurance Company", keys: ["insuranceCompany"] },
+  { header: "Sum Assured", keys: ["sumAssured"], formatter: formatCurrency },
+  { header: "Relation With Life Assured", keys: ["relationWithLifeAssured"] },
+  { header: "Policy Status", keys: ["policyStatus"] },
+  { header: "Annual Income", keys: ["annualIncome"], formatter: formatCurrency },
+  { header: "Type (Declared / Verified)", keys: ["type"] },
+];
+
+const DUMMY_FAMILY_POLICIES: PreviousPolicyItem[] = [
+  {
+    insuranceCompany: "Sample Life Insurance A",
+    sumAssured: 2500000,
+    relationWithLifeAssured: "Father",
+    policyStatus: "In Force",
+    annualIncome: 900000,
+    type: "Declared",
+  },
+  {
+    insuranceCompany: "Sample Life Insurance B",
+    sumAssured: 5000000,
+    relationWithLifeAssured: "Husband",
+    policyStatus: "In Force",
+    annualIncome: 1500000,
+    type: "Verified",
+  },
+];
+
+const FamilyPolicyTable = ({ rows }: { rows: PreviousPolicyItem[] }) => {
+  const [page, setPage] = useState(1);
+  const totalPages = Math.max(1, Math.ceil(rows.length / defaultRowsPerPage));
+  const safePage = Math.min(page, totalPages);
+  const paginatedRows = rows.slice(
+    (safePage - 1) * defaultRowsPerPage,
+    safePage * defaultRowsPerPage,
+  );
+
+  return (
+  <Box sx={{ mt: 2, minWidth: 0 }}>
+    <Typography sx={{ fontSize: 14, fontWeight: 700, mb: 1.25, color: "#0E3762" }}>
+      Parents / Husbands / Siblings
+    </Typography>
+    <TableContainer sx={{ border: "1px solid #D8E0E8", borderRadius: 2 }}>
+      <Table
+        size="small"
+        aria-label="Parents, husbands and siblings policies"
+        sx={{ width: "100%", tableLayout: "fixed", "& tbody tr:nth-of-type(even)": { bgcolor: "#FAFBFC" } }}
+      >
+        <TableHead>
+          <TableRow>
+            {FAMILY_POLICY_COLUMNS.map((column) => (
+              <TableCell key={column.header} scope="col" sx={tableHeaderCellSx}>
+                {column.header}
+              </TableCell>
+            ))}
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={FAMILY_POLICY_COLUMNS.length} sx={{ ...tableBodyCellSx, textAlign: "center", py: 3 }}>
+                No family policies available.
+              </TableCell>
+            </TableRow>
+          )}
+          {paginatedRows.map((row, index) => (
+            <TableRow key={`family-policy-${index}`}>
+              {FAMILY_POLICY_COLUMNS.map((column) => {
+                const value = getValueFromKeys(row, column.keys);
+                const display = column.formatter ? column.formatter(value) : toDisplayValue(value);
+                return (
+                  <TableCell key={column.header} title={display} sx={tableBodyCellSx}>
+                    {display}
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+    <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", py: 1, bgcolor: "#F5F6F7", borderTop: "1px solid #D8E0E8", borderRadius: "0 0 8px 8px" }}>
+      <Pagination
+        aria-label="Family policies table pagination"
+        count={totalPages}
+        page={safePage}
+        onChange={(_, nextPage) => setPage(nextPage)}
+        disabled={rows.length === 0}
+        shape="rounded"
+        siblingCount={1}
+        boundaryCount={1}
+        sx={{
+          "& .MuiPaginationItem-root": {
+            minWidth: 20, height: 20, borderRadius: "7px",
+            fontSize: 14, fontWeight: 400, margin: "0", color: "#5F5F5F",
+          },
+          "& .MuiPagination-ul": { flexWrap: "nowrap" },
+          "& .MuiPaginationItem-root.Mui-disabled": { opacity: 0.4 },
+          "& .MuiPaginationItem-icon": { fontSize: 14 },
+          "& .MuiPaginationItem-root.Mui-selected": {
+            bgcolor: "#E45F14", color: "#FFFFFF",
+            "&:hover": { bgcolor: "#D95400" },
+          },
+        }}
+      />
+    </Box>
+  </Box>
   );
 };
 
@@ -995,6 +1170,11 @@ const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) =
           </AccordionDetails>
         </Accordion>
       ))}
+      <FamilyPolicyTable
+        rows={showDummyData
+          ? DUMMY_FAMILY_POLICIES
+          : getFirstSectionRows(effectiveQuickLinksData, ["familyPolicies"])}
+      />
     </Container>
   );
 };
