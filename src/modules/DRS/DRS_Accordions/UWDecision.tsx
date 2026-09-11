@@ -1,4 +1,4 @@
-import { Alert, Box, Snackbar, TextField, Typography } from "@mui/material"
+import { Alert, Box, Snackbar, Typography } from "@mui/material"
 //import CustomAccordion from "../../../components/ui/Accordion/Accordion"
 import { useEffect, useMemo, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
@@ -1579,10 +1579,10 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                         minHeight: 34,
                         borderRadius: "6px",
                         backgroundColor: "#fff",
-                        fontSize: "12px",
+                        fontSize: "11px",
                     },
                     "& .MuiInputBase-input, & .MuiSelect-select": {
-                        fontSize: "12px",
+                        fontSize: "11px",
                         lineHeight: 1.2,
                         py: "7px !important",
                     },
@@ -1592,29 +1592,63 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                     },
                 }}
             >
-                <Box>
-                    <Typography component="label" htmlFor="financial-decision" sx={{ display: "block", mb: 0.5 }}>
-                        Financial Decision
-                    </Typography>
-                    <TextField
-                        id="financial-decision"
-                        value={financialDecisionLabel}
-                        size="small"
-                        fullWidth
-                        slotProps={{ input: { readOnly: true } }}
-                    />
-                </Box>
-                <Box>
-                    <Typography component="label" htmlFor="medical-decision" sx={{ display: "block", mb: 0.5 }}>
-                        Medical Decision
-                    </Typography>
-                    <TextField
-                        id="medical-decision"
-                        value={medicalDecisionLabel}
-                        size="small"
-                        fullWidth
-                        slotProps={{ input: { readOnly: true } }}
-                    />
+                <Box
+                    component="dl"
+                    sx={{
+                        gridColumn: { xs: "1", md: "span 2" },
+                        display: "grid",
+                        gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                        m: 0,
+                        backgroundColor: "#FCFAF9",
+                        borderBottom: "1px solid #E5E0DD",
+                    }}
+                >
+                    {[
+                        ["Financial Decision", financialDecisionLabel],
+                        ["Medical Decision", medicalDecisionLabel],
+                    ].map(([label, value], index) => (
+                        <Box
+                            key={label}
+                            sx={{
+                                minWidth: 0,
+                                px: 2,
+                                py: 1.25,
+                                borderLeft: index === 1 ? "1px solid #E5E0DD" : "none",
+                            }}
+                        >
+                            <Typography
+                                component="dt"
+                                sx={{
+                                    "&&": {
+                                        fontSize: "12px",
+                                        lineHeight: 1.4,
+                                        fontWeight: 700,
+                                        letterSpacing: "0.3px",
+                                        textTransform: "uppercase",
+                                        color: "#938883",
+                                        mb: 0.75,
+                                    },
+                                }}
+                            >
+                                {label}
+                            </Typography>
+                            <Typography
+                                component="dd"
+                                sx={{
+                                    "&&": {
+                                        m: 0,
+                                        fontSize: "12px",
+                                        lineHeight: 1.4,
+                                        fontWeight: 600,
+                                        color: "#37312E",
+                                        overflowWrap: "anywhere",
+                                    },
+                                }}
+                            >
+                                {value || "-"}
+                            </Typography>
+                        </Box>
+                    ))}
                 </Box>
                 <CustomSelect
                     label={memberLabel
@@ -2417,7 +2451,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
             >
                 <Typography
                     sx={{
-                        fontSize: "16px",
+                        fontSize: "12px",
                         fontWeight: 700,
                         color: "#2b2b2b",
                         mb: 1.5,
@@ -2440,7 +2474,6 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                         ["Financial Decision", financialDecisionLabel],
                         ["Medical Decision", medicalDecisionLabel],
                         ["Case UW Decision", caseUWDecisionLabel],
-                        ["UW Remarks", uwDecisionRemarks],
                         ...(!isRaiseRequirementDecision ? [["Outlier", outlier]] : []),
                         ...(showDecisionCode ? [["Decision Code", resolvedDecisionCode]] : []),
                         ...(isStandardDecision && isTermProduct ? [["Smoker Status", resolvedSmokerStatus]] : []),
@@ -2481,7 +2514,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                             <Typography sx={{ fontSize: "12px", color: "#756D69" }}>
                                 {label}
                             </Typography>
-                            <Typography sx={{ fontSize: "13px", fontWeight: 600, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
+                            <Typography sx={{ fontSize: "11px", fontWeight: 600, whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>
                                 {value || "-"}
                             </Typography>
                         </Box>

@@ -153,8 +153,6 @@ type NomineeTableRow = Pick<
   | "nomineeDOB"
   | "gender"
   | "relationship"
-  | "accountNumber"
-  | "ifsc"
   | "sharePercentage"
 >;
 
@@ -185,16 +183,6 @@ const nomineeColumns: Column<NomineeTableRow>[] = [
   {
     key: "relationship",
     header: "Relationship",
-    width: "12%",
-  },
-  {
-    key: "accountNumber",
-    header: "Account Number",
-    width: "14%",
-  },
-  {
-    key: "ifsc",
-    header: "IFSC",
     width: "12%",
   },
   {

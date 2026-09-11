@@ -1,6 +1,9 @@
 import { Box, IconButton, SvgIcon, Tooltip, Typography } from "@mui/material";
 import { useState, type KeyboardEvent, type ReactNode } from "react";
 
+import { useSelector } from "react-redux";
+import type { RootState } from "../../store/store";
+
 import CustomDialog from "../../components/ui/Dialog/Dialog";
 //import { KeyRightArrowIcon } from "../../icons/Icons";
 //import Decision from "./DRS_Accordions/decision";
@@ -22,8 +25,7 @@ interface DisplayMember {
   name: string;
   demographics: string[];
   decision: string;
-  decisionCode: string;
-  reason: string;
+  details: Array<[string, string]>;
 }
 
 interface RiderSummary {
@@ -148,21 +150,137 @@ const getAddressCity = (member: UnknownRecord): string => {
   );
 };
 
-const getMemberDecision = (member: UnknownRecord): string => {
-  const underwriting = toRecord(member.underwriting);
-  const breDecision = toRecord(underwriting.breDecision);
-  const uwDecision = toRecord(member.uwDecision);
+// Temporary UI demo data. Set to false to display the API UW decisions again.
+const USE_DUMMY_UW_DECISIONS = true;
+const DUMMY_UW_DECISIONS: Record<string, UnknownRecord> = {
+  lifeassured1: {
+    caseUWDecision: "Refer to HOD",
+    decision: "Refer to HOD",
+    remarks: "Referred to HOD for review and counter sign of the underwriting decision.",
+    outlier: "Medical history requires senior underwriting review",
+    fullName: "Amit Shah (Demo HOD)",
+    ntid: "demo.hod",
+    decisionType: "counterSign",
+    hodReason: "Approval required beyond the underwriter's authority limit",
+    firstUwDecision: "Standard",
+    firstUwDecisionCode: "STD",
+    firstUwSmokerStatus: "Non Smoker",
+  },
+  lifeassured2: {
+    caseUWDecision: "Decline",
+    decision: "Decline",
+    remarks: "Declined based on adverse medical findings.",
+    outlier: "Elevated HbA1c",
+    decisionCode: "XXR",
+    declineReason: "High than normal level of sugar as per Hemoglobin A1c test",
+  },
+  proposer: {
+    caseUWDecision: "Standard",
+    decision: "Standard",
+    remarks: "Accepted at standard rates after underwriting review.",
+    outlier: "None",
+    decisionCode: "STD",
+    smokerStatus: "Non Smoker",
+  },
+};
 
-  return displayText(
-    uwDecision.decision,
-    uwDecision.status,
+const withDummyUwDecision = (member: UnknownRecord): UnknownRecord => {
+  const memberType = String(member.memberType ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+  const dummy = DUMMY_UW_DECISIONS[memberType];
+  if (!USE_DUMMY_UW_DECISIONS || !dummy) return member;
+  // Keep demo decisions self-contained so old API fields cannot leak into the modal.
+  return { memberType: member.memberType, uwDecision: dummy };
+};
+
+// Resolve only this member's saved UW data; BRE is not a UW selection.
+const getUwData = (member: UnknownRecord): UnknownRecord => ({
+  ...toRecord(member.underwriting),
+  ...member,
+  ...toRecord(member.uwDecision),
+});
+
+const masterEntries = (value: unknown): UnknownRecord[] => {
+  if (Array.isArray(value)) return value.flatMap(masterEntries);
+  const record = toRecord(value);
+  return [record, ...Object.values(record)
+    .filter((item) => item !== null && typeof item === "object")
+    .flatMap(masterEntries)];
+};
+
+const decisionText = (value: unknown, masters: UnknownRecord[], reason = false): string => {
+  if (Array.isArray(value)) return value.map((item) => decisionText(item, masters, reason)).filter((item) => item !== "-").join(", ") || "-";
+  if (value !== null && typeof value === "object") {
+    const item = toRecord(value);
+    return decisionText(firstValue(item.description, item.label, item.fullName, item.value, item.code, item.iibCode), masters, reason);
+  }
+  if (!hasValue(value)) return "-";
+  const raw = String(value).trim();
+  const match = masters.find((item) =>
+    (reason ? [item.iibCode] : [item.code, item.key, item.value])
+      .some((key) => hasValue(key) && String(key).trim() === raw));
+  return displayText(match?.description, match?.label, raw);
+};
+
+const getMemberDecision = (member: UnknownRecord, masters: UnknownRecord[]): string => {
+  const uw = getUwData(member);
+  return decisionText(firstValue(uw.caseUWDecision, uw.decision,
     typeof member.uwDecision === "string" ? member.uwDecision : undefined,
-    member.decision,
-    breDecision.category,
-    breDecision.status,
-    underwriting.decision,
-    toRecord(member.proposerSummary).caseStatus,
-  );
+    uw.status), masters);
+};
+
+const getDecisionDetails = (member: UnknownRecord, masters: UnknownRecord[]): Array<[string, string]> => {
+  const uw = getUwData(member);
+  const decision = getMemberDecision(member, masters);
+  const normalize = (value: string) => value.toUpperCase().replace(/[^A-Z0-9]/g, "");
+  const kind = normalize(decision);
+  const rows: Array<[string, string]> = [["Case UW Decision", decision]];
+  const add = (label: string, value: unknown, reason = false) => rows.push([label, decisionText(value, masters, reason)]);
+  const optional = (label: string, value: unknown, reason = false) => { if (hasValue(value)) add(label, value, reason); };
+  if (!["RAISEREQUIREMENT", "RAISEREQ"].includes(kind)) add("Outlier", uw.outlier);
+  const terminal = (type: string, first = false) => {
+    const prefix = first ? "1st UW " : "";
+    if (["STANDARD", "STD", "ACCEPT", "ACCEPTED", "BORDERLINESTANDARD", "BORSTD", "DECLINE", "REJECT", "POSTPONE", "COUNTEROFFER"].includes(type)) {
+      rows.push([`${prefix}Decision Code`, displayText(first ? uw.firstUwDecisionCode : uw.decisionCode)]);
+    }
+    if (["STANDARD", "STD", "ACCEPT", "ACCEPTED"].includes(type)) {
+      add(`${prefix}Smoker Status`, first ? uw.firstUwSmokerStatus : firstValue(uw.smokerStatus, toRecord(member.healthDetail).smokerStatus, toRecord(member.healthDetail).smoker_status));
+    }
+    const reasons: Record<string, [string, unknown]> = {
+      DECLINE: ["Decline Reason", firstValue(uw.declineReasons, uw.declineReason)],
+      REJECT: ["Reject Reason", firstValue(uw.rejectReason, uw.rejectReasons)],
+      BORDERLINESTANDARD: ["Borderline Standard Reason", uw.borderlineStandardReasons],
+      BORSTD: ["Borderline Standard Reason", uw.borderlineStandardReasons],
+      COUNTEROFFER: ["Counter Offer Reason", uw.counterOfferReasons],
+      POSTPONE: ["Postpone Reason", uw.postponeReason],
+    };
+    if (reasons[type]) add(`${prefix}${reasons[type][0]}`, firstValue(reasons[type][1], first ? uw.firstUwReason : firstValue(uw.reason, uw.decisionReason)), true);
+    if (type === "POSTPONE") add("Postponement Period", uw.postponementPeriod);
+  };
+  terminal(kind);
+  if (kind.startsWith("REFER")) {
+    const labels: Record<string, string> = {
+      REFERTOHOD: "Name of HoD", REFERTOSRUW: "Name of Sr.UW",
+      REFERTOHOCMO: "Name of HO CMO", REFERTOCMO: "Name of CMO",
+      REFERTORISK: "Risk Referral Reasons", REFERTOREINSURER: "Reinsurer Referral reasons",
+    };
+    add(labels[kind] || "Approver", firstValue(uw.fullName, uw.referralValue, uw.ntid));
+    optional("Decision Type", uw.decisionType === "opinion" ? "Opinion" : uw.decisionType === "counterSign" ? "Counter Sign" : uw.decisionType);
+    optional("HOD Reasons", uw.hodReason);
+    optional("Sr UW Reasons", uw.srUwReason);
+    optional("Referral Reason", uw.referralReason);
+    optional("Parallel UW Decision", uw.parallelDecision);
+    optional("Parallel Approver", firstValue(uw.parallelFullName, uw.parallelNtid));
+    optional("Parallel Referral Reason", uw.parallelReferralReason);
+    if (hasValue(uw.firstUwDecision)) {
+      const firstDecision = decisionText(uw.firstUwDecision, masters);
+      add("1st UW Decision", firstDecision);
+      terminal(normalize(firstDecision), true);
+    }
+  }
+  if (kind === "HOLD") add("Hold Reasons", firstValue(uw.holdReasons, uw.reason));
+  optional("Waiver Justification", uw.waiverJustificationReason);
+  optional("Waiver Justification Remarks", uw.waiverJustificationRemarks);
+  return rows;
 };
 
 const getDecisionTone = (decision: string) => {
@@ -221,7 +339,8 @@ const MemberSelection = ({
   onMemberSelect,
   stickyTop = 0,
 }: MemberSelectionProps) => {
-  const [selectedDecision, setSelectedDecision] = useState<DisplayMember | null>(null);
+  const [selectedDecisionIndex, setSelectedDecisionIndex] = useState<number | null>(null);
+  const masters = masterEntries(useSelector((state: RootState) => state.drs.masters));
   const [riderDialogOpen, setRiderDialogOpen] = useState(false);
   const data = toRecord(source);
   const applicationOverview = toRecord(data.applicationOverview);
@@ -267,6 +386,7 @@ const MemberSelection = ({
       ...toRecord(member.financialDetails),
       ...toRecord(member.applicantFinancialDetails),
     };
+    const decisionMember = withDummyUwDecision(member);
     const age = toRecord(personal.age).years;
     const demographics = [
       hasValue(age) ? `${age} yrs` : null,
@@ -287,21 +407,12 @@ const MemberSelection = ({
       type: formatMemberType(member.memberType, index),
       name: getFullName(member),
       demographics,
-      decision: getMemberDecision(member),
-      decisionCode: displayText(
-        toRecord(member.uwDecision).decisionCode,
-        member.decisionCode,
-        toRecord(member.underwriting).decisionCode,
-      ),
-      reason: displayText(
-        toRecord(member.uwDecision).reason,
-        toRecord(member.uwDecision).decisionReason,
-        member.reason,
-        member.decisionReason,
-        toRecord(member.underwriting).reason,
-      ),
+      decision: getMemberDecision(decisionMember, masters),
+      details: getDecisionDetails(decisionMember, masters),
     };
   });
+
+  const selectedDecision = members.find((member) => member.index === selectedDecisionIndex) ?? null;
 
 //   const resolvedApplicationNumber = displayText(
 //     applicationNumber,
@@ -615,7 +726,7 @@ const MemberSelection = ({
                   aria-haspopup="dialog"
                   onClick={(event) => {
                     event.stopPropagation();
-                    setSelectedDecision(member);
+                    setSelectedDecisionIndex(member.index);
                   }}
                   sx={{ color: "#A92129", "&:hover": { bgcolor: "#FFEAD7" } }}
                 >
@@ -633,7 +744,7 @@ const MemberSelection = ({
 
       <CustomDialog
         open={selectedDecision !== null}
-        onClose={() => setSelectedDecision(null)}
+        onClose={() => setSelectedDecisionIndex(null)}
         title="UW Decision Details"
         maxWidth="sm"
         fullWidth
@@ -646,9 +757,14 @@ const MemberSelection = ({
             <Typography sx={{ color: "#5C514C", fontSize: 12 }}>
               {selectedDecision.name}
             </Typography>
-            <CompactField label="UW Decision" value={selectedDecision.decision} />
-            <CompactField label="Decision Code" value={selectedDecision.decisionCode} />
-            <CompactField label="Reason" value={selectedDecision.reason} />
+            <Box sx={{ display: "grid", gap: 1.5, p: 1.5, border: "1px solid #E5E0DD", borderRadius: "8px", bgcolor: "#FBF8F6" }}>
+              {selectedDecision.details.map(([label, value]) => (
+                <Box key={label} sx={{ display: "grid", gridTemplateColumns: { xs: "minmax(110px, 0.8fr) minmax(0, 1.2fr)", sm: "minmax(160px, 0.8fr) minmax(0, 1.2fr)" }, gap: 1.5, alignItems: "center" }}>
+                  <Typography sx={{ fontSize: 12, color: "#827671" }}>{label}</Typography>
+                  <Typography sx={{ fontSize: 13, color: "#292421", whiteSpace: "pre-wrap", overflowWrap: "anywhere" }}>{value}</Typography>
+                </Box>
+              ))}
+            </Box>
           </Box>
         )}
       </CustomDialog>
