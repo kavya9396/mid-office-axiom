@@ -22,23 +22,25 @@ import {
 } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
 import { drsThunk } from "../../store/thunks/drsThunk";
-import type { PreviousPolicyItem } from "../../types/drs.types";
+type PreviousPolicyItem = Record<string, unknown>;
 import type { RootState } from "../../store/store";
 import { formatDate } from "../../utils/dataFormat";
 
-const defaultRowsPerPage = 5;
+const defaultRowsPerPage = 3;
 
 const tableHeaderCellSx = {
-  backgroundColor: "#E85D04",
+  backgroundColor: "#E45F14",
   borderColor: "rgba(255, 255, 255, 0.35)",
   color: "#FFFFFF",
-  fontSize: 12,
+  fontSize: { xs: 10, md: 11, xl: 12 },
   fontWeight: 600,
   lineHeight: 1.25,
-  px: 1,
+  px: { xs: 0.4, md: 0.65, xl: 1 },
   py: 1.15,
   verticalAlign: "middle",
-  whiteSpace: "nowrap",
+  whiteSpace: "normal",
+  overflowWrap: "anywhere",
+  wordBreak: "normal",
   overflow: "hidden",
   textOverflow: "ellipsis",
 };
@@ -46,12 +48,14 @@ const tableHeaderCellSx = {
 const tableBodyCellSx = {
   borderColor: "#E7EBEF",
   color: "#263238",
-  fontSize: 12,
+  fontSize: { xs: 10, md: 11, xl: 12 },
   lineHeight: 1.35,
-  px: 1,
+  px: { xs: 0.4, md: 0.65, xl: 1 },
   py: 1.1,
   verticalAlign: "middle",
-  whiteSpace: "nowrap",
+  whiteSpace: "normal",
+  overflowWrap: "anywhere",
+  wordBreak: "normal",
   overflow: "hidden",
   textOverflow: "ellipsis",
 };
@@ -132,24 +136,32 @@ const formatDateOnly = (value: unknown): string => {
 
 const IPRU_COLUMNS: ColumnSpec[] = [
   { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
-  { header: "Product", keys: ["productName", "product", "product_name", "companyName"] },
+  { header: "Product Name", keys: ["productName", "product", "product_name", "companyName"] },
   { header: "Product Type", keys: ["productType", "product_type"] },
   { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"], formatter: formatDateOnly },
   { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision", "decision"] },
-  { header: "Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
+  { header: "Applied Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
   { header: "Medicals Received date", keys: ["medicalsReceivedDate", "medicalReceivedDate", "medicals_received_date", "medicalsDate"], formatter: formatDateOnly },
-  { header: "Validity", keys: ["validityMedical", "medicalValidity", "validityPeriod"] },
+  { header: "Validity", keys: ["validity", "validityMedical", "medicalValidity", "validityPeriod"] },
   { header: "Financials Received date", keys: ["financialsReceivedDate", "financialReceivedDate", "financials_received_date", "financialDate"], formatter: formatDateOnly },
-  { header: "Validity", keys: ["validityFinancial", "financialValidity", "validityPeriod"] },
+  { header: "TMSAR", keys: ["tmsar", "TMSAR"], formatter: formatCurrency },
+  { header: "TFSAR", keys: ["tfsar", "TFSAR"], formatter: formatCurrency },
+  { header: "Fund Value", keys: ["fundValue", "fund_value"], formatter: formatCurrency },
 ];
 
 const IIB_NON_IPRU_COLUMNS: ColumnSpec[] = [
-  { header: "Policy Number", keys: ["policyNumber", "policyNo", "policy_number"] },
-  { header: "Product", keys: ["productName", "product", "product_name", "companyName"] },
-  { header: "Product Type", keys: ["productType", "product_type"] },
-  { header: "Date of issuance", keys: ["dateOfIssuance", "dateOfIssue", "issueDate", "date_of_issuance", "policyIssueDate"], formatter: formatDateOnly },
-  { header: "UW Decision", keys: ["uwDecision", "uw_decision", "underwritingDecision", "decision"] },
-  { header: "Sum Assured", keys: ["appliedSumAssured", "appliedSA", "sumAssured", "applied_sum_assured"], formatter: formatCurrency },
+  { header: "IIB Match", keys: ["iibMatch", "iib_match"] },
+  { header: "QUESTDBNO", keys: ["questDbNo", "quest_db_no", "QUESTDBNO", "questDBNO"] },
+  { header: "Quest Sum Assured", keys: ["questSumAssured", "quest_sum_assured"], formatter: formatCurrency },
+  { header: "Quest Policy Status", keys: ["questPolicyStatus", "quest_policy_status"] },
+  { header: "Quest Company Number", keys: ["questCompanyNumber", "quest_company_number"] },
+  { header: "Matching Parameter", keys: ["matchingParameter", "matching_parameter"] },
+  { header: "Quest DOP DOC", keys: ["questDopDoc", "quest_dop_doc"], formatter: formatDateOnly },
+  { header: "Quest Date Of Death", keys: ["questDateOfDeath", "quest_date_of_death"], formatter: formatDateOnly },
+  { header: "Quest Cause Of Death", keys: ["questCauseOfDeath", "quest_cause_of_death"] },
+  { header: "Quest Record Last Updated", keys: ["questRecordLastUpdated", "quest_record_last_updated"], formatter: formatDateOnly },
+  { header: "Quest Entity Caution Status", keys: ["questEntityCautionStatus", "quest_entity_caution_status"] },
+  { header: "Intermediary Caution Status", keys: ["intermediaryCautionStatus", "intermediary_caution_status"] },
 ];
 
 const NEGATIVE_MATCH_COLUMNS: ColumnSpec[] = [
@@ -179,6 +191,7 @@ const APP_FORM_DETAILS_COLUMNS: ColumnSpec[] = [
   { header: "Reason for Decline/Postpone/ Withdraw", keys: ["reasonForDecision", "reasonForDecline", "reasonForPostpone", "reasonForWithdraw", "reason_for_decision"] },
   { header: "Policy Belongs to me - Yes/No", keys: ["policyBelongsToMe", "policy_belongs_to_me"] },
   { header: "Remarks", keys: ["remarks"] },
+  { header: "Declared Policy", keys: ["declaredPolicy", "declared_policy"] },
 ];
 
 const toRecord = (value: unknown): Record<string, unknown> =>
@@ -204,7 +217,299 @@ const toDisplayValue = (value: unknown) => {
   return text || "-";
 };
 
-const PreviousPolicy = () => {
+// Set showDummyData={false} to display API data. Dummy data never merges into API rows.
+const DUMMY_QUICK_LINKS: Record<string, unknown> = {
+  "ipru": [
+    {
+      "policyNumber": "DEMO-IPRU-001",
+      "productName": "Sample Term Plan",
+      "productType": "Term",
+      "dateOfIssuance": "2024-04-12",
+      "uwDecision": "Standard",
+      "appliedSumAssured": 5000000,
+      "medicalsReceivedDate": "2024-04-01",
+      "validity": "6 months",
+      "financialsReceivedDate": "2024-04-03",
+      "tmsar": 7500000,
+      "tfsar": 10000000,
+      "fundValue": 0
+    },
+    {
+      "policyNumber": "DEMO-IPRU-002",
+      "productName": "Sample Savings Plan",
+      "productType": "Savings",
+      "dateOfIssuance": "2024-02-12",
+      "uwDecision": "Standard",
+      "appliedSumAssured": 2000000,
+      "medicalsReceivedDate": "2024-04-01",
+      "validity": "6 months",
+      "financialsReceivedDate": "2024-04-03",
+      "tmsar": 3000000,
+      "tfsar": 4000000,
+      "fundValue": 0
+    },
+    {
+      "policyNumber": "DEMO-IPRU-003",
+      "productName": "Sample ULIP Plan",
+      "productType": "ULIP",
+      "dateOfIssuance": "2024-03-12",
+      "uwDecision": "Standard",
+      "appliedSumAssured": 3000000,
+      "medicalsReceivedDate": "2024-04-01",
+      "validity": "6 months",
+      "financialsReceivedDate": "2024-04-03",
+      "tmsar": 4500000,
+      "tfsar": 6000000,
+      "fundValue": 350000
+    },
+    {
+      "policyNumber": "DEMO-IPRU-004",
+      "productName": "Sample Whole Life Plan",
+      "productType": "Whole Life",
+      "dateOfIssuance": "2024-04-12",
+      "uwDecision": "Standard",
+      "appliedSumAssured": 4000000,
+      "medicalsReceivedDate": "2024-04-01",
+      "validity": "6 months",
+      "financialsReceivedDate": "2024-04-03",
+      "tmsar": 6000000,
+      "tfsar": 8000000,
+      "fundValue": 0
+    },
+    {
+      "policyNumber": "DEMO-IPRU-005",
+      "productName": "Sample Endowment Plan",
+      "productType": "Endowment",
+      "dateOfIssuance": "2024-05-12",
+      "uwDecision": "Standard",
+      "appliedSumAssured": 5000000,
+      "medicalsReceivedDate": "2024-04-01",
+      "validity": "6 months",
+      "financialsReceivedDate": "2024-04-03",
+      "tmsar": 7500000,
+      "tfsar": 10000000,
+      "fundValue": 0
+    }
+  ],
+  "iibNonIpru": [
+    {
+      "iibMatch": "Yes",
+      "questDbNo": "DEMO-QUEST-001",
+      "questSumAssured": 2500000,
+      "questPolicyStatus": "In Force",
+      "questCompanyNumber": "DEMO-INS-01",
+      "matchingParameter": "Name, DOB and PAN",
+      "questDopDoc": "2023-06-15",
+      "questDateOfDeath": "Not applicable",
+      "questCauseOfDeath": "Not applicable",
+      "questRecordLastUpdated": "2026-09-01",
+      "questEntityCautionStatus": "Clear",
+      "intermediaryCautionStatus": "Clear"
+    },
+    {
+      "iibMatch": "Yes",
+      "questDbNo": "DEMO-QUEST-002",
+      "questSumAssured": 2000000,
+      "questPolicyStatus": "In Force",
+      "questCompanyNumber": "DEMO-INS-02",
+      "matchingParameter": "Name and DOB",
+      "questDopDoc": "2023-02-15",
+      "questDateOfDeath": "Not applicable",
+      "questCauseOfDeath": "Not applicable",
+      "questRecordLastUpdated": "2026-09-01",
+      "questEntityCautionStatus": "Clear",
+      "intermediaryCautionStatus": "Clear"
+    },
+    {
+      "iibMatch": "Yes",
+      "questDbNo": "DEMO-QUEST-003",
+      "questSumAssured": 3000000,
+      "questPolicyStatus": "Lapsed",
+      "questCompanyNumber": "DEMO-INS-03",
+      "matchingParameter": "PAN",
+      "questDopDoc": "2023-03-15",
+      "questDateOfDeath": "Not applicable",
+      "questCauseOfDeath": "Not applicable",
+      "questRecordLastUpdated": "2026-09-01",
+      "questEntityCautionStatus": "Clear",
+      "intermediaryCautionStatus": "Clear"
+    },
+    {
+      "iibMatch": "Yes",
+      "questDbNo": "DEMO-QUEST-004",
+      "questSumAssured": 4000000,
+      "questPolicyStatus": "Paid Up",
+      "questCompanyNumber": "DEMO-INS-04",
+      "matchingParameter": "Name and mobile",
+      "questDopDoc": "2023-04-15",
+      "questDateOfDeath": "Not applicable",
+      "questCauseOfDeath": "Not applicable",
+      "questRecordLastUpdated": "2026-09-01",
+      "questEntityCautionStatus": "Clear",
+      "intermediaryCautionStatus": "Clear"
+    },
+    {
+      "iibMatch": "Yes",
+      "questDbNo": "DEMO-QUEST-005",
+      "questSumAssured": 5000000,
+      "questPolicyStatus": "In Force",
+      "questCompanyNumber": "DEMO-INS-05",
+      "matchingParameter": "Name, DOB and PAN",
+      "questDopDoc": "2023-05-15",
+      "questDateOfDeath": "Not applicable",
+      "questCauseOfDeath": "Not applicable",
+      "questRecordLastUpdated": "2026-09-01",
+      "questEntityCautionStatus": "Clear",
+      "intermediaryCautionStatus": "Clear"
+    }
+  ],
+  "negativeMatch": [
+    {
+      "isNegativeMatch": "Yes",
+      "whetherStandardLife": "No",
+      "medicalNonmedical": "Medical",
+      "reasonForDecline": "Adverse medical findings (dummy)",
+      "reasonForPostpone": "Not applicable",
+      "reasonForRepudiation": "Not applicable",
+      "linkedNonLinked": "Non-linked",
+      "productType": "Term",
+      "remarks": "Fictional record for UI preview",
+      "broadReason": "Medical",
+      "granularReason1": "Cardiac history",
+      "granularReason2": "Abnormal investigation"
+    },
+    {
+      "isNegativeMatch": "No",
+      "whetherStandardLife": "Yes",
+      "medicalNonmedical": "Medical",
+      "reasonForDecline": "Not applicable",
+      "reasonForPostpone": "Not applicable",
+      "reasonForRepudiation": "Not applicable",
+      "linkedNonLinked": "Non-linked",
+      "productType": "Savings",
+      "remarks": "Fictional review record 2",
+      "broadReason": "No adverse match",
+      "granularReason1": "Not applicable",
+      "granularReason2": "Not applicable"
+    },
+    {
+      "isNegativeMatch": "Yes",
+      "whetherStandardLife": "No",
+      "medicalNonmedical": "Medical",
+      "reasonForDecline": "Adverse medical findings (dummy)",
+      "reasonForPostpone": "Not applicable",
+      "reasonForRepudiation": "Not applicable",
+      "linkedNonLinked": "Non-linked",
+      "productType": "Term",
+      "remarks": "Fictional review record 3",
+      "broadReason": "Medical",
+      "granularReason1": "Cardiac history",
+      "granularReason2": "Abnormal investigation"
+    },
+    {
+      "isNegativeMatch": "No",
+      "whetherStandardLife": "Yes",
+      "medicalNonmedical": "Medical",
+      "reasonForDecline": "Not applicable",
+      "reasonForPostpone": "Not applicable",
+      "reasonForRepudiation": "Not applicable",
+      "linkedNonLinked": "Non-linked",
+      "productType": "Whole Life",
+      "remarks": "Fictional review record 4",
+      "broadReason": "No adverse match",
+      "granularReason1": "Not applicable",
+      "granularReason2": "Not applicable"
+    },
+    {
+      "isNegativeMatch": "Yes",
+      "whetherStandardLife": "No",
+      "medicalNonmedical": "Medical",
+      "reasonForDecline": "Adverse medical findings (dummy)",
+      "reasonForPostpone": "Not applicable",
+      "reasonForRepudiation": "Not applicable",
+      "linkedNonLinked": "Non-linked",
+      "productType": "Endowment",
+      "remarks": "Fictional review record 5",
+      "broadReason": "Medical",
+      "granularReason1": "Cardiac history",
+      "granularReason2": "Abnormal investigation"
+    }
+  ],
+  "applicationFormDetails": [
+    {
+      "policyType": "Term",
+      "baseSumAssured": 2500000,
+      "riderName": "Accidental Death Benefit",
+      "riderSumAssured": 500000,
+      "policyDecision": "Standard",
+      "companyName": "Sample Life Insurance",
+      "policyDecisionDate": "2023-06-15",
+      "policyStatus": "In Force",
+      "reasonForDecision": "Not applicable",
+      "policyBelongsToMe": "Yes",
+      "remarks": "Fictional declared policy",
+      "declaredPolicy": "Yes"
+    },
+    {
+      "policyType": "Savings",
+      "baseSumAssured": 2000000,
+      "riderName": "Accidental Death Benefit",
+      "riderSumAssured": 200000,
+      "policyDecision": "Standard",
+      "companyName": "Sample Insurer 2",
+      "policyDecisionDate": "2023-02-15",
+      "policyStatus": "In Force",
+      "reasonForDecision": "Not applicable",
+      "policyBelongsToMe": "Yes",
+      "remarks": "Fictional declared policy 2",
+      "declaredPolicy": "Yes"
+    },
+    {
+      "policyType": "Term",
+      "baseSumAssured": 3000000,
+      "riderName": "Accidental Death Benefit",
+      "riderSumAssured": 300000,
+      "policyDecision": "Standard",
+      "companyName": "Sample Insurer 3",
+      "policyDecisionDate": "2023-03-15",
+      "policyStatus": "In Force",
+      "reasonForDecision": "Not applicable",
+      "policyBelongsToMe": "Yes",
+      "remarks": "Fictional declared policy 3",
+      "declaredPolicy": "Yes"
+    },
+    {
+      "policyType": "Whole Life",
+      "baseSumAssured": 4000000,
+      "riderName": "Accidental Death Benefit",
+      "riderSumAssured": 400000,
+      "policyDecision": "Standard",
+      "companyName": "Sample Insurer 4",
+      "policyDecisionDate": "2023-04-15",
+      "policyStatus": "In Force",
+      "reasonForDecision": "Not applicable",
+      "policyBelongsToMe": "Yes",
+      "remarks": "Fictional declared policy 4",
+      "declaredPolicy": "Yes"
+    },
+    {
+      "policyType": "Endowment",
+      "baseSumAssured": 5000000,
+      "riderName": "Accidental Death Benefit",
+      "riderSumAssured": 500000,
+      "policyDecision": "Standard",
+      "companyName": "Sample Insurer 5",
+      "policyDecisionDate": "2023-05-15",
+      "policyStatus": "In Force",
+      "reasonForDecision": "Not applicable",
+      "policyBelongsToMe": "Yes",
+      "remarks": "Fictional declared policy 5",
+      "declaredPolicy": "Yes"
+    }
+  ]
+};
+
+const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const { businessType, applicationNumber } = useAppContext();
@@ -232,7 +537,9 @@ const PreviousPolicy = () => {
     [drsData],
   );
   const hasReduxPreviousPolicies = Array.isArray(reduxQuickLinks.previousPolicies);
-  const effectiveQuickLinksData = isApplicationIdMissing
+  const effectiveQuickLinksData = showDummyData
+    ? DUMMY_QUICK_LINKS
+    : isApplicationIdMissing
     ? null
     : hasReduxPreviousPolicies
       ? reduxQuickLinks
@@ -272,7 +579,7 @@ const PreviousPolicy = () => {
   };
 
   useEffect(() => {
-    if (isApplicationIdMissing || hasReduxPreviousPolicies) {
+    if (showDummyData || isApplicationIdMissing || hasReduxPreviousPolicies) {
       return;
     }
 
@@ -302,6 +609,7 @@ const PreviousPolicy = () => {
 
     void fetchPreviousPolicies();
   }, [
+    showDummyData,
     dispatch,
     hasReduxPreviousPolicies,
     isApplicationIdMissing,
@@ -360,20 +668,15 @@ const PreviousPolicy = () => {
     columns: ColumnSpec[],
     rows: PreviousPolicyItem[],
   ) => {
-    const { page, rowsPerPage } = pagination[tableKey];
+    const { page } = pagination[tableKey];
+    const rowsPerPage = defaultRowsPerPage;
     const totalCount = rows.length;
-    const totalPages =
-      rowsPerPage === -1
-        ? 1
-        : Math.max(1, Math.ceil(totalCount / rowsPerPage));
+    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
     const safePage = Math.min(page, totalPages - 1);
-    const paginatedRows =
-      rowsPerPage === -1
-        ? rows
-        : rows.slice(
-            safePage * rowsPerPage,
-            safePage * rowsPerPage + rowsPerPage,
-          );
+    const paginatedRows = rows.slice(
+      safePage * rowsPerPage,
+      (safePage + 1) * rowsPerPage,
+    );
     const updatePagination = (
       updates: Partial<PaginationState[TableKey]>,
     ) => {
@@ -408,6 +711,7 @@ const PreviousPolicy = () => {
             stickyHeader
             sx={{
               tableLayout: "fixed",
+              minWidth: 0,
               width: "100%",
               "& tbody tr:nth-of-type(even)": {
                 backgroundColor: "#FAFBFC",
@@ -420,7 +724,7 @@ const PreviousPolicy = () => {
                   <TableCell
                     key={`${column.header}-${columnIndex}`}
                     title={column.header}
-                    sx={tableHeaderCellSx}
+                    sx={{ ...tableHeaderCellSx, width: `${100 / columns.length}%` }}
                   >
                     {column.header}
                   </TableCell>
@@ -453,9 +757,23 @@ const PreviousPolicy = () => {
           </Table>
         </TableContainer>
 
-        {totalPages > 1 && (
-          <Box sx={{ display: "flex", justifyContent: "center", pt: 1.5 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            minHeight: 64,
+            py: 1,
+            boxSizing: "border-box",
+            flexShrink: 0,
+            bgcolor: "#F5F6F7",
+            borderTop: "1px solid #D8E0E8",
+            borderRadius: "0 0 8px 8px",
+          }}
+        >
             <Pagination
+              aria-label={`${tableKey} table pagination`}
               count={totalPages}
               page={safePage + 1}
               onChange={(_, nextPage) =>
@@ -466,33 +784,37 @@ const PreviousPolicy = () => {
               boundaryCount={1}
               sx={{
                 "& .MuiPaginationItem-root": {
-                  minWidth: 38,
+                  minWidth: 40,
                   height: 40,
                   borderRadius: "7px",
-                  fontSize: 16,
-                  color: "#374151",
+                  fontSize: 20,
+                  fontWeight: 400,
+                  margin: "0 2px",
+                  color: "#5F5F5F",
                 },
+                "& .MuiPagination-ul": { flexWrap: "nowrap" },
+                "& .MuiPaginationItem-root.Mui-disabled": { opacity: 0.4 },
+                "& .MuiPaginationItem-icon": { fontSize: 24 },
                 "& .MuiPaginationItem-root.Mui-selected": {
-                  bgcolor: "#E85D04",
+                  bgcolor: "#E45F14",
                   color: "#FFFFFF",
                   "&:hover": { bgcolor: "#D95400" },
                 },
               }}
             />
-          </Box>
-        )}
+        </Box>
       </Box>
     );
   };
 
   return (
-    <Container maxWidth={false} disableGutters sx={{ pb: 4, width: "100%" }}>
-      <BackButton
+    <Container maxWidth={false} disableGutters sx={{ pt:1,pb: 4, width: "100%" }}>
+      {/* <BackButton
         label={isFromSearchApplication ? "Back to Search Application" : "Back to DRS"}
         onClick={handleBack}
-      />
+      /> */}
 
-      {isApplicationIdMissing && (
+      {!showDummyData && isApplicationIdMissing && (
         <Typography sx={{ color: "#DE2C3B", mb: 2 }}>
           Application ID is missing.
         </Typography>
@@ -530,6 +852,11 @@ const PreviousPolicy = () => {
         </Box>
 
         <Box sx={{ p: { xs: 1.25, md: 2 }, overflow: "hidden" }}>
+          {/* {showDummyData && (
+            <Typography sx={{ color: "#9A6200", mb: 1.5, fontSize: 12 }}>
+              Dummy data — fictional values for UI preview only.
+            </Typography>
+          )} */}
           {loading && (
             <Typography sx={{ color: "#6B7280", py: 2 }}>
               Loading previous policies...
@@ -568,7 +895,7 @@ const PreviousPolicy = () => {
               {appFormRows.length > 0 && (
                 <>
                   <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
-                    Application form details
+                    Details as per application form
                   </Typography>
                   {renderPolicyTable("applicationForm", APP_FORM_DETAILS_COLUMNS, appFormRows)}
                 </>
