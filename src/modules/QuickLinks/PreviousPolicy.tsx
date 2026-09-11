@@ -3,7 +3,9 @@ import {
   Box,
   Container,
   Pagination,
-  Paper,
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
   Table,
   TableBody,
   TableCell,
@@ -60,7 +62,7 @@ const tableBodyCellSx = {
   textOverflow: "ellipsis",
 };
 
-type TableKey = "ipru" | "iibNonIpru" | "negativeMatch" | "applicationForm";
+type TableKey = "ipru" | "iibNonIpru" | "applicationForm";
 
 type PaginationState = Record<
   TableKey,
@@ -73,7 +75,6 @@ type PaginationState = Record<
 const initialPagination: PaginationState = {
   ipru: { page: 0, rowsPerPage: defaultRowsPerPage },
   iibNonIpru: { page: 0, rowsPerPage: defaultRowsPerPage },
-  negativeMatch: { page: 0, rowsPerPage: defaultRowsPerPage },
   applicationForm: { page: 0, rowsPerPage: defaultRowsPerPage },
 };
 
@@ -365,6 +366,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
   ],
   "negativeMatch": [
     {
+      "questDbNo": "DEMO-QUEST-001",
       "isNegativeMatch": "Yes",
       "whetherStandardLife": "No",
       "medicalNonmedical": "Medical",
@@ -379,6 +381,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
       "granularReason2": "Abnormal investigation"
     },
     {
+      "questDbNo": "DEMO-QUEST-002",
       "isNegativeMatch": "No",
       "whetherStandardLife": "Yes",
       "medicalNonmedical": "Medical",
@@ -393,6 +396,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
       "granularReason2": "Not applicable"
     },
     {
+      "questDbNo": "DEMO-QUEST-003",
       "isNegativeMatch": "Yes",
       "whetherStandardLife": "No",
       "medicalNonmedical": "Medical",
@@ -407,6 +411,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
       "granularReason2": "Abnormal investigation"
     },
     {
+      "questDbNo": "DEMO-QUEST-004",
       "isNegativeMatch": "No",
       "whetherStandardLife": "Yes",
       "medicalNonmedical": "Medical",
@@ -421,6 +426,7 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
       "granularReason2": "Not applicable"
     },
     {
+      "questDbNo": "DEMO-QUEST-005",
       "isNegativeMatch": "Yes",
       "whetherStandardLife": "No",
       "medicalNonmedical": "Medical",
@@ -509,6 +515,307 @@ const DUMMY_QUICK_LINKS: Record<string, unknown> = {
   ]
 };
 
+// Match separate API sections by QUESTDBNO; never associate records by array position.
+// Unmatched records remain visible as separate rows in the combined table.
+const combineMatchRows = (
+  iibRows: PreviousPolicyItem[],
+  negativeRows: PreviousPolicyItem[],
+): PreviousPolicyItem[] => {
+  const matchKey = (row: PreviousPolicyItem) => {
+    const value = getValueFromKeys(row, ["questDbNo", "quest_db_no", "QUESTDBNO", "questDBNO"]);
+    return value === "-" ? "" : String(value).trim();
+  };
+  const matched = new Set<number>();
+  const combined = iibRows.flatMap((iib) => {
+    const key = matchKey(iib);
+    const matches = negativeRows.flatMap((negative, index) => {
+      if (!key || matchKey(negative) !== key) return [];
+      matched.add(index);
+      return [{ ...iib, ...negative }];
+    });
+    return matches.length ? matches : [iib];
+  });
+  return [...combined, ...negativeRows.filter((_, index) => !matched.has(index))];
+};
+
+const MEMBER_DEFINITIONS = [
+  { key: "lifeAssured1", label: "Lifeassured1" },
+  { key: "lifeAssured2", label: "Lifeassured2" },
+  { key: "proposer", label: "Proposer" },
+] as const;
+
+// Member-keyed quickLinks keep each member's policy records separate.
+// Legacy unscoped quickLinks are shown only under Lifeassured1.
+const getMemberPolicyData = (
+  data: Record<string, unknown> | null,
+  memberKey: string,
+): Record<string, unknown> | null => {
+  if (!data) return null;
+  const key = Object.keys(data).find(
+    (candidate) => candidate.toLowerCase() === memberKey.toLowerCase(),
+  );
+  if (key) return toRecord(data[key]);
+  const hasMemberData = MEMBER_DEFINITIONS.some((member) =>
+    Object.keys(data).some((candidate) => candidate.toLowerCase() === member.key.toLowerCase()),
+  );
+  return !hasMemberData && memberKey === "lifeAssured1" ? data : null;
+};
+
+const MemberPolicyTables = ({
+  effectiveQuickLinksData,
+  roleType,
+  memberKey,
+}: {
+  effectiveQuickLinksData: Record<string, unknown> | null;
+  roleType: string;
+  memberKey: string;
+}) => {
+  const [pagination, setPagination] = useState<PaginationState>(initialPagination);
+  const ipruRows = useMemo(() => {
+    return getFirstSectionRows(effectiveQuickLinksData, [
+      "ipru",
+      "ipruPolicies",
+      "ipruPreviousPolicies",
+      "ipruSection",
+      "previousPolicies",
+      "policies",
+    ]);
+  }, [effectiveQuickLinksData]);
+
+  const iibNonIpruRows = useMemo(
+    () =>
+      getFirstSectionRows(effectiveQuickLinksData, [
+        "iibNonIpru",
+        "iibNonIpruPolicies",
+        "iibSection",
+        "iibPolicies",
+        "nonIpruPolicies",
+      ]),
+    [effectiveQuickLinksData]
+  );
+
+  const negativeMatchRows = useMemo(
+    () =>
+      getFirstSectionRows(effectiveQuickLinksData, [
+        "negativeMatch",
+        "negativeMatches",
+        "negativeMatchPolicies",
+        "negativeMatchSection",
+      ]),
+    [effectiveQuickLinksData]
+  );
+
+  const showNegativeMatch = roleType !== "DVT_FORMAL_TASK";
+  const combinedMatchColumns = showNegativeMatch
+    ? [...IIB_NON_IPRU_COLUMNS, ...NEGATIVE_MATCH_COLUMNS]
+    : IIB_NON_IPRU_COLUMNS;
+  const combinedMatchRows = useMemo(
+    () => showNegativeMatch
+      ? combineMatchRows(iibNonIpruRows, negativeMatchRows)
+      : iibNonIpruRows,
+    [iibNonIpruRows, negativeMatchRows, showNegativeMatch],
+  );
+
+  const appFormRows = useMemo(
+    () =>
+      getFirstSectionRows(effectiveQuickLinksData, [
+        "applicationFormDetails",
+        "detailsAsPerApplicationForm",
+        "appFormDetails",
+        "applicationFormSection",
+      ]),
+    [effectiveQuickLinksData]
+  );
+
+  const renderPolicyTable = (
+    tableKey: TableKey,
+    columns: ColumnSpec[],
+    rows: PreviousPolicyItem[],
+  ) => {
+    const allowHorizontalScroll = tableKey === "iibNonIpru";
+    const { page } = pagination[tableKey];
+    const rowsPerPage = defaultRowsPerPage;
+    const totalCount = rows.length;
+    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
+    const safePage = Math.min(page, totalPages - 1);
+    const paginatedRows = rows.slice(
+      safePage * rowsPerPage,
+      (safePage + 1) * rowsPerPage,
+    );
+    const updatePagination = (
+      updates: Partial<PaginationState[TableKey]>,
+    ) => {
+      setPagination((current) => ({
+        ...current,
+        [tableKey]: {
+          ...current[tableKey],
+          ...updates,
+        },
+      }));
+    };
+
+    return (
+      <Box
+        sx={{
+          width: "100%",
+          minWidth: 0,
+        }}
+      >
+        <TableContainer
+          sx={{
+            border: "1px solid #D8E0E8",
+            borderRadius: 2,
+            maxHeight: 420,
+            overflow: "hidden",
+            overflowX: allowHorizontalScroll ? "auto" : "hidden",
+            overflowY: "auto",
+            width: "100%",
+          }}
+        >
+          <Table
+            size="small"
+            stickyHeader
+            sx={{
+              tableLayout: "fixed",
+              minWidth: allowHorizontalScroll ? columns.length * 160 : 0,
+              width: "100%",
+              "& tbody tr:nth-of-type(even)": {
+                backgroundColor: "#FAFBFC",
+              },
+            }}
+          >
+            <TableHead>
+              <TableRow>
+                {columns.map((column, columnIndex) => (
+                  <TableCell
+                    key={`${column.header}-${columnIndex}`}
+                    title={column.header}
+                    sx={{ ...tableHeaderCellSx, width: `${100 / columns.length}%` }}
+                  >
+                    {column.header}
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+
+            <TableBody>
+              {rows.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={columns.length} sx={{ ...tableBodyCellSx, textAlign: "center", py: 3 }}>
+                    No previous policies available.
+                  </TableCell>
+                </TableRow>
+              )}
+              {paginatedRows.map((policy, rowIndex) => (
+                  <TableRow key={`${tableKey}-policy-row-${safePage}-${rowIndex}`}>
+                    {columns.map((column, columnIndex) => {
+                      const rawValue = getValueFromKeys(policy, column.keys);
+                      const display = column.formatter
+                        ? column.formatter(rawValue)
+                        : toDisplayValue(rawValue);
+
+                      return (
+                        <TableCell
+                          key={`${column.header}-${columnIndex}-${rowIndex}`}
+                          title={display}
+                          sx={tableBodyCellSx}
+                        >
+                          {display}
+                        </TableCell>
+                      );
+                    })}
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            width: "100%",
+            minHeight: 64,
+            py: 1,
+            boxSizing: "border-box",
+            flexShrink: 0,
+            bgcolor: "#F5F6F7",
+            borderTop: "1px solid #D8E0E8",
+            borderRadius: "0 0 8px 8px",
+          }}
+        >
+            <Pagination
+              aria-label={`${memberKey} ${tableKey} table pagination`}
+              count={totalPages}
+              page={safePage + 1}
+              onChange={(_, nextPage) =>
+                updatePagination({ page: nextPage - 1 })
+              }
+              shape="rounded"
+              siblingCount={1}
+              boundaryCount={1}
+              sx={{
+                "& .MuiPaginationItem-root": {
+                  minWidth: 40,
+                  height: 40,
+                  borderRadius: "7px",
+                  fontSize: 14,
+                  fontWeight: 400,
+                  margin: "0 2px",
+                  color: "#5F5F5F",
+                },
+                "& .MuiPagination-ul": { flexWrap: "nowrap" },
+                "& .MuiPaginationItem-root.Mui-disabled": { opacity: 0.4 },
+                "& .MuiPaginationItem-icon": { fontSize: 14 },
+                "& .MuiPaginationItem-root.Mui-selected": {
+                  bgcolor: "#E45F14",
+                  color: "#FFFFFF",
+                  "&:hover": { bgcolor: "#D95400" },
+                },
+              }}
+            />
+        </Box>
+      </Box>
+    );
+  };
+
+  return (
+    <Box sx={{ minWidth: 0 }}>
+          {(
+            <>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, mb: 1.25, color: "#0E3762" }}>
+                IPRU
+              </Typography>
+              {renderPolicyTable("ipru", IPRU_COLUMNS, ipruRows)}
+            </>
+          )}
+
+          {(
+            <>
+              <Typography sx={{ fontSize: 14, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
+                {showNegativeMatch ? "IIB / Non IPRU and Negative Match Details" : "IIB / Non IPRU"}
+              </Typography>
+              {renderPolicyTable("iibNonIpru", combinedMatchColumns, combinedMatchRows)}
+            </>
+          )}
+
+          {roleType !== "DVT_FORMAL_TASK" && (
+            <>
+              {(
+                <>
+                  <Typography sx={{ fontSize: 14, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
+                    Details as per application form
+                  </Typography>
+                  {renderPolicyTable("applicationForm", APP_FORM_DETAILS_COLUMNS, appFormRows)}
+                </>
+              )}
+            </>
+          )}
+    </Box>
+  );
+};
+
 const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
@@ -518,8 +825,6 @@ const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) =
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quickLinksData, setQuickLinksData] = useState<Record<string, unknown> | null>(null);
-  const [pagination, setPagination] =
-    useState<PaginationState>(initialPagination);
 
   const safeBusinessType =
     String(
@@ -536,7 +841,11 @@ const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) =
     () => toRecord((drsData as unknown as Record<string, unknown> | null)?.quickLinks),
     [drsData],
   );
-  const hasReduxPreviousPolicies = Array.isArray(reduxQuickLinks.previousPolicies);
+  const hasReduxPreviousPolicies = Array.isArray(reduxQuickLinks.previousPolicies)
+    || Array.isArray(reduxQuickLinks.ipru)
+    || MEMBER_DEFINITIONS.some((member) => Object.keys(reduxQuickLinks).some(
+      (key) => key.toLowerCase() === member.key.toLowerCase(),
+    ));
   const effectiveQuickLinksData = showDummyData
     ? DUMMY_QUICK_LINKS
     : isApplicationIdMissing
@@ -618,194 +927,6 @@ const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) =
     safeBusinessType,
   ]);
 
-  const ipruRows = useMemo(() => {
-    return getFirstSectionRows(effectiveQuickLinksData, [
-      "ipru",
-      "ipruPolicies",
-      "ipruPreviousPolicies",
-      "ipruSection",
-      "previousPolicies",
-      "policies",
-    ]);
-  }, [effectiveQuickLinksData]);
-
-  const iibNonIpruRows = useMemo(
-    () =>
-      getFirstSectionRows(effectiveQuickLinksData, [
-        "iibNonIpru",
-        "iibNonIpruPolicies",
-        "iibSection",
-        "iibPolicies",
-        "nonIpruPolicies",
-      ]),
-    [effectiveQuickLinksData]
-  );
-
-  const negativeMatchRows = useMemo(
-    () =>
-      getFirstSectionRows(effectiveQuickLinksData, [
-        "negativeMatch",
-        "negativeMatches",
-        "negativeMatchPolicies",
-        "negativeMatchSection",
-      ]),
-    [effectiveQuickLinksData]
-  );
-
-  const appFormRows = useMemo(
-    () =>
-      getFirstSectionRows(effectiveQuickLinksData, [
-        "applicationFormDetails",
-        "detailsAsPerApplicationForm",
-        "appFormDetails",
-        "applicationFormSection",
-      ]),
-    [effectiveQuickLinksData]
-  );
-
-  const renderPolicyTable = (
-    tableKey: TableKey,
-    columns: ColumnSpec[],
-    rows: PreviousPolicyItem[],
-  ) => {
-    const { page } = pagination[tableKey];
-    const rowsPerPage = defaultRowsPerPage;
-    const totalCount = rows.length;
-    const totalPages = Math.max(1, Math.ceil(totalCount / rowsPerPage));
-    const safePage = Math.min(page, totalPages - 1);
-    const paginatedRows = rows.slice(
-      safePage * rowsPerPage,
-      (safePage + 1) * rowsPerPage,
-    );
-    const updatePagination = (
-      updates: Partial<PaginationState[TableKey]>,
-    ) => {
-      setPagination((current) => ({
-        ...current,
-        [tableKey]: {
-          ...current[tableKey],
-          ...updates,
-        },
-      }));
-    };
-
-    return (
-      <Box
-        sx={{
-          width: "100%",
-        }}
-      >
-        <TableContainer
-          sx={{
-            border: "1px solid #D8E0E8",
-            borderRadius: 2,
-            maxHeight: 420,
-            overflow: "hidden",
-            overflowX: "hidden",
-            overflowY: "auto",
-            width: "100%",
-          }}
-        >
-          <Table
-            size="small"
-            stickyHeader
-            sx={{
-              tableLayout: "fixed",
-              minWidth: 0,
-              width: "100%",
-              "& tbody tr:nth-of-type(even)": {
-                backgroundColor: "#FAFBFC",
-              },
-            }}
-          >
-            <TableHead>
-              <TableRow>
-                {columns.map((column, columnIndex) => (
-                  <TableCell
-                    key={`${column.header}-${columnIndex}`}
-                    title={column.header}
-                    sx={{ ...tableHeaderCellSx, width: `${100 / columns.length}%` }}
-                  >
-                    {column.header}
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-
-            <TableBody>
-              {paginatedRows.map((policy, rowIndex) => (
-                  <TableRow key={`${tableKey}-policy-row-${safePage}-${rowIndex}`}>
-                    {columns.map((column, columnIndex) => {
-                      const rawValue = getValueFromKeys(policy, column.keys);
-                      const display = column.formatter
-                        ? column.formatter(rawValue)
-                        : toDisplayValue(rawValue);
-
-                      return (
-                        <TableCell
-                          key={`${column.header}-${columnIndex}-${rowIndex}`}
-                          title={display}
-                          sx={tableBodyCellSx}
-                        >
-                          {display}
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            width: "100%",
-            minHeight: 64,
-            py: 1,
-            boxSizing: "border-box",
-            flexShrink: 0,
-            bgcolor: "#F5F6F7",
-            borderTop: "1px solid #D8E0E8",
-            borderRadius: "0 0 8px 8px",
-          }}
-        >
-            <Pagination
-              aria-label={`${tableKey} table pagination`}
-              count={totalPages}
-              page={safePage + 1}
-              onChange={(_, nextPage) =>
-                updatePagination({ page: nextPage - 1 })
-              }
-              shape="rounded"
-              siblingCount={1}
-              boundaryCount={1}
-              sx={{
-                "& .MuiPaginationItem-root": {
-                  minWidth: 40,
-                  height: 40,
-                  borderRadius: "7px",
-                  fontSize: 20,
-                  fontWeight: 400,
-                  margin: "0 2px",
-                  color: "#5F5F5F",
-                },
-                "& .MuiPagination-ul": { flexWrap: "nowrap" },
-                "& .MuiPaginationItem-root.Mui-disabled": { opacity: 0.4 },
-                "& .MuiPaginationItem-icon": { fontSize: 24 },
-                "& .MuiPaginationItem-root.Mui-selected": {
-                  bgcolor: "#E45F14",
-                  color: "#FFFFFF",
-                  "&:hover": { bgcolor: "#D95400" },
-                },
-              }}
-            />
-        </Box>
-      </Box>
-    );
-  };
 
   return (
     <Container maxWidth={false} disableGutters sx={{ pt:1,pb: 4, width: "100%" }}>
@@ -826,85 +947,54 @@ const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) =
         </Typography>
       )}
 
-      <Paper
-        sx={{
-          borderRadius: "16px",
-          overflow: "hidden",
-          border: "1px solid #D8D8D8",
-          width: "100%",
-        }}
-      >
-        <Box
+      {loading && (
+        <Typography sx={{ color: "#6B7280", py: 2 }}>
+          Loading previous policies...
+        </Typography>
+      )}
+      {MEMBER_DEFINITIONS.map((member, index) => (
+        <Accordion
+          key={member.key}
+          defaultExpanded={index === 0}
+          disableGutters
+          elevation={0}
           sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            p: 1,
-            pl: 2,
-            backgroundColor: "#E45F14",
-            color: "#FFFFFF",
-            minHeight: 46,
+            mb: 2,
+            border: "1px solid #D8D8D8",
+            borderRadius: "12px !important",
+            overflow: "hidden",
+            width: "100%",
+            "&::before": { display: "none" },
           }}
         >
-          <Typography sx={{ fontSize: "18px", fontWeight: 700 }}>
-            Previous Policies
-          </Typography>
-        </Box>
-
-        <Box sx={{ p: { xs: 1.25, md: 2 }, overflow: "hidden" }}>
-          {/* {showDummyData && (
-            <Typography sx={{ color: "#9A6200", mb: 1.5, fontSize: 12 }}>
-              Dummy data — fictional values for UI preview only.
+          <AccordionSummary
+            id={`previous-policies-${member.key}-header`}
+            aria-controls={`previous-policies-${member.key}-content`}
+            expandIcon={<Box component="span" sx={{ color: "#FFFFFF", fontSize: 12 }}>⌄</Box>}
+            sx={{
+              bgcolor: "#E45F14",
+              color: "#FFFFFF",
+              minHeight: 48,
+              px: 2,
+              "& .MuiAccordionSummary-content": { my: 1.25 },
+            }}
+          >
+            <Typography sx={{ fontSize: 12, fontWeight: 700 }}>
+              Previous Policies - {member.label}
             </Typography>
-          )} */}
-          {loading && (
-            <Typography sx={{ color: "#6B7280", py: 2 }}>
-              Loading previous policies...
-            </Typography>
-          )}
-
-          {ipruRows.length > 0 && (
-            <>
-              <Typography sx={{ fontSize: 20, fontWeight: 700, mb: 1.25, color: "#0E3762" }}>
-                IPRU
-              </Typography>
-              {renderPolicyTable("ipru", IPRU_COLUMNS, ipruRows)}
-            </>
-          )}
-
-          {iibNonIpruRows.length > 0 && (
-            <>
-              <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
-                IIB/ Non IPRU
-              </Typography>
-              {renderPolicyTable("iibNonIpru", IIB_NON_IPRU_COLUMNS, iibNonIpruRows)}
-            </>
-          )}
-
-          {roleType !== "DVT_FORMAL_TASK" && (
-            <>
-              {negativeMatchRows.length > 0 && (
-                <>
-                  <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
-                    Negative match details
-                  </Typography>
-                  {renderPolicyTable("negativeMatch", NEGATIVE_MATCH_COLUMNS, negativeMatchRows)}
-                </>
-              )}
-
-              {appFormRows.length > 0 && (
-                <>
-                  <Typography sx={{ fontSize: 20, fontWeight: 700, mt: 2.5, mb: 1.25, color: "#0E3762" }}>
-                    Details as per application form
-                  </Typography>
-                  {renderPolicyTable("applicationForm", APP_FORM_DETAILS_COLUMNS, appFormRows)}
-                </>
-              )}
-            </>
-          )}
-        </Box>
-
-      </Paper>
+          </AccordionSummary>
+          <AccordionDetails sx={{ p: { xs: 1.25, md: 2 }, minWidth: 0 }}>
+            <MemberPolicyTables
+              key={`${safeApplicationId}-${member.key}-${showDummyData}`}
+              memberKey={member.key}
+              roleType={roleType}
+              effectiveQuickLinksData={showDummyData
+                ? DUMMY_QUICK_LINKS
+                : getMemberPolicyData(effectiveQuickLinksData, member.key)}
+            />
+          </AccordionDetails>
+        </Accordion>
+      ))}
     </Container>
   );
 };
