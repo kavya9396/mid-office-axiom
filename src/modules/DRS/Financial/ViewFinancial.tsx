@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useMemo, useRef, useState } from 
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import CustomButton from "../../../components/ui/Button/Button";
-import CustomTabs from "../../../components/ui/Tabs/Tabs";
+// import CustomTabs from "../../../components/ui/Tabs/Tabs";
 import CustomTextField from "../../../components/ui/TextField/TextField";
 import CustomSelect from "../../../components/ui/Select/Select";
 import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
@@ -25,20 +25,23 @@ import type { ApplicantTab, FinancialResponse, FinancialResponseSection, Financi
 import { applicantTabs, title } from "../../../utils/constant";
 import { getFinancialFieldRule, validateFinancialFieldValue, validateFinancialSectionValues } from "../../../validations/financialValidation";
 import { getErrorMessage } from "../../../config/errorMessages";
-import BreDecision from "../DRS_Accordions/BreDecision";
+// import BreDecision from "../DRS_Accordions/BreDecision";
 import {
+  cuwFinancialDecisionSection,
+  cuwFinancialProfessionSection,
   financialSections,
   type FinancialField,
   type FinancialSectionConfig,
   type FinancialSectionKey,
 } from "./financialAccordionConfig";
-import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
+// import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
 
 const getRoleType = () => localStorage.getItem("roleType") ?? "";
 
 type SelectedCaseContext = {
   taskId?: string;
   instanceId?: string;
+  roleType?: string;
 };
 
 const getSelectedCaseContext = (): SelectedCaseContext => {
@@ -60,7 +63,13 @@ const drsViewTabs: { key: DRSViewTab; label: string }[] = [
   { key: "financial", label: "View Financial" },
 ];
 
-const buildInitialFieldValues = (sections: FinancialSectionConfig[] = financialSections) => {
+const buildInitialFieldValues = (
+  sections: FinancialSectionConfig[] = [
+    cuwFinancialProfessionSection,
+    cuwFinancialDecisionSection,
+    ...financialSections,
+  ],
+) => {
   return sections.reduce<Record<FinancialSectionKey, Record<string, string>>>(
     (accumulator, section) => {
       accumulator[section.key] = section.items.reduce<Record<string, string>>((itemAccumulator, item) => {
@@ -1775,6 +1784,91 @@ const renderFieldValue = (
   />
 );
 
+const verifiedIncomeDocumentOptions: SelectOption[] = [
+  { label: "Appointment Letter", value: "Appointment Letter" },
+  { label: "Commission Statement", value: "Commission Statement" },
+  { label: "Computation of Income", value: "Computation of Income" },
+  { label: "Credit Cards", value: "Credit Cards" },
+];
+
+const financialDecisionOptions: SelectOption[] = [
+  { label: "Standard", value: "Standard" },
+  { label: "Non-Standard", value: "Non-Standard" },
+];
+
+const renderDecisionSection = (
+  section: FinancialSectionConfig,
+  values: Record<FinancialSectionKey, Record<string, string>>,
+  sectionErrors: Record<string, string>,
+  onFieldValueChange: (sectionKey: FinancialSectionKey, label: string, value: string) => void,
+) => {
+  const sectionValues = values[section.key] ?? {};
+  const fieldsByLabel = section.items.reduce<Record<string, FinancialField>>((fields, item) => {
+    fields[item.label] = item;
+    return fields;
+  }, {});
+
+  const renderLabel = (label: string) => (
+    <Box sx={{ display: "flex", alignItems: "center", gap: 0.25, mb: 0.5 }}>
+      <Typography sx={{ fontSize: 12, color: "#475467" }}>{label}</Typography>
+      {isFieldMandatory(fieldsByLabel[label]) && (
+        <Typography sx={{ fontSize: 12, fontWeight: 700, color: "#B42318" }}>*</Typography>
+      )}
+    </Box>
+  );
+
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: {
+          sm: "repeat(3, minmax(0, 1fr))",
+        },
+        gap: 1.25,
+      }}
+    >
+      <Box>
+        {renderLabel("Verified Income Doc")}
+        <CustomSelect
+          fullWidth
+          options={verifiedIncomeDocumentOptions}
+          value={sectionValues["Verified Income Doc"] ?? ""}
+          onChange={(value) => onFieldValueChange(section.key, "Verified Income Doc", value)}
+          required
+          error={Boolean(sectionErrors["Verified Income Doc"])}
+          helperText={sectionErrors["Verified Income Doc"]}
+          placeholder="Select verified income document"
+        />
+      </Box>
+
+      {["Verified Income", "Justification"].map((label) => (
+        <Box key={label}>
+          {renderLabel(label)}
+          <CustomTextField
+            fullWidth
+            size="small"
+            required={isFieldMandatory(fieldsByLabel[label])}
+            error={Boolean(sectionErrors[label])}
+            helperText={sectionErrors[label]}
+            value={sectionValues[label] ?? ""}
+            onChange={(event) => onFieldValueChange(section.key, label, event.target.value)}
+          />
+        </Box>
+      ))}
+         <Box>
+        {renderLabel("Financial Decision")}
+        <CustomSelect
+          fullWidth
+          options={financialDecisionOptions}
+          value={sectionValues["Financial Decision"] ?? ""}
+          onChange={(value) => onFieldValueChange(section.key, "Financial Decision", value)}
+          placeholder="Select financial decision"
+        />
+      </Box>
+    </Box>
+  );
+};
+
 type SingleFinancialField = {
   label: string;
   fieldLabel?: string;
@@ -2658,8 +2752,10 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
     () => getMiscOptionsFromMasters(masters, "YESNO"),
     [masters],
   );
-  const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
   const selectedCaseContext = useMemo(() => getSelectedCaseContext(), []);
+  const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
+  const roleType = String(selectedCaseContext.roleType || getRoleType()).trim().toUpperCase();
+  const isCuwTask = roleType === "CUW_TASK";
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
@@ -2681,7 +2777,11 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
     FinancialSectionKey,
     Record<string, string>
   >>(buildInitialFieldValues);
-  const [activeSectionId, setActiveSectionId] = useState<string>(financialSections[0]?.key ?? "");
+  const [activeSectionId, setActiveSectionId] = useState<string>(
+    isCuwTask
+      ? cuwFinancialProfessionSection.key
+      : (financialSections[0]?.key ?? ""),
+  );
   const safeBusinessType =
     String(
       businessType ??
@@ -2691,8 +2791,8 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
       .trim()
       .toLowerCase() || "retail";
   const safeApplicationId = applicationNumber ?? "";
-  const roleType = getRoleType();
   const [editingSectionKey, setEditingSectionKey] = useState<FinancialSectionKey | null>(null);
+  const [sectionReviewStatus, setSectionReviewStatus] = useState<Partial<Record<FinancialSectionKey, "agree" | "disagree">>>({});
   const [sectionErrors, setSectionErrors] = useState<Partial<Record<FinancialSectionKey, Record<string, string>>>>({});
   const [submitLoading, setSubmitLoading] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -2764,9 +2864,19 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
       (!drsApplicationNumber || !drsPartyId)
       ? "Application number or party ID is unavailable for financial fetch."
       : null;
-  const displayFinancialSections = useMemo(
+  const financialDocumentSections = useMemo(
     () => buildFinancialSectionsFromResponse(financialData?.sections),
     [financialData?.sections]
+  );
+  const displayFinancialSections = useMemo(
+    () => isCuwTask
+      ? [
+        cuwFinancialProfessionSection,
+        cuwFinancialDecisionSection,
+        ...financialDocumentSections,
+      ]
+      : financialDocumentSections,
+    [financialDocumentSections, isCuwTask],
   );
 
   useEffect(() => {
@@ -2816,9 +2926,15 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
         setLoading(true);
         const response = normalizeFinancialResponse(await dispatch(financialThunk(payload)).unwrap());
         setFinancialData(response);
-        const built = buildInitialFieldValues(buildFinancialSectionsFromResponse(response.sections));
+        const built = buildInitialFieldValues([
+          cuwFinancialProfessionSection,
+          cuwFinancialDecisionSection,
+          ...buildFinancialSectionsFromResponse(response.sections),
+        ]);
         setFinancialFieldValues(built);
         setOriginalFinancialFieldValues(built);
+        setEditingSectionKey(null);
+        setSectionReviewStatus({});
         // Clear error on success
         setFinancialDataLoaded(true);
       } catch {
@@ -3612,8 +3728,11 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
     return documents;
   };
 
-  const handleSave = async () => {
-    const savingSectionKey = editingSectionKey ?? (resolvedActiveSectionId as FinancialSectionKey);
+  const handleSave = async (sectionKey?: FinancialSectionKey) => {
+    const savingSectionKey =
+      sectionKey ??
+      editingSectionKey ??
+      (resolvedActiveSectionId as FinancialSectionKey);
     const activeSection = displayFinancialSections.find((s) => s.key === savingSectionKey);
 
     const sectionsToValidate = activeSection ? [activeSection] : displayFinancialSections;
@@ -3991,8 +4110,28 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
       [sectionKey]: JSON.parse(JSON.stringify(originalSection)),
     }));
 
-    setEditingSectionKey(null);
+    setEditingSectionKey((currentSectionKey) =>
+      currentSectionKey === sectionKey ? null : currentSectionKey,
+    );
     setSectionErrors((prev) => ({ ...prev, [sectionKey]: {} }));
+  };
+
+  const handleSectionAgree = (sectionKey: FinancialSectionKey) => {
+    if (editingSectionKey === sectionKey) {
+      handleReset(sectionKey);
+    }
+
+    setSectionReviewStatus((current) => ({ ...current, [sectionKey]: "agree" }));
+  };
+
+  const handleSectionDisagree = (sectionKey: FinancialSectionKey) => {
+    if (editingSectionKey && editingSectionKey !== sectionKey) {
+      handleReset(editingSectionKey);
+    }
+
+    setSectionErrors((current) => ({ ...current, [sectionKey]: {} }));
+    setEditingSectionKey(sectionKey);
+    setSectionReviewStatus((current) => ({ ...current, [sectionKey]: "disagree" }));
   };
 
   const handleSubmit = async () => {
@@ -4002,6 +4141,33 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
     if (!safeApplicationId || !taskId) {
       showSnackbar("Application number or task ID is unavailable.", "error");
       return;
+    }
+
+    if (isCuwTask) {
+      const decisionErrors = cuwFinancialDecisionSection.items.reduce<Record<string, string>>(
+        (errors, item) => {
+          const value = financialFieldValues.decision?.[item.label] ?? "";
+
+          if (isFieldMandatory(item) && !value.trim()) {
+            errors[item.label] = getErrorMessage("financialFieldMandatory");
+          }
+
+          return errors;
+        },
+        {},
+      );
+
+      setSectionErrors((current) => ({ ...current, decision: decisionErrors }));
+
+      if (Object.keys(decisionErrors).length > 0) {
+        setActiveSectionId(cuwFinancialDecisionSection.key);
+        sectionRefs.current[cuwFinancialDecisionSection.key]?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        showSnackbar("Please fill all mandatory fields in the Decision section.", "error");
+        return;
+      }
     }
 
     try {
@@ -4123,12 +4289,13 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
           sx={{
             textTransform: "none",
             px: 1,
+            minWidth: "200px",
             color: "#9A2529",
             fontWeight: 600,
             textDecoration: "underline",
           }}
         >
-          View UDS Link
+          View Financial Documents
         </CustomButton>
       </Box>
 
@@ -4329,7 +4496,7 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
                             <CustomButton
                               sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
                               disabled={submitLoading || !safeApplicationId}
-                              onClick={handleSave}
+                              onClick={() => handleSave(section.key)}
                             >
                               {submitLoading ? "Saving..." : "Save"}
                             </CustomButton>
@@ -4345,10 +4512,41 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
                       </Box>
                     </Box>
                   )}
+                  {isCuwTask && section.key !== "financial_profession" && (
+                    <Box sx={{ display: "flex", gap: 1 }}>
+                      {(section.key === "decision" ||
+                        editingSectionKey === section.key) && (
+                        <CustomButton
+                          sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                          disabled={submitLoading || !safeApplicationId}
+                          onClick={() => handleSave(section.key)}
+                        >
+                          {submitLoading ? "Saving..." : "Save"}
+                        </CustomButton>
+                      )}
+                      {section.key !== "decision" && (
+                        <CustomButton
+                          variant="outlined"
+                          sx={{ minWidth: 80, py: 0.5, fontSize: 13 }}
+                          disabled={submitLoading}
+                          onClick={() => handleReset(section.key)}
+                        >
+                          Reset
+                        </CustomButton>
+                      )}
+                    </Box>
+                  )}
                 </Box>
 
                 <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
-                  {section.key === "form16"
+                  {section.key === "decision"
+                    ? renderDecisionSection(
+                      section,
+                      financialFieldValues,
+                      sectionErrors[section.key] ?? {},
+                      handleFieldValueChange,
+                    )
+                    : section.key === "form16"
                     ? renderForm16Section(
                       section,
                       financialFieldValues,
@@ -4421,6 +4619,52 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
                                   )}
 
                 </Box>
+                {isCuwTask &&
+                  section.key !== "financial_profession" &&
+                  section.key !== "decision" && (
+                  <Box
+                    sx={{
+                      px: { xs: 1.5, md: 2 },
+                      py: 1.25,
+                      borderTop: "1px solid #E4E7EC",
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      gap: 1,
+                      backgroundColor: "#FCFCFD",
+                    }}
+                  >
+                    <CustomButton
+                      variant={sectionReviewStatus[section.key] === "agree" ? "contained" : "outlined"}
+                      aria-pressed={sectionReviewStatus[section.key] === "agree"}
+                      onClick={() => handleSectionAgree(section.key)}
+                      sx={{
+                        minWidth: 90,
+                        py: 0.5,
+                        fontSize: 13,
+                        ...(sectionReviewStatus[section.key] === "agree"
+                          ? { bgcolor: "#027A48", "&:hover": { bgcolor: "#05603A" } }
+                          : { color: "#027A48", borderColor: "#027A48" }),
+                      }}
+                    >
+                      Agree
+                    </CustomButton>
+                    <CustomButton
+                      variant={sectionReviewStatus[section.key] === "disagree" ? "contained" : "outlined"}
+                      aria-pressed={sectionReviewStatus[section.key] === "disagree"}
+                      onClick={() => handleSectionDisagree(section.key)}
+                      sx={{
+                        minWidth: 90,
+                        py: 0.5,
+                        fontSize: 13,
+                        ...(sectionReviewStatus[section.key] === "disagree"
+                          ? { bgcolor: "#B42318", "&:hover": { bgcolor: "#912018" } }
+                          : { color: "#B42318", borderColor: "#B42318" }),
+                      }}
+                    >
+                      Disagree
+                    </CustomButton>
+                  </Box>
+                )}
               </Box>
             ))}
           </Box>

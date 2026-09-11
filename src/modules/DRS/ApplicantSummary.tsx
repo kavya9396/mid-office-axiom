@@ -1,4 +1,16 @@
-import { Avatar, Box, Button, Pagination, Typography } from "@mui/material";
+import {
+  Avatar,
+  Box,
+  Button,
+  Pagination,
+  // Table,
+  // TableBody,
+  // TableCell,
+  // TableContainer,
+  // TableHead,
+  // TableRow,
+  Typography,
+} from "@mui/material";
 import {
   cloneElement,
   isValidElement,
@@ -32,36 +44,37 @@ import BreDecision from "./DRS_Accordions/BreDecision";
 import MemberSelection from "./MemberSeclection";
 import ViewMedical from "./Medical Final/ViewMedical";
 import ViewFinancial from "./Financial/ViewFinancial";
+// import { GridSection } from "../../components/layout/GridSection";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
 /* -------------------------------------------------------------------------- */
 
-const summaryActionSx = {
-              minWidth: "auto",
-              px: 1.4,
-              py: 0.55,
-              border: "1px solid #E45F14",
-              borderRadius: "18px",
-              bgcolor: "#FFF4EC",
-              color: "#A92129",
-              fontSize: { xs: 10, sm: 11 },
-              fontWeight: 900,
-              lineHeight: 1.2,
-              textTransform: "none",
-              whiteSpace: "nowrap",
-              boxShadow: "0 2px 7px rgba(169,33,41,.12)",
-              "& .MuiButton-startIcon": {
-                mr: 0.55,
-                ml: 0,
-              },
-              "&:hover": {
-                borderColor: "#C83C2F",
-                bgcolor: "#FFEAD7",
-                boxShadow: "0 3px 9px rgba(169,33,41,.18)",
-                transform: "translateY(-1px)",
-              },
-            } as const;
+// const summaryActionSx = {
+//               minWidth: "auto",
+//               px: 1.4,
+//               py: 0.55,
+//               border: "1px solid #E45F14",
+//               borderRadius: "18px",
+//               bgcolor: "#FFF4EC",
+//               color: "#A92129",
+//               fontSize: { xs: 10, sm: 11 },
+//               fontWeight: 900,
+//               lineHeight: 1.2,
+//               textTransform: "none",
+//               whiteSpace: "nowrap",
+//               boxShadow: "0 2px 7px rgba(169,33,41,.12)",
+//               "& .MuiButton-startIcon": {
+//                 mr: 0.55,
+//                 ml: 0,
+//               },
+//               "&:hover": {
+//                 borderColor: "#C83C2F",
+//                 bgcolor: "#FFEAD7",
+//                 boxShadow: "0 3px 9px rgba(169,33,41,.18)",
+//                 transform: "translateY(-1px)",
+//               },
+//             } as const;
 
 interface ApplicantApplicationSummaryProps {
   onBackToInbox?: () => void;
@@ -202,6 +215,11 @@ interface SdtReadonlyRowProps {
   timestamp: ReactNode;
 }
 
+// interface MedicalSummaryField {
+//   label: string;
+//   value: string;
+// }
+
 /* -------------------------------------------------------------------------- */
 /* CONSTANTS                                                                  */
 /* -------------------------------------------------------------------------- */
@@ -236,24 +254,99 @@ const GRIEVANCE_HISTORY_COLUMNS: Column<GrievanceHistoryRow>[] = [
   { key: "tpaRemarks", header: "TPA Remarks", width: "18%" },
 ];
 
+// const MedicalSummaryTable = ({ rows }: { rows: MedicalSummaryField[] }) => (
+//   <TableContainer>
+//     <Table size="small" aria-label="Medical summary">
+//       <TableHead>
+//         <TableRow>
+//           <TableCell
+//             sx={{
+//               width: "55%",
+//               py: 0.8,
+//               px: 1.5,
+//               bgcolor: "#F8FAFC",
+//               color: "#344054",
+//               fontSize: 12,
+//               fontWeight: 700,
+//               borderColor: "#E4E7EC",
+//             }}
+//           >
+//             Parameter
+//           </TableCell>
+//           <TableCell
+//             sx={{
+//               py: 0.8,
+//               px: 1.5,
+//               bgcolor: "#F8FAFC",
+//               color: "#344054",
+//               fontSize: 12,
+//               fontWeight: 700,
+//               borderColor: "#E4E7EC",
+//             }}
+//           >
+//             Value
+//           </TableCell>
+//         </TableRow>
+//       </TableHead>
+//       <TableBody>
+//         {rows.map((row, index) => (
+//           <TableRow
+//             key={row.label}
+//             sx={{ backgroundColor: index % 2 === 0 ? "#FFFFFF" : "#FAFAFA" }}
+//           >
+//             <TableCell
+//               component="th"
+//               scope="row"
+//               sx={{
+//                 py: 0.8,
+//                 px: 1.5,
+//                 color: "#475467",
+//                 fontSize: 12,
+//                 fontWeight: 600,
+//                 borderColor: "#E4E7EC",
+//               }}
+//             >
+//               {row.label}
+//             </TableCell>
+//             <TableCell
+//               sx={{
+//                 py: 0.8,
+//                 px: 1.5,
+//                 color: "#101828",
+//                 fontSize: 12,
+//                 borderColor: "#E4E7EC",
+//               }}
+//             >
+//               {row.value}
+//             </TableCell>
+//           </TableRow>
+//         ))}
+//       </TableBody>
+//     </Table>
+//   </TableContainer>
+// );
+
 const MEDICAL_FIELDS: FieldConfig[] = [
   ["brePhysicalMedicalDecision", "Physical Medical Decision"],
-  ["brePhysicalMedicalRemark", "Physical Medical Remark"],
   ["breTeleVideoMerDecision", "Tele/Video MER Decision"],
   ["breTeleVideoMerRemark", "Tele/Video MER Remark"],
   ["munichReMedicalDecision", "MunichRe Medical Decision"],
   ["munichReRating", "MunichRe Rating"],
   ["biuMedicalStatus", "BIU Medical Status"],
+  // ["brePhysicalMedicalRemark", "Physical Medical Remark"],
 ];
 
 const FINANCIAL_FIELDS: FieldConfig[] = [
   ["breFinancialDecision", "Financial Decision"],
-  ["breRemark", "Financial Remark"],
   ["financialEligibility", "Financial Eligibility"],
   ["derivedIncome", "Derived Income"],
+  ["verifiedIncome", "Verified Income"],
   ["counterOfferValue", "Counter Offer Value"],
   ["additionalSA", "Additional SA"],
   ["biuFinancialStatus", "BIU Financial Status"],
+  ["finalBureauIncome", "Final Bureau Income"],
+  ["reinsurerCase", "Reinsurer Case "],
+  // ["breRemark", "Financial Remark"],
 ];
 
 const OTHER_RISK_FIELDS: FieldConfig[] = [
@@ -275,6 +368,11 @@ const OTHER_RISK_FIELDS: FieldConfig[] = [
   ["faceMatchScore", "Face Match Score"],
   ["tobacco", "Tobacco"],
   ["narcotics", "Narcotics"],
+  ["thirdPartyPayment", "Third Party Payment"],
+["pbRiskResponse", "Policy Bazar Risk Response"],
+["adverseACRrange", "Adverse ACR"],
+["acceptable", "Distance < acceptable range"],
+["adverseOID", "Adverse App OID"],
 ];
 
 const RISK_TONES: Record<
@@ -604,7 +702,10 @@ const buildRiskCards = (applicant: UnknownRecord): RiskCard[] => {
       : [];
 
   const medicalRisk = getFirstRisk(analyticsItems, "medicalRisk");
-  const financialRisk = getFirstRisk(analyticsItems, "financialRisk");
+  const financialRisk = {
+    ...getFirstRisk(analyticsItems, "financialRisk"),
+    verifiedIncome: "₹16,00,000",
+  };
   const otherRisk = getFirstRisk(analyticsItems, "otherRisk");
 
   const medicalStatus = getMedicalRiskStatus(medicalRisk);
@@ -617,8 +718,7 @@ const buildRiskCards = (applicant: UnknownRecord): RiskCard[] => {
       label: "Financial",
       value: text(
         firstValue(
-          financialRisk.breFinancialDecision,
-          financialRisk.financialEligibility,
+          financialRisk.verifiedIncome,
         ),
       ),
       status: financialStatus,
@@ -857,13 +957,15 @@ const ApplicationSummaryBanner = ({
   personalSummary,
   parameters,
   productName,
+  // policyTerm,
+  // premiumTerm,
   sumAssured,
   tsa,
   tfsa,
   tssa,
   tpsa,
   riderSummaries,
-  onViewRiders,
+  // onViewRiders,
 }: ApplicationSummaryBannerProps) => {
   const coverageItems = [
     `SA - ${sumAssured}`,
@@ -1031,7 +1133,6 @@ const ApplicationSummaryBanner = ({
             overflowWrap: "anywhere",
           }}
         >
-          Product:{" "}
           <Box
             component="span"
             sx={{
@@ -1065,99 +1166,14 @@ const ApplicationSummaryBanner = ({
               {item}
             </Box>
           ))}
-        </Typography>
-
-        {/* ================================================================ */}
-        {/* RIDERS                                                            */}
-        {/* ================================================================ */}
-
-        <Box
-          sx={{
-            mt: 0.45,
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 0.35,
-            flexWrap: "wrap",
-          }}
-        >
-          <Typography
-            sx={{
-              color: "#000",
-              fontSize: {
-                xs: 10,
-                sm: 11.5,
-              },
-              lineHeight: 1.65,
-              fontWeight: 800,
-            }}
-          >
-            Riders:
-          </Typography>
-
-          {riderSummaries.length > 0 ? (
-            <Typography
-              sx={{
-                flex: 1,
-                minWidth: 0,
-                color: "#000",
-                fontSize: {
-                  xs: 10,
-                  sm: 11.5,
-                },
-                lineHeight: 1.65,
-                fontWeight: 600,
-                overflowWrap: "anywhere",
-              }}
-            >
-              {riderSummaries.map((rider, index) => (
+          {" / "}
+           {riderSummaries.map((rider, index) => (
                 <Box component="span" key={`${rider.name}-${index}`}>
                   {rider.name} - SA ₹{rider.sumAssured}
                   {index < riderSummaries.length - 1 ? " / " : ""}
                 </Box>
               ))}
-            </Typography>
-          ) : (
-            <Typography
-              sx={{
-                color: "#000",
-                fontSize: {
-                  xs: 10,
-                  sm: 11.5,
-                },
-                lineHeight: 1.65,
-                fontWeight: 600,
-              }}
-            >
-              No riders
-            </Typography>
-          )}
-
-          {riderSummaries.length > 0 && (
-            <Box
-              component="button"
-              type="button"
-              onClick={onViewRiders}
-              sx={{
-                border: 0,
-                p: 0,
-                ml: 0.5,
-                mt: 0.15,
-                bgcolor: "transparent",
-                color: "#FFEAD7",
-                fontSize: 9,
-                fontWeight: 900,
-                cursor: "pointer",
-                fontFamily: "inherit",
-                whiteSpace: "nowrap",
-                "&:hover": {
-                  textDecoration: "underline",
-                },
-              }}
-            >
-              View details <KeyRightArrowIcon />
-            </Box>
-          )}
-        </Box>
+        </Typography>
 
         {/* ================================================================ */}
         {/* ELIGIBILTY PARAMETERS                                            */}
@@ -1172,18 +1188,7 @@ const ApplicationSummaryBanner = ({
             flexWrap: "wrap",
           }}
         >
-          <Typography
-            sx={{
-              color: "#000",
-              fontSize: {
-                xs: 10,
-                sm: 11.5,
-              },
-              lineHeight: 1.65,
-              fontWeight: 800,
-            }}
-          >
-            Eligibility Parameters:
+          
               <Typography
               component="span"
           sx={{
@@ -1195,12 +1200,10 @@ const ApplicationSummaryBanner = ({
             lineHeight: 1.6,
             fontWeight: 500,
             overflowWrap: "anywhere",
-            ml:1
           }}
         >
           {parameters || "-"}
         </Typography>
-          </Typography>
         </Box>
       </Box>
     </Box>
@@ -1214,15 +1217,18 @@ const ApplicationSummaryBanner = ({
 const RiskAnalyticsCard = ({
   card,
   onClick,
+  onArrowClick,
 }: {
   card: RiskCard;
   onClick: () => void;
+  onArrowClick: () => void;
 }) => {
   const tone = RISK_TONES[card.status];
   const icon = "";
+  const initialDetailLimit = card.id === "financial" ? 4 : 3;
   const visibleDetails = card.details
     .filter((detail) => text(detail.value) !== "-")
-    .slice(0, 3);
+    .slice(0, initialDetailLimit);
 
   return (
     <Box
@@ -1309,9 +1315,18 @@ const RiskAnalyticsCard = ({
 
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.7, mt: 1 }}>
         <Box
+          component="button"
+          type="button"
+          aria-label={`View ${card.label} risk details`}
+          onClick={(event) => {
+            event.stopPropagation();
+            onArrowClick();
+          }}
+          onKeyDown={(event) => event.stopPropagation()}
           sx={{
             width: 34,
             height: 28,
+            p: 0,
             display: "grid",
             placeItems: "center",
             border: "1px solid #E1D8D2",
@@ -1319,6 +1334,12 @@ const RiskAnalyticsCard = ({
             bgcolor: "#FFF8F3",
             color: "#A92129",
             fontSize: 13,
+            cursor: "pointer",
+            fontFamily: "inherit",
+            "&:hover": {
+              borderColor: "#E45F14",
+              bgcolor: "#FFEAD7",
+            },
           }}
         >
           <KeyRightArrowIcon />
@@ -1945,6 +1966,7 @@ const ApplicantApplicationSummary = ({
     // text(personal.maritalStatus ?? applicantDetails.maritalStatus),
 
     // age ? text(age) : "-",
+    "Life Assured 1",
     "Married",
     "Male",
     "40",
@@ -2274,6 +2296,65 @@ const ApplicantApplicationSummary = ({
     },
   ];
 
+  // const financeFields = [
+  //     {
+  //       label: "Occupation",
+  //       value: "SPVT",
+  //     },
+  //     {
+  //       label: "Annual Income",
+  //       value: "₹ 50,00,000",
+  //     },
+  //     {
+  //       label: "GSTIN",
+  //       value: "-",
+  //     },
+  //     {
+  //       label: "Industry Type",
+  //       value: "-",
+  //     },
+  //     {
+  //       label: "Organisation Type",
+  //       value: "PVT",
+  //     },
+  //     {
+  //       label: "Organisation Name",
+  //       value: "3I INFOTECH",
+  //     },
+  //     {
+  //       label: "Designation",
+  //       value: "-",
+  //     }
+  //   ];
+
+  // Temporary hard-coded values. Replace these arrays with the medical API
+  // response mapping once the payload is available.
+  // const medicalHealthFields = [
+  //   {
+  //     label: "Height",
+  //     value: "170 cm",
+  //   },
+  //   {
+  //     label: "Weight",
+  //     value: "70 kg",
+  //   },
+  //   {
+  //     label: "Other Medical History",
+  //     value: "No",
+  //   },
+  // ];
+
+  // const medicalLifestyleFields = [
+  //   {
+  //     label: "Alcohol Consumption",
+  //     value: "No",
+  //   },
+  //   {
+  //     label: "Smoking",
+  //     value: "No",
+  //   }
+  // ];
+
   const tabFields: Record<
     ApplicantDetailTab,
     Array<{ label: string; value: string }>
@@ -2560,34 +2641,142 @@ const ApplicantApplicationSummary = ({
             Summary
           </Button>
         )}
-        <Button
-          type="button"
-          variant="outlined"
-          onClick={() => setGrievanceHistoryDialogOpen(true)}
-          sx={{ ...summaryActionSx, ml: "auto" }}
-        >
-          Grievance History
-        </Button>
       </Box>
       )}
 
       {activeDetailView === "medical" && (
-        <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
-          <ViewMedical
-            onBack={() => setActiveDetailView(null)}
-            backLabel="Back to DRS"
-          />
-        </Box>
+        <>
+          {/* <Box
+            sx={{
+              ml: 1,
+              backgroundColor: "#E45F14",
+              color: "#FFFFFF",
+              px: 2,
+              py: 1.25,
+              minHeight: "42px",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <Typography
+              component="h3"
+              sx={{
+                m: 0,
+                fontSize: "14px",
+                fontWeight: 700,
+                lineHeight: 1.4,
+                color: "inherit",
+              }}
+            >
+              Medical &amp; Lifestyle
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              ml: 2,
+              py: 2,
+              px: { xs: 1, sm: 2 },
+              backgroundColor: "#F6F6F6",
+              borderRadius: "8px",
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", lg: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
+            <Box
+              sx={{
+                overflow: "hidden",
+                border: "1px solid #E3E3E3",
+                borderRadius: 2,
+                backgroundColor: "#FFFFFF",
+              }}
+            >
+              <Box sx={{ px: 2, py: 1, backgroundColor: "#FFF1E8" }}>
+                <Typography sx={{ color: "#A92129", fontSize: 13, fontWeight: 700 }}>
+                  Health Information
+                </Typography>
+              </Box>
+              <MedicalSummaryTable rows={medicalHealthFields} />
+            </Box>
+
+            <Box
+              sx={{
+                overflow: "hidden",
+                border: "1px solid #E3E3E3",
+                borderRadius: 2,
+                backgroundColor: "#FFFFFF",
+              }}
+            >
+              <Box sx={{ px: 2, py: 1, backgroundColor: "#FFF1E8" }}>
+                <Typography sx={{ color: "#A92129", fontSize: 13, fontWeight: 700 }}>
+                  Lifestyle Habits
+                </Typography>
+              </Box>
+              <MedicalSummaryTable rows={medicalLifestyleFields} />
+            </Box>
+          </Box> */}
+
+          <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
+            <ViewMedical
+              onBack={() => setActiveDetailView(null)}
+              backLabel="Back to DRS"
+            />
+          </Box>
+        </>
       )}
 
       {activeDetailView === "financial" && (
+        <>
+         {/* <Box
+            sx={{
+              backgroundColor: "#E45F14",
+              color: "#FFFFFF",
+              px: 2,
+              py: 1.25,
+              minHeight: "42px",
+              display: "flex",
+              alignItems: "center",
+              ml:1
+            }}
+          >
+            <Typography
+              component="h3"
+              sx={{
+                m: 0,
+                fontSize: "14px",
+                fontWeight: 700,
+                lineHeight: 1.4,
+                color: "inherit",
+              }}
+            >
+              Financial & Profession
+            </Typography>
+          </Box>
+
+          <Box
+            sx={{
+              // mt: 1.5,
+              ml: 2,
+              py:2,
+              backgroundColor: "#F6F6F6",
+              borderRadius: "8px",
+            }}
+          >
+            <GridSection
+              columns={7}
+              items={financeFields}
+            />
+          </Box>
+                   */}
         <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
           <ViewFinancial
             onBack={() => setActiveDetailView(null)}
             backLabel="Back to DRS"
             onViewMedical={() => setActiveDetailView("medical")}
-          />
+            />
         </Box>
+            </>
       )}
 
       <CustomDialog
@@ -3097,6 +3286,7 @@ const ApplicantApplicationSummary = ({
                         <RiskAnalyticsCard
                           key={card.id}
                           card={card}
+                          onArrowClick={() => setSelectedRiskCard(card)}
                           onClick={() => {
                             if ((card.id === "medical" || card.id === "financial") && !readOnly) {
                               setActiveQuickLinkPanel(null);
@@ -3783,20 +3973,18 @@ const ApplicantApplicationSummary = ({
               onClose={() => setSelectedRiskCard(null)}
               title={
                 selectedRiskCard
-                  ? `${selectedRiskCard.label} Risk Details`
+                  ? `${selectedRiskCard.label} Details`
                   : "Risk Details"
               }
               maxWidth="lg"
             >
               {selectedRiskCard && (
+                <>
                 <Box
                   sx={{
                     display: "grid",
                     gridTemplateColumns: {
-                      xs: "1fr",
-                      sm: "repeat(2,1fr)",
-                      md: "repeat(3,1fr)",
-                      lg: "repeat(4,1fr)",
+                      lg: "repeat(6,1fr)",
                     },
                     gap: 0.75,
                     minWidth: {
@@ -3810,15 +3998,12 @@ const ApplicantApplicationSummary = ({
                       key={detail.key}
                       sx={{
                         p: 0.8,
-                        border: "1px solid #E3DEDB",
-                        borderRadius: 1,
-                        bgcolor: "#F8F7F6",
                       }}
                     >
                       <Typography
                         sx={{
                           color: "#827671",
-                          fontSize: 9,
+                          fontSize: 11,
                         }}
                       >
                         {detail.label}
@@ -3837,7 +4022,70 @@ const ApplicantApplicationSummary = ({
                       </Typography>
                     </Box>
                   ))}
+
                 </Box>
+                  
+                  {
+                    selectedRiskCard.label == "Medical" && (
+                   <Box sx={{
+                        p: 0.8,
+                      }}>
+                  <Typography
+                    sx={{
+                      color: "#827671",
+                      fontSize: 11,
+                    }}
+                  >
+                    Physical Medical Remark
+                  </Typography>
+
+                  <Typography
+                    sx={{
+                      mt: 0.25,
+                      color: "#332D2A",
+                      fontSize: 11,
+                      fontWeight: 800,
+                      overflowWrap: "anywhere",
+                    }}
+                  >
+                    -
+                  </Typography>
+                   </Box>
+                    )
+                  }
+
+                  {
+                     selectedRiskCard.label == "Financial" && (
+  <Box sx={{
+                        p: 0.8,
+                      }}>
+                    <Typography
+                      sx={{
+                        color: "#827671",
+                        fontSize: 11,
+                      }}
+                    >
+                      Financial Remark
+                    </Typography>
+
+                    <Typography
+                      sx={{
+                        mt: 0.25,
+                        color: "#332D2A",
+                        fontSize: 11,
+                        fontWeight: 800,
+                        overflowWrap: "anywhere",
+                      }}
+                    >
+                      -
+                    </Typography>
+                  </Box>
+                     )
+                  }
+
+                
+
+                </>
               )}
             </CustomDialog>
 

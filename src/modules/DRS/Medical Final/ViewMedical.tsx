@@ -3,7 +3,9 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLocation, useNavigate } from "react-router-dom";
 import CustomButton from "../../../components/ui/Button/Button";
-import CustomTabs from "../../../components/ui/Tabs/Tabs";
+import CustomSelect from "../../../components/ui/Select/Select";
+// import CustomTabs from "../../../components/ui/Tabs/Tabs";
+import CustomTextField from "../../../components/ui/TextField/TextField";
 import { useAppContext } from "../../../hooks/useAppContext";
 import { getDRSPath, getFinancialPath, getMedicalPath } from "../../../routes/routes";
 import { apiRequest } from "../../../services/api";
@@ -17,12 +19,16 @@ import { completeTaskThunk } from "../../../store/thunks/completeTaskThunk";
 import { drsThunk } from "../../../store/thunks/drsThunk";
 import type { ApplicantTab } from "../../../types/drs.types";
 import { applicantTabs, title } from "../../../utils/constant";
-import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
+// import ApplicantProfile from "../DRS_Accordions/ApplicantProfile";
 import MerForm, { type MerFormHandle } from "./MER/MerForm";
 import { getMerConfig } from "./MER/merConfig";
-import OtherMedicalsForm, { type OtherMedicalsFormHandle } from "./Other Medicals/OtherMedicalsForm";
+import 
+// OtherMedicalsForm,
+ { type OtherMedicalsFormHandle } from "./Other Medicals/OtherMedicalsForm";
 import { CBC_TABLE_ROWS, getOtherMedicalsConfig, LFT_TABLE_ROWS, LIPIDS_TABLE_ROWS, OGTT_TABLE_ROWS, RUA_TABLE_ROWS, S13_TABLE_ROWS, SMA12_TABLE_ROWS, TFT_TABLE_ROWS } from "./Other Medicals/otherMedicalsConfig";
-import SpecialMedicalForm, { type SpecialMedicalFormHandle } from "./Special Medical/SpecialMedicalForm";
+import 
+// SpecialMedicalForm,
+ { type SpecialMedicalFormHandle } from "./Special Medical/SpecialMedicalForm";
 import { getSpecialMedicalConfig } from "./Special Medical/specialMedicalConfig";
 import { saveMerThunk, type MerSaveResponse } from "../../../store/thunks/medicalMerSaveThunk";
 import { buildMerRequest } from "./MER/merPayloadMapper";
@@ -32,7 +38,7 @@ import { buildSpecialMedicalRequest } from "./Special Medical/specialMedicalPayl
 import { saveSpecialMedicalThunk } from "../../../store/thunks/medicalSpecialSaveThunk";
 import type { OtherMedicalTableData } from "./Other Medicals/otherMedicals.types";
 import type { MedicalCalculatedParameter } from "./Special Medical/specialMedical.types";
-import BreDecision from "../DRS_Accordions/BreDecision";
+// import BreDecision from "../DRS_Accordions/BreDecision";
 import { KeyDownArrowIcon, KeyRightArrowIcon } from "../../../icons/Icons";
 
 const getStoredApplicantTab = () =>
@@ -438,8 +444,21 @@ const mapApplicantTabFromMemberType = (memberType: unknown, index: number): Appl
   return "lifeassured2";
 };
 
-const drsViewTabs: { key: DRSViewTab; label: string }[] = [
-  { key: "medical", label: "View Medical" },
+// const drsViewTabs: { key: DRSViewTab; label: string }[] = [
+//   { key: "medical", label: "View Medical" },
+// ];
+
+const medicalDecisionOptions = [
+  { label: "Standard", value: "Standard" },
+  { label: "Non-Standard", value: "Non-Standard" },
+];
+
+const applicationFormMedicalLifestyleFields = [
+  { label: "Height", value: "170 cm" },
+  { label: "Weight", value: "70 kg" },
+  { label: "Alcohol Consumption", value: "Yes" },
+  { label: "Smoking", value: "Yes" },
+  { label: "Diving", value: "Yes" },
 ];
 
 const uniqSectionTitles = (titles: string[]) => {
@@ -472,7 +491,10 @@ const ViewMedical = ({ onBack, backLabel }: ViewMedicalProps) => {
   const drsData = useSelector((state: RootState) => state.drs.data);
   const userId = String(localStorage.getItem("userId") ?? "").trim();
   const roleType = getRoleType();
-  const isCptMedicalRole = roleType.toUpperCase() === "CPT_DATA_ENTRY_MR_TASK";
+  const normalizedRoleType = roleType.toUpperCase();
+  const isCuwTask = normalizedRoleType === "CUW_TASK";
+  const isCptMedicalRole =
+    normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK" || isCuwTask;
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??
@@ -497,6 +519,8 @@ const ViewMedical = ({ onBack, backLabel }: ViewMedicalProps) => {
   );
   const [submitLoading, setSubmitLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [medicalDecision, setMedicalDecision] = useState("");
+  const [savedMedicalDecision, setSavedMedicalDecision] = useState("");
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [udsSnackbarOpen, setUdsSnackbarOpen] = useState(false);
   const merFormRefs = useRef<Record<string, MerFormHandle | null>>({});
@@ -1334,6 +1358,18 @@ const ViewMedical = ({ onBack, backLabel }: ViewMedicalProps) => {
     setEditingSubSectionId(subSectionId);
   };
 
+  const handleDecisionSave = () => {
+    const selectedDecision = medicalDecision.trim();
+
+    if (!selectedDecision) {
+      setSubmitError("Please select a Medical Decision before saving.");
+      return;
+    }
+
+    setSavedMedicalDecision(selectedDecision);
+    setSubmitError(null);
+  };
+
   const handleSubSectionSave = async () => {
     if (!editingSubSectionId) {
       return;
@@ -1775,12 +1811,13 @@ const ViewMedical = ({ onBack, backLabel }: ViewMedicalProps) => {
           sx={{
             textTransform: "none",
             px: 1,
+            minWidth: "200px",
             color: "#9A2529",
             fontWeight: 600,
             textDecoration: "underline",
           }}
         >
-          View UDS Link
+          View Medical Documents
         </CustomButton>
       </Box>
 
@@ -1970,6 +2007,155 @@ const ViewMedical = ({ onBack, backLabel }: ViewMedicalProps) => {
 
           <Box sx={{ flex: 1, width: "100%", minWidth: 0, minHeight: 240 }}>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1.25 }}>
+              {isCuwTask && (
+                <Box
+                  sx={{
+                    border: "1px solid #E4E7EC",
+                    borderRadius: 1.5,
+                    backgroundColor: "#FFFFFF",
+                    boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      px: { xs: 1.5, md: 2 },
+                      py: 1.25,
+                      borderBottom: "1px solid #E4E7EC",
+                      backgroundColor: "#F8FAFC",
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "#1F2937",
+                      }}
+                    >
+                      Application Form Medical &amp; Lifestyle Details
+                    </Typography>
+                  </Box>
+
+                  <Box
+                    sx={{
+                      p: { xs: 1.25, md: 1.5 },
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "1fr",
+                        md: "repeat(3, minmax(0, 1fr))",
+                      },
+                      gap: 1.5,
+                      "& .MuiOutlinedInput-root": {
+                        height: 36,
+                        minHeight: "36px",
+                      },
+                      "& .MuiOutlinedInput-input": {
+                        boxSizing: "border-box",
+                        height: 36,
+                        py: "12px",
+                      },
+                      "& .MuiOutlinedInput-root.Mui-disabled": {
+                        backgroundColor: "#F3F4F6",
+                      },
+                    }}
+                  >
+                    {applicationFormMedicalLifestyleFields.map((field) => (
+                      <Box key={field.label} sx={{ minWidth: 0 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            mb: 1,
+                          }}
+                        >
+                          <Typography
+                            sx={{
+                              fontSize: "14px",
+                              fontWeight: 400,
+                              color: "#444",
+                            }}
+                          >
+                            {field.label}
+                          </Typography>
+                        </Box>
+
+                        <CustomTextField
+                          fullWidth
+                          size="small"
+                          value={field.value}
+                          disabled
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {isCuwTask && (
+                <Box
+                  sx={{
+                    border: "1px solid #E4E7EC",
+                    borderRadius: 1.5,
+                    backgroundColor: "#FFFFFF",
+                    boxShadow: "0 1px 2px rgba(16,24,40,0.08)",
+                    overflow: "hidden",
+                  }}
+                >
+                  <Box
+                    sx={{
+                      px: { xs: 1.5, md: 2 },
+                      py: 1.25,
+                      borderBottom: "1px solid #E4E7EC",
+                      backgroundColor: "#F8FAFC",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      gap: 1,
+                    }}
+                  >
+                    <Typography
+                      sx={{
+                        fontSize: 16,
+                        fontWeight: 700,
+                        color: "#1F2937",
+                      }}
+                    >
+                      Decision
+                    </Typography>
+                    <CustomButton
+                      sx={{ minWidth: 72, py: 0.4, fontSize: 11.5 }}
+                      disabled={
+                        submitLoading ||
+                        (Boolean(savedMedicalDecision) &&
+                          savedMedicalDecision === medicalDecision)
+                      }
+                      onClick={handleDecisionSave}
+                    >
+                      Save
+                    </CustomButton>
+                  </Box>
+
+                    <Box sx={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)" }}>
+                  <Box sx={{ p: { xs: 1.25, md: 1.5 } }}>
+                      <Box>
+                      <Typography
+                        sx={{ mb: 0.5, fontSize: 12, color: "#475467" }}
+                        >
+                        Medical Decision
+                      </Typography>
+                      <CustomSelect
+                        fullWidth
+                        options={medicalDecisionOptions}
+                        value={medicalDecision}
+                        onChange={setMedicalDecision}
+                        placeholder="Select medical decision"
+                      />
+                        </Box>
+                     </Box>
+                    </Box>
+                  </Box>
+              )}
+
               {flattenedSubSections.map((subSection) => {
                 const group = medicalSectionGroups.find((medicalGroup) => medicalGroup.label === subSection.groupLabel);
                 const isSubSectionExpanded = !collapsedSubSections.has(subSection.id);

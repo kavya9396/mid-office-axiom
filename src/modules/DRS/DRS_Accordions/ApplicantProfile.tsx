@@ -394,6 +394,16 @@ const applicantTabConfig: Record<string, string[]> = {
     "Payment & Payout",
   ],
 
+  CUW_TASK: [
+    "Image Details",
+    "Personal & KYC",
+    "Contact & Address",
+    "Nominee",
+    "Generic",
+    "eIA",
+    "Payment & Payout",
+  ],
+
   DEFAULT: [
     "Image Details",
     "Personal & KYC",

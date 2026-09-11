@@ -568,7 +568,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
         masters,
     ]);
 
-    const financialDecisionLabel = "Financially Eligible";
+    const financialDecisionLabel = "Standard";
     const medicalDecisionLabel = "Standard";
 
     // Preserve configured API codes for the fixed, read-only decisions.
@@ -1649,6 +1649,20 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                         </Box>
                     ))}
                 </Box>
+                {/* <CustomSelect
+                    label="Financial Decision"
+                    value={"Standard"}
+                    onChange={setFinancialDecision}
+                    options={financialDecisionOptions}
+                    disabled
+                />
+                <CustomSelect
+                    label="Medical Decision"
+                    value={"Standard"}
+                    onChange={setMedicalDecision}
+                    options={medicalDecisionOptions}
+                    disabled
+                /> */}
                 <CustomSelect
                     label={memberLabel
                         ? `Case UW Decision - ${memberLabel}`

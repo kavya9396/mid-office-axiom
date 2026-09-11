@@ -6,6 +6,8 @@ export type FinancialField = {
 };
 
 export type FinancialSectionKey =
+  | "financial_profession"
+  | "decision"
   | "appointment_letter"
   | "ca_balance_sheet"
   | "ca_networth"
@@ -524,6 +526,33 @@ export const financialSections: FinancialSectionConfig[] = [
     { label: "Photo available", isMandatory: true },
   ], 3),
 ];
+
+export const cuwFinancialProfessionSection: FinancialSectionConfig = section(
+  "financial_profession",
+  "Application Form Financial & Professional Details",
+  [
+    { label: "Occupation", value: "SPVT" },
+    { label: "Annual Income", value: "₹ 50,00,000" },
+    { label: "GSTIN", value: "-" },
+    { label: "Industry Type", value: "-" },
+    { label: "Organisation Type", value: "PVT" },
+    { label: "Organisation Name", value: "3I INFOTECH" },
+    { label: "Designation", value: "-" },
+  ],
+  3,
+);
+
+export const cuwFinancialDecisionSection: FinancialSectionConfig = section(
+  "decision",
+  "Decision",
+  [
+    { label: "Verified Income Doc", isMandatory: true },
+    { label: "Verified Income", isMandatory: true },
+    { label: "Justification" },
+    { label: "Financial Decision" },
+  ],
+  3,
+);
 
 export const financialSectionOptions = financialSections.map((section) => ({
   key: section.key,
