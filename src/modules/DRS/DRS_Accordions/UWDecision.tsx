@@ -1624,7 +1624,6 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                                         lineHeight: 1.4,
                                         fontWeight: 700,
                                         letterSpacing: "0.3px",
-                                        textTransform: "uppercase",
                                         color: "#938883",
                                         mb: 0.75,
                                     },

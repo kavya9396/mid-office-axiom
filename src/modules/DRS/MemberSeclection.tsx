@@ -335,6 +335,7 @@ const CompactField = ({ label, value }: { label: string; value: string }) => (
 );
 
 const MemberSelection = ({
+  applicationNumber,
   source,
   onMemberSelect,
   stickyTop = 0,
@@ -414,13 +415,13 @@ const MemberSelection = ({
 
   const selectedDecision = members.find((member) => member.index === selectedDecisionIndex) ?? null;
 
-//   const resolvedApplicationNumber = displayText(
-//     applicationNumber,
-//     data.applicationNumber,
-//     data.applicationNo,
-//     applicationOverview.applicationNumber,
-//     applicationOverview.applicationNo,
-//   );
+  const resolvedApplicationNumber = displayText(
+    applicationNumber,
+    data.applicationNumber,
+    data.applicationNo,
+    applicationOverview.applicationNumber,
+    applicationOverview.applicationNo,
+  );
   const productName = displayText(
     baseProduct.productName,
     baseProduct.name,
@@ -493,22 +494,55 @@ const MemberSelection = ({
             color: "#000000",
             borderLeft: "1px solid #E45F14",
             borderRadius: "0 0 12px 0",
-            px: { xs: 1.5, sm: 2.2 },
+            // Reserve the 48px applicant photo slot plus its 12px gap.
+            pl: { xs: "calc(12px + 60px)", sm: "calc(17.6px + 60px)" },
+            pr: { xs: 1.5, sm: 2.2 },
             py: 0.5,
           }}
         >
-          <Typography
+          <Box
             sx={{
-              fontSize: { xs: 10, sm: 11.5 },
-              lineHeight: 1.65,
-              fontWeight: 700,
-              overflowWrap: "anywhere",
+              display: "flex",
+              flexWrap: "nowrap",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 1.5,
+              minWidth: 0,
+              pt: 0.5,
             }}
           >
-            <Box component="span" sx={{ fontWeight: 800 }}>Product:</Box>{" "}
-            {productName} / <Box component="span" sx={{ fontWeight: 800 }}>Channel:</Box>{" "}
-            {channel} / SA - {sumAssured}
-          </Typography>
+            <Typography
+              sx={{
+                flex: "1 1 0",
+                minWidth: 0,
+                fontSize: { xs: 10, sm: 11.5 },
+                lineHeight: 1.65,
+                fontWeight: 700,
+                overflowWrap: "anywhere",
+              }}
+            >
+              <Box component="span" sx={{ fontWeight: 800 }}>Product:</Box>{" "}
+              {productName} / <Box component="span" sx={{ fontWeight: 800 }}>Channel:</Box>{" "}
+              {channel} / SA - {sumAssured}
+            </Typography>
+            <Typography
+              sx={{
+                flexShrink: 0,
+                px: 1.5,
+                py: 0.5,
+                border: "1px solid #EAD8D1",
+                borderRadius: "999px",
+                bgcolor: "#FFFFFF",
+                color: "#B71C2C",
+                fontSize: { xs: 12, sm: 14 },
+                fontWeight: 800,
+                lineHeight: 1.4,
+                whiteSpace: "nowrap",
+              }}
+            >
+              App No. - {resolvedApplicationNumber}
+            </Typography>
+          </Box>
           <Typography
             sx={{
               mt: 0.45,
@@ -745,7 +779,7 @@ const MemberSelection = ({
       <CustomDialog
         open={selectedDecision !== null}
         onClose={() => setSelectedDecisionIndex(null)}
-        title="UW Decision Details"
+        title=" "
         maxWidth="sm"
         fullWidth
       >
