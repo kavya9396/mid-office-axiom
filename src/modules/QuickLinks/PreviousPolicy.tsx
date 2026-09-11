@@ -14,14 +14,14 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
-import BackButton from "../../components/layout/BackButton";
+//import BackButton from "../../components/layout/BackButton";
 import { useAppContext } from "../../hooks/useAppContext";
-import {
-  getDRSPath,
-  getSearchApplicationPath,
-} from "../../routes/routes";
+// import {
+//   getDRSPath,
+//   getSearchApplicationPath,
+// } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
 import { drsThunk } from "../../store/thunks/drsThunk";
 type PreviousPolicyItem = Record<string, unknown>;
@@ -736,7 +736,7 @@ const MemberPolicyTables = ({
             justifyContent: "center",
             alignItems: "center",
             width: "100%",
-            minHeight: 64,
+            minHeight: 14,
             py: 1,
             boxSizing: "border-box",
             flexShrink: 0,
@@ -757,12 +757,12 @@ const MemberPolicyTables = ({
               boundaryCount={1}
               sx={{
                 "& .MuiPaginationItem-root": {
-                  minWidth: 40,
-                  height: 40,
+                  minWidth: 20,
+                  height: 20,
                   borderRadius: "7px",
                   fontSize: 14,
                   fontWeight: 400,
-                  margin: "0 2px",
+                  margin: "0",
                   color: "#5F5F5F",
                 },
                 "& .MuiPagination-ul": { flexWrap: "nowrap" },
@@ -818,7 +818,7 @@ const MemberPolicyTables = ({
 
 const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
 
@@ -854,38 +854,38 @@ const PreviousPolicy = ({ showDummyData = true }: { showDummyData?: boolean }) =
       ? reduxQuickLinks
       : quickLinksData;
 
-  const selectedCaseContext = useMemo(() => {
-    try {
-      return JSON.parse(
-        localStorage.getItem("selectedCaseContext") ?? "{}",
-      ) as {
-        applicationNo?: string;
-        source?: string;
-        readOnly?: boolean;
-      };
-    } catch {
-      return {};
-    }
-  }, []);
+  // const selectedCaseContext = useMemo(() => {
+  //   try {
+  //     return JSON.parse(
+  //       localStorage.getItem("selectedCaseContext") ?? "{}",
+  //     ) as {
+  //       applicationNo?: string;
+  //       source?: string;
+  //       readOnly?: boolean;
+  //     };
+  //   } catch {
+  //     return {};
+  //   }
+  // }, []);
 
-  const isFromSearchApplication =
-    selectedCaseContext.source === "searchApplication" &&
-    selectedCaseContext.readOnly === true;
+  // const isFromSearchApplication =
+  //   selectedCaseContext.source === "searchApplication" &&
+  //   selectedCaseContext.readOnly === true;
 
-  const handleBack = () => {
-    if (isFromSearchApplication) {
-      navigate(getSearchApplicationPath(), {
-        state: {
-          restoreSearchResult: true,
-          applicationNo:
-            selectedCaseContext.applicationNo || safeApplicationId,
-        },
-      });
-      return;
-    }
+  // const handleBack = () => {
+  //   if (isFromSearchApplication) {
+  //     navigate(getSearchApplicationPath(), {
+  //       state: {
+  //         restoreSearchResult: true,
+  //         applicationNo:
+  //           selectedCaseContext.applicationNo || safeApplicationId,
+  //       },
+  //     });
+  //     return;
+  //   }
 
-    navigate(getDRSPath(safeBusinessType, safeApplicationId));
-  };
+  //   navigate(getDRSPath(safeBusinessType, safeApplicationId));
+  // };
 
   useEffect(() => {
     if (showDummyData || isApplicationIdMissing || hasReduxPreviousPolicies) {
