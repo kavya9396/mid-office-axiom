@@ -859,9 +859,13 @@ import GroupVendorCMOApplicationSummary from "./Group/GroupVendorCMOApplicationS
 import GroupHOCMOApplicationSummary from "./Group/GroupHOCMOApplicationSummary";
 import GroupRefCMOApplicationSummary from "./Group/GroupRefCMOApplicationSummary";
 import GroupGrievance from "./Group/GroupGrievance";
+
+import GroupClaimAuditTask from "./Group/GroupClaimAuditTask";
+
 import GroupCUWDRS from "./Group/GroupCUWDRS";
 import GroupSrUwDrs from "./Group/GroupSrUwDrs";
 import GroupHoD from "./Group/GroupHoD";
+
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -941,6 +945,7 @@ const mapper = {
   GROUP_CMO_TASK: "GROUP_CMO_TASK",
   GROUP_REF_CMO_TASK: "GROUP_REF_CMO_TASK",
   MAS_TASK: "MAS_TASK",
+  GROUP_CUW_CLAIM_AUDIT_TASK:"GROUP_CUW_CLAIM_AUDIT_TASK"
   GROUP_CUW_TASK: "GROUP_CUW_TASK",
   GROUP_SR_UW_TASK: "GROUP_SR_UW_TASK",
   GROUP_HOD_TASK: "GROUP_HOD_TASK"
@@ -1655,6 +1660,9 @@ const DRS = () => {
             ) :
             normalizeValue(roleType) === "CUW_CLAIM_AUDIT_TASK" ? (
               <ClaimAudit />
+            ) :
+            normalizeValue(roleType) === "GROUP_CUW_CLAIM_AUDIT_TASK" ? (
+              <GroupClaimAuditTask />
             ) :
             normalizeValue(roleType) === "PIVV_TASK" ? (
               <PIVVDrs />

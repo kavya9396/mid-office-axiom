@@ -161,7 +161,7 @@ export const getPoolWiseAvailableAccordions = (
 
       const checker =
         sectionAvailabilityCheck[
-          accordion as AccordionKey
+        accordion as AccordionKey
         ];
 
       if (!checker || !data) {
@@ -253,16 +253,19 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     // "applicationOverview", 
     // "claimSection", 
     "quickLinks"],
-  GROUP_VENDOR_CMO_TASK:[
+  GROUP_VENDOR_CMO_TASK: [
     "quickLinks"
   ],
-  GROUP_CMO_TASK:[
+  GROUP_CUW_CLAIM_AUDIT_TASK: [
     "quickLinks"
   ],
-  GROUP_REF_CMO_TASK:[
+  GROUP_CMO_TASK: [
     "quickLinks"
   ],
-  MAS_TASK:[
+  GROUP_REF_CMO_TASK: [
+    "quickLinks"
+  ],
+  MAS_TASK: [
     "quickLinks"
   ],
   GROUP_CUW_TASK: [
@@ -385,7 +388,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks",
   ],
   RETAIL_IT_POOL: [
-   "itdrs"
+    "itdrs"
   ],
   RETAIL_VENDOR_CMO_POOL: [
     // "breDecision",
