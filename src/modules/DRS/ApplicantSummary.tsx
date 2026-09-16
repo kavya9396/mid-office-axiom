@@ -81,8 +81,16 @@ interface ApplicantApplicationSummaryProps {
   onBackToSummary?: () => void;
   initialMemberIndex?: number;
   showMemberSelectionInitially?: boolean;
+  allowMemberSelectionPage?: boolean;
   readOnly?: boolean;
   showRiskAnalytics?: boolean;
+  showBreDecision?: boolean;
+  showUserPhoto?: boolean;
+  showHeaderTotals?: boolean;
+  productOnlyHeader?: boolean;
+  productHeaderDetails?: Array<{ label: string; value: string }>;
+  showFaceValue?: boolean;
+  afterHeader?: ReactNode;
   uwDecision?: ReactNode;
   quickLinks?: ReactNode;
   requirementManagement?: ReactNode;
@@ -927,12 +935,18 @@ const SdtReadonlyRow = ({ decision, remarks }: SdtReadonlyRowProps) => (
 /* -------------------------------------------------------------------------- */
 
 interface ApplicationSummaryBannerProps {
+  compactHeader?: boolean;
   onBackToInbox?: () => void;
   image?: string;
   name: string;
   appNo: string;
   personalSummary: string;
   parameters: string;
+  showUserPhoto?: boolean;
+  showHeaderTotals?: boolean;
+  productOnlyHeader?: boolean;
+  productHeaderDetails?: Array<{ label: string; value: string }>;
+  showFaceValue?: boolean;
   productName: string;
   policyTerm: string;
   premiumTerm: string;
@@ -952,6 +966,12 @@ interface ApplicationSummaryBannerProps {
 }
 
 const ApplicationSummaryBanner = ({
+  compactHeader = false,
+  showUserPhoto = true,
+  showHeaderTotals = true,
+  productOnlyHeader = false,
+  productHeaderDetails = [],
+  showFaceValue = true,
   image,
   name,
   personalSummary,
@@ -969,11 +989,65 @@ const ApplicationSummaryBanner = ({
 }: ApplicationSummaryBannerProps) => {
   const coverageItems = [
     `SA - ${sumAssured}`,
-    tsa !== "-" ? `TSA - ${tsa}` : null,
-    tfsa !== "-" ? `TFSA - ${tfsa}` : null,
-    tssa !== "-" ? `TSSA - ${tssa}` : null,
-    tpsa !== "-" ? `TPSA - ${tpsa}` : null,
+    showHeaderTotals && tsa !== "-" ? `TSA - ${tsa}` : null,
+    showHeaderTotals && tfsa !== "-" ? `TFSA - ${tfsa}` : null,
+    showHeaderTotals && tssa !== "-" ? `TSSA - ${tssa}` : null,
+    showHeaderTotals && tpsa !== "-" ? `TPSA - ${tpsa}` : null,
   ].filter(Boolean) as string[];
+
+  if (productOnlyHeader) {
+    return (
+      <Box sx={{ width: "100%", minWidth: 0, px: { xs: 1.5, sm: 2.2 }, py: 1.25,
+        bgcolor: "#FFEAD7", borderRadius: "8px", border: "1px solid #F1D8C8" }}>
+        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
+        <Typography sx={{ flex: "1 1 240px", minWidth: 0, fontSize: compactHeader ? { xs: 11, sm: 12 } : { xs: 12, sm: 14 }, lineHeight: 1.6, overflowWrap: "anywhere" }}>
+          <Box component="span" sx={{ fontWeight: 800 }}>Product: </Box>{productName}
+          {" / "}<Box component="span" sx={{ fontWeight: 800 }}>Channel: </Box>Agency
+          {" / "}<Box component="span" sx={{ fontWeight: 800 }}>SA - </Box>{sumAssured}
+          {showFaceValue && (<>
+            {" / "}<Box component="span" sx={{ fontWeight: 800 }}>Face Value - </Box>{sumAssured}
+          </>)}
+        </Typography>
+        <Typography sx={{ flexShrink: 0, maxWidth: "100%", px: 1.1, py: 0.45,
+          borderRadius: "16px", bgcolor: "#FFFFFF",
+          border: "1px solid rgba(169,33,41,.18)", color: "#A92129",
+          fontSize: compactHeader ? { xs: 11, sm: 12 } : { xs: 11, sm: 13 },
+          fontWeight: 900, overflowWrap: "anywhere" }}>
+          App No. - OB90322247
+        </Typography>
+        </Box>
+        {productHeaderDetails.length > 0 && (
+          <Typography
+            sx={{
+              mt: 0.55,
+              fontSize: compactHeader ? { xs: 10.5, sm: 11.5 } : { xs: 11, sm: 12.5 },
+              lineHeight: 1.6,
+              color: "#000",
+              overflowWrap: "anywhere",
+            }}
+          >
+            {productHeaderDetails.map((detail, index) => (
+              <Box component="span" key={detail.label}>
+                {index > 0 && " / "}
+                <Box component="span" sx={{ fontWeight: 800 }}>
+                  {detail.label}: {" "}
+                </Box>
+                <Box component="span" sx={{ fontWeight: 500 }}>
+                  {detail.value}
+                </Box>
+              </Box>
+            ))}
+          </Typography>
+        )}
+        <Typography sx={{ mt: 0.75, fontSize: compactHeader ? { xs: 11, sm: 12 } : { xs: 12, sm: 14 }, lineHeight: 1.6, overflowWrap: "anywhere" }}>
+          <Box component="span" sx={{ fontWeight: 800 }}>Riders: </Box>
+          {riderSummaries.length ? riderSummaries.map((rider) =>
+            `${rider.name} - SA ${rider.sumAssured}`,
+          ).join(" / ") : "-"}
+        </Typography>
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -982,8 +1056,8 @@ const ApplicationSummaryBanner = ({
         mb: 0.75,
         display: "grid",
         gridTemplateColumns: {
-          xs: "84px minmax(0,1fr)",
-          sm: "150px minmax(0,1fr)",
+          xs: showUserPhoto ? "84px minmax(0,1fr)" : "minmax(0,1fr)",
+          sm: showUserPhoto ? "150px minmax(0,1fr)" : "minmax(0,1fr)",
         },
         bgcolor: "#FFEAD7",
         color: "#000",
@@ -992,6 +1066,7 @@ const ApplicationSummaryBanner = ({
         boxShadow: "0 3px 10px rgba(169, 33, 41, 0.16)",
       }}
     >
+      {showUserPhoto && (
       <Box
         sx={{
           position: "relative",
@@ -1040,6 +1115,7 @@ const ApplicationSummaryBanner = ({
           <UserProfileIcon sx={{ fontSize: { xs: 30, sm: 44 } }} />
         </Avatar>
       </Box>
+      )}
 
       <Box
         sx={{ minWidth: 0, px: { xs: 1.2, sm: 2.2 }, py: { xs: 1, sm: 1.45 } }}
@@ -1126,7 +1202,7 @@ const ApplicationSummaryBanner = ({
             color: "#000",
             fontSize: {
               xs: 10,
-              sm: 11.5,
+              sm: 10,
             },
             lineHeight: 1.65,
             fontWeight: 800,
@@ -1179,6 +1255,7 @@ const ApplicationSummaryBanner = ({
         {/* ELIGIBILTY PARAMETERS                                            */}
         {/* ================================================================ */}
 
+        {showHeaderTotals && (
         <Box
           sx={{
             mt: 0.45,
@@ -1205,6 +1282,7 @@ const ApplicationSummaryBanner = ({
           {parameters || "-"}
         </Typography>
         </Box>
+        )}
       </Box>
     </Box>
   );
@@ -1371,8 +1449,16 @@ const ApplicantApplicationSummary = ({
   onBackToInbox,
   initialMemberIndex = 0,
   showMemberSelectionInitially = true,
+  allowMemberSelectionPage = true,
   readOnly = false,
+  afterHeader,
   showRiskAnalytics = true,
+  showBreDecision = true,
+  showUserPhoto = true,
+  showHeaderTotals = true,
+  productOnlyHeader = false,
+  productHeaderDetails = [],
+  showFaceValue = true,
   uwDecision,
   quickLinks,
   requirementManagement,
@@ -2496,7 +2582,7 @@ const ApplicantApplicationSummary = ({
   /* RENDER                                                                   */
   /* ------------------------------------------------------------------------ */
 
-  if (showMemberSelection && members.length > 1) {
+  if (allowMemberSelectionPage && showMemberSelection && members.length > 1) {
     return (
       <Box
         sx={{
@@ -2564,6 +2650,21 @@ const ApplicantApplicationSummary = ({
           }}
         >
           <ApplicationSummaryBanner
+            compactHeader={roleType.trim().toUpperCase() === "CVT_TASK" || roleType.trim().toUpperCase() === "DVT_TASK"}
+            showUserPhoto={showUserPhoto}
+            showHeaderTotals={showHeaderTotals}
+            productOnlyHeader={productOnlyHeader}
+            productHeaderDetails={
+              roleType.trim().toUpperCase() === "CVT_TASK"
+                ? [
+                    { label: "Policy Type", value: "Individual" },
+                    { label: "Agent Name", value: "Rajesh Sharma" },
+                    { label: "Agent Code", value: "AGT10234" },
+                    { label: "Customer Type", value: "Existing Customer" },
+                  ]
+                : productHeaderDetails
+            }
+            showFaceValue={showFaceValue}
             onBackToInbox={onBackToInbox}
             image={image}
             name={name}
@@ -2584,6 +2685,10 @@ const ApplicantApplicationSummary = ({
         </Box>
       </Box>
 
+      {!activeDetailView && afterHeader && (
+        <Box sx={{ px: 0.5, pt: 1 }}>{afterHeader}</Box>
+      )}
+
       {!activeDetailView && (
       <Box
         sx={{
@@ -2597,7 +2702,7 @@ const ApplicantApplicationSummary = ({
           "& .MuiButton-root": { flexShrink: 0 },
         }}
       >
-        {members.length > 1 && (
+        {allowMemberSelectionPage && members.length > 1 && (
           <Button
             type="button"
             variant="outlined"
@@ -2872,9 +2977,9 @@ const ApplicantApplicationSummary = ({
                   display: "grid",
                   gridTemplateColumns: {
                     xs: "1fr",
-                    md: showRiskAnalytics
+                    md: showRiskAnalytics && showBreDecision
                       ? "minmax(0, 3fr) minmax(245px, 1fr)"
-                      : "minmax(245px, 1fr) minmax(0, 3fr)",
+                      : "minmax(0, 1fr)",
                   },
                   gap: 0.75,
                   alignItems: "stretch",
@@ -3306,6 +3411,7 @@ const ApplicantApplicationSummary = ({
                 {/* BRE DECISION                                           */}
                 {/* ====================================================== */}
 
+                {showBreDecision && (
                 <DashboardCard
                   eyebrow=""
                   title=""
@@ -3891,15 +3997,18 @@ const ApplicantApplicationSummary = ({
                   {breRemarks}
                 </Typography> */}
                 </DashboardCard>
+                )}
               </Box>
 
-              <Box sx={{ mt: 0.75 }}>
-                <SdtReadonlyRow
-                  decision={sdtDecision}
-                  remarks={sdtRemarks}
-                  timestamp={sdtTimestamp}
-                />
-              </Box>
+              {showBreDecision && (
+                <Box sx={{ mt: 0.75 }}>
+                  <SdtReadonlyRow
+                    decision={sdtDecision}
+                    remarks={sdtRemarks}
+                    timestamp={sdtTimestamp}
+                  />
+                </Box>
+              )}
             </Box>
 
             {/* </CustomAccordion> */}
@@ -3930,7 +4039,7 @@ const ApplicantApplicationSummary = ({
             >
               <Typography
                 sx={{
-                  fontSize: "14px",
+                  fontSize: "12px",
                   color: "#161616",
                 }}
               >

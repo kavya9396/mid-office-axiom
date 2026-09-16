@@ -190,9 +190,9 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     // "applicantProfile",
     //"summary",
     //"applicationOverview",
-    "pivvSection",
+   // "pivvSection",
     //"requirementManagement",
-    "decision",
+    //"decision",
     "quickLinks",
   ],
   // RETAIL_CPT_POOL: [
@@ -420,12 +420,12 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   ],
 
   GROUP_DVT_POOL: [
-    "breDecision",
-    "applicationOverview",
-    "groupPolicyDetails",
-    "summary",
-    "requirementManagement",
-    "decision",
+    // "breDecision",
+    // "applicationOverview",
+    // "groupPolicyDetails",
+    // "summary",
+    // "requirementManagement",
+     //"decision",
     "quickLinks",
   ],
   GROUP_GUW_POOL: [

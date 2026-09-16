@@ -334,6 +334,13 @@ const Decision = () => {
           item.isActive === "Y",
       )
       ?.filter((item) => {
+        // TEMPORARY CVT BEHAVIOUR:
+        // Do not apply requirement/BRE/PIVV option validations.
+        // Show every active CVT decision configured in master data.
+        if (roleType === "CVT_TASK") {
+          return true;
+        }
+
         const decisionValue = String(item.value ?? "")
           .trim()
           .toLowerCase();
@@ -343,20 +350,6 @@ const Decision = () => {
           "",
         );
 
-        // Pending requirements must be resolved before any other decision.
-        if (roleType === "CVT_TASK" && hasPendingRequirement) {
-          return normalizedDecisionValue === "raiserequirement";
-        }
-
-        // Hide Raise Requirement only when every existing row is accepted.
-        if (
-          roleType === "CVT_TASK" &&
-          hasOnlyAcceptedRequirements &&
-          normalizedDecisionValue === "raiserequirement"
-        ) {
-          return false;
-        }
-
         if (
           hasPivRequirement &&
           normalizedDecisionValue === "reraisepivv"
@@ -364,12 +357,11 @@ const Decision = () => {
           return false;
         }
 
-        // Accept is permitted only for an ST BRE decision.
+        // Existing validation for non-CVT roles remains unchanged.
         if (normalizedDecisionValue === "accept") {
           return finalBreStatus === "ST";
         }
 
-        // Preserve the existing Standard decision BRE rule.
         if (normalizedDecisionValue === "standard") {
           return finalBreStatus === "ST" || finalBreStatus === "STD";
         }
@@ -418,29 +410,33 @@ const Decision = () => {
     const hasSavedRequirements =
       sessionStorage.getItem(requirementSaveStorageKey) === "true";
 
-    if (!hasSavedRequirements) {
-      showSnackbar(
-        "Save button is mandatory in Requirement Management before proceeding.",
-        "warning",
-      );
+    // TEMPORARY: skip Requirement Management save and Applicant Profile
+    // tab-visit validations for CVT_TASK.
+    if (roleType !== "CVT_TASK") {
+      if (!hasSavedRequirements) {
+        showSnackbar(
+          "Save button is mandatory in Requirement Management before proceeding.",
+          "warning",
+        );
 
-      return;
-    }
+        return;
+      }
 
-    const applicantTabsValidation =
-  validateApplicantTabsVisited(
-    drsState.data,
-    applicationNumber,
-    roleType,
-  );
+      const applicantTabsValidation =
+        validateApplicantTabsVisited(
+          drsState.data,
+          applicationNumber,
+          roleType,
+        );
 
-    if (!applicantTabsValidation.isValid) {
-      showSnackbar(
-        applicantTabsValidation.message ??
-          "Please visit all Applicant Profile tabs before submitting the decision.",
-        "warning",
-      );
-      return;
+      if (!applicantTabsValidation.isValid) {
+        showSnackbar(
+          applicantTabsValidation.message ??
+            "Please visit all Applicant Profile tabs before submitting the decision.",
+          "warning",
+        );
+        return;
+      }
     }
 
     const validationResult = validateDecision({

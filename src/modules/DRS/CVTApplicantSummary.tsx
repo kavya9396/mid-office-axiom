@@ -1,0 +1,502 @@
+
+import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
+import { useState, type ComponentProps } from "react";
+import { useAppSelector } from "../../store/hooks";
+import type { AdditionalRequirementRow } from "../../types/drs.types";
+import RequirementManagementTable from "./DRS_Accordions/RequirementManagementTable";
+import CVTApplicantProfile from "./DRS_Accordions/CVTApplicantProfile";
+import ApplicantApplicationSummary from "./ApplicantSummary";
+import BreDecision from "./DRS_Accordions/BreDecision";
+import CustomDialog from "../../components/ui/Dialog/Dialog";
+import { RefreshIcon } from "../../icons/Icons";
+
+type CVTApplicantSummaryProps = Omit<
+  ComponentProps<typeof ApplicantApplicationSummary>,
+  | "showRiskAnalytics"
+  | "showBreDecision"
+  | "showUserPhoto"
+  | "showHeaderTotals"
+  | "productOnlyHeader"
+  | "afterHeader"
+  | "allowMemberSelectionPage"
+>;
+
+type DataRecord = Record<string, unknown>;
+
+const EMPTY_REQUIREMENTS: AdditionalRequirementRow[] = [];
+
+const CVT_DECISION_OPTIONS = [
+  "Accept",
+  "Raise Requirements",
+  "Refer to Risk",
+  "Refer to IT",
+  "Reraise PIVV",
+  "Refer to CUW",
+] as const;
+
+const toRecord = (value: unknown): DataRecord =>
+  value !== null && typeof value === "object" && !Array.isArray(value)
+    ? (value as DataRecord)
+    : {};
+
+const firstValue = (...values: unknown[]): string => {
+  const value = values.find(
+    (item) =>
+      item !== undefined &&
+      item !== null &&
+      String(item).trim() !== "",
+  );
+
+  return value !== undefined && value !== null ? String(value) : "-";
+};
+
+const CVTApplicantSummary = (props: CVTApplicantSummaryProps) => {
+  const [memberIndex, setMemberIndex] = useState(
+    props.initialMemberIndex ?? 0,
+  );
+
+  const [addRowSignal, setAddRowSignal] = useState(0);
+
+  const [cvtRemarks, setCvtRemarks] = useState("");
+  const [cvtDecision, setCvtDecision] = useState("");
+  const [decisionCode, setDecisionCode] = useState("");
+  const [breDetailOpen, setBreDetailOpen] = useState(false);
+
+  const source = useAppSelector((state) =>
+    props.readOnly
+      ? state.searchApplication.response?.data
+      : state.drs.data,
+  );
+
+  const requirements = Array.isArray(source?.requirementManagement)
+    ? (source.requirementManagement as AdditionalRequirementRow[])
+    : EMPTY_REQUIREMENTS;
+
+  /*
+   * BRE data
+   * ------------------------------------------------------------
+   * Initial BRE  -> source.breDecision
+   * Final BRE    -> source.latestBreDecision
+   */
+  const initialBre = toRecord(source?.breDecision);
+  const latestBre = toRecord(source?.latestBreDecision);
+
+  const initialBreDecision = firstValue(
+    initialBre.overallDecision,
+    initialBre.finalDecision,
+    initialBre.decision,
+    initialBre.decisionCode,
+    initialBre.breDecision,
+    initialBre.status,
+  );
+
+  const finalBreDecision = firstValue(
+    latestBre.overallDecision,
+    latestBre.finalDecision,
+    latestBre.decision,
+    latestBre.decisionCode,
+    latestBre.breDecision,
+    latestBre.status,
+  );
+
+  const handleAddRequirement = () => {
+    setAddRowSignal((signal) => signal + 1);
+  };
+
+  const handleBreRetrigger = () => {
+    /*
+     * Plug the existing BRE Retrigger logic here.
+     *
+     * If ApplicantSummary already exposes the retrigger handler,
+     * pass it as a prop instead and call that handler here.
+     */
+    console.log("BRE Retrigger clicked");
+  };
+
+  return (
+    <ApplicantApplicationSummary
+      {...props}
+      initialMemberIndex={memberIndex}
+      showMemberSelectionInitially={false}
+      allowMemberSelectionPage={false}
+      showRiskAnalytics={false}
+      showBreDecision={false}
+      showUserPhoto={false}
+      showHeaderTotals={false}
+      productOnlyHeader
+      afterHeader={
+        <Box
+          sx={{
+            display: "grid",
+            gap: 1,
+            minWidth: 0,
+          }}
+        >
+          {/* BRE DECISION ROW */}
+          <Box
+            component="section"
+            aria-label="BRE Decision"
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              minHeight: 46,
+              px: 1.5,
+              py: 0.75,
+              gap: 2,
+              border: "1px solid #E7DDD7",
+              borderRadius: 1.5,
+              backgroundColor: "#FFF",
+              minWidth: 0,
+            }}
+          >
+            {/* Title */}
+            {/* <Typography
+              sx={{
+                fontSize: 13,
+                fontWeight: 700,
+                color: "#8D232A",
+                whiteSpace: "nowrap",
+                pr: 2,
+                borderRight: "1px solid #E7DDD7",
+              }}
+            >
+              BRE Decision
+            </Typography> */}
+
+            {/* Initial BRE */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                minWidth: 0,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: 11,
+                  color: "#756D69",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Initial
+              </Typography>
+
+              <Box
+                sx={{
+                  px: 1.1,
+                  py: 0.35,
+                  borderRadius: 1,
+                  backgroundColor: "#F4F3F2",
+                  border: "1px solid #DED9D6",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#4E4743",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {initialBreDecision}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Divider */}
+            <Box
+              sx={{
+                width: "1px",
+                height: 24,
+                backgroundColor: "#E7DDD7",
+                flexShrink: 0,
+              }}
+            />
+
+            {/* Final BRE */}
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.75,
+                minWidth: 0,
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: 11,
+                  color: "#756D69",
+                  whiteSpace: "nowrap",
+                }}
+              >
+                Final
+              </Typography>
+
+              <Box
+                sx={{
+                  px: 1.1,
+                  py: 0.35,
+                  borderRadius: 1,
+                  backgroundColor: "#EEF8F1",
+                  border: "1px solid #B8DCC0",
+                }}
+              >
+                <Typography
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 700,
+                    color: "#28743C",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {finalBreDecision}
+                </Typography>
+              </Box>
+            </Box>
+
+            {/* Push button to right */}
+            <Box sx={{ flex: 1 }} />
+
+            {!props.readOnly && (
+              <Button
+                size="small"
+                variant="outlined"
+                startIcon={<RefreshIcon width={16} />}
+                onClick={handleBreRetrigger}
+                sx={{
+                  minWidth: 25,
+                  height: 25,
+                  flexShrink: 0,
+                  borderColor: "#E45F14",
+                  color: "#E45F14",
+                  textTransform: "none",
+                  fontSize: 8,
+                  fontWeight: 700,
+                  borderRadius: 1.25,
+                  "&:hover": {
+                    borderColor: "#C94F0B",
+                    backgroundColor: "#FFF5EE",
+                  },
+                }}
+              />
+            )}
+
+            <Button
+              size="small"
+              variant="outlined"
+              onClick={() => setBreDetailOpen(true)}
+              sx={{
+                minWidth: 78,
+                height: 25,
+                flexShrink: 0,
+                borderColor: "#E45F14",
+                color: "#E45F14",
+                textTransform: "none",
+                fontSize: 10,
+                fontWeight: 700,
+                borderRadius: 1.25,
+                "&:hover": {
+                  borderColor: "#C94F0B",
+                  backgroundColor: "#FFF5EE",
+                },
+              }}
+            >
+              View Detail
+            </Button>
+          </Box>
+
+          <CustomDialog
+            open={breDetailOpen}
+            onClose={() => setBreDetailOpen(false)}
+            maxWidth="lg"
+            fullWidth
+            contentSx={{
+              p: { xs: 1, sm: 1.5 },
+              overflowY: "auto",
+            }}
+          >
+            <BreDecision readOnly={props.readOnly} />
+          </CustomDialog>
+
+          {/* APPLICANT PROFILE */}
+          <CVTApplicantProfile
+            readOnly={props.readOnly}
+            roleType="CVT_TASK"
+            initialMemberIndex={memberIndex}
+            onMemberChange={setMemberIndex}
+          />
+
+          {/* =====================================================
+              REQUIREMENT MANAGEMENT
+          ===================================================== */}
+
+          <Box
+            component="section"
+            aria-label="Requirement Management"
+            sx={{
+              minWidth: 0,
+              border: "1px solid #E7DDD7",
+              borderRadius: 1.5,
+              bgcolor: "#FFFFFF",
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                minHeight: 42,
+                px: 1.5,
+                py: 0.7,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 1,
+                borderBottom: "1px solid #E7DDD7",
+                bgcolor: "#FFF8F3",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: 13,
+                  fontWeight: 800,
+                  color: "#8D232A",
+                }}
+              >
+                Requirement Management
+              </Typography>
+
+              {!props.readOnly && (
+                <Button
+                  size="small"
+                  variant="outlined"
+                  onClick={handleAddRequirement}
+                  sx={{
+                    minHeight: 28,
+                    px: 1.4,
+                    py: 0.3,
+                    borderColor: "#E45F14",
+                    color: "#E45F14",
+                    bgcolor: "#FFFFFF",
+                    borderRadius: 1.25,
+                    fontSize: 11.5,
+                    fontWeight: 700,
+                    textTransform: "none",
+                    whiteSpace: "nowrap",
+                    "&:hover": {
+                      borderColor: "#C94F0B",
+                      bgcolor: "#FFF5EE",
+                    },
+                  }}
+                >
+                  + Add Requirement
+                </Button>
+              )}
+            </Box>
+
+            <Box sx={{ p: 1 }}>
+              <RequirementManagementTable
+                requirements={requirements}
+                readOnly={props.readOnly}
+                addRowSignal={addRowSignal}
+              />
+            </Box>
+          </Box>
+           {/* =====================================================
+                        CVT DECISION
+                    ===================================================== */}
+          
+                    <Box
+                      component="section"
+                      aria-label="CVT Decision"
+                      sx={{
+                        p: { xs: 1, sm: 1.25 },
+                        display: "grid",
+                        gridTemplateColumns: {
+                          xs: "minmax(0, 1fr)",
+                          md: "minmax(0, 1fr) 250px 220px auto",
+                        },
+                        gap: 1.25,
+                        alignItems: "center",
+                        border: "1px solid #D8D8D8",
+                        borderLeft: "4px solid #E45F14",
+                        borderRadius: "10px",
+                        bgcolor: "#FFFFFF",
+                        boxShadow: "0 2px 7px rgba(60, 42, 35, 0.05)",
+                      }}
+                    >
+                      <TextField
+                        label="CVT Remarks"
+                        value={cvtRemarks}
+                        onChange={(event) => setCvtRemarks(event.target.value)}
+                        multiline
+                        minRows={1}
+                        size="small"
+                        fullWidth
+                        disabled={props.readOnly}
+                      />
+          
+                      <TextField
+                        select
+                        label="CVT Decision"
+                        value={cvtDecision}
+                        onChange={(event) => setCvtDecision(event.target.value)}
+                        size="small"
+                        fullWidth
+                        disabled={props.readOnly}
+                      >
+                        {CVT_DECISION_OPTIONS.map((option) => (
+                          <MenuItem key={option} value={option}>
+                            {option}
+                          </MenuItem>
+                        ))}
+                      </TextField>
+          
+                      <TextField
+                        label="Decision Code"
+                        value={decisionCode}
+                        onChange={(event) => setDecisionCode(event.target.value)}
+                        size="small"
+                        fullWidth
+                        disabled={props.readOnly}
+                      />
+          
+                      {!props.readOnly && (
+                        <Button
+                          type="button"
+                          variant="contained"
+                          onClick={() => {
+                            console.log("Submit CVT decision", {
+                              remarks: cvtRemarks,
+                              decision: cvtDecision,
+                              decisionCode,
+                            });
+                          }}
+                          sx={{
+                            minWidth: 88,
+                            height: 36,
+                            px: 2,
+                            borderRadius: "18px",
+                            bgcolor: "#E45F14",
+                            color: "#FFFFFF",
+                            fontSize: 12,
+                            fontWeight: 700,
+                            textTransform: "none",
+                            boxShadow: "none",
+                            whiteSpace: "nowrap",
+                            "&:hover": {
+                              bgcolor: "#C94F0B",
+                              boxShadow: "none",
+                            },
+                          }}
+                        >
+                          Submit
+                        </Button>
+                      )}
+                    </Box>
+        </Box>
+      }
+    />
+  );
+};
+
+export default CVTApplicantSummary;

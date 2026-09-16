@@ -1,4 +1,4 @@
-import { Box, Tab, Tabs, Typography } from "@mui/material";
+import { Box, MenuItem, Select, Tab, Tabs, Typography } from "@mui/material";
 import { useEffect, useState, type SyntheticEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 //import CustomAccordion from "../../../components/ui/Accordion/Accordion";
@@ -14,9 +14,10 @@ import CustomTable from "../../../components/ui/Table/Table";
 import { centerFlex } from "../../../utils/styles";
 import KeyValueTable from "../../../components/ui/KeyValueTable/KeyValueTable";
 import { drsThunk } from "../../../store/thunks/drsThunk";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import CustomButton from "../../../components/ui/Button/Button";
-import { getFinancialPath, getMedicalPath } from "../../../routes/routes";
+import ViewMedical from "../Medical Final/ViewMedical";
+import ViewFinancial from "../Financial/ViewFinancial";
 //import RiskAnalytics from "./RiskAnalytics";
 import { markApplicantTabVisited } from "../../../validations/drsApplicantTabValidation";
 import { formatDate } from "../../../utils/dataFormat";
@@ -378,9 +379,7 @@ const applicantTabConfig: Record<string, string[]> = {
     "Image Details",
     "Personal & KYC",
     "Contact & Address",
-    "Financial & Profession",
-    "Medical & Lifestyle",
-    "Nominee",
+    "Payment & Payout",
   ],
 
   PIVV_TASK: ["Image Details", "Personal & KYC", "Contact & Address"],
@@ -515,20 +514,38 @@ const ExpandableDetailField = ({
   );
 };
 
+const CompactProfileFields = ({
+  items,
+}: {
+  items: { label: string; value: unknown }[];
+}) => (
+  <Box sx={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 140px), 1fr))",
+    columnGap: 1,
+    rowGap: 0.75,
+    "& .MuiTypography-root": { fontSize: 11, lineHeight: 1.3 },
+  }}>
+    {items.map((field) => <ExpandableDetailField key={field.label} {...field} />)}
+  </Box>
+);
+
 const DetailsCard = ({
   title: cardTitle,
   fields,
   orangeHeader = false,
+  compact = false,
 }: {
   title: string;
   fields: { label: string; value: unknown }[];
   orangeHeader?: boolean;
+  compact?: boolean;
 }) => (
   <Box
     sx={{
       minWidth: 0,
       p: orangeHeader ? 0 : 2,
-      backgroundColor: "#F6F6F6",
+      backgroundColor: compact ? "#FFFBF8" : "#F6F6F6",
       borderRadius: "8px",
       overflow: "hidden",
     }}
@@ -536,8 +553,8 @@ const DetailsCard = ({
     <Typography
       sx={{
         mb: orangeHeader ? 0 : 2,
-        px: orangeHeader ? 2 : 0,
-        py: orangeHeader ? 1.25 : 0,
+        px: orangeHeader ? (compact ? 0.75 : 2) : 0,
+        py: orangeHeader ? (compact ? 0.5 : 1.25) : 0,
         fontSize: "12px",
         fontWeight: 700,
         color: orangeHeader ? "#FFFFFF" : "#161616",
@@ -548,11 +565,11 @@ const DetailsCard = ({
     </Typography>
     <Box
       sx={{
-        p: orangeHeader ? 2 : 0,
+        p: orangeHeader ? (compact ? 0.75 : 2) : 0,
         display: "grid",
-        gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
-        columnGap: 2,
-        rowGap: 2,
+        gridTemplateColumns: compact ? { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))" } : "repeat(3, minmax(0, 1fr))",
+        columnGap: compact ? 1 : 2,
+        rowGap: compact ? 0.75 : 2,
       }}
     >
       {fields.map((field) => (
@@ -567,14 +584,13 @@ const DetailsCard = ({
 /*                            MAIN COMPONENT                                  */
 /* -------------------------------------------------------------------------- */
 
-const ApplicantProfile = ({
+const DVTApplicantProfile = ({
   readOnly = false,
-  roleType: roleTypeOverride,
+  roleType: roleTypeOverride = "DVT_TASK",
   initialMemberIndex = 0,
   onMemberChange,
 }: ApplicantProfileProps) => {
   const dispatch = useDispatch<AppDispatch>();
-  const navigate = useNavigate();
   const {
     businessType: routeBusinessType,
     applicationNumber: routeApplicationNumber,
@@ -590,6 +606,9 @@ const ApplicantProfile = ({
   const sourceRecord = (applicantProfileData ?? {}) as Record<string, unknown>;
   const [isImageDialogOpen, setIsImageDialogOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [activeDetailView, setActiveDetailView] = useState<
+    "medical" | "financial" | null
+  >(null);
  
   /*
    * summary contains objects such as:
@@ -716,17 +735,6 @@ const ApplicantProfile = ({
   /*                         MEMBER TAB CHANGE                                */
   /* ------------------------------------------------------------------------ */
 
-  const handleMemberTabChange = (_event: SyntheticEvent, newValue: number) => {
-    setSelectedMemberTab(newValue);
-    onMemberChange?.(newValue);
-
-    /*
-     * Whenever Proposer/Life Assured changes,
-     * always open the first inner tab.
-     */
-    setSelectedDetailTab(0);
-  };
-
   /* ------------------------------------------------------------------------ */
   /*                         DETAIL TAB CHANGE                                 */
   /* ------------------------------------------------------------------------ */
@@ -756,8 +764,8 @@ const ApplicantProfile = ({
               width: "100%",
               backgroundColor: "#F6F6F6",
               borderRadius: "6px",
-              px: 2,
-              py: 1.5,
+              px: roleType === "DVT_TASK" ? 1 : 2,
+              py: roleType === "DVT_TASK" ? 0.75 : 1.5,
             }}
           >
             <GridSection
@@ -880,18 +888,19 @@ const ApplicantProfile = ({
         return (
           <Box
             sx={{
-              mt: 1.5,
-              p: 2,
+              mt: roleType === "DVT_TASK" ? 0 : 1.5,
+              p: roleType === "DVT_TASK" ? 1 : 2,
               backgroundColor: "#F6F6F6",
               borderRadius: "8px",
             }}
           >
-            <GridSection
-              columns={8}
-              items={personalFields}
-            />
+            {roleType === "DVT_TASK" ? (
+              <CompactProfileFields items={personalFields} />
+            ) : (
+              <GridSection columns={8} items={personalFields} />
+            )}
 
-            <Box sx={{ borderTop: "1px solid #AFAFAF", my: 2 }} />
+            <Box sx={{ borderTop: "1px solid #AFAFAF", my: roleType === "DVT_TASK" ? 1 : 2 }} />
 
             {/* <Typography
               sx={{
@@ -903,10 +912,11 @@ const ApplicantProfile = ({
             >
               KYC
             </Typography> */}
-            <GridSection
-              columns={8}
-              items={kycFields}
-            />
+            {roleType === "DVT_TASK" ? (
+              <CompactProfileFields items={kycFields} />
+            ) : (
+              <GridSection columns={8} items={kycFields} />
+            )}
           </Box>
         );
       }
@@ -945,28 +955,30 @@ const ApplicantProfile = ({
         return (
           <Box
             sx={{
-              mt: 1.5,
+              mt: roleType === "DVT_TASK" ? 0 : 1.5,
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
                 md: "repeat(2, minmax(0, 1fr))",
                 lg: "repeat(3, minmax(0, 1fr))",
               },
-              gap: 1.5,
+              gap: roleType === "DVT_TASK" ? 0.75 : 1.5,
               alignItems: "stretch",
             }}
           >
             <DetailsCard
+              compact={roleType === "DVT_TASK"}
               orangeHeader
               title="Communication Address"
               fields={getAddressFields(communicationAddress)}
             />
             <DetailsCard
+              compact={roleType === "DVT_TASK"}
               orangeHeader
               title="Permanent Address"
               fields={getAddressFields(permanentAddress)}
             />
-            <DetailsCard orangeHeader title="Contact Details" fields={contactFields} />
+            <DetailsCard compact={roleType === "DVT_TASK"} orangeHeader title="Contact Details" fields={contactFields} />
           </Box>
         );
       }
@@ -1707,18 +1719,18 @@ const ApplicantProfile = ({
         return (
           <Box
             sx={{
-              mt: 1.5,
+              mt: roleType === "DVT_TASK" ? 0 : 1.5,
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
                 md: "repeat(2, minmax(0, 1fr))",
               },
-              gap: 1.5,
+              gap: roleType === "DVT_TASK" ? 0.75 : 1.5,
               alignItems: "stretch",
             }}
           >
-            <DetailsCard orangeHeader title="Payment Details" fields={paymentFields} />
-            <DetailsCard orangeHeader title="Payout Details" fields={payoutFields} />
+            <DetailsCard compact={roleType === "DVT_TASK"} orangeHeader title="Payment Details" fields={paymentFields} />
+            <DetailsCard compact={roleType === "DVT_TASK"} orangeHeader title="Payout Details" fields={payoutFields} />
           </Box>
         );
       }
@@ -1764,6 +1776,7 @@ const ApplicantProfile = ({
   const canShowApplicantActions = ![
     "CUW_TASK",
     "CVT_TASK",
+    "DVT_TASK",
     "CPT_DATA_ENTRY_NMR_TASK",
     "CPT_DATA_ENTRY_MR_TASK",
     "DVT_TASK",
@@ -1794,11 +1807,36 @@ const ApplicantProfile = ({
   /*                                   UI                                     */
   /* ------------------------------------------------------------------------ */
 
+
+  if (activeDetailView === "medical") {
+    return (
+      <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
+        <ViewMedical
+          onBack={() => setActiveDetailView(null)}
+          backLabel="Back to DRS"
+        />
+      </Box>
+    );
+  }
+
+  if (activeDetailView === "financial") {
+    return (
+      <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
+        <ViewFinancial
+          onBack={() => setActiveDetailView(null)}
+          backLabel="Back to DRS"
+          onViewMedical={() => setActiveDetailView("medical")}
+        />
+      </Box>
+    );
+  }
+
   return (
     <Box sx={{
-      px: roleType === "CVT_TASK" ? { xs: 1.25, sm: 2 } : 1,
-      ...(roleType === "CVT_TASK" && {
-        py: 1.5, border: "1px solid #F1D8C8", borderRadius: "12px",
+      px: roleType === "DVT_TASK" ? 0 : 1,
+      ...(roleType === "DVT_TASK" && {
+        py: 0, border: "1px solid #F1D8C8", borderRadius: "8px",
+        overflow: "hidden",
         bgcolor: "#FFFFFF", boxShadow: "0 3px 12px rgba(169,33,41,.06)",
       }),
     }}>
@@ -1807,285 +1845,151 @@ const ApplicantProfile = ({
           {/*                    PROPOSER / LIFE ASSURED                        */}
           {/* ================================================================= */}
 
-          {summary.length > 0 && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: roleType === "CVT_TASK" ? "flex-start" : "center",
-                alignItems: "center",
-                width: "100%",
-                mb: 1.5,
-                gap: 1.5,
-                flexWrap: "wrap",
-                ...(roleType === "CVT_TASK" && { pb: 1.5, borderBottom: "1px solid #F3E1D6" }),
-              }}
-            >
-              {/* Applicant Image */}
-              <Box
-                component="button"
-                type="button"
-                aria-label="View applicant profile photo"
-                onClick={() => {
-                  const image = getApplicantImage(selectedApplicant);
-
-                  if (image) {
-                    setPreviewImage(image);
-                    setIsImageDialogOpen(true);
-                  }
-                }}
-                sx={{
-                  width: roleType === "CVT_TASK" ? 64 : 48,
-                  height: roleType === "CVT_TASK" ? 64 : 48,
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  border: "1px solid #D9D9D9",
-                  backgroundColor: "#F2F2F2",
-                  flexShrink: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: roleType === "CVT_TASK" ? "flex-start" : "center",
-                  padding: 0,
-                  cursor: getApplicantImage(selectedApplicant) ? "pointer" : "default",
-                }}
-              >
-                {getApplicantImage(selectedApplicant) ? (
-                  <Box
-                    component="img"
-                    src={getApplicantImage(selectedApplicant)}
-                    alt={formatMemberType(
-                      selectedApplicant?.memberType,
-                      summary.length,
-                    )}
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <Typography
-                    sx={{
-                      fontSize: "12px",
-                      fontWeight: 600,
-                      color: "#999999",
-                    }}
-                  >
-                    {selectedApplicant?.memberType?.charAt(0)?.toUpperCase() || "A"}
-                  </Typography>
-                )}
-              </Box>
-
-
-              {roleType === "CVT_TASK" && (
-                <Box sx={{ minWidth: 120 }}>
-                  <Typography component="h2" sx={{ m: 0, color: "#A92129", fontWeight: 800, fontSize: 16 }}>
-                    Applicant Profile
-                  </Typography>
-                  <Typography sx={{ color: "#75645B", fontSize: 12, mt: 0.3 }}>
-                    {formatMemberType(selectedApplicant?.memberType, summary.length)}
-                  </Typography>
-                </Box>
-              )}
-
-              {/* Proposer / Life Assured Tabs */}
-              <Tabs
-                variant="scrollable"
-                scrollButtons="auto"
-                aria-label="Select applicant"
-                value={selectedMemberTab}
-                onChange={handleMemberTabChange}
-                sx={{
-                  minHeight: "34px",
-                  height: "34px",
-                  width: "fit-content",
-                  border: "1px solid #D9D9D9",
-                  borderRadius: "18px",
-                  padding: "2px",
-                  backgroundColor: "#FFFFFF",
-
-                  "& .MuiTabs-indicator": {
-                    display: "none",
-                  },
-
-                  "& .MuiTabs-flexContainer": {
-                    gap: "2px",
-                  },
-                }}
-              >
-                {summary.map((member, index) => (
-                  <Tab
-                    key={`${member.memberType}-${index}`}
-                    label={formatMemberType(member.memberType, summary.length)}
-                    sx={{
-                      minHeight: "28px",
-                      height: "28px",
-                      minWidth: "auto",
-                      padding: "0 12px",
-                      borderRadius: "15px",
-                      textTransform: "none",
-                      fontSize: "13px",
-                      lineHeight: 1,
-                      color: "#666666",
-                      fontWeight: 500,
-
-                      "&.Mui-selected": {
-                        backgroundColor: roleType === "CVT_TASK" ? "#E45F14" : "#A92129",
-                        color: "#FFFFFF",
-                        fontWeight: 600,
-                      },
-
-                      "&:hover": {
-                        backgroundColor:
-                          selectedMemberTab === index ? "#A92129" : "#F7F7F7",
-                      },
-                    }}
-                  />
-                ))}
-              </Tabs>
-              {!readOnly && roleType === "CVT_TASK" && selectedApplicant && (
-                <CustomButton
-                  variant="outlined"
-                  onClick={() => setEditProfileOpen(true)}
-                  sx={{ ml: "auto", borderRadius: "20px", px: 2.5,
-                    borderColor: "#E45F14", color: "#A92129", bgcolor: "#FFF4EC",
-                    textTransform: "none", fontWeight: 700,
-                    "&:hover": { borderColor: "#C84B0D", bgcolor: "#FFEAD7" } }}
-                >
-                  Edit
-                </CustomButton>
-              )}
-            </Box>
-          )}
-
-          {/* ================================================================= */}
-          {/*                         INNER TABS                                 */}
-          {/* ================================================================= */}
-
-          {selectedApplicant && innerTabs.length > 0 && (
-            <Box sx={{ width: "100%" }}>
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: roleType === "CVT_TASK" ? "flex-start" : "center",
-                  alignItems: "center",
-                  width: "100%",
-                }}
-              >
-                <Tabs
-                  value={safeDetailTab}
-                  onChange={handleDetailTabChange}
-                  variant="scrollable"
-                  scrollButtons={false}
-                  sx={{
-                    minHeight: "32px",
-                    height: "32px",
-                    maxWidth: "100%",
-                    border: "1px solid #E1E1E1",
-                    borderRadius: "17px",
-                    padding: "2px",
-                    backgroundColor: "#FAFAFA",
-
-                    "& .MuiTabs-indicator": {
-                      display: "none",
-                    },
-
-                    "& .MuiTabs-flexContainer": {
-                      gap: "1px",
-                    },
-
-                    "& .MuiTabs-scroller": {
-                      overflowX: "auto !important",
-                      scrollbarWidth: "none",
-
-                      "&::-webkit-scrollbar": {
-                        display: "none",
-                      },
-                    },
+          {roleType === "DVT_TASK" && selectedApplicant && (
+            <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "108px minmax(0, 1fr)" } }}>
+              <Box sx={{ p: 1, bgcolor: "#FFF8F2", display: "flex", flexDirection: "column",
+                alignItems: "center", gap: 0.75, borderRight: { sm: "1px solid #F1D8C8" },
+                borderBottom: { xs: "1px solid #F1D8C8", sm: 0 } }}>
+                <Box component="button" type="button" aria-label="View applicant photo"
+                  onClick={() => {
+                    const image = getApplicantImage(selectedApplicant);
+                    if (image) { setPreviewImage(image); setIsImageDialogOpen(true); }
                   }}
-                >
+                  sx={{ width: 80, maxWidth: "100%", height: 96, borderRadius: "6px", p: 0,
+                    border: "1px solid #E8BEA1", bgcolor: "#FFFFFF", overflow: "hidden",
+                    flexShrink: 0, display: "grid", placeItems: "center", color: "#A92129", fontSize: 28, fontWeight: 800,
+                    cursor: getApplicantImage(selectedApplicant) ? "pointer" : "default" }}>
+                  {getApplicantImage(selectedApplicant) ? (
+                    <Box component="img" src={getApplicantImage(selectedApplicant)}
+                      alt="Applicant" sx={{ width: "100%", height: "100%", objectFit: "contain" }} />
+                  ) : (selectedApplicant.memberType?.charAt(0)?.toUpperCase() || "A")}
+                </Box>
+                <Typography sx={{ color: "#A92129", fontSize: 11, fontWeight: 700, textAlign: "center" }}>
+                  {formatMemberType(selectedApplicant.memberType, summary.length)}
+                </Typography>
+              </Box>
+              <Box sx={{ minWidth: 0 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1,
+                px: 1.25, py: 0.75, bgcolor: "#FFF2E7", borderBottom: "1px solid #F1D8C8",
+                flexWrap: "nowrap" }}>
+                <Select size="small" value={selectedMemberTab}
+                  inputProps={{ "aria-label": "Select applicant" }}
+                  onChange={(event) => {
+                    const index = Number(event.target.value);
+                    setSelectedMemberTab(index);
+                    onMemberChange?.(index);
+                    setSelectedDetailTab(0);
+                  }}
+                  sx={{ width: { xs: 112, md: 132 }, minWidth: 0, flexShrink: 0, height: 32, bgcolor: "#FFFFFF",
+                    fontSize: 12, fontWeight: 700, borderRadius: "6px",
+                    "& .MuiOutlinedInput-notchedOutline": { borderColor: "#E8CDBA" } }}>
+                  {summary.map((member, index) => (
+                    <MenuItem key={`${member.memberType}-${index}`} value={index}>
+                      {formatMemberType(member.memberType, summary.length)}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Tabs value={safeDetailTab} onChange={handleDetailTabChange}
+                  aria-label="Applicant profile details" variant="scrollable" scrollButtons="auto"
+                  sx={{ flex: "1 1 0", minWidth: 0, minHeight: 32,
+                    "& .MuiTabs-indicator": { bgcolor: "#E45F14", height: 3 },
+                    "& .MuiTab-root": { minHeight: 32, px: 1, py: 0.5, minWidth: 0,
+                      fontSize: 12, textTransform: "none", fontWeight: 600, color: "#6D5A4D" },
+                    "& .MuiTab-root.Mui-selected": { color: "#B8450B", fontWeight: 800 } }}>
                   {innerTabs.map((tab, index) => (
-                    <Tab
-                      key={tab}
-                      label={tab}
-                      sx={{
-                        minHeight: "26px",
-                        height: "26px",
-                        minWidth: "auto",
-                        padding: "0 10px",
-                        borderRadius: "12px",
-                        textTransform: "none",
-                        whiteSpace: "nowrap",
-                        fontSize: "12px",
-                        lineHeight: 1,
-                        color: "#666666",
-                        fontWeight: 500,
-
-                        "&.Mui-selected": {
-                          backgroundColor: roleType === "CVT_TASK" ? "#E45F14" : "#A92129",
-                          color: "#FFFFFF",
-                          fontWeight: 600,
-                        },
-
-                        "&:hover": {
-                          backgroundColor:
-                            safeDetailTab === index ? "#A92129" : "#F2F2F2",
-                        },
-                      }}
-                    />
+                    <Tab key={tab} label={tab} id={`dvt-profile-tab-${index}`}
+                      aria-controls="dvt-profile-panel" />
                   ))}
                 </Tabs>
-              </Box>
-
-              {/* ============================================================= */}
-              {/*                         TAB CONTENT                            */}
-              {/* ============================================================= */}
-
-              {["Contact & Address", "Medical & Lifestyle", "Nominee", "Payment & Payout"].includes(
-                innerTabs[safeDetailTab],
-              ) ? (
-                <Box sx={{ mt: 1.5 }}>{renderDetailContent()}</Box>
-              ) : (
-              <Box
-                sx={{
-                  mt: 1.5,
-                  border: "1px solid #E5E0DD",
-                  borderRadius: "8px",
-                  overflow: "hidden",
-                  backgroundColor: "#FFFFFF",
-                }}
-              >
                 <Box
                   sx={{
-                    backgroundColor: "#E45F14",
-                    color: "#FFFFFF",
-                    px: 2,
-                    py: 1.25,
-                    minHeight: "42px",
+                    ml: "auto",
                     display: "flex",
                     alignItems: "center",
+                    gap: 0.75,
+                    flexShrink: 0,
                   }}
                 >
-                  <Typography
-                    component="h3"
+                  {!readOnly && (
+                    <CustomButton
+                      variant="outlined"
+                      onClick={() => setEditProfileOpen(true)}
+                      sx={{
+                        minWidth: 58,
+                        height: 32,
+                        px: 1.25,
+                        flexShrink: 0,
+                        borderRadius: "6px",
+                        textTransform: "none",
+                        fontSize: 12,
+                        borderColor: "#E45F14",
+                        color: "#A92129",
+                        bgcolor: "#FFFFFF",
+                        "&:hover": {
+                          bgcolor: "#FFEAD7",
+                          borderColor: "#C84B0D",
+                        },
+                      }}
+                    >
+                      Edit
+                    </CustomButton>
+                  )}
+
+                  <CustomButton
+                    variant="outlined"
+                    onClick={() => setActiveDetailView("medical")}
                     sx={{
-                      m: 0,
-                      fontSize: "14px",
-                      fontWeight: 700,
-                      lineHeight: 1.4,
-                      color: "inherit",
+                      minWidth: 92,
+                      height: 32,
+                      px: 1.25,
+                      flexShrink: 0,
+                      borderRadius: "6px",
+                      textTransform: "none",
+                      fontSize: 12,
+                      borderColor: "#E45F14",
+                      color: "#A92129",
+                      bgcolor: "#FFFFFF",
+                      "&:hover": {
+                        bgcolor: "#FFEAD7",
+                        borderColor: "#C84B0D",
+                      },
                     }}
                   >
-                    {innerTabs[safeDetailTab]}
-                  </Typography>
-                </Box>
-                <Box sx={{ p: { xs: 1.5, sm: 2 } }}>
-                  {renderDetailContent()}
+                    View Medical
+                  </CustomButton>
+
+                  <CustomButton
+                    variant="outlined"
+                    onClick={() => setActiveDetailView("financial")}
+                    sx={{
+                      minWidth: 98,
+                      height: 32,
+                      px: 1.25,
+                      flexShrink: 0,
+                      borderRadius: "6px",
+                      textTransform: "none",
+                      fontSize: 12,
+                      borderColor: "#E45F14",
+                      color: "#A92129",
+                      bgcolor: "#FFFFFF",
+                      "&:hover": {
+                        bgcolor: "#FFEAD7",
+                        borderColor: "#C84B0D",
+                      },
+                    }}
+                  >
+                    View Financial
+                  </CustomButton>
                 </Box>
               </Box>
-              )}
+              <Box role="tabpanel" id="dvt-profile-panel"
+                aria-labelledby={`dvt-profile-tab-${safeDetailTab}`}
+                sx={{ p: 0.75, "& > .MuiBox-root": { mt: 0 } }}>
+                {renderDetailContent()}
+              </Box>
+              </Box>
             </Box>
           )}
-
 
           {/* ================================================================= */}
           {/*                     VIEW MEDICAL AND FINANCIAL                    */}
@@ -2116,14 +2020,7 @@ const ApplicantProfile = ({
                   lineHeight: "16px",
                   fontWeight: 700,
                 }}
-                onClick={() =>
-                  navigate(
-                    getMedicalPath(
-                      resolvedBusinessType,
-                      resolvedApplicationNumber,
-                    ),
-                  )
-                }
+                onClick={() => setActiveDetailView("medical")}
               >
                 View Medicals
               </CustomButton>
@@ -2139,14 +2036,7 @@ const ApplicantProfile = ({
                   lineHeight: "16px",
                   fontWeight: 700,
                 }}
-                onClick={() =>
-                  navigate(
-                    getFinancialPath(
-                      resolvedBusinessType,
-                      resolvedApplicationNumber,
-                    ),
-                  )
-                }
+                onClick={() => setActiveDetailView("financial")}
               >
                 View Financials
               </CustomButton>
@@ -2225,4 +2115,4 @@ const ApplicantProfile = ({
   );
 };
 
-export default ApplicantProfile;
+export default DVTApplicantProfile;
