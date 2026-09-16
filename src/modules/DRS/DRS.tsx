@@ -859,6 +859,7 @@ import GroupVendorCMOApplicationSummary from "./Group/GroupVendorCMOApplicationS
 import GroupHOCMOApplicationSummary from "./Group/GroupHOCMOApplicationSummary";
 import GroupRefCMOApplicationSummary from "./Group/GroupRefCMOApplicationSummary";
 import GroupGrievance from "./Group/GroupGrievance";
+import GroupClaimAuditTask from "./Group/GroupClaimAuditTask";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -937,7 +938,8 @@ const mapper = {
   GROUP_VENDOR_CMO_TASK: "GROUP_VENDOR_CMO_TASK",
   GROUP_CMO_TASK: "GROUP_CMO_TASK",
   GROUP_REF_CMO_TASK: "GROUP_REF_CMO_TASK",
-  MAS_TASK: "MAS_TASK"
+  MAS_TASK: "MAS_TASK",
+  GROUP_CUW_CLAIM_AUDIT_TASK:"GROUP_CUW_CLAIM_AUDIT_TASK"
 } as const;
 
 const SUMMARY_SECTION_ROLES = new Set([
@@ -1635,6 +1637,9 @@ const DRS = () => {
             ) :
             normalizeValue(roleType) === "CUW_CLAIM_AUDIT_TASK" ? (
               <ClaimAudit />
+            ) :
+            normalizeValue(roleType) === "GROUP_CUW_CLAIM_AUDIT_TASK" ? (
+              <GroupClaimAuditTask />
             ) :
             normalizeValue(roleType) === "PIVV_TASK" ? (
               <PIVVDrs />
