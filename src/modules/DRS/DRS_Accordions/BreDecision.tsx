@@ -30,10 +30,12 @@ type BRERow = {
 
 interface BreDecisionProps {
   readOnly?: boolean;
+  embedded?: boolean;
 }
 
 const BreDecision = ({
   readOnly = false,
+  embedded = false,
 }: BreDecisionProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
@@ -422,23 +424,31 @@ const renderDiscrepancy = (
   };
 
   return (
-    <Box sx={{ px: 1 }}>
-      <CustomAccordion
-        title={title.breDecision}
-        chip={
-          <Badge
-            label={finalBreStatus}
-            variant="Low"
-          />
-        }
-        defaultExpanded
-      >
+    <Box sx={{ px: embedded ? 0 : 1 }}>
+      {embedded ? (
         <CustomTable
           title=""
           columns={breColumns}
           data={breTableData}
         />
-      </CustomAccordion>
+      ) : (
+        // <CustomAccordion
+        //   title={title.breDecision}
+        //   chip={
+        //     <Badge
+        //       label={finalBreStatus}
+        //       variant="Low"
+        //     />
+        //   }
+        //   defaultExpanded
+        // >
+          <CustomTable
+            title=""
+            columns={breColumns}
+            data={breTableData}
+          />
+        // </CustomAccordion>
+      )}
 
       <CustomDialog
         open={bredialogOpen}

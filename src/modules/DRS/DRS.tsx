@@ -859,6 +859,8 @@ import GroupVendorCMOApplicationSummary from "./Group/GroupVendorCMOApplicationS
 import GroupHOCMOApplicationSummary from "./Group/GroupHOCMOApplicationSummary";
 import GroupRefCMOApplicationSummary from "./Group/GroupRefCMOApplicationSummary";
 import GroupGrievance from "./Group/GroupGrievance";
+import CVTApplicantSummary from "./CVTApplicantSummary";
+import DVTApplicantSummary from "./DVTApplicantSummary";
 
 interface ApplicationRow {
   applicationNo?: string;
@@ -1305,9 +1307,14 @@ const DRS = () => {
   const pageAccordionIds = useMemo(
     () =>
       visibleAccordions.filter(
-        (accordionId) => !movedAccordionIds.includes(accordionId),
+        (accordionId) =>
+          !movedAccordionIds.includes(accordionId) &&
+          !(normalizeValue(roleType) === "CVT_TASK" &&
+            ["summary", "applicantprofile", "applicantdetails"].includes(
+              normalizeAccordionId(String(accordionId)),
+            )),
       ),
-    [movedAccordionIds, visibleAccordions],
+    [movedAccordionIds, visibleAccordions, roleType],
   );
 
   const handleSubmit = async () => {
@@ -1547,6 +1554,10 @@ const DRS = () => {
     (accordionId) =>
       isUwToolkitAccordion(String(accordionId)),
   );
+  const SummaryComponent =
+    normalizeValue(roleType) === "CVT_TASK"
+      ? CVTApplicantSummary
+      : normalizeValue(roleType) === "DVT_TASK" ? DVTApplicantSummary :ApplicantApplicationSummary;
   const shouldShowSubmitButton =
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK";
@@ -1556,6 +1567,7 @@ const DRS = () => {
     ? drsRecord.summary
     : [];
   const shouldShowMemberSelection =
+    (normalizeValue(roleType) !== "DVT_TASK" && normalizeValue(roleType) !== "CVT_TASK") &&
     summaryMembers.length > 1 && selectedMemberIndex === null;
 
   if (shouldShowMemberSelection) {
@@ -1695,7 +1707,8 @@ const DRS = () => {
                       }
                     />
                   ) : (
-                    <ApplicantApplicationSummary
+                    <SummaryComponent
+                      key={applicationNo}
                       stickyTop={0}
                       initialMemberIndex={selectedMemberIndex ?? 0}
                       showMemberSelectionInitially={false}

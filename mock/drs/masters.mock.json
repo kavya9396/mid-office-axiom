@@ -2284,6 +2284,14 @@
         "miscMastId": "1",
         "type": "REQT_ST"
       },
+       {
+        "code": "ISS",
+        "description": "Accept",
+        "value": "Accept",
+        "isActive": "Y",
+        "miscMastId": "2",
+        "type": "CVT"
+      },
       {
         "code": "PIVV_RSCH",
         "description": "Reraise PIVV",
@@ -3163,14 +3171,7 @@
         "miscMastId": "199",
         "type": "SUGAR_GLYCOSURIA"
       },
-      {
-        "code": "ISS",
-        "description": "Accept",
-        "value": "Accept",
-        "isActive": "Y",
-        "miscMastId": "2",
-        "type": "CVT"
-      },
+     
       {
         "code": "IFS",
         "description": "Customer didn’t complete the full script",

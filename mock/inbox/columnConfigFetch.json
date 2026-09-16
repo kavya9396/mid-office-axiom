@@ -3,7 +3,6 @@
   "availableFields": [
     "id",
     "applicationNo",
-    "channel",
     "sumAssured",
     "product",
     "premium",
