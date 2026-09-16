@@ -758,7 +758,7 @@ const CVTApplicantProfile = ({
 
     switch (selectedTab) {
       case "Image Details": {
-        const faceMatchDetails = selectedApplicant?.faceMatchDetails;
+        //const faceMatchDetails = selectedApplicant?.faceMatchDetails;
 
         return (
           <Box
@@ -775,19 +775,19 @@ const CVTApplicantProfile = ({
               items={[
                 {
                   label: "Document",
-                  value: faceMatchDetails?.document,
+                  value: "Aadhar",
                 },
                 {
                   label: "Face Match Score",
-                  value: faceMatchDetails?.faceMatchScore,
+                  value: "75",
                 },
                 {
                   label: "Image Quality",
-                  value: faceMatchDetails?.imageQuality,
+                  value: "Good",
                 },
                 {
                   label: "Remarks",
-                  value: faceMatchDetails?.remarks,
+                  value: "Good quality image found",
                 },
               ]}
             />
