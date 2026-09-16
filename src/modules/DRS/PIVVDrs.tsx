@@ -568,7 +568,7 @@ const PIVVDrs = ({
                 .includes("PIV"),
         ) ?? {};
 
-    const pivvFupCode = "ECG";
+    const pivvFupCode = "PIV";
     const pivvProfile = "Life Assured";
     const pivvRaisedDate = "9 Sep 2026";
     const pivvRaisedRemark = displayText(

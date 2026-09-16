@@ -1,4 +1,4 @@
-import { Avatar, Box, Button, MenuItem, TextField, Typography } from "@mui/material";
+import { Avatar, Box, MenuItem, TextField, Typography } from "@mui/material";
 import { useState } from "react";
 
 import CustomButton from "../../components/ui/Button/Button";
@@ -6,7 +6,7 @@ import CustomDialog from "../../components/ui/Dialog/Dialog";
 import { UserProfileIcon } from "../../icons/Icons";
 import { useAppSelector } from "../../store/hooks";
 import type { RootState } from "../../store/store";
-import RequirementManagement from "./DRS_Accordions/RequirementManagement";
+// import RequirementManagement from "./DRS_Accordions/RequirementManagement";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -34,13 +34,18 @@ interface RiderSummary {
     id: string;
     name: string;
     sumAssured: string;
+    policyTerm: string;
+    premiumTerm: string;
+    premium: string;
 }
 
 interface ApplicationSummaryBannerProps {
+    onBackToInbox?: () => void;
     image?: string;
     name: string;
     appNo: string;
     personalSummary: string;
+    parameters: string;
     productName: string;
     policyTerm: string;
     premiumTerm: string;
@@ -50,6 +55,7 @@ interface ApplicationSummaryBannerProps {
     tssa: string;
     tpsa: string;
     riderSummaries: RiderSummary[];
+    onViewRiders: () => void;
 }
 
 const toRecord = (value: unknown): UnknownRecord =>
@@ -86,6 +92,24 @@ const formatCurrency = (value: unknown): string => {
         : displayText(value);
 };
 
+const toDateInputValue = (value: unknown): string => {
+    const rawValue = displayText(value);
+
+    if (rawValue === "-") {
+        return "";
+    }
+
+    if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+        return rawValue;
+    }
+
+    const parsedDate = new Date(rawValue);
+
+    return Number.isNaN(parsedDate.getTime())
+        ? ""
+        : parsedDate.toISOString().slice(0, 10);
+};
+
 const getFullName = (person: UnknownRecord): string =>
     [person.firstName, person.middleName, person.lastName]
         .filter(Boolean)
@@ -113,18 +137,20 @@ const ApplicationSummaryBanner = ({
     image,
     name,
     personalSummary,
+    parameters,
     productName,
-    policyTerm,
-    premiumTerm,
+    // policyTerm,
+    // premiumTerm,
     sumAssured,
     tsa,
     tfsa,
     tssa,
     tpsa,
     riderSummaries,
+    // onViewRiders,
 }: ApplicationSummaryBannerProps) => {
     const coverageItems = [
-        sumAssured !== "-" ? `SA - ${sumAssured}` : null,
+        `SA - ${sumAssured}`,
         tsa !== "-" ? `TSA - ${tsa}` : null,
         tfsa !== "-" ? `TFSA - ${tfsa}` : null,
         tssa !== "-" ? `TSSA - ${tssa}` : null,
@@ -135,13 +161,14 @@ const ApplicationSummaryBanner = ({
         <Box
             sx={{
                 width: "100%",
+                mb: 0.75,
                 display: "grid",
                 gridTemplateColumns: {
-                    xs: "84px minmax(0, 1fr)",
-                    sm: "150px minmax(0, 1fr)",
+                    xs: "84px minmax(0,1fr)",
+                    sm: "150px minmax(0,1fr)",
                 },
                 bgcolor: "#FFEAD7",
-                color: "#000000",
+                color: "#000",
                 borderRadius: "12px",
                 overflow: "hidden",
                 boxShadow: "0 3px 10px rgba(169, 33, 41, 0.16)",
@@ -149,6 +176,7 @@ const ApplicationSummaryBanner = ({
         >
             <Box
                 sx={{
+                    position: "relative",
                     minHeight: { xs: 112, sm: 138 },
                     display: "flex",
                     alignItems: "center",
@@ -163,7 +191,7 @@ const ApplicationSummaryBanner = ({
                         width: { xs: 54, sm: 76 },
                         height: { xs: 54, sm: 76 },
                         bgcolor: "rgba(255,255,255,.18)",
-                        color: "#000000",
+                        color: "#000",
                         border: "2px solid rgba(255,255,255,.45)",
                     }}
                 >
@@ -172,11 +200,7 @@ const ApplicationSummaryBanner = ({
             </Box>
 
             <Box
-                sx={{
-                    minWidth: 0,
-                    px: { xs: 1.2, sm: 2.2 },
-                    py: { xs: 1, sm: 1.45 },
-                }}
+                sx={{ minWidth: 0, px: { xs: 1.2, sm: 2.2 }, py: { xs: 1, sm: 1.45 } }}
             >
                 <Box
                     sx={{
@@ -191,7 +215,11 @@ const ApplicationSummaryBanner = ({
                         title={name}
                         sx={{
                             minWidth: 0,
-                            fontSize: { xs: 14, sm: 16 },
+                            color: "#000",
+                            fontSize: {
+                                xs: 14,
+                                sm: 16,
+                            },
                             fontWeight: 900,
                             lineHeight: 1.25,
                             overflow: "hidden",
@@ -199,7 +227,7 @@ const ApplicationSummaryBanner = ({
                             whiteSpace: "nowrap",
                         }}
                     >
-                        {name}
+                        Rudra Prakash Sangha
                     </Typography>
 
                     <Typography
@@ -222,7 +250,11 @@ const ApplicationSummaryBanner = ({
 
                 <Typography
                     sx={{
-                        fontSize: { xs: 10, sm: 11.5 },
+                        color: "#000",
+                        fontSize: {
+                            xs: 10,
+                            sm: 11.5,
+                        },
                         lineHeight: 1.6,
                         fontWeight: 500,
                         overflowWrap: "anywhere",
@@ -232,22 +264,56 @@ const ApplicationSummaryBanner = ({
                 </Typography>
 
                 <Typography
-                    component="div"
                     sx={{
                         mt: 0.5,
-                        fontSize: { xs: 10, sm: 11.5 },
+                        color: "#000",
+                        fontSize: {
+                            xs: 10,
+                            sm: 11.5,
+                        },
                         lineHeight: 1.65,
                         fontWeight: 800,
                         overflowWrap: "anywhere",
                     }}
                 >
-                    Product: <Box component="span">{productName}</Box>
-                    {" / "}Policy Term: <Box component="span">{policyTerm}</Box>
-                    {" / "}Premium Term: <Box component="span">{premiumTerm}</Box>
+                    <Box
+                        component="span"
+                        sx={{
+                            color: "#000",
+                            fontWeight: 700,
+                        }}
+                    >
+                        {productName}
+                    </Box>
+                    {" / "}
+                    Channel:{" "}
+                    <Box
+                        component="span"
+                        sx={{
+                            color: "#000",
+                            fontWeight: 700,
+                        }}
+                    >
+                        Agency
+                    </Box>
                     {coverageItems.map((item) => (
-                        <Box component="span" key={item} sx={{ fontWeight: 700 }}>
+                        <Box
+                            component="span"
+                            key={item}
+                            sx={{
+                                color: "#000",
+                                fontWeight: 700,
+                            }}
+                        >
                             {" / "}
                             {item}
+                        </Box>
+                    ))}
+                    {" / "}
+                    {riderSummaries.map((rider, index) => (
+                        <Box component="span" key={`${rider.name}-${index}`}>
+                            {rider.name} - SA ₹{rider.sumAssured}
+                            {index < riderSummaries.length - 1 ? " / " : ""}
                         </Box>
                     ))}
                 </Typography>
@@ -258,33 +324,23 @@ const ApplicationSummaryBanner = ({
                         display: "flex",
                         alignItems: "flex-start",
                         gap: 0.35,
+                        flexWrap: "wrap",
                     }}
                 >
                     <Typography
+                        component="span"
                         sx={{
-                            flexShrink: 0,
-                            fontSize: { xs: 10, sm: 11.5 },
-                            lineHeight: 1.65,
-                            fontWeight: 800,
-                        }}
-                    >
-                        Riders:
-                    </Typography>
-
-                    <Typography
-                        sx={{
-                            minWidth: 0,
-                            fontSize: { xs: 10, sm: 11.5 },
-                            lineHeight: 1.65,
-                            fontWeight: 600,
+                            color: "#000",
+                            fontSize: {
+                                xs: 10,
+                                sm: 11.5,
+                            },
+                            lineHeight: 1.6,
+                            fontWeight: 500,
                             overflowWrap: "anywhere",
                         }}
                     >
-                        {riderSummaries.length > 0
-                            ? riderSummaries
-                                .map((rider) => `${rider.name} - SA ${rider.sumAssured}`)
-                                .join(" / ")
-                            : "No riders"}
+                        {parameters || "-"}
                     </Typography>
                 </Box>
             </Box>
@@ -292,31 +348,31 @@ const ApplicationSummaryBanner = ({
     );
 };
 
-const summaryActionSx = {
-    minWidth: "auto",
-    px: 1.4,
-    py: 0.55,
-    border: "1px solid #E45F14",
-    borderRadius: "18px",
-    bgcolor: "#FFF4EC",
-    color: "#A92129",
-    fontSize: { xs: 10, sm: 11 },
-    fontWeight: 900,
-    lineHeight: 1.2,
-    textTransform: "none",
-    whiteSpace: "nowrap",
-    boxShadow: "0 2px 7px rgba(169,33,41,.12)",
-    "& .MuiButton-startIcon": {
-        mr: 0.55,
-        ml: 0,
-    },
-    "&:hover": {
-        borderColor: "#C83C2F",
-        bgcolor: "#FFEAD7",
-        boxShadow: "0 3px 9px rgba(169,33,41,.18)",
-        transform: "translateY(-1px)",
-    },
-} as const;
+// const summaryActionSx = {
+//     minWidth: "auto",
+//     px: 1.4,
+//     py: 0.55,
+//     border: "1px solid #E45F14",
+//     borderRadius: "18px",
+//     bgcolor: "#FFF4EC",
+//     color: "#A92129",
+//     fontSize: { xs: 10, sm: 11 },
+//     fontWeight: 900,
+//     lineHeight: 1.2,
+//     textTransform: "none",
+//     whiteSpace: "nowrap",
+//     boxShadow: "0 2px 7px rgba(169,33,41,.12)",
+//     "& .MuiButton-startIcon": {
+//         mr: 0.55,
+//         ml: 0,
+//     },
+//     "&:hover": {
+//         borderColor: "#C83C2F",
+//         bgcolor: "#FFEAD7",
+//         boxShadow: "0 3px 9px rgba(169,33,41,.18)",
+//         transform: "translateY(-1px)",
+//     },
+// } as const;
 
 const MAS = ({
     stickyTop = 72,
@@ -335,14 +391,14 @@ const MAS = ({
     const applicationOverview = toRecord(source.applicationOverview);
     const masDetails = toRecord(source.masDetails);
 
-    const premiumDebitDate = displayText(
+    const premiumDebitDate = toDateInputValue(
         firstValue(
             masDetails.dateOfPremiumDebit,
             source.dateOfPremiumDebit,
             applicationOverview.dateOfPremiumDebit,
         ),
     );
-    const frontlineEmailDate = displayText(
+    const frontlineEmailDate = toDateInputValue(
         firstValue(
             masDetails.dateOfEmailReceivedFromFrontline,
             source.dateOfEmailReceivedFromFrontline,
@@ -355,6 +411,16 @@ const MAS = ({
             source.eopsReferenceNumber,
             applicationOverview.eopsReferenceNumber,
         ),
+    );
+
+    const [dateOfPremiumDebit, setDateOfPremiumDebit] = useState(
+        premiumDebitDate,
+    );
+    const [dateOfEmailReceived, setDateOfEmailReceived] = useState(
+        frontlineEmailDate,
+    );
+    const [eopsReference, setEopsReference] = useState(
+        eopsReferenceNumber === "-" ? "" : eopsReferenceNumber,
     );
 
     const members = Array.isArray(source.summary)
@@ -425,6 +491,23 @@ const MAS = ({
         .filter((value) => value !== "-")
         .join(" / ");
 
+    const parameters = [
+        "TSA - ₹10,00,000",
+        "TRSA - ₹5,00,000",
+        "TPSA - ₹10,00,000",
+        "TFSA - ₹10,00,000",
+        "TSSA - ₹10,00,000",
+        "ADBR TSA - ₹5,00,000",
+        "ATPD TSA - ₹5,00,000",
+        "CI Rider TSA - ₹3,00,000",
+        "CI Rider TRSA - ₹3,00,000",
+        "WOP TSA - ₹10,00,000",
+        "BTBB TSA - ₹5,00,000",
+        "Total Premium - ₹10,000",
+    ]
+        .filter((value) => value !== "-")
+        .join(" / ");
+
     const riderSummaries: RiderSummary[] = riders
         .map((rider, index) => ({
             id: String(firstValue(rider.id, rider.productCode, index)),
@@ -433,6 +516,15 @@ const MAS = ({
             ),
             sumAssured: formatCurrency(
                 firstValue(rider.sumAssured, rider.tsa, rider.appliedSA),
+            ),
+            policyTerm: displayText(
+                firstValue(rider.policyTerm, rider.term),
+            ),
+            premiumTerm: displayText(
+                firstValue(rider.premiumPaymentTerm, rider.ppt),
+            ),
+            premium: formatCurrency(
+                firstValue(rider.premium, rider.modalPremium, rider.annualPremium),
             ),
         }))
         .filter((rider) => rider.name !== "-");
@@ -465,6 +557,7 @@ const MAS = ({
                     ),
                 )}
                 personalSummary={personalSummary}
+                parameters={parameters}
                 productName={displayText(
                     firstValue(
                         baseProduct.productName,
@@ -528,11 +621,12 @@ const MAS = ({
                     ),
                 )}
                 riderSummaries={riderSummaries}
+                onViewRiders={() => undefined}
             />
-
+            {/* 
             <Box sx={{ my: 1 }}>
                 <RequirementManagement />
-            </Box>
+            </Box> */}
 
             <Box
                 sx={{
@@ -542,7 +636,7 @@ const MAS = ({
                     gridTemplateColumns: {
                         xs: "minmax(0, 1fr)",
                         sm: "repeat(2, minmax(0, 1fr))",
-                        lg: "repeat(4, minmax(0, 1fr)) auto",
+                        lg: "repeat(3, minmax(0, 1fr))",
                     },
                     gap: 1.25,
                     alignItems: "center",
@@ -553,52 +647,113 @@ const MAS = ({
                     boxShadow: "0 2px 7px rgba(60, 42, 35, 0.05)",
                 }}
             >
-
                 <Box>
-                    <Typography sx={{ color: "#444", fontSize: 12, fontWeight: 400 }}>
+
+                    <Typography>
                         Date of Premium Debit
                     </Typography>
-                    <Typography sx={{ color: "#161616", fontWeight: 700, fontSize: 10 }}>
-                        -
-                    </Typography>
+                    <TextField
+                        type="date"
+                        // label="Date of Premium Debit"
+                        value={dateOfPremiumDebit}
+                        onChange={(event) => setDateOfPremiumDebit(event.target.value)}
+                        size="small"
+                        fullWidth
+                        disabled={readOnly || submitInProgress}
+                        InputLabelProps={{ shrink: true }}
+                    />
                 </Box>
+
                 <Box>
-                    <Typography sx={{ color: "#444", fontSize: 12, fontWeight: 400 }}>
+
+                    <Typography>
                         Date of Email received from Frontline
                     </Typography>
-                    <Typography sx={{ color: "#161616", fontWeight: 700, fontSize: 10 }}>
-                        -
-                    </Typography>
+                    <TextField
+                        type="date"
+                        // label="Date of Email received from Frontline"
+                        value={dateOfEmailReceived}
+                        onChange={(event) => setDateOfEmailReceived(event.target.value)}
+                        size="small"
+                        fullWidth
+                        disabled={readOnly || submitInProgress}
+                        InputLabelProps={{ shrink: true }}
+                    />
                 </Box>
-                <Box>
-                    <Typography sx={{ color: "#444", fontSize: 12, fontWeight: 400 }}>
-                        Eops Reference number
-                    </Typography>
-                    <Typography sx={{ color: "#161616", fontWeight: 700, fontSize: 10 }}>
-                        -
-                    </Typography>
-                </Box>
-                <TextField
-                    select
-                    label="MAS Decision"
-                    value={masDecision}
-                    onChange={(event) => setMasDecision(event.target.value)}
+
+                {/* <TextField
+                    type="date"
+                    label="Date of Email received from Frontline"
+                    value={dateOfEmailReceived}
+                    onChange={(event) => setDateOfEmailReceived(event.target.value)}
                     size="small"
                     fullWidth
                     disabled={readOnly || submitInProgress}
-                >
-                    {MAS_DECISION_OPTIONS.map((option) => (
-                        <MenuItem key={option} value={option}>
-                            {option}
-                        </MenuItem>
-                    ))}
-                </TextField>
+                    InputLabelProps={{ shrink: true }}
+                /> */}
 
+
+                <Box>
+
+                    <Typography>
+                        Eops Reference number
+                    </Typography>
+
+                    <TextField
+                        // label="Eops Reference number"
+                        value={eopsReference}
+                        onChange={(event) => setEopsReference(event.target.value)}
+                        size="small"
+                        fullWidth
+                        disabled={readOnly || submitInProgress}
+                    />
+                </Box>
+
+                <Box>
+
+                    <Typography>
+                        MAS Decision
+                    </Typography>
+                    <TextField
+                        select
+                        // label="Select"
+                        placeholder="Select"
+                        value={masDecision}
+                        onChange={(event) => setMasDecision(event.target.value)}
+                        size="small"
+                        fullWidth
+                        disabled={readOnly || submitInProgress}
+                    >
+                        {MAS_DECISION_OPTIONS.map((option) => (
+                            <MenuItem key={option} value={option}>
+                                {option}
+                            </MenuItem>
+                        ))}
+                    </TextField>
+
+                </Box>
+                  <Box>
+
+                    <Typography>
+                        Remarks
+                    </Typography>
+
+                    <TextField
+                        // label="Eops Reference number"
+                        value={eopsReference}
+                        onChange={(event) => setEopsReference(event.target.value)}
+                        size="small"
+                        fullWidth
+                        disabled={readOnly || submitInProgress}
+                    />
+                </Box>
+            </Box>
                 <Box
                     sx={{
                         display: "flex",
                         justifyContent: "center",
                         alignItems: "center",
+                        mt:1
                     }}
                 >
                     <CustomButton
@@ -610,7 +765,6 @@ const MAS = ({
                         {submitInProgress ? "Submitting..." : "Submit"}
                     </CustomButton>
                 </Box>
-            </Box>
 
 
             {/* </CustomAccordion> */}

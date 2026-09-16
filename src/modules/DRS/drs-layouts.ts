@@ -262,6 +262,9 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
   GROUP_REF_CMO_TASK:[
     "quickLinks"
   ],
+  MAS_TASK:[
+    "quickLinks"
+  ],
   RETAIL_REINSTATEMENT_SUW: [
     "applicationOverview",
     "postIssuanceServicing",

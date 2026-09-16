@@ -377,7 +377,7 @@ const QuickLinks = ({
                     : undefined,
             },
         ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" ? [
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK" ? [
             {
                 label: "Previous Policies",
                 path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "",
@@ -387,7 +387,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK"? [
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK"? [
             {
                 label: "Open Tasks",
                 path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "",
@@ -397,7 +397,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" ? [
+        ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK" ? [
             {
                 label: "Risk Details",
                 path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "",
@@ -436,7 +436,7 @@ const QuickLinks = ({
             ]
             : []),
 
-        ...(roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "GROUP_CMO_TASK"  ? [
+        ...(roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "GROUP_CMO_TASK" && roleType !== "MAS_TASK" ? [
             {
                 label: "Raise Grievance",
                 path: "",

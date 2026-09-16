@@ -46,32 +46,6 @@ import ViewFinancial from "./Financial/ViewFinancial";
 /* TYPES                                                                      */
 /* -------------------------------------------------------------------------- */
 
-const summaryActionSx = {
-    minWidth: "auto",
-    px: 1.4,
-    py: 0.55,
-    border: "1px solid #E45F14",
-    borderRadius: "18px",
-    bgcolor: "#FFF4EC",
-    color: "#A92129",
-    fontSize: { xs: 10, sm: 11 },
-    fontWeight: 900,
-    lineHeight: 1.2,
-    textTransform: "none",
-    whiteSpace: "nowrap",
-    boxShadow: "0 2px 7px rgba(169,33,41,.12)",
-    "& .MuiButton-startIcon": {
-        mr: 0.55,
-        ml: 0,
-    },
-    "&:hover": {
-        borderColor: "#C83C2F",
-        bgcolor: "#FFEAD7",
-        boxShadow: "0 3px 9px rgba(169,33,41,.18)",
-        transform: "translateY(-1px)",
-    },
-} as const;
-
 interface SrUWDrsProps {
     onBackToInbox?: () => void;
     onBackToSummary?: () => void;
@@ -127,8 +101,8 @@ type RiskStatus = "clear" | "attention" | "unavailable";
 const UW_DECISION_HISTORY_COLUMNS: Column<UwDecisionHistoryRow>[] = [
     { key: "userName", header: "User Name", width: "12%" },
     { key: "userRole", header: "User Role", width: "10%" },
-    { key: "firstUwDecision", header: "1st UW Decision", width: "12%" },
-    { key: "firstUwRemarks", header: "1st UW Remarks", width: "19%" },
+    { key: "firstUwDecision", header: "UW Decision", width: "12%" },
+    { key: "firstUwRemarks", header: "UW Remarks", width: "19%" },
     { key: "date", header: "Date", width: "11%" },
     { key: "financialDecision", header: "Financial Decision", width: "12%" },
     { key: "medicalDecision", header: "Medical Decision", width: "12%" },
@@ -138,10 +112,10 @@ const UW_DECISION_HISTORY_COLUMNS: Column<UwDecisionHistoryRow>[] = [
 const STATIC_UW_DECISION_HISTORY: UwDecisionHistoryRow[] = [
     {
         userName: "Ananya Sharma",
-        userRole: "Underwriter",
-        firstUwDecision: "Accept",
-        firstUwRemarks: "Case referred for HOD review due to the overall risk assessment.",
-        date: "08 Sep 2026",
+        userRole: "CUW",
+        firstUwDecision: "Standard",
+        firstUwRemarks: "Case referred for Sr.UW review due to the overall risk assessment.",
+        date: "08 Sep 2026, 11:15:48 am",
         financialDecision: "Standard",
         medicalDecision: "Standard",
         smokerStatus: "Non-Smoker",
@@ -291,7 +265,6 @@ const GRIEVANCE_HISTORY_COLUMNS: Column<GrievanceHistoryRow>[] = [
 
 const MEDICAL_FIELDS: FieldConfig[] = [
     ["brePhysicalMedicalDecision", "Physical Medical Decision"],
-    ["brePhysicalMedicalRemark", "Physical Medical Remark"],
     ["breTeleVideoMerDecision", "Tele/Video MER Decision"],
     ["breTeleVideoMerRemark", "Tele/Video MER Remark"],
     ["munichReMedicalDecision", "MunichRe Medical Decision"],
@@ -301,12 +274,14 @@ const MEDICAL_FIELDS: FieldConfig[] = [
 
 const FINANCIAL_FIELDS: FieldConfig[] = [
     ["breFinancialDecision", "Financial Decision"],
-    ["breRemark", "Financial Remark"],
     ["financialEligibility", "Financial Eligibility"],
     ["derivedIncome", "Derived Income"],
+    ["verifiedIncome", "Verified Income"],
     ["counterOfferValue", "Counter Offer Value"],
     ["additionalSA", "Additional SA"],
     ["biuFinancialStatus", "BIU Financial Status"],
+    ["finalBureauIncome", "Final Bureau Income"],
+    ["reinsurerCase", "Reinsurer Case "],
 ];
 
 const OTHER_RISK_FIELDS: FieldConfig[] = [
@@ -328,6 +303,11 @@ const OTHER_RISK_FIELDS: FieldConfig[] = [
     ["faceMatchScore", "Face Match Score"],
     ["tobacco", "Tobacco"],
     ["narcotics", "Narcotics"],
+    ["thirdPartyPayment", "Third Party Payment"],
+    ["pbRiskResponse", "Policy Bazar Risk Response"],
+    ["adverseACRrange", "Adverse ACR"],
+    ["acceptable", "Distance < acceptable range"],
+    ["adverseOID", "Adverse App OID"],
 ];
 
 const RISK_TONES: Record<
@@ -657,7 +637,10 @@ const buildRiskCards = (applicant: UnknownRecord): RiskCard[] => {
             : [];
 
     const medicalRisk = getFirstRisk(analyticsItems, "medicalRisk");
-    const financialRisk = getFirstRisk(analyticsItems, "financialRisk");
+    const financialRisk = {
+        ...getFirstRisk(analyticsItems, "financialRisk"),
+        verifiedIncome: "₹16,00,000",
+    };
     const otherRisk = getFirstRisk(analyticsItems, "otherRisk");
 
     const medicalStatus = getMedicalRiskStatus(medicalRisk);
@@ -670,8 +653,7 @@ const buildRiskCards = (applicant: UnknownRecord): RiskCard[] => {
             label: "Financial",
             value: text(
                 firstValue(
-                    financialRisk.breFinancialDecision,
-                    financialRisk.financialEligibility,
+                    financialRisk.verifiedIncome,
                 ),
             ),
             status: financialStatus,
@@ -807,7 +789,7 @@ const DashboardCard = ({
     </Box>
 );
 
-const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) => (
+const SdtReadonlyRow = ({ decision, remarks }: SdtReadonlyRowProps) => (
     <Box
         role="group"
         aria-label="SDT decision details"
@@ -830,8 +812,8 @@ const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) =
         }}
     >
         {[
-            { label: "SDT Decision", value: decision },
-            { label: "SDT Remarks", value: remarks },
+            { label: "BRE Overall Decision", value: decision },
+            { label: "BRE Overall Remarks", value: remarks },
             // { label: "SDT Timestamp", value: timestamp },
         ].map(({ label, value }, index) => (
             <Box
@@ -885,6 +867,7 @@ interface ApplicationSummaryBannerProps {
     name: string;
     appNo: string;
     personalSummary: string;
+    parameters: string;
     productName: string;
     policyTerm: string;
     premiumTerm: string;
@@ -907,16 +890,17 @@ const ApplicationSummaryBanner = ({
     image,
     name,
     personalSummary,
+    parameters,
     productName,
-    policyTerm,
-    premiumTerm,
+    // policyTerm,
+    // premiumTerm,
     sumAssured,
     tsa,
     tfsa,
     tssa,
     tpsa,
     riderSummaries,
-    onViewRiders,
+    // onViewRiders,
 }: ApplicationSummaryBannerProps) => {
     const coverageItems = [
         `SA - ${sumAssured}`,
@@ -1024,7 +1008,7 @@ const ApplicationSummaryBanner = ({
                             whiteSpace: "nowrap",
                         }}
                     >
-                        {name}
+                        Rudra Prakash Sangha
                     </Typography>
 
                     <Typography
@@ -1084,7 +1068,6 @@ const ApplicationSummaryBanner = ({
                         overflowWrap: "anywhere",
                     }}
                 >
-                    Product:{" "}
                     <Box
                         component="span"
                         sx={{
@@ -1095,7 +1078,7 @@ const ApplicationSummaryBanner = ({
                         {productName}
                     </Box>
                     {" / "}
-                    Policy Term:{" "}
+                    Channel:{" "}
                     <Box
                         component="span"
                         sx={{
@@ -1103,18 +1086,7 @@ const ApplicationSummaryBanner = ({
                             fontWeight: 700,
                         }}
                     >
-                        {policyTerm}
-                    </Box>
-                    {" / "}
-                    Premium Term:{" "}
-                    <Box
-                        component="span"
-                        sx={{
-                            color: "#000",
-                            fontWeight: 700,
-                        }}
-                    >
-                        {premiumTerm}
+                        Agency
                     </Box>
                     {coverageItems.map((item) => (
                         <Box
@@ -1129,10 +1101,17 @@ const ApplicationSummaryBanner = ({
                             {item}
                         </Box>
                     ))}
+                    {" / "}
+                    {riderSummaries.map((rider, index) => (
+                        <Box component="span" key={`${rider.name}-${index}`}>
+                            {rider.name} - SA ₹{rider.sumAssured}
+                            {index < riderSummaries.length - 1 ? " / " : ""}
+                        </Box>
+                    ))}
                 </Typography>
 
                 {/* ================================================================ */}
-                {/* RIDERS                                                            */}
+                {/* ELIGIBILTY PARAMETERS                                            */}
                 {/* ================================================================ */}
 
                 <Box
@@ -1145,82 +1124,20 @@ const ApplicationSummaryBanner = ({
                     }}
                 >
                     <Typography
+                        component="span"
                         sx={{
                             color: "#000",
                             fontSize: {
                                 xs: 10,
                                 sm: 11.5,
                             },
-                            lineHeight: 1.65,
-                            fontWeight: 800,
+                            lineHeight: 1.6,
+                            fontWeight: 500,
+                            overflowWrap: "anywhere",
                         }}
                     >
-                        Riders:
+                        {parameters || "-"}
                     </Typography>
-
-                    {riderSummaries.length > 0 ? (
-                        <Typography
-                            sx={{
-                                flex: 1,
-                                minWidth: 0,
-                                color: "#000",
-                                fontSize: {
-                                    xs: 10,
-                                    sm: 11.5,
-                                },
-                                lineHeight: 1.65,
-                                fontWeight: 600,
-                                overflowWrap: "anywhere",
-                            }}
-                        >
-                            {riderSummaries.map((rider, index) => (
-                                <Box component="span" key={`${rider.name}-${index}`}>
-                                    {rider.name} - SA ₹{rider.sumAssured}
-                                    {index < riderSummaries.length - 1 ? " / " : ""}
-                                </Box>
-                            ))}
-                        </Typography>
-                    ) : (
-                        <Typography
-                            sx={{
-                                color: "#000",
-                                fontSize: {
-                                    xs: 10,
-                                    sm: 11.5,
-                                },
-                                lineHeight: 1.65,
-                                fontWeight: 600,
-                            }}
-                        >
-                            No riders
-                        </Typography>
-                    )}
-
-                    {riderSummaries.length > 0 && (
-                        <Box
-                            component="button"
-                            type="button"
-                            onClick={onViewRiders}
-                            sx={{
-                                border: 0,
-                                p: 0,
-                                ml: 0.5,
-                                mt: 0.15,
-                                bgcolor: "transparent",
-                                color: "#FFEAD7",
-                                fontSize: 9,
-                                fontWeight: 900,
-                                cursor: "pointer",
-                                fontFamily: "inherit",
-                                whiteSpace: "nowrap",
-                                "&:hover": {
-                                    textDecoration: "underline",
-                                },
-                            }}
-                        >
-                            View details <KeyRightArrowIcon />
-                        </Box>
-                    )}
                 </Box>
             </Box>
         </Box>
@@ -1234,15 +1151,18 @@ const ApplicationSummaryBanner = ({
 const RiskAnalyticsCard = ({
     card,
     onClick,
+    onArrowClick,
 }: {
     card: RiskCard;
     onClick: () => void;
+    onArrowClick: () => void;
 }) => {
     const tone = RISK_TONES[card.status];
     const icon = "";
+    const initialDetailLimit = card.id === "financial" ? 4 : 3;
     const visibleDetails = card.details
         .filter((detail) => text(detail.value) !== "-")
-        .slice(0, 3);
+        .slice(0, initialDetailLimit);
 
     return (
         <Box
@@ -1329,9 +1249,18 @@ const RiskAnalyticsCard = ({
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.7, mt: 1 }}>
                 <Box
+                    component="button"
+                    type="button"
+                    aria-label={`View ${card.label} risk details`}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onArrowClick();
+                    }}
+                    onKeyDown={(event) => event.stopPropagation()}
                     sx={{
                         width: 34,
                         height: 28,
+                        p: 0,
                         display: "grid",
                         placeItems: "center",
                         border: "1px solid #E1D8D2",
@@ -1339,6 +1268,12 @@ const RiskAnalyticsCard = ({
                         bgcolor: "#FFF8F3",
                         color: "#A92129",
                         fontSize: 13,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        "&:hover": {
+                            borderColor: "#E45F14",
+                            bgcolor: "#FFEAD7",
+                        },
                     }}
                 >
                     <KeyRightArrowIcon />
@@ -1958,30 +1893,34 @@ const SrUWDrs = ({
     /* PERSONAL SUMMARY FOR BANNER                                             */
     /* ------------------------------------------------------------------------ */
 
-    const annualIncomeForBanner = currency(
-        firstValue(
-            finance.annualIncome,
-            financialDetails.annualIncome,
-            personalDetails.netIncomeAmt,
-        ),
-    );
-
     const personalSummary = [
-        text(personal.maritalStatus ?? applicantDetails.maritalStatus),
+        "Life Assured 1",
+        "Married",
+        "Male",
+        "40",
+        "Graduate",
+        "Salaried",
+        "₹10,00,000",
+        "Pune, Maharashtra",
+        "Indian",
+        "India",
+    ]
+        .filter((value) => value !== "-")
+        .join(" / ");
 
-        age ? text(age) : "-",
-
-        text(personal.gender ?? applicantDetails.gender),
-
-        text(personal.education ?? applicantDetails.education),
-
-        annualIncomeForBanner !== "-" ? `${annualIncomeForBanner} p.a.` : "-",
-
-        address,
-
-        text(personal.nationality ?? applicantDetails.nationality),
-
-        text(personal.residentStatus ?? personal.countryOfResidence),
+    const parameters = [
+        "TSA - ₹10,00,000",
+        "TRSA - ₹5,00,000",
+        "TPSA - ₹10,00,000",
+        "TFSA - ₹10,00,000",
+        "TSSA - ₹10,00,000",
+        "ADBR TSA - ₹5,00,000",
+        "ATPD TSA - ₹5,00,000",
+        "CI Rider TSA - ₹3,00,000",
+        "CI Rider TRSA - ₹3,00,000",
+        "WOP TSA - ₹10,00,000",
+        "BTBB TSA - ₹5,00,000",
+        "Total Premium - ₹10,000",
     ]
         .filter((value) => value !== "-")
         .join(" / ");
@@ -2487,6 +2426,7 @@ const SrUWDrs = ({
                         name={name}
                         appNo={appNo}
                         personalSummary={personalSummary}
+                        parameters={parameters}
                         productName={productName}
                         policyTerm={policyTerm}
                         premiumTerm={premiumTerm}
@@ -2558,14 +2498,6 @@ const SrUWDrs = ({
                             Summary
                         </Button>
                     )}
-                    <Button
-                        type="button"
-                        variant="outlined"
-                        onClick={() => setGrievanceHistoryDialogOpen(true)}
-                        sx={{ ...summaryActionSx, ml: "auto" }}
-                    >
-                        Grievance History
-                    </Button>
                 </Box>
             )}
 
@@ -3095,6 +3027,7 @@ const SrUWDrs = ({
                                                     <RiskAnalyticsCard
                                                         key={card.id}
                                                         card={card}
+                                                        onArrowClick={() => setSelectedRiskCard(card)}
                                                         onClick={() => {
                                                             if ((card.id === "medical" || card.id === "financial") && !readOnly) {
                                                                 setActiveQuickLinkPanel(null);
@@ -3901,47 +3834,52 @@ const SrUWDrs = ({
                                 onClose={() => setSelectedRiskCard(null)}
                                 title={
                                     selectedRiskCard
-                                        ? `${selectedRiskCard.label} Risk Details`
+                                        ? `${selectedRiskCard.label} Details`
                                         : "Risk Details"
                                 }
                                 maxWidth="lg"
                             >
                                 {selectedRiskCard && (
-                                    <Box
-                                        sx={{
-                                            display: "grid",
-                                            gridTemplateColumns: {
-                                                xs: "1fr",
-                                                sm: "repeat(2,1fr)",
-                                                md: "repeat(3,1fr)",
-                                                lg: "repeat(4,1fr)",
-                                            },
-                                            gap: 0.75,
-                                            minWidth: {
-                                                xs: "auto",
-                                                md: 760,
-                                            },
-                                        }}
-                                    >
-                                        {selectedRiskCard.details.map((detail) => (
-                                            <Box
-                                                key={detail.key}
-                                                sx={{
-                                                    p: 0.8,
-                                                    border: "1px solid #E3DEDB",
-                                                    borderRadius: 1,
-                                                    bgcolor: "#F8F7F6",
-                                                }}
-                                            >
-                                                <Typography
-                                                    sx={{
-                                                        color: "#827671",
-                                                        fontSize: 9,
-                                                    }}
-                                                >
-                                                    {detail.label}
-                                                </Typography>
+                                    <>
+                                        <Box
+                                            sx={{
+                                                display: "grid",
+                                                gridTemplateColumns: {
+                                                    lg: "repeat(6,1fr)",
+                                                },
+                                                gap: 0.75,
+                                                minWidth: {
+                                                    xs: "auto",
+                                                    md: 760,
+                                                },
+                                            }}
+                                        >
+                                            {selectedRiskCard.details.map((detail) => (
+                                                <Box key={detail.key} sx={{ p: 0.8 }}>
+                                                    <Typography sx={{ color: "#827671", fontSize: 11 }}>
+                                                        {detail.label}
+                                                    </Typography>
 
+                                                    <Typography
+                                                        sx={{
+                                                            mt: 0.25,
+                                                            color: "#332D2A",
+                                                            fontSize: 11,
+                                                            fontWeight: 800,
+                                                            overflowWrap: "anywhere",
+                                                        }}
+                                                    >
+                                                        {text(detail.value)}
+                                                    </Typography>
+                                                </Box>
+                                            ))}
+                                        </Box>
+
+                                        {selectedRiskCard.label === "Medical" && (
+                                            <Box sx={{ p: 0.8 }}>
+                                                <Typography sx={{ color: "#827671", fontSize: 11 }}>
+                                                    Physical Medical Remark
+                                                </Typography>
                                                 <Typography
                                                     sx={{
                                                         mt: 0.25,
@@ -3951,11 +3889,30 @@ const SrUWDrs = ({
                                                         overflowWrap: "anywhere",
                                                     }}
                                                 >
-                                                    {text(detail.value)}
+                                                    -
                                                 </Typography>
                                             </Box>
-                                        ))}
-                                    </Box>
+                                        )}
+
+                                        {selectedRiskCard.label === "Financial" && (
+                                            <Box sx={{ p: 0.8 }}>
+                                                <Typography sx={{ color: "#827671", fontSize: 11 }}>
+                                                    Financial Remark
+                                                </Typography>
+                                                <Typography
+                                                    sx={{
+                                                        mt: 0.25,
+                                                        color: "#332D2A",
+                                                        fontSize: 11,
+                                                        fontWeight: 800,
+                                                        overflowWrap: "anywhere",
+                                                    }}
+                                                >
+                                                    -
+                                                </Typography>
+                                            </Box>
+                                        )}
+                                    </>
                                 )}
                             </CustomDialog>
 
