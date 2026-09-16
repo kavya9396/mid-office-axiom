@@ -2,7 +2,9 @@ import {
     Avatar,
     Box,
     Button,
+    MenuItem,
     Pagination,
+    TextField,
     Typography,
 } from "@mui/material";
 import {
@@ -17,74 +19,49 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 // import CustomAccordion from "../../components/ui/Accordion/Accordion";
-import CustomDialog from "../../components/ui/Dialog/Dialog";
+import CustomDialog from "../../../components/ui/Dialog/Dialog";
+import CustomButton from "../../../components/ui/Button/Button";
 import CustomTable, {
     type Column,
-} from "../../components/ui/Table/Table";
-import { useAppContext } from "../../hooks/useAppContext";
+} from "../../../components/ui/Table/Table";
+import { useAppContext } from "../../../hooks/useAppContext";
 import {
     KeyRightArrowIcon,
     RefreshIcon,
     UserProfileIcon,
-} from "../../icons/Icons";
-import { getInboxPath } from "../../routes/routes";
-import { useAppSelector } from "../../store/hooks";
-import type { AppDispatch, RootState } from "../../store/store";
-import { breThunk } from "../../store/thunks/breThunk";
-import { drsThunk } from "../../store/thunks/drsThunk";
-import type { BreResponse } from "../../types/drs.types";
+} from "../../../icons/Icons";
+import { getInboxPath } from "../../../routes/routes";
+import { useAppSelector } from "../../../store/hooks";
+import type { AppDispatch, RootState } from "../../../store/store";
+import { breThunk } from "../../../store/thunks/breThunk";
+import { drsThunk } from "../../../store/thunks/drsThunk";
+import type { BreResponse } from "../../../types/drs.types";
 //import { formatDate } from "../../utils/dataFormat";
-import BreDecision from "./DRS_Accordions/BreDecision";
-import ClaimSection from "./DRS_Accordions/ClaimSection";
-import MemberSelection from "./MemberSeclection";
-import ViewMedical from "./Medical Final/ViewMedical";
-import ViewFinancial from "./Financial/ViewFinancial";
-import { centerFlex } from "../../utils/styles";
-import CustomButton from "../../components/ui/Button/Button";
+import BreDecision from ".././DRS_Accordions/BreDecision";
+import MemberSelection from ".././MemberSeclection";
+import ViewMedical from ".././Medical Final/ViewMedical";
+import ViewFinancial from ".././Financial/ViewFinancial";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
 /* -------------------------------------------------------------------------- */
 
-const summaryActionSx = {
-    minWidth: "auto",
-    px: 1.4,
-    py: 0.55,
-    border: "1px solid #E45F14",
-    borderRadius: "18px",
-    bgcolor: "#FFF4EC",
-    color: "#A92129",
-    fontSize: { xs: 10, sm: 11 },
-    fontWeight: 900,
-    lineHeight: 1.2,
-    textTransform: "none",
-    whiteSpace: "nowrap",
-    boxShadow: "0 2px 7px rgba(169,33,41,.12)",
-    "& .MuiButton-startIcon": {
-        mr: 0.55,
-        ml: 0,
-    },
-    "&:hover": {
-        borderColor: "#C83C2F",
-        bgcolor: "#FFEAD7",
-        boxShadow: "0 3px 9px rgba(169,33,41,.18)",
-        transform: "translateY(-1px)",
-    },
-} as const;
-
-interface ClaimAuditProps {
+interface GroupHoDProps {
     onBackToInbox?: () => void;
+    onBackToSummary?: () => void;
     initialMemberIndex?: number;
     showMemberSelectionInitially?: boolean;
     readOnly?: boolean;
     showRiskAnalytics?: boolean;
+    uwDecision?: ReactNode;
+    quickLinks?: ReactNode;
     requirementManagement?: ReactNode;
+    decisionHistory?: ReactNode;
     stickyTop?: number | string;
     grievanceHistoryPaginationDisabled?: boolean;
-    data?: unknown;
 }
 
-type QuickLinkPanel = "summary" | "requirementManagement";
+type QuickLinkPanel = "summary" | "requirementManagement" | "decisionHistory";
 
 type RequirementStatusFilter =
     | "All"
@@ -106,9 +83,52 @@ interface CaseSnapshotRowProps {
     stickyTop?: number | string;
 }
 
+interface UwDecisionHistoryRow {
+    userName: string;
+    userRole: string;
+    firstUwDecision: string;
+    firstUwRemarks: string;
+    date: string;
+    financialDecision: string;
+    medicalDecision: string;
+    smokerStatus: string;
+}
+
 type UnknownRecord = Record<string, unknown>;
 
 type RiskStatus = "clear" | "attention" | "unavailable";
+
+const UW_DECISION_HISTORY_COLUMNS: Column<UwDecisionHistoryRow>[] = [
+    { key: "userName", header: "User Name", width: "12%" },
+    { key: "userRole", header: "User Role", width: "10%" },
+    { key: "firstUwDecision", header: "UW Decision", width: "12%" },
+    { key: "firstUwRemarks", header: "UW Remarks", width: "19%" },
+    { key: "date", header: "Date", width: "11%" },
+    { key: "financialDecision", header: "Financial Decision", width: "12%" },
+    { key: "medicalDecision", header: "Medical Decision", width: "12%" },
+    { key: "smokerStatus", header: "Smoker Status", width: "12%" },
+];
+
+const STATIC_UW_DECISION_HISTORY: UwDecisionHistoryRow[] = [
+    {
+        userName: "Ananya Sharma",
+        userRole: "Sr. UW",
+        firstUwDecision: "Standard",
+        firstUwRemarks: "Case referred for HOD review due to the overall risk assessment.",
+        date: "08 Sep 2026, 11:15:48 am",
+        financialDecision: "Standard",
+        medicalDecision: "Standard",
+        smokerStatus: "Non-Smoker",
+    }
+];
+
+const HOD_DECISION_OPTIONS = [
+    "Agree",
+    "Disagree",
+    "Refer to HO CMO",
+    "Refer back to last UW",
+    "Refer to IT"
+] as const;
 
 const REQUIREMENT_STATUS_FILTERS: RequirementStatusFilter[] = [
     "All",
@@ -244,7 +264,6 @@ const GRIEVANCE_HISTORY_COLUMNS: Column<GrievanceHistoryRow>[] = [
 
 const MEDICAL_FIELDS: FieldConfig[] = [
     ["brePhysicalMedicalDecision", "Physical Medical Decision"],
-    ["brePhysicalMedicalRemark", "Physical Medical Remark"],
     ["breTeleVideoMerDecision", "Tele/Video MER Decision"],
     ["breTeleVideoMerRemark", "Tele/Video MER Remark"],
     ["munichReMedicalDecision", "MunichRe Medical Decision"],
@@ -254,12 +273,14 @@ const MEDICAL_FIELDS: FieldConfig[] = [
 
 const FINANCIAL_FIELDS: FieldConfig[] = [
     ["breFinancialDecision", "Financial Decision"],
-    ["breRemark", "Financial Remark"],
     ["financialEligibility", "Financial Eligibility"],
     ["derivedIncome", "Derived Income"],
+    ["verifiedIncome", "Verified Income"],
     ["counterOfferValue", "Counter Offer Value"],
     ["additionalSA", "Additional SA"],
     ["biuFinancialStatus", "BIU Financial Status"],
+    ["finalBureauIncome", "Final Bureau Income"],
+    ["reinsurerCase", "Reinsurer Case "],
 ];
 
 const OTHER_RISK_FIELDS: FieldConfig[] = [
@@ -281,6 +302,11 @@ const OTHER_RISK_FIELDS: FieldConfig[] = [
     ["faceMatchScore", "Face Match Score"],
     ["tobacco", "Tobacco"],
     ["narcotics", "Narcotics"],
+    ["thirdPartyPayment", "Third Party Payment"],
+    ["pbRiskResponse", "Policy Bazar Risk Response"],
+    ["adverseACRrange", "Adverse ACR"],
+    ["acceptable", "Distance < acceptable range"],
+    ["adverseOID", "Adverse App OID"],
 ];
 
 const RISK_TONES: Record<
@@ -336,6 +362,31 @@ const text = (value: unknown): string => {
     }
 
     return String(value);
+};
+
+const formatMemberType = (value: unknown, index: number): string => {
+    const memberType = String(value ?? "").trim();
+
+    if (!memberType) {
+        return `Member ${index + 1}`;
+    }
+
+    const lifeAssuredMatch =
+        memberType.match(/^life\s*assured\s*(\d+)$/i) ??
+        memberType.match(/^lifeassured(\d+)$/i);
+
+    if (lifeAssuredMatch) {
+        return `Life Assured ${lifeAssuredMatch[1]}`;
+    }
+
+    if (/^proposer$/i.test(memberType)) {
+        return "Proposer";
+    }
+
+    return memberType
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/[_-]+/g, " ")
+        .replace(/\b\w/g, (character) => character.toUpperCase());
 };
 
 const firstValue = (...values: unknown[]): unknown =>
@@ -585,7 +636,10 @@ const buildRiskCards = (applicant: UnknownRecord): RiskCard[] => {
             : [];
 
     const medicalRisk = getFirstRisk(analyticsItems, "medicalRisk");
-    const financialRisk = getFirstRisk(analyticsItems, "financialRisk");
+    const financialRisk = {
+        ...getFirstRisk(analyticsItems, "financialRisk"),
+        verifiedIncome: "₹16,00,000",
+    };
     const otherRisk = getFirstRisk(analyticsItems, "otherRisk");
 
     const medicalStatus = getMedicalRiskStatus(medicalRisk);
@@ -598,8 +652,7 @@ const buildRiskCards = (applicant: UnknownRecord): RiskCard[] => {
             label: "Financial",
             value: text(
                 firstValue(
-                    financialRisk.breFinancialDecision,
-                    financialRisk.financialEligibility,
+                    financialRisk.verifiedIncome,
                 ),
             ),
             status: financialStatus,
@@ -735,7 +788,7 @@ const DashboardCard = ({
     </Box>
 );
 
-const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) => (
+const SdtReadonlyRow = ({ decision, remarks }: SdtReadonlyRowProps) => (
     <Box
         role="group"
         aria-label="SDT decision details"
@@ -835,16 +888,18 @@ interface ApplicationSummaryBannerProps {
 const ApplicationSummaryBanner = ({
     image,
     name,
-    appNo,
     personalSummary,
     parameters,
     productName,
+    // policyTerm,
+    // premiumTerm,
     sumAssured,
     tsa,
     tfsa,
     tssa,
     tpsa,
     riderSummaries,
+    // onViewRiders,
 }: ApplicationSummaryBannerProps) => {
     const coverageItems = [
         `SA - ${sumAssured}`,
@@ -952,7 +1007,7 @@ const ApplicationSummaryBanner = ({
                             whiteSpace: "nowrap",
                         }}
                     >
-                        {name}
+                        Rudra Prakash Sangha
                     </Typography>
 
                     <Typography
@@ -1000,50 +1055,89 @@ const ApplicationSummaryBanner = ({
                 {/* ================================================================ */}
 
                 <Typography
-                    component="div"
                     sx={{
                         mt: 0.5,
                         color: "#000",
-                        fontSize: { xs: 10, sm: 11.5 },
+                        fontSize: {
+                            xs: 10,
+                            sm: 11.5,
+                        },
                         lineHeight: 1.65,
                         fontWeight: 800,
                         overflowWrap: "anywhere",
                     }}
                 >
-                    <Box component="span" sx={{ fontWeight: 700 }}>
+                    <Box
+                        component="span"
+                        sx={{
+                            color: "#000",
+                            fontWeight: 700,
+                        }}
+                    >
                         {productName}
                     </Box>
-                    {" / "}Channel:{" "}
-                    <Box component="span" sx={{ fontWeight: 700 }}>
+                    {" / "}
+                    Channel:{" "}
+                    <Box
+                        component="span"
+                        sx={{
+                            color: "#000",
+                            fontWeight: 700,
+                        }}
+                    >
                         Agency
                     </Box>
                     {coverageItems.map((item) => (
-                        <Box component="span" key={item} sx={{ fontWeight: 700 }}>
+                        <Box
+                            component="span"
+                            key={item}
+                            sx={{
+                                color: "#000",
+                                fontWeight: 700,
+                            }}
+                        >
                             {" / "}
                             {item}
                         </Box>
                     ))}
+                    {" / "}
                     {riderSummaries.map((rider, index) => (
                         <Box component="span" key={`${rider.name}-${index}`}>
-                            {" / "}
-                            {rider.name} - SA {rider.sumAssured}
+                            {rider.name} - SA ₹{rider.sumAssured}
+                            {index < riderSummaries.length - 1 ? " / " : ""}
                         </Box>
                     ))}
                 </Typography>
 
-                <Typography
-                    component="div"
+                {/* ================================================================ */}
+                {/* ELIGIBILTY PARAMETERS                                            */}
+                {/* ================================================================ */}
+
+                <Box
                     sx={{
                         mt: 0.45,
-                        color: "#000",
-                        fontSize: { xs: 10, sm: 11.5 },
-                        lineHeight: 1.6,
-                        fontWeight: 500,
-                        overflowWrap: "anywhere",
+                        display: "flex",
+                        alignItems: "flex-start",
+                        gap: 0.35,
+                        flexWrap: "wrap",
                     }}
                 >
-                    {parameters || "-"}
-                </Typography>
+                    <Typography
+                        component="span"
+                        sx={{
+                            color: "#000",
+                            fontSize: {
+                                xs: 10,
+                                sm: 11.5,
+                            },
+                            lineHeight: 1.6,
+                            fontWeight: 500,
+                            overflowWrap: "anywhere",
+                        }}
+                    >
+                        {parameters || "-"}
+                    </Typography>
+                </Box>
             </Box>
         </Box>
     );
@@ -1056,15 +1150,18 @@ const ApplicationSummaryBanner = ({
 const RiskAnalyticsCard = ({
     card,
     onClick,
+    onArrowClick,
 }: {
     card: RiskCard;
     onClick: () => void;
+    onArrowClick: () => void;
 }) => {
     const tone = RISK_TONES[card.status];
     const icon = "";
+    const initialDetailLimit = card.id === "financial" ? 4 : 3;
     const visibleDetails = card.details
         .filter((detail) => text(detail.value) !== "-")
-        .slice(0, 3);
+        .slice(0, initialDetailLimit);
 
     return (
         <Box
@@ -1151,9 +1248,18 @@ const RiskAnalyticsCard = ({
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.7, mt: 1 }}>
                 <Box
+                    component="button"
+                    type="button"
+                    aria-label={`View ${card.label} risk details`}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        onArrowClick();
+                    }}
+                    onKeyDown={(event) => event.stopPropagation()}
                     sx={{
                         width: 34,
                         height: 28,
+                        p: 0,
                         display: "grid",
                         placeItems: "center",
                         border: "1px solid #E1D8D2",
@@ -1161,6 +1267,12 @@ const RiskAnalyticsCard = ({
                         bgcolor: "#FFF8F3",
                         color: "#A92129",
                         fontSize: 13,
+                        cursor: "pointer",
+                        fontFamily: "inherit",
+                        "&:hover": {
+                            borderColor: "#E45F14",
+                            bgcolor: "#FFEAD7",
+                        },
                     }}
                 >
                     <KeyRightArrowIcon />
@@ -1188,17 +1300,19 @@ const RiskAnalyticsCard = ({
 /* MAIN COMPONENT                                                             */
 /* -------------------------------------------------------------------------- */
 
-const ClaimAudit = ({
+const GroupHoD = ({
     onBackToInbox,
     initialMemberIndex = 0,
     showMemberSelectionInitially = true,
     readOnly = false,
     showRiskAnalytics = true,
+    uwDecision,
+    quickLinks,
     requirementManagement,
+    decisionHistory,
     stickyTop = 0,
     grievanceHistoryPaginationDisabled = true,
-    data,
-}: ClaimAuditProps) => {
+}: GroupHoDProps) => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
@@ -1266,6 +1380,11 @@ const ClaimAudit = ({
 
     const [breRetriggerLimitOpen, setBreRetriggerLimitOpen] = useState(false);
 
+    const [hodRemarks, setHodRemarks] = useState("");
+    const [hodDecision, setHodDecision] = useState("");
+    const [outliers, setOutliers] = useState("");
+    const [submitConfirmationOpen, setSubmitConfirmationOpen] = useState(false);
+
     const [requirementStatusFilter, setRequirementStatusFilter] =
         useState<RequirementStatusFilter>("All");
     const [requirementStatusFilterSignal, setRequirementStatusFilterSignal] =
@@ -1303,6 +1422,12 @@ const ClaimAudit = ({
         setActiveQuickLinkPanel("requirementManagement");
     };
 
+    // const handleAddRequirementRow = () => {
+    //   setRequirementStatusFilter("All");
+    //   setRequirementStatusFilterSignal((currentSignal) => currentSignal + 1);
+    //   setRequirementAddRowSignal((currentSignal) => currentSignal + 1);
+    // };
+
     useEffect(() => {
         const openApplicantSummary = () => setActiveQuickLinkPanel("summary");
         const openRequirementManagement = () => {
@@ -1310,11 +1435,16 @@ const ClaimAudit = ({
             setRequirementStatusFilterSignal((currentSignal) => currentSignal + 1);
             setActiveQuickLinkPanel("requirementManagement");
         };
+        const openDecisionHistory = () =>
+            setActiveQuickLinkPanel("decisionHistory");
+
         window.addEventListener("open-applicant-summary", openApplicantSummary);
         window.addEventListener(
             "open-requirement-management",
             openRequirementManagement,
         );
+        window.addEventListener("open-decision-history", openDecisionHistory);
+
         return () => {
             window.removeEventListener(
                 "open-applicant-summary",
@@ -1324,10 +1454,11 @@ const ClaimAudit = ({
                 "open-requirement-management",
                 openRequirementManagement,
             );
+            window.removeEventListener("open-decision-history", openDecisionHistory);
         };
     }, []);
 
-    const source = toRecord(data ?? (readOnly ? searchData : drsData));
+    const source = toRecord(readOnly ? searchData : drsData);
 
     const requirementRows = Array.isArray(source.requirementManagement)
         ? source.requirementManagement.map(toRecord)
@@ -1508,6 +1639,20 @@ const ClaimAudit = ({
             applicant.sdtTimestamp,
         ),
     );
+
+    const activeMemberLabel = formatMemberType(
+        applicant.memberType,
+        activeMemberIndex,
+    );
+
+    const selectedMemberLabel =
+        members.length > 1 && !showMemberSelection ? activeMemberLabel : undefined;
+
+    const uwDecisionForActiveMember = isValidElement(uwDecision)
+        ? cloneElement(uwDecision as ReactElement<{ memberLabel?: string }>, {
+            memberLabel: selectedMemberLabel,
+        })
+        : uwDecision;
 
     const applicantDetails = toRecord(applicant.applicantDetails);
 
@@ -1747,31 +1892,17 @@ const ClaimAudit = ({
     /* PERSONAL SUMMARY FOR BANNER                                             */
     /* ------------------------------------------------------------------------ */
 
-    const annualIncomeForBanner = currency(
-        firstValue(
-            finance.annualIncome,
-            financialDetails.annualIncome,
-            personalDetails.netIncomeAmt,
-        ),
-    );
-
     const personalSummary = [
-        text(firstValue(applicant.memberType, applicant.proposerType)),
-        text(personal.maritalStatus ?? applicantDetails.maritalStatus),
-
-        age ? text(age) : "-",
-
-        text(personal.gender ?? applicantDetails.gender),
-
-        text(personal.education ?? applicantDetails.education),
-
-        annualIncomeForBanner !== "-" ? `${annualIncomeForBanner} p.a.` : "-",
-
-        address,
-
-        text(personal.nationality ?? applicantDetails.nationality),
-
-        text(personal.residentStatus ?? personal.countryOfResidence),
+        "Life Assured 1",
+        "Married",
+        "Male",
+        "40",
+        "Graduate",
+        "Salaried",
+        "₹10,00,000",
+        "Pune, Maharashtra",
+        "Indian",
+        "India",
     ]
         .filter((value) => value !== "-")
         .join(" / ");
@@ -1789,7 +1920,9 @@ const ClaimAudit = ({
         "WOP TSA - ₹10,00,000",
         "BTBB TSA - ₹5,00,000",
         "Total Premium - ₹10,000",
-    ].join(" / ");
+    ]
+        .filter((value) => value !== "-")
+        .join(" / ");
 
     /* ------------------------------------------------------------------------ */
     /* KYC FIELDS                                                               */
@@ -2179,6 +2312,25 @@ const ClaimAudit = ({
     //       }`
     //     : "All clear";
 
+    const hasStickyRail = Boolean(uwDecision || quickLinks);
+
+    const quickLinksWithApplicantAction = isValidElement(quickLinks)
+        ? cloneElement(
+            quickLinks as ReactElement<{
+                onApplicantInformationClick?: () => void;
+                onRequirementManagementClick?: () => void;
+                onDecisionHistoryClick?: () => void;
+            }>,
+            {
+                onApplicantInformationClick: () => setActiveQuickLinkPanel("summary"),
+                onRequirementManagementClick: () =>
+                    openRequirementManagementPanel("All"),
+                onDecisionHistoryClick: () =>
+                    setActiveQuickLinkPanel("decisionHistory"),
+            },
+        )
+        : quickLinks;
+
     const requirementManagementWithStatusFilter = isValidElement(
         requirementManagement,
     )
@@ -2224,6 +2376,11 @@ const ClaimAudit = ({
                     }}
                 />
 
+                {uwDecision && (
+                    <DashboardCard eyebrow="Underwriter" title="UW Decision">
+                        {uwDecision}
+                    </DashboardCard>
+                )}
             </Box>
         );
     }
@@ -2257,7 +2414,7 @@ const ClaimAudit = ({
                         display: "grid",
                         gridTemplateColumns: {
                             xs: "1fr",
-                            lg: "minmax(0,1fr)",
+                            lg: hasStickyRail ? "minmax(0,1fr) 300px" : "minmax(0,1fr)",
                         },
                         gap: 1,
                     }}
@@ -2283,7 +2440,7 @@ const ClaimAudit = ({
                 </Box>
             </Box>
 
-            {/* {!activeDetailView && (
+            {!activeDetailView && (
                 <Box
                     sx={{
                         width: "100%",
@@ -2340,16 +2497,8 @@ const ClaimAudit = ({
                             Summary
                         </Button>
                     )}
-                    <Button
-                        type="button"
-                        variant="outlined"
-                        onClick={() => setGrievanceHistoryDialogOpen(true)}
-                        sx={{ ...summaryActionSx, ml: "auto" }}
-                    >
-                        Grievance History
-                    </Button>
                 </Box>
-            )} */}
+            )}
 
             {activeDetailView === "medical" && (
                 <Box sx={{ width: "100%", minWidth: 0, px: 0.5 }}>
@@ -2433,7 +2582,7 @@ const ClaimAudit = ({
                             display: "grid",
                             gridTemplateColumns: {
                                 xs: "1fr",
-                                lg: "minmax(0,1fr)",
+                                lg: hasStickyRail ? "minmax(0,1fr) 300px" : "minmax(0,1fr)",
                             },
                             gap: 1,
                             alignItems: "start",
@@ -2538,6 +2687,8 @@ const ClaimAudit = ({
                           </Button>
                         )} */}
                                                 </Box>
+                                            ) : activeQuickLinkPanel === "decisionHistory" ? (
+                                                "Decision History"
                                             ) : (
                                                 "Applicant Details"
                                             )
@@ -2587,6 +2738,8 @@ const ClaimAudit = ({
                                                 <Box sx={{ minWidth: 0 }}>
                                                     {requirementManagementWithStatusFilter}
                                                 </Box>
+                                            ) : activeQuickLinkPanel === "decisionHistory" ? (
+                                                <Box sx={{ minWidth: 0 }}>{decisionHistory}</Box>
                                             ) : (
                                                 <DashboardCard
                                                     eyebrow=""
@@ -2873,6 +3026,7 @@ const ClaimAudit = ({
                                                     <RiskAnalyticsCard
                                                         key={card.id}
                                                         card={card}
+                                                        onArrowClick={() => setSelectedRiskCard(card)}
                                                         onClick={() => {
                                                             if ((card.id === "medical" || card.id === "financial") && !readOnly) {
                                                                 setActiveQuickLinkPanel(null);
@@ -3488,16 +3642,127 @@ const ClaimAudit = ({
                                 </Box>
 
                                 <Box sx={{ mt: 0.75 }}>
-                                    <ClaimSection />
+                                    <CustomTable<UwDecisionHistoryRow>
+                                        title="Underwriting Decision History"
+                                        columns={UW_DECISION_HISTORY_COLUMNS}
+                                        data={STATIC_UW_DECISION_HISTORY}
+                                    />
                                 </Box>
-                                 <Box sx={{...centerFlex}}>
-                                          <CustomButton variant="contained" sx={{mt:1, borderRadius: "50px"}}>
+
+                                <Box
+                                    sx={{
+                                        mt: 0.75,
+                                        p: { xs: 1, sm: 1.25 },
+                                        display: "grid",
+                                        gridTemplateColumns: {
+                                            xs: "minmax(0, 1fr)",
+                                            md: "minmax(0, 1fr) 250px 250px auto",
+                                        },
+                                        gap: 1.25,
+                                        alignItems: "center",
+                                        border: "1px solid #D8D8D8",
+                                        borderLeft: "4px solid #E45F14",
+                                        borderRadius: "10px",
+                                        bgcolor: "#FFFFFF",
+                                        boxShadow: "0 2px 7px rgba(60, 42, 35, 0.05)",
+                                    }}
+                                >
+                                    <TextField
+                                        label="HOD Remarks"
+                                        value={hodRemarks}
+                                        onChange={(event) => setHodRemarks(event.target.value)}
+                                        multiline
+                                        minRows={1}
+                                        size="small"
+                                        fullWidth
+                                        disabled={readOnly}
+                                    />
+
+                                    <TextField
+                                        select
+                                        label="HOD Decision"
+                                        value={hodDecision}
+                                        onChange={(event) => setHodDecision(event.target.value)}
+                                        size="small"
+                                        fullWidth
+                                        disabled={readOnly}
+                                    >
+                                        {HOD_DECISION_OPTIONS.map((option) => (
+                                            <MenuItem key={option} value={option}>
+                                                {option}
+                                            </MenuItem>
+                                        ))}
+                                    </TextField>
+
+                                    <TextField
+                                        label="Outliers"
+                                        value={outliers}
+                                        onChange={(event) => setOutliers(event.target.value)}
+                                        multiline
+                                        minRows={1}
+                                        size="small"
+                                        fullWidth
+                                        disabled={readOnly}
+                                    />
+
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                        }}
+                                    >
+                                        <CustomButton
+                                            type="button"
+                                            onClick={() => setSubmitConfirmationOpen(true)}
+                                            disabled={readOnly}
+                                            sx={{ minWidth: 80, borderRadius: "50px" }}
+                                        >
                                             Submit
-                                          </CustomButton>
-                                        </Box>
+                                        </CustomButton>
+                                    </Box>
+                                </Box>
                             </Box>
 
                             {/* </CustomAccordion> */}
+                            <CustomDialog
+                                open={submitConfirmationOpen}
+                                onClose={() => setSubmitConfirmationOpen(false)}
+                                title="Confirm Submission"
+                            >
+                                <Box sx={{ p: 1 }}>
+                                    <Typography
+                                        sx={{
+                                            fontSize: "14px",
+                                            color: "#333",
+                                        }}
+                                    >
+                                        Do you want to submit the case?
+                                    </Typography>
+
+                                    <Box
+                                        sx={{
+                                            display: "flex",
+                                            justifyContent: "flex-end",
+                                            gap: 1,
+                                            mt: 3,
+                                        }}
+                                    >
+                                        <CustomButton
+                                            variant="outlined"
+                                            onClick={() => setSubmitConfirmationOpen(false)}
+                                        >
+                                            Cancel
+                                        </CustomButton>
+
+                                        <CustomButton
+                                            onClick={() => setSubmitConfirmationOpen(false)}
+                                        >
+                                            Submit
+                                        </CustomButton>
+                                    </Box>
+                                </Box>
+                            </CustomDialog>
 
                             {/* ============================================================ */}
                             {/* BRE DECISION DETAILS DIALOG                                 */}
@@ -3568,47 +3833,52 @@ const ClaimAudit = ({
                                 onClose={() => setSelectedRiskCard(null)}
                                 title={
                                     selectedRiskCard
-                                        ? `${selectedRiskCard.label} Risk Details`
+                                        ? `${selectedRiskCard.label} Details`
                                         : "Risk Details"
                                 }
                                 maxWidth="lg"
                             >
                                 {selectedRiskCard && (
-                                    <Box
-                                        sx={{
-                                            display: "grid",
-                                            gridTemplateColumns: {
-                                                xs: "1fr",
-                                                sm: "repeat(2,1fr)",
-                                                md: "repeat(3,1fr)",
-                                                lg: "repeat(4,1fr)",
-                                            },
-                                            gap: 0.75,
-                                            minWidth: {
-                                                xs: "auto",
-                                                md: 760,
-                                            },
-                                        }}
-                                    >
-                                        {selectedRiskCard.details.map((detail) => (
-                                            <Box
-                                                key={detail.key}
-                                                sx={{
-                                                    p: 0.8,
-                                                    border: "1px solid #E3DEDB",
-                                                    borderRadius: 1,
-                                                    bgcolor: "#F8F7F6",
-                                                }}
-                                            >
-                                                <Typography
-                                                    sx={{
-                                                        color: "#827671",
-                                                        fontSize: 9,
-                                                    }}
-                                                >
-                                                    {detail.label}
-                                                </Typography>
+                                    <>
+                                        <Box
+                                            sx={{
+                                                display: "grid",
+                                                gridTemplateColumns: {
+                                                    lg: "repeat(6,1fr)",
+                                                },
+                                                gap: 0.75,
+                                                minWidth: {
+                                                    xs: "auto",
+                                                    md: 760,
+                                                },
+                                            }}
+                                        >
+                                            {selectedRiskCard.details.map((detail) => (
+                                                <Box key={detail.key} sx={{ p: 0.8 }}>
+                                                    <Typography sx={{ color: "#827671", fontSize: 11 }}>
+                                                        {detail.label}
+                                                    </Typography>
 
+                                                    <Typography
+                                                        sx={{
+                                                            mt: 0.25,
+                                                            color: "#332D2A",
+                                                            fontSize: 11,
+                                                            fontWeight: 800,
+                                                            overflowWrap: "anywhere",
+                                                        }}
+                                                    >
+                                                        {text(detail.value)}
+                                                    </Typography>
+                                                </Box>
+                                            ))}
+                                        </Box>
+
+                                        {selectedRiskCard.label === "Medical" && (
+                                            <Box sx={{ p: 0.8 }}>
+                                                <Typography sx={{ color: "#827671", fontSize: 11 }}>
+                                                    Physical Medical Remark
+                                                </Typography>
                                                 <Typography
                                                     sx={{
                                                         mt: 0.25,
@@ -3618,11 +3888,30 @@ const ClaimAudit = ({
                                                         overflowWrap: "anywhere",
                                                     }}
                                                 >
-                                                    {text(detail.value)}
+                                                    -
                                                 </Typography>
                                             </Box>
-                                        ))}
-                                    </Box>
+                                        )}
+
+                                        {selectedRiskCard.label === "Financial" && (
+                                            <Box sx={{ p: 0.8 }}>
+                                                <Typography sx={{ color: "#827671", fontSize: 11 }}>
+                                                    Financial Remark
+                                                </Typography>
+                                                <Typography
+                                                    sx={{
+                                                        mt: 0.25,
+                                                        color: "#332D2A",
+                                                        fontSize: 11,
+                                                        fontWeight: 800,
+                                                        overflowWrap: "anywhere",
+                                                    }}
+                                                >
+                                                    -
+                                                </Typography>
+                                            </Box>
+                                        )}
+                                    </>
                                 )}
                             </CustomDialog>
 
@@ -3702,6 +3991,32 @@ const ClaimAudit = ({
                             </CustomDialog>
                         </Box>
 
+                        {/* ================================================================ */}
+                        {/* RIGHT RAIL                                                       */}
+                        {/* ================================================================ */}
+
+                        {hasStickyRail && (
+                            <Box
+                                component="aside"
+                                sx={{
+                                    display: "grid",
+                                    gap: 0.8,
+                                    minWidth: 0,
+                                }}
+                            >
+                                {uwDecision && (
+                                    <DashboardCard eyebrow="Underwriter" title="UW Decision">
+                                        {uwDecisionForActiveMember}
+                                    </DashboardCard>
+                                )}
+
+                                {quickLinks && (
+                                    <DashboardCard eyebrow="Navigation" title="Quick Links">
+                                        {quickLinksWithApplicantAction}
+                                    </DashboardCard>
+                                )}
+                            </Box>
+                        )}
                     </Box>
                 </Box>
             </Box>
@@ -3709,4 +4024,132 @@ const ClaimAudit = ({
     );
 };
 
-export default ClaimAudit;
+export default GroupHoD;
+
+/* -------------------------------------------------------------------------- */
+/* STANDALONE CASE SNAPSHOT ROW                                               */
+/* -------------------------------------------------------------------------- */
+
+export const CaseSnapshotRow = ({
+    breDecision,
+    applicationOverview,
+    applicantSummary,
+    riskAnalytics,
+    uwDecision,
+    quickLinks,
+}: CaseSnapshotRowProps) => {
+    const hasStickyRail = Boolean(uwDecision || quickLinks);
+
+    return (
+        <Box
+            sx={{
+                width: "100%",
+                display: "grid",
+                gridTemplateColumns: {
+                    xs: "1fr",
+                    lg: hasStickyRail ? "minmax(0,1fr) 300px" : "1fr",
+                },
+                gap: 1,
+                alignItems: "start",
+            }}
+        >
+            <Box
+                sx={{
+                    display: "grid",
+                    gridTemplateColumns: {
+                        xs: "1fr",
+                        md: "minmax(240px,30%) minmax(270px,32%) minmax(300px,38%)",
+                    },
+                    gap: 0.75,
+                    minWidth: 0,
+                }}
+            >
+                {/* RISK FIRST */}
+
+                <DashboardCard eyebrow="Signals" title="Risk Analytics">
+                    {riskAnalytics ?? (
+                        <Typography
+                            sx={{
+                                color: "#817773",
+                                fontSize: 10,
+                            }}
+                        >
+                            Risk analytics are not available.
+                        </Typography>
+                    )}
+                </DashboardCard>
+
+                {/* APPLICATION SECOND */}
+
+                <DashboardCard eyebrow="Application" title="Application & Applicant">
+                    <Box
+                        sx={{
+                            display: "grid",
+                            gridTemplateColumns: {
+                                xs: "1fr",
+                                sm: "1fr 1fr",
+                            },
+                            gap: 0.7,
+                        }}
+                    >
+                        <Box sx={{ minWidth: 0 }}>
+                            {applicantSummary ?? (
+                                <Typography
+                                    sx={{
+                                        color: "#817773",
+                                        fontSize: 10,
+                                    }}
+                                >
+                                    Applicant details are not available.
+                                </Typography>
+                            )}
+                        </Box>
+
+                        <Box
+                            sx={{
+                                minWidth: 0,
+                                p: 0.7,
+                                bgcolor: "#FCFAF9",
+                                borderRadius: 1,
+                            }}
+                        >
+                            {applicationOverview}
+                        </Box>
+                    </Box>
+                </DashboardCard>
+
+                {/* BRE THIRD */}
+
+                <DashboardCard eyebrow="Assessment" title="BRE Decision">
+                    {breDecision}
+                </DashboardCard>
+
+            </Box>
+
+            {/* RIGHT RAIL */}
+
+            {hasStickyRail && (
+                <Box
+                    component="aside"
+                    sx={{
+                        display: "grid",
+                        gap: 0.8,
+                        minWidth: 0,
+                    }}
+                >
+                    {uwDecision && (
+                        <DashboardCard eyebrow="Underwriter" title="UW Decision">
+                            {uwDecision}
+                        </DashboardCard>
+                    )}
+
+                    {quickLinks && (
+                        <DashboardCard eyebrow="Navigation" title="Quick Links">
+                            {quickLinks}
+                        </DashboardCard>
+                    )}
+                </Box>
+            )}
+        </Box>
+    );
+};

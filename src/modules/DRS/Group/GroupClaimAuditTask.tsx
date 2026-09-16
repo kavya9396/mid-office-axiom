@@ -16,63 +16,37 @@ import {
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-// import CustomAccordion from "../../components/ui/Accordion/Accordion";
-import CustomDialog from "../../components/ui/Dialog/Dialog";
+// import CustomAccordion from "../../../components/ui/Accordion/Accordion";
+import CustomDialog from "../../../components/ui/Dialog/Dialog";
 import CustomTable, {
     type Column,
-} from "../../components/ui/Table/Table";
-import { useAppContext } from "../../hooks/useAppContext";
+} from "../../../components/ui/Table/Table";
+import { useAppContext } from "../../../hooks/useAppContext";
 import {
     KeyRightArrowIcon,
     RefreshIcon,
     UserProfileIcon,
-} from "../../icons/Icons";
-import { getInboxPath } from "../../routes/routes";
-import { useAppSelector } from "../../store/hooks";
-import type { AppDispatch, RootState } from "../../store/store";
-import { breThunk } from "../../store/thunks/breThunk";
-import { drsThunk } from "../../store/thunks/drsThunk";
-import type { BreResponse } from "../../types/drs.types";
-//import { formatDate } from "../../utils/dataFormat";
-import BreDecision from "./DRS_Accordions/BreDecision";
-import ClaimSection from "./DRS_Accordions/ClaimSection";
-import MemberSelection from "./MemberSeclection";
-import ViewMedical from "./Medical Final/ViewMedical";
-import ViewFinancial from "./Financial/ViewFinancial";
-import { centerFlex } from "../../utils/styles";
-import CustomButton from "../../components/ui/Button/Button";
+} from "../../../icons/Icons";
+import { getInboxPath } from "../../../routes/routes";
+import { useAppSelector } from "../../../store/hooks";
+import type { AppDispatch, RootState } from "../../../store/store";
+import { breThunk } from "../../../store/thunks/breThunk";
+import { drsThunk } from "../../../store/thunks/drsThunk";
+import type { BreResponse } from "../../../types/drs.types";
+//import { formatDate } from "../../../utils/dataFormat";
+import BreDecision from "../DRS_Accordions/BreDecision";
+import ClaimSection from "../DRS_Accordions/ClaimSection";
+import MemberSelection from "../MemberSeclection";
+import ViewMedical from "../Medical Final/ViewMedical";
+import ViewFinancial from "../Financial/ViewFinancial";
+import { centerFlex } from "../../../utils/styles";
+import CustomButton from "../../../components/ui/Button/Button";
 
 /* -------------------------------------------------------------------------- */
 /* TYPES                                                                      */
 /* -------------------------------------------------------------------------- */
 
-const summaryActionSx = {
-    minWidth: "auto",
-    px: 1.4,
-    py: 0.55,
-    border: "1px solid #E45F14",
-    borderRadius: "18px",
-    bgcolor: "#FFF4EC",
-    color: "#A92129",
-    fontSize: { xs: 10, sm: 11 },
-    fontWeight: 900,
-    lineHeight: 1.2,
-    textTransform: "none",
-    whiteSpace: "nowrap",
-    boxShadow: "0 2px 7px rgba(169,33,41,.12)",
-    "& .MuiButton-startIcon": {
-        mr: 0.55,
-        ml: 0,
-    },
-    "&:hover": {
-        borderColor: "#C83C2F",
-        bgcolor: "#FFEAD7",
-        boxShadow: "0 3px 9px rgba(169,33,41,.18)",
-        transform: "translateY(-1px)",
-    },
-} as const;
-
-interface ClaimAuditProps {
+interface GroupClaimAuditTaskProps {
     onBackToInbox?: () => void;
     initialMemberIndex?: number;
     showMemberSelectionInitially?: boolean;
@@ -94,17 +68,6 @@ type RequirementStatusFilter =
     | "Cancelled"
     | "Reject"
     | "Waived";
-
-interface CaseSnapshotRowProps {
-    breDecision: ReactNode;
-    applicationOverview: ReactNode;
-    applicantSummary?: ReactNode;
-    riskAnalytics?: ReactNode;
-    uwDecision?: ReactNode;
-    quickLinks?: ReactNode;
-    readOnly?: boolean;
-    stickyTop?: number | string;
-}
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -735,7 +698,7 @@ const DashboardCard = ({
     </Box>
 );
 
-const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) => (
+const SdtReadonlyRow = ({ decision, remarks }: SdtReadonlyRowProps) => (
     <Box
         role="group"
         aria-label="SDT decision details"
@@ -807,251 +770,304 @@ const SdtReadonlyRow = ({ decision, remarks, timestamp }: SdtReadonlyRowProps) =
 /* APPLICATION SUMMARY BANNER                                                 */
 /* -------------------------------------------------------------------------- */
 
+interface RiderSummary {
+  id: string;
+  name: string;
+  sumAssured: string;
+  policyTerm: string;
+  premiumTerm: string;
+  premium: string;
+}
+
 interface ApplicationSummaryBannerProps {
-    onBackToInbox?: () => void;
-    image?: string;
-    name: string;
-    appNo: string;
-    personalSummary: string;
-    parameters: string;
-    productName: string;
-    policyTerm: string;
-    premiumTerm: string;
-    sumAssured: string;
-    tsa: string;
-    tfsa: string;
-    tssa: string;
-    tpsa: string;
-    riderSummaries: Array<{
-        name: string;
-        sumAssured: string;
-        policyTerm: string;
-        premiumTerm: string;
-        premium: string;
-    }>;
-    onViewRiders: () => void;
+  image?: string;
+  name: string;
+  appNo: string;
+  personalSummary: string;
+  productName: string;
+  policyTerm: string;
+  premiumTerm: string;
+  sumAssured: string;
+  tsa: string;
+  tfsa: string;
+  tssa: string;
+  tpsa: string;
+  loanSummaryItems: Array<{
+    label: string;
+    value: string;
+  }>;
+  coverageSummaryItems: Array<{
+    label: string;
+    value: string;
+  }>;
+  riderSummaries: RiderSummary[];
+  onViewRiders: () => void;
 }
 
 const ApplicationSummaryBanner = ({
-    image,
-    name,
-    appNo,
-    personalSummary,
-    parameters,
-    productName,
-    sumAssured,
-    tsa,
-    tfsa,
-    tssa,
-    tpsa,
-    riderSummaries,
+  image,
+  name,
+  // appNo,
+  personalSummary,
+  productName,
+  policyTerm,
+  premiumTerm,
+  sumAssured,
+  tsa,
+  tfsa,
+  tssa,
+  tpsa,
+  loanSummaryItems,
+  coverageSummaryItems,
+  riderSummaries,
+  // onViewRiders,
 }: ApplicationSummaryBannerProps) => {
-    const coverageItems = [
-        `SA - ${sumAssured}`,
-        tsa !== "-" ? `TSA - ${tsa}` : null,
-        tfsa !== "-" ? `TFSA - ${tfsa}` : null,
-        tssa !== "-" ? `TSSA - ${tssa}` : null,
-        tpsa !== "-" ? `TPSA - ${tpsa}` : null,
-    ].filter(Boolean) as string[];
+  const coverageItems = [
+    `SA - ${sumAssured}`,
+    `TSA - ${tsa}`,
+    tfsa !== "-" ? `TFSA - ${tfsa}` : null,
+    tssa !== "-" ? `TSSA - ${tssa}` : null,
+    tpsa !== "-" ? `TPSA - ${tpsa}` : null,
+  ].filter(Boolean) as string[];
 
-    return (
-        <Box
-            sx={{
-                width: "100%",
-                mb: 0.75,
-                display: "grid",
-                gridTemplateColumns: {
-                    xs: "84px minmax(0,1fr)",
-                    sm: "150px minmax(0,1fr)",
-                },
-                bgcolor: "#FFEAD7",
-                color: "#000",
-                borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "0 3px 10px rgba(169, 33, 41, 0.16)",
-            }}
+  return (
+    <Box
+      sx={{
+        width: "100%",
+        display: "grid",
+        gridTemplateColumns: {
+          xs: "84px minmax(0, 1fr)",
+          sm: "150px minmax(0, 1fr)",
+        },
+        bgcolor: "#FFEAD7",
+        color: "#000000",
+        borderRadius: "12px",
+        overflow: "hidden",
+        boxShadow: "0 3px 10px rgba(169, 33, 41, 0.16)",
+      }}
+    >
+      <Box
+        sx={{
+          minHeight: { xs: 112, sm: 138 },
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          background: "linear-gradient(145deg, #E45F14 0%, #C83C2F 100%)",
+        }}
+      >
+        <Avatar
+          src={image || undefined}
+          alt={name === "-" ? "Applicant" : name}
+          sx={{
+            width: { xs: 54, sm: 76 },
+            height: { xs: 54, sm: 76 },
+            bgcolor: "rgba(255, 255, 255, 0.18)",
+            color: "#000000",
+            border: "2px solid rgba(255, 255, 255, 0.45)",
+          }}
         >
-            <Box
-                sx={{
-                    position: "relative",
-                    minHeight: { xs: 112, sm: 138 },
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    background: "linear-gradient(145deg, #E45F14 0%, #C83C2F 100%)",
-                }}
-            >
-                {/* {onBackToInbox && (
-          <Box
-            component="button"
-            type="button"
-            aria-label="Back to Inbox"
-            onClick={onBackToInbox}
+          <UserProfileIcon sx={{ fontSize: { xs: 30, sm: 44 } }} />
+        </Avatar>
+      </Box>
+
+      <Box
+        sx={{
+          minWidth: 0,
+          px: { xs: 1.2, sm: 2.2 },
+          py: { xs: 1, sm: 1.45 },
+        }}
+      >
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+            mb: 0.4,
+          }}
+        >
+          <Typography
+            title={name}
             sx={{
-              position: "absolute",
-              top: 10,
-              left: 10,
-              width: 30,
-              height: 30,
-              border: "1px solid rgba(255,255,255,.55)",
-              borderRadius: "50%",
-              bgcolor: "rgba(255,255,255,.18)",
-              color: "#FFFFFF",
-              cursor: "pointer",
-              fontSize: 18,
-              lineHeight: 1,
+              minWidth: 0,
+              color: "#000000",
+              fontSize: { xs: 14, sm: 16 },
+              fontWeight: 900,
+              lineHeight: 1.25,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
             }}
           >
-            ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
-          </Box>
-        )} */}
-                <Avatar
-                    src={image || undefined}
-                    alt={name === "-" ? "Applicant" : name}
-                    sx={{
-                        width: { xs: 54, sm: 76 },
-                        height: { xs: 54, sm: 76 },
-                        bgcolor: "rgba(255,255,255,.18)",
-                        color: "#000",
-                        border: "2px solid rgba(255,255,255,.45)",
-                    }}
-                >
-                    <UserProfileIcon sx={{ fontSize: { xs: 30, sm: 44 } }} />
-                </Avatar>
-            </Box>
+            {name}
+          </Typography>
 
-            <Box
-                sx={{ minWidth: 0, px: { xs: 1.2, sm: 2.2 }, py: { xs: 1, sm: 1.45 } }}
-            >
-                {/* ================================================================ */}
-                {/* NAME + APPLICATION NUMBER                                        */}
-                {/* ================================================================ */}
-
-                <Box
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: 2,
-                        mb: 0.4,
-                    }}
-                >
-                    <Typography
-                        title={name}
-                        sx={{
-                            minWidth: 0,
-                            color: "#000",
-                            fontSize: {
-                                xs: 14,
-                                sm: 16,
-                            },
-                            fontWeight: 900,
-                            lineHeight: 1.25,
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            whiteSpace: "nowrap",
-                        }}
-                    >
-                        {name}
-                    </Typography>
-
-                    <Typography
-                        sx={{
-                            flexShrink: 0,
-                            px: 1.1,
-                            py: 0.45,
-                            borderRadius: "16px",
-                            bgcolor: "#FFFFFF",
-                            border: "1px solid rgba(169,33,41,.18)",
-                            color: "#A92129",
-                            fontSize: {
-                                xs: 11,
-                                sm: 13,
-                            },
-                            fontWeight: 900,
-                            whiteSpace: "nowrap",
-                        }}
-                    >
-                        App No. - OB90377122
-                    </Typography>
-                </Box>
-
-                {/* ================================================================ */}
-                {/* PERSONAL SUMMARY                                                  */}
-                {/* ================================================================ */}
-
-                <Typography
-                    sx={{
-                        color: "#000",
-                        fontSize: {
-                            xs: 10,
-                            sm: 11.5,
-                        },
-                        lineHeight: 1.6,
-                        fontWeight: 500,
-                        overflowWrap: "anywhere",
-                    }}
-                >
-                    {personalSummary || "-"}
-                </Typography>
-
-                {/* ================================================================ */}
-                {/* PRODUCT / POLICY / COVERAGE                                      */}
-                {/* ================================================================ */}
-
-                <Typography
-                    component="div"
-                    sx={{
-                        mt: 0.5,
-                        color: "#000",
-                        fontSize: { xs: 10, sm: 11.5 },
-                        lineHeight: 1.65,
-                        fontWeight: 800,
-                        overflowWrap: "anywhere",
-                    }}
-                >
-                    <Box component="span" sx={{ fontWeight: 700 }}>
-                        {productName}
-                    </Box>
-                    {" / "}Channel:{" "}
-                    <Box component="span" sx={{ fontWeight: 700 }}>
-                        Agency
-                    </Box>
-                    {coverageItems.map((item) => (
-                        <Box component="span" key={item} sx={{ fontWeight: 700 }}>
-                            {" / "}
-                            {item}
-                        </Box>
-                    ))}
-                    {riderSummaries.map((rider, index) => (
-                        <Box component="span" key={`${rider.name}-${index}`}>
-                            {" / "}
-                            {rider.name} - SA {rider.sumAssured}
-                        </Box>
-                    ))}
-                </Typography>
-
-                <Typography
-                    component="div"
-                    sx={{
-                        mt: 0.45,
-                        color: "#000",
-                        fontSize: { xs: 10, sm: 11.5 },
-                        lineHeight: 1.6,
-                        fontWeight: 500,
-                        overflowWrap: "anywhere",
-                    }}
-                >
-                    {parameters || "-"}
-                </Typography>
-            </Box>
+          <Typography
+            sx={{
+              flexShrink: 0,
+              px: 1.1,
+              py: 0.45,
+              borderRadius: "16px",
+              bgcolor: "#FFFFFF",
+              border: "1px solid rgba(169, 33, 41, 0.18)",
+              color: "#A92129",
+              fontSize: { xs: 11, sm: 13 },
+              fontWeight: 900,
+              whiteSpace: "nowrap",
+            }}
+          >
+            App No. - OB90377122
+          </Typography>
         </Box>
-    );
-};
 
-/* -------------------------------------------------------------------------- */
-/* RISK CARD                                                                  */
-/* -------------------------------------------------------------------------- */
+        <Typography
+          sx={{
+            color: "#000000",
+            fontSize: { xs: 10, sm: 11.5 },
+            lineHeight: 1.6,
+            fontWeight: 500,
+            overflowWrap: "anywhere",
+          }}
+        >
+          {personalSummary || "-"}
+        </Typography>
+
+        <Typography
+          sx={{
+            mt: 0.5,
+            color: "#000000",
+            fontSize: { xs: 10, sm: 11.5 },
+            lineHeight: 1.65,
+            fontWeight: 800,
+            overflowWrap: "anywhere",
+          }}
+        >
+          Product: <Box component="span">{productName}</Box>
+          {" / "}Policy Term: <Box component="span">{policyTerm}</Box>
+          {" / "}Premium Term: <Box component="span">{premiumTerm}</Box>
+          {coverageItems.map((item) => (
+            <Box component="span" key={item} sx={{ fontWeight: 700 }}>
+              {" / "}
+              {item}
+            </Box>
+          ))}
+        </Typography>
+
+        <Box
+          sx={{
+            mt: 0.45,
+            display: "flex",
+            alignItems: "center",
+            columnGap: 0.75,
+            rowGap: 0.2,
+            flexWrap: "wrap",
+            color: "#000000",
+            fontSize: { xs: 10, sm: 11 },
+            lineHeight: 1.65,
+          }}
+        >
+          {[...loanSummaryItems, ...coverageSummaryItems].map((item, index) => (
+            <Box
+              component="span"
+              key={item.label}
+              sx={{ display: "inline-flex", gap: 0.35 }}
+            >
+              {index > 0 && <Box component="span">/</Box>}
+              <Box component="span" sx={{ fontWeight: 800 }}>
+                {item.label}:
+              </Box>
+              <Box component="span" sx={{ fontWeight: 600 }}>
+                {item.value}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+
+        <Box
+          sx={{
+            mt: 0.45,
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 0.35,
+            flexWrap: "wrap",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "#000000",
+              fontSize: { xs: 10, sm: 11.5 },
+              lineHeight: 1.65,
+              fontWeight: 800,
+            }}
+          >
+            Riders:
+          </Typography>
+
+          {riderSummaries.length > 0 ? (
+            <Typography
+              sx={{
+                flex: 1,
+                minWidth: 0,
+                color: "#000000",
+                fontSize: { xs: 10, sm: 11.5 },
+                lineHeight: 1.65,
+                fontWeight: 600,
+                overflowWrap: "anywhere",
+              }}
+            >
+              {riderSummaries.map((rider, index) => (
+                <Box component="span" key={rider.id}>
+                  {rider.name} - SA {rider.sumAssured}
+                  {index < riderSummaries.length - 1 ? " / " : ""}
+                </Box>
+              ))}
+            </Typography>
+          ) : (
+            <Typography
+              sx={{
+                color: "#000000",
+                fontSize: { xs: 10, sm: 11.5 },
+                lineHeight: 1.65,
+                fontWeight: 600,
+              }}
+            >
+              No riders
+            </Typography>
+          )}
+
+          {/* {riderSummaries.length > 0 && (
+            <Box
+              component="button"
+              type="button"
+              onClick={onViewRiders}
+              sx={{
+                border: 0,
+                p: 0,
+                ml: 0.5,
+                mt: 0.15,
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 0.25,
+                bgcolor: "transparent",
+                color: "#A92129",
+                fontSize: 9,
+                fontWeight: 900,
+                cursor: "pointer",
+                fontFamily: "inherit",
+                whiteSpace: "nowrap",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              View details <KeyRightArrowIcon />
+            </Box>
+          )} */}
+        </Box>
+      </Box>
+    </Box>
+  );
+};
 
 const RiskAnalyticsCard = ({
     card,
@@ -1188,8 +1204,7 @@ const RiskAnalyticsCard = ({
 /* MAIN COMPONENT                                                             */
 /* -------------------------------------------------------------------------- */
 
-const ClaimAudit = ({
-    onBackToInbox,
+const GroupClaimAuditTask = ({
     initialMemberIndex = 0,
     showMemberSelectionInitially = true,
     readOnly = false,
@@ -1198,7 +1213,7 @@ const ClaimAudit = ({
     stickyTop = 0,
     grievanceHistoryPaginationDisabled = true,
     data,
-}: ClaimAuditProps) => {
+}: GroupClaimAuditTaskProps) => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
 
@@ -1440,13 +1455,6 @@ const ClaimAudit = ({
     const referBreToIT = () => {
         setBreRetriggerLimitOpen(false);
         navigate(getInboxPath());
-    };
-
-    const handleBackToSummary = () => {
-        setActiveDetailView(null);
-        setSelectedRiskCard(null);
-        setActiveQuickLinkPanel(null);
-        setShowMemberSelection(true);
     };
 
     const members = Array.isArray(source.summary)
@@ -1749,47 +1757,53 @@ const ClaimAudit = ({
 
     const annualIncomeForBanner = currency(
         firstValue(
-            finance.annualIncome,
             financialDetails.annualIncome,
             personalDetails.netIncomeAmt,
         ),
     );
 
     const personalSummary = [
-        text(firstValue(applicant.memberType, applicant.proposerType)),
-        text(personal.maritalStatus ?? applicantDetails.maritalStatus),
-
-        age ? text(age) : "-",
-
-        text(personal.gender ?? applicantDetails.gender),
-
-        text(personal.education ?? applicantDetails.education),
-
+        text(firstValue(personal.maritalStatus, applicantDetails.maritalStatus)),
+        age ? `${text(age)} years` : "-",
+        text(firstValue(personal.gender, applicantDetails.gender)),
+        text(firstValue(personal.education, applicantDetails.education)),
         annualIncomeForBanner !== "-" ? `${annualIncomeForBanner} p.a.` : "-",
-
         address,
-
-        text(personal.nationality ?? applicantDetails.nationality),
-
-        text(personal.residentStatus ?? personal.countryOfResidence),
+        text(firstValue(personal.nationality, applicantDetails.nationality)),
+        text(firstValue(personal.residentStatus, personal.countryOfResidence)),
     ]
         .filter((value) => value !== "-")
         .join(" / ");
 
-    const parameters = [
-        "TSA - ₹10,00,000",
-        "TRSA - ₹5,00,000",
-        "TPSA - ₹10,00,000",
-        "TFSA - ₹10,00,000",
-        "TSSA - ₹10,00,000",
-        "ADBR TSA - ₹5,00,000",
-        "ATPD TSA - ₹5,00,000",
-        "CI Rider TSA - ₹3,00,000",
-        "CI Rider TRSA - ₹3,00,000",
-        "WOP TSA - ₹10,00,000",
-        "BTBB TSA - ₹5,00,000",
-        "Total Premium - ₹10,000",
-    ].join(" / ");
+    const loanSummaryItems = [
+        { label: "MPH Name", value: "ICICI" },
+        { label: "PAD", value: "9 Sept 2026" },
+        { label: "Date of loan disbursement", value: "9 Sept 2026" },
+        { label: "Coverage option", value: "Life" },
+        { label: "Loan type", value: "Personal Loan" },
+        { label: "Bank type", value: "Private" },
+        { label: "Loan term", value: "60" },
+        { label: "Loan Account No.", value: "12345678" },
+        { label: "Share of loan", value: "50%" },
+        { label: "Applicant status", value: "Active" },
+        { label: "Loan amount", value: "₹50,00,000" },
+        { label: "Master policy holder code", value: "MPH123" },
+        { label: "Type of loan", value: "Unsecured" },
+    ];
+
+    const coverageSummaryItems = [
+        { label: "TSA", value: "₹10,00,000" },
+        { label: "TRSA", value: "₹5,00,000" },
+        { label: "TPSA", value: "₹10,00,000" },
+        { label: "TFSA", value: "₹10,00,000" },
+        { label: "TSSA", value: "₹10,00,000" },
+        { label: "ADBR TSA", value: "₹5,00,000" },
+        { label: "ATPD TSA", value: "₹5,00,000" },
+        { label: "CI Rider TSA", value: "₹3,00,000" },
+        { label: "CI Rider TRSA", value: "₹3,00,000" },
+        { label: "WOP TSA", value: "₹10,00,000" },
+        { label: "BTBB TSA", value: "₹5,00,000" },
+    ];
 
     /* ------------------------------------------------------------------------ */
     /* KYC FIELDS                                                               */
@@ -2263,12 +2277,10 @@ const ClaimAudit = ({
                     }}
                 >
                     <ApplicationSummaryBanner
-                        onBackToInbox={onBackToInbox}
                         image={image}
                         name={name}
                         appNo={appNo}
                         personalSummary={personalSummary}
-                        parameters={parameters}
                         productName={productName}
                         policyTerm={policyTerm}
                         premiumTerm={premiumTerm}
@@ -2277,6 +2289,8 @@ const ClaimAudit = ({
                         tfsa={tfsa}
                         tssa={tssa}
                         tpsa={tpsa}
+                        loanSummaryItems={loanSummaryItems}
+                        coverageSummaryItems={coverageSummaryItems}
                         riderSummaries={riderSummaries}
                         onViewRiders={() => setRiderDialogOpen(true)}
                     />
@@ -3709,4 +3723,4 @@ const ClaimAudit = ({
     );
 };
 
-export default ClaimAudit;
+export default GroupClaimAuditTask;

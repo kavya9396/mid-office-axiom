@@ -438,7 +438,7 @@ const QuickLinks = ({
             ]
             : []),
 
-        ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "GROUP_CMO_TASK" && roleType !== "MAS_TASK" ? [
+        ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'GROUP_CUW_CLAIM_AUDIT_TASK' && roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "GROUP_CMO_TASK" && roleType !== "MAS_TASK" ? [
             {
                 label: "Raise Grievance",
                 path: "",
