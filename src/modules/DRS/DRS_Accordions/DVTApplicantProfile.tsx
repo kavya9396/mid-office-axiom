@@ -380,6 +380,15 @@ const applicantTabConfig: Record<string, string[]> = {
     "Personal & KYC",
     "Contact & Address",
     "Payment & Payout",
+    "Nominee"
+  ],
+
+  DVT_FORMAL_TASK: [
+    "Image Details",
+    "Personal & KYC",
+    "Contact & Address",
+    "Payment & Payout",
+     "Nominee"
   ],
 
   PIVV_TASK: ["Image Details", "Personal & KYC", "Contact & Address"],
@@ -652,6 +661,9 @@ const DVTApplicantProfile = ({
     }
   })();
 
+  const isDvtTaskRole =
+    roleType === "DVT_TASK" || roleType === "DVT_FORMAL_TASK";
+
   /* ------------------------------------------------------------------------ */
   /*                                STATE                                     */
   /* ------------------------------------------------------------------------ */
@@ -756,7 +768,7 @@ const DVTApplicantProfile = ({
 
     switch (selectedTab) {
       case "Image Details": {
-        const faceMatchDetails = selectedApplicant?.faceMatchDetails;
+        //const faceMatchDetails = selectedApplicant?.faceMatchDetails;
 
         return (
           <Box
@@ -764,8 +776,8 @@ const DVTApplicantProfile = ({
               width: "100%",
               backgroundColor: "#F6F6F6",
               borderRadius: "6px",
-              px: roleType === "DVT_TASK" ? 1 : 2,
-              py: roleType === "DVT_TASK" ? 0.75 : 1.5,
+              px: isDvtTaskRole ? 1 : 2,
+              py: isDvtTaskRole ? 0.75 : 1.5,
             }}
           >
             <GridSection
@@ -773,19 +785,19 @@ const DVTApplicantProfile = ({
               items={[
                 {
                   label: "Document",
-                  value: faceMatchDetails?.document,
+                  value: "Aadhar",
                 },
                 {
                   label: "Face Match Score",
-                  value: faceMatchDetails?.faceMatchScore,
+                  value: "75",
                 },
                 {
                   label: "Image Quality",
-                  value: faceMatchDetails?.imageQuality,
+                  value: "Good",
                 },
                 {
                   label: "Remarks",
-                  value: faceMatchDetails?.remarks,
+                  value: "Good quality image found",
                 },
               ]}
             />
@@ -888,19 +900,19 @@ const DVTApplicantProfile = ({
         return (
           <Box
             sx={{
-              mt: roleType === "DVT_TASK" ? 0 : 1.5,
-              p: roleType === "DVT_TASK" ? 1 : 2,
+              mt: isDvtTaskRole ? 0 : 1.5,
+              p: isDvtTaskRole ? 1 : 2,
               backgroundColor: "#F6F6F6",
               borderRadius: "8px",
             }}
           >
-            {roleType === "DVT_TASK" ? (
+            {isDvtTaskRole ? (
               <CompactProfileFields items={personalFields} />
             ) : (
               <GridSection columns={8} items={personalFields} />
             )}
 
-            <Box sx={{ borderTop: "1px solid #AFAFAF", my: roleType === "DVT_TASK" ? 1 : 2 }} />
+            <Box sx={{ borderTop: "1px solid #AFAFAF", my: isDvtTaskRole ? 1 : 2 }} />
 
             {/* <Typography
               sx={{
@@ -912,7 +924,7 @@ const DVTApplicantProfile = ({
             >
               KYC
             </Typography> */}
-            {roleType === "DVT_TASK" ? (
+            {isDvtTaskRole ? (
               <CompactProfileFields items={kycFields} />
             ) : (
               <GridSection columns={8} items={kycFields} />
@@ -955,30 +967,30 @@ const DVTApplicantProfile = ({
         return (
           <Box
             sx={{
-              mt: roleType === "DVT_TASK" ? 0 : 1.5,
+              mt: isDvtTaskRole ? 0 : 1.5,
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
                 md: "repeat(2, minmax(0, 1fr))",
                 lg: "repeat(3, minmax(0, 1fr))",
               },
-              gap: roleType === "DVT_TASK" ? 0.75 : 1.5,
+              gap: isDvtTaskRole ? 0.75 : 1.5,
               alignItems: "stretch",
             }}
           >
             <DetailsCard
-              compact={roleType === "DVT_TASK"}
+              compact={isDvtTaskRole}
               orangeHeader
               title="Communication Address"
               fields={getAddressFields(communicationAddress)}
             />
             <DetailsCard
-              compact={roleType === "DVT_TASK"}
+              compact={isDvtTaskRole}
               orangeHeader
               title="Permanent Address"
               fields={getAddressFields(permanentAddress)}
             />
-            <DetailsCard compact={roleType === "DVT_TASK"} orangeHeader title="Contact Details" fields={contactFields} />
+            <DetailsCard compact={isDvtTaskRole} orangeHeader title="Contact Details" fields={contactFields} />
           </Box>
         );
       }
@@ -1719,18 +1731,18 @@ const DVTApplicantProfile = ({
         return (
           <Box
             sx={{
-              mt: roleType === "DVT_TASK" ? 0 : 1.5,
+              mt: isDvtTaskRole ? 0 : 1.5,
               display: "grid",
               gridTemplateColumns: {
                 xs: "1fr",
                 md: "repeat(2, minmax(0, 1fr))",
               },
-              gap: roleType === "DVT_TASK" ? 0.75 : 1.5,
+              gap: isDvtTaskRole ? 0.75 : 1.5,
               alignItems: "stretch",
             }}
           >
-            <DetailsCard compact={roleType === "DVT_TASK"} orangeHeader title="Payment Details" fields={paymentFields} />
-            <DetailsCard compact={roleType === "DVT_TASK"} orangeHeader title="Payout Details" fields={payoutFields} />
+            <DetailsCard compact={isDvtTaskRole} orangeHeader title="Payment Details" fields={paymentFields} />
+            <DetailsCard compact={isDvtTaskRole} orangeHeader title="Payout Details" fields={payoutFields} />
           </Box>
         );
       }
@@ -1779,7 +1791,6 @@ const DVTApplicantProfile = ({
     "DVT_TASK",
     "CPT_DATA_ENTRY_NMR_TASK",
     "CPT_DATA_ENTRY_MR_TASK",
-    "DVT_TASK",
     "DVT_FORMAL_TASK",
     "GUW_FORMAL_TASK",
     "RISK_TASK",
@@ -1833,8 +1844,8 @@ const DVTApplicantProfile = ({
 
   return (
     <Box sx={{
-      px: roleType === "DVT_TASK" ? 0 : 1,
-      ...(roleType === "DVT_TASK" && {
+      px: isDvtTaskRole ? 0 : 1,
+      ...(isDvtTaskRole && {
         py: 0, border: "1px solid #F1D8C8", borderRadius: "8px",
         overflow: "hidden",
         bgcolor: "#FFFFFF", boxShadow: "0 3px 12px rgba(169,33,41,.06)",
@@ -1845,7 +1856,7 @@ const DVTApplicantProfile = ({
           {/*                    PROPOSER / LIFE ASSURED                        */}
           {/* ================================================================= */}
 
-          {roleType === "DVT_TASK" && selectedApplicant && (
+          {isDvtTaskRole && selectedApplicant && (
             <Box sx={{ display: "grid", gridTemplateColumns: { xs: "1fr", sm: "108px minmax(0, 1fr)" } }}>
               <Box sx={{ p: 1, bgcolor: "#FFF8F2", display: "flex", flexDirection: "column",
                 alignItems: "center", gap: 0.75, borderRight: { sm: "1px solid #F1D8C8" },

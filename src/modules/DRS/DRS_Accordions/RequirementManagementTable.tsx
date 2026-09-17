@@ -2336,115 +2336,186 @@ const RequirementManagementTable = ({
         )}
       </Box>
 
-      {filteredRows.length > ROWS_PER_PAGE && (
+      <Box
+        sx={{
+          mt: 0.75,
+          mb: 0.25,
+          display: "grid",
+          gridTemplateColumns: "1fr auto 1fr",
+          alignItems: "center",
+          gap: 1,
+          minHeight: 30,
+          width: "100%",
+        }}
+      >
+        <Box />
+
+        {filteredRows.length > ROWS_PER_PAGE ? (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: 0,
+            }}
+          >
+            <Pagination
+              count={pageCount}
+              page={page}
+              onChange={(_, nextPage) => setPage(nextPage)}
+              shape="rounded"
+              size="small"
+              siblingCount={0}
+              boundaryCount={1}
+              sx={{
+                "& .MuiPagination-ul": {
+                  flexWrap: "nowrap",
+                },
+                "& .MuiPaginationItem-root": {
+                  color: "#555555",
+                  minWidth: 26,
+                  height: 26,
+                  mx: "1px",
+                  fontSize: "11px",
+                  borderRadius: "5px",
+                },
+                "& .MuiPaginationItem-icon": {
+                  fontSize: "17px",
+                },
+                "& .MuiPaginationItem-root.Mui-selected": {
+                  color: "#ffffff",
+                  bgcolor: "#E45F14",
+                  "&:hover": {
+                    bgcolor: "#E45F14",
+                  },
+                },
+              }}
+            />
+          </Box>
+        ) : (
+          <Box />
+        )}
+
         <Box
           sx={{
             display: "flex",
-            justifyContent: "center",
-            mt: 1,
+            alignItems: "center",
+            justifyContent: "flex-end",
+            justifySelf: "end",
+            gap: 0.75,
+            flexShrink: 0,
           }}
         >
-          <Pagination
-            count={pageCount}
-            page={page}
-            onChange={(_, nextPage) => setPage(nextPage)}
-            shape="rounded"
-            sx={{
-              "& .MuiPaginationItem-root": {
-                color: "#555555",
-              },
-              "& .MuiPaginationItem-root.Mui-selected": {
-                color: "#ffffff",
-                bgcolor: "#E45F14",
-                "&:hover": {
-                  bgcolor: "#E45F14",
-                },
-              },
-            }}
-            size="small"
-          />
+          {isSaveButtonVisible && (
+            <Button
+              variant="contained"
+              onClick={handleSave}
+              disabled={rows.length === 0 || isSaving}
+              startIcon={
+                isSaving ? (
+                  <CircularProgress size={13} thickness={5} color="inherit" />
+                ) : undefined
+              }
+              sx={{
+                ...actionButtonSx,
+                minWidth: 82,
+                height: 28,
+                px: 1.5,
+                py: 0,
+                borderRadius: "6px",
+                fontSize: "11px",
+              }}
+            >
+              {isSaving ? "Saving..." : "Save"}
+            </Button>
+          )}
+
+          {normalizedRoleType === "CPT_DATA_ENTRY_NMR_TASK" && (
+            <>
+              <Button
+                variant="contained"
+                onClick={() =>
+                  navigate(
+                    getFinancialPath(
+                      businessType,
+                      applicationNumber ?? "",
+                    ),
+                  )
+                }
+                sx={{
+                  ...actionButtonSx,
+                  minWidth: 108,
+                  height: 28,
+                  px: 1.25,
+                  py: 0,
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                }}
+              >
+                View Financials
+              </Button>
+
+              <Button
+                variant="contained"
+                onClick={handleViewDocuments}
+                sx={{
+                  ...actionButtonSx,
+                  minWidth: 108,
+                  height: 28,
+                  px: 1.25,
+                  py: 0,
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                }}
+              >
+                View Documents
+              </Button>
+            </>
+          )}
+
+          {normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK" && (
+            <>
+              <Button
+                variant="contained"
+                onClick={() =>
+                  navigate(
+                    getMedicalPath(
+                      businessType,
+                      applicationNumber ?? "",
+                    ),
+                  )
+                }
+                sx={{
+                  ...actionButtonSx,
+                  minWidth: 104,
+                  height: 28,
+                  px: 1.25,
+                  py: 0,
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                }}
+              >
+                View Medicals
+              </Button>
+
+              <Button
+                variant="contained"
+                onClick={handleViewDocuments}
+                sx={{
+                  ...actionButtonSx,
+                  minWidth: 108,
+                  height: 28,
+                  px: 1.25,
+                  py: 0,
+                  borderRadius: "6px",
+                  fontSize: "11px",
+                }}
+              >
+                View Documents
+              </Button>
+            </>
+          )}
         </Box>
-      )}
-
-      <Box
-        sx={{
-          mt: 1,
-          mb: 0.5,
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: 1,
-        }}
-      >
-        {isSaveButtonVisible && (
-          <Button
-            variant="contained"
-            onClick={handleSave}
-            disabled={rows.length === 0 || isSaving}
-            sx={actionButtonSx}
-            startIcon={
-              isSaving ? (
-                <CircularProgress size={16} thickness={5} color="inherit" />
-              ) : undefined
-            }
-          >
-            {isSaving ? "Saving..." : "Save"}
-          </Button>
-        )}
-
-        {normalizedRoleType === "CPT_DATA_ENTRY_NMR_TASK" && (
-          <>
-            <Button
-              variant="contained"
-              onClick={() =>
-                navigate(
-                  getFinancialPath(
-                    businessType,
-                    applicationNumber ?? "",
-                  ),
-                )
-              }
-              sx={actionButtonSx}
-            >
-              View Financials
-            </Button>
-
-            <Button
-              variant="contained"
-              onClick={handleViewDocuments}
-              sx={actionButtonSx}
-            >
-              View Documents
-            </Button>
-          </>
-        )}
-
-        {normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK" && (
-          <>
-            <Button
-              variant="contained"
-              onClick={() =>
-                navigate(
-                  getMedicalPath(
-                    businessType,
-                    applicationNumber ?? "",
-                  ),
-                )
-              }
-              sx={actionButtonSx}
-            >
-              View Medicals
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleViewDocuments}
-              sx={actionButtonSx}
-            >
-              View Documents
-            </Button>
-          </>
-        )}
       </Box>
 
       {!readOnly && (

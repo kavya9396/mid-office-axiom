@@ -348,7 +348,7 @@ const QuickLinks = ({
     ).trim();
 
     const quickLinks: QuickLinkItem[] = [
-         ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' ? [
+         ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'DVT_FORMAL_TASK' ? [
         {
             label: "Applicant Profile",
             path: "",
@@ -370,7 +370,7 @@ const QuickLinks = ({
         //         onDecisionHistoryClick ??
         //         (() => window.dispatchEvent(new CustomEvent("open-decision-history"))),
         // },
-        ...(roleType !== 'DVT_FORMAL_TASK' ? [
+       
             {
                 label: "Proposal Form & Documents",
                 path: proposerFormLink,
@@ -378,8 +378,8 @@ const QuickLinks = ({
                     ? "There is no document link found."
                     : undefined,
             },
-        ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK" ? [
+        
+        ...(roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK" ? [
             {
                 label: "Previous Policies",
                 path: safeApplicationNumber ? getPreviousPoliciesPath(safeBusinessType, safeApplicationNumber) : "",
@@ -389,7 +389,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK"? [
+        ...(roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK"? [
             {
                 label: "Open Tasks",
                 path: safeApplicationNumber ? getOpenTasksPath(safeBusinessType, safeApplicationNumber) : "",
@@ -399,7 +399,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT Pool' && roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK" ? [
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== 'DVT_TASK'  &&roleType !== 'DVT Pool' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK" ? [
             {
                 label: "Risk Details",
                 path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "",
@@ -409,7 +409,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" ? [
+        ...( roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" ? [
 
             {
                 label: "Audit Trail",
@@ -438,7 +438,7 @@ const QuickLinks = ({
             ]
             : []),
 
-        ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'GROUP_CUW_CLAIM_AUDIT_TASK' && roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "GROUP_CMO_TASK" && roleType !== "MAS_TASK" ? [
+        ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'DVT_FORMAL_TASK' && roleType !== 'GROUP_CUW_CLAIM_AUDIT_TASK' && roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "GROUP_CMO_TASK" && roleType !== "MAS_TASK" ? [
             {
                 label: "Raise Grievance",
                 path: "",

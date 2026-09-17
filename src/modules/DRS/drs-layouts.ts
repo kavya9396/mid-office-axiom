@@ -462,10 +462,10 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "quickLinks",
   ],
   DVT_FORMAL_TASK: [
-    "breDecision",
-    "applicationOverview",
-    "summary",
-    "requirementManagement",
+    // "breDecision",
+    // "applicationOverview",
+    // "summary",
+    // "requirementManagement",
     "quickLinks",
   ],
   RISK_TASK: [

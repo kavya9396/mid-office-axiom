@@ -1,8 +1,7 @@
-import { Alert, Box, Snackbar, Typography } from "@mui/material"
+import { Alert, Box, FormControlLabel, Radio, RadioGroup, Snackbar, Typography } from "@mui/material"
 //import CustomAccordion from "../../../components/ui/Accordion/Accordion"
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CustomSelect from "../../../components/ui/Select/Select";
-import CustomRadioGroup from "../../../components/ui/Radio/Radio";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch, RootState } from "../../../store/store";
 import CustomButton from "../../../components/ui/Button/Button";
@@ -31,6 +30,10 @@ const referralRoleMap: Record<string, "hod" | "sruw" | "cmo"> = {
     "Refer to CMO": "cmo",
     "Refer to HO CMO": "cmo",
 };
+
+const REFER_TO_APPROVER_VALUE = "__REFER_TO_APPROVER__";
+const isApproverLabel = (label: string) =>
+    ["Refer to HOD", "Refer to Sr UW"].includes(canonicalReferralDecisionLabel(label));
 
 const CLEAR_CASE_UW_DECISION_VALUE = "__CLEAR_CASE_UW_DECISION__";
 
@@ -370,6 +373,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
             : "BRE-RETAIL";
 
     const [uwDecisionRemarks, setUwDecisionRemarks] = useState("");
+    const referralRequestRef = useRef(0);
     const [caseUWDecision, setCaseUWDecision] = useState("");
     const [uwDecisionDialogOpen, setUwDecisionDialogOpen] = useState(false);
     const [outlier, setOutlier] = useState("");
@@ -589,23 +593,26 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
     const effectiveCaseUWDecision = caseUWDecisionOptions.some((option) => option.value === caseUWDecision)
         ? caseUWDecision
         : "";
-    const caseUWDecisionSelectOptions = useMemo(
-        () => effectiveCaseUWDecision
-            ? [
-                {
-                    label: "Clear Case UW Decision",
-                    value: CLEAR_CASE_UW_DECISION_VALUE,
-                },
-                ...caseUWDecisionOptions,
-            ]
-            : caseUWDecisionOptions,
-        [caseUWDecisionOptions, effectiveCaseUWDecision],
-    );
+    const approverOptions = caseUWDecisionOptions.filter((option) => isApproverLabel(option.label));
+    const isApproverFlow = caseUWDecision === REFER_TO_APPROVER_VALUE ||
+        approverOptions.some((option) => option.value === effectiveCaseUWDecision);
+    const caseUWDecisionSelectValue = isApproverFlow
+        ? REFER_TO_APPROVER_VALUE : effectiveCaseUWDecision;
+    const caseUWDecisionSelectOptions = [
+        ...(caseUWDecisionSelectValue ? [{
+            label: "Clear Case UW Decision", value: CLEAR_CASE_UW_DECISION_VALUE,
+        }] : []),
+        ...caseUWDecisionOptions.filter((option) => !isApproverLabel(option.label)),
+        ...(approverOptions.length ? [{
+            label: "Refer to Approver", value: REFER_TO_APPROVER_VALUE,
+            disabled: approverOptions.every((option) => option.disabled),
+        }] : []),
+    ];
     const postponementPeriodOptions = useMemo(
         () => getPostponementPeriodOptions(masters),
         [masters],
     );
-    const caseUWDecisionLabel = toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions);
+    const caseUWDecisionLabel = canonicalReferralDecisionLabel(toMasterLabel(effectiveCaseUWDecision, caseUWDecisionOptions));
     const selectedCaseDecisionOption = caseUWDecisionOptions.find(
         (option) => option.value === effectiveCaseUWDecision,
     );
@@ -1057,6 +1064,11 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
     );
 
     const handleSubmit = async () => {
+        if (isApproverFlow && !effectiveCaseUWDecision) {
+            setSubmitMessage("Select HOD or Sr UW before continuing.");
+            setSubmitStatus("failure");
+            return;
+        }
         if (!financialDecision.trim() || !medicalDecision.trim()) {
             setSubmitMessage("Financial Decision and Medical Decision are mandatory.");
             setSubmitStatus("failure");
@@ -1264,6 +1276,11 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
     };
 
     const handleSaveIntent = () => {
+        if (isApproverFlow && !effectiveCaseUWDecision) {
+            setSubmitMessage("Select HOD or Sr UW before continuing.");
+            setSubmitStatus("failure");
+            return;
+        }
         if (!financialDecision.trim() || !medicalDecision.trim()) {
             setSubmitMessage("Financial Decision and Medical Decision are mandatory.");
             setSubmitStatus("failure");
@@ -1350,6 +1367,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
     ];
 
     const fetchUsersForReferralDecision = (decisionLabel: string) => {
+        const requestId = ++referralRequestRef.current;
         const roleName = referralRoleMap[
             canonicalReferralDecisionLabel(decisionLabel)
         ];
@@ -1365,6 +1383,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
         dispatch(userRoleNameThunk({ roleName }))
             .unwrap()
             .then((response) => {
+                if (requestId !== referralRequestRef.current) return;
                 setRoleUsers(
                     Array.isArray(response.data?.users)
                         ? response.data.users
@@ -1372,6 +1391,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                 );
             })
             .catch((error) => {
+                if (requestId !== referralRequestRef.current) return;
                 setRoleUsers([]);
                 setSubmitMessage(
                     error instanceof Error
@@ -1380,7 +1400,9 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                 );
                 setSubmitStatus("failure");
             })
-            .finally(() => setRoleUsersLoading(false));
+            .finally(() => {
+                if (requestId === referralRequestRef.current) setRoleUsersLoading(false);
+            });
     };
 
     const fetchUsersForParallelDecision = (decisionLabel: string) => {
@@ -1415,6 +1437,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
     };
 
     const resetCaseUWDecisionDependentFields = () => {
+        referralRequestRef.current += 1;
         setOutlier("");
         setDecisionCode("");
         setSmokerStatus("");
@@ -1497,7 +1520,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
         const masterDecisionCode = toText(
             selectedOption?.code ?? selectedOption?.value,
         );
-        const selectedLabel = toMasterLabel(value, caseUWDecisionOptions);
+        const selectedLabel = canonicalReferralDecisionLabel(toMasterLabel(value, caseUWDecisionOptions));
         const normalizedSelectedLabel = selectedLabel
             .trim()
             .replace(/[\s_-]+/g, " ")
@@ -1667,7 +1690,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                     label={memberLabel
                         ? `Case UW Decision - ${memberLabel}`
                         : "Case UW Decision"}
-                    value={effectiveCaseUWDecision}
+                    value={caseUWDecisionSelectValue}
                     onChange={(value: string) => {
                         void handleCaseUWDecisionChange(value, true);
                     }}
@@ -1707,9 +1730,11 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                 open={uwDecisionDialogOpen}
                 onClose={handleDecisionDialogClose}
                 fullWidth
-                maxWidth="lg"
+                maxWidth={isApproverFlow ? "md" : "lg"}
+                title={undefined}
+                titleSx={isApproverFlow ? { bgcolor: "#E45F14", color: "#fff", py: 1.25, fontWeight: 700 } : undefined}
                 paperSx={{
-                    width: "min(1200px, 96vw)",
+                    width: isApproverFlow ? "min(780px, 96vw)" : "min(1200px, 96vw)",
                     maxHeight: "92vh",
                     borderRadius: "10px",
                 }}
@@ -1727,7 +1752,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                     <Box
                         sx={{
                             display: "grid",
-                            gridTemplateColumns: {
+                            gridTemplateColumns: isApproverFlow ? "1fr" : {
                                 xs: "1fr",
                                 md: "repeat(2, minmax(0, 1fr))",
                             },
@@ -1759,7 +1784,136 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                         }}
                     >
                         
-<Box>
+{!isApproverFlow && (<Box>
+                            <Typography
+                                sx={{
+                                    fontSize: "11px",
+                                    fontWeight: 400,
+                                    color: "#444",
+                                    lineHeight: 1.2,
+                                    mb: 0.5,
+                                }}
+                            >
+                                UW Remarks
+                            </Typography>
+
+                            <CustomTextField
+                                fullWidth
+                                multiline
+                                placeholder="Enter remarks..."
+                                value={uwDecisionRemarks}
+                                onChange={(event) => {
+                                    const value = event.target.value;
+                                    if (value.length <= 10000) {
+                                        setUwDecisionRemarks(value);
+                                    }
+                                }}
+                                variant="outlined"
+                                size="small"
+                                  sx={{
+                            backgroundColor: "#fff",
+                            borderRadius: "6px",
+                            "& .MuiInputBase-root": {
+                                minHeight: 48,
+                                fontSize: "12px",
+                            },
+                            "& .MuiInputBase-input": {
+                                py: 0.75,
+                            },
+                        }}
+                            />
+                            <Typography
+                                sx={{
+                                    display: "flex",
+                                    justifyContent: "flex-end",
+                                    fontSize: "10px !important",
+                                    lineHeight: 1.2,
+                                    color: "#888",
+                                    mt: 0.2,
+                                }}
+                            >
+                                {uwDecisionRemarks.length}/10000
+                            </Typography>
+                        </Box>)}
+                        <CustomSelect
+                            label={memberLabel
+                                ? `Case UW Decision - ${memberLabel}`
+                                : "Case UW Decision"}
+                            value={caseUWDecisionSelectValue}
+                            onChange={(value: string) => {
+                                void handleCaseUWDecisionChange(value, false);
+                            }}
+                            options={caseUWDecisionSelectOptions}
+                        />
+                        
+                    </Box>
+
+                    {isApproverFlow && (
+                        <Box sx={{ my: 2, p: 2, border: "1px solid #F2D8C8", borderRadius: 2, bgcolor: "#FFF8F3",
+                            display: "grid", gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" }, gap: 2, alignItems: "start",
+                            "& .MuiInputBase-root": { bgcolor: "#fff", borderRadius: "6px" } }}>
+                            <Box>
+    <Typography sx={{ mb: 0.5, color: "#756D69", fontWeight: 600, fontSize: 12 }}>Referral purpose</Typography>
+    <RadioGroup row aria-label="Referral purpose" value={decisionType}
+        onChange={(event) => { setDecisionType(event.target.value); setReferralReason(""); }}
+        sx={{ flexWrap: "nowrap", "& .MuiRadio-root.Mui-checked": { color: "#E45F14" }, "& .MuiFormControlLabel-label": { fontSize: 13 }, "& .MuiFormControlLabel-root": { mr: 1 } }}>
+        <FormControlLabel value="counterSign" control={<Radio size="small" />} label="Counter Sign" />
+        <FormControlLabel value="opinion" control={<Radio size="small" />} label="Opinion" />
+    </RadioGroup>
+</Box>
+                            <CustomSelect label="Refer To" value={effectiveCaseUWDecision}
+                                options={approverOptions.map((option) => ({ ...option, label: canonicalReferralDecisionLabel(option.label).replace("Refer to ", "") }))}
+                                placeholder="Select HOD or Sr UW" disabled={submitLoading}
+                                onChange={(value: string) => {
+                                    const purpose = decisionType;
+                                    void handleCaseUWDecisionChange(value, false);
+                                    setDecisionType(purpose);
+                                }} />
+                            <Box>
+                                                        {selectedReferralConfig && (
+                            <CustomSelect
+                                label={isReferToSrUw ? "Sr UW Name" : "HOD Name"}
+                                value={referralValue}
+                                onChange={(value: string) => {
+                                    if (!referralRoleMap[caseUWDecisionLabel]) {
+                                        setReferralValue(value);
+                                        return;
+                                    }
+
+                                    const selectedUser = roleUsers.find(
+                                        (user) => user.ntid === value,
+                                    );
+
+                                    if (!selectedUser) {
+                                        setReferralValue("");
+                                        return;
+                                    }
+
+                                    if (selectedUser.threshold === true) {
+                                        setReferralValue(value);
+                                        setThresholdUserNtid(value);
+                                        setThresholdDialogOpen(true);
+                                        return;
+                                    }
+
+                                    setReferralValue(value);
+                                }}
+                                options={selectedReferralConfig.options}
+                                disabled={roleUsersLoading}
+                                placeholder={
+                                    roleUsersLoading
+                                        ? "Loading users..."
+                                        : "Select user"
+                                }
+                            />
+                        )}
+
+
+                                {!selectedReferralConfig && (
+                                    <CustomSelect label="Approver Name" value="" options={[]} disabled placeholder="Select a role first" />
+                                )}
+                            </Box>
+                            <Box>
                             <Typography
                                 sx={{
                                     fontSize: "11px",
@@ -1810,23 +1964,13 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                                 {uwDecisionRemarks.length}/10000
                             </Typography>
                         </Box>
-                        <CustomSelect
-                            label={memberLabel
-                                ? `Case UW Decision - ${memberLabel}`
-                                : "Case UW Decision"}
-                            value={effectiveCaseUWDecision}
-                            onChange={(value: string) => {
-                                void handleCaseUWDecisionChange(value, false);
-                            }}
-                            options={caseUWDecisionSelectOptions}
-                        />
-                        
-                    </Box>
+                        </Box>
+                    )}
 
                     <Box
                         sx={{
                             display: "grid",
-                            gridTemplateColumns: "repeat(3, minmax(0, 1fr))",
+                            gridTemplateColumns: { xs: "1fr", sm: "repeat(2, minmax(0, 1fr))", md: isApproverFlow ? "repeat(2, minmax(0, 1fr))" : "repeat(3, minmax(0, 1fr))" },
                             alignItems: "end",
                             columnGap: 1,
                             rowGap: 0.75,
@@ -2051,7 +2195,7 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                             </Box>
                         )}
 
-                        {selectedReferralConfig && (
+                        {selectedReferralConfig && !isApproverFlow && (
                             <CustomSelect
                                 label={selectedReferralConfig.label}
                                 value={referralValue}
@@ -2132,22 +2276,15 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                             />
                         )}
 
-                        {showDecisionType && (
-                            <Box sx={{ alignSelf: "end" }}>
-                                <CustomRadioGroup
-                                    row
-                                    value={decisionType}
-                                    onChange={(e) => {
-                                        setDecisionType(e.target.value);
-                                        setReferralReason("");
-                                    }}
-                                    options={[
-                                        { label: "Counter Sign", value: "counterSign" },
-                                        { label: "Opinion", value: "opinion" },
-                                    ]}
-                                />
-                            </Box>
-                        )}
+                        {showDecisionType && !isApproverFlow && (<Box>
+    <Typography sx={{ mb: 0.5, color: "#756D69", fontWeight: 600, fontSize: 12 }}>Referral purpose</Typography>
+    <RadioGroup row aria-label="Referral purpose" value={decisionType}
+        onChange={(event) => { setDecisionType(event.target.value); setReferralReason(""); }}
+        sx={{ flexWrap: "nowrap", "& .MuiRadio-root.Mui-checked": { color: "#E45F14" }, "& .MuiFormControlLabel-label": { fontSize: 11 }, "& .MuiFormControlLabel-root": { mr: 1 } }}>
+        <FormControlLabel value="counterSign" control={<Radio size="small" />} label="Counter Sign" />
+        <FormControlLabel value="opinion" control={<Radio size="small" />} label="Opinion" />
+    </RadioGroup>
+</Box>)}
 
                         {showReferralDecisionFlow && (
                             <CustomSelect
@@ -2423,8 +2560,10 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                         sx={{
                             display: "flex",
                             gap: 1,
-                            mt: 1,
-                            justifyContent:"center"
+                            mt: 2,
+                            pt: 1.5,
+                            borderTop: isApproverFlow ? "1px solid #F2D8C8" : undefined,
+                            justifyContent: isApproverFlow ? "flex-end" : "center"
                         }}
                     >
                         <CustomButton
@@ -2486,7 +2625,8 @@ const UWDecision = ({ memberLabel }: UWDecisionProps) => {
                     {[
                         ["Financial Decision", financialDecisionLabel],
                         ["Medical Decision", medicalDecisionLabel],
-                        ["Case UW Decision", caseUWDecisionLabel],
+                        ["Case UW Decision", isApproverFlow ? "Refer to Approver" : caseUWDecisionLabel],
+                        ...(isApproverFlow ? [["Approver Role", caseUWDecisionLabel.replace("Refer to ", "")]] : []),
                         ...(!isRaiseRequirementDecision ? [["Outlier", outlier]] : []),
                         ...(showDecisionCode ? [["Decision Code", resolvedDecisionCode]] : []),
                         ...(isStandardDecision && isTermProduct ? [["Smoker Status", resolvedSmokerStatus]] : []),

@@ -37,6 +37,8 @@
         "productCode",
         "breOverallDecision",
         "policyType",
+        "masterPlanNo",
+        "poolTAT",
         "priorityFlag"
   ]
 }

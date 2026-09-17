@@ -1,16 +1,16 @@
 import { Box, Container, Typography } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+//import { useNavigate } from "react-router-dom";
 
-import BackButton from "../../components/layout/BackButton";
+//import BackButton from "../../components/layout/BackButton";
 import CustomTable from "../../components/ui/Table/Table";
 import type { Column } from "../../components/ui/Table/Table";
 import { useAppContext } from "../../hooks/useAppContext";
-import {
-  getDRSPath,
-  getSearchApplicationPath,
-} from "../../routes/routes";
+// import {
+//   getDRSPath,
+//   getSearchApplicationPath,
+// } from "../../routes/routes";
 import { useAppDispatch } from "../../store/hooks";
 import type { RootState } from "../../store/store";
 import { drsThunk } from "../../store/thunks/drsThunk";
@@ -338,7 +338,7 @@ const EmptyTableMessage = ({
 );
 
 const AuditTrailPage = () => {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const dispatch = useAppDispatch();
   const { businessType, applicationNumber } = useAppContext();
   const drsData = useSelector((state: RootState) => state.drs.data);
@@ -474,30 +474,30 @@ const AuditTrailPage = () => {
     safeBusinessType,
   ]);
 
-  const handleBack = () => {
-    if (isFromSearchApplication) {
-      navigate(getSearchApplicationPath(), {
-        state: {
-          restoreSearchResult: true,
-          applicationNo: safeApplicationNumber,
-        },
-      });
-      return;
-    }
+  // const handleBack = () => {
+  //   if (isFromSearchApplication) {
+  //     navigate(getSearchApplicationPath(), {
+  //       state: {
+  //         restoreSearchResult: true,
+  //         applicationNo: safeApplicationNumber,
+  //       },
+  //     });
+  //     return;
+  //   }
 
-    navigate(getDRSPath(safeBusinessType, safeApplicationNumber));
-  };
+  //   navigate(getDRSPath(safeBusinessType, safeApplicationNumber));
+  // };
 
   return (
     <Container maxWidth={false} disableGutters>
-      <BackButton
+      {/* <BackButton
         label={
           isFromSearchApplication
             ? "Back to Search Application"
             : "Back to DRS"
         }
         onClick={handleBack}
-      />
+      /> */}
 
       <Box sx={{ mt: 1, display: "grid", gap: 1.5 }}>
         {auditTrailRows.length > 0 ? (

@@ -13,7 +13,7 @@
         "clientType":"Fresh",
         "caseType":"Fresh",
         "priorityFlag":"Y",
-        "roleType": "CUW_TASK",
+        "roleType": "SR_UW_TASK",
         "role": "RETAIL_CUW_USER",
         "businessType": "RETAIL",
         "creationDate": "2026-06-30T19:45:29.847589",

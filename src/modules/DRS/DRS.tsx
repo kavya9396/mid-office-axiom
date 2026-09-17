@@ -1568,7 +1568,7 @@ const DRS = () => {
   const SummaryComponent =
     normalizeValue(roleType) === "CVT_TASK"
       ? CVTApplicantSummary
-      : normalizeValue(roleType) === "DVT_TASK" ? DVTApplicantSummary :ApplicantApplicationSummary;
+      : (normalizeValue(roleType) === "DVT_TASK" || normalizeValue(roleType) === "DVT_FORMAL_TASK") ? DVTApplicantSummary :ApplicantApplicationSummary;
   const shouldShowSubmitButton =
     roleType === "CPT_DATA_ENTRY_NMR_TASK" ||
     roleType === "CPT_DATA_ENTRY_MR_TASK";
@@ -1578,8 +1578,11 @@ const DRS = () => {
     ? drsRecord.summary
     : [];
   const shouldShowMemberSelection =
-    (normalizeValue(roleType) !== "DVT_TASK" && normalizeValue(roleType) !== "CVT_TASK") &&
-    summaryMembers.length > 1 && selectedMemberIndex === null;
+    !["DVT_TASK", "DVT_FORMAL_TASK", "CVT_TASK"].includes(
+      normalizeValue(roleType),
+    ) &&
+    summaryMembers.length > 1 &&
+    selectedMemberIndex === null;
 
   if (shouldShowMemberSelection) {
     return (

@@ -2650,7 +2650,7 @@ const ApplicantApplicationSummary = ({
           }}
         >
           <ApplicationSummaryBanner
-            compactHeader={roleType.trim().toUpperCase() === "CVT_TASK" || roleType.trim().toUpperCase() === "DVT_TASK"}
+            compactHeader={roleType.trim().toUpperCase() === "CVT_TASK" || roleType.trim().toUpperCase() === "DVT_TASK" || roleType.trim().toUpperCase() === "DVT_FORMAL_TASK"}
             showUserPhoto={showUserPhoto}
             showHeaderTotals={showHeaderTotals}
             productOnlyHeader={productOnlyHeader}

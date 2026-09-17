@@ -1,5 +1,10 @@
-
-import { Box, Button, MenuItem, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  MenuItem,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { useState, type ComponentProps } from "react";
 import { useAppSelector } from "../../store/hooks";
 import type { AdditionalRequirementRow } from "../../types/drs.types";
@@ -7,6 +12,8 @@ import RequirementManagementTable from "./DRS_Accordions/RequirementManagementTa
 import ApplicantApplicationSummary from "./ApplicantSummary";
 import { RefreshIcon } from "../../icons/Icons";
 import DVTApplicantProfile from "./DRS_Accordions/DVTApplicantProfile";
+import CustomDialog from "../../components/ui/Dialog/Dialog";
+import BreDecision from "./DRS_Accordions/BreDecision";
 
 type DVTApplicantSummaryProps = Omit<
   ComponentProps<typeof ApplicantApplicationSummary>,
@@ -28,13 +35,27 @@ type HeaderDetail = {
 
 const EMPTY_REQUIREMENTS: AdditionalRequirementRow[] = [];
 
-const DVT_DECISION_OPTIONS = [
+/* ============================================================
+   DVT DECISION OPTIONS
+============================================================ */
+
+const DVT_INFORMAL_OPTIONS = [
   "Accept",
   "Raise Requirements",
   "Refer to Risk",
   "Refer to IT",
   "Refer to GUW",
 ] as const;
+
+const DVT_FORMAL_OPTIONS = [
+  "Accept",
+  "Raise Requirements",
+  "Refer to GUW",
+] as const;
+
+/* ============================================================
+   HELPERS
+============================================================ */
 
 const toRecord = (value: unknown): DataRecord =>
   value !== null && typeof value === "object" && !Array.isArray(value)
@@ -52,6 +73,10 @@ const firstValue = (...values: unknown[]): string => {
   return value !== undefined && value !== null ? String(value) : "-";
 };
 
+/* ============================================================
+   COMPONENT
+============================================================ */
+
 const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
   const [memberIndex, setMemberIndex] = useState(
     props.initialMemberIndex ?? 0,
@@ -61,6 +86,22 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
   const [dvtRemarks, setDvtRemarks] = useState("");
   const [dvtDecision, setDvtDecision] = useState("");
   const [decisionCode, setDecisionCode] = useState("");
+  const [breDetailDialogOpen, setBreDetailDialogOpen] = useState(false);
+
+  /* ============================================================
+     ROLE
+  ============================================================ */
+
+  const roleType = localStorage.getItem("roleType") ?? "";
+
+  const dvtDecisionOptions =
+    roleType === "DVT_TASK"
+      ? DVT_INFORMAL_OPTIONS
+      : DVT_FORMAL_OPTIONS;
+
+  /* ============================================================
+     SOURCE DATA
+  ============================================================ */
 
   const source = useAppSelector((state) =>
     props.readOnly
@@ -72,20 +113,11 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
     ? (source.requirementManagement as AdditionalRequirementRow[])
     : EMPTY_REQUIREMENTS;
 
-  /*
-   * ------------------------------------------------------------
-   * SOURCE DATA
-   * ------------------------------------------------------------
-   */
-
-
-  /*
-   * ------------------------------------------------------------
-   * BRE DATA
-   * ------------------------------------------------------------
-   * Initial BRE -> source.breDecision
-   * Final BRE   -> source.latestBreDecision
-   */
+  /* ============================================================
+     BRE DATA
+     Initial BRE -> source.breDecision
+     Final BRE   -> source.latestBreDecision
+  ============================================================ */
 
   const initialBre = toRecord(source?.breDecision);
   const latestBre = toRecord(source?.latestBreDecision);
@@ -108,15 +140,11 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
     latestBre.status,
   );
 
-  /*
-   * ------------------------------------------------------------
-   * DVT HEADER DETAILS
-   * ------------------------------------------------------------
-   */
+  /* ============================================================
+     DVT HEADER DETAILS
+  ============================================================ */
 
-
-
-  const headerDetails: HeaderDetail[] = [
+  const dvtHeaderDetails: HeaderDetail[] = [
     {
       label: "Agent Name",
       value: "Ram",
@@ -144,14 +172,84 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
     {
       label: "Login Date",
       value: "14 Sep 2026",
+    },{
+      label: "Premium",
+      value: "12,000",
     },
+    {
+      label: "PT",
+      value: "130",
+    },
+    {
+      label: "PPT",
+      value: "149",
+    }, {
+      label: "Payment Mode",
+      value: "Monthly",
+    },{
+      label: "Call ID",
+      value: "-",
+    }
   ];
 
-  /*
-   * ------------------------------------------------------------
-   * HANDLERS
-   * ------------------------------------------------------------
-   */
+  const dvtFormalHeaderDetails: HeaderDetail[] = [
+    {
+      label: "Policy No.",
+      value: "POL123456",
+    },
+    {
+      label: "Applied Sum Assured",
+      value: "₹ 50,00,000",
+    },
+    {
+      label: "Channel",
+      value: "Agency",
+    },
+    {
+      label: "Sub Channel",
+      value: "Direct",
+    },
+    {
+      label: "Agent Code",
+      value: "AG123",
+    },
+    {
+      label: "Agent Name",
+      value: "Ram",
+    },
+    {
+      label: "Premium",
+      value: "₹ 52,000",
+    },
+    {
+      label: "Cover Requested",
+      value: "₹ 50,00,000",
+    },
+    {
+      label: "Cover Provided",
+      value: "₹ 45,00,000",
+    },
+    {
+      label: "Free Cover",
+      value: "₹ 10,00,000",
+    },
+    {
+      label: "Cover above FCL",
+      value: "₹ 35,00,000",
+    },{
+      label: "Call ID",
+      value: "-",
+    }
+  ];
+
+  const headerDetails =
+    roleType === "DVT_FORMAL_TASK"
+      ? dvtFormalHeaderDetails
+      : dvtHeaderDetails;
+
+  /* ============================================================
+     HANDLERS
+  ============================================================ */
 
   const handleAddRequirement = () => {
     setAddRowSignal((signal) => signal + 1);
@@ -321,9 +419,9 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
               </Box>
             </Box>
 
-            {/* Push BRE Retrigger to right */}
-
             <Box sx={{ flex: 1 }} />
+
+            {/* BRE Retrigger */}
 
             {!props.readOnly && (
               <Button
@@ -354,7 +452,57 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
                 }}
               />
             )}
+
+            {/* BRE View Detail */}
+
+            <Button
+              type="button"
+              variant="outlined"
+              size="small"
+              onClick={() => setBreDetailDialogOpen(true)}
+              sx={{
+                minWidth: 0,
+                px: 1.15,
+                py: 0.35,
+                flexShrink: 0,
+                borderRadius: 4,
+                bgcolor: "#FFF8F3",
+                borderColor: "#E45F14",
+                color: "#E45F14",
+                fontSize: 9,
+                fontWeight: 900,
+                lineHeight: 1.4,
+                textTransform: "none",
+                whiteSpace: "nowrap",
+
+                "&:hover": {
+                  bgcolor: "#E45F14",
+                  borderColor: "#E45F14",
+                  color: "#FFFFFF",
+                },
+              }}
+            >
+              View Detail
+            </Button>
           </Box>
+
+          {/* =====================================================
+              BRE DETAIL DIALOG
+          ===================================================== */}
+
+          <CustomDialog
+            open={breDetailDialogOpen}
+            onClose={() => setBreDetailDialogOpen(false)}
+            title="BRE Decision"
+            maxWidth="lg"
+            fullWidth
+            contentSx={{
+              p: { xs: 1, sm: 1.5 },
+              overflowY: "auto",
+            }}
+          >
+            <BreDecision readOnly={props.readOnly} />
+          </CustomDialog>
 
           {/* =====================================================
               APPLICANT PROFILE
@@ -362,7 +510,7 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
 
           <DVTApplicantProfile
             readOnly={props.readOnly}
-            roleType="DVT_TASK"
+            roleType={roleType}
             initialMemberIndex={memberIndex}
             onMemberChange={setMemberIndex}
           />
@@ -422,6 +570,7 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
                     fontWeight: 700,
                     textTransform: "none",
                     whiteSpace: "nowrap",
+
                     "&:hover": {
                       borderColor: "#C94F0B",
                       bgcolor: "#FFF5EE",
@@ -465,6 +614,8 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
               boxShadow: "0 2px 7px rgba(60, 42, 35, 0.05)",
             }}
           >
+            {/* DVT Remarks */}
+
             <TextField
               label="DVT Remarks"
               value={dvtRemarks}
@@ -476,6 +627,8 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
               disabled={props.readOnly}
             />
 
+            {/* DVT Decision */}
+
             <TextField
               select
               label="DVT Decision"
@@ -485,12 +638,14 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
               fullWidth
               disabled={props.readOnly}
             >
-              {DVT_DECISION_OPTIONS.map((option) => (
+              {dvtDecisionOptions.map((option) => (
                 <MenuItem key={option} value={option}>
                   {option}
                 </MenuItem>
               ))}
             </TextField>
+
+            {/* Decision Code */}
 
             <TextField
               label="Decision Code"
@@ -500,6 +655,8 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
               fullWidth
               disabled={props.readOnly}
             />
+
+            {/* Submit */}
 
             {!props.readOnly && (
               <Button
@@ -524,6 +681,7 @@ const DVTApplicantSummary = (props: DVTApplicantSummaryProps) => {
                   textTransform: "none",
                   boxShadow: "none",
                   whiteSpace: "nowrap",
+
                   "&:hover": {
                     bgcolor: "#C94F0B",
                     boxShadow: "none",
