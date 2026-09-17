@@ -999,7 +999,7 @@ const GroupApplicationSummaryBanner = ({
               whiteSpace: "nowrap",
             }}
           >
-            App No. - OB90377122
+            App No. - OS40378654
           </Typography>
         </Box>
 

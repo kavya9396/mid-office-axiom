@@ -334,6 +334,22 @@ const CompactField = ({ label, value }: { label: string; value: string }) => (
   </Box>
 );
 
+const loanSummaryItems = [
+    { label: "MPH Name", value: "ICICI" },
+    { label: "PAD", value: "9 Sept 2026" },
+    { label: "Date of loan disbursement", value: "9 Sept 2026" },
+    { label: "Coverage option", value: "Life" },
+    { label: "Loan type", value: "Personal Loan" },
+    { label: "Bank type", value: "Private" },
+    { label: "Loan term", value: "60" },
+    { label: "Loan Account No.", value: "12345678" },
+    { label: "Share of loan", value: "50%" },
+    { label: "Applicant status", value: "Active" },
+    { label: "Loan amount", value: "₹50,00,000" },
+    { label: "Master policy holder code", value: "MPH123" },
+    { label: "Type of loan", value: "Unsecured" },
+];
+
 const MemberSelection = ({
   applicationNumber,
   source,
@@ -557,6 +573,35 @@ const MemberSelection = ({
               ? riders.map((rider) => `${rider.name} - SA ${rider.sumAssured}`).join(" / ")
               : "No riders"}
           </Typography>
+            <Box
+                    sx={{
+                      mt: 0.45,
+                      display: "flex",
+                      alignItems: "center",
+                      columnGap: 0.75,
+                      rowGap: 0.2,
+                      flexWrap: "wrap",
+                      color: "#000000",
+                      fontSize: { xs: 10, sm: 11 },
+                      lineHeight: 1.65,
+                    }}
+                  >
+                    {...loanSummaryItems.map((item, index) => (
+                      <Box
+                        component="span"
+                        key={item.label}
+                        sx={{ display: "inline-flex", gap: 0.35 }}
+                      >
+                        {index > 0 && <Box component="span">/</Box>}
+                        <Box component="span" sx={{ fontWeight: 800 }}>
+                          {item.label}:
+                        </Box>
+                        <Box component="span" sx={{ fontWeight: 600 }}>
+                          {item.value}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
           <Typography
             sx={{
               mt: 0.45,

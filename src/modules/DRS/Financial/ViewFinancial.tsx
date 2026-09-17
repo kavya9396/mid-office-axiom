@@ -2755,7 +2755,7 @@ const ViewFinancial = ({ onBack, backLabel, onViewMedical }: ViewFinancialProps)
   const selectedCaseContext = useMemo(() => getSelectedCaseContext(), []);
   const userId = (localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "").trim();
   const roleType = String(selectedCaseContext.roleType || getRoleType()).trim().toUpperCase();
-  const isCuwTask = roleType === "CUW_TASK";
+  const isCuwTask = roleType === "CUW_TASK" || roleType === "GROUP_CUW_CLAIM_AUDIT_TASK" || roleType === "GROUP_CUW_TASK" || roleType === "GROUP_HOD_TASK" || roleType === "GROUP_SR_UW_TASK";
 
   const requestedApplicantTab =
     ((location.state as { selectedApplicantTab?: ApplicantTab } | null)?.selectedApplicantTab) ??

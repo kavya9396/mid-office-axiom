@@ -1064,7 +1064,7 @@ const GroupApplicationSummaryBanner = ({
               whiteSpace: "nowrap",
             }}
           >
-            App No. - {appNo}
+            App No. - OS40378654
           </Typography>
         </Box>
 
@@ -1756,7 +1756,7 @@ const GroupCUWDRS = ({
   /* GROUP GRIEVANCE EXAMPLE SHOWN IN THE SUMMARY BANNER                      */
   /* ------------------------------------------------------------------------ */
 
-  const productName = "ICICI Pru GIFT Pro";
+  const productName = "Group Loan Secure";
   const policyTerm = "8";
   const premiumTerm = "10";
   const sumAssured = "₹10,68,000";

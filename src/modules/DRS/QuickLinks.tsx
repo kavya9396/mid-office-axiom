@@ -347,10 +347,12 @@ const QuickLinks = ({
         "",
     ).trim();
 
+    const profileName = roleType === "GROUP_CUW_CLAIM_AUDIT_TASK" || roleType === "GROUP_CUW_TASK" || roleType === "GROUP_HOD_TASK" || roleType === "GROUP_SR_UW_TASK" ? "Member Profile" : "Applicant Profile"
+
     const quickLinks: QuickLinkItem[] = [
          ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'DVT_FORMAL_TASK' ? [
         {
-            label: "Applicant Profile",
+            label: profileName ,
             path: "",
             onClick: () => setOpenSummaryDialog(true),
         },
