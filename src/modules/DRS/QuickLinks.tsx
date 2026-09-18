@@ -399,7 +399,7 @@ const QuickLinks = ({
                 ),
             },
         ] : []),
-        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== 'DVT_TASK'  &&roleType !== 'DVT Pool' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK" ? [
+        ...(roleType !== 'DVT_FORMAL_TASK' && roleType !== 'DVT_TASK'  &&roleType !== 'CVT_TASK' && roleType !== "GROUP_CMO_TASK" && roleType !== "CMO_TASK" && roleType !== "REF_CMO_TASK" && roleType !== 'PIVV_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "MAS_TASK" ? [
             {
                 label: "Risk Details",
                 path: safeApplicationNumber ? getRiskDetailsPath(safeBusinessType, safeApplicationNumber) : "",

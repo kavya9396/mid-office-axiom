@@ -39,6 +39,9 @@
         "policyType",
         "masterPlanNo",
         "poolTAT",
-        "priorityFlag"
+        "priorityFlag",
+        "memberName",
+        "appliedCover",
+        "policyNo"
   ]
 }
