@@ -417,6 +417,16 @@ const applicantTabConfig: Record<string, string[]> = {
     "Payment & Payout",
   ],
   
+  FORMAL_CUW_CLAIM_AUDIT_TASK: [
+    "Image Details",
+    "Personal & KYC",
+    "Contact & Address",
+    "Nominee",
+    "Generic",
+    "eIA",
+    "Payment & Payout",
+  ],
+  
   GROUP_CUW_TASK: [
     "Image Details",
     "Personal & KYC",
@@ -438,6 +448,36 @@ const applicantTabConfig: Record<string, string[]> = {
   ],
 
   GROUP_SR_UW_TASK: [
+    "Image Details",
+    "Personal & KYC",
+    "Contact & Address",
+    "Nominee",
+    "Generic",
+    "eIA",
+    "Payment & Payout",
+  ],
+
+  FORMAL_GUW_TASK: [
+    "Image Details",
+    "Personal & KYC",
+    "Contact & Address",
+    "Nominee",
+    "Generic",
+    "eIA",
+    "Payment & Payout",
+  ],
+
+  FORMAL_SR_UW_TASK: [
+    "Image Details",
+    "Personal & KYC",
+    "Contact & Address",
+    "Nominee",
+    "Generic",
+    "eIA",
+    "Payment & Payout",
+  ],
+
+  FORMAL_HOD_TASK: [
     "Image Details",
     "Personal & KYC",
     "Contact & Address",
@@ -1819,7 +1859,11 @@ const ApplicantProfile = ({
     "GROUP_CUW_CLAIM_AUDIT_TASK",
     "GROUP_CUW_TASK", 
     "GROUP_HOD_TASK",
-    "GROUP_SR_UW_TASK"
+    "GROUP_SR_UW_TASK",
+    "FORMAL_GUW_TASK",
+    "FORMAL_HOD_TASK",
+    "FORMAL_SR_UW_TASK",
+    "FORMAL_CUW_CLAIM_AUDIT_TASK"
   ].includes(roleType);
 
   // const canShowRiskAnalytics = ![

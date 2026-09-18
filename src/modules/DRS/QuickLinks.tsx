@@ -347,7 +347,7 @@ const QuickLinks = ({
         "",
     ).trim();
 
-    const profileName = roleType === "GROUP_CUW_CLAIM_AUDIT_TASK" || roleType === "GROUP_CUW_TASK" || roleType === "GROUP_HOD_TASK" || roleType === "GROUP_SR_UW_TASK" ? "Member Profile" : "Applicant Profile"
+    const profileName = roleType === "GROUP_CUW_CLAIM_AUDIT_TASK" || roleType === "GROUP_CUW_TASK" || roleType === "GROUP_HOD_TASK" || roleType === "GROUP_SR_UW_TASK" || roleType === "FORMAL_HOD_TASK" || roleType === "FORMAL_SR_UW_TASK" || roleType === "FORMAL_CUW_CLAIM_AUDIT_TASK" ? "Member Profile" : "Applicant Profile"
 
     const quickLinks: QuickLinkItem[] = [
          ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'DVT_FORMAL_TASK' ? [
@@ -440,7 +440,7 @@ const QuickLinks = ({
             ]
             : []),
 
-        ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'DVT_FORMAL_TASK' && roleType !== 'GROUP_CUW_CLAIM_AUDIT_TASK' && roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "GROUP_CMO_TASK" && roleType !== "MAS_TASK" ? [
+        ...(roleType !== 'CVT_TASK' && roleType !== 'DVT_TASK' && roleType !== 'DVT_FORMAL_TASK' && roleType !== 'GROUP_CUW_CLAIM_AUDIT_TASK' && roleType !== 'PIVV_TASK' && roleType !== 'CUW_CLAIM_AUDIT_TASK' && roleType !== "GROUP_VENDOR_CMO_TASK" && roleType !== "GROUP_CMO_TASK" && roleType !== "FORMAL_CUW_CLAIM_AUDIT_TASK" ? [
             {
                 label: "Raise Grievance",
                 path: "",

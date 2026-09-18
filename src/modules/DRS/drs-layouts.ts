@@ -149,30 +149,21 @@ export const getPoolWiseAvailableAccordions = (
   layoutKey: string | undefined,
   data?: unknown,
 ): AccordionKey[] => {
-  const baseAccordions = layoutKey
-    ? DRS_LAYOUTS[layoutKey] ?? []
-    : [];
+  const baseAccordions = layoutKey ? (DRS_LAYOUTS[layoutKey] ?? []) : [];
 
-  return baseAccordions.filter(
-    (accordion): accordion is AccordionKey => {
-      if (!(accordion in accordionRegistry)) {
-        return false;
-      }
+  return baseAccordions.filter((accordion): accordion is AccordionKey => {
+    if (!(accordion in accordionRegistry)) {
+      return false;
+    }
 
-      const checker =
-        sectionAvailabilityCheck[
-        accordion as AccordionKey
-        ];
+    const checker = sectionAvailabilityCheck[accordion as AccordionKey];
 
-      if (!checker || !data) {
-        return true;
-      }
+    if (!checker || !data) {
+      return true;
+    }
 
-      return checker(
-        (data as DrsDataRecord) ?? {},
-      );
-    },
-  );
+    return checker((data as DrsDataRecord) ?? {});
+  });
 };
 
 export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
@@ -190,7 +181,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     // "applicantProfile",
     //"summary",
     //"applicationOverview",
-   // "pivvSection",
+    // "pivvSection",
     //"requirementManagement",
     //"decision",
     "quickLinks",
@@ -250,33 +241,22 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "decision",
   ],
   RETAIL_CUW_CLAIM_AUDIT: [
-    // "applicationOverview", 
-    // "claimSection", 
-    "quickLinks"],
-  GROUP_VENDOR_CMO_TASK: [
-    "quickLinks"
+    // "applicationOverview",
+    // "claimSection",
+    "quickLinks",
   ],
-  GROUP_CUW_CLAIM_AUDIT_TASK: [
-    "quickLinks"
-  ],
-  GROUP_CMO_TASK: [
-    "quickLinks"
-  ],
-  GROUP_REF_CMO_TASK: [
-    "quickLinks"
-  ],
-  MAS_TASK: [
-    "quickLinks"
-  ],
-  GROUP_CUW_TASK: [
-    "quickLinks"
-  ],
-  GROUP_SR_UW_TASK: [
-    "quickLinks"
-  ],
-  GROUP_HOD_TASK: [
-    "quickLinks"
-  ],
+  GROUP_VENDOR_CMO_TASK: ["quickLinks"],
+  FORMAL_GUW_TASK: ["quickLinks"],
+  FORMAL_SR_UW_TASK: ["quickLinks"],
+  FORMAL_HOD_TASK: ["quickLinks"],
+  FORMAL_CUW_CLAIM_AUDIT_TASK: ["quickLinks"],
+  GROUP_CUW_CLAIM_AUDIT_TASK: ["quickLinks"],
+  GROUP_CMO_TASK: ["quickLinks"],
+  GROUP_REF_CMO_TASK: ["quickLinks"],
+  MAS_TASK: ["quickLinks"],
+  GROUP_CUW_TASK: ["quickLinks"],
+  GROUP_SR_UW_TASK: ["quickLinks"],
+  GROUP_HOD_TASK: ["quickLinks"],
   RETAIL_REINSTATEMENT_SUW: [
     "applicationOverview",
     "postIssuanceServicing",
@@ -387,9 +367,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     "decisionHistory",
     "quickLinks",
   ],
-  RETAIL_IT_POOL: [
-    "itdrs"
-  ],
+  RETAIL_IT_POOL: ["itdrs"],
   RETAIL_VENDOR_CMO_POOL: [
     // "breDecision",
     // "applicationOverview",
@@ -425,7 +403,7 @@ export const DRS_LAYOUTS: Record<string, Array<AccordionKey | string>> = {
     // "groupPolicyDetails",
     // "summary",
     // "requirementManagement",
-     //"decision",
+    //"decision",
     "quickLinks",
   ],
   GROUP_GUW_POOL: [

@@ -1,49 +1,44 @@
 import {
-  Avatar,
-  Box,
-  Button,
-  Pagination,
-  // Table,
-  // TableBody,
-  // TableCell,
-  // TableContainer,
-  // TableHead,
-  // TableRow,
-  Typography,
+    Avatar,
+    Box,
+    Button,
+    Pagination,
+    Typography,
 } from "@mui/material";
 import {
-  cloneElement,
-  isValidElement,
-  useEffect,
-  useState,
-  type ReactElement,
-  type ReactNode,
+    cloneElement,
+    isValidElement,
+    useEffect,
+    useState,
+    type ReactElement,
+    type ReactNode,
 } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
-// import CustomAccordion from "../../components/ui/Accordion/Accordion";
-import CustomDialog from "../../components/ui/Dialog/Dialog";
+// import CustomAccordion from "../../../components/ui/Accordion/Accordion";
+import CustomDialog from "../../../../components/ui/Dialog/Dialog";
 import CustomTable, {
-  type Column,
-} from "../../components/ui/Table/Table";
-import { useAppContext } from "../../hooks/useAppContext";
+    type Column,
+} from "../../../../components/ui/Table/Table";
+import { useAppContext } from "../../../../hooks/useAppContext";
 import {
-  KeyRightArrowIcon,
-  RefreshIcon,
-  UserProfileIcon,
-} from "../../icons/Icons";
-import { getInboxPath } from "../../routes/routes";
-import { useAppSelector } from "../../store/hooks";
-import type { AppDispatch, RootState } from "../../store/store";
-import { breThunk } from "../../store/thunks/breThunk";
-import { drsThunk } from "../../store/thunks/drsThunk";
-import type { BreResponse } from "../../types/drs.types";
-//import { formatDate } from "../../utils/dataFormat";
-import BreDecision from "./DRS_Accordions/BreDecision";
-import MemberSelection from "./MemberSeclection";
-import ViewMedical from "./Medical Final/ViewMedical";
-import ViewFinancial from "./Financial/ViewFinancial";
+    KeyRightArrowIcon,
+    RefreshIcon,
+    UserProfileIcon,
+} from "../../../../icons/Icons";
+import { getInboxPath } from "../../../../routes/routes";
+import { useAppSelector } from "../../../../store/hooks";
+import type { AppDispatch, RootState } from "../../../../store/store";
+import { breThunk } from "../../../../store/thunks/breThunk";
+import { drsThunk } from "../../../../store/thunks/drsThunk";
+import type { BreResponse } from "../../../../types/drs.types";
+//import { formatDate } from "../../../utils/dataFormat";
+import BreDecision from "../../DRS_Accordions/BreDecision";
+import ApplicantApplicationSummary from "../../ApplicantSummary";
+import MemberSelection from "../.././MemberSeclection";
+import ViewMedical from "../.././Medical Final/ViewMedical";
+import ViewFinancial from "../.././Financial/ViewFinancial";
 // import { GridSection } from "../../components/layout/GridSection";
 
 /* -------------------------------------------------------------------------- */
@@ -76,21 +71,13 @@ import ViewFinancial from "./Financial/ViewFinancial";
 //               },
 //             } as const;
 
-interface ApplicantApplicationSummaryProps {
+interface GroupFormalGuwDrsProps {
   onBackToInbox?: () => void;
   onBackToSummary?: () => void;
   initialMemberIndex?: number;
   showMemberSelectionInitially?: boolean;
-  allowMemberSelectionPage?: boolean;
   readOnly?: boolean;
   showRiskAnalytics?: boolean;
-  showBreDecision?: boolean;
-  showUserPhoto?: boolean;
-  showHeaderTotals?: boolean;
-  productOnlyHeader?: boolean;
-  productHeaderDetails?: Array<{ label: string; value: string }>;
-  showFaceValue?: boolean;
-  afterHeader?: ReactNode;
   uwDecision?: ReactNode;
   quickLinks?: ReactNode;
   requirementManagement?: ReactNode;
@@ -931,364 +918,6 @@ const SdtReadonlyRow = ({ decision, remarks }: SdtReadonlyRowProps) => (
 );
 
 /* -------------------------------------------------------------------------- */
-/* APPLICATION SUMMARY BANNER                                                 */
-/* -------------------------------------------------------------------------- */
-
-interface ApplicationSummaryBannerProps {
-  compactHeader?: boolean;
-  onBackToInbox?: () => void;
-  image?: string;
-  name: string;
-  appNo: string;
-  personalSummary: string;
-  parameters: string;
-  showUserPhoto?: boolean;
-  showHeaderTotals?: boolean;
-  productOnlyHeader?: boolean;
-  productHeaderDetails?: Array<{ label: string; value: string }>;
-  showFaceValue?: boolean;
-  productName: string;
-  policyTerm: string;
-  premiumTerm: string;
-  sumAssured: string;
-  tsa: string;
-  tfsa: string;
-  tssa: string;
-  tpsa: string;
-  riderSummaries: Array<{
-    name: string;
-    sumAssured: string;
-    policyTerm: string;
-    premiumTerm: string;
-    premium: string;
-  }>;
-  onViewRiders: () => void;
-}
-
-const ApplicationSummaryBanner = ({
-  compactHeader = false,
-  showUserPhoto = true,
-  showHeaderTotals = true,
-  productOnlyHeader = false,
-  productHeaderDetails = [],
-  showFaceValue = true,
-  image,
-  name,
-  personalSummary,
-  parameters,
-  productName,
-  // policyTerm,
-  // premiumTerm,
-  sumAssured,
-  tsa,
-  tfsa,
-  tssa,
-  tpsa,
-  riderSummaries,
-  // onViewRiders,
-}: ApplicationSummaryBannerProps) => {
-  const coverageItems = [
-    `SA - ${sumAssured}`,
-    showHeaderTotals && tsa !== "-" ? `TSA - ${tsa}` : null,
-    showHeaderTotals && tfsa !== "-" ? `TFSA - ${tfsa}` : null,
-    showHeaderTotals && tssa !== "-" ? `TSSA - ${tssa}` : null,
-    showHeaderTotals && tpsa !== "-" ? `TPSA - ${tpsa}` : null,
-  ].filter(Boolean) as string[];
-
-  if (productOnlyHeader) {
-    return (
-      <Box sx={{ width: "100%", minWidth: 0, px: { xs: 1.5, sm: 2.2 }, py: 1.25,
-        bgcolor: "#FFEAD7", borderRadius: "8px", border: "1px solid #F1D8C8" }}>
-        <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 1, flexWrap: "wrap", minWidth: 0 }}>
-        <Typography sx={{ flex: "1 1 240px", minWidth: 0, fontSize: compactHeader ? { xs: 11, sm: 12 } : { xs: 12, sm: 12 }, lineHeight: 1.6, overflowWrap: "anywhere" }}>
-          <Box component="span" sx={{ fontWeight: 800 }}>Product: </Box>{productName}
-          {" / "}<Box component="span" sx={{ fontWeight: 800 }}>Channel: </Box>Agency
-          {" / "}<Box component="span" sx={{ fontWeight: 800 }}>SA - </Box>{sumAssured}
-          {showFaceValue && (<>
-            {" / "}<Box component="span" sx={{ fontWeight: 800 }}>Face Value - </Box>{sumAssured}
-          </>)}
-        </Typography>
-        <Typography sx={{ flexShrink: 0, maxWidth: "100%", px: 1.1, py: 0.45,
-          borderRadius: "16px", bgcolor: "#FFFFFF",
-          border: "1px solid rgba(169,33,41,.18)", color: "#A92129",
-          fontSize: compactHeader ? { xs: 11, sm: 12 } : { xs: 11, sm: 13 },
-          fontWeight: 900, overflowWrap: "anywhere" }}>
-          App No. - OB90322247
-        </Typography>
-        </Box>
-        {productHeaderDetails.length > 0 && (
-          <Typography
-            sx={{
-              mt: 0.55,
-              fontSize: compactHeader ? { xs: 10.5, sm: 11.5 } : { xs: 11, sm: 12 },
-              lineHeight: 1.6,
-              color: "#000",
-              overflowWrap: "anywhere",
-            }}
-          >
-            {productHeaderDetails.map((detail, index) => (
-              <Box component="span" key={detail.label}>
-                {index > 0 && " / "}
-                <Box component="span" sx={{ fontWeight: 800 }}>
-                  {detail.label}: {" "}
-                </Box>
-                <Box component="span" sx={{ fontWeight: 500 }}>
-                  {detail.value}
-                </Box>
-              </Box>
-            ))}
-          </Typography>
-        )}
-        <Typography sx={{ mt: 0.75, fontSize: compactHeader ? { xs: 11, sm: 12 } : { xs: 12, sm: 12 }, lineHeight: 1.6, overflowWrap: "anywhere" }}>
-          <Box component="span" sx={{ fontWeight: 800 }}>Riders: </Box>
-          {riderSummaries.length ? riderSummaries.map((rider) =>
-            `${rider.name} - SA ${rider.sumAssured}`,
-          ).join(" / ") : "-"}
-        </Typography>
-      </Box>
-    );
-  }
-
-  return (
-    <Box
-      sx={{
-        width: "100%",
-        mb: 0.75,
-        display: "grid",
-        gridTemplateColumns: {
-          xs: showUserPhoto ? "84px minmax(0,1fr)" : "minmax(0,1fr)",
-          sm: showUserPhoto ? "150px minmax(0,1fr)" : "minmax(0,1fr)",
-        },
-        bgcolor: "#FFEAD7",
-        color: "#000",
-        borderRadius: "12px",
-        overflow: "hidden",
-        boxShadow: "0 3px 10px rgba(169, 33, 41, 0.16)",
-      }}
-    >
-      {showUserPhoto && (
-      <Box
-        sx={{
-          position: "relative",
-          minHeight: { xs: 112, sm: 138 },
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: "linear-gradient(145deg, #E45F14 0%, #C83C2F 100%)",
-        }}
-      >
-        {/* {onBackToInbox && (
-          <Box
-            component="button"
-            type="button"
-            aria-label="Back to Inbox"
-            onClick={onBackToInbox}
-            sx={{
-              position: "absolute",
-              top: 10,
-              left: 10,
-              width: 30,
-              height: 30,
-              border: "1px solid rgba(255,255,255,.55)",
-              borderRadius: "50%",
-              bgcolor: "rgba(255,255,255,.18)",
-              color: "#FFFFFF",
-              cursor: "pointer",
-              fontSize: 18,
-              lineHeight: 1,
-            }}
-          >
-            ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â
-          </Box>
-        )} */}
-        <Avatar
-          src={image || undefined}
-          alt={name === "-" ? "Applicant" : name}
-          sx={{
-            width: { xs: 54, sm: 76 },
-            height: { xs: 54, sm: 76 },
-            bgcolor: "rgba(255,255,255,.18)",
-            color: "#000",
-            border: "2px solid rgba(255,255,255,.45)",
-          }}
-        >
-          <UserProfileIcon sx={{ fontSize: { xs: 30, sm: 44 } }} />
-        </Avatar>
-      </Box>
-      )}
-
-      <Box
-        sx={{ minWidth: 0, px: { xs: 1.2, sm: 2.2 }, py: { xs: 1, sm: 1.45 } }}
-      >
-        {/* ================================================================ */}
-        {/* NAME + APPLICATION NUMBER                                        */}
-        {/* ================================================================ */}
-
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 2,
-            mb: 0.4,
-          }}
-        >
-          <Typography
-            title={name}
-            sx={{
-              minWidth: 0,
-              color: "#000",
-              fontSize: {
-                xs: 14,
-                sm: 16,
-              },
-              fontWeight: 900,
-              lineHeight: 1.25,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}
-          >
-            Rudra Prakash Sangha
-          </Typography>
-
-          <Typography
-            sx={{
-              flexShrink: 0,
-              px: 1.1,
-              py: 0.45,
-              borderRadius: "16px",
-              bgcolor: "#FFFFFF",
-              border: "1px solid rgba(169,33,41,.18)",
-              color: "#A92129",
-              fontSize: {
-                xs: 11,
-                sm: 13,
-              },
-              fontWeight: 900,
-              whiteSpace: "nowrap",
-            }}
-          >
-            App No. - OB90377122
-          </Typography>
-        </Box>
-
-        {/* ================================================================ */}
-        {/* PERSONAL SUMMARY                                                  */}
-        {/* ================================================================ */}
-
-        <Typography
-          sx={{
-            color: "#000",
-            fontSize: {
-              xs: 10,
-              sm: 11.5,
-            },
-            lineHeight: 1.6,
-            fontWeight: 500,
-            overflowWrap: "anywhere",
-          }}
-        >
-          {personalSummary || "-"}
-        </Typography>
-
-        {/* ================================================================ */}
-        {/* PRODUCT / POLICY / COVERAGE                                      */}
-        {/* ================================================================ */}
-
-        <Typography
-          sx={{
-            mt: 0.5,
-            color: "#000",
-            fontSize: {
-              xs: 10,
-              sm: 10,
-            },
-            lineHeight: 1.65,
-            fontWeight: 800,
-            overflowWrap: "anywhere",
-          }}
-        >
-          <Box
-            component="span"
-            sx={{
-              color: "#000",
-              fontWeight: 700,
-            }}
-          >
-            {productName}
-          </Box>
-          {" / "}
-          Channel:{" "}
-          <Box
-            component="span"
-            sx={{
-              color: "#000",
-              fontWeight: 700,
-            }}
-          >
-            Agency
-          </Box>
-          {coverageItems.map((item) => (
-            <Box
-              component="span"
-              key={item}
-              sx={{
-                color: "#000",
-                fontWeight: 700,
-              }}
-            >
-              {" / "}
-              {item}
-            </Box>
-          ))}
-          {" / "}
-           {riderSummaries.map((rider, index) => (
-                <Box component="span" key={`${rider.name}-${index}`}>
-                  {rider.name} - SA ₹{rider.sumAssured}
-                  {index < riderSummaries.length - 1 ? " / " : ""}
-                </Box>
-              ))}
-        </Typography>
-
-        {/* ================================================================ */}
-        {/* ELIGIBILTY PARAMETERS                                            */}
-        {/* ================================================================ */}
-
-        {showHeaderTotals && (
-        <Box
-          sx={{
-            mt: 0.45,
-            display: "flex",
-            alignItems: "flex-start",
-            gap: 0.35,
-            flexWrap: "wrap",
-          }}
-        >
-          
-              <Typography
-              component="span"
-          sx={{
-            color: "#000",
-            fontSize: {
-              xs: 10,
-              sm: 11.5,
-            },
-            lineHeight: 1.6,
-            fontWeight: 500,
-            overflowWrap: "anywhere",
-          }}
-        >
-          {parameters || "-"}
-        </Typography>
-        </Box>
-        )}
-      </Box>
-    </Box>
-  );
-};
-
-/* -------------------------------------------------------------------------- */
 /* RISK CARD                                                                  */
 /* -------------------------------------------------------------------------- */
 
@@ -1441,31 +1070,75 @@ const RiskAnalyticsCard = ({
   );
 };
 
+type HeaderDetail = { label: string; value: string };
+
+const FORMAL_HEADER_DETAILS: HeaderDetail[] = [
+    {
+      label: "Policy No.",
+      value: "POL123456",
+    },
+    {
+      label: "Applied Sum Assured",
+      value: "₹ 50,00,000",
+    },
+    {
+      label: "Channel",
+      value: "Agency",
+    },
+    {
+      label: "Sub Channel",
+      value: "Direct",
+    },
+    {
+      label: "Agent Code",
+      value: "AG123",
+    },
+    {
+      label: "Agent Name",
+      value: "Ram",
+    },
+    {
+      label: "Premium",
+      value: "₹ 52,000",
+    },
+    {
+      label: "Cover Requested",
+      value: "₹ 50,00,000",
+    },
+    {
+      label: "Cover Provided",
+      value: "₹ 45,00,000",
+    },
+    {
+      label: "Free Cover",
+      value: "₹ 10,00,000",
+    },
+    {
+      label: "Cover above FCL",
+      value: "₹ 35,00,000",
+    },
+    {
+      label: "Call ID",
+      value: "-",
+    },
+];
+
 /* -------------------------------------------------------------------------- */
 /* MAIN COMPONENT                                                             */
 /* -------------------------------------------------------------------------- */
 
-const ApplicantApplicationSummary = ({
-  onBackToInbox,
+const GroupFormalGuwDrs = ({
   initialMemberIndex = 0,
-  showMemberSelectionInitially = true,
-  allowMemberSelectionPage = true,
+  showMemberSelectionInitially = false,
   readOnly = false,
-  afterHeader,
   showRiskAnalytics = true,
-  showBreDecision = true,
-  showUserPhoto = true,
-  showHeaderTotals = true,
-  productOnlyHeader = false,
-  productHeaderDetails = [],
-  showFaceValue = true,
   uwDecision,
   quickLinks,
   requirementManagement,
   decisionHistory,
-  stickyTop = 72,
+  stickyTop = 0,
   grievanceHistoryPaginationDisabled = true,
-}: ApplicantApplicationSummaryProps) => {
+}: GroupFormalGuwDrsProps) => {
   const dispatch = useDispatch<AppDispatch>();
   const navigate = useNavigate();
 
@@ -1832,114 +1505,10 @@ const ApplicantApplicationSummary = ({
     applicant.medicalDetails ?? applicant.medicalSummary ?? applicant.medical,
   );
 
-  /* ------------------------------------------------------------------------ */
-  /* PRODUCT                                                                  */
-  /* ------------------------------------------------------------------------ */
-
-  const products = Array.isArray(applicationOverview.productDetail)
-    ? applicationOverview.productDetail.map(toRecord)
-    : [];
-
-  const baseProduct =
-    products.find(
-      (product) => String(product.type ?? "").toLowerCase() === "base",
-    ) ??
-    products[0] ??
-    applicationOverview;
-
-  const riderDetails = Array.isArray(applicationOverview.riderDetails)
-    ? applicationOverview.riderDetails.map(toRecord)
-    : products.filter(
-        (product) => String(product.type ?? "").toLowerCase() === "rider",
-      );
-
-  const productName = text(
-    firstValue(
-      baseProduct.productName,
-      baseProduct.name,
-      applicationOverview.productName,
-      applicationOverview.product,
-    ),
-  );
-
-  const policyTerm = text(
-    firstValue(
-      baseProduct.policyTerm,
-      baseProduct.term,
-      applicationOverview.policyTerm,
-    ),
-  );
-
-  const premiumTerm = text(
-    firstValue(
-      baseProduct.premiumPaymentTerm,
-      baseProduct.ppt,
-      applicationOverview.premiumPaymentTerm,
-    ),
-  );
-
-  const sumAssured = currency(
-    firstValue(
-      baseProduct.sumAssured,
-      baseProduct.appliedSA,
-      applicationOverview.sumAssured,
-      applicationOverview.appliedSa,
-    ),
-  );
-
-  const tsa = currency(
-    firstValue(
-      baseProduct.tsa,
-      baseProduct.totalSumAssured,
-      applicationOverview.tsa,
-      applicationOverview.totalSumAssured,
-    ),
-  );
-
-  const tfsa = currency(
-    firstValue(
-      baseProduct.tfsa,
-      baseProduct.totalFaceSumAssured,
-      applicationOverview.tfsa,
-      applicationOverview.totalFaceSumAssured,
-    ),
-  );
-
-  const tssa = currency(
-    firstValue(
-      baseProduct.tssa,
-      baseProduct.totalSumAssuredAdditional,
-      applicationOverview.tssa,
-      applicationOverview.totalSumAssuredAdditional,
-    ),
-  );
-
-  const tpsa = currency(
-    firstValue(
-      baseProduct.tpsa,
-      baseProduct.totalPremiumSumAssured,
-      applicationOverview.tpsa,
-      applicationOverview.totalPremiumSumAssured,
-    ),
-  );
-
-  const riderSummaries = riderDetails
-    .map((rider, index) => ({
-      id: String(firstValue(rider.id, rider.productCode, index)),
-
-      name: text(firstValue(rider.name, rider.riderName, rider.productName)),
-
-      sumAssured: currency(
-        firstValue(rider.sumAssured, rider.tsa, rider.appliedSA),
-      ),
-
-      policyTerm: text(firstValue(rider.policyTerm, rider.term)),
-
-      premiumTerm: text(firstValue(rider.premiumPaymentTerm, rider.ppt)),
-
-      premium: currency(firstValue(rider.premium, rider.annualPremium)),
-    }))
-    .filter((rider) => rider.name !== "-");
+  const riderSummaries = [
+    { id: "wop", name: "WOP", sumAssured: "15,000", policyTerm: "-", premiumTerm: "-", premium: "-" },
+    { id: "btbb", name: "BTBB", sumAssured: "25,000", policyTerm: "-", premiumTerm: "-", premium: "-" },
+  ];
 
   /* ------------------------------------------------------------------------ */
   /* APPLICANT                                                                */
@@ -2035,65 +1604,6 @@ const ApplicantApplicationSummary = ({
       ),
     },
   ];
-
-  /* ------------------------------------------------------------------------ */
-  /* PERSONAL SUMMARY FOR BANNER                                             */
-  /* ------------------------------------------------------------------------ */
-
-  // const annualIncomeForBanner = currency(
-  //   firstValue(
-  //     finance.annualIncome,
-  //     financialDetails.annualIncome,
-  //     personalDetails.netIncomeAmt,
-  //   ),
-  // );
-
-  const personalSummary = [
-    // text(personal.maritalStatus ?? applicantDetails.maritalStatus),
-
-    // age ? text(age) : "-",
-    "Life Assured 1",
-    "Married",
-    "Male",
-    "40",
-    "Graduate",
-    "Salaried",
-    "₹10,00,000",
-    "Pune, Maharashtra",
-    "Indian",
-    "India",
-
-    // text(personal.gender ?? applicantDetails.gender),
-
-    // text(personal.education ?? applicantDetails.education),
-
-    // annualIncomeForBanner !== "-" ? `${annualIncomeForBanner} p.a.` : "-",
-
-    // address,
-
-    // text(personal.nationality ?? applicantDetails.nationality),
-
-    // text(personal.residentStatus ?? personal.countryOfResidence),
-  ]
-    .filter((value) => value !== "-")
-    .join(" / ");
-
-  const parameters = [
-    "TSA - ₹10,00,000",
-    "TRSA - ₹5,00,000",
-    "TPSA - ₹10,00,000",
-    "TFSA - ₹10,00,000",
-    "TSSA - ₹10,00,000",
-    "ADBR TSA - ₹5,00,000",
-    "ATPD TSA - ₹5,00,000",
-    "CI Rider TSA - ₹3,00,000",
-    "CI Rider TRSA - ₹3,00,000",
-    "WOP TSA - ₹10,00,000",
-    "BTBB TSA - ₹5,00,000",
-    "Total Premium - ₹10,000"
-  ]
-    .filter((value) => value !== "-")
-    .join(" / ");
 
   /* ------------------------------------------------------------------------ */
   /* KYC FIELDS                                                               */
@@ -2582,7 +2092,7 @@ const ApplicantApplicationSummary = ({
   /* RENDER                                                                   */
   /* ------------------------------------------------------------------------ */
 
-  if (allowMemberSelectionPage && showMemberSelection && members.length > 1) {
+  if (showMemberSelection && members.length > 1) {
     return (
       <Box
         sx={{
@@ -2617,77 +2127,23 @@ const ApplicantApplicationSummary = ({
 
   return (
     <>
-      {/* Only the applicant/application banner is frozen. */}
-      <Box
-        sx={{
-          width: "100%",
-          minWidth: 0,
-          px: 0.5,
-          pt: 0.75,
-          position: {
-            xs: "static",
-            lg: "sticky",
-          },
-          top: {
-            lg: stickyTop,
-          },
-          zIndex: {
-            xs: "auto",
-            lg: 20,
-          },
-          overflow: "visible",
-          bgcolor: "#FFFFFF",
-        }}
-      >
-        <Box
-          sx={{
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "1fr",
-              lg: hasStickyRail ? "minmax(0,1fr) 300px" : "minmax(0,1fr)",
-            },
-            gap: 1,
-          }}
-        >
-          <ApplicationSummaryBanner
-            compactHeader={roleType.trim().toUpperCase() === "CVT_TASK" || roleType.trim().toUpperCase() === "DVT_TASK" || roleType.trim().toUpperCase() === "DVT_FORMAL_TASK"}
-            showUserPhoto={showUserPhoto}
-            showHeaderTotals={showHeaderTotals}
-            productOnlyHeader={productOnlyHeader}
-            productHeaderDetails={
-              roleType.trim().toUpperCase() === "CVT_TASK"
-                ? [
-                    { label: "Policy Type", value: "Individual" },
-                    { label: "Agent Name", value: "Rajesh Sharma" },
-                    { label: "Agent Code", value: "AGT10234" },
-                    { label: "Customer Type", value: "Existing Customer" },
-                  ]
-                : productHeaderDetails
-            }
-            showFaceValue={showFaceValue}
-            onBackToInbox={onBackToInbox}
-            image={image}
-            name={name}
-            appNo={appNo}
-            personalSummary={personalSummary}
-            parameters={parameters}
-            productName={productName}
-            policyTerm={policyTerm}
-            premiumTerm={premiumTerm}
-            sumAssured={sumAssured}
-            tsa={tsa}
-            tfsa={tfsa}
-            tssa={tssa}
-            tpsa={tpsa}
-            riderSummaries={riderSummaries}
-            onViewRiders={() => setRiderDialogOpen(true)}
-          />
-        </Box>
-      </Box>
+      {/* Reuse the formal DVT summary header. */}
+      <ApplicantApplicationSummary
+        readOnly={readOnly}
+        initialMemberIndex={activeMemberIndex}
+        showMemberSelectionInitially={false}
+        allowMemberSelectionPage={false}
+        showRiskAnalytics={false}
+        showBreDecision={false}
+        showUserPhoto={false}
+        showHeaderTotals={false}
+        productOnlyHeader
+        productHeaderDetails={FORMAL_HEADER_DETAILS}
+        showFaceValue={false}
+        stickyTop={stickyTop}
+        afterHeader={null}
+      />
 
-      {!activeDetailView && afterHeader && (
-        <Box sx={{ px: 0.5, pt: 1 }}>{afterHeader}</Box>
-      )}
 
       {!activeDetailView && (
       <Box
@@ -2702,7 +2158,7 @@ const ApplicantApplicationSummary = ({
           "& .MuiButton-root": { flexShrink: 0 },
         }}
       >
-        {allowMemberSelectionPage && members.length > 1 && (
+        {members.length > 1 && (
           <Button
             type="button"
             variant="outlined"
@@ -2977,9 +2433,9 @@ const ApplicantApplicationSummary = ({
                   display: "grid",
                   gridTemplateColumns: {
                     xs: "1fr",
-                    md: showRiskAnalytics && showBreDecision
+                    md: showRiskAnalytics
                       ? "minmax(0, 3fr) minmax(245px, 1fr)"
-                      : "minmax(0, 1fr)",
+                      : "minmax(245px, 1fr) minmax(0, 3fr)",
                   },
                   gap: 0.75,
                   alignItems: "stretch",
@@ -3411,7 +2867,6 @@ const ApplicantApplicationSummary = ({
                 {/* BRE DECISION                                           */}
                 {/* ====================================================== */}
 
-                {showBreDecision && (
                 <DashboardCard
                   eyebrow=""
                   title=""
@@ -3997,18 +3452,15 @@ const ApplicantApplicationSummary = ({
                   {breRemarks}
                 </Typography> */}
                 </DashboardCard>
-                )}
               </Box>
 
-              {showBreDecision && (
-                <Box sx={{ mt: 0.75 }}>
-                  <SdtReadonlyRow
-                    decision={sdtDecision}
-                    remarks={sdtRemarks}
-                    timestamp={sdtTimestamp}
-                  />
-                </Box>
-              )}
+              <Box sx={{ mt: 0.75 }}>
+                <SdtReadonlyRow
+                  decision={sdtDecision}
+                  remarks={sdtRemarks}
+                  timestamp={sdtTimestamp}
+                />
+              </Box>
             </Box>
 
             {/* </CustomAccordion> */}
@@ -4039,7 +3491,7 @@ const ApplicantApplicationSummary = ({
             >
               <Typography
                 sx={{
-                  fontSize: "12px",
+                  fontSize: "14px",
                   color: "#161616",
                 }}
               >
@@ -4307,7 +3759,7 @@ const ApplicantApplicationSummary = ({
   );
 };
 
-export default ApplicantApplicationSummary;
+export default GroupFormalGuwDrs;
 
 /* -------------------------------------------------------------------------- */
 /* STANDALONE CASE SNAPSHOT ROW                                               */

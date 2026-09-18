@@ -867,6 +867,10 @@ import GroupClaimAuditTask from "./Group/GroupClaimAuditTask";
 import GroupCUWDRS from "./Group/GroupCuwDrs";
 import GroupSrUwDrs from "./Group/GroupSrUwDrs";
 import GroupHoD from "./Group/GroupHoD";
+import GroupFormalGuwDrs from "./Group/Formal/GroupFormalGuwDrs";
+import GroupFormalSrUwDrs from "./Group/Formal/GroupFormalSrUwDrs";
+import GroupFormalHoD from "./Group/Formal/GroupFormalHoD";
+import GroupFormalClaimAuditTask from "./Group/Formal/GroupFormalClaimAuditTask";
 
 
 interface ApplicationRow {
@@ -950,7 +954,11 @@ const mapper = {
   GROUP_CUW_CLAIM_AUDIT_TASK:"GROUP_CUW_CLAIM_AUDIT_TASK",
   GROUP_CUW_TASK: "GROUP_CUW_TASK",
   GROUP_SR_UW_TASK: "GROUP_SR_UW_TASK",
-  GROUP_HOD_TASK: "GROUP_HOD_TASK"
+  GROUP_HOD_TASK: "GROUP_HOD_TASK",
+  FORMAL_GUW_TASK: "FORMAL_GUW_TASK",
+FORMAL_SR_UW_TASK: "FORMAL_SR_UW_TASK",
+FORMAL_HOD_TASK: "FORMAL_HOD_TASK",
+FORMAL_CUW_CLAIM_AUDIT_TASK: "FORMAL_CUW_CLAIM_AUDIT_TASK",
 } as const;
 
 const SUMMARY_SECTION_ROLES = new Set([
@@ -1638,6 +1646,30 @@ const DRS = () => {
           }}
         >
           {
+             normalizeValue(roleType) === "FORMAL_GUW_TASK" ? (
+              <>
+                <GroupFormalGuwDrs />
+               <Box sx={{ mx: 0.5, mt: 1, pb: 1 }}>
+          <UWDecision />
+        </Box>
+              </>
+            ) :
+             normalizeValue(roleType) === "FORMAL_SR_UW_TASK" ? (
+              <GroupFormalSrUwDrs
+              />
+            ) :
+             normalizeValue(roleType) === "FORMAL_HOD_TASK" ? (
+              <GroupFormalHoD 
+                
+              />
+            ) :
+             normalizeValue(roleType) === "FORMAL_CUW_CLAIM_AUDIT_TASK" ? (
+              <GroupFormalClaimAuditTask 
+                
+              />
+            ) :
+
+
              normalizeValue(roleType) === "GROUP_CUW_TASK" ? (
               <>
               <GroupCUWDRS

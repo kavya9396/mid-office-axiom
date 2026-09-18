@@ -493,7 +493,7 @@ const ViewMedical = ({ onBack, backLabel }: ViewMedicalProps) => {
   const roleType = getRoleType();
   const normalizedRoleType = roleType.toUpperCase();
   // const isCuwTask = normalizedRoleType === "CUW_TASK";
-  const isCuwTask = normalizedRoleType === "CUW_TASK" || normalizedRoleType === "GROUP_CUW_CLAIM_AUDIT_TASK" || normalizedRoleType === "GROUP_CUW_TASK" || normalizedRoleType === "GROUP_HOD_TASK" || normalizedRoleType === "GROUP_SR_UW_TASK";
+  const isCuwTask = normalizedRoleType === "CUW_TASK" || normalizedRoleType === "GROUP_CUW_CLAIM_AUDIT_TASK" || normalizedRoleType === "GROUP_CUW_TASK" || normalizedRoleType === "GROUP_HOD_TASK" || normalizedRoleType === "GROUP_SR_UW_TASK" || normalizedRoleType === "FORMAL_GUW_TASK" || normalizedRoleType === "FORMAL_SR_UW_TASK" || normalizedRoleType === "FORMAL_HOD_TASK" || normalizedRoleType === "FORMAL_CUW_CLAIM_AUDIT_TASK";
   const isCptMedicalRole =
     normalizedRoleType === "CPT_DATA_ENTRY_MR_TASK" || isCuwTask;
 
