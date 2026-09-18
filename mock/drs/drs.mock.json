@@ -217,13 +217,13 @@
         "address": [
           {
             "type": "communication",
-            "addressLine1": "",
-            "addressLine2": "",
+            "addressLine1": "malad",
+            "addressLine2": "malad",
             "addressLine3": "",
-            "landmark": "",
-            "city": "",
-            "state": "",
-            "pinCode": "",
+            "landmark": "prism",
+            "city": "mumbai",
+            "state": "maharashtra",
+            "pinCode": "400064",
             "residingCountry": "",
             "topCity": "",
             "negativePinCode": ""
@@ -622,13 +622,13 @@
         "address": [
           {
             "type": "communication",
-            "addressLine1": "",
-            "addressLine2": "",
+            "addressLine1": "malad",
+            "addressLine2": "malad",
             "addressLine3": "",
-            "landmark": "",
-            "city": "",
-            "state": "",
-            "pinCode": "",
+            "landmark": "prism",
+            "city": "mumbai",
+            "state": "maharashtra",
+            "pinCode": "400064",
             "residingCountry": "",
             "topCity": "",
             "negativePinCode": ""
@@ -1012,14 +1012,14 @@
         },
         "address": [
           {
-            "type": "communication",
-            "addressLine1": "",
-            "addressLine2": "",
+           "type": "communication",
+            "addressLine1": "malad",
+            "addressLine2": "malad",
             "addressLine3": "",
-            "landmark": "",
-            "city": "",
-            "state": "",
-            "pinCode": "",
+            "landmark": "prism",
+            "city": "mumbai",
+            "state": "maharashtra",
+            "pinCode": "400064",
             "residingCountry": "",
             "topCity": "",
             "negativePinCode": ""

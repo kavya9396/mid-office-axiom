@@ -150,7 +150,7 @@ const CVTApplicantSummary = (props: CVTApplicantSummaryProps) => {
             }}
           >
             {/* Title */}
-            {/* <Typography
+            <Typography
               sx={{
                 fontSize: 13,
                 fontWeight: 700,
@@ -161,7 +161,7 @@ const CVTApplicantSummary = (props: CVTApplicantSummaryProps) => {
               }}
             >
               BRE Decision
-            </Typography> */}
+            </Typography>
 
             {/* Initial BRE */}
             <Box
@@ -308,6 +308,7 @@ const CVTApplicantSummary = (props: CVTApplicantSummaryProps) => {
 
           <CustomDialog
             open={breDetailOpen}
+            title="BRE Decision"
             onClose={() => setBreDetailOpen(false)}
             maxWidth="lg"
             fullWidth
