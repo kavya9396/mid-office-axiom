@@ -864,7 +864,7 @@ import DVTApplicantSummary from "./DVTApplicantSummary";
 
 import GroupClaimAuditTask from "./Group/GroupClaimAuditTask";
 
-import GroupCUWDRS from "./Group/GroupCUWDRS";
+import GroupCUWDRS from "./Group/GroupCuwDrs";
 import GroupSrUwDrs from "./Group/GroupSrUwDrs";
 import GroupHoD from "./Group/GroupHoD";
 
@@ -1640,29 +1640,65 @@ const DRS = () => {
           {
              normalizeValue(roleType) === "GROUP_CUW_TASK" ? (
               <>
-              <GroupCUWDRS />
+              <GroupCUWDRS
+                 requirementManagement={
+                    RequirementManagementPanel ? (
+                      <RequirementManagementPanel embedded />
+                    ) : null
+                  }
+              />
                <Box sx={{ mx: 0.5, mt: 1, pb: 1 }}>
           <UWDecision />
         </Box>
               </>
             ) :
             normalizeValue(roleType) === "GROUP_SR_UW_TASK" ? (
-              <GroupSrUwDrs />
+              <GroupSrUwDrs 
+                requirementManagement={
+                    RequirementManagementPanel ? (
+                      <RequirementManagementPanel embedded />
+                    ) : null
+                  }
+              />
             ) :
             normalizeValue(roleType) === "GROUP_HOD_TASK" ? (
-              <GroupHoD />
+              <GroupHoD 
+                requirementManagement={
+                    RequirementManagementPanel ? (
+                      <RequirementManagementPanel embedded />
+                    ) : null
+                  }
+              />
             ) :
             normalizeValue(roleType) === "GROUP_GRIEVANCE_TASK" ? (
               <GroupGrievance />
             ) :
             normalizeValue(roleType) === "GROUP_REF_CMO_TASK" ? (
-              <GroupRefCMOApplicationSummary />
+              <GroupRefCMOApplicationSummary 
+                requirementManagement={
+                    RequirementManagementPanel ? (
+                      <RequirementManagementPanel embedded />
+                    ) : null
+                  }
+              />
             ) :
             normalizeValue(roleType) === "GROUP_CMO_TASK" ? (
-              <GroupHOCMOApplicationSummary />
+              <GroupHOCMOApplicationSummary 
+                requirementManagement={
+                    RequirementManagementPanel ? (
+                      <RequirementManagementPanel embedded />
+                    ) : null
+                  }
+              />
             ) :
             normalizeValue(roleType) === "GROUP_VENDOR_CMO_TASK" ? (
-              <GroupVendorCMOApplicationSummary />
+              <GroupVendorCMOApplicationSummary 
+                requirementManagement={
+                    RequirementManagementPanel ? (
+                      <RequirementManagementPanel embedded />
+                    ) : null
+                  }
+              />
             ) :
             normalizeValue(roleType) === "MAS_TASK" ? (
               <MAS />
