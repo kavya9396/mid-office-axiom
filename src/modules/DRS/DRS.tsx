@@ -325,7 +325,7 @@ const DRS = () => {
     businessType === "group"
       ? "BRE-GROUP"
       : "BRE-RETAIL";
-      console.log('eventName',businessType,eventName)
+  console.log('eventName', businessType, eventName)
 
   useEffect(() => {
     if (
@@ -358,6 +358,15 @@ const DRS = () => {
       setIsPageLoading(true);
 
       try {
+        console.log("DRS request payload", {
+          applicationNo,
+          userId,
+          roleType,
+          sections,
+          businessType,
+          // Temporary validation preview for the shared DRS endpoint payload.
+          ...(businessType.toLowerCase() === "group" ? { lob: "G" } : {}),
+        });
         const requests: Promise<unknown>[] = [
           dispatch(
             drsThunk({
@@ -366,6 +375,8 @@ const DRS = () => {
               roleType,
               sections,
               businessType,
+              // The shared DRS endpoint requires lob only for Group business.
+              ...(businessType.toLowerCase() === "group" ? { lob: "G" } : {}),
             }),
           ).unwrap(),
         ];

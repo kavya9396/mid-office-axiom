@@ -190,6 +190,8 @@ const Grievance = () => {
       grievanceResolvedBy: "",
       grievanceStatus: "OPEN",
       applicationNumber,
+      // The thunk converts Group business to lob: "G" for the shared endpoint.
+      businessType,
     };
     console.log("Raise grievance request payload:", payload);
     try {

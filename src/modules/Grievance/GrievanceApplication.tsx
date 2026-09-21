@@ -134,7 +134,12 @@ const GrievanceApplication = () => {
       try {
         setLoading(true);
         setFetchError(null);
-        const response = await dispatch(grievanceApplicationThunk({ applicationId: safeApplicationId, roleType })).unwrap();
+        // The thunk converts Group business to lob: "G" for the shared endpoint.
+        const response = await dispatch(grievanceApplicationThunk({
+          applicationId: safeApplicationId,
+          roleType,
+          businessType: safeBusinessType,
+        })).unwrap();
         const responseReports = response.reports ?? [];
         setApplicationData(response);
         setReports(responseReports);

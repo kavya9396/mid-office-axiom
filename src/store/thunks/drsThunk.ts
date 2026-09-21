@@ -4,6 +4,8 @@ import { createApiThunk } from "./createApiThunk";
 
 type BusinessAwareRequest<T> = T & {
   businessType: string;
+  // Group requests use this flag when Retail and Group share an endpoint.
+  lob?: "G";
 };
 
 /*
@@ -24,6 +26,8 @@ export const drsThunk = createApiThunk<
  */
 export type DRSUpdateRequest = NonNullable<DRSResponse["data"]> & {
   businessType: string;
+  // Group requests use this flag when Retail and Group share an endpoint.
+  lob?: "G";
 };
 
 export const updateDrsThunk = createApiThunk<DRSResponse, DRSUpdateRequest>(

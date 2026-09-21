@@ -200,7 +200,7 @@ type CustomerProfileProps = {
 
 const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
   const dispatch = useAppDispatch();
-  const { applicationNumber } = useAppContext();
+  const { applicationNumber, businessType } = useAppContext();
   const storeData = useAppSelector(
   (state) => state.prelogin.data,
 );
@@ -271,6 +271,10 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
     const nextValues = formValues ?? toMasterCustomerForm(displayProfile, customerProfileMasterOptions);
     const roleType = localStorage.getItem("roleType") ?? "";
     const userId = localStorage.getItem("userId") ?? localStorage.getItem("username") ?? "";
+    // Use the active case context so Group customer profile updates receive lob: "G".
+    const safeBusinessType = String(
+      businessType ?? localStorage.getItem("businessType") ?? "retail",
+    ).trim().toLowerCase() || "retail";
 
     setIsSaving(true);
     setSubmitStatus(null);
@@ -282,6 +286,7 @@ const CustomerProfile = ({ data: dataOverride }: CustomerProfileProps = {}) => {
           roleType,
           userId,
           updatedDetails: nextValues,
+          businessType: safeBusinessType,
         }),
       ).unwrap();
 

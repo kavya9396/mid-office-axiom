@@ -5,7 +5,7 @@
 //  When USE_MOCK = true  → every thunk hits its mock JSON file.
 //  When USE_MOCK = false → every thunk hits the real API URL.
 // ============================================================
-export const USE_MOCK = false; // <-- flip this one flag to switch modes
+export const USE_MOCK = true; // <-- flip this one flag to switch modes
 
 export type BusinessType = "retail" | "group";
 
@@ -33,10 +33,8 @@ const apiUrls = {
     mock: "/mock/inbox/poolData.json",
   },
   searchApplication: {
-    real: {
-      retail: "http://172.30.74.182:8094/api/v1/drs/ui/search-application",
-      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/search-application",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/search-application",
     mock: "/mock/inbox/search-application.json",
   },
   columnConfigSave: {
@@ -50,10 +48,8 @@ const apiUrls = {
 
   // DRS
   drs: {
-    real: {
-      retail: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
-      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/drs-data",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
     mock: "/mock/drs/drs.mock.json",
   },
   masters: {
@@ -65,31 +61,23 @@ const apiUrls = {
     mock: "/mock/drs/decisionCodes.json",
   },
   bre: {
-    real: {
-      retail: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
-      group: "http://172.30.84.196:8132/icic-group-bpm-service/v1/group/events",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
     mock: "/mock/drs/breRetrigger.mock.json",
   },
   breRetrigger: {
-    real: {
-      retail: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
-      group: "http://172.30.84.196:8132/icic-group-bpm-service/v1/group/events",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8157/icic-bre-wrapper-orchestrator/v1/events",
     mock: "/mock/drs/breRetrigger.mock.json",
   },
   applicantProfileSubmit: {
-    real: {
-      retail: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
-      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/drs-data",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
     mock: "/mock/drs/applicantProfileSubmit.mock.json",
   },
   customerProfileSubmit: {
-    real: {
-      retail: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
-      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/drs-data",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
     mock: "/mock/drs/customerProfileSubmit.mock.json",
   },
   referToIt: {
@@ -109,17 +97,13 @@ const apiUrls = {
     mock: "/mock/drs/preIssuanceRequestChangeSubmit.mock.json",
   },
   requirementManagementSave: {
-    real: {
-      retail: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
-      group: "http://172.30.84.196:8165/api/v1/drs/ui/group/drs-data",
-    },
+    // Reserved endpoint: Retail and Group share this URL when this API is wired to a caller.
+    real: "http://172.30.74.182:8094/api/v1/drs/ui/drs-data",
     mock: "/mock/drs/requirementManagementSubmit.mock.json",
   },
   completeTask: {
-    real: {
-      retail: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/complete-task/retail",
-      group: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/complete-task/group",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8112/icic-drs-landing-service/v1/bpm/complete-task/retail",
     mock: "/mock/drs/completeTask.mock.json",
   },
   referralUsers: {
@@ -205,10 +189,8 @@ const apiUrls = {
 
   // Grievance
   raiseGrievance: { 
-    real: {
-      retail: "http://172.30.74.182:8166/icic-common-service/v1/grievances",
-      group: "http://172.30.74.182:8167/icic-common-service/v1/grievance",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8166/icic-common-service/v1/grievances",
     mock: "/mock/drs/grievance.mock.json",
   },
   grievanceSubmit: {
@@ -216,10 +198,8 @@ const apiUrls = {
     mock: "/mock/drs/grievanceSubmit.mock.json",
   },
   grievanceApplicationView: {
-    real: {
-      retail: "http://172.30.74.182:8166/icic-common-service/v1/grievances",
-      group: "http://172.30.74.182:8167/icic-common-service/v1/grievance",
-    },
+    // Retail and Group share this endpoint; Group is identified by lob: "G" in the request body.
+    real: "http://172.30.74.182:8166/icic-common-service/v1/grievances",
     mock: "/mock/drs/grievanceApplication.mock.json",
   },
   grievanceApplicationSubmit: {

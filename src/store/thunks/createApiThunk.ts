@@ -8,12 +8,28 @@ type ThunkConfig = {
   rejectValue: string;
 };
 
+type BusinessAwarePayload = {
+  businessType: string;
+  lob?: "G";
+};
+
+// Shared-endpoint APIs use lob to distinguish Group requests from Retail requests.
+export const addGroupLob = <TPayload extends BusinessAwarePayload>(
+  payload: TPayload,
+): TPayload => (
+  payload.businessType.trim().toLowerCase() === "group"
+    ? { ...payload, lob: "G" as const }
+    : payload
+);
+
 type DynamicRequestConfig<TPayload> = Omit<
   ApiRequest<TPayload>,
   "body" | "url"
 > & {
   url: string | ((payload: TPayload) => string);
   fallbackUrl?: string;
+  // Lets a specific API adjust its outgoing body without changing other thunks.
+  transformBody?: (payload: TPayload) => TPayload;
 };
 
 export function createApiThunk<
@@ -33,6 +49,7 @@ export function createApiThunk<
       try {
         const {
           url: configuredUrl,
+          transformBody,
           ...remainingConfig
         } = requestConfig;
 
@@ -47,7 +64,9 @@ export function createApiThunk<
           body:
             remainingConfig.method === "GET"
               ? undefined
-              : payload,
+              : transformBody
+                ? transformBody(payload)
+                : payload,
         });
       } catch (error) {
         return rejectWithValue(
