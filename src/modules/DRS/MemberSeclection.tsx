@@ -335,19 +335,19 @@ const CompactField = ({ label, value }: { label: string; value: string }) => (
 );
 
 const loanSummaryItems = [
-    { label: "MPH Name", value: "ICICI" },
-    { label: "PAD", value: "9 Sept 2026" },
-    { label: "Date of loan disbursement", value: "9 Sept 2026" },
-    { label: "Coverage option", value: "Life" },
-    { label: "Loan type", value: "Personal Loan" },
-    { label: "Bank type", value: "Private" },
-    { label: "Loan term", value: "60" },
-    { label: "Loan Account No.", value: "12345678" },
-    { label: "Share of loan", value: "50%" },
-    { label: "Applicant status", value: "Active" },
-    { label: "Loan amount", value: "₹50,00,000" },
-    { label: "Master policy holder code", value: "MPH123" },
-    { label: "Type of loan", value: "Unsecured" },
+    // { label: "MPH Name", value: "ICICI" },
+    // { label: "PAD", value: "9 Sept 2026" },
+    // { label: "Date of loan disbursement", value: "9 Sept 2026" },
+    // { label: "Coverage option", value: "Life" },
+    // { label: "Loan type", value: "Personal Loan" },
+    // { label: "Bank type", value: "Private" },
+    // { label: "Loan term", value: "60" },
+    // { label: "Loan Account No.", value: "12345678" },
+    // { label: "Share of loan", value: "50%" },
+    // { label: "Applicant status", value: "Active" },
+    // { label: "Loan amount", value: "₹50,00,000" },
+    // { label: "Master policy holder code", value: "MPH123" },
+    // { label: "Type of loan", value: "Unsecured" },
 ];
 
 // Keep this module focused on member selection: DRS renders this component for

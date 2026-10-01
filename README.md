@@ -2,6 +2,8 @@
 
 ## Runtime Error Messages
 
+writing demo text, to fix pr raise
+
 Error messages that must be changeable after deployment are loaded from `public/config/errorMessages.json`.
 
 After `npm run build`, Vite copies this file to `dist/config/errorMessages.json`. On the server, edit that JSON file and restart the application/static server; no rebuild is required. The app keeps default messages in code, so it still runs if the JSON file is missing or contains only a few overridden keys.
