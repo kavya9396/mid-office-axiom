@@ -2809,6 +2809,41 @@ const ApplicantApplicationSummary = ({
             Summary
           </Button>
         )}
+
+
+        <Button
+          type="button"
+          variant="outlined"
+          aria-label="Open Grievance History"
+          onClick={() => {
+            setGrievanceHistoryPage(1);
+            setGrievanceHistoryDialogOpen(true);
+          }}
+          sx={{
+            ml: "auto",
+            minWidth: "auto",
+            px: 1.4,
+            py: 0.55,
+            border: "1px solid #E45F14",
+            borderRadius: "18px",
+            bgcolor: "#FFF4EC",
+            color: "#A92129",
+            fontSize: { xs: 10, sm: 11 },
+            fontWeight: 900,
+            lineHeight: 1.2,
+            textTransform: "none",
+            whiteSpace: "nowrap",
+            boxShadow: "0 2px 7px rgba(169,33,41,.12)",
+            "&:hover": {
+              borderColor: "#C83C2F",
+              bgcolor: "#FFEAD7",
+              boxShadow: "0 3px 9px rgba(169,33,41,.18)",
+              transform: "translateY(-1px)",
+            },
+          }}
+        >
+          Grievance History
+        </Button>
       </Box>
       )}
 

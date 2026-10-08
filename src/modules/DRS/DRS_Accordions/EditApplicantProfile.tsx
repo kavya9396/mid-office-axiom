@@ -29,7 +29,9 @@ import { applicantProfileSubmitThunk } from "../../../store/thunks/applicantProf
 import { useParams } from "react-router-dom";
 
 import CustomSnackbar from "../../../components/ui/SnackBar/Snackbar";
+
 import type { Column } from "../../../components/ui/Table/Table";
+
 import CustomTable from "../../../components/ui/Table/Table";
 
 type Address = {
@@ -147,6 +149,38 @@ type FormValues = {
 };
 
 type FormErrors = Partial<Record<keyof FormValues, string>>;
+
+type ChangedField = {
+  field: keyof FormValues;
+  label: string;
+  oldValue: string;
+  newValue: string;
+};
+
+const FIELD_LABELS: Record<keyof FormValues, string> = {
+  dob: "DOB",
+  gender: "Gender",
+  residentialStatus: "Residential Status",
+  panNumber: "PAN Number",
+  pranNumber: "PRAN Number",
+  identityProof: "Identity Proof",
+  ageProof: "Age Proof",
+  addressProof: "Address Proof",
+  communicationPincode: "Comm. Pincode",
+  permanentPincode: "Perm. Pincode",
+  isPanValid: "Is PAN Valid",
+  aadharSeedingStatus: "Aadhar Seeding Status",
+  nsdlDobMatching: "Is NSDL DOB Matching",
+  nsdlNameMatching: "Is NSDL Name Matching",
+  immigrationStatus: "Immigration Status",
+  nsdlTab: "NSDL Tab",
+  dobDocument: "DOB Document",
+  genderDocument: "Gender Document",
+  pincodeDocument: "Pincode Document",
+  mobileNo: "Mobile No",
+  emailId: "Email ID",
+  zipCode: "Zip Code",
+};
 
 interface EditApplicantProfileProps {
   open: boolean;
@@ -476,6 +510,7 @@ const extractSummary = (response: unknown): EditableMember[] => {
   const result = response as {
     data?: {
       data?: { summary?: EditableMember[] };
+
       summary?: EditableMember[];
     };
 
@@ -732,13 +767,25 @@ const EditApplicantProfile = ({
   /*
 
 
-   * MasterDataRoute reloads this shared slice after a browser refresh.
 
 
-   * Do not read state.drs.masters here because that is not the slice
+
+   \* MasterDataRoute reloads this shared slice after a browser refresh.
 
 
-   * populated by the application-level master-data initializer.
+
+
+
+   \* Do not read state.drs.masters here because that is not the slice
+
+
+
+
+
+   \* populated by the application-level master-data initializer.
+
+
+
 
 
    */
@@ -752,6 +799,12 @@ const EditApplicantProfile = ({
   const drsData = useSelector((state: RootState) => state.drs.data);
 
   const [values, setValues] = useState<FormValues>(EMPTY_FORM);
+
+  const [originalValues, setOriginalValues] = useState<FormValues>(EMPTY_FORM);
+
+  const [reviewOpen, setReviewOpen] = useState(false);
+
+  const [changedFields, setChangedFields] = useState<ChangedField[]>([]);
 
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -834,8 +887,12 @@ const EditApplicantProfile = ({
 
         if (active) {
           const member = extractSummary(response)[memberIndex];
+          const mappedValues = mapMemberToForm(member, masters);
 
-          setValues(mapMemberToForm(member, masters));
+          setValues(mappedValues);
+          setOriginalValues(mappedValues);
+          setChangedFields([]);
+          setReviewOpen(false);
         }
       } catch (error) {
         if (active) {
@@ -1020,33 +1077,65 @@ const EditApplicantProfile = ({
     return "Unable to save applicant details";
   };
 
-  const handleSave = async () => {
-    const nextErrors = validate(values, isDvtTaskRole);
+  const normalizeForCompare = (value: string) => value.trim();
 
-    setErrors(nextErrors);
+  const getOptionDescription = (
+    fieldName: keyof FormValues,
+    value: string,
+  ): string => {
+    if (!value) return "-";
 
-    if (Object.keys(nextErrors).length > 0) {
-      return;
-    }
+    const optionSets: Partial<Record<keyof FormValues, MasterOption[]>> = {
+      gender: masters.gender ?? [],
+      residentialStatus: masters.resident_status ?? [],
+      identityProof: masters.id_proof_type ?? [],
+      ageProof: masters.id_proof_type ?? [],
+      addressProof: masters.id_proof_type ?? [],
+      dobDocument: masters.id_proof_type ?? [],
+      genderDocument: masters.id_proof_type ?? [],
+      pincodeDocument: masters.id_proof_type ?? [],
+      immigrationStatus: masters.resident_status ?? [],
+      isPanValid: YES_NO_OPTIONS,
+      aadharSeedingStatus: YES_NO_OPTIONS,
+      nsdlDobMatching: YES_NO_OPTIONS,
+      nsdlNameMatching: YES_NO_OPTIONS,
+    };
 
+    const matched = optionSets[fieldName]?.find(
+      (option) =>
+        option.code === value ||
+        option.description?.trim().toLowerCase() === value.trim().toLowerCase(),
+    );
+
+    return matched?.description ?? value;
+  };
+
+  const buildChangedFields = (): ChangedField[] =>
+    (Object.keys(values) as Array<keyof FormValues>)
+      .filter(
+        (fieldName) =>
+          normalizeForCompare(originalValues[fieldName]) !==
+          normalizeForCompare(values[fieldName]),
+      )
+      .map((fieldName) => ({
+        field: fieldName,
+        label: FIELD_LABELS[fieldName],
+        oldValue: getOptionDescription(fieldName, originalValues[fieldName]),
+        newValue: getOptionDescription(fieldName, values[fieldName]),
+      }));
+
+  const saveApplicantProfile = async () => {
     if (!drsData?.summary?.[memberIndex]) {
       showSnackbar("Unable to find applicant details", "error");
-
       return;
     }
 
     setLoading(true);
-
     setApiError("");
 
     try {
       const currentMember = drsData.summary[memberIndex];
-
-      const updatedMember = createUpdatedMember(
-        currentMember,
-
-        values,
-      );
+      const updatedMember = createUpdatedMember(currentMember, values);
 
       const updatedSummary = drsData.summary.map((member, index) =>
         index === memberIndex ? updatedMember : member,
@@ -1056,60 +1145,96 @@ const EditApplicantProfile = ({
         businessType: string;
       } = {
         applicationNo: applicationNumber ?? "",
-
         roleType,
-
         sections: ["summary"],
-
         userId,
-
         businessType,
-
         data: {
           ...drsData,
-
           summary: updatedSummary,
         },
-
         isAccuity: true,
       };
-
-      console.log("payload--------", payload);
 
       const response: ApplicantProfileSubmitResponse = await dispatch(
         applicantProfileSubmitThunk(payload),
       ).unwrap();
 
-      console.log("Applicant profile save response:", response);
-
       if (response.success) {
+        setReviewOpen(false);
+        setOriginalValues({ ...values });
+        setChangedFields([]);
+
         showSnackbar(
           response.message || "Applicant profile updated successfully",
-
           "success",
         );
 
         await onSave?.(values, memberIndex);
-
         onClose();
       } else {
         showSnackbar(
           response.message || "Unable to update applicant profile",
-
           "error",
         );
       }
     } catch (error: unknown) {
       const errorMessage = getErrorMessage(error);
-
-      console.error("Applicant profile save error:", error);
-
       setApiError(errorMessage);
-
       showSnackbar(errorMessage, "error");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSave = () => {
+    const nextErrors = validate(values, isDvtTaskRole);
+    setErrors(nextErrors);
+
+    if (Object.keys(nextErrors).length > 0) return;
+
+    const changes = buildChangedFields();
+
+    if (changes.length === 0) {
+      showSnackbar("No changes found to save", "info");
+      return;
+    }
+
+    setChangedFields(changes);
+    setReviewOpen(true);
+  };
+
+  const handleRevalidatePan = () => {
+    const pan = values.panNumber.trim().toUpperCase();
+
+    if (!pan) {
+      setErrors((current) => ({
+        ...current,
+        panNumber: "PAN Number is required",
+      }));
+      showSnackbar("Please enter PAN Number before revalidation", "warning");
+      return;
+    }
+
+    if (!/^[A-Z]{5}[0-9]{4}[A-Z]$/.test(pan)) {
+      setErrors((current) => ({
+        ...current,
+        panNumber: "Enter a valid PAN Number",
+      }));
+      showSnackbar("Please enter a valid PAN Number", "warning");
+      return;
+    }
+
+    setErrors((current) => {
+      if (!current.panNumber) return current;
+      const nextErrors = { ...current };
+      delete nextErrors.panNumber;
+      return nextErrors;
+    });
+
+    // Keep PAN revalidation separate from the normal Save flow.
+    // Replace this block with the PAN revalidation API dispatch when available.
+    showSnackbar("PAN is ready for revalidation", "info");
   };
 
   const field = (
@@ -1184,17 +1309,32 @@ const EditApplicantProfile = ({
         }
         actionsSx={{ justifyContent: "center", pb: 2 }}
         actions={
-          <CustomButton
-            onClick={handleSave}
-            disabled={loading || Boolean(apiError)}
-            sx={{
-              px: 4,
+          <>
+            <CustomButton
+              onClick={handleSave}
+              disabled={loading || Boolean(apiError)}
+              sx={{
+                px: 4,
 
-              borderRadius: "50px",
-            }}
-          >
-            {loading ? "Saving..." : "Save"}
-          </CustomButton>
+                borderRadius: "50px",
+              }}
+            >
+              {loading ? "Saving..." : "Save"}
+            </CustomButton>
+
+            <CustomButton
+              type="button"
+              variant="outlined"
+              onClick={handleRevalidatePan}
+              disabled={loading}
+              sx={{
+                px: 4,
+                borderRadius: "50px",
+              }}
+            >
+              Revalidate PAN
+            </CustomButton>
+          </>
         }
       >
         {loading ? (
@@ -1238,19 +1378,25 @@ const EditApplicantProfile = ({
                 >
                   {field(
                     "dobDocument",
+
                     "DOB Document",
+
                     masters.id_proof_type ?? [],
                   )}
 
                   {field(
                     "genderDocument",
+
                     "Gender Document",
+
                     masters.id_proof_type ?? [],
                   )}
 
                   {field(
                     "pincodeDocument",
+
                     "Pincode Document",
+
                     masters.id_proof_type ?? [],
                   )}
 
@@ -1276,7 +1422,9 @@ const EditApplicantProfile = ({
 
                   {field(
                     "immigrationStatus",
+
                     "Immigration Status",
+
                     masters.resident_status ?? [],
                   )}
 
@@ -1286,19 +1434,25 @@ const EditApplicantProfile = ({
 
                   {field(
                     "aadharSeedingStatus",
+
                     "Aadhar Seeding Status?",
+
                     YES_NO_OPTIONS,
                   )}
 
                   {field(
                     "nsdlNameMatching",
+
                     "Is NSDL Name Matching?",
+
                     YES_NO_OPTIONS,
                   )}
 
                   {field(
                     "nsdlDobMatching",
+
                     "Is NSDL DOB Matching?",
+
                     YES_NO_OPTIONS,
                   )}
 
@@ -1477,6 +1631,97 @@ const EditApplicantProfile = ({
             )}
           </Box>
         )}
+      </CustomDialog>
+
+      <CustomDialog
+        open={reviewOpen}
+        onClose={() => !loading && setReviewOpen(false)}
+        maxWidth="md"
+        title={
+          <Typography sx={{ color: "#9A2529", fontSize: 14, fontWeight: 700 }}>
+            REVIEW CHANGES - OLD VALUE VS NEW VALUE
+          </Typography>
+        }
+        actionsSx={{ justifyContent: "center", pb: 2 }}
+        actions={
+          <>
+            <CustomButton
+              variant="outlined"
+              onClick={() => setReviewOpen(false)}
+              disabled={loading}
+              sx={{ px: 4, borderRadius: "50px" }}
+            >
+              Back to Edit
+            </CustomButton>
+            <CustomButton
+              onClick={() => void saveApplicantProfile()}
+              disabled={loading}
+              sx={{ px: 4, borderRadius: "50px" }}
+            >
+              {loading ? "Saving..." : "Confirm & Save"}
+            </CustomButton>
+          </>
+        }
+      >
+        <Box sx={{ p: 1 }}>
+          <Typography sx={{ fontSize: 13, color: "#555", mb: 1.5 }}>
+            Please review the changed fields before saving the case.
+          </Typography>
+
+          <Box
+            sx={{
+              border: "1px solid #E0E0E0",
+              borderRadius: 1,
+              overflow: "hidden",
+            }}
+          >
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: "1.2fr 1fr 1fr",
+                backgroundColor: "#F3F3F3",
+                borderBottom: "1px solid #E0E0E0",
+                fontWeight: 700,
+                fontSize: 13,
+              }}
+            >
+              <Box sx={{ p: 1.25 }}>Field</Box>
+              <Box sx={{ p: 1.25 }}>Old Value</Box>
+              <Box sx={{ p: 1.25 }}>New Value</Box>
+            </Box>
+
+            {changedFields.map((change, index) => (
+              <Box
+                key={change.field}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "1.2fr 1fr 1fr",
+                  borderBottom:
+                    index === changedFields.length - 1
+                      ? "none"
+                      : "1px solid #EEEEEE",
+                  fontSize: 13,
+                  alignItems: "start",
+                }}
+              >
+                <Box sx={{ p: 1.25, fontWeight: 600 }}>{change.label}</Box>
+                <Box sx={{ p: 1.25, wordBreak: "break-word" }}>
+                  {change.oldValue || "-"}
+                </Box>
+                <Box
+                  sx={{
+                    p: 1.25,
+                    wordBreak: "break-word",
+                    fontWeight: 600,
+                    color: "#237A3B",
+                  }}
+                >
+                  {change.newValue || "-"}
+                </Box>
+              </Box>
+            ))}
+          </Box>
+        </Box>
       </CustomDialog>
 
       <CustomSnackbar
