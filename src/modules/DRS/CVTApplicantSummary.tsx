@@ -529,7 +529,7 @@ const CVTApplicantSummary = (props: CVTApplicantSummaryProps) => {
             </Typography>
 
             {/* Initial BRE */}
-            <Box
+            {/* <Box
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -567,17 +567,17 @@ const CVTApplicantSummary = (props: CVTApplicantSummaryProps) => {
                   ACR#OCD#PAN#ADP#AGE#IDM#KYP
                 </Typography>
               </Box>
-            </Box>
+            </Box> */}
 
             {/* Divider */}
-            <Box
+            {/* <Box
               sx={{
                 width: "1px",
                 height: 24,
                 backgroundColor: "#E7DDD7",
                 flexShrink: 0,
               }}
-            />
+            /> */}
 
             {/* Final BRE */}
             <Box

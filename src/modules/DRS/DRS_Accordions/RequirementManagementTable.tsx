@@ -213,23 +213,20 @@ const ROWS_PER_PAGE = 5;
 const COLUMN_HEADINGS = [
   "Actions",
   "Status",
-  "OCR Status",
-  "Team",
-  "Profile",
-  "Category",
-  "Sub Category",
-  "Document",
-  "Reason",
-  // "Special Test",
   "FUP Code",
   "Extra Remarks",
   "Description",
+  "Category",
+  "Sub Category",
+  "OCR Status",
+  "Team",
+  "Profile",
+  "Document",
+  "Reason",
 ] as const;
 
 const DEFAULT_COLUMN_WIDTHS = [
-  60, 125, 95, 85, 95, 105, 115, 120, 145,
-  // 100, // Special Test
-  85, 170, 85,
+  60, 125, 65, 170, 65, 85, 115, 85, 65, 85, 100, 145,
 ];
 const MIN_COLUMN_WEIGHT = 30;
 
@@ -2224,43 +2221,9 @@ const RequirementManagementTable = ({
                   </Select>
                   </Box>
                 )}
-                {renderCompactCell(row.ocrStatus)}
-
-                {isNewRow && !readOnly
-                  ? renderAddRowSelect(row, rowKey, "team")
-                  : renderCompactCell(row.team)}
-
-                {isNewRow && !readOnly
-                  ? renderAddRowSelect(row, rowKey, "profile")
-                  : renderCompactCell(row.profile)}
-
-                {isNewRow && !readOnly
-                  ? renderAddRowSelect(row, rowKey, "category")
-                  : renderCompactCell(row.category)}
-
-                {isNewRow && !readOnly
-                  ? renderAddRowSelect(row, rowKey, "subCategory")
-                  : renderCompactCell(row.subCategory)}
-
-                {isNewRow && !readOnly
-                  ? renderAddRowSelect(row, rowKey, "document")
-                  : renderCompactCell(row.document)}
-
-                {isNewRow && !readOnly
-                  ? renderAddRowSelect(row, rowKey, "reason")
-                  : renderCompactCell(row.reason)}
-
-                {/* Special Test is currently not part of the table.
-                    Keep this code for future use if the column is enabled again. */}
-                {/* {renderCompactCell(row.specialTest)} */}
-
                 {isNewRow && !readOnly
                   ? renderAddRowSelect(row, rowKey, "fupCode")
                   : renderCompactCell(row.fupCode)}
-
-                {/* {renderDetailAction("Extra Remarks", getExtraRemarks(row))}
-
-                {renderDetailAction("Description", row.description)} */}
 
                 {readOnly ? (
                   renderCompactCell(getExtraRemarks(row))
@@ -2315,6 +2278,41 @@ const RequirementManagementTable = ({
                     "Description",
                     row.description,
                   )}
+
+                {isNewRow && !readOnly
+                  ? renderAddRowSelect(row, rowKey, "category")
+                  : renderCompactCell(row.category)}
+
+                {isNewRow && !readOnly
+                  ? renderAddRowSelect(row, rowKey, "subCategory")
+                  : renderCompactCell(row.subCategory)}
+
+                {renderCompactCell(row.ocrStatus)}
+
+                {isNewRow && !readOnly
+                  ? renderAddRowSelect(row, rowKey, "team")
+                  : renderCompactCell(row.team)}
+
+                {isNewRow && !readOnly
+                  ? renderAddRowSelect(row, rowKey, "profile")
+                  : renderCompactCell(row.profile)}
+
+                {isNewRow && !readOnly
+                  ? renderAddRowSelect(row, rowKey, "document")
+                  : renderCompactCell(row.document)}
+
+                {isNewRow && !readOnly
+                  ? renderAddRowSelect(row, rowKey, "reason")
+                  : renderCompactCell(row.reason)}
+
+                {/* Special Test is currently not part of the table.
+                    Keep this code for future use if the column is enabled again. */}
+
+                {/* {renderCompactCell(row.specialTest)} */}
+
+                {/* {renderDetailAction("Extra Remarks", getExtraRemarks(row))}
+
+                {renderDetailAction("Description", row.description)} */}
 
               </Box>
             );

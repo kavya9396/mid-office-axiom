@@ -2518,8 +2518,8 @@
       },
       {
         "code": "SESSION",
-        "description": "15",
-        "value": "15",
+        "description": "20",
+        "value": "20",
         "isActive": "Y",
         "miscMastId": "126",
         "type": "SES_TIMEOUT"

@@ -1013,6 +1013,7 @@ const ApplicationSummaryBanner = ({
           {showFaceValue && (<>
             {" / "}<Box component="span" sx={{ fontWeight: 800 }}>Face Value - </Box>{sumAssured}
           </>)}
+            {" / "}<Box component="span" sx={{ fontWeight: 800 }}>RelationshipWithLA - </Box>Spouse
         </Typography>
         <Typography sx={{ flexShrink: 0, maxWidth: "100%", px: 1.1, py: 0.45,
           borderRadius: "16px", bgcolor: "#FFFFFF",
