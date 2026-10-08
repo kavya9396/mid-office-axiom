@@ -874,63 +874,54 @@ export default function HOCMODecisionTable({
 
       {showSpecialMedicalTest && <CustomDialog
         open={testSelectorOpen}
-        onClose={() => setTestSelectorOpen(false)}
+        onClose={() => {
+          setTestSelectorOpen(false);
+          setSelectedSpecialMedical("");
+        }}
         title="Add Special Medical Test"
-        maxWidth="sm"
-        fullWidth
-      >
-        <Box sx={{ px: 0.5, pb: 1 }}>
-          <Typography sx={{ mb: 0.75, color: "#444444", fontSize: 12 }}>
-            Special Medical Test
-          </Typography>
-          <CustomSelect
-            value=""
-            placeholder="Select Special Medical Test"
-            options={SPECIAL_MEDICAL_SECTIONS.map((section) => ({
-              label: section,
-              value: section,
-            }))}
-            onChange={(section) => {
-              setTestSelectorOpen(false);
-              setSelectedSpecialMedical(section);
-            }}
-          />
-        </Box>
-      </CustomDialog>}
-
-      {showSpecialMedicalTest && <CustomDialog
-        open={Boolean(selectedSpecialMedical)}
-        onClose={() => setSelectedSpecialMedical("")}
-        title={selectedSpecialMedical || "Special Medical Test"}
         maxWidth="lg"
         fullWidth
-        contentSx={{ p: { xs: 1.5, sm: 2 } }}
-        actions={
+        actions={selectedSpecialMedical ? (
           <CustomButton
             type="button"
             variant="contained"
             onClick={() => {
-              // Keep the modal open when required medical fields are incomplete.
               if (!specialMedicalFormRef.current?.validateForm()) return;
-
               specialMedicalFormRef.current.commitEdit();
+              // Keep the common dialog open so another test can be selected.
               setSelectedSpecialMedical("");
             }}
             sx={{ minWidth: 82, borderRadius: "18px" }}
           >
             Save
           </CustomButton>
-        }
+        ) : undefined}
         actionsSx={{ px: { xs: 1.5, sm: 2 }, pb: 2 }}
       >
-        {selectedSpecialMedical && (
-          <SpecialMedicalForm
-            ref={specialMedicalFormRef}
-            selectedSubSection={selectedSpecialMedical}
-            fields={specialMedicalFields}
-            isEditing
+        <Box sx={{ px: 0.5, pb: 1 }}>
+          <Typography sx={{ mb: 0.75, color: "#444444", fontSize: 12 }}>
+            Special Medical Test
+          </Typography>
+          <CustomSelect
+            value={selectedSpecialMedical}
+            placeholder="Select Special Medical Test"
+            options={SPECIAL_MEDICAL_SECTIONS.map((section) => ({
+              label: section,
+              value: section,
+            }))}
+            onChange={setSelectedSpecialMedical}
           />
-        )}
+          {selectedSpecialMedical && (
+            <Box sx={{ mt: 2 }}>
+              <SpecialMedicalForm
+                ref={specialMedicalFormRef}
+                selectedSubSection={selectedSpecialMedical}
+                fields={specialMedicalFields}
+                isEditing
+              />
+            </Box>
+          )}
+        </Box>
       </CustomDialog>}
 
       <CustomDialog

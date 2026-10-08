@@ -3139,6 +3139,7 @@ import RefCMODecisionTable, {
   REF_CMO_HARDCODED_ROWS,
   type RefCMODecisionRow,
 } from "./RefCMODecisionTable";
+import RiskDetailsContent from "./RiskDetailsContent";
 import CustomButton from "../../components/ui/Button/Button";
 
 /* -------------------------------------------------------------------------- */
@@ -3272,12 +3273,12 @@ interface RiskCard {
 
 const MEDICAL_FIELDS: FieldConfig[] = [
   ["brePhysicalMedicalDecision", "Physical Medical Decision"],
-  ["brePhysicalMedicalRemark", "Physical Medical Remark"],
   ["breTeleVideoMerDecision", "Tele/Video MER Decision"],
-  ["breTeleVideoMerRemark", "Tele/Video MER Remark"],
   ["munichReMedicalDecision", "MunichRe Medical Decision"],
   ["munichReRating", "MunichRe Rating"],
   ["biuMedicalStatus", "BIU Medical Status"],
+  ["breTeleVideoMerRemark", "Tele/Video MER Remark"],
+  ["brePhysicalMedicalRemark", "Physical Medical Remark"],
 ];
 
 const FINANCIAL_FIELDS: FieldConfig[] = [
@@ -4129,9 +4130,11 @@ const ApplicationSummaryBanner = ({
 const RiskAnalyticsCard = ({
   card,
   onClick,
+  onViewMedical,
 }: {
   card: RiskCard;
   onClick: () => void;
+  onViewMedical: () => void;
 }) => {
   const tone = RISK_TONES[card.status];
   const icon = '';
@@ -4214,9 +4217,11 @@ const RiskAnalyticsCard = ({
         <Box sx={{ width: 34, height: 28, display: "grid", placeItems: "center", border: "1px solid #E1D8D2", borderRadius: "14px", bgcolor: "#FFF8F3", color: "#A92129", fontSize: 13 }}>
           <KeyRightArrowIcon />
         </Box>
-        <Box sx={{ px: 1.2, py: 0.65, border: "1px solid #E1D8D2", borderRadius: "16px", bgcolor: "#FFF8F3", color: "#5B302A", fontSize: 9.5, fontWeight: 800 }}>
-          View {card.id === "other" ? "Risk" : card.label}
-        </Box>
+        {card.id !== "other" && (
+          <Box component="button" type="button" onClick={(event) => { event.stopPropagation(); card.id === "medical" ? onViewMedical() : onClick(); }} sx={{ px: 1.2, py: 0.65, border: "1px solid #E1D8D2", borderRadius: "16px", bgcolor: "#FFF8F3", color: "#5B302A", fontSize: 9.5, fontWeight: 800, cursor: "pointer" }}>
+            View {card.label}
+          </Box>
+        )}
       </Box>
     </Box>
   );
@@ -4245,6 +4250,15 @@ const RefCMOApplicationSummary = ({
 
   const [selectedRiskCard, setSelectedRiskCard] =
     useState<RiskCard | null>(null);
+  const [showMedicalPrototype, setShowMedicalPrototype] = useState(false);
+
+  useEffect(() => {
+    const closeMedicalPrototype = (event: MessageEvent) => {
+      if (event.data === "close-medical-view") setShowMedicalPrototype(false);
+    };
+    window.addEventListener("message", closeMedicalPrototype);
+    return () => window.removeEventListener("message", closeMedicalPrototype);
+  }, []);
 
   const [selectedMemberIndex, setSelectedMemberIndex] = useState(0);
   const [cmoDecisionRows, setCmoDecisionRows] = useState<
@@ -5253,6 +5267,14 @@ const RefCMOApplicationSummary = ({
   /* RENDER                                                                   */
   /* ------------------------------------------------------------------------ */
 
+  if (showMedicalPrototype) {
+    return (
+      <Box sx={{ minHeight: "100vh", bgcolor: "#FFFFFF" }}>
+        <Box component="iframe" title="Medical prototype" src="/dvt-mr-view-medical.html" sx={{ display: "block", width: "100%", height: "100vh", border: 0 }} />
+      </Box>
+    );
+  }
+
   return (
     <>
       {/* Only the applicant/application banner is frozen. */}
@@ -5781,6 +5803,7 @@ const RefCMOApplicationSummary = ({
                             card,
                           )
                         }
+                        onViewMedical={() => setShowMedicalPrototype(true)}
                       />
                     ))}
                   </Box>
@@ -5848,66 +5871,16 @@ const RefCMOApplicationSummary = ({
               }
               title={
                 selectedRiskCard
-                  ? `${selectedRiskCard.label} Risk Details`
+                  ? selectedRiskCard.id === "medical"
+                    ? "Medical Details"
+                    : selectedRiskCard.id === "other"
+                      ? "Other Risk Details"
+                    : `${selectedRiskCard.label} Risk Details`
                   : "Risk Details"
               }
               maxWidth="lg"
             >
-              {selectedRiskCard && (
-                <Box
-                  sx={{
-                    display: "grid",
-                    gridTemplateColumns: {
-                      xs: "1fr",
-                      sm: "repeat(2,1fr)",
-                      md: "repeat(3,1fr)",
-                      lg: "repeat(4,1fr)",
-                    },
-                    gap: 0.75,
-                    minWidth: {
-                      xs: "auto",
-                      md: 760,
-                    },
-                  }}
-                >
-                  {selectedRiskCard.details.map(
-                    (detail) => (
-                      <Box
-                        key={detail.key}
-                        sx={{
-                          p: 0.8,
-                          border:
-                            "1px solid #E3DEDB",
-                          borderRadius: 1,
-                          bgcolor: "#F8F7F6",
-                        }}
-                      >
-                        <Typography
-                          sx={{
-                            color: "#827671",
-                            fontSize: 9,
-                          }}
-                        >
-                          {detail.label}
-                        </Typography>
-
-                        <Typography
-                          sx={{
-                            mt: 0.25,
-                            color: "#332D2A",
-                            fontSize: 11,
-                            fontWeight: 800,
-                            overflowWrap:
-                              "anywhere",
-                          }}
-                        >
-                          {text(detail.value)}
-                        </Typography>
-                      </Box>
-                    ),
-                  )}
-                </Box>
-              )}
+              {selectedRiskCard && <RiskDetailsContent details={selectedRiskCard.details} />}
             </CustomDialog>
 
             {/* ============================================================ */}
